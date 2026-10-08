@@ -1,6 +1,7 @@
 "use client";
 
 import type { Task } from "@taff/schemas";
+import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { useMembers } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
@@ -35,7 +36,11 @@ export function TaskRow({
           </span>
         )}
       </div>
-      <h3>{task.title}</h3>
+      <h3>
+        <Link className="task-title-link" href={`/tasks/${task.id}`}>
+          {task.title}
+        </Link>
+      </h3>
       <p className="task-owner">{t("ownedBy", { name: owner })}</p>
     </li>
   );

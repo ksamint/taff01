@@ -10,9 +10,11 @@ import {
 } from "@taff/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
+import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
+import { useRuns } from "../lib/m3-queries";
 import { tasksKey, useMembers, useTasks } from "../lib/queries";
 import { todayTasks } from "../lib/today";
 import { useWorkspace } from "./app-shell";
@@ -36,6 +38,7 @@ export function TodayView() {
   const [validationError, setValidationError] = useState(false);
   const members = useMembers(workspace.id);
   const tasks = useTasks(workspace.id);
+  const runs = useRuns(workspace.id);
   const mutation = useMutation({
     mutationFn: async (input: TaskMutation) =>
       taskSchema.parse(
@@ -109,11 +112,8 @@ export function TodayView() {
       .filter((member) => member.kind === "agent")
       .map((member) => [member.id, member.name]),
   );
-  const agentWork = (tasks.data ?? []).filter(
-    (task) =>
-      task.status === "in_progress" &&
-      task.workerId &&
-      agents.has(task.workerId),
+  const agentWork = (runs.data ?? []).filter((run) =>
+    ["running", "paused", "changes_requested"].includes(run.status),
   );
   const memberName = (id: string | null) =>
     members.data?.find((member) => member.id === id)?.name ??
@@ -147,14 +147,27 @@ export function TodayView() {
           <Sparkles aria-hidden="true" strokeWidth={1.5} />
           {t("agentsAtWork")}
         </h2>
-        {agentWork.length === 0 ? (
+        {runs.isPending ? (
+          <p className="quiet">{t("loading")}</p>
+        ) : runs.isError ? (
+          <p className="alert" role="alert">
+            {t(errorKey(runs.error))}
+          </p>
+        ) : agentWork.length === 0 ? (
           <p className="quiet">{t("agentsIdle")}</p>
         ) : (
           <ul>
-            {agentWork.map((task) => (
-              <li key={task.id}>
-                <span>{task.title}</span>
-                <span>{agents.get(task.workerId ?? "")}</span>
+            {agentWork.map((run) => (
+              <li key={run.id}>
+                <Link className="task-title-link" href={`/tasks/${run.taskId}`}>
+                  {tasks.data?.find((task) => task.id === run.taskId)?.title ??
+                    t("agentProfile.task")}
+                </Link>
+                <Link href={`/agents/${run.agentId}`}>
+                  <Sparkles size={12} aria-hidden="true" />
+                  {agents.get(run.agentId) ?? t("agent")} ·{" "}
+                  {t(`run.status.${run.status}`)}
+                </Link>
               </li>
             ))}
           </ul>
@@ -285,7 +298,14 @@ export function TodayView() {
                       </span>
                     )}
                   </div>
-                  <h3>{task.title}</h3>
+                  <h3>
+                    <Link
+                      className="task-title-link"
+                      href={`/tasks/${task.id}`}
+                    >
+                      {task.title}
+                    </Link>
+                  </h3>
                   <p className="task-owner">
                     {t("ownedBy", { name: memberName(task.ownerId) })}
                   </p>

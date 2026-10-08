@@ -89,7 +89,22 @@
     "blockers": "阻塞",
     "zero": "收件箱已清空",
     "zeroSub": "新的审核请求和阻塞会出现在这里。",
-    "needsReview_other": "{{count}} 项待你审核"
+    "needsReview_other": "{{count}} 项待你审核",
+    "unread": "{{count}} 条未读",
+    "snoozed": "已延后 24 小时。",
+    "undo": "撤销",
+    "taskGroup": "任务动态",
+    "workspaceGroup": "工作空间动态",
+    "kind": {
+      "review": "待审核",
+      "blocker": "已阻塞",
+      "mention": "提及"
+    },
+    "openTask": "打开任务",
+    "grantAccess": "授予访问权限",
+    "markUnread": "标为未读",
+    "markRead": "标为已读",
+    "snoozeDay": "延后 24 小时"
   },
   "me": {
     "title": "我的",
@@ -122,7 +137,8 @@
       "tasks:read": "读取任务",
       "tasks:write": "创建与更新任务",
       "calendar:write": "修改日程",
-      "inbox:review": "提交审核"
+      "inbox:review": "提交审核",
+      "files:write": "附加交付物"
     },
     "createToken": "创建令牌",
     "tokens": "令牌",
@@ -146,6 +162,157 @@
       "error": "错误",
       "denied": "已拒绝",
       "rate_limited": "已限流"
+    }
+  },
+  "taskDetail": {
+    "back": "返回今天",
+    "due": "到期时间",
+    "unscheduled": "未安排日期"
+  },
+  "run": {
+    "title": "智能体执行",
+    "start": "启动智能体",
+    "pause": "暂停",
+    "resume": "继续执行",
+    "cancel": "取消执行",
+    "keep": "保留执行",
+    "cancelQuestion": "取消这次执行？",
+    "cancelHint": "智能体将无法为这次执行提交事件或交付物，已有证据会保留在历史中。",
+    "refresh": "刷新",
+    "duration": "用时 {{duration}}",
+    "cost": "费用 {{cost}}",
+    "started": "开始于 {{date}}",
+    "timeline": "执行时间线",
+    "noEvents": "等待智能体报告第一个事件。",
+    "notStarted": "分配智能体并启动执行，即可在此查看工作。",
+    "status": {
+      "running": "工作中",
+      "paused": "已暂停",
+      "needs_review": "待审核",
+      "changes_requested": "已要求修改",
+      "completed": "已完成",
+      "canceled": "已取消",
+      "failed": "失败"
+    },
+    "eventKind": {
+      "step": "步骤",
+      "tool_call": "工具调用",
+      "message": "消息",
+      "source": "来源",
+      "test": "测试结果"
+    }
+  },
+  "review": {
+    "open": "审核交付物",
+    "back": "返回任务",
+    "title": "审核工作区",
+    "deliverables": "交付物",
+    "noArtifacts": "尚未提交交付物。",
+    "preview": "预览",
+    "diff": "改动对比",
+    "source": "来源",
+    "itemDecision": "{{name}} 的审核决定",
+    "approveItem": "批准此项",
+    "changesItem": "要求修改",
+    "itemComment": "对此项发表评论",
+    "addComment": "添加评论",
+    "sourcesTests": "来源与测试结果",
+    "noEvidence": "尚未报告来源或测试结果。",
+    "testStatus": {
+      "passed": "通过",
+      "failed": "失败",
+      "skipped": "已跳过"
+    },
+    "checklist": "审核清单",
+    "checked": "已检查 {{count}} / 3",
+    "check": {
+      "matchesDescription": "交付物符合任务描述",
+      "verifiable": "来源或测试可以核查",
+      "withinPermissions": "没有超出授权范围的操作"
+    },
+    "overallComment": "审核评论",
+    "approve": "批准",
+    "requestChanges": "要求修改",
+    "approveHint": "批准执行前，请完成三个检查项并批准每个交付物。要求修改时需填写评论。",
+    "approved": "已批准，任务已完成。",
+    "readonly": "当前账户或执行状态下只能查看审核内容。",
+    "comments": "审核评论"
+  },
+  "agentProfile": {
+    "open": "智能体资料",
+    "back": "返回我的",
+    "team": "智能体",
+    "supervisedBy": "监管人：{{name}}",
+    "noSupervisor": "无监管人",
+    "permissions": "权限",
+    "permissionsHint": "令牌范围同样有效，授权无法覆盖被拒绝的能力。",
+    "decision": {
+      "allow": "允许",
+      "ask": "询问",
+      "deny": "拒绝"
+    },
+    "settings": "监管与限制",
+    "supervisor": "监管人",
+    "policy": "审核策略",
+    "alwaysReview": "每次都需审核",
+    "askOnly": "智能体提出要求时审核",
+    "policyHint": "默认每次审核。第二种策略仅在智能体明确选择不审核时允许直接完成。",
+    "maxDuration": "每次执行时限（秒）",
+    "maxCost": "每次执行费用上限（美元）",
+    "unlimited": "无限制",
+    "save": "保存设置",
+    "saved": "设置已保存。",
+    "runHistory": "执行历史",
+    "noRuns": "暂无执行记录。",
+    "task": "任务",
+    "changeHistory": "配置历史",
+    "noChanges": "暂无配置更改。",
+    "capability": {
+      "tasks.read": "读取任务",
+      "tasks.write": "创建和更新任务",
+      "calendar.schedule": "修改日程",
+      "files.attach": "附加文件",
+      "web.search": "搜索网络",
+      "repo.read": "读取代码库",
+      "repo.pr": "创建拉取请求",
+      "repo.merge": "合并代码",
+      "deploy.prod": "发布到生产环境",
+      "staging.read": "读取预发环境",
+      "staging.write": "修改预发环境",
+      "alerts": "管理告警"
+    },
+    "historyGrantChanged": "{{capability}}：{{previousStatus}} → {{status}}",
+    "historyGrant": "{{capability}}：{{status}}",
+    "historyPermission": "{{capability}}：{{decision}}",
+    "historyPolicy": "审核策略：{{policy}}",
+    "historySettings": "智能体设置已更改"
+  },
+  "grants": {
+    "history": "授权记录",
+    "none": "暂无授权记录。",
+    "expiry": "授权有效期",
+    "oneHour": "1 小时",
+    "oneDay": "24 小时",
+    "oneWeek": "7 天",
+    "thirtyDays": "30 天",
+    "allow": "授予访问权限",
+    "deny": "拒绝请求",
+    "revoke": "撤销授权",
+    "taskScope": "任务范围：{{task}}",
+    "workspaceScope": "工作空间范围",
+    "expires": "到期时间：{{date}}",
+    "notGranted": "无生效中的有效期",
+    "recorded": "{{name}} · {{date}}",
+    "pending": "等待决定",
+    "request": "申请访问权限",
+    "capability": "能力",
+    "scope": "范围",
+    "reason": "原因",
+    "status": {
+      "pending": "待处理",
+      "allowed": "已允许",
+      "denied": "已拒绝",
+      "revoked": "已撤销"
     }
   }
 }

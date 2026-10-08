@@ -1,7 +1,8 @@
 # Taff
 
 An open-source, performance-first task and calendar app where people and AI
-agents work as one team. Mobile web and PWA first, in Simplified Chinese and English.
+agents work as one team. Mobile web and PWA first, in English, Simplified Chinese
+and Traditional Chinese (Hong Kong).
 
 ## Status
 
@@ -10,15 +11,19 @@ personal workspaces, task creation, person ownership and person/agent
 assignment. Milestone 01 adds the TABLE AI design system, light and dark themes,
 the Calendar, Projects, Inbox and Me routes and three locales (en, zh-CN, zh-HK).
 Milestone 02 adds agent tokens, the `/mcp` Streamable HTTP endpoint with five
-tools over core, a per-token rate limit, a call log and the MCP settings page. Core owns database access, workspace permissions and
+tools over core, a per-token rate limit, a call log and the MCP settings page.
+Milestone 03 adds agent runs, actual events and artifacts, scoped permissions and
+expiring grants, a review workspace with comments and checklist, and a managed
+Inbox. MCP now exposes twelve tools, including `files.attach` and run controls.
+Core owns database access, workspace permissions and
 transactional activity/notification behavior. The worker connects to Redis; no
 background job handlers are exposed yet.
 
-The review workspace, agent runs, WebSocket fan-out, the full calendar,
+WebSocket fan-out, the full calendar,
 recurrence, IndexedDB persistence, PWA installation and release gates follow in
 later milestones (see the implementation plan).
-This is a development foundation, not a production release. Each phase ends with
-user review before the next starts.
+This is a development foundation, not a production release. Milestone reports
+record working behavior and validation; development continues while they are reviewed.
 
 ## Quick start
 
@@ -85,7 +90,12 @@ sample users/tasks to the local app database.
 the Today page's gzipped JavaScript against the 200 KiB budget. API and worker run from
 TypeScript during development; production packaging is a later phase.
 `pnpm mcp:smoke` connects the official MCP client to the running API, exercises
-every tool, the rate limit and revocation; run it with `pnpm dev` up.
+every tool, measured events, artifacts, grants, review changes, the rate limit
+and revocation; run it with `pnpm dev` up. Agents must submit their own real
+outputs: assigning or starting a run does not launch an LLM or simulate progress.
+Run duration and cost limits pause further submissions from reported metrics;
+external runtimes must enforce their own process limits. See
+[the agent run contract](docs/agent-runs.md) for versioned inputs and scope rules.
 
 ## Structure
 
@@ -106,7 +116,7 @@ Coding agents start from [the agent goal](docs/agent-goal.md).
 ## Contributing
 
 Read [AGENTS.md](AGENTS.md). Use conventional commits and keep changes focused.
-Tests accompany behavior changes. Add both locales for every user-facing string.
+Tests accompany behavior changes. Add all three locales for every user-facing string.
 Never commit credentials. Document every new environment variable with a dummy
 value in `.env.example`.
 

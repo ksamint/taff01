@@ -90,7 +90,22 @@
     "zero": "Inbox zero",
     "zeroSub": "New review requests and blockers will appear here.",
     "needsReview_one": "{{count}} item needs your review",
-    "needsReview_other": "{{count}} items need your review"
+    "needsReview_other": "{{count}} items need your review",
+    "unread": "{{count}} unread",
+    "snoozed": "Snoozed for 24 hours.",
+    "undo": "Undo",
+    "taskGroup": "Task updates",
+    "workspaceGroup": "Workspace updates",
+    "kind": {
+      "review": "Needs review",
+      "blocker": "Blocked",
+      "mention": "Mention"
+    },
+    "openTask": "Open task",
+    "grantAccess": "Grant access",
+    "markUnread": "Mark unread",
+    "markRead": "Mark read",
+    "snoozeDay": "Snooze 24 hours"
   },
   "me": {
     "title": "Me",
@@ -123,7 +138,8 @@
       "tasks:read": "Read tasks",
       "tasks:write": "Create and update tasks",
       "calendar:write": "Change events",
-      "inbox:review": "Submit for review"
+      "inbox:review": "Submit for review",
+      "files:write": "Attach deliverables"
     },
     "createToken": "Create token",
     "tokens": "Tokens",
@@ -147,6 +163,157 @@
       "error": "Error",
       "denied": "Denied",
       "rate_limited": "Rate limited"
+    }
+  },
+  "taskDetail": {
+    "back": "Back to Today",
+    "due": "Due",
+    "unscheduled": "Unscheduled"
+  },
+  "run": {
+    "title": "Agent run",
+    "start": "Start agent",
+    "pause": "Pause",
+    "resume": "Resume",
+    "cancel": "Cancel run",
+    "keep": "Keep run",
+    "cancelQuestion": "Cancel this run?",
+    "cancelHint": "The agent can no longer submit events or deliverables for this run. Existing evidence stays in the history.",
+    "refresh": "Refresh",
+    "duration": "Duration {{duration}}",
+    "cost": "Cost {{cost}}",
+    "started": "Started {{date}}",
+    "timeline": "Run timeline",
+    "noEvents": "Waiting for the agent to report its first event.",
+    "notStarted": "Assign an agent and start a run to see its work here.",
+    "status": {
+      "running": "Working",
+      "paused": "Paused",
+      "needs_review": "Needs review",
+      "changes_requested": "Changes requested",
+      "completed": "Completed",
+      "canceled": "Canceled",
+      "failed": "Failed"
+    },
+    "eventKind": {
+      "step": "Step",
+      "tool_call": "Tool call",
+      "message": "Message",
+      "source": "Source",
+      "test": "Test result"
+    }
+  },
+  "review": {
+    "open": "Review the deliverable",
+    "back": "Back to task",
+    "title": "Review workspace",
+    "deliverables": "Deliverables",
+    "noArtifacts": "No deliverable has been submitted.",
+    "preview": "Preview",
+    "diff": "Diff",
+    "source": "Source",
+    "itemDecision": "Decision for {{name}}",
+    "approveItem": "Approve item",
+    "changesItem": "Request changes",
+    "itemComment": "Comment on this item",
+    "addComment": "Add comment",
+    "sourcesTests": "Sources and test results",
+    "noEvidence": "No source or test result was reported.",
+    "testStatus": {
+      "passed": "Passed",
+      "failed": "Failed",
+      "skipped": "Skipped"
+    },
+    "checklist": "Checklist",
+    "checked": "Checked {{count}} / 3",
+    "check": {
+      "matchesDescription": "Matches the task description",
+      "verifiable": "Sources or tests can be verified",
+      "withinPermissions": "No actions beyond granted permissions"
+    },
+    "overallComment": "Review comment",
+    "approve": "Approve",
+    "requestChanges": "Request changes",
+    "approveHint": "Check all three items and approve each deliverable before approving the run. A change request needs a comment.",
+    "approved": "Approved. The task is complete.",
+    "readonly": "This review is read-only for your account or its current state.",
+    "comments": "Review comments"
+  },
+  "agentProfile": {
+    "open": "Agent profile",
+    "back": "Back to Me",
+    "team": "Agents",
+    "supervisedBy": "Supervised by {{name}}",
+    "noSupervisor": "No supervisor",
+    "permissions": "Permissions",
+    "permissionsHint": "Token scopes also apply. Grants cannot override a denied capability.",
+    "decision": {
+      "allow": "Allow",
+      "ask": "Ask",
+      "deny": "Deny"
+    },
+    "settings": "Supervision and limits",
+    "supervisor": "Supervisor",
+    "policy": "Review policy",
+    "alwaysReview": "Always review",
+    "askOnly": "Review when the agent asks",
+    "policyHint": "Always review is the default. The second policy allows completion only when the agent explicitly opts out of review.",
+    "maxDuration": "Time limit per run (seconds)",
+    "maxCost": "Cost limit per run (USD)",
+    "unlimited": "No limit",
+    "save": "Save settings",
+    "saved": "Settings saved.",
+    "runHistory": "Run history",
+    "noRuns": "No runs yet.",
+    "task": "Task",
+    "changeHistory": "Configuration history",
+    "noChanges": "No configuration changes yet.",
+    "capability": {
+      "tasks.read": "Read tasks",
+      "tasks.write": "Create and update tasks",
+      "calendar.schedule": "Change events",
+      "files.attach": "Attach files",
+      "web.search": "Search the web",
+      "repo.read": "Read repositories",
+      "repo.pr": "Open pull requests",
+      "repo.merge": "Merge code",
+      "deploy.prod": "Deploy to production",
+      "staging.read": "Read staging",
+      "staging.write": "Change staging",
+      "alerts": "Manage alerts"
+    },
+    "historyGrantChanged": "{{capability}}: {{previousStatus}} → {{status}}",
+    "historyGrant": "{{capability}}: {{status}}",
+    "historyPermission": "{{capability}}: {{decision}}",
+    "historyPolicy": "Review policy: {{policy}}",
+    "historySettings": "Agent settings changed"
+  },
+  "grants": {
+    "history": "Grant history",
+    "none": "No grants yet.",
+    "expiry": "Grant expires after",
+    "oneHour": "1 hour",
+    "oneDay": "24 hours",
+    "oneWeek": "7 days",
+    "thirtyDays": "30 days",
+    "allow": "Grant access",
+    "deny": "Deny request",
+    "revoke": "Revoke grant",
+    "taskScope": "Task scope: {{task}}",
+    "workspaceScope": "Workspace scope",
+    "expires": "Expires {{date}}",
+    "notGranted": "No active expiry",
+    "recorded": "{{name}} · {{date}}",
+    "pending": "Awaiting decision",
+    "request": "Request access",
+    "capability": "Capability",
+    "scope": "Scope",
+    "reason": "Reason",
+    "status": {
+      "pending": "Pending",
+      "allowed": "Allowed",
+      "denied": "Denied",
+      "revoked": "Revoked"
     }
   }
 }

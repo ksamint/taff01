@@ -1,15 +1,28 @@
 import { CoreError, type createCore, userPrincipal } from "@taff/core";
 import {
+  agentPermissionInputSchema,
+  agentProfileInputSchema,
+  appendRunEventSchema,
   assignTaskSchema,
+  attachRunArtifactSchema,
+  controlRunSchema,
   createAgentTokenSchema,
   createTaskSchema,
+  decideGrantSchema,
   idSchema,
+  inboxFilterSchema,
+  inboxItemInputSchema,
   profileSchema,
+  requestGrantSchema,
+  reviewCommentSchema,
+  reviewRunSchema,
   SchemaError,
   scheduleTaskSchema,
   signInSchema,
   signOutSchema,
   signUpSchema,
+  startRunSchema,
+  submitRunSchema,
   updateTaskStatusSchema,
   workspaceQuerySchema,
 } from "@taff/schemas";
@@ -31,6 +44,13 @@ export function createApp(
   const origin = new URL(authUrl).origin;
   const app = new Hono<{ Variables: { userId: string } }>();
   const mcp = createMcpHttpHandler(core);
+  app.use(
+    "/mcp",
+    bodyLimit({
+      maxSize: 1_048_576,
+      onError: (c) => c.json({ error: "invalid_input" }, 413),
+    }),
+  );
   // Agents reach core only through this adapter, with the same core as people.
   app.all("/mcp", async (c) => {
     const requestOrigin = c.req.header("origin");
@@ -83,12 +103,13 @@ export function createApp(
     return response;
   });
   app.use("/api/*", cors({ origin, credentials: true }));
-  app.use(
-    "/api/*",
+  app.use("/api/*", (c, next) =>
     bodyLimit({
-      maxSize: 16_384,
-      onError: (c) => c.json({ error: "invalid_input" }, 413),
-    }),
+      maxSize: /^\/api\/runs\/[^/]+\/artifacts$/.test(c.req.path)
+        ? 1_048_576
+        : 16_384,
+      onError: (ctx) => ctx.json({ error: "invalid_input" }, 413),
+    })(c, next),
   );
   app.use("/api/*", async (c, next) => {
     const requestOrigin = c.req.header("origin");
@@ -166,6 +187,168 @@ export function createApp(
       await core.scheduleTask(userPrincipal(c.get("userId")), id, input),
     );
   });
+  app.get("/api/tasks/:id", async (c) =>
+    c.json(
+      await core.getTask(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.get("/api/runs", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.listRuns(userPrincipal(c.get("userId")), workspaceId),
+    );
+  });
+  app.get("/api/runs/:id", async (c) =>
+    c.json(
+      await core.getRun(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.post("/api/tasks/:id/runs", async (c) =>
+    c.json(
+      await core.startRun(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        startRunSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.post("/api/runs/:id/control", async (c) =>
+    c.json(
+      await core.controlRun(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        controlRunSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.post("/api/runs/:id/events", async (c) =>
+    c.json(
+      await core.appendRunEvent(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        appendRunEventSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.post("/api/runs/:id/artifacts", async (c) =>
+    c.json(
+      await core.attachRunArtifact(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        attachRunArtifactSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.post("/api/runs/:id/submit", async (c) =>
+    c.json(
+      await core.submitRun(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        submitRunSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.get("/api/tasks/:id/review", async (c) =>
+    c.json(
+      await core.getReview(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.post("/api/runs/:id/review", async (c) =>
+    c.json(
+      await core.reviewRun(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        reviewRunSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.post("/api/runs/:id/comments", async (c) =>
+    c.json(
+      await core.addReviewComment(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        reviewCommentSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.get("/api/agents/:id", async (c) =>
+    c.json(
+      await core.getAgentProfile(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.patch("/api/agents/:id", async (c) =>
+    c.json(
+      await core.updateAgentProfile(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        agentProfileInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.put("/api/agents/:id/permissions", async (c) =>
+    c.json(
+      await core.setAgentPermission(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        agentPermissionInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.post("/api/agents/:id/grants", async (c) =>
+    c.json(
+      await core.requestGrant(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        requestGrantSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.post("/api/grants/:id/decision", async (c) =>
+    c.json(
+      await core.decideGrant(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        decideGrantSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.get("/api/inbox", async (c) => {
+    const { workspaceId, ...filter } = c.req.query();
+    const workspace = workspaceQuerySchema.parse({ workspaceId });
+    return c.json(
+      await core.listInbox(
+        userPrincipal(c.get("userId")),
+        workspace.workspaceId,
+        inboxFilterSchema.parse(filter),
+      ),
+    );
+  });
+  app.patch("/api/inbox/:id", async (c) =>
+    c.json(
+      await core.updateInboxItem(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        inboxItemInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
   app.get("/api/agent-tokens", async (c) => {
     const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
     return c.json(

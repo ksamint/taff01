@@ -39,7 +39,11 @@ const session = {
     tz: "UTC",
   },
 };
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.restoreAllMocks();
+  rateLimiter.hits = 0;
+  rateLimiter.limit = 2;
+});
 afterAll(() => core.close());
 describe("REST adapter boundaries", () => {
   it("requires a session before core task reads", async () => {
@@ -251,5 +255,199 @@ describe("REST adapter boundaries", () => {
     expect(foreign.headers.get("access-control-allow-origin")).not.toBe(
       "https://other.example",
     );
+  });
+  it.each([
+    ["POST", "/api/tasks/:id/runs", "startRun", { unexpected: true }],
+    [
+      "POST",
+      "/api/runs/:id/control",
+      "controlRun",
+      { version: 0, action: "pause" },
+    ],
+    [
+      "POST",
+      "/api/runs/:id/events",
+      "appendRunEvent",
+      { version: 1, kind: "test", title: "test", costMicros: -1 },
+    ],
+    [
+      "POST",
+      "/api/runs/:id/artifacts",
+      "attachRunArtifact",
+      {
+        version: 1,
+        name: "file",
+        mimeType: "text/plain",
+        content: "",
+        sourceUrl: "javascript:alert(1)",
+      },
+    ],
+    ["POST", "/api/runs/:id/submit", "submitRun", { version: 1, summary: "" }],
+    [
+      "POST",
+      "/api/runs/:id/review",
+      "reviewRun",
+      { version: 1, decision: "approve", checks: {} },
+    ],
+    [
+      "POST",
+      "/api/runs/:id/comments",
+      "addReviewComment",
+      { version: 1, body: "comment", line: 0 },
+    ],
+    [
+      "PATCH",
+      "/api/agents/:id",
+      "updateAgentProfile",
+      { supervisorId: id, reviewPolicy: "auto" },
+    ],
+    [
+      "PUT",
+      "/api/agents/:id/permissions",
+      "setAgentPermission",
+      { capability: "deploy.prod", decision: "sometimes" },
+    ],
+    [
+      "POST",
+      "/api/agents/:id/grants",
+      "requestGrant",
+      { capability: "repo.read", reason: "" },
+    ],
+    [
+      "POST",
+      "/api/grants/:id/decision",
+      "decideGrant",
+      { decision: "allow", expiresAt: "tomorrow" },
+    ],
+    ["PATCH", "/api/inbox/:id", "updateInboxItem", {}],
+  ] as const)(
+    "validates %s %s before core",
+    async (method, path, operation, input) => {
+      vi.spyOn(core, "getSession").mockResolvedValue({
+        response: session,
+        headers: new Headers(),
+      });
+      const write = vi.spyOn(core, operation);
+      const response = await app.request(path.replace(":id", id), {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(input),
+      });
+      expect(response.status).toBe(400);
+      expect(await response.json()).toEqual({ error: "invalid_input" });
+      expect(write).not.toHaveBeenCalled();
+    },
+  );
+  it("accepts bounded artifact content above the ordinary body limit and preserves the actor", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const input = {
+      version: 2,
+      name: "report.txt",
+      mimeType: "text/plain",
+      content: "x".repeat(20000),
+      diff: null,
+      sourceUrl: null,
+    };
+    const artifact = {
+      ...input,
+      id,
+      workspaceId: id,
+      runId: id,
+      createdAt: now.toISOString(),
+    };
+    const attach = vi
+      .spyOn(core, "attachRunArtifact")
+      .mockResolvedValue(artifact);
+    const response = await app.request(`/api/runs/${id}/artifacts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    expect(response.status).toBe(201);
+    expect(attach).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      id,
+      input,
+    );
+    const oversized = await app.request(`/api/runs/${id}/artifacts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...input, content: "x".repeat(1_048_576) }),
+    });
+    expect(oversized.status).toBe(413);
+  });
+  it("validates MCP run arguments and forwards a valid artifact with token identity", async () => {
+    const principal = {
+      kind: "agent" as const,
+      tokenId: id,
+      memberId: id,
+      workspaceId: id,
+      scopes: ["tasks:write" as const, "files:write" as const],
+    };
+    vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    vi.spyOn(core, "recordMcpCall").mockResolvedValue();
+    const artifact = {
+      id,
+      workspaceId: id,
+      runId: id,
+      name: "file.txt",
+      mimeType: "text/plain",
+      content: "Real output",
+      diff: null,
+      sourceUrl: null,
+      createdAt: now.toISOString(),
+    };
+    const attach = vi
+      .spyOn(core, "attachRunArtifact")
+      .mockResolvedValue(artifact);
+    const call = (args: unknown) =>
+      app.request("/mcp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
+          Authorization: "Bearer redacted-test-token",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call",
+          params: { name: "files.attach", arguments: args },
+        }),
+      });
+    const invalid = await call({ runId: id, version: -1 });
+    const invalidBody = await invalid.text();
+    const raw = invalid.headers.get("content-type")?.includes("event-stream")
+      ? invalidBody
+          .split("\n")
+          .find((line) => line.startsWith("data:"))
+          ?.slice(5)
+      : invalidBody;
+    const invalidResult = JSON.parse(raw ?? "{}") as {
+      result?: { isError: boolean };
+      error?: unknown;
+    };
+    expect(invalidResult.result?.isError || !!invalidResult.error).toBe(true);
+    expect(attach).not.toHaveBeenCalled();
+    const args = {
+      runId: id,
+      version: 3,
+      name: "file.txt",
+      mimeType: "text/plain",
+      content: "Real output",
+    };
+    const valid = await call(args);
+    expect(valid.status).toBe(200);
+    expect(attach).toHaveBeenCalledWith(principal, id, {
+      version: 3,
+      name: "file.txt",
+      mimeType: "text/plain",
+      content: "Real output",
+      diff: null,
+      sourceUrl: null,
+    });
   });
 });

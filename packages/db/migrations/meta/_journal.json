@@ -29,6 +29,34 @@
       "when": 1791472687107,
       "tag": "0003_agent_tokens",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791492388882,
+      "tag": "0004_strong_dexter_bennett",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791492394606,
+      "tag": "0005_m3_audit_invariants",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1791492483167,
+      "tag": "0006_grant_policy_history",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1791492745317,
+      "tag": "0007_colorful_shocker",
+      "breakpoints": true
     }
   ]
 }

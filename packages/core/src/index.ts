@@ -1,10 +1,14 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import {
+  agentPermissions,
+  agentProfiles,
   agentTokens,
   connectDatabase,
+  grants,
   mcpCalls,
   members,
+  runs,
   type Transaction,
   tasks,
   user,
@@ -36,6 +40,7 @@ import {
 import { betterAuth } from "better-auth";
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { type Action, type Actor, can, type Resource } from "./permissions";
+import { createRunOperations } from "./runs";
 
 export class CoreError extends Error {
   constructor(
@@ -160,7 +165,42 @@ export function createCore(options: {
           ),
         )
         .limit(1);
-      return member ? { ...member, scopes: principal.scopes } : null;
+      if (!member || member.kind !== "agent") return null;
+      const [token] = await query
+        .select()
+        .from(agentTokens)
+        .where(
+          and(
+            eq(agentTokens.id, principal.tokenId),
+            eq(agentTokens.workspaceId, workspaceId),
+            eq(agentTokens.memberId, member.id),
+            isNull(agentTokens.revokedAt),
+          ),
+        )
+        .for("share");
+      if (!token) return null;
+      const [profile] = await query
+        .select()
+        .from(agentProfiles)
+        .where(eq(agentProfiles.id, member.id));
+      const permissions = await query
+        .select()
+        .from(agentPermissions)
+        .where(eq(agentPermissions.agentId, member.id));
+      const grantRows = await query
+        .select()
+        .from(grants)
+        .where(eq(grants.agentId, member.id));
+      return {
+        ...member,
+        scopes: token.scopes as Scope[],
+        reviewPolicy: profile?.reviewPolicy ?? "always_review",
+        permissions: permissions as Actor["permissions"],
+        grants: grantRows.map((row) => ({
+          ...row,
+          expiresAt: row.expiresAt?.toISOString() ?? null,
+        })) as Actor["grants"],
+      };
     }
     const [member] = await query
       .select()
@@ -320,6 +360,21 @@ export function createCore(options: {
     if (!task) throw new CoreError("not_found", 404);
     return task;
   }
+  async function currentRunId(
+    tx: Transaction,
+    taskId: string,
+  ): Promise<string | undefined> {
+    const [run] = await tx
+      .select({ id: runs.id })
+      .from(runs)
+      .where(
+        and(
+          eq(runs.taskId, taskId),
+          sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
+        ),
+      );
+    return run?.id;
+  }
   async function assignTask(
     principal: Principal,
     taskId: string,
@@ -332,8 +387,20 @@ export function createCore(options: {
         workspaceId: task.workspaceId,
         ownerId: task.ownerId,
         workerId: task.workerId,
+        taskId: task.id,
+        runId: await currentRunId(tx, task.id),
         toWorkerId: body.workerId,
       });
+      const active = await tx
+        .select({ id: runs.id })
+        .from(runs)
+        .where(
+          and(
+            eq(runs.taskId, taskId),
+            sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
+          ),
+        );
+      if (active.length) throw new CoreError("conflict", 409);
       await validateAssignees(
         tx,
         task.workspaceId,
@@ -360,6 +427,8 @@ export function createCore(options: {
         workspaceId: task.workspaceId,
         ownerId: task.ownerId,
         workerId: task.workerId,
+        taskId: task.id,
+        runId: await currentRunId(tx, task.id),
         to: body.status,
       };
       await requireMember(
@@ -369,6 +438,25 @@ export function createCore(options: {
         body.status === "done" ? "task:review" : "task:status",
         resource,
       );
+      const active = await tx
+        .select({ id: runs.id })
+        .from(runs)
+        .where(
+          and(
+            eq(runs.taskId, taskId),
+            sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
+          ),
+        );
+      if (
+        active.length ||
+        body.status === "needs_review" ||
+        (body.status === "done" &&
+          task.workerId !== null &&
+          (
+            await tx.select().from(members).where(eq(members.id, task.workerId))
+          )[0]?.kind === "agent")
+      )
+        throw new CoreError("conflict", 409);
       const [updated] = await tx
         .update(tasks)
         .set({ status: body.status, updatedAt: new Date() })
@@ -389,6 +477,8 @@ export function createCore(options: {
         workspaceId: task.workspaceId,
         ownerId: task.ownerId,
         workerId: task.workerId,
+        taskId: task.id,
+        runId: await currentRunId(tx, task.id),
       });
       const [updated] = await tx
         .update(tasks)
@@ -547,7 +637,22 @@ export function createCore(options: {
     status: McpCall["status"];
     durationMs: number;
   }): Promise<void> {
-    await db.insert(mcpCalls).values(entry);
+    await db.transaction(async (tx) => {
+      const [token] = await tx
+        .select()
+        .from(agentTokens)
+        .where(
+          and(
+            eq(agentTokens.id, entry.tokenId),
+            eq(agentTokens.workspaceId, entry.workspaceId),
+          ),
+        );
+      if (!token) throw new CoreError("forbidden", 403);
+      await tx.execute(
+        sql`select set_config('taff.actor_id', ${`agent:${token.memberId}`}, true)`,
+      );
+      await tx.insert(mcpCalls).values(entry);
+    });
   }
   async function listMcpCalls(
     principal: Principal,
@@ -567,6 +672,13 @@ export function createCore(options: {
     return auth.api.getSession({ headers, returnHeaders: true });
   }
   return {
+    ...createRunOperations({
+      db,
+      mutation,
+      loadActor,
+      requireMember,
+      lockTask,
+    }),
     auth,
     getSession,
     getMe,

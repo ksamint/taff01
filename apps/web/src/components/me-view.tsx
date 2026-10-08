@@ -4,6 +4,7 @@ import type { Locale } from "@taff/schemas";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useMembers } from "../lib/queries";
 import { applyTheme, readTheme, type ThemePreference } from "../lib/theme";
 import { useWorkspace } from "./app-shell";
 import { Label } from "./ui/label";
@@ -14,6 +15,7 @@ export function MeView() {
   const { me, workspace, setWorkspaceId, setLocale, localePending } =
     useWorkspace();
   const { t, i18n } = useTranslation();
+  const members = useMembers(workspace.id);
   const [theme, setTheme] = useState<ThemePreference>("system");
   useEffect(() => setTheme(readTheme()), []);
   return (
@@ -49,6 +51,20 @@ export function MeView() {
             ))}
           </select>
         </div>
+      </section>
+      <section className="me-section" aria-labelledby="agents-list-heading">
+        <h2 id="agents-list-heading">{t("agentProfile.team")}</h2>
+        <ul className="history-list">
+          {members.data
+            ?.filter((member) => member.kind === "agent")
+            .map((member) => (
+              <li key={member.id}>
+                <Link className="text-link" href={`/agents/${member.id}`}>
+                  {member.name}
+                </Link>
+              </li>
+            ))}
+        </ul>
       </section>
       <section className="me-section" aria-labelledby="integrations-heading">
         <h2 id="integrations-heading">{t("mcp.title")}</h2>

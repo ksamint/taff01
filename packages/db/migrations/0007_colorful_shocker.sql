@@ -1,0 +1,2 @@
+ALTER TABLE "run_events" ADD COLUMN "capability" text;--> statement-breakpoint
+ALTER TABLE "inbox_items" ADD CONSTRAINT "inbox_items_agent_fk" FOREIGN KEY ("workspace_id","agent_id") REFERENCES "public"."members"("workspace_id","id") ON DELETE no action ON UPDATE no action;

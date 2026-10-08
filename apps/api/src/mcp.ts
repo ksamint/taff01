@@ -37,7 +37,14 @@ import { CoreError } from "@taff/core";
 import {
   type McpCall,
   mcpCalendarScheduleArgs,
+  mcpFilesAttachArgs,
+  mcpGrantsRequestArgs,
   mcpInboxRequestReviewArgs,
+  mcpRunsControlArgs,
+  mcpRunsEventArgs,
+  mcpRunsGetArgs,
+  mcpRunsStartArgs,
+  mcpRunsSubmitArgs,
   mcpTasksCreateArgs,
   mcpTasksListArgs,
   mcpTasksUpdateArgs,
@@ -151,10 +158,82 @@ export function createMcpServer(
     },
     (args) =>
       run(() =>
-        core.updateTaskStatus(principal, args.taskId, {
-          status: "needs_review",
-        }),
+        core.requestReview(principal, args.taskId, { note: args.note }),
       ),
+  );
+  server.registerTool(
+    "runs.get",
+    {
+      title: "Read agent run",
+      description:
+        "Read real steps, tool calls, sources, tests and artifacts for a run.",
+      inputSchema: toolSchema(mcpRunsGetArgs),
+    },
+    ({ runId }) => run(() => core.getRun(principal, runId)),
+  );
+  server.registerTool(
+    "runs.start",
+    {
+      title: "Start agent run",
+      description:
+        "Start a run for a task assigned to this agent. Progress is submitted explicitly.",
+      inputSchema: toolSchema(mcpRunsStartArgs),
+    },
+    ({ taskId }) => run(() => core.startRun(principal, taskId, {})),
+  );
+  server.registerTool(
+    "runs.control",
+    {
+      title: "Control agent run",
+      description:
+        "Pause, resume or cancel this agent's run using its current version.",
+      inputSchema: toolSchema(mcpRunsControlArgs),
+    },
+    ({ runId, ...input }) =>
+      run(() => core.controlRun(principal, runId, input)),
+  );
+  server.registerTool(
+    "runs.event",
+    {
+      title: "Record agent progress",
+      description:
+        "Record a real step, tool call, source or test with measured duration and cost.",
+      inputSchema: toolSchema(mcpRunsEventArgs),
+    },
+    ({ runId, ...input }) =>
+      run(() => core.appendRunEvent(principal, runId, input)),
+  );
+  server.registerTool(
+    "files.attach",
+    {
+      title: "Attach deliverable",
+      description:
+        "Attach text content, an optional diff and source URL to this agent's running task; requires files:write.",
+      inputSchema: toolSchema(mcpFilesAttachArgs),
+    },
+    ({ runId, ...input }) =>
+      run(() => core.attachRunArtifact(principal, runId, input)),
+  );
+  server.registerTool(
+    "runs.submit",
+    {
+      title: "Submit agent run",
+      description:
+        "Submit actual artifacts for human review. Only the configured review policy can allow completion without review.",
+      inputSchema: toolSchema(mcpRunsSubmitArgs),
+    },
+    ({ runId, ...input }) => run(() => core.submitRun(principal, runId, input)),
+  );
+  server.registerTool(
+    "grants.request",
+    {
+      title: "Request permission",
+      description:
+        "Request a scoped, expiring grant. A person must decide; deny and token scopes remain binding.",
+      inputSchema: toolSchema(mcpGrantsRequestArgs),
+    },
+    ({ agentId, ...input }) =>
+      run(() => core.requestGrant(principal, agentId, input)),
   );
   return server;
 }
@@ -168,7 +247,7 @@ export function createMcpHttpHandler(core: Core) {
       if (!extra) throw new CoreError("unauthorized", 401);
       return createMcpServer(core, extra.principal, extra.state);
     },
-    { responseMode: "json", maxRequestBodySize: 65_536 },
+    { responseMode: "json", maxRequestBodySize: 1_048_576 },
   );
 }
 

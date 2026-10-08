@@ -16,6 +16,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { savePreference } from "../lib/i18n";
+import { useInbox } from "../lib/m3-queries";
 import { meKey, useMeQuery } from "../lib/queries";
 import { Auth } from "./auth";
 import { Button } from "./ui/button";
@@ -59,9 +60,11 @@ function Wordmark({ label }: { label: string }) {
 function NavItems({
   pathname,
   t,
+  workspaceId,
 }: {
   pathname: string;
   t: (k: string) => string;
+  workspaceId?: string;
 }) {
   return NAV.map(({ href, key, Icon }) => {
     const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -74,9 +77,27 @@ function NavItems({
       >
         <Icon aria-hidden="true" strokeWidth={1.5} />
         {t(`nav.${key}`)}
+        {key === "inbox" && workspaceId && (
+          <InboxBadge workspaceId={workspaceId} />
+        )}
       </Link>
     );
   });
+}
+
+function InboxBadge({ workspaceId }: { workspaceId: string }) {
+  const { t, i18n } = useTranslation();
+  const inbox = useInbox(workspaceId);
+  const count = inbox.data?.unreadCount ?? 0;
+  return count > 0 ? (
+    <span
+      data-testid="inbox-badge"
+      className="nav-badge"
+      aria-label={t("inbox.unread", { count })}
+    >
+      {new Intl.NumberFormat(i18n.resolvedLanguage).format(count)}
+    </span>
+  ) : null;
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -144,7 +165,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <aside className="sidebar">
           <Wordmark label={t("app")} />
           <nav aria-label={t("nav.label")}>
-            <NavItems pathname={pathname} t={t} />
+            <NavItems pathname={pathname} t={t} workspaceId={workspace?.id} />
           </nav>
         </aside>
       )}
@@ -220,7 +241,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <footer className="tagline">{t("tagline")}</footer>
       {me.data && (
         <nav className="tabbar" aria-label={t("nav.label")}>
-          <NavItems pathname={pathname} t={t} />
+          <NavItems pathname={pathname} t={t} workspaceId={workspace?.id} />
         </nav>
       )}
     </div>

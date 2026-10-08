@@ -5,8 +5,7 @@ import {
   StreamableHTTPClientTransport,
 } from "@modelcontextprotocol/client";
 import { createCore, userPrincipal } from "@taff/core";
-import { connectDatabase, user } from "@taff/db";
-import { eq } from "drizzle-orm";
+import { grantSchema, runDetailSchema, runSchema } from "@taff/schemas";
 
 const env = (name: string) => {
   const value = process.env[name];
@@ -24,7 +23,6 @@ const core = createCore({
   authSecret: env("AUTH_SECRET"),
   tokenPepper: env("TOKEN_PEPPER"),
 });
-const connection = connectDatabase(env("DATABASE_URL"));
 let failures = 0;
 function check(name: string, condition: boolean, detail?: unknown) {
   console.log(
@@ -39,12 +37,19 @@ function text(result: { content: { type: string; text?: string }[] }) {
     : null;
 }
 try {
-  const [person] = await connection.db
-    .select()
-    .from(user)
-    .where(eq(user.email, process.env.DEMO_EMAIL ?? "alex@taff.local"))
-    .limit(1);
-  if (!person) throw new Error("Run pnpm db:seed first");
+  const signedIn = await fetch(new URL("/api/auth/sign-in/email", apiUrl), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", origin: env("AUTH_URL") },
+    body: JSON.stringify({
+      email: process.env.DEMO_EMAIL ?? "alex@taff.local",
+      password: env("DEMO_PASSWORD"),
+    }),
+  });
+  if (!signedIn.ok)
+    throw new Error(
+      `Demo sign-in failed (${signedIn.status}); run pnpm db:seed first`,
+    );
+  const person = ((await signedIn.json()) as { user: { id: string } }).user;
   const me = await core.getMe(person.id);
   const workspace = me.workspaces[0];
   const asUser = userPrincipal(person.id);
@@ -55,7 +60,13 @@ try {
     workspaceId: workspace.id,
     memberId: agent.id,
     name: `smoke ${new Date().toISOString()}`,
-    scopes: ["tasks:read", "tasks:write", "calendar:write", "inbox:review"],
+    scopes: [
+      "tasks:read",
+      "tasks:write",
+      "calendar:write",
+      "inbox:review",
+      "files:write",
+    ],
   });
   const client = new Client({ name: "taff-smoke", version: "0.1.0" });
   const transport = new StreamableHTTPClientTransport(apiUrl, {
@@ -66,11 +77,18 @@ try {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists the five tools",
+    "lists every task, run, grant and file tool",
     JSON.stringify(tools) ===
       JSON.stringify([
         "calendar.schedule",
+        "files.attach",
+        "grants.request",
         "inbox.request_review",
+        "runs.control",
+        "runs.event",
+        "runs.get",
+        "runs.start",
+        "runs.submit",
         "tasks.create",
         "tasks.list",
         "tasks.update",
@@ -115,6 +133,140 @@ try {
     typeof scheduled?.dueAt === "string",
     scheduled,
   );
+  let run = runSchema.parse(
+    text(await client.callTool({ name: "runs.start", arguments: { taskId } })),
+  );
+  check("runs.start creates real running work", run.status === "running");
+  const detail = async () =>
+    runDetailSchema.parse(
+      text(
+        await client.callTool({
+          name: "runs.get",
+          arguments: { runId: run.id },
+        }),
+      ),
+    );
+  run = runSchema.parse(
+    text(
+      await client.callTool({
+        name: "runs.control",
+        arguments: { runId: run.id, version: run.version, action: "pause" },
+      }),
+    ),
+  );
+  check("runs.control pauses", run.status === "paused");
+  run = runSchema.parse(
+    text(
+      await client.callTool({
+        name: "runs.control",
+        arguments: { runId: run.id, version: run.version, action: "resume" },
+      }),
+    ),
+  );
+  const grant = grantSchema.parse(
+    text(
+      await client.callTool({
+        name: "grants.request",
+        arguments: {
+          agentId: agent.id,
+          taskId,
+          runId: run.id,
+          capability: "repo.read",
+          reason: "MCP smoke verifies scoped grants",
+        },
+      }),
+    ),
+  );
+  check(
+    "grants.request creates a pending human decision",
+    grant.status === "pending",
+  );
+  await core.decideGrant(asUser, grant.id, {
+    decision: "allow",
+    expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+  });
+  run = (await detail()).run;
+  if (run.status === "paused")
+    run = runSchema.parse(
+      text(
+        await client.callTool({
+          name: "runs.control",
+          arguments: { runId: run.id, version: run.version, action: "resume" },
+        }),
+      ),
+    );
+  const measuredStart = performance.now();
+  const discovery = await client.listTools();
+  await client.callTool({
+    name: "runs.event",
+    arguments: {
+      runId: run.id,
+      version: run.version,
+      kind: "test",
+      title: "MCP tool discovery",
+      text: `Discovered ${discovery.tools.length} tools`,
+      testStatus: "passed",
+      durationMs: Math.round(performance.now() - measuredStart),
+      costMicros: 0,
+    },
+  });
+  run = (await detail()).run;
+  const attached = await client.callTool({
+    name: "files.attach",
+    arguments: {
+      runId: run.id,
+      version: run.version,
+      name: "mcp-smoke.txt",
+      mimeType: "text/plain",
+      content: `Official client discovered:\n${tools.join("\n")}`,
+      diff: "+ MCP discovery verified",
+      sourceUrl: apiUrl.href,
+    },
+  });
+  check("files.attach stores actual content", !attached.isError);
+  run = (await detail()).run;
+  run = runSchema.parse(
+    text(
+      await client.callTool({
+        name: "runs.submit",
+        arguments: {
+          runId: run.id,
+          version: run.version,
+          summary: "MCP discovery verified",
+        },
+      }),
+    ),
+  );
+  check("runs.submit waits for a person", run.status === "needs_review");
+  run = await core.reviewRun(asUser, run.id, {
+    version: run.version,
+    decision: "request_changes",
+    checks: {
+      matchesDescription: false,
+      verifiable: false,
+      withinPermissions: false,
+    },
+    comment: "Include a source event before final approval",
+    items: [],
+  });
+  run = runSchema.parse(
+    text(
+      await client.callTool({
+        name: "runs.control",
+        arguments: { runId: run.id, version: run.version, action: "resume" },
+      }),
+    ),
+  );
+  await client.callTool({
+    name: "runs.event",
+    arguments: {
+      runId: run.id,
+      version: run.version,
+      kind: "source",
+      title: "Local MCP endpoint",
+      sourceUrl: apiUrl.href,
+    },
+  });
   const review = text(
     await client.callTool({
       name: "inbox.request_review",
@@ -126,10 +278,27 @@ try {
     review?.status === "needs_review",
     review,
   );
+  const workspaceReview = await core.getReview(asUser, taskId);
+  const approved = await core.reviewRun(asUser, workspaceReview.run.id, {
+    version: workspaceReview.run.version,
+    decision: "approve",
+    checks: {
+      matchesDescription: true,
+      verifiable: true,
+      withinPermissions: true,
+    },
+    comment: "",
+    items: workspaceReview.artifacts.map((artifact) => ({
+      artifactId: artifact.id,
+      decision: "approve",
+      comment: "",
+    })),
+  });
+  check("human review completes the run", approved.status === "completed");
   const listed = text(
     await client.callTool({
       name: "tasks.list",
-      arguments: { status: "needs_review" },
+      arguments: { status: "done" },
     }),
   ) as unknown as { id: string }[] | null;
   check(
@@ -184,7 +353,6 @@ try {
   );
 } finally {
   await core.close();
-  await connection.close();
 }
 if (failures) {
   console.error(`${failures} MCP smoke check(s) failed`);

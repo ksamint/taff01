@@ -89,7 +89,22 @@
     "blockers": "阻塞",
     "zero": "收件箱已清空",
     "zeroSub": "新的審核請求和阻塞會出現在這裏。",
-    "needsReview_other": "{{count}} 項待你審核"
+    "needsReview_other": "{{count}} 項待你審核",
+    "unread": "{{count}} 則未讀",
+    "snoozed": "已延後 24 小時。",
+    "undo": "復原",
+    "taskGroup": "任務動態",
+    "workspaceGroup": "工作空間動態",
+    "kind": {
+      "review": "待審核",
+      "blocker": "已阻塞",
+      "mention": "提及"
+    },
+    "openTask": "開啟任務",
+    "grantAccess": "授予存取權限",
+    "markUnread": "標為未讀",
+    "markRead": "標為已讀",
+    "snoozeDay": "延後 24 小時"
   },
   "me": {
     "title": "我的",
@@ -122,7 +137,8 @@
       "tasks:read": "讀取任務",
       "tasks:write": "建立與更新任務",
       "calendar:write": "修改日程",
-      "inbox:review": "提交審核"
+      "inbox:review": "提交審核",
+      "files:write": "附加交付物"
     },
     "createToken": "建立權杖",
     "tokens": "權杖",
@@ -146,6 +162,157 @@
       "error": "錯誤",
       "denied": "已拒絕",
       "rate_limited": "已限流"
+    }
+  },
+  "taskDetail": {
+    "back": "返回今天",
+    "due": "到期時間",
+    "unscheduled": "未安排日期"
+  },
+  "run": {
+    "title": "智能體執行",
+    "start": "啟動智能體",
+    "pause": "暫停",
+    "resume": "繼續執行",
+    "cancel": "取消執行",
+    "keep": "保留執行",
+    "cancelQuestion": "取消這次執行？",
+    "cancelHint": "智能體將無法為這次執行提交事件或交付物，已有證據會保留在歷史中。",
+    "refresh": "重新整理",
+    "duration": "用時 {{duration}}",
+    "cost": "費用 {{cost}}",
+    "started": "開始於 {{date}}",
+    "timeline": "執行時間線",
+    "noEvents": "等待智能體報告第一個事件。",
+    "notStarted": "分配智能體並啟動執行，即可在此查看工作。",
+    "status": {
+      "running": "工作中",
+      "paused": "已暫停",
+      "needs_review": "待審核",
+      "changes_requested": "已要求修改",
+      "completed": "已完成",
+      "canceled": "已取消",
+      "failed": "失敗"
+    },
+    "eventKind": {
+      "step": "步驟",
+      "tool_call": "工具呼叫",
+      "message": "訊息",
+      "source": "來源",
+      "test": "測試結果"
+    }
+  },
+  "review": {
+    "open": "審核交付物",
+    "back": "返回任務",
+    "title": "審核工作區",
+    "deliverables": "交付物",
+    "noArtifacts": "尚未提交交付物。",
+    "preview": "預覽",
+    "diff": "改動對比",
+    "source": "來源",
+    "itemDecision": "{{name}} 的審核決定",
+    "approveItem": "批准此項",
+    "changesItem": "要求修改",
+    "itemComment": "對此項發表評論",
+    "addComment": "新增評論",
+    "sourcesTests": "來源與測試結果",
+    "noEvidence": "尚未報告來源或測試結果。",
+    "testStatus": {
+      "passed": "通過",
+      "failed": "失敗",
+      "skipped": "已略過"
+    },
+    "checklist": "審核清單",
+    "checked": "已檢查 {{count}} / 3",
+    "check": {
+      "matchesDescription": "交付物符合任務描述",
+      "verifiable": "來源或測試可以核查",
+      "withinPermissions": "沒有超出授權範圍的操作"
+    },
+    "overallComment": "審核評論",
+    "approve": "批准",
+    "requestChanges": "要求修改",
+    "approveHint": "批准執行前，請完成三個檢查項並批准每個交付物。要求修改時需填寫評論。",
+    "approved": "已批准，任務已完成。",
+    "readonly": "目前帳戶或執行狀態下只能查看審核內容。",
+    "comments": "審核評論"
+  },
+  "agentProfile": {
+    "open": "智能體資料",
+    "back": "返回我的",
+    "team": "智能體",
+    "supervisedBy": "監管人：{{name}}",
+    "noSupervisor": "無監管人",
+    "permissions": "權限",
+    "permissionsHint": "權杖範圍同樣有效，授權無法覆蓋被拒絕的能力。",
+    "decision": {
+      "allow": "允許",
+      "ask": "詢問",
+      "deny": "拒絕"
+    },
+    "settings": "監管與限制",
+    "supervisor": "監管人",
+    "policy": "審核策略",
+    "alwaysReview": "每次都需審核",
+    "askOnly": "智能體提出要求時審核",
+    "policyHint": "預設每次審核。第二種策略僅在智能體明確選擇不審核時允許直接完成。",
+    "maxDuration": "每次執行時限（秒）",
+    "maxCost": "每次執行費用上限（美元）",
+    "unlimited": "無限制",
+    "save": "儲存設定",
+    "saved": "設定已儲存。",
+    "runHistory": "執行歷史",
+    "noRuns": "暫無執行記錄。",
+    "task": "任務",
+    "changeHistory": "設定歷史",
+    "noChanges": "暫無設定更改。",
+    "capability": {
+      "tasks.read": "讀取任務",
+      "tasks.write": "建立及更新任務",
+      "calendar.schedule": "修改日程",
+      "files.attach": "附加檔案",
+      "web.search": "搜尋網絡",
+      "repo.read": "讀取程式碼庫",
+      "repo.pr": "建立拉取請求",
+      "repo.merge": "合併程式碼",
+      "deploy.prod": "發佈至正式環境",
+      "staging.read": "讀取預發環境",
+      "staging.write": "修改預發環境",
+      "alerts": "管理警報"
+    },
+    "historyGrantChanged": "{{capability}}：{{previousStatus}} → {{status}}",
+    "historyGrant": "{{capability}}：{{status}}",
+    "historyPermission": "{{capability}}：{{decision}}",
+    "historyPolicy": "審核策略：{{policy}}",
+    "historySettings": "智能體設定已更改"
+  },
+  "grants": {
+    "history": "授權記錄",
+    "none": "暫無授權記錄。",
+    "expiry": "授權有效期",
+    "oneHour": "1 小時",
+    "oneDay": "24 小時",
+    "oneWeek": "7 天",
+    "thirtyDays": "30 天",
+    "allow": "授予存取權限",
+    "deny": "拒絕請求",
+    "revoke": "撤銷授權",
+    "taskScope": "任務範圍：{{task}}",
+    "workspaceScope": "工作空間範圍",
+    "expires": "到期時間：{{date}}",
+    "notGranted": "無生效中的有效期",
+    "recorded": "{{name}} · {{date}}",
+    "pending": "等待決定",
+    "request": "申請存取權限",
+    "capability": "能力",
+    "scope": "範圍",
+    "reason": "原因",
+    "status": {
+      "pending": "待處理",
+      "allowed": "已允許",
+      "denied": "已拒絕",
+      "revoked": "已撤銷"
     }
   }
 }

@@ -508,10 +508,9 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       `agent:${agentId}`,
       `agent:${agentId}`,
     ]);
-    const reviewed = await core.updateTaskStatus(asUser, task.id, {
-      status: "done",
-    });
-    expect(reviewed.status).toBe("done");
+    await expect(
+      core.updateTaskStatus(asUser, task.id, { status: "done" }),
+    ).rejects.toMatchObject({ code: "conflict" });
     await core.recordMcpCall({
       tokenId: issued.id,
       workspaceId,
@@ -531,5 +530,8 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
     const revoked = await core.revokeAgentToken(asUser, issued.id);
     expect(revoked.revokedAt).not.toBeNull();
     expect(await core.authenticateAgentToken(issued.token)).toBeNull();
+    await expect(core.listTasks(agent, workspaceId)).rejects.toMatchObject({
+      code: "forbidden",
+    });
   });
 });

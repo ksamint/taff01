@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   check,
   foreignKey,
@@ -144,6 +145,7 @@ export const tasks = pgTable(
     ...dates,
   },
   (t) => [
+    unique("tasks_workspace_id_unique").on(t.workspaceId, t.id),
     index("tasks_workspace_created_idx").on(t.workspaceId, t.createdAt),
     foreignKey({
       columns: [t.workspaceId, t.ownerId],
@@ -235,5 +237,372 @@ export const mcpCalls = pgTable(
   },
   (t) => [
     index("mcp_calls_workspace_created_idx").on(t.workspaceId, t.createdAt),
+  ],
+);
+
+export const reviewPolicy = pgEnum("review_policy", [
+  "always_review",
+  "ask_only",
+]);
+export const permissionDecision = pgEnum("permission_decision", [
+  "allow",
+  "ask",
+  "deny",
+]);
+export const grantStatus = pgEnum("grant_status", [
+  "pending",
+  "allowed",
+  "denied",
+  "revoked",
+]);
+export const runStatus = pgEnum("run_status", [
+  "running",
+  "paused",
+  "needs_review",
+  "changes_requested",
+  "completed",
+  "canceled",
+  "failed",
+]);
+export const agentProfiles = pgTable(
+  "agent_profiles",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    supervisorId: uuid("supervisor_id"),
+    reviewPolicy: reviewPolicy("review_policy")
+      .default("always_review")
+      .notNull(),
+    maxDurationMs: bigint("max_duration_ms", { mode: "number" }),
+    maxCostMicros: bigint("max_cost_micros", { mode: "number" }),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.id],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "agent_profiles_member_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.supervisorId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "agent_profiles_supervisor_fk",
+    }),
+    check(
+      "agent_profiles_limits",
+      sql`(${t.maxDurationMs} IS NULL OR ${t.maxDurationMs} > 0) AND (${t.maxCostMicros} IS NULL OR ${t.maxCostMicros} > 0)`,
+    ),
+  ],
+);
+export const agentPermissions = pgTable(
+  "agent_permissions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    agentId: uuid("agent_id").notNull(),
+    capability: text("capability").notNull(),
+    decision: permissionDecision("decision").notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("agent_permissions_agent_capability").on(t.agentId, t.capability),
+    foreignKey({
+      columns: [t.workspaceId, t.agentId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "agent_permissions_member_fk",
+    }),
+  ],
+);
+export const runs = pgTable(
+  "runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    taskId: uuid("task_id").notNull(),
+    agentId: uuid("agent_id").notNull(),
+    status: runStatus("status").default("running").notNull(),
+    version: integer("version").default(1).notNull(),
+    summary: text("summary").default("").notNull(),
+    startedAt: timestamp("started_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    finishedAt: timestamp("finished_at", { withTimezone: true }),
+    durationMs: bigint("duration_ms", { mode: "number" }).default(0).notNull(),
+    costMicros: bigint("cost_micros", { mode: "number" }).default(0).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("runs_workspace_id_unique").on(t.workspaceId, t.id),
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "runs_task_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.agentId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "runs_agent_fk",
+    }),
+    index("runs_workspace_started_idx").on(t.workspaceId, t.startedAt),
+    uniqueIndex("runs_one_active_per_task")
+      .on(t.taskId)
+      .where(
+        sql`${t.status} IN ('running','paused','needs_review','changes_requested')`,
+      ),
+    check(
+      "runs_metrics",
+      sql`${t.version} > 0 AND ${t.durationMs} >= 0 AND ${t.costMicros} >= 0`,
+    ),
+  ],
+);
+export const runEvents = pgTable(
+  "run_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    runId: uuid("run_id").notNull(),
+    kind: text("kind").notNull(),
+    capability: text("capability"),
+    title: text("title").notNull(),
+    text: text("text").default("").notNull(),
+    sourceUrl: text("source_url"),
+    testStatus: text("test_status"),
+    durationMs: bigint("duration_ms", { mode: "number" }).default(0).notNull(),
+    costMicros: bigint("cost_micros", { mode: "number" }).default(0).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("run_events_workspace_run_id_unique").on(
+      t.workspaceId,
+      t.runId,
+      t.id,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.runId],
+      foreignColumns: [runs.workspaceId, runs.id],
+      name: "run_events_run_fk",
+    }),
+    index("run_events_run_created_idx").on(t.runId, t.createdAt),
+    check(
+      "run_events_kind",
+      sql`${t.kind} IN ('step','tool_call','message','source','test')`,
+    ),
+    check(
+      "run_events_metrics",
+      sql`${t.durationMs} >= 0 AND ${t.costMicros} >= 0`,
+    ),
+  ],
+);
+export const runArtifacts = pgTable(
+  "run_artifacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    runId: uuid("run_id").notNull(),
+    name: text("name").notNull(),
+    mimeType: text("mime_type").notNull(),
+    content: text("content").notNull(),
+    diff: text("diff"),
+    sourceUrl: text("source_url"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("run_artifacts_workspace_run_id_unique").on(
+      t.workspaceId,
+      t.runId,
+      t.id,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.runId],
+      foreignColumns: [runs.workspaceId, runs.id],
+      name: "run_artifacts_run_fk",
+    }),
+  ],
+);
+export const grants = pgTable(
+  "grants",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    agentId: uuid("agent_id").notNull(),
+    capability: text("capability").notNull(),
+    taskId: uuid("task_id"),
+    runId: uuid("run_id"),
+    status: grantStatus("status").default("pending").notNull(),
+    reason: text("reason").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    decidedBy: uuid("decided_by"),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.agentId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "grants_agent_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "grants_task_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.runId],
+      foreignColumns: [runs.workspaceId, runs.id],
+      name: "grants_run_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.decidedBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "grants_decider_fk",
+    }),
+    unique("grants_workspace_id_unique").on(t.workspaceId, t.id),
+    index("grants_agent_created_idx").on(t.agentId, t.createdAt),
+  ],
+);
+export const reviewChecks = pgTable(
+  "review_checks",
+  {
+    id: uuid("id").primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    matchesDescription: boolean("matches_description").notNull(),
+    verifiable: boolean("verifiable").notNull(),
+    withinPermissions: boolean("within_permissions").notNull(),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.id],
+      foreignColumns: [runs.workspaceId, runs.id],
+      name: "review_checks_run_fk",
+    }),
+  ],
+);
+export const reviewComments = pgTable(
+  "review_comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    runId: uuid("run_id").notNull(),
+    authorId: uuid("author_id").notNull(),
+    body: text("body").notNull(),
+    artifactId: uuid("artifact_id"),
+    eventId: uuid("event_id"),
+    line: integer("line"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.runId],
+      foreignColumns: [runs.workspaceId, runs.id],
+      name: "review_comments_run_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.authorId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "review_comments_author_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.runId, t.artifactId],
+      foreignColumns: [
+        runArtifacts.workspaceId,
+        runArtifacts.runId,
+        runArtifacts.id,
+      ],
+      name: "review_comments_artifact_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.runId, t.eventId],
+      foreignColumns: [runEvents.workspaceId, runEvents.runId, runEvents.id],
+      name: "review_comments_event_fk",
+    }),
+  ],
+);
+export const reviewItems = pgTable(
+  "review_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    runId: uuid("run_id").notNull(),
+    artifactId: uuid("artifact_id").notNull(),
+    decision: text("decision").notNull(),
+    reviewedBy: uuid("reviewed_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.runId, t.artifactId],
+      foreignColumns: [
+        runArtifacts.workspaceId,
+        runArtifacts.runId,
+        runArtifacts.id,
+      ],
+      name: "review_items_artifact_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.reviewedBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "review_items_reviewer_fk",
+    }),
+    check(
+      "review_items_decision",
+      sql`${t.decision} IN ('approve','request_changes')`,
+    ),
+  ],
+);
+export const inboxItems = pgTable(
+  "inbox_items",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    memberId: uuid("member_id").notNull(),
+    agentId: uuid("agent_id"),
+    taskId: uuid("task_id"),
+    runId: uuid("run_id"),
+    grantId: uuid("grant_id"),
+    kind: text("kind").notNull(),
+    title: text("title").notNull(),
+    readAt: timestamp("read_at", { withTimezone: true }),
+    snoozedUntil: timestamp("snoozed_until", { withTimezone: true }),
+    resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.memberId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "inbox_items_member_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.agentId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "inbox_items_agent_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "inbox_items_task_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.runId],
+      foreignColumns: [runs.workspaceId, runs.id],
+      name: "inbox_items_run_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.grantId],
+      foreignColumns: [grants.workspaceId, grants.id],
+      name: "inbox_items_grant_fk",
+    }),
+    index("inbox_items_member_created_idx").on(t.memberId, t.createdAt),
+    check("inbox_items_kind", sql`${t.kind} IN ('review','blocker','mention')`),
   ],
 );
