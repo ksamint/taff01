@@ -7,8 +7,13 @@ const core = createCore({
   databaseUrl: "postgres://unused:unused@localhost:1/unused_test",
   authUrl: "http://localhost:3000",
   authSecret: "test-only-secret-with-at-least-32-characters",
+  tokenPepper: "test-only-pepper-with-16-characters",
 });
-const app = createApp(core, "http://localhost:3000", pino({ enabled: false }));
+const rateLimiter = { hits: 0, limit: 2 };
+const app = createApp(core, "http://localhost:3000", pino({ enabled: false }), {
+  hit: async () => ++rateLimiter.hits <= rateLimiter.limit,
+  close: async () => {},
+});
 const id = "00000000-0000-4000-8000-000000000001";
 const now = new Date();
 const session = {
@@ -102,12 +107,82 @@ describe("REST adapter boundaries", () => {
       body: JSON.stringify({ workspaceId: id, ownerId: id, title: " Task " }),
     });
     expect(response.status).toBe(201);
-    expect(write).toHaveBeenCalledWith(id, {
+    expect(write).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      {
+        workspaceId: id,
+        ownerId: id,
+        title: "Task",
+        workerId: null,
+        dueAt: null,
+      },
+    );
+  });
+  it("rejects MCP requests without a valid agent token and never reaches core", async () => {
+    const authenticate = vi
+      .spyOn(core, "authenticateAgentToken")
+      .mockResolvedValue(null);
+    const read = vi.spyOn(core, "listTasks");
+    const anonymous = await app.request("/mcp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+    expect(anonymous.status).toBe(401);
+    expect(anonymous.headers.get("www-authenticate")).toContain("Bearer");
+    expect(authenticate).not.toHaveBeenCalled();
+    const bad = await app.request("/mcp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer taff_not-a-real-token",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+    expect(bad.status).toBe(401);
+    expect(authenticate).toHaveBeenCalledWith("taff_not-a-real-token");
+    expect(read).not.toHaveBeenCalled();
+  });
+  it("rate-limits MCP calls per token and logs every call", async () => {
+    const principal = {
+      kind: "agent" as const,
+      tokenId: id,
+      memberId: id,
       workspaceId: id,
-      ownerId: id,
-      title: "Task",
-      workerId: null,
-      dueAt: null,
+      scopes: ["tasks:read" as const],
+    };
+    vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    const log = vi.spyOn(core, "recordMcpCall").mockResolvedValue();
+    vi.spyOn(core, "listTasks").mockResolvedValue([]);
+    rateLimiter.hits = 0;
+    const call = () =>
+      app.request("/mcp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
+          Authorization: "Bearer taff_token",
+        },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call",
+          params: { name: "tasks.list", arguments: {} },
+        }),
+      });
+    expect((await call()).status).toBe(200);
+    expect((await call()).status).toBe(200);
+    const limited = await call();
+    expect(limited.status).toBe(429);
+    expect(log.mock.calls.map(([entry]) => entry.status)).toEqual([
+      "ok",
+      "ok",
+      "rate_limited",
+    ]);
+    expect(log.mock.calls[0][0]).toMatchObject({
+      tokenId: id,
+      method: "tools/call",
+      tool: "tasks.list",
     });
   });
   it("forwards every refreshed session cookie to the browser", async () => {
