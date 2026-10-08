@@ -26,21 +26,24 @@ import {
   useRuns,
   useTask,
 } from "../lib/m3-queries";
+import { useTaskAccess } from "../lib/m5-queries";
 import { m3MutationKey, patchTask, snapshotM3 } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
 import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
 import { RunPanel } from "./run-panel";
+import { TaskEditor } from "./task-editor";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 
 export function TaskDetailView({ taskId }: { taskId: string }) {
-  const { me, workspace } = useWorkspace();
-  const { t, i18n } = useTranslation();
+  const { workspace } = useWorkspace();
+  const { t } = useTranslation();
   const client = useQueryClient();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const task = useTask(taskId);
+  const access = useTaskAccess(taskId);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
   const latest = runs.data
@@ -131,7 +134,6 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
     ["running", "paused", "needs_review", "changes_requested"].includes(
       latest.status,
     );
-  const locale = i18n.resolvedLanguage ?? me.user.locale;
   return (
     <>
       <Link className="back-link" href="/">
@@ -149,36 +151,21 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
       </section>
       <div className="detail-layout">
         <div>
-          <dl className="detail-fields">
-            <div>
-              <dt>{t("owner")}</dt>
-              <dd>
-                {members.data?.find((member) => member.id === task.data.ownerId)
-                  ?.name ?? t("unknownMember")}
-              </dd>
-            </div>
-            <div>
-              <dt>{t("taskDetail.due")}</dt>
-              <dd>
-                {task.data.dueAt
-                  ? new Intl.DateTimeFormat(locale, {
-                      timeZone: me.user.tz,
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    }).format(new Date(task.data.dueAt))
-                  : t("taskDetail.unscheduled")}
-              </dd>
-            </div>
-          </dl>
+          <TaskEditor task={task.data} />
           <div className="field">
             <Label htmlFor="detail-worker">{t("worker")}</Label>
             <select
               id="detail-worker"
               data-testid="detail-worker"
               value={task.data.workerId ?? ""}
-              disabled={busy || !!active || !members.data}
+              disabled={
+                busy || !!active || !members.data || !access.data?.canAssign
+              }
               onChange={(event) =>
-                assign.mutate({ workerId: event.target.value || null })
+                assign.mutate({
+                  workerId: event.target.value || null,
+                  version: task.data.version,
+                })
               }
             >
               <MemberOptions members={members.data ?? []} />
@@ -197,7 +184,12 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
                 <Button
                   className="button-primary"
                   data-testid="run-start"
-                  disabled={busy || runs.isPending || runs.isError}
+                  disabled={
+                    busy ||
+                    runs.isPending ||
+                    runs.isError ||
+                    !access.data?.canAssign
+                  }
                   onClick={() => start.mutate()}
                 >
                   <Play size={16} aria-hidden="true" />

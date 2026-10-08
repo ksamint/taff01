@@ -9,6 +9,13 @@ import type {
 } from "@taff/schemas";
 
 export type Action =
+  | "workspace:create"
+  | "workspace:join"
+  | "workspace:manage"
+  | "project:manage"
+  | "task:edit"
+  | "task:owner"
+  | "task:comment"
   | "workspace:read"
   | "task:create"
   | "task:assign"
@@ -73,7 +80,11 @@ export function can(
   resource: Resource,
 ): boolean {
   if (!actor) return false;
-  if (action === "profile:update")
+  if (
+    action === "profile:update" ||
+    action === "workspace:create" ||
+    action === "workspace:join"
+  )
     return (
       "userId" in resource &&
       actor.kind === "person" &&
@@ -84,7 +95,22 @@ export function can(
     actor.workspaceId !== resource.workspaceId
   )
     return false;
+  if (
+    actor.role === "guest" &&
+    !["workspace:read", "inbox:read", "inbox:update"].includes(action)
+  )
+    return false;
+  if (action === "workspace:manage" || action === "project:manage")
+    return actor.kind === "person" && actor.role === "admin";
   const owns = actor.role === "admin" || actor.id === resource.ownerId;
+  if (["task:edit", "task:owner", "task:comment"].includes(action)) {
+    if (actor.kind === "person") return action === "task:comment" || owns;
+    return (
+      action !== "task:owner" &&
+      actor.id === resource.workerId &&
+      can(actor, "capability:use", { ...resource, capability: "tasks.write" })
+    );
+  }
   if (action === "agent:manage")
     return actor.kind === "person" && actor.role === "admin";
   if (action === "grant:decide")

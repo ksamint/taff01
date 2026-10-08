@@ -36,12 +36,15 @@ import {
   type Scope,
   scheduleTaskSchema,
   type Task,
+  type TaskFilter,
   type TaskStatus,
+  taskFilterSchema,
   updateTaskStatusSchema,
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { type Action, type Actor, can, type Resource } from "./permissions";
+import { createPlanningOperations } from "./planning";
 import { createRunOperations } from "./runs";
 
 export class CoreError extends Error {
@@ -282,7 +285,8 @@ export function createCore(options: {
           eq(members.workspaceId, workspaceId),
         ),
       )
-      .limit(1);
+      .limit(1)
+      .for("share");
     return member ?? null;
   }
   async function requireMember(
@@ -305,12 +309,22 @@ export function createCore(options: {
       principal.kind === "user"
         ? principal.userId
         : `agent:${principal.memberId}`;
-    return db.transaction(async (tx) => {
-      await tx.execute(
-        sql`select set_config('taff.actor_id', ${actorId}, true)`,
-      );
-      return run(tx);
-    });
+    try {
+      return await db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id', ${actorId}, true)`,
+        );
+        return run(tx);
+      });
+    } catch (error) {
+      const cause =
+        error instanceof Error && "cause" in error ? error.cause : error;
+      if (cause instanceof Error && cause.message === "taff_conflict")
+        throw new CoreError("conflict", 409);
+      if (cause instanceof Error && cause.message === "taff_invalid")
+        throw new CoreError("invalid_input", 400);
+      throw error;
+    }
   }
   async function getMe(userId: string): Promise<Me> {
     const [person] = await db
@@ -358,22 +372,42 @@ export function createCore(options: {
   async function listTasks(
     principal: Principal,
     workspaceId: string,
-    filter: { status?: TaskStatus } = {},
+    filter: TaskFilter = {},
   ): Promise<Task[]> {
     parse(idSchema, workspaceId);
     await requireMember(db, principal, workspaceId, "workspace:read");
+    const body = parse(taskFilterSchema, filter);
+    const where = [eq(tasks.workspaceId, workspaceId)];
+    if (body.status) where.push(eq(tasks.status, body.status));
+    for (const key of [
+      "projectId",
+      "parentId",
+      "ownerId",
+      "workerId",
+      "priority",
+    ] as const) {
+      const value = body[key];
+      if (value !== undefined)
+        where.push(
+          value === null ? isNull(tasks[key]) : sql`${tasks[key]} = ${value}`,
+        );
+    }
+    if (body.label) where.push(sql`${body.label} = ANY(${tasks.labels})`);
+    const sort =
+      body.sort === "priority"
+        ? tasks.priority
+        : body.sort === "title"
+          ? tasks.title
+          : body.sort === "due"
+            ? tasks.dueAt
+            : body.sort === "updated"
+              ? desc(tasks.updatedAt)
+              : desc(tasks.createdAt);
     const rows = await db
       .select()
       .from(tasks)
-      .where(
-        filter.status
-          ? and(
-              eq(tasks.workspaceId, workspaceId),
-              eq(tasks.status, filter.status),
-            )
-          : eq(tasks.workspaceId, workspaceId),
-      )
-      .orderBy(desc(tasks.createdAt), tasks.id);
+      .where(and(...where))
+      .orderBy(sort, tasks.id);
     return rows.map(toTask);
   }
   async function validateAssignees(
@@ -406,7 +440,23 @@ export function createCore(options: {
   ): Promise<Task> {
     const body = parse(createTaskSchema, input);
     return mutation(principal, async (tx) => {
-      await requireMember(tx, principal, body.workspaceId, "task:create");
+      await requireMember(tx, principal, body.workspaceId, "task:create", {
+        workspaceId: body.workspaceId,
+        taskId: body.parentId ?? undefined,
+      });
+      let parent: typeof tasks.$inferSelect | undefined;
+      if (body.parentId) {
+        parent = await lockTask(tx, body.parentId);
+        if (parent.workspaceId !== body.workspaceId)
+          throw new CoreError("invalid_input", 400);
+        if (parent.status === "done" || (await currentRunId(tx, parent.id)))
+          throw new CoreError("conflict", 409);
+      }
+      const projectId =
+        body.projectId === undefined
+          ? (parent?.projectId ?? null)
+          : body.projectId;
+      await planning.validateProject(tx, body.workspaceId, projectId);
       await validateAssignees(
         tx,
         body.workspaceId,
@@ -415,7 +465,16 @@ export function createCore(options: {
       );
       const [task] = await tx
         .insert(tasks)
-        .values({ ...body, dueAt: body.dueAt ? new Date(body.dueAt) : null })
+        .values({
+          ...body,
+          projectId,
+          priority: body.priority ?? parent?.priority ?? 3,
+          dueAt: body.dueAt
+            ? new Date(body.dueAt)
+            : body.dueAt === undefined
+              ? (parent?.dueAt ?? null)
+              : null,
+        })
         .returning();
       return toTask(task);
     });
@@ -432,7 +491,7 @@ export function createCore(options: {
     return task;
   }
   async function currentRunId(
-    tx: Transaction,
+    tx: typeof db | Transaction,
     taskId: string,
   ): Promise<string | undefined> {
     const [run] = await tx
@@ -454,6 +513,8 @@ export function createCore(options: {
     const body = parse(assignTaskSchema, input);
     return mutation(principal, async (tx) => {
       const task = await lockTask(tx, taskId);
+      if (body.version !== undefined && body.version !== task.version)
+        throw new CoreError("conflict", 409);
       await requireMember(tx, principal, task.workspaceId, "task:assign", {
         workspaceId: task.workspaceId,
         ownerId: task.ownerId,
@@ -489,11 +550,13 @@ export function createCore(options: {
   async function updateTaskStatus(
     principal: Principal,
     taskId: string,
-    input: { status: TaskStatus },
+    input: { status: TaskStatus; version?: number },
   ): Promise<Task> {
     const body = parse(updateTaskStatusSchema, input);
     return mutation(principal, async (tx) => {
       const task = await lockTask(tx, taskId);
+      if (body.version !== undefined && body.version !== task.version)
+        throw new CoreError("conflict", 409);
       const resource = {
         workspaceId: task.workspaceId,
         ownerId: task.ownerId,
@@ -539,11 +602,13 @@ export function createCore(options: {
   async function scheduleTask(
     principal: Principal,
     taskId: string,
-    input: { dueAt: string | null },
+    input: { dueAt: string | null; version?: number },
   ): Promise<Task> {
     const body = parse(scheduleTaskSchema, input);
     return mutation(principal, async (tx) => {
       const task = await lockTask(tx, taskId);
+      if (body.version !== undefined && body.version !== task.version)
+        throw new CoreError("conflict", 409);
       await requireMember(tx, principal, task.workspaceId, "task:schedule", {
         workspaceId: task.workspaceId,
         ownerId: task.ownerId,
@@ -742,7 +807,17 @@ export function createCore(options: {
   function getSession(headers: Headers) {
     return auth.api.getSession({ headers, returnHeaders: true });
   }
+  const planning = createPlanningOperations({
+    db,
+    mutation,
+    requireMember,
+    lockTask,
+    validateAssignees,
+    currentRunId,
+    tokenPepper: options.tokenPepper,
+  });
   return {
+    ...planning.operations,
     ...createRunOperations({
       db,
       mutation,

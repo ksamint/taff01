@@ -3,7 +3,7 @@ import { createTaskSchema, profileSchema, signInSchema } from "./index";
 
 const id = "00000000-0000-4000-8000-000000000001";
 describe("API trust boundaries", () => {
-  it("trims task titles and defaults optional values", () => {
+  it("trims task titles, defaults worker and preserves omitted due date", () => {
     expect(
       createTaskSchema.parse({
         workspaceId: id,
@@ -15,7 +15,6 @@ describe("API trust boundaries", () => {
       ownerId: id,
       title: "Task",
       workerId: null,
-      dueAt: null,
     });
   });
   it.each([

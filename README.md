@@ -14,10 +14,13 @@ Milestone 02 adds agent tokens, the `/mcp` Streamable HTTP endpoint with five
 tools over core, a per-token rate limit, a call log and the MCP settings page.
 Milestone 03 adds agent runs, actual events and artifacts, scoped permissions and
 expiring grants, a review workspace with comments and checklist, and a managed
-Inbox. MCP now exposes twelve tools, including `files.attach` and run controls.
+Inbox. MCP includes `files.attach` and run controls.
 Milestone 04 adds authenticated workspace WebSockets, cache reconciliation after
 disconnects, and optimistic writes with rollback across tasks, runs, reviews,
 permissions, Inbox and settings.
+Milestone 05 adds versioned task editing, real subtasks and comments, project
+boards and lists, authorized search, editable Quick Add parsing, organizations,
+single-use invitations and admin/member/guest roles. MCP exposes eighteen tools.
 Core owns database access, workspace permissions and
 transactional activity/notification behavior. The worker connects to Redis; no
 background job handlers are exposed yet.
@@ -102,12 +105,14 @@ external runtimes must enforce their own process limits. See
 [the agent run contract](docs/agent-runs.md) for versioned inputs and scope rules.
 See [the realtime contract](docs/realtime.md) for socket authorization and cache
 reconciliation behavior.
+See [the planning contract](docs/planning.md) for task versions, invitations,
+permissions, search and Quick Add behavior.
 
 ## Structure
 
 | Path | Responsibility |
 | --- | --- |
-| `apps/web` | Next.js mobile UI, bilingual strings, cache-first queries and optimistic mutations |
+| `apps/web` | Next.js mobile UI, three locales, cache-first queries and optimistic mutations |
 | `apps/api` | Thin Hono REST/auth adapters, workspace WebSocket fan-out, `/mcp` Streamable HTTP, rate limiting, validation and sanitized logging |
 | `apps/worker` | BullMQ 6 connection to Valkey and rejection of unsupported jobs |
 | `packages/schemas` | Shared Zod schemas and inferred client types |

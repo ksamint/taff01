@@ -64,6 +64,27 @@
       "when": 1791493482749,
       "tag": "0008_realtime_routing",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791494915791,
+      "tag": "0009_bright_mercury",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791495072829,
+      "tag": "0010_m5_invariants",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791495518750,
+      "tag": "0011_m5_subtask_reopen_guard",
+      "breakpoints": true
     }
   ]
 }

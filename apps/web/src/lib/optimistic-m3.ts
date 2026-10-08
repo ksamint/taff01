@@ -10,7 +10,23 @@ import type {
 import type { QueryClient } from "@tanstack/react-query";
 import { snapshotQueries } from "./query-snapshot";
 
-const FAMILIES = ["tasks", "task", "runs", "run", "review", "agent", "inbox"];
+const FAMILIES = [
+  "tasks",
+  "task",
+  "runs",
+  "run",
+  "review",
+  "agent",
+  "inbox",
+  "task-access",
+  "task-comments",
+  "projects",
+  "search",
+  "invites",
+  "workspace-access",
+  "members",
+  "org-drafts",
+];
 export const m3MutationKey = ["m3-write"] as const;
 export function snapshotM3(client: QueryClient) {
   return snapshotQueries(

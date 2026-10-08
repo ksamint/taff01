@@ -73,8 +73,22 @@ export function invalidateM3(client: QueryClient) {
   if (client.isMutating() > 1) return Promise.resolve();
   return client.invalidateQueries({
     predicate: ({ queryKey }) =>
-      ["tasks", "task", "runs", "run", "review", "agent", "inbox"].includes(
-        String(queryKey[0]),
-      ),
+      [
+        "tasks",
+        "task",
+        "runs",
+        "run",
+        "review",
+        "agent",
+        "inbox",
+        "task-access",
+        "task-comments",
+        "projects",
+        "search",
+        "invites",
+        "workspace-access",
+        "members",
+        "org-drafts",
+      ].includes(String(queryKey[0])),
   });
 }

@@ -40,12 +40,18 @@ import {
   mcpFilesAttachArgs,
   mcpGrantsRequestArgs,
   mcpInboxRequestReviewArgs,
+  mcpProjectsListArgs,
+  mcpQuickAddArgs,
   mcpRunsControlArgs,
   mcpRunsEventArgs,
   mcpRunsGetArgs,
   mcpRunsStartArgs,
   mcpRunsSubmitArgs,
+  mcpSearchArgs,
+  mcpTaskCommentsAddArgs,
+  mcpTaskCommentsListArgs,
   mcpTasksCreateArgs,
+  mcpTasksEditArgs,
   mcpTasksListArgs,
   mcpTasksUpdateArgs,
 } from "@taff/schemas";
@@ -86,12 +92,7 @@ export function createMcpServer(
       description: "Read and filter the workspace's tasks.",
       inputSchema: toolSchema(mcpTasksListArgs),
     },
-    (args) =>
-      run(() =>
-        core.listTasks(principal, principal.workspaceId, {
-          status: args.status,
-        }),
-      ),
+    (args) => run(() => core.listTasks(principal, principal.workspaceId, args)),
   );
   server.registerTool(
     "tasks.create",
@@ -105,10 +106,8 @@ export function createMcpServer(
       run(() =>
         core.createTask(principal, {
           workspaceId: principal.workspaceId,
-          title: args.title,
-          ownerId: args.ownerId,
+          ...args,
           workerId: principal.memberId,
-          dueAt: args.dueAt ?? null,
         }),
       ),
   );
@@ -135,6 +134,68 @@ export function createMcpServer(
         if (!task) throw new CoreError("invalid_input", 400);
         return task;
       }),
+  );
+  server.registerTool(
+    "tasks.edit",
+    {
+      title: "Edit task fields",
+      description:
+        "Edit the calling agent's task using its current version. Human review rules still apply.",
+      inputSchema: toolSchema(mcpTasksEditArgs),
+    },
+    ({ taskId, ...input }) =>
+      run(() => core.updateTask(principal, taskId, input)),
+  );
+  server.registerTool(
+    "tasks.comments.list",
+    {
+      title: "Read task comments",
+      description: "Read comments on an authorized workspace task.",
+      inputSchema: toolSchema(mcpTaskCommentsListArgs),
+    },
+    ({ taskId }) => run(() => core.listTaskComments(principal, taskId)),
+  );
+  server.registerTool(
+    "tasks.comments.add",
+    {
+      title: "Comment on task",
+      description:
+        "Add an actual comment to the calling agent's assigned task.",
+      inputSchema: toolSchema(mcpTaskCommentsAddArgs),
+    },
+    ({ taskId, ...input }) =>
+      run(() => core.addTaskComment(principal, taskId, input)),
+  );
+  server.registerTool(
+    "projects.list",
+    {
+      title: "Read projects",
+      description:
+        "List the token workspace's projects. Project administration is a human action.",
+      inputSchema: toolSchema(mcpProjectsListArgs),
+    },
+    () => run(() => core.listProjects(principal, principal.workspaceId)),
+  );
+  server.registerTool(
+    "search.query",
+    {
+      title: "Search tasks and comments",
+      description:
+        "Search authorized tasks and comments; an agent remains limited to its token workspace.",
+      inputSchema: toolSchema(mcpSearchArgs),
+    },
+    (input) => run(() => core.search(principal, principal.workspaceId, input)),
+  );
+  server.registerTool(
+    "quickadd.parse",
+    {
+      title: "Parse a task draft",
+      description:
+        "Parse editable task fields in the saved time zone without creating a task.",
+      inputSchema: toolSchema(mcpQuickAddArgs),
+    },
+    (input) =>
+      run(() => core.parseQuickAdd(principal, principal.workspaceId, input)),
   );
   server.registerTool(
     "calendar.schedule",

@@ -90,7 +90,13 @@ describe("workspace realtime lifecycle", () => {
       workspaceId: null,
       userId,
     });
-    expect(invalidate).toHaveBeenCalledTimes(3);
+    socket.message({
+      ...event,
+      action: "members.insert",
+      workspaceId: "33333333-3333-4333-8333-333333333333",
+      userId,
+    });
+    expect(invalidate).toHaveBeenCalledTimes(4);
   });
   it("defers change refetches until a pending optimistic mutation settles", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");

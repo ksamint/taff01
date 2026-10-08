@@ -5,7 +5,14 @@ import {
   StreamableHTTPClientTransport,
 } from "@modelcontextprotocol/client";
 import { createCore, userPrincipal } from "@taff/core";
-import { grantSchema, runDetailSchema, runSchema } from "@taff/schemas";
+import {
+  grantSchema,
+  quickAddResultSchema,
+  runDetailSchema,
+  runSchema,
+  searchResultSchema,
+  taskSchema,
+} from "@taff/schemas";
 
 const env = (name: string) => {
   const value = process.env[name];
@@ -53,6 +60,9 @@ try {
   const me = await core.getMe(person.id);
   const workspace = me.workspaces[0];
   const asUser = userPrincipal(person.id);
+  const project = await core.createProject(asUser, workspace.id, {
+    name: `Smoke-${Date.now()}`,
+  });
   const members = await core.listMembers(asUser, workspace.id);
   const agent = members.find((member) => member.kind === "agent");
   if (!agent) throw new Error("The demo workspace has no agent");
@@ -77,19 +87,25 @@ try {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists every task, run, grant and file tool",
+    "lists every task, project, search, draft, run, grant and file tool",
     JSON.stringify(tools) ===
       JSON.stringify([
         "calendar.schedule",
         "files.attach",
         "grants.request",
         "inbox.request_review",
+        "projects.list",
+        "quickadd.parse",
         "runs.control",
         "runs.event",
         "runs.get",
         "runs.start",
         "runs.submit",
+        "search.query",
+        "tasks.comments.add",
+        "tasks.comments.list",
         "tasks.create",
+        "tasks.edit",
         "tasks.list",
         "tasks.update",
       ]),
@@ -101,6 +117,10 @@ try {
       arguments: {
         title: `Smoke task ${Date.now()}`,
         ownerId: workspace.memberId,
+        description: "M5 MCP smoke",
+        priority: 2,
+        projectId: project.id,
+        labels: ["smoke"],
       },
     }),
   );
@@ -110,6 +130,87 @@ try {
     created,
   );
   const taskId = String(created?.id);
+  const edited = taskSchema.parse(
+    text(
+      await client.callTool({
+        name: "tasks.edit",
+        arguments: {
+          taskId,
+          version: created?.version,
+          description: "M5 versioned edit",
+          labels: ["smoke", "edited"],
+        },
+      }),
+    ),
+  );
+  check(
+    "tasks.edit preserves rich fields and increments the task version",
+    edited.version === Number(created?.version) + 1 &&
+      edited.projectId === project.id &&
+      edited.labels.includes("edited"),
+  );
+  const projectList = text(
+    await client.callTool({ name: "projects.list", arguments: {} }),
+  );
+  check(
+    "projects.list reads the token workspace",
+    Array.isArray(projectList) &&
+      projectList.some((item) => item.id === project.id),
+  );
+  const parsed = quickAddResultSchema.parse(
+    text(
+      await client.callTool({
+        name: "quickadd.parse",
+        arguments: {
+          text: `Quick smoke tomorrow 15:30 !high #${project.name} +smoke`,
+        },
+      }),
+    ),
+  );
+  check(
+    "quickadd.parse returns editable timezone-aware fields without creating work",
+    parsed.title === "Quick smoke" &&
+      parsed.priority === 2 &&
+      parsed.projectId === project.id &&
+      parsed.labels.includes("smoke") &&
+      parsed.dueTime === "15:30" &&
+      !!parsed.dueAt,
+  );
+  const commentBody = `Searchable MCP comment ${Date.now()}`;
+  const comment = text(
+    await client.callTool({
+      name: "tasks.comments.add",
+      arguments: { taskId, body: commentBody },
+    }),
+  );
+  check(
+    "tasks.comments.add stores real agent discussion",
+    comment?.body === commentBody && comment?.authorId === agent.id,
+  );
+  const comments = text(
+    await client.callTool({
+      name: "tasks.comments.list",
+      arguments: { taskId },
+    }),
+  );
+  check(
+    "tasks.comments.list reads the authorized discussion",
+    Array.isArray(comments) && comments.some((item) => item.id === comment?.id),
+  );
+  const matches = text(
+    await client.callTool({
+      name: "search.query",
+      arguments: { query: commentBody, scope: "all", types: ["comment"] },
+    }),
+  );
+  check(
+    "search.query finds the comment in the token workspace",
+    Array.isArray(matches) &&
+      matches.some((item) => {
+        const match = searchResultSchema.parse(item);
+        return match.id === comment?.id && match.workspaceId === workspace.id;
+      }),
+  );
   const started = text(
     await client.callTool({
       name: "tasks.update",

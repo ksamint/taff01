@@ -98,7 +98,7 @@ export const workspaces = pgTable("workspaces", {
   ...dates,
 });
 export const memberKind = pgEnum("member_kind", ["person", "agent"]);
-export const memberRole = pgEnum("member_role", ["admin", "member"]);
+export const memberRole = pgEnum("member_role", ["admin", "member", "guest"]);
 export const members = pgTable(
   "members",
   {
@@ -130,6 +130,24 @@ export const taskStatus = pgEnum("task_status", [
   "needs_review",
   "done",
 ]);
+export const projects = pgTable(
+  "projects",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    name: text("name").notNull(),
+    archived: boolean("archived").default(false).notNull(),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("projects_workspace_id_unique").on(t.workspaceId, t.id),
+    check("projects_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 100`),
+    check("projects_version", sql`${t.version}>0`),
+  ],
+);
 export const tasks = pgTable(
   "tasks",
   {
@@ -138,6 +156,12 @@ export const tasks = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
+    description: text("description").default("").notNull(),
+    priority: integer("priority").default(3).notNull(),
+    labels: text("labels").array().default(sql`ARRAY[]::text[]`).notNull(),
+    projectId: uuid("project_id"),
+    parentId: uuid("parent_id"),
+    version: integer("version").default(1).notNull(),
     ownerId: uuid("owner_id").notNull(),
     workerId: uuid("worker_id"),
     status: taskStatus("status").default("todo").notNull(),
@@ -157,6 +181,24 @@ export const tasks = pgTable(
       foreignColumns: [members.workspaceId, members.id],
       name: "tasks_worker_fk",
     }),
+    foreignKey({
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+      name: "tasks_project_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.parentId],
+      foreignColumns: [t.workspaceId, t.id],
+      name: "tasks_parent_fk",
+    }),
+    check("tasks_priority", sql`${t.priority} BETWEEN 1 AND 4`),
+    check("tasks_version", sql`${t.version} > 0`),
+    check(
+      "tasks_parent_self",
+      sql`${t.parentId} IS NULL OR ${t.parentId} <> ${t.id}`,
+    ),
+    index("tasks_workspace_project_idx").on(t.workspaceId, t.projectId),
+    index("tasks_parent_idx").on(t.parentId),
     check("tasks_title", sql`length(btrim(${t.title})) BETWEEN 1 AND 200`),
   ],
 );
@@ -604,5 +646,65 @@ export const inboxItems = pgTable(
     }),
     index("inbox_items_member_created_idx").on(t.memberId, t.createdAt),
     check("inbox_items_kind", sql`${t.kind} IN ('review','blocker','mention')`),
+  ],
+);
+
+export const taskComments = pgTable(
+  "task_comments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    taskId: uuid("task_id").notNull(),
+    authorId: uuid("author_id").notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "task_comments_task_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.authorId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "task_comments_author_fk",
+    }),
+    index("task_comments_task_idx").on(t.taskId, t.createdAt),
+    check(
+      "task_comments_body",
+      sql`length(btrim(${t.body})) BETWEEN 1 AND 5000`,
+    ),
+  ],
+);
+export const workspaceInvites = pgTable(
+  "workspace_invites",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    email: text("email").notNull(),
+    role: memberRole("role").notNull(),
+    hash: text("hash").notNull().unique(),
+    status: text("status").default("pending").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    acceptedBy: text("accepted_by").references(() => user.id),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.createdBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "workspace_invites_creator_fk",
+    }),
+    index("workspace_invites_workspace_idx").on(t.workspaceId, t.createdAt),
+    check(
+      "workspace_invites_status",
+      sql`${t.status} IN ('pending','accepted','revoked')`,
+    ),
   ],
 );

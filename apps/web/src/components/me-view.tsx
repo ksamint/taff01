@@ -52,6 +52,11 @@ export function MeView() {
           </select>
         </div>
       </section>
+      <section className="me-section">
+        <Link className="button" href="/orgs">
+          {t("organization.title")}
+        </Link>
+      </section>
       <section className="me-section" aria-labelledby="agents-list-heading">
         <h2 id="agents-list-heading">{t("agentProfile.team")}</h2>
         <ul className="history-list">

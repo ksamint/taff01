@@ -12,18 +12,29 @@ import {
   idSchema,
   inboxFilterSchema,
   inboxItemInputSchema,
+  memberRoleInputSchema,
   profileSchema,
+  projectInputSchema,
+  projectUpdateSchema,
+  quickAddInputSchema,
   requestGrantSchema,
   reviewCommentSchema,
   reviewRunSchema,
   SchemaError,
   scheduleTaskSchema,
+  searchInputSchema,
   signInSchema,
   signOutSchema,
   signUpSchema,
   startRunSchema,
   submitRunSchema,
+  taskCommentInputSchema,
+  taskFilterSchema,
+  updateTaskSchema,
   updateTaskStatusSchema,
+  workspaceCreateSchema,
+  workspaceInviteAcceptSchema,
+  workspaceInviteInputSchema,
   workspaceQuerySchema,
 } from "@taff/schemas";
 import { Hono } from "hono";
@@ -111,7 +122,9 @@ export function createApp(
     bodyLimit({
       maxSize: /^\/api\/runs\/[^/]+\/artifacts$/.test(c.req.path)
         ? 1_048_576
-        : 16_384,
+        : /^\/api\/tasks(?:\/[^/]+(?:\/comments)?)?$/.test(c.req.path)
+          ? 131_072
+          : 16_384,
       onError: (ctx) => ctx.json({ error: "invalid_input" }, 413),
     })(c, next),
   );
@@ -168,9 +181,25 @@ export function createApp(
     );
   });
   app.get("/api/tasks", async (c) => {
-    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    const { workspaceId, ...query } = c.req.query();
+    const workspace = workspaceQuerySchema.parse({ workspaceId });
+    const filter = taskFilterSchema.parse({
+      ...query,
+      ...(query.priority !== undefined
+        ? { priority: Number(query.priority) }
+        : {}),
+      ...Object.fromEntries(
+        ["projectId", "parentId", "workerId"]
+          .filter((key) => query[key] === "null")
+          .map((key) => [key, null]),
+      ),
+    });
     return c.json(
-      await core.listTasks(userPrincipal(c.get("userId")), workspaceId),
+      await core.listTasks(
+        userPrincipal(c.get("userId")),
+        workspace.workspaceId,
+        filter,
+      ),
     );
   });
   app.post("/api/tasks", async (c) => {
@@ -209,6 +238,148 @@ export function createApp(
       ),
     ),
   );
+  app.patch("/api/tasks/:id", async (c) =>
+    c.json(
+      await core.updateTask(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        updateTaskSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.get("/api/tasks/:id/access", async (c) =>
+    c.json(
+      await core.getTaskAccess(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.get("/api/tasks/:id/comments", async (c) =>
+    c.json(
+      await core.listTaskComments(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.post("/api/tasks/:id/comments", async (c) =>
+    c.json(
+      await core.addTaskComment(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        taskCommentInputSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.get("/api/projects", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.listProjects(userPrincipal(c.get("userId")), workspaceId),
+    );
+  });
+  app.post("/api/projects", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.createProject(
+        userPrincipal(c.get("userId")),
+        workspaceId,
+        projectInputSchema.parse(await c.req.json()),
+      ),
+      201,
+    );
+  });
+  app.patch("/api/projects/:id", async (c) =>
+    c.json(
+      await core.updateProject(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        projectUpdateSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.post("/api/workspaces", async (c) =>
+    c.json(
+      await core.createWorkspace(
+        userPrincipal(c.get("userId")),
+        workspaceCreateSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.get("/api/workspaces/:id/invites", async (c) =>
+    c.json(
+      await core.listWorkspaceInvites(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.get("/api/workspaces/:id/access", async (c) =>
+    c.json(
+      await core.getWorkspaceAccess(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.post("/api/workspaces/:id/invites", async (c) =>
+    c.json(
+      await core.createWorkspaceInvite(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        workspaceInviteInputSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
+  app.delete("/api/workspace-invites/:id", async (c) =>
+    c.json(
+      await core.revokeWorkspaceInvite(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.post("/api/workspace-invites/accept", async (c) =>
+    c.json(
+      await core.acceptWorkspaceInvite(
+        userPrincipal(c.get("userId")),
+        workspaceInviteAcceptSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.patch("/api/workspaces/:id/members/:memberId", async (c) =>
+    c.json(
+      await core.updateMemberRole(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        idSchema.parse(c.req.param("memberId")),
+        memberRoleInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.post("/api/search", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.search(
+        userPrincipal(c.get("userId")),
+        workspaceId,
+        searchInputSchema.parse(await c.req.json()),
+      ),
+    );
+  });
+  app.post("/api/quick-add/parse", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.parseQuickAdd(
+        userPrincipal(c.get("userId")),
+        workspaceId,
+        quickAddInputSchema.parse(await c.req.json()),
+      ),
+    );
+  });
   app.get("/api/runs", async (c) => {
     const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
     return c.json(

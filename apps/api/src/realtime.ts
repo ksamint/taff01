@@ -31,9 +31,8 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
     );
     for (const client of clients) {
       if (
-        event.workspaceId
-          ? event.workspaceId !== client.workspaceId
-          : event.userId !== client.userId
+        event.workspaceId !== client.workspaceId &&
+        event.userId !== client.userId
       )
         continue;
       if (

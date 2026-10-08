@@ -157,6 +157,12 @@ test("failed optimistic creation and assignment restore the previous list", asyn
     id: "44444444-4444-4444-8444-444444444444",
     workspaceId,
     title: "Existing task",
+    description: "",
+    priority: 3,
+    projectId: null,
+    labels: [],
+    parentId: null,
+    version: 1,
     ownerId,
     workerId: null,
     status: "todo",
@@ -164,6 +170,16 @@ test("failed optimistic creation and assignment restore the previous list", asyn
     createdAt: "2026-10-08T00:00:00Z",
     updatedAt: "2026-10-08T00:00:00Z",
   };
+  await page.route("**/api/workspaces/*/access", (route) =>
+    route.fulfill({
+      json: {
+        canCreateTasks: true,
+        canManageProjects: true,
+        canInvite: true,
+        canManageRoles: true,
+      },
+    }),
+  );
   await page.route("**/api/me", (route) => route.fulfill({ json: me }));
   await page.route("**/api/members?*", (route) =>
     route.fulfill({
@@ -216,6 +232,9 @@ test("failed optimistic creation and assignment restore the previous list", asyn
   await expect(
     page.getByRole("heading", { name: "Rejected task", exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Rejected task", exact: true }),
+  ).toHaveCount(0);
   rejectCreate();
   await expect(
     page.getByRole("heading", { name: "Rejected task", exact: true }),

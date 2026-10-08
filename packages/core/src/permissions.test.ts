@@ -562,3 +562,171 @@ describe("M3 permission decisions", () => {
     expect(can(actor, action, target)).toBe(expected),
   );
 });
+
+describe("M5 permission decisions", () => {
+  it.each<[string, Actor, Action, Resource, boolean]>([
+    [
+      "admin manages organization",
+      { ...person, role: "admin" },
+      "workspace:manage",
+      task,
+      true,
+    ],
+    [
+      "member cannot manage organization",
+      person,
+      "workspace:manage",
+      task,
+      false,
+    ],
+    [
+      "agent admin cannot manage organization",
+      { ...agent, role: "admin" },
+      "workspace:manage",
+      task,
+      false,
+    ],
+    [
+      "admin manages projects",
+      { ...person, role: "admin" },
+      "project:manage",
+      task,
+      true,
+    ],
+    ["member cannot manage projects", person, "project:manage", task, false],
+    ["owner edits", person, "task:edit", task, true],
+    [
+      "bystander cannot edit",
+      { ...person, id: "other" },
+      "task:edit",
+      task,
+      false,
+    ],
+    ["assigned scoped agent edits", agent, "task:edit", task, true],
+    [
+      "agent cannot edit other worker",
+      agent,
+      "task:edit",
+      { ...task, workerId: "other" },
+      false,
+    ],
+    [
+      "scope cannot be widened",
+      { ...agent, scopes: ["tasks:read"] },
+      "task:edit",
+      task,
+      false,
+    ],
+    [
+      "deny beats write scope",
+      {
+        ...agent,
+        permissions: [{ capability: "tasks.write", decision: "deny" }],
+      },
+      "task:edit",
+      task,
+      false,
+    ],
+    ["owner changes owner", person, "task:owner", task, true],
+    ["agent never changes owner", agent, "task:owner", task, false],
+    ["member comments", { ...person, id: "other" }, "task:comment", task, true],
+    ["assigned agent comments", agent, "task:comment", task, true],
+    [
+      "other agent cannot comment",
+      { ...agent, id: "other" },
+      "task:comment",
+      task,
+      false,
+    ],
+    [
+      "guest can read",
+      { ...person, role: "guest" },
+      "workspace:read",
+      task,
+      true,
+    ],
+    [
+      "guest can read own inbox",
+      { ...person, role: "guest" },
+      "inbox:read",
+      task,
+      true,
+    ],
+    [
+      "guest cannot edit",
+      { ...person, role: "guest" },
+      "task:edit",
+      task,
+      false,
+    ],
+    [
+      "guest cannot comment",
+      { ...person, role: "guest" },
+      "task:comment",
+      task,
+      false,
+    ],
+    [
+      "guest cannot review as owner",
+      { ...person, role: "guest" },
+      "task:review",
+      task,
+      false,
+    ],
+    [
+      "guest cannot create",
+      { ...person, role: "guest" },
+      "task:create",
+      task,
+      false,
+    ],
+    [
+      "guest cannot use generic capability",
+      { ...person, role: "guest" },
+      "capability:use",
+      { ...task, capability: "tasks.write" },
+      false,
+    ],
+    [
+      "cross-workspace edit denied",
+      person,
+      "task:edit",
+      { ...task, workspaceId: "other" },
+      false,
+    ],
+    [
+      "cross-workspace admin denied",
+      { ...person, role: "admin" },
+      "workspace:manage",
+      { workspaceId: "other" },
+      false,
+    ],
+  ])("%s", (_, actor, action, resource, expected) =>
+    expect(can(actor, action, resource)).toBe(expected),
+  );
+});
+
+describe("M5 authenticated workspace identity rules", () => {
+  for (const action of ["workspace:create", "workspace:join"] as const) {
+    it.each<[string, Actor | null, Resource, boolean]>([
+      ["person acts for self", person, { userId: "user" }, true],
+      [
+        "guest can create or accept new workspace",
+        { ...person, role: "guest" },
+        { userId: "user" },
+        true,
+      ],
+      [
+        "another user cannot be impersonated",
+        person,
+        { userId: "other" },
+        false,
+      ],
+      ["anonymous denied", null, { userId: "user" }, false],
+      ["agent denied", agent, { userId: "user" }, false],
+      ["workspace resource is not user identity", person, task, false],
+    ])(`${action}: %s`, (_, actor, resource, expected) =>
+      expect(can(actor, action, resource)).toBe(expected),
+    );
+  }
+});

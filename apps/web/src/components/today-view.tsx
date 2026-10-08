@@ -19,6 +19,7 @@ import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { useRuns } from "../lib/m3-queries";
+import { useWorkspaceAccess } from "../lib/m5-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { tasksKey, useMembers, useTasks } from "../lib/queries";
 import {
@@ -47,6 +48,7 @@ export function TodayView() {
   const [workerId, setWorkerId] = useState("");
   const [validationError, setValidationError] = useState(false);
   const members = useMembers(workspace.id);
+  const access = useWorkspaceAccess(workspace.id);
   const tasks = useTasks(workspace.id);
   const runs = useRuns(workspace.id);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
@@ -70,13 +72,20 @@ export function TodayView() {
       ),
     onMutate: async (input) => {
       const snapshot = await snapshotQueries(client, [taskKey]);
-      const temporaryId = crypto.randomUUID();
+      const temporaryId = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(taskKey, (current = []) =>
         input.kind === "create"
           ? [
               {
                 ...input.body,
+                dueAt: input.body.dueAt ?? null,
+                description: input.body.description ?? "",
+                priority: input.body.priority ?? 3,
+                projectId: input.body.projectId ?? null,
+                labels: input.body.labels ?? [],
+                parentId: input.body.parentId ?? null,
+                version: 1,
                 id: temporaryId,
                 status: "todo",
                 createdAt: now,
@@ -195,6 +204,7 @@ export function TodayView() {
                 id="task-title"
                 data-testid="task-title"
                 value={title}
+                disabled={!access.data?.canCreateTasks || busy}
                 onChange={(event) => setTitle(event.target.value)}
                 placeholder={t("taskPlaceholder")}
                 maxLength={200}
@@ -209,7 +219,9 @@ export function TodayView() {
                   data-testid="task-owner"
                   value={ownerId}
                   onChange={(event) => setOwnerId(event.target.value)}
-                  disabled={!people.length || busy}
+                  disabled={
+                    !access.data?.canCreateTasks || !people.length || busy
+                  }
                 >
                   {people.map((member) => (
                     <option key={member.id} value={member.id}>
@@ -225,7 +237,9 @@ export function TodayView() {
                   data-testid="task-worker"
                   value={workerId}
                   onChange={(event) => setWorkerId(event.target.value)}
-                  disabled={!members.data || busy}
+                  disabled={
+                    !access.data?.canCreateTasks || !members.data || busy
+                  }
                 >
                   <MemberOptions members={members.data ?? []} />
                 </select>
@@ -246,7 +260,11 @@ export function TodayView() {
               className="button-primary button-full"
               type="submit"
               disabled={
-                busy || !people.length || tasks.isPending || tasks.isError
+                !access.data?.canCreateTasks ||
+                busy ||
+                !people.length ||
+                tasks.isPending ||
+                tasks.isError
               }
             >
               {t(
@@ -308,12 +326,18 @@ export function TodayView() {
                     )}
                   </div>
                   <h3>
-                    <Link
-                      className="task-title-link"
-                      href={`/tasks/${task.id}`}
-                    >
-                      {task.title}
-                    </Link>
+                    {task.id.startsWith("optimistic:") ? (
+                      <span className="task-title-link" aria-busy="true">
+                        {task.title}
+                      </span>
+                    ) : (
+                      <Link
+                        className="task-title-link"
+                        href={`/tasks/${task.id}`}
+                      >
+                        {task.title}
+                      </Link>
+                    )}
                   </h3>
                   <p className="task-owner">
                     {t("ownedBy", { name: memberName(task.ownerId) })}
@@ -324,7 +348,9 @@ export function TodayView() {
                       id={`worker-${task.id}`}
                       data-testid="assignment-select"
                       value={task.workerId ?? ""}
-                      disabled={busy || !members.data}
+                      disabled={
+                        !access.data?.canCreateTasks || busy || !members.data
+                      }
                       onChange={(event) =>
                         mutation.mutate({
                           kind: "assign",

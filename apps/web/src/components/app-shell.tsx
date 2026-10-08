@@ -7,7 +7,16 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { CalendarDays, Inbox, LayoutGrid, Sun, User } from "lucide-react";
+import {
+  CalendarDays,
+  Inbox,
+  LayoutGrid,
+  Plus,
+  Search,
+  Sun,
+  User,
+} from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -15,6 +24,7 @@ import {
   type ReactNode,
   useContext,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
@@ -31,8 +41,18 @@ import {
 import { connectWorkspace } from "../lib/realtime";
 import { sessionMatches, synchronizeSession } from "../lib/session-cache";
 import { Auth } from "./auth";
+import { useWorkspaceSelection } from "./providers";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+
+const SearchDialog = dynamic(
+  () => import("./search-dialog").then((module) => module.SearchDialog),
+  { ssr: false },
+);
+const QuickAddDialog = dynamic(
+  () => import("./quick-add-dialog").then((module) => module.QuickAddDialog),
+  { ssr: false },
+);
 
 type Workspace = Me["workspaces"][number];
 type WorkspaceValue = {
@@ -116,7 +136,23 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const pathname = usePathname();
-  const [workspaceId, setWorkspaceId] = useState("");
+  const [overlay, setOverlay] = useState<"search" | "quick" | null>(null);
+  useEffect(() => {
+    const open = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        event.preventDefault();
+        setOverlay("search");
+      }
+    };
+    window.addEventListener("keydown", open);
+    return () => window.removeEventListener("keydown", open);
+  }, []);
+  const {
+    id: workspaceId,
+    setId: setWorkspaceId,
+    invitation,
+    setInvitation,
+  } = useWorkspaceSelection();
   const [sessionError, setSessionError] = useState<string | null>(null);
   const me = useMeQuery();
   const userId = me.data?.user.id ?? null;
@@ -131,6 +167,27 @@ export function AppShell({ children }: { children: ReactNode }) {
   >(undefined);
   const identityReady =
     checkedIdentity === identityKey && sessionMatches(client, userId, scope);
+  const selectionUser = useRef<string | null>(null);
+  useEffect(() => {
+    if (!me.data || !identityReady) return;
+    try {
+      const key = `taff:workspace:${me.data.user.id}`;
+      if (selectionUser.current !== me.data.user.id) {
+        selectionUser.current = me.data.user.id;
+        const saved = window.sessionStorage.getItem(key);
+        if (saved && me.data.workspaces.some((item) => item.id === saved)) {
+          setWorkspaceId(saved);
+          return;
+        }
+      }
+      const selected =
+        me.data.workspaces.find((item) => item.id === workspaceId) ??
+        me.data.workspaces[0];
+      if (selected) window.sessionStorage.setItem(key, selected.id);
+    } catch {
+      /* The current page selection still works when storage is blocked. */
+    }
+  }, [me.data, identityReady, workspaceId, setWorkspaceId]);
   const busy = useIsMutating() > 0;
   useEffect(() => {
     if (me.isPending || me.isError) return;
@@ -216,6 +273,26 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="topbar">
         <Wordmark label={t("app")} />
         <div className="header-actions">
+          {me.data && (
+            <>
+              <Button
+                data-testid="open-search"
+                className="button-quiet"
+                aria-label={t("search.title")}
+                onClick={() => setOverlay("search")}
+              >
+                <Search size={20} aria-hidden="true" />
+              </Button>
+              <Button
+                data-testid="open-quick"
+                className="button-quiet"
+                aria-label={t("quickAdd.title")}
+                onClick={() => setOverlay("quick")}
+              >
+                <Plus size={20} aria-hidden="true" />
+              </Button>
+            </>
+          )}
           <Label htmlFor="locale-select">
             <span className="sr-only">{t("language")}</span>
           </Label>
@@ -258,6 +335,17 @@ export function AppShell({ children }: { children: ReactNode }) {
               {t(sessionError)}
             </p>
           )}
+          {invitation && (
+            <p className="invite-banner">
+              {t("organization.acceptHint")}{" "}
+              <Button
+                className="button-quiet"
+                onClick={() => setInvitation(null)}
+              >
+                {t("organization.dismiss")}
+              </Button>
+            </p>
+          )}
           <Auth />
         </main>
       ) : workspace ? (
@@ -276,7 +364,26 @@ export function AppShell({ children }: { children: ReactNode }) {
                 {t(sessionError)}
               </p>
             )}
+            {invitation && pathname !== "/orgs" && (
+              <p className="invite-banner">
+                <Link href="/orgs" className="text-link">
+                  {t("organization.accept")}
+                </Link>
+              </p>
+            )}
             {children}
+            {overlay === "search" && (
+              <SearchDialog
+                key={workspace.id}
+                onClose={() => setOverlay(null)}
+              />
+            )}
+            {overlay === "quick" && (
+              <QuickAddDialog
+                key={workspace.id}
+                onClose={() => setOverlay(null)}
+              />
+            )}
           </main>
         </WorkspaceContext.Provider>
       ) : (

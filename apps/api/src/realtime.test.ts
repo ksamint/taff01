@@ -31,7 +31,11 @@ let realtime: Realtime;
 let server: ServerType;
 let url: string;
 let expiresAt = Date.now() + 60_000;
-const allowed = new Set([`alice:${workspace}`, `bob:${otherWorkspace}`]);
+const allowed = new Set([
+  `alice:${workspace}`,
+  `bob:${otherWorkspace}`,
+  `charlie:${workspace}`,
+]);
 const unsubscribe = vi.fn(async () => {});
 const sockets = new Set<WebSocket>();
 
@@ -212,6 +216,24 @@ describe("authenticated realtime boundaries", () => {
     const nextClosed = closed(next);
     await reconnect();
     expect(await nextClosed).toBe(1012);
+  });
+  it("routes new membership to its workspace and affected user without notifying unrelated users", async () => {
+    const alice = await connect("alice");
+    const bob = await connect("bob", otherWorkspace);
+    const charlie = await connect("charlie");
+    const unrelated: unknown[] = [];
+    charlie.on("message", (data) => unrelated.push(data.toString()));
+    const toUser = message(alice);
+    const toWorkspace = message(bob);
+    const membership = change({
+      workspaceId: otherWorkspace,
+      userId: "alice",
+      action: "members.insert",
+    });
+    await deliver(membership);
+    expect(await toUser).toEqual(membership);
+    expect(await toWorkspace).toEqual(membership);
+    expect(unrelated).toEqual([]);
   });
   it("expires authenticated connections and rejects client writes", async () => {
     expiresAt = Date.now() + 200;

@@ -45,14 +45,37 @@ export const taskStatusSchema = zodEnum([
 ]);
 export const idSchema = uuid();
 export const workspaceQuerySchema = strictObject({ workspaceId: idSchema });
+export const prioritySchema = number().check(
+  refine((v) => Number.isInteger(v) && v >= 1 && v <= 4),
+);
+export const labelsSchema = array(
+  string().check(trim(), minLength(1), maxLength(40)),
+).check(
+  maxLength(20),
+  refine((v) => new Set(v).size === v.length),
+);
+export const memberRoleSchema = zodEnum(["admin", "member", "guest"]);
+const taskFields = {
+  description: optional(string().check(maxLength(20000))),
+  priority: optional(prioritySchema),
+  projectId: optional(nullable(idSchema)),
+  labels: optional(labelsSchema),
+};
 export const createTaskSchema = strictObject({
+  ...taskFields,
+  parentId: optional(nullable(idSchema)),
   workspaceId: idSchema,
   title: string().check(trim(), minLength(1), maxLength(200)),
   ownerId: idSchema,
   workerId: _default(nullable(idSchema), null),
-  dueAt: _default(nullable(iso.datetime({ offset: true })), null),
+  dueAt: optional(nullable(iso.datetime({ offset: true }))),
 });
-export const assignTaskSchema = strictObject({ workerId: nullable(idSchema) });
+export const assignTaskSchema = strictObject({
+  workerId: nullable(idSchema),
+  version: optional(
+    number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
+  ),
+});
 export const signInSchema = strictObject({
   email: email(),
   password: string().check(minLength(8), maxLength(128)),
@@ -75,10 +98,16 @@ export const memberSchema = object({
   userId: nullable(string()),
   name: string(),
   kind: zodEnum(["person", "agent"]),
-  role: zodEnum(["admin", "member"]),
+  role: memberRoleSchema,
 });
 export const memberListSchema = array(memberSchema);
 export const taskSchema = object({
+  description: string(),
+  priority: prioritySchema,
+  projectId: nullable(idSchema),
+  labels: labelsSchema,
+  parentId: nullable(idSchema),
+  version: number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
   id: idSchema,
   workspaceId: idSchema,
   title: string(),
@@ -113,9 +142,15 @@ export const errorSchema = object({
   ]),
 });
 export const updateTaskStatusSchema = strictObject({
+  version: optional(
+    number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
+  ),
   status: taskStatusSchema,
 });
 export const scheduleTaskSchema = strictObject({
+  version: optional(
+    number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
+  ),
   dueAt: nullable(iso.datetime({ offset: true })),
 });
 /** MCP token scopes, as shown on the MCP page. */
@@ -161,10 +196,10 @@ export const mcpCallSchema = object({
 });
 export const mcpCallListSchema = array(mcpCallSchema);
 /* MCP tool arguments. The token fixes the workspace, so no tool takes one. */
-export const mcpTasksListArgs = strictObject({
-  status: optional(taskStatusSchema),
-});
+
 export const mcpTasksCreateArgs = strictObject({
+  ...taskFields,
+  parentId: optional(nullable(idSchema)),
   title: string().check(trim(), minLength(1), maxLength(200)),
   ownerId: idSchema,
   dueAt: optional(nullable(iso.datetime({ offset: true }))),
@@ -504,10 +539,193 @@ export const changeEventSchema = strictObject({
   resourceId: string().check(minLength(1), maxLength(200)),
   action: string().check(
     regex(
-      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items)\.(insert|update|delete)$/,
+      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites)\.(insert|update|delete)$/,
     ),
   ),
   actorId: string().check(minLength(1), maxLength(200)),
   userId: nullable(string().check(minLength(1), maxLength(200))),
 });
 export type ChangeEvent = Infer<typeof changeEventSchema>;
+
+// M5 planning, collaboration and organizations.
+export const updateTaskSchema = strictObject({
+  ...taskFields,
+  version: versionSchema,
+  title: optional(boundedText(200)),
+  ownerId: optional(idSchema),
+  dueAt: optional(nullable(iso.datetime({ offset: true }))),
+  status: optional(taskStatusSchema),
+}).check(
+  refine((v) =>
+    [
+      v.title,
+      v.description,
+      v.ownerId,
+      v.dueAt,
+      v.priority,
+      v.projectId,
+      v.labels,
+      v.status,
+    ].some((field) => field !== undefined),
+  ),
+);
+export const taskFilterSchema = strictObject({
+  status: optional(taskStatusSchema),
+  projectId: optional(nullable(idSchema)),
+  parentId: optional(nullable(idSchema)),
+  ownerId: optional(idSchema),
+  workerId: optional(nullable(idSchema)),
+  priority: optional(prioritySchema),
+  label: optional(boundedText(40)),
+  sort: optional(zodEnum(["created", "updated", "due", "priority", "title"])),
+});
+export const taskCommentInputSchema = strictObject({ body: boundedText(5000) });
+export const taskCommentSchema = object({
+  id: idSchema,
+  workspaceId: idSchema,
+  taskId: idSchema,
+  authorId: idSchema,
+  body: string(),
+  createdAt: iso.datetime(),
+});
+export const projectInputSchema = strictObject({ name: boundedText(100) });
+export const projectUpdateSchema = strictObject({
+  version: versionSchema,
+  name: optional(boundedText(100)),
+  archived: optional(boolean()),
+}).check(refine((v) => v.name !== undefined || v.archived !== undefined));
+export const projectSchema = object({
+  id: idSchema,
+  workspaceId: idSchema,
+  name: string(),
+  archived: boolean(),
+  version: versionSchema,
+  createdAt: iso.datetime(),
+  updatedAt: iso.datetime(),
+});
+export const workspaceCreateSchema = strictObject({
+  name: boundedText(100),
+  agentIds: optional(
+    array(idSchema).check(
+      maxLength(20),
+      refine((v) => new Set(v).size === v.length),
+    ),
+  ),
+});
+export const workspaceSchema = object({
+  id: idSchema,
+  name: string(),
+  memberId: idSchema,
+});
+export const workspaceInviteInputSchema = strictObject({
+  email: email(),
+  role: _default(memberRoleSchema, "member"),
+});
+export const workspaceInviteAcceptSchema = strictObject({
+  token: string().check(minLength(32), maxLength(200)),
+});
+export const workspaceInviteSchema = object({
+  id: idSchema,
+  workspaceId: idSchema,
+  email: email(),
+  role: memberRoleSchema,
+  status: zodEnum(["pending", "accepted", "revoked", "expired"]),
+  expiresAt: iso.datetime(),
+  createdAt: iso.datetime(),
+});
+export const issuedWorkspaceInviteSchema = extend(workspaceInviteSchema, {
+  token: string(),
+});
+export const memberRoleInputSchema = strictObject({ role: memberRoleSchema });
+export const searchInputSchema = strictObject({
+  query: boundedText(200),
+  scope: _default(zodEnum(["workspace", "all"]), "workspace"),
+  types: optional(
+    array(zodEnum(["task", "comment"])).check(minLength(1), maxLength(2)),
+  ),
+  filters: optional(taskFilterSchema),
+  limit: _default(
+    number().check(refine((v) => Number.isInteger(v) && v >= 1 && v <= 100)),
+    50,
+  ),
+});
+export const searchResultSchema = object({
+  id: idSchema,
+  type: zodEnum(["task", "comment"]),
+  workspaceId: idSchema,
+  workspaceName: string(),
+  taskId: idSchema,
+  title: string(),
+  snippet: string(),
+  match: zodEnum(["title", "description", "comment"]),
+  task: taskSchema,
+});
+export const quickAddInputSchema = strictObject({ text: boundedText(1000) });
+export const quickAddResultSchema = object({
+  title: string(),
+  ownerId: nullable(idSchema),
+  workerId: nullable(idSchema),
+  priority: prioritySchema,
+  projectId: nullable(idSchema),
+  labels: labelsSchema,
+  dueDate: nullable(iso.date()),
+  dueTime: nullable(string().check(regex(/^\d{2}:\d{2}$/))),
+  dueAt: nullable(iso.datetime()),
+  warnings: array(
+    zodEnum([
+      "unknown_member",
+      "ambiguous_member",
+      "unknown_project",
+      "ambiguous_project",
+      "invalid_time",
+      "invalid_date",
+      "empty_title",
+    ]),
+  ),
+  unresolved: array(string()),
+});
+export const mcpTasksEditArgs = extend(updateTaskSchema, { taskId: idSchema });
+export const mcpTaskCommentsListArgs = strictObject({ taskId: idSchema });
+export const mcpTaskCommentsAddArgs = extend(taskCommentInputSchema, {
+  taskId: idSchema,
+});
+export const mcpProjectsListArgs = strictObject({});
+export const mcpSearchArgs = searchInputSchema;
+export const mcpQuickAddArgs = quickAddInputSchema;
+export type UpdateTask = Infer<typeof updateTaskSchema>;
+export type TaskFilter = Infer<typeof taskFilterSchema>;
+export type TaskCommentInput = Infer<typeof taskCommentInputSchema>;
+export type TaskComment = Infer<typeof taskCommentSchema>;
+export type ProjectInput = Infer<typeof projectInputSchema>;
+export type ProjectUpdate = Infer<typeof projectUpdateSchema>;
+export type Project = Infer<typeof projectSchema>;
+export type WorkspaceCreate = Infer<typeof workspaceCreateSchema>;
+export type Workspace = Infer<typeof workspaceSchema>;
+export type WorkspaceInviteInput = Infer<typeof workspaceInviteInputSchema>;
+export type WorkspaceInvite = Infer<typeof workspaceInviteSchema>;
+export type IssuedWorkspaceInvite = Infer<typeof issuedWorkspaceInviteSchema>;
+export type WorkspaceInviteAccept = Infer<typeof workspaceInviteAcceptSchema>;
+export type MemberRoleInput = Infer<typeof memberRoleInputSchema>;
+export type SearchInput = Infer<typeof searchInputSchema>;
+export type SearchResult = Infer<typeof searchResultSchema>;
+export type QuickAddInput = Infer<typeof quickAddInputSchema>;
+export type QuickAddResult = Infer<typeof quickAddResultSchema>;
+
+export const mcpTasksListArgs = taskFilterSchema;
+
+export const taskAccessSchema = object({
+  canEditMetadata: boolean(),
+  canEdit: boolean(),
+  canComment: boolean(),
+  canAssign: boolean(),
+  allowedStatuses: array(taskStatusSchema),
+});
+export type TaskAccess = Infer<typeof taskAccessSchema>;
+
+export const workspaceAccessSchema = object({
+  canCreateTasks: boolean(),
+  canManageProjects: boolean(),
+  canInvite: boolean(),
+  canManageRoles: boolean(),
+});
+export type WorkspaceAccess = Infer<typeof workspaceAccessSchema>;

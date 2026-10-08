@@ -13,6 +13,12 @@ const FAMILIES = [
   "mcp-calls",
   "me",
   "members",
+  "task-access",
+  "task-comments",
+  "projects",
+  "search",
+  "invites",
+  "workspace-access",
 ];
 
 export function connectWorkspace(
@@ -67,8 +73,7 @@ export function connectWorkspace(
       const event = changeEventSchema.safeParse(body);
       if (
         event.success &&
-        (event.data.workspaceId === workspaceId ||
-          (event.data.workspaceId === null && event.data.userId === userId))
+        (event.data.workspaceId === workspaceId || event.data.userId === userId)
       )
         invalidate();
     };

@@ -32,6 +32,26 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
+const TOOLS = [
+  ["tasks.list", "listTasks"],
+  ["tasks.create", "createTask"],
+  ["tasks.update", "updateTask"],
+  ["tasks.edit", "editTask"],
+  ["tasks.comments.list", "readComments"],
+  ["tasks.comments.add", "addComment"],
+  ["projects.list", "readProjects"],
+  ["search.query", "search"],
+  ["quickadd.parse", "parseDraft"],
+  ["calendar.schedule", "schedule"],
+  ["inbox.request_review", "requestReview"],
+  ["runs.get", "readRun"],
+  ["runs.start", "startRun"],
+  ["runs.control", "controlRun"],
+  ["runs.event", "recordProgress"],
+  ["files.attach", "attachFile"],
+  ["runs.submit", "submitRun"],
+  ["grants.request", "requestGrant"],
+] as const;
 const SCOPES = scopeSchema.options as Scope[];
 
 export function McpView() {
@@ -179,6 +199,17 @@ export function McpView() {
         <h1>{t("mcp.title")}</h1>
         <p className="task-count">{t("mcp.subtitle")}</p>
       </section>
+      <details className="me-section">
+        <summary>{t("mcp.tools")}</summary>
+        <ul className="history-list">
+          {TOOLS.map(([name, key]) => (
+            <li key={name}>
+              <code>{name}</code>
+              <p className="quiet">{t(`mcp.toolNames.${key}`)}</p>
+            </li>
+          ))}
+        </ul>
+      </details>
       <section className="me-section" aria-labelledby="endpoint-heading">
         <h2 id="endpoint-heading">{t("mcp.endpoint")}</h2>
         <dl className="me-row">

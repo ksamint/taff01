@@ -94,6 +94,12 @@ describe("REST adapter boundaries", () => {
       headers: new Headers(),
     });
     const task = {
+      description: "",
+      priority: 3,
+      projectId: null,
+      labels: [],
+      parentId: null,
+      version: 1,
       id,
       workspaceId: id,
       ownerId: id,
@@ -118,7 +124,6 @@ describe("REST adapter boundaries", () => {
         ownerId: id,
         title: "Task",
         workerId: null,
-        dueAt: null,
       },
     );
   });
@@ -236,6 +241,111 @@ describe("REST adapter boundaries", () => {
     expect(response.status).toBe(403);
     expect(await response.json()).toEqual({ error: "forbidden" });
   });
+  it("normalizes typed task filters while rejecting unknown or malformed query fields", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const read = vi.spyOn(core, "listTasks").mockResolvedValue([]);
+    const response = await app.request(
+      `/api/tasks?workspaceId=${id}&projectId=null&parentId=null&workerId=null&priority=1&sort=due`,
+    );
+    expect(response.status).toBe(200);
+    expect(read).toHaveBeenCalledWith({ kind: "user", userId: id }, id, {
+      projectId: null,
+      parentId: null,
+      workerId: null,
+      priority: 1,
+      sort: "due",
+    });
+    read.mockClear();
+    for (const extra of ["priority=urgent", "unknown=secret", "ownerId=null"]) {
+      const invalid = await app.request(
+        `/api/tasks?workspaceId=${id}&${extra}`,
+      );
+      expect(invalid.status).toBe(400);
+      expect(await invalid.json()).toEqual({ error: "invalid_input" });
+    }
+    expect(read).not.toHaveBeenCalled();
+  });
+  it("preserves full CJK task descriptions within a bounded task-only request limit", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const input = { version: 1, description: "說".repeat(20_000) };
+    const result = {
+      id,
+      workspaceId: id,
+      title: "Task",
+      ownerId: id,
+      workerId: null,
+      dueAt: null,
+      status: "todo" as const,
+      createdAt: now.toISOString(),
+      updatedAt: now.toISOString(),
+      description: input.description,
+      priority: 3,
+      projectId: null,
+      labels: [],
+      parentId: null,
+      version: 2,
+    };
+    const update = vi.spyOn(core, "updateTask").mockResolvedValue(result);
+    const response = await app.request(`/api/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    expect(response.status).toBe(200);
+    expect(update).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      id,
+      input,
+    );
+    const escapedInput = { version: 1, description: "\u0001".repeat(20_000) };
+    const escaped = await app.request(`/api/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(escapedInput),
+    });
+    expect(escaped.status).toBe(200);
+    expect(update).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      id,
+      escapedInput,
+    );
+    update.mockClear();
+    const oversized = await app.request(`/api/tasks/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ version: 1, description: "說".repeat(44_000) }),
+    });
+    expect(oversized.status).toBe(413);
+    expect(update).not.toHaveBeenCalled();
+  });
+  it("accepts the full shared comment limit even when JSON escaping expands it", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const input = { body: "\u0001".repeat(5000) };
+    const write = vi.spyOn(core, "addTaskComment").mockResolvedValue({
+      id,
+      workspaceId: id,
+      taskId: id,
+      authorId: id,
+      body: input.body,
+      createdAt: now.toISOString(),
+    });
+    const response = await app.request(`/api/tasks/${id}/comments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+    expect(response.status).toBe(201);
+    expect(write).toHaveBeenCalledWith({ kind: "user", userId: id }, id, input);
+  });
   it("limits auth request size and CORS to AUTH_URL", async () => {
     const response = await app.request("/api/auth/sign-in/email", {
       method: "POST",
@@ -320,6 +430,51 @@ describe("REST adapter boundaries", () => {
       { decision: "allow", expiresAt: "tomorrow" },
     ],
     ["PATCH", "/api/inbox/:id", "updateInboxItem", {}],
+    ["PATCH", "/api/tasks/:id", "updateTask", { version: 0, title: "Task" }],
+    ["POST", "/api/tasks/:id/comments", "addTaskComment", { body: "" }],
+    ["POST", `/api/projects?workspaceId=${id}`, "createProject", { name: "" }],
+    [
+      "PATCH",
+      "/api/projects/:id",
+      "updateProject",
+      { version: 1, archived: "true" },
+    ],
+    [
+      "POST",
+      "/api/workspaces",
+      "createWorkspace",
+      { name: "Organization", agentIds: ["bad"] },
+    ],
+    [
+      "POST",
+      "/api/workspaces/:id/invites",
+      "createWorkspaceInvite",
+      { email: "invalid", role: "admin" },
+    ],
+    [
+      "POST",
+      "/api/workspace-invites/accept",
+      "acceptWorkspaceInvite",
+      { token: "short" },
+    ],
+    [
+      "PATCH",
+      "/api/workspaces/:id/members/:id",
+      "updateMemberRole",
+      { role: "owner" },
+    ],
+    [
+      "POST",
+      `/api/search?workspaceId=${id}`,
+      "search",
+      { query: "task", scope: "public" },
+    ],
+    [
+      "POST",
+      `/api/quick-add/parse?workspaceId=${id}`,
+      "parseQuickAdd",
+      { text: "" },
+    ],
   ] as const)(
     "validates %s %s before core",
     async (method, path, operation, input) => {
@@ -328,7 +483,7 @@ describe("REST adapter boundaries", () => {
         headers: new Headers(),
       });
       const write = vi.spyOn(core, operation);
-      const response = await app.request(path.replace(":id", id), {
+      const response = await app.request(path.replaceAll(":id", id), {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(input),

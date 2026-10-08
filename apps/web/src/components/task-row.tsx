@@ -37,9 +37,15 @@ export function TaskRow({
         )}
       </div>
       <h3>
-        <Link className="task-title-link" href={`/tasks/${task.id}`}>
-          {task.title}
-        </Link>
+        {task.id.startsWith("optimistic:") ? (
+          <span className="task-title-link" aria-busy="true">
+            {task.title}
+          </span>
+        ) : (
+          <Link className="task-title-link" href={`/tasks/${task.id}`}>
+            {task.title}
+          </Link>
+        )}
       </h3>
       <p className="task-owner">{t("ownedBy", { name: owner })}</p>
     </li>
