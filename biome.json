@@ -6,6 +6,7 @@
       "!!**/node_modules",
       "!!**/.next",
       "!!**/migrations",
+      "!!docs/ui/prototype",
       "!!pnpm-lock.yaml",
       "!!**/next-env.d.ts"
     ]

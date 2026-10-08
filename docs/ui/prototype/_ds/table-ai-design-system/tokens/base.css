@@ -1,0 +1,21 @@
+/* TABLE AI — minimal base. Consumers link styles.css; everything else is inline or component-level. */
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:var(--text-body-md);line-height:var(--lh-body-md);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
+h1,h2,h3,h4,h5,h6{letter-spacing:-0.025em;font-feature-settings:"ss01","ss02","cv01";margin:0}
+a{color:var(--text);text-decoration:none;transition:color var(--dur-fast) var(--ease-standard)}
+a:hover{color:var(--accent-text)}
+::selection{background:var(--selection-bg);color:var(--selection-text)}
+::-webkit-scrollbar{width:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--color-surface-dim);border-radius:1.5px}
+::-webkit-scrollbar-thumb:hover{background:var(--color-outline)}
+[lang|="zh"]{
+--ls-track-xl:0; /* @kind other */
+--ls-track-lg:0; /* @kind other */
+--ls-track-md:0; /* @kind other */
+--ls-track-sm:0; /* @kind other */
+--ls-eyebrow:0; /* @kind other */
+--ls-eyebrow-tight:0; /* @kind other */
+}
+:focus-visible{outline:var(--focus-ring-width) solid var(--focus-ring);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

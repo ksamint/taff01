@@ -1,0 +1,4 @@
+/* Noto Sans TC — 繁體中文 (Hong Kong) for bilingual 中/EN copy; system CJK fonts as fallback (SC no longer downloaded). Binaries not shipped (≈10 MB/weight); loaded from Google Fonts. */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600&display=swap");
+/* Manrope — display, body and UI (variable font, 200–800). Source: google/fonts ofl/manrope, OFL 1.1 */
+@font-face{font-family:"Manrope";src:url("../assets/fonts/Manrope[wght].ttf") format("truetype");font-weight:200 800;font-style:normal;font-display:swap}
