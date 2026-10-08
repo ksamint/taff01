@@ -10,7 +10,7 @@ services:
       - "127.0.0.1:55432:5432"
     volumes:
       # PostgreSQL 18 images keep the cluster under /var/lib/postgresql (not .../data).
-      - postgres_data:/var/lib/postgresql
+      - postgres18_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U taff -d taff"]
       interval: 2s
@@ -27,4 +27,4 @@ services:
       timeout: 3s
       retries: 20
 volumes:
-  postgres_data:
+  postgres18_data:

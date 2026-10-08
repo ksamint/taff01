@@ -54,11 +54,20 @@ compatible.
 
 ## Local development data after the PostgreSQL move
 
-A PostgreSQL 16 volume cannot be opened by 18. For development data run:
+A PostgreSQL 16 volume cannot be opened by 18. Compose uses a distinct
+`postgres18_data` volume mounted at `/var/lib/postgresql`, preserving the old
+`postgres_data` volume. Before upgrading an existing PostgreSQL 16 service,
+make a restricted local logical backup:
 
 ```sh
-docker compose down -v
+umask 077
+docker compose exec -T postgres pg_dump -U taff -d taff > /tmp/taff-pg16.sql
 docker compose up -d --wait
+docker compose exec -T postgres psql -U taff -d taff < /tmp/taff-pg16.sql
 pnpm db:migrate
-pnpm db:seed
 ```
+
+Make the dump while the old container is still running, before recreating it
+with the new image and volume. Fresh installs need no restore; use the README
+quick start. Keep the old volume and protected backup until the new database
+has passed validation. Never use `docker compose down -v` as an upgrade step.
