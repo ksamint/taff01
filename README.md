@@ -8,12 +8,15 @@ agents work as one team. Mobile web and PWA first, in Simplified Chinese and Eng
 Phase 1 provides a mobile Today view, email/password sign-up and sign-in,
 personal workspaces, task creation, person ownership and person/agent
 assignment. Milestone 01 adds the TABLE AI design system, light and dark themes,
-the Calendar, Projects, Inbox and Me routes and three locales (en, zh-CN, zh-HK). Core owns database access, workspace permissions and
+the Calendar, Projects, Inbox and Me routes and three locales (en, zh-CN, zh-HK).
+Milestone 02 adds agent tokens, the `/mcp` Streamable HTTP endpoint with five
+tools over core, a per-token rate limit, a call log and the MCP settings page. Core owns database access, workspace permissions and
 transactional activity/notification behavior. The worker connects to Redis; no
 background job handlers are exposed yet.
 
-MCP, the review Inbox, WebSocket fan-out, calendar, recurrence, IndexedDB persistence,
-PWA installation and release performance gates are scheduled for later phases.
+The review workspace, agent runs, WebSocket fan-out, the full calendar,
+recurrence, IndexedDB persistence, PWA installation and release gates follow in
+later milestones (see the implementation plan).
 This is a development foundation, not a production release. Each phase ends with
 user review before the next starts.
 
@@ -81,14 +84,15 @@ sample users/tasks to the local app database.
 `pnpm build` builds the web production bundle; `pnpm perf:budget` then measures
 the Today page's gzipped JavaScript against the 200 KiB budget. API and worker run from
 TypeScript during development; production packaging is a later phase.
-`pnpm mcp:smoke` will be introduced with the MCP tools in Phase 2.
+`pnpm mcp:smoke` connects the official MCP client to the running API, exercises
+every tool, the rate limit and revocation; run it with `pnpm dev` up.
 
 ## Structure
 
 | Path | Responsibility |
 | --- | --- |
 | `apps/web` | Next.js mobile UI, bilingual strings, cache-first queries and optimistic mutations |
-| `apps/api` | Thin Hono REST/auth adapters, CORS, validation and sanitized logging |
+| `apps/api` | Thin Hono REST/auth adapters, the `/mcp` Streamable HTTP adapter, rate limiting, validation and sanitized logging |
 | `apps/worker` | BullMQ 6 connection to Valkey and rejection of unsupported jobs |
 | `packages/schemas` | Shared Zod schemas and inferred client types |
 | `packages/db` | Drizzle schema, migrations, PostgreSQL connection and audit triggers |
