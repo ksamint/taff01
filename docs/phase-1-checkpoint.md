@@ -38,19 +38,51 @@ The production page references 198,624 gzip bytes of modern-browser initial JS
 bundle baseline, not a Lighthouse or simulated-network measurement. Aggregate
 performance enforcement and full browser measurements remain required before release.
 
-## Remaining work and open decision
+## Re-validation on 2026-10-08 (cloud session)
+
+Re-run from a fresh clone with Node 22.22, pnpm 10.34, a local PostgreSQL 16 and
+Redis 7.0 (Docker was unavailable, so the services were started from host binaries):
+
+| Check | Result |
+| --- | --- |
+| `pnpm i --frozen-lockfile` | Passed |
+| `pnpm lint` | Passed (51 files) |
+| `pnpm typecheck` | All six packages passed |
+| `pnpm db:migrate` + `pnpm db:seed` | Passed; demo workspace created |
+| `pnpm test` | 39 passed, including nine PostgreSQL integration tests |
+| `pnpm build` | Production web build passed |
+| `pnpm e2e` | Six passed (en and zh-CN) after the web-server teardown fix below; run with Playwright 1.56 because the container ships Chromium 141 and the lockfile's Playwright 1.64 needs a newer build |
+| Licence scan of every installed manifest | No GPL, AGPL, SSPL or LGPL; two MPL-2.0 components as documented in ADR 0003 |
+
+`pnpm e2e` never exited on Linux: Playwright stops the combined `pnpm dev` runner
+with SIGKILL, its detached child servers survived and kept the output pipe open.
+The Playwright config now starts the API and web servers as separate web-server
+entries so Playwright owns each process group; `pnpm dev` is unchanged.
+
+Turborepo 2.11 appends an agent-guidance block to `AGENTS.md` when it detects an
+AI agent; `agentGuidance` is now disabled in `turbo.json` so the instructions file
+stays authored by people.
+
+## Remaining work and decisions
 
 The application is not complete. Phase 2 still needs agent tokens, validated MCP
-tools and smoke tests, per-token Redis limits, review Inbox, agent output approval,
+tools and smoke tests, per-token rate limits, review Inbox, agent output approval,
 WebSocket fan-out and query invalidation. Phase 3 adds calendar/dragging, recurrence,
 board/list views, IndexedDB persistence and PWA installation. Phase 4 adds production
-packaging, Caddy and all CI/performance gates.
+packaging, Caddy and all CI/performance gates, including the licence gate from ADR 0003.
 
-The fixed Next/Tailwind stack contains transitive MPL-2.0 components while the
-original requirements ban copyleft dependencies. Optional LGPL image optimization
-was excluded. The required MPL components still need a user decision documented in
-`adr/0003-transitive-license-decision.md`. The user explicitly authorized committing
-and pushing Phase 1 on 2026-10-08; the policy decision remains open.
+Decisions:
 
-Per the original checkpoint rule, await review before starting Phase 2. The overall
-goal remains active. This checkpoint is not a claim that the complete app is delivered.
+- Closed: the transitive-licence question. The user restated the standing rules
+  with the fixed stack on 2026-10-08; ADR 0003 records the stack as retained with
+  the two MPL-2.0 components as documented exceptions.
+- Applied: the local Redis image is pinned to the BSD-licensed 7.2 line, because
+  `redis:7` now resolves to 7.4, which is RSALv2/SSPLv1 and banned by the rules.
+- Open: [ADR 0004](adr/0004-stack-version-review.md) proposes version moves
+  (Node 24, pnpm 12, TypeScript 6, PostgreSQL 18, Valkey instead of Redis, MCP SDK
+  v2 packages, Vitest 4 or 5). The stack is fixed by the rules, so each needs
+  the user's approval.
+- Open: Phase 1 review. Per the checkpoint rule, Phase 2 starts after the user
+  approves this checkpoint.
+
+This checkpoint is not a claim that the complete app is delivered.
