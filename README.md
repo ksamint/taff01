@@ -5,9 +5,10 @@ agents work as one team. Mobile web and PWA first, in Simplified Chinese and Eng
 
 ## Status
 
-The Phase 1 implementation provides a bilingual mobile Today view, email/password
-sign-up and sign-in, personal workspaces, task creation, person ownership and
-person/agent assignment. Core owns database access, workspace permissions and
+Phase 1 provides a mobile Today view, email/password sign-up and sign-in,
+personal workspaces, task creation, person ownership and person/agent
+assignment. Milestone 01 adds the TABLE AI design system, light and dark themes,
+the Calendar, Projects, Inbox and Me routes and three locales (en, zh-CN, zh-HK). Core owns database access, workspace permissions and
 transactional activity/notification behavior. The worker connects to Redis; no
 background job handlers are exposed yet.
 
@@ -72,12 +73,13 @@ pnpm e2e
 Create `taff_test` only once. `pnpm test` loads `.env` when present. PostgreSQL tests
 skip visibly without `TEST_DATABASE_URL` and reject names that do not end in
 `_test`; use a database distinct from `DATABASE_URL`. These tests create data in
-that dedicated database. Mobile Playwright runs en and zh-CN (zh-HK joins in milestone M1), verifies real
+that dedicated database. Mobile Playwright runs en, zh-CN and zh-HK, verifies real
 signup and assignment, language persistence and optimistic rollback. It requires
 the seeded demo password and starts the development services if needed. It adds
 sample users/tasks to the local app database.
 
-`pnpm build` currently builds the web production bundle. API and worker run from
+`pnpm build` builds the web production bundle; `pnpm perf:budget` then measures
+the Today page's gzipped JavaScript against the 200 KiB budget. API and worker run from
 TypeScript during development; production packaging is a later phase.
 `pnpm mcp:smoke` will be introduced with the MCP tools in Phase 2.
 
