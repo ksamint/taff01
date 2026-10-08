@@ -11,8 +11,8 @@ agent instructions, runtime version declaration, and this plan.
 Acceptance: the saved objective matches the supplied file, the initial commit is
 pushed, and the README accurately describes the current state.
 
-Checkpoint: repository ready; application, dependencies, runtime configuration,
-and all application validation remain pending. No stack change is proposed.
+Checkpoint accepted by the user’s resume instruction. Repository ready; the
+application implementation follows in Phase 1. No stack change is proposed.
 
 ## Phase 1 — Runnable vertical slice
 
@@ -26,6 +26,10 @@ dummy environment documentation, migration and demo seed commands.
 Acceptance: clean setup works using documented commands; core permission and
 mutation tests pass; web, API and worker start; the demo workspace has five people
 and three agents. Task owners are people and worker assignments accept agents.
+
+Phase 1 implementation and validation are recorded in
+[the checkpoint](phase-1-checkpoint.md). The user authorized committing and pushing Phase 1 on 2026-10-08. The transitive-
+license policy decision remains open; review is required before Phase 2.
 
 ## Phase 2 — Agent collaboration and realtime
 

@@ -1,0 +1,16 @@
+{
+  "name": "@taff/worker",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "bullmq": "^5.58.0",
+    "pino": "^9.9.0",
+    "zod": "^4.0.0"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "@taff/api",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@taff/core": "workspace:*",
+    "@taff/schemas": "workspace:*",
+    "@hono/node-server": "^1.19.0",
+    "hono": "^4.9.0",
+    "pino": "^9.9.0",
+    "zod": "^4.0.0"
+  }
+}

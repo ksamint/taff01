@@ -1,0 +1,22 @@
+{
+  "name": "@taff/core",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./permissions": "./src/permissions.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@taff/db": "workspace:*",
+    "@taff/schemas": "workspace:*",
+    "@better-auth/drizzle-adapter": "^1.7.7",
+    "better-auth": "^1.7.7",
+    "drizzle-orm": "^0.45.4",
+    "zod": "^4.0.0"
+  }
+}
