@@ -1,5 +1,10 @@
-import { TodayApp } from "../src/components/today-app";
+import { AppShell } from "../src/components/app-shell";
+import { TodayView } from "../src/components/today-view";
 
 export default function Page() {
-  return <TodayApp />;
+  return (
+    <AppShell>
+      <TodayView />
+    </AppShell>
+  );
 }

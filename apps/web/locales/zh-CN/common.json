@@ -59,5 +59,46 @@
     "auth": "无法登录，请检查邮箱和密码后重试。",
     "signup": "无法创建账户，请检查信息或尝试登录。",
     "profile": "无法保存语言偏好，请重试。"
+  },
+  "zh-HK": "繁體中文（香港）",
+  "nav": {
+    "label": "主导航",
+    "today": "今天",
+    "calendar": "日历",
+    "projects": "项目",
+    "inbox": "收件箱",
+    "me": "我的"
+  },
+  "agentsAtWork": "智能体工作中",
+  "agentsIdle": "目前没有智能体在工作。",
+  "calendar": {
+    "title": "日历",
+    "hint": "未来七天到期的任务。",
+    "unscheduled": "未安排",
+    "empty": "本周没有安排。"
+  },
+  "projects": {
+    "title": "项目",
+    "board": "按状态分栏",
+    "empty": "此栏暂无任务。"
+  },
+  "inbox": {
+    "title": "收件箱",
+    "all": "全部",
+    "reviews": "审核",
+    "blockers": "阻塞",
+    "zero": "收件箱已清空",
+    "zeroSub": "新的审核请求和阻塞会出现在这里。",
+    "needsReview_other": "{{count}} 项待你审核"
+  },
+  "me": {
+    "title": "我的",
+    "signedInAs": "当前登录：{{name}}",
+    "account": "账户",
+    "preferences": "偏好设置",
+    "appearance": "外观",
+    "light": "浅色",
+    "dark": "深色",
+    "system": "跟随系统"
   }
 }

@@ -1,0 +1,165 @@
+/* TABLE AI design tokens for Taff. Source: docs/ui/prototype/_ds/table-ai-design-system/tokens.
+   Light values come from the design system; dark values from the approved prototype. */
+@font-face {
+  font-family: "Manrope";
+  src: url("/fonts/Manrope.ttf") format("truetype");
+  font-weight: 200 800;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  /* Base palette */
+  --color-white: #ffffff;
+  --color-deep-blue: #0a1626;
+  --color-deep-blue-soft: #101c2c;
+  --color-deep-blue-muted: #3c4759;
+  --color-deep-blue-fixed: #d7e3fa;
+  --color-deep-blue-fixed-dim: #bbc7dd;
+  --color-gold: #a88b52;
+  --color-gold-hover: #9a7e48;
+  --color-gold-deep: #785f2a;
+  --color-gold-mist: rgba(168, 139, 82, 0.08);
+  --color-gold-fixed-dim: #e3c284;
+  --color-ink: #1b1b1d;
+  --color-ink-variant: #44474c;
+  --color-outline: #75777d;
+  --color-outline-variant: #c5c6cd;
+  --color-surface: #fbf9fa;
+  --color-surface-dim: #dcd9db;
+  --color-surface-container-low: #f5f3f4;
+  --color-surface-container: #f0edef;
+  --color-surface-container-high: #eae7e9;
+  --color-surface-container-highest: #e4e2e3;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+  --color-success: #2f5d4e;
+  --color-success-container: #e3eee9;
+  --color-warning: #8a5a12;
+  --color-warning-container: #f6ebd7;
+  --color-line: rgba(10, 22, 38, 0.08);
+  /* Semantic aliases */
+  --bg: var(--color-white);
+  --bg-surface: var(--color-surface);
+  --bg-container: var(--color-surface-container);
+  --bg-container-low: var(--color-surface-container-low);
+  --bg-container-high: var(--color-surface-container-highest);
+  --bg-inverse: var(--color-deep-blue);
+  --bg-inverse-hover: var(--color-deep-blue-muted);
+  --bg-canvas: var(--color-surface-container-high);
+  --text: var(--color-deep-blue);
+  --text-body: var(--color-ink);
+  --text-muted: var(--color-ink-variant);
+  --text-subtle: var(--color-outline);
+  --text-on-inverse: var(--color-white);
+  --accent: var(--color-gold);
+  --accent-hover: var(--color-gold-hover);
+  --accent-text: var(--color-gold-deep);
+  --accent-wash: var(--color-gold-mist);
+  --border: var(--color-outline-variant);
+  --border-strong: var(--color-deep-blue);
+  --border-line: var(--color-line);
+  --danger: var(--color-error);
+  --danger-bg: var(--color-error-container);
+  --danger-text: var(--color-on-error-container);
+  --success: var(--color-success);
+  --success-bg: var(--color-success-container);
+  --warning: var(--color-warning);
+  --warning-bg: var(--color-warning-container);
+  --scrim: rgba(10, 22, 38, 0.45);
+  --focus-ring: var(--color-gold);
+  --focus-ring-width: 2px;
+  --skeleton: var(--color-surface-container-high);
+  --selection-bg: var(--color-deep-blue);
+  --selection-text: var(--color-white);
+  --shadow-lift: 0 20px 60px -15px rgba(10, 22, 38, 0.16);
+  /* Type */
+  --font-sans:
+    "Manrope", "Noto Sans TC", "PingFang HK", "PingFang SC",
+    "Microsoft JhengHei", "Microsoft YaHei", "Noto Sans SC", system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-headline-xl: 40px;
+  --text-headline-lg: 32px;
+  --text-headline-md: 24px;
+  --text-body-lg: 18px;
+  --text-body-md: 16px;
+  --text-body-sm: 14px;
+  --text-label-sm: 12px;
+  --lh-body: 1.6;
+  --type-product-h1-size: 24px;
+  --type-product-h2-size: 20px;
+  --type-product-h3-size: 16px;
+  --weight-body: 400;
+  --weight-medium: 500;
+  --weight-label: 600;
+  --weight-heading: 600;
+  --ls-track-sm: 0.12em;
+  --ls-track-md: 0.15em;
+  --ls-track-lg: 0.2em;
+  /* Space (8px grid) */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-xxl: 80px;
+  --container-content: 1152px;
+  --gutter: 20px;
+  --nav-height: 64px;
+  --tabbar-height: 64px;
+  --sidebar-width: 240px;
+  --hairline: 1px;
+  /* Radius: square cards, 2px controls, 4px dialogs */
+  --radius-none: 0px;
+  --radius-control: 2px;
+  --radius-dialog: 4px;
+  --radius-avatar: 9999px;
+  /* Motion: one easing */
+  --ease-standard: cubic-bezier(0.16, 1, 0.3, 1);
+  --dur-fast: 300ms;
+  --dur-base: 400ms;
+  --dur-slow: 500ms;
+  --press-scale: 0.98;
+}
+:root[data-theme="dark"],
+:root:not([data-theme="light"]):has(body[data-prefers-dark="true"]) {
+  --bg: #0a1626;
+  --bg-surface: #0e1b2b;
+  --bg-container: #17253a;
+  --bg-container-low: #122034;
+  --bg-container-high: #22324a;
+  --bg-inverse: #f3f0f1;
+  --bg-inverse-hover: #dcd9db;
+  --bg-canvas: #05090f;
+  --text: #f3f0f1;
+  --text-body: #e4e2e3;
+  --text-muted: #bbc7dd;
+  --text-subtle: #8b96aa;
+  --text-on-inverse: #0a1626;
+  --accent: #a88b52;
+  --accent-hover: #b89a60;
+  --accent-text: #e3c284;
+  --accent-wash: rgba(227, 194, 132, 0.1);
+  --border: #2c3a50;
+  --border-strong: #d7e3fa;
+  --border-line: rgba(215, 227, 250, 0.09);
+  --danger: #ffb4ab;
+  --danger-bg: rgba(186, 26, 26, 0.28);
+  --danger-text: #ffdad6;
+  --success: #9cc9b6;
+  --success-bg: rgba(47, 93, 78, 0.4);
+  --warning: #e8be7a;
+  --warning-bg: rgba(138, 90, 18, 0.32);
+  --scrim: rgba(0, 0, 0, 0.55);
+  --skeleton: #22324a;
+  --selection-bg: #d7e3fa;
+  --selection-text: #0a1626;
+  --shadow-lift: 0 20px 60px -15px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+[lang|="zh"] {
+  --ls-track-sm: 0;
+  --ls-track-md: 0;
+  --ls-track-lg: 0;
+}

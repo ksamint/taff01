@@ -14,7 +14,14 @@ const labels = {
     failure: "你没有执行此操作的权限。",
     signout: "退出登录",
   },
+  "zh-HK": {
+    today: "今天",
+    agent: "智能體",
+    failure: "你沒有執行此操作的權限。",
+    signout: "登出",
+  },
 };
+type TestLocale = keyof typeof labels;
 
 async function signIn(page: Page) {
   const password = process.env.DEMO_PASSWORD;
@@ -31,7 +38,7 @@ async function signIn(page: Page) {
   await expect(page.getByTestId("today-heading")).toBeVisible();
 }
 
-async function useLocale(page: Page, locale: "en" | "zh-CN") {
+async function useLocale(page: Page, locale: TestLocale) {
   await expect(page.getByTestId("locale-select")).toBeEnabled();
   await page.getByTestId("locale-select").selectOption(locale);
   await expect(page.getByTestId("today-heading")).toHaveText(
@@ -43,7 +50,7 @@ async function useLocale(page: Page, locale: "en" | "zh-CN") {
 test("sign in, create a task and assign it to an agent", async ({
   page,
 }, info) => {
-  const locale = info.project.name as "en" | "zh-CN";
+  const locale = info.project.name as TestLocale;
   await signIn(page);
   await useLocale(page, locale);
   const title = `Agent task ${locale} ${Date.now()}`;
@@ -78,7 +85,7 @@ test("sign in, create a task and assign it to an agent", async ({
     agentId as string,
   );
   await page.screenshot({ path: `/tmp/taff01-${locale}.png`, fullPage: true });
-  const otherLocale = locale === "en" ? "zh-CN" : "en";
+  const otherLocale: TestLocale = locale === "en" ? "zh-HK" : "en";
   await useLocale(page, otherLocale);
   await page.reload();
   await expect(page.getByTestId("today-heading")).toHaveText(
@@ -93,7 +100,7 @@ test("sign in, create a task and assign it to an agent", async ({
 test("create an account with a workspace, then sign in again", async ({
   page,
 }, info) => {
-  const locale = info.project.name as "en" | "zh-CN";
+  const locale = info.project.name as TestLocale;
   const email = `e2e-${locale}-${Date.now()}@example.test`;
   const password = "Taff-e2e-only-2026!";
   await page.goto("/");
@@ -130,7 +137,7 @@ test("create an account with a workspace, then sign in again", async ({
 test("failed optimistic creation and assignment restore the previous list", async ({
   page,
 }, info) => {
-  const locale = info.project.name as "en" | "zh-CN";
+  const locale = info.project.name as TestLocale;
   const workspaceId = "11111111-1111-4111-8111-111111111111";
   const ownerId = "22222222-2222-4222-8222-222222222222";
   const agentId = "33333333-3333-4333-8333-333333333333";

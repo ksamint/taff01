@@ -13,6 +13,7 @@
     "@taff/schemas": "workspace:*",
     "@tanstack/react-query": "^5.104.0",
     "i18next": "^26.4.0",
+    "lucide-react": "^1.52.0",
     "next": "^16.4.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",

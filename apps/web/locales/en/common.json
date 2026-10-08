@@ -59,5 +59,47 @@
     "auth": "Couldn’t sign in. Check your email and password, then try again.",
     "signup": "Couldn’t create an account. Check your details or try signing in.",
     "profile": "Couldn’t save your language preference. Please try again."
+  },
+  "zh-HK": "繁體中文（香港）",
+  "nav": {
+    "label": "Main navigation",
+    "today": "Today",
+    "calendar": "Calendar",
+    "projects": "Projects",
+    "inbox": "Inbox",
+    "me": "Me"
+  },
+  "agentsAtWork": "Agents at work",
+  "agentsIdle": "No agents are working right now.",
+  "calendar": {
+    "title": "Calendar",
+    "hint": "Tasks due in the next seven days.",
+    "unscheduled": "Unscheduled",
+    "empty": "Nothing is scheduled this week."
+  },
+  "projects": {
+    "title": "Projects",
+    "board": "Board by status",
+    "empty": "No tasks in this column."
+  },
+  "inbox": {
+    "title": "Inbox",
+    "all": "All",
+    "reviews": "Reviews",
+    "blockers": "Blockers",
+    "zero": "Inbox zero",
+    "zeroSub": "New review requests and blockers will appear here.",
+    "needsReview_one": "{{count}} item needs your review",
+    "needsReview_other": "{{count}} items need your review"
+  },
+  "me": {
+    "title": "Me",
+    "signedInAs": "Signed in as {{name}}",
+    "account": "Account",
+    "preferences": "Preferences",
+    "appearance": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Follow system"
   }
 }

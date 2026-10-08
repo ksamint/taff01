@@ -11,6 +11,7 @@ export default defineConfig({
   projects: [
     { name: "en", use: { ...devices["Pixel 7"], locale: "en-US" } },
     { name: "zh-CN", use: { ...devices["Pixel 7"], locale: "zh-CN" } },
+    { name: "zh-HK", use: { ...devices["Pixel 7"], locale: "zh-HK" } },
   ],
   // One entry per service so Playwright owns each process group and can stop it
   // on teardown. The combined `pnpm dev` runner detaches its children, which
