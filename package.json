@@ -2,10 +2,10 @@
   "name": "taff01",
   "private": true,
   "license": "MIT",
-  "packageManager": "pnpm@10.34.5",
+  "packageManager": "pnpm@12.10.1",
   "engines": {
-    "node": ">=22 <23",
-    "pnpm": ">=10 <11"
+    "node": ">=24 <27",
+    "pnpm": ">=12 <13"
   },
   "scripts": {
     "dev": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/dev.ts",
@@ -19,12 +19,12 @@
     "e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.0.0",
-    "@playwright/test": "^1.56.0",
-    "@types/node": "^22.0.0",
-    "tsx": "^4.20.0",
-    "turbo": "^2.5.0",
-    "typescript": "~5.9.3",
-    "vitest": "^3.2.0"
+    "@biomejs/biome": "^2.5.15",
+    "@playwright/test": "^1.64.0",
+    "@types/node": "^24.0.0",
+    "tsx": "^4.23.0",
+    "turbo": "^2.11.0",
+    "typescript": "~7.0.2",
+    "vitest": "^5.0.3"
   }
 }

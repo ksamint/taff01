@@ -1,9 +1,16 @@
 packages:
   - apps/*
   - packages/*
-onlyBuiltDependencies:
-  - '@tailwindcss/oxide'
-  - esbuild
-  - sharp
+# pnpm 12: dependency build scripts run only when approved here.
+allowBuilds:
+  '@tailwindcss/oxide': true
+  esbuild: true
+  msgpackr-extract: false
+  sharp: false
 ignoredOptionalDependencies:
   - sharp
+minimumReleaseAgeExclude:
+  - '@playwright/test@1.64.0'
+  - drizzle-orm@0.45.4
+  - playwright-core@1.64.0
+  - playwright@1.64.0

@@ -9,8 +9,9 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "bullmq": "^5.58.0",
-    "pino": "^9.9.0",
-    "zod": "^4.0.0"
+    "bullmq": "^6.3.0",
+    "pino": "^10.4.0",
+    "zod": "^4.6.0",
+    "ioredis": "^5.11.0"
   }
 }

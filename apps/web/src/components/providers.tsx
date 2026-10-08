@@ -20,7 +20,7 @@ export function Providers({ children }: { children: ReactNode }) {
       resources: { en: { translation: en }, "zh-CN": { translation: zh } },
       lng: "en",
       fallbackLng: "en",
-      initImmediate: false,
+      initAsync: false,
       interpolation: { escapeValue: false },
     });
     return instance;
