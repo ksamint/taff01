@@ -1,7 +1,7 @@
 name: taff01
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: taff
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
@@ -9,18 +9,20 @@ services:
     ports:
       - "127.0.0.1:55432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # PostgreSQL 18 images keep the cluster under /var/lib/postgresql (not .../data).
+      - postgres_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U taff -d taff"]
       interval: 2s
       timeout: 3s
       retries: 20
-  redis:
-    image: redis:7.2-alpine
+  valkey:
+    # Valkey is the BSD-3 Linux Foundation fork of Redis 7.2; Redis 7.4+ is RSAL/SSPL.
+    image: valkey/valkey:9-alpine
     ports:
       - "127.0.0.1:56379:6379"
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "valkey-cli", "ping"]
       interval: 2s
       timeout: 3s
       retries: 20
