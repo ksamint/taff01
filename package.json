@@ -16,7 +16,8 @@
     "db:generate": "pnpm --filter @taff/db generate",
     "db:migrate": "node --env-file=.env node_modules/tsx/dist/cli.mjs packages/db/src/migrate.ts",
     "db:seed": "node --env-file=.env node_modules/tsx/dist/cli.mjs packages/core/src/seed.ts",
-    "e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test"
+    "e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test",
+    "perf:budget": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/bundle-budget.mts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
