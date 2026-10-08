@@ -13,6 +13,8 @@ const FAMILIES = [
   "mcp-calls",
   "me",
   "members",
+  "calendar",
+  "task-calendar",
   "task-access",
   "task-comments",
   "projects",

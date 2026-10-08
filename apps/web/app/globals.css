@@ -1513,3 +1513,7 @@ select,
 .search-result > * {
   min-width: 0;
 }
+
+.page-heading h1 {
+  overflow-wrap: anywhere;
+}

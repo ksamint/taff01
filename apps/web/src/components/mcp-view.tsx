@@ -42,6 +42,8 @@ const TOOLS = [
   ["projects.list", "readProjects"],
   ["search.query", "search"],
   ["quickadd.parse", "parseDraft"],
+  ["calendar.list", "calendarList"],
+  ["calendar.set", "calendarSet"],
   ["calendar.schedule", "schedule"],
   ["inbox.request_review", "requestReview"],
   ["runs.get", "readRun"],

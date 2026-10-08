@@ -1,13 +1,15 @@
 import type {
   AgentProfile,
+  CalendarViewData,
   Inbox,
   InboxItem,
   ReviewWorkspace,
   Run,
   RunDetail,
   Task,
+  TaskCalendar,
 } from "@taff/schemas";
-import type { QueryClient } from "@tanstack/react-query";
+import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import { snapshotQueries } from "./query-snapshot";
 
 const FAMILIES = [
@@ -18,6 +20,8 @@ const FAMILIES = [
   "review",
   "agent",
   "inbox",
+  "calendar",
+  "task-calendar",
   "task-access",
   "task-comments",
   "projects",
@@ -28,15 +32,15 @@ const FAMILIES = [
   "org-drafts",
 ];
 export const m3MutationKey = ["m3-write"] as const;
-export function snapshotM3(client: QueryClient) {
-  return snapshotQueries(
-    client,
-    client
+export function snapshotM3(client: QueryClient, extraKeys: QueryKey[] = []) {
+  return snapshotQueries(client, [
+    ...extraKeys,
+    ...client
       .getQueryCache()
       .findAll()
       .filter(({ queryKey }) => FAMILIES.includes(String(queryKey[0])))
       .map(({ queryKey }) => queryKey),
-  );
+  ]);
 }
 export function patchTask(
   client: QueryClient,
@@ -48,6 +52,27 @@ export function patchTask(
   );
   client.setQueriesData<Task>({ queryKey: ["task", id] }, (task) =>
     task ? { ...task, ...patch } : task,
+  );
+  client.setQueriesData<TaskCalendar>(
+    { queryKey: ["task-calendar", id] },
+    (data) => (data ? { ...data, task: { ...data.task, ...patch } } : data),
+  );
+  client.setQueriesData<CalendarViewData>({ queryKey: ["calendar"] }, (data) =>
+    data
+      ? {
+          ...data,
+          occurrences: data.occurrences.map((item) =>
+            item.task.id === id
+              ? { ...item, task: { ...item.task, ...patch } }
+              : item,
+          ),
+          unscheduled: data.unscheduled.map((item) =>
+            item.task.id === id
+              ? { ...item, task: { ...item.task, ...patch } }
+              : item,
+          ),
+        }
+      : data,
   );
   client.setQueriesData<ReviewWorkspace>(
     { queryKey: ["review", id] },

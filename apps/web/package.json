@@ -10,14 +10,25 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@preact/signals": "^2.11.3",
+    "@schedule-x/calendar": "4.9.1",
+    "@schedule-x/calendar-controls": "4.9.1",
+    "@schedule-x/drag-and-drop": "3.7.3",
+    "@schedule-x/events-service": "4.9.1",
+    "@schedule-x/react": "4.1.0",
+    "@schedule-x/resize": "3.7.3",
+    "@schedule-x/theme-default": "4.9.1",
+    "@schedule-x/translations": "4.9.1",
     "@taff/schemas": "workspace:*",
     "@tanstack/react-query": "^5.104.0",
     "i18next": "^26.4.0",
     "lucide-react": "^1.52.0",
     "next": "^16.4.0",
+    "preact": "^10.29.8",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-i18next": "^17.0.0"
+    "react-i18next": "^17.0.0",
+    "temporal-polyfill": "0.3.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.0",

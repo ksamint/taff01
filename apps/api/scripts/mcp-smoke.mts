@@ -6,11 +6,13 @@ import {
 } from "@modelcontextprotocol/client";
 import { createCore, userPrincipal } from "@taff/core";
 import {
+  calendarViewDataSchema,
   grantSchema,
   quickAddResultSchema,
   runDetailSchema,
   runSchema,
   searchResultSchema,
+  taskCalendarSchema,
   taskSchema,
 } from "@taff/schemas";
 
@@ -87,10 +89,12 @@ try {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists every task, project, search, draft, run, grant and file tool",
+    "lists every task, calendar, project, search, draft, run, grant and file tool",
     JSON.stringify(tools) ===
       JSON.stringify([
+        "calendar.list",
         "calendar.schedule",
+        "calendar.set",
         "files.attach",
         "grants.request",
         "inbox.request_review",
@@ -111,16 +115,29 @@ try {
       ]),
     tools,
   );
+  const calendarStart = new Date(Date.now() + 3_600_000).toISOString();
+  const calendarEnd = new Date(Date.now() + 7_200_000).toISOString();
+  const initialCalendar = {
+    startAt: calendarStart,
+    endAt: calendarEnd,
+    timeZone: "Asia/Singapore",
+    rrule: "FREQ=DAILY;COUNT=3",
+  };
+  const calendarRange = {
+    from: new Date(Date.now() - 3_600_000).toISOString(),
+    to: new Date(Date.now() + 5 * 86_400_000).toISOString(),
+  };
   const created = text(
     await client.callTool({
       name: "tasks.create",
       arguments: {
         title: `Smoke task ${Date.now()}`,
         ownerId: workspace.memberId,
-        description: "M5 MCP smoke",
+        description: "M6 MCP smoke",
         priority: 2,
         projectId: project.id,
         labels: ["smoke"],
+        calendar: initialCalendar,
       },
     }),
   );
@@ -130,6 +147,29 @@ try {
     created,
   );
   const taskId = String(created?.id);
+  const initialView = calendarViewDataSchema.parse(
+    text(
+      await client.callTool({
+        name: "calendar.list",
+        arguments: calendarRange,
+      }),
+    ),
+  );
+  const initialOccurrences = initialView.occurrences.filter(
+    (item) => item.task.id === taskId,
+  );
+  check(
+    "tasks.create atomically stores a recurring calendar interval in the token workspace",
+    initialOccurrences.length === 3 &&
+      initialOccurrences.every(
+        (item) =>
+          item.task.workspaceId === workspace.id &&
+          item.isAgent &&
+          item.canSchedule,
+      ) &&
+      initialOccurrences[0].startAt === calendarStart,
+    initialOccurrences,
+  );
   const edited = taskSchema.parse(
     text(
       await client.callTool({
@@ -233,6 +273,61 @@ try {
     "calendar.schedule sets the due time",
     typeof scheduled?.dueAt === "string",
     scheduled,
+  );
+  const interval = taskCalendarSchema.parse(
+    text(
+      await client.callTool({
+        name: "calendar.set",
+        arguments: {
+          taskId,
+          version: scheduled?.version,
+          schedule: {
+            ...initialCalendar,
+            startAt: new Date(
+              Date.parse(calendarStart) + 1_800_000,
+            ).toISOString(),
+            endAt: new Date(Date.parse(calendarEnd) + 1_800_000).toISOString(),
+          },
+        },
+      }),
+    ),
+  );
+  check(
+    "calendar.set moves the whole series without changing its deadline",
+    interval.task.version === Number(scheduled?.version) + 1 &&
+      interval.task.dueAt === scheduled?.dueAt &&
+      interval.schedule?.startAt ===
+        new Date(Date.parse(calendarStart) + 1_800_000).toISOString(),
+    interval,
+  );
+  const movedView = calendarViewDataSchema.parse(
+    text(
+      await client.callTool({
+        name: "calendar.list",
+        arguments: calendarRange,
+      }),
+    ),
+  );
+  check(
+    "calendar.list expands the updated series with unique occurrence IDs",
+    movedView.occurrences.filter((item) => item.task.id === taskId).length ===
+      3 &&
+      new Set(movedView.occurrences.map((item) => item.id)).size ===
+        movedView.occurrences.length,
+  );
+  const cleared = taskCalendarSchema.parse(
+    text(
+      await client.callTool({
+        name: "calendar.set",
+        arguments: { taskId, version: interval.task.version, schedule: null },
+      }),
+    ),
+  );
+  check(
+    "calendar.set clears only the interval and advances the shared task version",
+    cleared.schedule === null &&
+      cleared.task.dueAt === scheduled?.dueAt &&
+      cleared.task.version === interval.task.version + 1,
   );
   let run = runSchema.parse(
     text(await client.callTool({ name: "runs.start", arguments: { taskId } })),

@@ -78,6 +78,7 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   await page.getByTestId("project-submit").click();
   const project = projectSchema.parse(await (await projectResponse).json());
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page).toHaveURL(`/projects/${project.id}`);
   await page.getByTestId("open-quick").click();
   const parsedTitle = `Draft ${Date.now()}`;
   const when =
@@ -378,6 +379,7 @@ test("organization creation, real invitation fragment acceptance, guest role ref
     await guest.goto(`/tasks/${task.id}`);
     await expect(guest.getByTestId("edit-save")).toBeDisabled();
     await expect(guest.getByTestId("task-comment-submit")).toBeDisabled();
+    await expect(guest.getByTestId("task-schedule")).toBeDisabled();
     await guest.reload();
     await expect(guest.getByTestId("edit-save")).toBeDisabled();
     const team = memberListSchema.parse(
@@ -396,8 +398,12 @@ test("organization creation, real invitation fragment acceptance, guest role ref
       timeout: 3000,
     });
     await expect(guest.getByTestId("task-comment")).toBeEnabled();
+    await expect(guest.getByTestId("task-schedule")).toBeEnabled();
     await page.getByTestId(`role-${invited.id}`).selectOption("guest");
     await expect(guest.getByTestId("edit-save")).toBeDisabled({
+      timeout: 3000,
+    });
+    await expect(guest.getByTestId("task-schedule")).toBeDisabled({
       timeout: 3000,
     });
     const self = page.getByTestId(`role-${workspace.memberId}`);

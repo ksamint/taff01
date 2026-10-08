@@ -5,6 +5,7 @@ import {
   appendRunEventSchema,
   assignTaskSchema,
   attachRunArtifactSchema,
+  calendarRangeSchema,
   controlRunSchema,
   createAgentTokenSchema,
   createTaskSchema,
@@ -23,6 +24,7 @@ import {
   SchemaError,
   scheduleTaskSchema,
   searchInputSchema,
+  setTaskCalendarSchema,
   signInSchema,
   signOutSchema,
   signUpSchema,
@@ -255,6 +257,34 @@ export function createApp(
       ),
     ),
   );
+  app.get("/api/tasks/:id/calendar", async (c) =>
+    c.json(
+      await core.getTaskCalendar(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.patch("/api/tasks/:id/calendar", async (c) =>
+    c.json(
+      await core.setTaskCalendar(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        setTaskCalendarSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.get("/api/calendar", async (c) => {
+    const { workspaceId, ...range } = c.req.query();
+    const workspace = workspaceQuerySchema.parse({ workspaceId });
+    return c.json(
+      await core.listCalendar(
+        userPrincipal(c.get("userId")),
+        workspace.workspaceId,
+        calendarRangeSchema.parse(range),
+      ),
+    );
+  });
   app.get("/api/tasks/:id/comments", async (c) =>
     c.json(
       await core.listTaskComments(

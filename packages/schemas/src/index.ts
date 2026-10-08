@@ -14,6 +14,7 @@ import {
   nullable,
   number,
   object,
+  omit,
   optional,
   record,
   refine,
@@ -61,7 +62,33 @@ const taskFields = {
   projectId: optional(nullable(idSchema)),
   labels: optional(labelsSchema),
 };
+const calendarInstantSchema = iso.datetime({ offset: true }).check(
+  refine((value) => {
+    const ms = Date.parse(value);
+    return ms >= Date.UTC(1970, 0, 1) && ms < Date.UTC(2201, 0, 1);
+  }),
+);
+export const calendarScheduleInputSchema = strictObject({
+  startAt: calendarInstantSchema,
+  endAt: calendarInstantSchema,
+  timeZone: string().check(
+    minLength(1),
+    maxLength(100),
+    refine(timeZone, "Invalid time zone"),
+  ),
+  rrule: _default(
+    nullable(string().check(trim(), minLength(1), maxLength(500))),
+    null,
+  ),
+}).check(
+  refine((value) => {
+    const duration = Date.parse(value.endAt) - Date.parse(value.startAt);
+    return duration > 0 && duration <= 7 * 86400000;
+  }),
+);
+export type CalendarScheduleInput = Infer<typeof calendarScheduleInputSchema>;
 export const createTaskSchema = strictObject({
+  calendar: optional(calendarScheduleInputSchema),
   ...taskFields,
   parentId: optional(nullable(idSchema)),
   workspaceId: idSchema,
@@ -197,13 +224,11 @@ export const mcpCallSchema = object({
 export const mcpCallListSchema = array(mcpCallSchema);
 /* MCP tool arguments. The token fixes the workspace, so no tool takes one. */
 
-export const mcpTasksCreateArgs = strictObject({
-  ...taskFields,
-  parentId: optional(nullable(idSchema)),
-  title: string().check(trim(), minLength(1), maxLength(200)),
-  ownerId: idSchema,
-  dueAt: optional(nullable(iso.datetime({ offset: true }))),
+export const mcpTasksCreateArgs = omit(createTaskSchema, {
+  workspaceId: true,
+  workerId: true,
 });
+
 export const mcpTasksUpdateArgs = strictObject({
   taskId: idSchema,
   status: optional(zodEnum(["in_progress", "needs_review"])),
@@ -539,7 +564,7 @@ export const changeEventSchema = strictObject({
   resourceId: string().check(minLength(1), maxLength(200)),
   action: string().check(
     regex(
-      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites)\.(insert|update|delete)$/,
+      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites|task_calendar)\.(insert|update|delete)$/,
     ),
   ),
   actorId: string().check(minLength(1), maxLength(200)),
@@ -729,3 +754,61 @@ export const workspaceAccessSchema = object({
   canManageRoles: boolean(),
 });
 export type WorkspaceAccess = Infer<typeof workspaceAccessSchema>;
+
+export const calendarRangeSchema = strictObject({
+  from: calendarInstantSchema,
+  to: calendarInstantSchema,
+}).check(
+  refine(
+    (v) =>
+      Date.parse(v.to) > Date.parse(v.from) &&
+      Date.parse(v.to) - Date.parse(v.from) <= 62 * 86400000,
+  ),
+);
+export const setTaskCalendarSchema = strictObject({
+  version: versionSchema,
+  schedule: nullable(calendarScheduleInputSchema),
+});
+export const calendarScheduleSchema = object({
+  taskId: idSchema,
+  workspaceId: idSchema,
+  startAt: iso.datetime(),
+  endAt: iso.datetime(),
+  timeZone: string(),
+  rrule: nullable(string()),
+});
+export const taskCalendarSchema = object({
+  task: taskSchema,
+  schedule: nullable(calendarScheduleSchema),
+  canSchedule: boolean(),
+});
+export const calendarOccurrenceSchema = object({
+  id: string().check(minLength(1), maxLength(100)),
+  task: taskSchema,
+  schedule: calendarScheduleSchema,
+  startAt: iso.datetime(),
+  endAt: iso.datetime(),
+  canSchedule: boolean(),
+  isAgent: boolean(),
+});
+export const calendarViewDataSchema = object({
+  occurrences: array(calendarOccurrenceSchema),
+  unscheduled: array(taskCalendarSchema),
+  truncated: boolean(),
+});
+export const mcpCalendarListArgs = calendarRangeSchema;
+export const mcpCalendarSetArgs = extend(setTaskCalendarSchema, {
+  taskId: idSchema,
+});
+export type CalendarRange = Infer<typeof calendarRangeSchema>;
+export type SetTaskCalendar = Infer<typeof setTaskCalendarSchema>;
+export type CalendarSchedule = Infer<typeof calendarScheduleSchema>;
+export type TaskCalendar = Infer<typeof taskCalendarSchema>;
+export type CalendarOccurrence = Infer<typeof calendarOccurrenceSchema>;
+export type CalendarViewData = Infer<typeof calendarViewDataSchema>;
+export {
+  calendarCivilTime,
+  calendarWallToInstant,
+  canonicalCalendarTimeZone,
+  shiftCalendarSeries,
+} from "./calendar";

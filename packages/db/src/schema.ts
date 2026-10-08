@@ -708,3 +708,40 @@ export const workspaceInvites = pgTable(
     ),
   ],
 );
+
+export const taskCalendar = pgTable(
+  "task_calendar",
+  {
+    taskId: uuid("id").primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    startAt: timestamp("start_at", { withTimezone: true }).notNull(),
+    endAt: timestamp("end_at", { withTimezone: true }).notNull(),
+    timeZone: text("time_zone").notNull(),
+    rrule: text("rrule"),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "task_calendar_task_fk",
+    }).onDelete("cascade"),
+    index("task_calendar_workspace_start_idx").on(t.workspaceId, t.startAt),
+    check(
+      "task_calendar_duration",
+      sql`${t.endAt}>${t.startAt} AND ${t.endAt}<=${t.startAt}+interval '168 hours'`,
+    ),
+    check(
+      "task_calendar_range",
+      sql`${t.startAt}>=timestamptz '1970-01-01T00:00:00Z' AND ${t.endAt}<timestamptz '2201-01-01T00:00:00Z'`,
+    ),
+    check(
+      "task_calendar_timezone",
+      sql`length(${t.timeZone}) BETWEEN 1 AND 100`,
+    ),
+    check(
+      "task_calendar_rrule",
+      sql`${t.rrule} IS NULL OR length(${t.rrule}) BETWEEN 1 AND 500`,
+    ),
+  ],
+);

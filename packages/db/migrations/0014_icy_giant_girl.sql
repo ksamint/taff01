@@ -1,0 +1,2 @@
+ALTER TABLE "task_calendar" DROP CONSTRAINT "task_calendar_duration";--> statement-breakpoint
+ALTER TABLE "task_calendar" ADD CONSTRAINT "task_calendar_duration" CHECK ("task_calendar"."end_at">"task_calendar"."start_at" AND "task_calendar"."end_at"<="task_calendar"."start_at"+interval '168 hours');

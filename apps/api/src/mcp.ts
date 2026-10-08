@@ -36,7 +36,9 @@ import type { Core, Principal } from "@taff/core";
 import { CoreError } from "@taff/core";
 import {
   type McpCall,
+  mcpCalendarListArgs,
   mcpCalendarScheduleArgs,
+  mcpCalendarSetArgs,
   mcpFilesAttachArgs,
   mcpGrantsRequestArgs,
   mcpInboxRequestReviewArgs,
@@ -198,10 +200,33 @@ export function createMcpServer(
       run(() => core.parseQuickAdd(principal, principal.workspaceId, input)),
   );
   server.registerTool(
+    "calendar.list",
+    {
+      title: "Read calendar",
+      description:
+        "Read bounded calendar occurrences and unscheduled tasks in the token workspace.",
+      inputSchema: toolSchema(mcpCalendarListArgs),
+    },
+    (input) =>
+      run(() => core.listCalendar(principal, principal.workspaceId, input)),
+  );
+  server.registerTool(
+    "calendar.set",
+    {
+      title: "Edit calendar schedule",
+      description:
+        "Set or clear a calendar interval and whole-series recurrence using the task's current version. Its deadline stays unchanged.",
+      inputSchema: toolSchema(mcpCalendarSetArgs),
+    },
+    ({ taskId, ...input }) =>
+      run(() => core.setTaskCalendar(principal, taskId, input)),
+  );
+  server.registerTool(
     "calendar.schedule",
     {
       title: "Schedule task",
-      description: "Set or clear the due time of a task the agent works on.",
+      description:
+        "Set or clear a task deadline (legacy protocol). Use calendar.set for calendar intervals and recurrence.",
       inputSchema: toolSchema(mcpCalendarScheduleArgs),
     },
     (args) =>

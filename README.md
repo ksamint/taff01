@@ -20,13 +20,16 @@ disconnects, and optimistic writes with rollback across tasks, runs, reviews,
 permissions, Inbox and settings.
 Milestone 05 adds versioned task editing, real subtasks and comments, project
 boards and lists, authorized search, editable Quick Add parsing, organizations,
-single-use invitations and admin/member/guest roles. MCP exposes eighteen tools.
+single-use invitations and admin/member/guest roles.
+Milestone 06 adds day/week/month calendars, moves and resizes with Undo,
+atomic slot creation, an unscheduled tray and agent time. Calendar intervals
+and bounded recurrence have their own saved time zone and preserve task
+deadlines. MCP exposes twenty tools.
 Core owns database access, workspace permissions and
 transactional activity/notification behavior. The worker connects to Redis; no
 background job handlers are exposed yet.
 
-The full calendar,
-recurrence, IndexedDB persistence, PWA installation and release gates follow in
+IndexedDB persistence, PWA installation and release gates follow in
 later milestones (see the implementation plan).
 This is a development foundation, not a production release. Milestone reports
 record working behavior and validation; development continues while they are reviewed.
@@ -107,6 +110,8 @@ See [the realtime contract](docs/realtime.md) for socket authorization and cache
 reconciliation behavior.
 See [the planning contract](docs/planning.md) for task versions, invitations,
 permissions, search and Quick Add behavior.
+See [the calendar contract](docs/calendar.md) for separate intervals,
+whole-series editing, recurrence limits and DST behavior.
 
 ## Structure
 

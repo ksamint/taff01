@@ -25,6 +25,23 @@ Validation on the upgraded stack: Biome, TypeScript 7 typecheck of six packages,
 build, six Playwright mobile tests in en and zh-CN, BullMQ 6 worker reaching
 ready against a Redis-protocol server.
 
+## Calendar dependencies applied on 2026-10-09
+
+| Component | Version | Licence and integration |
+| --- | --- | --- |
+| Schedule-X React | 4.1.0 | MIT; calendar rendering stays on the Calendar route. |
+| Calendar, controls, events service, theme, translations | 4.9.1 | MIT; BCP47 locale values and private CSS-safe event identifiers adapt the shared calendar DTOs. |
+| Drag/drop and resize | Exact 3.7.3 | MIT; bound aliases bridge the three renamed v4 drag entry points. Resize's complete MIT `LICENSE` is verified by its recorded hash. |
+| Temporal polyfill | Exact 0.3.2 | MIT; matches the calendar peer, with ISC `temporal-spec`. |
+| Preact and signals | 10.29.8 / 2.11.3 | MIT; Schedule-X's rendering peers. |
+| RRULE | 2.8.1 | BSD-3-Clause; core expands bounded local-time recurrence. Node ESM imports its CommonJS default before extracting `RRule`. |
+
+[ADR 0006](adr/0006-calendar-schedules-and-free-gestures.md) records the free
+plugin pins and the Calendar-route size exception. Today retains its 200 KiB
+initial JavaScript limit. Core's PostgreSQL tests and the official MCP smoke
+exercise schedules against the running Node 24 API; real browser gestures
+verify the legacy plugin bridge.
+
 ## Scheduled
 
 | When | Move | How | Validation |

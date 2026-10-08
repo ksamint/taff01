@@ -1,4 +1,11 @@
-import type { InboxItem, Run, RunDetail, Task } from "@taff/schemas";
+import type {
+  CalendarViewData,
+  InboxItem,
+  Run,
+  RunDetail,
+  Task,
+  TaskCalendar,
+} from "@taff/schemas";
 import { QueryClient } from "@tanstack/react-query";
 import { expect, it } from "vitest";
 import {
@@ -8,6 +15,53 @@ import {
   snapshotM3,
 } from "./optimistic-m3";
 import { restoreQueries, snapshotQueries } from "./query-snapshot";
+
+it("updates calendar task metadata with detail/list writes and rolls it back together", async () => {
+  const client = new QueryClient();
+  const task = {
+    id: "task",
+    title: "Before",
+    version: 3,
+    dueAt: "2026-11-01T06:30:45.123Z",
+  } as Task;
+  const calendar = {
+    task,
+    schedule: null,
+    canSchedule: true,
+  } satisfies TaskCalendar;
+  client.setQueryData(["task-calendar", task.id], calendar);
+  client.setQueryData(["calendar", "workspace", "from", "to"], {
+    occurrences: [],
+    unscheduled: [calendar],
+    truncated: false,
+  } satisfies CalendarViewData);
+  const snapshot = await snapshotM3(client);
+  patchTask(client, task.id, { title: "Pending", version: 4 });
+  expect(
+    client.getQueryData<TaskCalendar>(["task-calendar", task.id])?.task.title,
+  ).toBe("Pending");
+  expect(
+    client.getQueryData<CalendarViewData>([
+      "calendar",
+      "workspace",
+      "from",
+      "to",
+    ])?.unscheduled[0].task.version,
+  ).toBe(4);
+  restoreQueries(client, snapshot);
+  expect(
+    client.getQueryData<TaskCalendar>(["task-calendar", task.id])?.task,
+  ).toEqual(task);
+  expect(
+    client.getQueryData<CalendarViewData>([
+      "calendar",
+      "workspace",
+      "from",
+      "to",
+    ])?.unscheduled[0].task.dueAt,
+  ).toBe("2026-11-01T06:30:45.123Z");
+  client.clear();
+});
 
 it("restores related detail/list snapshots after a rejected transition", async () => {
   const client = new QueryClient();

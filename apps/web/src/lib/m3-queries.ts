@@ -81,6 +81,8 @@ export function invalidateM3(client: QueryClient) {
         "review",
         "agent",
         "inbox",
+        "calendar",
+        "task-calendar",
         "task-access",
         "task-comments",
         "projects",

@@ -24,4 +24,4 @@ export function applyTheme(preference: ThemePreference) {
 }
 
 /** Runs before paint so a dark preference never flashes light. */
-export const themeBootScript = `try{var t=localStorage.getItem("${KEY}");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}try{document.body.dataset.prefersDark=String(matchMedia("(prefers-color-scheme: dark)").matches);}catch(e){}`;
+export const themeBootScript = `try{var t=localStorage.getItem("${KEY}");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t;}catch(e){}try{var m=matchMedia("(prefers-color-scheme: dark)");var u=function(){document.body.dataset.prefersDark=String(m.matches)};u();m.addEventListener("change",u);}catch(e){}`;

@@ -104,6 +104,7 @@ function NavItems({
       <Link
         key={href}
         href={href}
+        prefetch={false}
         className="tab"
         aria-current={active ? "page" : undefined}
       >

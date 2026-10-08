@@ -431,6 +431,40 @@ describe("REST adapter boundaries", () => {
     ],
     ["PATCH", "/api/inbox/:id", "updateInboxItem", {}],
     ["PATCH", "/api/tasks/:id", "updateTask", { version: 0, title: "Task" }],
+    [
+      "PATCH",
+      "/api/tasks/:id/calendar",
+      "setTaskCalendar",
+      { version: 0, schedule: null },
+    ],
+    [
+      "PATCH",
+      "/api/tasks/:id/calendar",
+      "setTaskCalendar",
+      {
+        version: 1,
+        schedule: {
+          startAt: "2026-10-09T09:00:00Z",
+          endAt: "2026-10-09T09:00:00Z",
+          timeZone: "UTC",
+          rrule: null,
+        },
+      },
+    ],
+    [
+      "PATCH",
+      "/api/tasks/:id/calendar",
+      "setTaskCalendar",
+      {
+        version: 1,
+        schedule: {
+          startAt: "2026-10-09T09:00:00Z",
+          endAt: "2026-10-09T10:00:00Z",
+          timeZone: "Moon/Sea",
+          rrule: null,
+        },
+      },
+    ],
     ["POST", "/api/tasks/:id/comments", "addTaskComment", { body: "" }],
     ["POST", `/api/projects?workspaceId=${id}`, "createProject", { name: "" }],
     [
@@ -493,6 +527,60 @@ describe("REST adapter boundaries", () => {
       expect(write).not.toHaveBeenCalled();
     },
   );
+  it("validates the calendar range before forwarding the authenticated workspace", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const list = vi.spyOn(core, "listCalendar").mockResolvedValue({
+      occurrences: [],
+      unscheduled: [],
+      truncated: false,
+    });
+    const range = { from: "2026-10-09T00:00:00Z", to: "2026-10-16T00:00:00Z" };
+    const query = new URLSearchParams({ workspaceId: id, ...range });
+    const response = await app.request(`/api/calendar?${query}`);
+    expect(response.status).toBe(200);
+    expect(list).toHaveBeenCalledWith({ kind: "user", userId: id }, id, range);
+    list.mockClear();
+    for (const invalid of [
+      { ...range, unknown: "field" },
+      { ...range, to: range.from },
+      { ...range, to: "2027-01-01T00:00:00Z" },
+    ]) {
+      const result = await app.request(
+        `/api/calendar?${new URLSearchParams({ workspaceId: id, ...invalid })}`,
+      );
+      expect(result.status).toBe(400);
+    }
+    expect(list).not.toHaveBeenCalled();
+  });
+  it("forwards a versioned schedule to core and retains its conflict response", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const body = {
+      version: 2,
+      schedule: {
+        startAt: "2026-10-09T09:00:00Z",
+        endAt: "2026-10-09T10:00:00Z",
+        timeZone: "Asia/Singapore",
+        rrule: "FREQ=DAILY;COUNT=3",
+      },
+    };
+    const write = vi
+      .spyOn(core, "setTaskCalendar")
+      .mockRejectedValue(new CoreError("conflict", 409));
+    const response = await app.request(`/api/tasks/${id}/calendar`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ error: "conflict" });
+    expect(write).toHaveBeenCalledWith({ kind: "user", userId: id }, id, body);
+  });
   it("accepts bounded artifact content above the ordinary body limit and preserves the actor", async () => {
     vi.spyOn(core, "getSession").mockResolvedValue({
       response: session,

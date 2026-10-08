@@ -34,6 +34,7 @@ import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
 import { RunPanel } from "./run-panel";
 import { TaskEditor } from "./task-editor";
+import { TaskScheduleButton } from "./task-schedule-button";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 
@@ -152,6 +153,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
       <div className="detail-layout">
         <div>
           <TaskEditor task={task.data} />
+          <TaskScheduleButton taskId={taskId} />
           <div className="field">
             <Label htmlFor="detail-worker">{t("worker")}</Label>
             <select

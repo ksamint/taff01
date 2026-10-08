@@ -43,6 +43,7 @@ import {
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
+import { createCalendarOperations } from "./calendar";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRunOperations } from "./runs";
@@ -439,6 +440,7 @@ export function createCore(options: {
     input: CreateTask,
   ): Promise<Task> {
     const body = parse(createTaskSchema, input);
+    const { calendar: initialCalendar, ...fields } = body;
     return mutation(principal, async (tx) => {
       await requireMember(tx, principal, body.workspaceId, "task:create", {
         workspaceId: body.workspaceId,
@@ -466,7 +468,7 @@ export function createCore(options: {
       const [task] = await tx
         .insert(tasks)
         .values({
-          ...body,
+          ...fields,
           projectId,
           priority: body.priority ?? parent?.priority ?? 3,
           dueAt: body.dueAt
@@ -476,6 +478,8 @@ export function createCore(options: {
               : null,
         })
         .returning();
+      if (initialCalendar)
+        await calendar.storeOnCreate(tx, principal, task, initialCalendar);
       return toTask(task);
     });
   }
@@ -807,6 +811,13 @@ export function createCore(options: {
   function getSession(headers: Headers) {
     return auth.api.getSession({ headers, returnHeaders: true });
   }
+  const calendar = createCalendarOperations({
+    db,
+    mutation,
+    requireMember,
+    lockTask,
+    currentRunId,
+  });
   const planning = createPlanningOperations({
     db,
     mutation,
@@ -817,6 +828,7 @@ export function createCore(options: {
     tokenPepper: options.tokenPepper,
   });
   return {
+    ...calendar.operations,
     ...planning.operations,
     ...createRunOperations({
       db,
