@@ -18,7 +18,7 @@ user review before the next starts.
 
 ## Quick start
 
-Install Node 22, pnpm 10 and Docker with Compose, then:
+Install Node 24, pnpm 12 and Docker with Compose, then:
 
 ```sh
 git clone https://github.com/ksamint/taff01.git
@@ -46,8 +46,8 @@ Open [the local app](http://localhost:3000). Sign in as `alex@taff.local` using 
 three agents. Re-running the seed preserves existing accounts, passwords and tasks.
 Changing `DEMO_PASSWORD` after seeding does not reset existing passwords.
 
-Web runs on port 3000 and proxies `/api` to the API on port 3001. PostgreSQL and
-Redis bind locally to 55432 and 56379. `AUTH_URL` defines the browser origin;
+Web runs on port 3000 and proxies `/api` to the API on port 3001. PostgreSQL 18 and
+Valkey 9 bind locally to 55432 and 56379. `AUTH_URL` defines the browser origin;
 `API_INTERNAL_URL` defines the web-to-API proxy target. `.env.example` documents all
 configuration. Secrets stay in the ignored `.env` file.
 
@@ -72,7 +72,7 @@ pnpm e2e
 Create `taff_test` only once. `pnpm test` loads `.env` when present. PostgreSQL tests
 skip visibly without `TEST_DATABASE_URL` and reject names that do not end in
 `_test`; use a database distinct from `DATABASE_URL`. These tests create data in
-that dedicated database. Mobile Playwright runs both en and zh-CN, verifies real
+that dedicated database. Mobile Playwright runs en and zh-CN (zh-HK joins in milestone M1), verifies real
 signup and assignment, language persistence and optimistic rollback. It requires
 the seeded demo password and starts the development services if needed. It adds
 sample users/tasks to the local app database.
@@ -87,14 +87,15 @@ TypeScript during development; production packaging is a later phase.
 | --- | --- |
 | `apps/web` | Next.js mobile UI, bilingual strings, cache-first queries and optimistic mutations |
 | `apps/api` | Thin Hono REST/auth adapters, CORS, validation and sanitized logging |
-| `apps/worker` | BullMQ connection and rejection of unsupported jobs |
+| `apps/worker` | BullMQ 6 connection to Valkey and rejection of unsupported jobs |
 | `packages/schemas` | Shared Zod schemas and inferred client types |
 | `packages/db` | Drizzle schema, migrations, PostgreSQL connection and audit triggers |
 | `packages/core` | Business logic, permissions, authentication, transactional operations and seed |
 
-The fixed stack and budgets are specified in [the original requirements](instruction_v0.md).
-See [the implementation plan](docs/implementation-plan.md) and
-[architecture decisions](docs/adr).
+The fixed stack and budgets are specified in [the standing rules](instruction_v0.md).
+See [the implementation plan](docs/implementation-plan.md), [the upgrade plan](docs/upgrade-plan.md),
+[the UI specification](docs/ui/README.md) and [architecture decisions](docs/adr).
+Coding agents start from [the agent goal](docs/agent-goal.md).
 
 ## Contributing
 
@@ -109,5 +110,5 @@ The application source is [MIT](LICENSE). Third-party dependencies retain their
 own licenses. The prescribed Next.js and Tailwind stack carries two transitive
 MPL-2.0 components, accepted as documented exceptions in
 [ADR 0003](docs/adr/0003-transitive-license-decision.md); GPL, AGPL and SSPL
-code is not permitted. The local Redis image is pinned to the BSD-licensed 7.2
-line for the same reason.
+code is not permitted. The queue and rate-limit store is Valkey (BSD-3) rather
+than Redis 7.4+ (RSAL/SSPL) for the same reason.

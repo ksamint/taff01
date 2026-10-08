@@ -1,5 +1,8 @@
 # Phase 1 checkpoint — 2026-10-08
 
+Approved by the user on 2026-10-08 and merged to main through pull request 1.
+The stack upgrades that followed are recorded in [the upgrade plan](upgrade-plan.md).
+
 ## Working behavior
 
 - Node 22 / pnpm 10 workspace with web, API and Redis-connected worker.
@@ -78,11 +81,9 @@ Decisions:
   the two MPL-2.0 components as documented exceptions.
 - Applied: the local Redis image is pinned to the BSD-licensed 7.2 line, because
   `redis:7` now resolves to 7.4, which is RSALv2/SSPLv1 and banned by the rules.
-- Open: [ADR 0004](adr/0004-stack-version-review.md) proposes version moves
-  (Node 24, pnpm 12, TypeScript 6, PostgreSQL 18, Valkey instead of Redis, MCP SDK
-  v2 packages, Vitest 4 or 5). The stack is fixed by the rules, so each needs
-  the user's approval.
-- Open: Phase 1 review. Per the checkpoint rule, Phase 2 starts after the user
-  approves this checkpoint.
+- Closed: [ADR 0004](adr/0004-stack-version-review.md) was approved in full and
+  applied on 2026-10-08.
+- Closed: Phase 1 review. Approved on 2026-10-08; the checkpoint rule was replaced
+  by non-blocking milestone reviews (see `instruction_v0.md`).
 
 This checkpoint is not a claim that the complete app is delivered.

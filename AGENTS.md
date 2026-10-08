@@ -16,5 +16,7 @@ procedure if access is unavailable. Never commit secrets.
 For a requested brand treatment, resolve its latest guide, tokens, and official
 assets through https://apuch.art/ before styling.
 
-At each phase checkpoint, summarize working behavior, missing work, and open
-decisions, then wait for user review before proceeding to the next phase.
+There are no blocking review gates. At each milestone, push, record working
+behavior, missing work, open decisions and validation evidence in
+`docs/milestones/`, then continue. The user reviews asynchronously.
+The agent goal command lives in `docs/agent-goal.md`.
