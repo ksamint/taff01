@@ -8,14 +8,24 @@ import {
   type Task,
   taskSchema,
 } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { useRuns } from "../lib/m3-queries";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { tasksKey, useMembers, useTasks } from "../lib/queries";
+import {
+  isCurrentSnapshot,
+  restoreQueries,
+  snapshotQueries,
+} from "../lib/query-snapshot";
 import { todayTasks } from "../lib/today";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
@@ -39,7 +49,9 @@ export function TodayView() {
   const members = useMembers(workspace.id);
   const tasks = useTasks(workspace.id);
   const runs = useRuns(workspace.id);
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const mutation = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: async (input: TaskMutation) =>
       taskSchema.parse(
         await request(
@@ -57,8 +69,7 @@ export function TodayView() {
         ),
       ),
     onMutate: async (input) => {
-      await client.cancelQueries({ queryKey: taskKey });
-      const previous = client.getQueryData<Task[]>(taskKey);
+      const snapshot = await snapshotQueries(client, [taskKey]);
       const temporaryId = crypto.randomUUID();
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(taskKey, (current = []) =>
@@ -79,12 +90,13 @@ export function TodayView() {
                 : task,
             ),
       );
-      return { previous, temporaryId };
+      return { snapshot, temporaryId };
     },
     onError: (_, __, context) => {
-      if (context) client.setQueryData(taskKey, context.previous ?? []);
+      restoreQueries(client, context?.snapshot);
     },
     onSuccess: (task, input, context) => {
+      if (!isCurrentSnapshot(client, context.snapshot)) return;
       client.setQueryData<Task[]>(taskKey, (current = []) =>
         current.map((item) =>
           item.id === (input.kind === "create" ? context.temporaryId : input.id)
@@ -197,7 +209,7 @@ export function TodayView() {
                   data-testid="task-owner"
                   value={ownerId}
                   onChange={(event) => setOwnerId(event.target.value)}
-                  disabled={!people.length || mutation.isPending}
+                  disabled={!people.length || busy}
                 >
                   {people.map((member) => (
                     <option key={member.id} value={member.id}>
@@ -213,7 +225,7 @@ export function TodayView() {
                   data-testid="task-worker"
                   value={workerId}
                   onChange={(event) => setWorkerId(event.target.value)}
-                  disabled={!members.data || mutation.isPending}
+                  disabled={!members.data || busy}
                 >
                   <MemberOptions members={members.data ?? []} />
                 </select>
@@ -234,14 +246,11 @@ export function TodayView() {
               className="button-primary button-full"
               type="submit"
               disabled={
-                mutation.isPending ||
-                !people.length ||
-                tasks.isPending ||
-                tasks.isError
+                busy || !people.length || tasks.isPending || tasks.isError
               }
             >
               {t(
-                mutation.isPending && mutation.variables?.kind === "create"
+                busy && mutation.variables?.kind === "create"
                   ? "adding"
                   : "addTask",
               )}
@@ -315,7 +324,7 @@ export function TodayView() {
                       id={`worker-${task.id}`}
                       data-testid="assignment-select"
                       value={task.workerId ?? ""}
-                      disabled={mutation.isPending || !members.data}
+                      disabled={busy || !members.data}
                       onChange={(event) =>
                         mutation.mutate({
                           kind: "assign",

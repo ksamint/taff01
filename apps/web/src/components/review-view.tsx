@@ -8,14 +8,26 @@ import {
   reviewCommentSchema,
   reviewRunSchema,
 } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { ArrowLeft, Check, FileText } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { invalidateM3, useReview } from "../lib/m3-queries";
+import { invalidateM3, reviewKey, useReview } from "../lib/m3-queries";
+import {
+  m3MutationKey,
+  patchRun,
+  patchTask,
+  resolveInbox,
+  snapshotM3,
+} from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
+import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { RunPanel } from "./run-panel";
 import { Button } from "./ui/button";
@@ -25,6 +37,14 @@ import { Label } from "./ui/label";
 export function ReviewView({ taskId }: { taskId: string }) {
   const { t } = useTranslation();
   const review = useReview(taskId);
+  const pending = useIsMutating({ mutationKey: m3MutationKey });
+  const [cycle, setCycle] = useState<string | null>(null);
+  const statusKey = review.data
+    ? `${review.data.run.id}:${review.data.run.status}`
+    : null;
+  useEffect(() => {
+    if (!pending) setCycle(statusKey);
+  }, [pending, statusKey]);
   if (review.isPending) return <p className="loading">{t("loading")}</p>;
   if (review.isError)
     return (
@@ -35,12 +55,7 @@ export function ReviewView({ taskId }: { taskId: string }) {
         <Button onClick={() => void review.refetch()}>{t("retry")}</Button>
       </div>
     );
-  return (
-    <ReviewEditor
-      key={`${review.data.run.id}:${review.data.run.status}`}
-      data={review.data}
-    />
-  );
+  return <ReviewEditor key={cycle ?? statusKey} data={review.data} />;
 }
 
 function ReviewEditor({ data }: { data: ReviewWorkspace }) {
@@ -56,19 +71,68 @@ function ReviewEditor({ data }: { data: ReviewWorkspace }) {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [validationError, setValidationError] = useState(false);
   const review = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (body: ReviewRun) =>
       request(`/api/runs/${data.run.id}/review`, {
         method: "POST",
         body: JSON.stringify(reviewRunSchema.parse(body)),
       }),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      patchRun(client, data.run.id, {
+        status: body.decision === "approve" ? "completed" : "changes_requested",
+      });
+      patchTask(client, data.task.id, {
+        status: body.decision === "approve" ? "done" : "in_progress",
+      });
+      client.setQueryData<ReviewWorkspace>(
+        reviewKey(data.task.id),
+        (current) => (current ? { ...current, checks: body.checks } : current),
+      );
+      resolveInbox(
+        client,
+        (item) => item.runId === data.run.id && item.kind === "review",
+      );
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
   });
   const addComment = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (body: ReviewCommentInput) =>
       request(`/api/runs/${data.run.id}/comments`, {
         method: "POST",
         body: JSON.stringify(reviewCommentSchema.parse(body)),
       }),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      client.setQueryData<ReviewWorkspace>(
+        reviewKey(data.task.id),
+        (current) =>
+          current
+            ? {
+                ...current,
+                comments: [
+                  ...current.comments,
+                  {
+                    id: `optimistic:${crypto.randomUUID()}`,
+                    workspaceId: workspace.id,
+                    runId: data.run.id,
+                    authorId: workspace.memberId,
+                    body: body.body,
+                    artifactId: body.artifactId ?? null,
+                    eventId: body.eventId ?? null,
+                    line: body.line ?? null,
+                    createdAt: new Date().toISOString(),
+                  },
+                ],
+              }
+            : current,
+      );
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (_, body) =>
       setDrafts((current) => ({
         ...current,
@@ -81,8 +145,9 @@ function ReviewEditor({ data }: { data: ReviewWorkspace }) {
     "verifiable",
     "withinPermissions",
   ];
-  const busy = review.isPending || addComment.isPending;
-  const eligible = data.canReview && data.run.status === "needs_review";
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
+  const eligible =
+    data.canReview && (data.run.status === "needs_review" || review.isPending);
   const allChecked = checkKeys.every((key) => checks[key]);
   const allApproved =
     data.artifacts.length > 0 &&

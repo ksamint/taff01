@@ -4,6 +4,7 @@ import pino from "pino";
 import { z } from "zod";
 import { createApp } from "./app";
 import { createRateLimiter } from "./rate-limit";
+import { createRealtime } from "./realtime";
 
 const env = z
   .object({
@@ -31,14 +32,21 @@ const core = createCore({
   tokenPepper: env.TOKEN_PEPPER,
 });
 const rateLimiter = createRateLimiter(env.REDIS_URL, env.MCP_RATE_LIMIT);
-const app = createApp(core, env.AUTH_URL, logger, rateLimiter);
+const realtime = await createRealtime(core);
+const app = createApp(core, env.AUTH_URL, logger, rateLimiter, realtime);
 const server = serve(
-  { fetch: app.fetch, port: env.API_PORT, hostname: "127.0.0.1" },
+  {
+    fetch: app.fetch,
+    port: env.API_PORT,
+    hostname: "127.0.0.1",
+    websocket: { server: realtime.server },
+  },
   () => {
     logger.info({ port: env.API_PORT }, "API ready");
   },
 );
-const shutdown = () => {
+const shutdown = async () => {
+  await realtime.close();
   server.close(() => {
     void Promise.all([core.close(), rateLimiter.close()]).then(() =>
       process.exit(0),

@@ -17,6 +17,7 @@ import {
   optional,
   record,
   refine,
+  regex,
   strictObject,
   string,
   trim,
@@ -495,3 +496,18 @@ export type AgentPermissionInput = Infer<typeof agentPermissionInputSchema>;
 export type RequestGrant = Infer<typeof requestGrantSchema>;
 export type DecideGrant = Infer<typeof decideGrantSchema>;
 export type InboxItemInput = Infer<typeof inboxItemInputSchema>;
+
+/** Safe routing metadata emitted transactionally by PostgreSQL taff_changes. */
+export const changeEventSchema = strictObject({
+  activityId: idSchema,
+  workspaceId: nullable(idSchema),
+  resourceId: string().check(minLength(1), maxLength(200)),
+  action: string().check(
+    regex(
+      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items)\.(insert|update|delete)$/,
+    ),
+  ),
+  actorId: string().check(minLength(1), maxLength(200)),
+  userId: nullable(string().check(minLength(1), maxLength(200))),
+});
+export type ChangeEvent = Infer<typeof changeEventSchema>;

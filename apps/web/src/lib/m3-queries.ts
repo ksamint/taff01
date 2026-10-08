@@ -33,7 +33,7 @@ export function useRun(id: string | undefined) {
     queryKey: runKey(id ?? ""),
     queryFn: async () =>
       runDetailSchema.parse(await request(`/api/runs/${id}`)),
-    enabled: !!id,
+    enabled: !!id && !id.startsWith("optimistic:"),
   });
 }
 export function useTask(id: string) {
@@ -70,6 +70,7 @@ export function useInbox(workspaceId: string) {
   });
 }
 export function invalidateM3(client: QueryClient) {
+  if (client.isMutating() > 1) return Promise.resolve();
   return client.invalidateQueries({
     predicate: ({ queryKey }) =>
       ["tasks", "task", "runs", "run", "review", "agent", "inbox"].includes(

@@ -2,7 +2,11 @@
 
 import type { Locale, Me } from "@taff/schemas";
 import { profileSchema } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { CalendarDays, Inbox, LayoutGrid, Sun, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,7 +21,15 @@ import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { savePreference } from "../lib/i18n";
 import { useInbox } from "../lib/m3-queries";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { meKey, useMeQuery } from "../lib/queries";
+import {
+  isCurrentSnapshot,
+  restoreQueries,
+  snapshotQueries,
+} from "../lib/query-snapshot";
+import { connectWorkspace } from "../lib/realtime";
+import { sessionMatches, synchronizeSession } from "../lib/session-cache";
 import { Auth } from "./auth";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -107,6 +119,24 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [workspaceId, setWorkspaceId] = useState("");
   const [sessionError, setSessionError] = useState<string | null>(null);
   const me = useMeQuery();
+  const userId = me.data?.user.id ?? null;
+  const scope =
+    me.data?.workspaces
+      .map(({ id }) => id)
+      .sort()
+      .join(",") ?? "";
+  const identityKey = `${userId ?? "signed-out"}:${scope}`;
+  const [checkedIdentity, setCheckedIdentity] = useState<
+    string | null | undefined
+  >(undefined);
+  const identityReady =
+    checkedIdentity === identityKey && sessionMatches(client, userId, scope);
+  const busy = useIsMutating() > 0;
+  useEffect(() => {
+    if (me.isPending || me.isError) return;
+    synchronizeSession(client, userId, scope);
+    setCheckedIdentity(identityKey);
+  }, [client, userId, scope, identityKey, me.isPending, me.isError]);
   useEffect(() => {
     if (me.data) {
       void i18n.changeLanguage(me.data.user.locale);
@@ -114,6 +144,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [me.data?.user.locale, i18n]);
   const profile = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (locale: Locale) =>
       request("/api/profile", {
         method: "PATCH",
@@ -121,27 +152,36 @@ export function AppShell({ children }: { children: ReactNode }) {
           profileSchema.parse({ locale, tz: me.data?.user.tz }),
         ),
       }),
-    onMutate: (locale) => {
+    onMutate: async (locale) => {
+      const snapshot = await snapshotQueries(client, [meKey]);
       const previous = i18n.language;
+      client.setQueryData<Me | null>(meKey, (current) =>
+        current ? { ...current, user: { ...current.user, locale } } : current,
+      );
       setSessionError(null);
       void i18n.changeLanguage(locale);
-      return previous;
+      return { previous, snapshot };
     },
-    onSuccess: (_, locale) => {
+    onSuccess: (_, locale, context) => {
+      if (!isCurrentSnapshot(client, context.snapshot)) return;
       savePreference(locale);
       client.setQueryData<Me | null>(meKey, (current) =>
         current ? { ...current, user: { ...current.user, locale } } : current,
       );
     },
-    onError: (_, __, previous) => {
-      void i18n.changeLanguage(previous ?? "en");
+    onError: (_, __, context) => {
+      if (!isCurrentSnapshot(client, context?.snapshot)) return;
+      restoreQueries(client, context?.snapshot);
+      void i18n.changeLanguage(context?.previous ?? "en");
       setSessionError("errors.profile");
     },
+    onSettled: () => client.invalidateQueries({ queryKey: meKey }),
   });
   const signOut = useMutation({
     mutationFn: () =>
       request("/api/auth/sign-out", { method: "POST", body: "{}" }),
     onSuccess: () => {
+      synchronizeSession(client, null);
       client.clear();
       client.setQueryData(meKey, null);
       setWorkspaceId("");
@@ -159,6 +199,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const workspace =
     me.data?.workspaces.find(({ id }) => id === workspaceId) ??
     me.data?.workspaces[0];
+  useEffect(() => {
+    if (identityReady && workspace && me.data)
+      return connectWorkspace(client, workspace.id, me.data.user.id);
+  }, [client, workspace?.id, me.data?.user.id, identityReady]);
   return (
     <div className="app-shell">
       {me.data && (
@@ -180,7 +224,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             data-testid="locale-select"
             className="language-select"
             value={i18n.resolvedLanguage ?? "en"}
-            disabled={profile.isPending || me.isPending}
+            disabled={busy || me.isPending}
             onChange={(event) => setLocale(event.target.value as Locale)}
           >
             <option value="en">{t("en")}</option>
@@ -190,7 +234,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {me.data && (
             <Button
               className="button-quiet"
-              disabled={signOut.isPending}
+              disabled={busy}
               onClick={() => signOut.mutate()}
             >
               {t("signOut")}
@@ -198,7 +242,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         </div>
       </header>
-      {me.isPending ? (
+      {me.isPending || (!identityReady && !me.isError) ? (
         <main className="loading" aria-live="polite">
           {t("loading")}
         </main>

@@ -1,18 +1,29 @@
 "use client";
 
 import {
+  type Inbox,
   type InboxItem,
   type InboxItemInput,
   inboxItemInputSchema,
 } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { ArrowUpRight, Bell, Clock, Eye, EyeOff, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { invalidateM3, useInbox } from "../lib/m3-queries";
+import { inboxKey, invalidateM3, useInbox } from "../lib/m3-queries";
+import {
+  inboxFromItems,
+  m3MutationKey,
+  snapshotM3,
+} from "../lib/optimistic-m3";
 import { useTasks } from "../lib/queries";
+import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 
@@ -24,14 +35,43 @@ export function InboxView() {
   const inbox = useInbox(workspace.id);
   const tasks = useTasks(workspace.id);
   const client = useQueryClient();
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const [tab, setTab] = useState<Tab>("all");
   const [snoozed, setSnoozed] = useState<InboxItem | null>(null);
   const update = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: ({ id, body }: { id: string; body: InboxItemInput }) =>
       request(`/api/inbox/${id}`, {
         method: "PATCH",
         body: JSON.stringify(inboxItemInputSchema.parse(body)),
       }),
+    onMutate: async ({ id, body }) => {
+      const snapshot = await snapshotM3(client);
+      client.setQueryData<Inbox>(inboxKey(workspace.id), (current) => {
+        if (!current) return current;
+        const items =
+          current.items.some((item) => item.id === id) || snoozed?.id !== id
+            ? current.items
+            : [snoozed, ...current.items];
+        return inboxFromItems(
+          items.map((item) =>
+            item.id !== id
+              ? item
+              : {
+                  ...item,
+                  ...(body.read === undefined
+                    ? {}
+                    : { readAt: body.read ? new Date().toISOString() : null }),
+                  ...(body.snoozedUntil === undefined
+                    ? {}
+                    : { snoozedUntil: body.snoozedUntil }),
+                },
+          ),
+        );
+      });
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
   });
   const groups = (inbox.data?.groups ?? [])
@@ -93,7 +133,7 @@ export function InboxView() {
           {t("inbox.snoozed")}{" "}
           <Button
             className="button-quiet"
-            disabled={update.isPending}
+            disabled={busy}
             onClick={() =>
               update.mutate(
                 {
@@ -169,9 +209,13 @@ export function InboxView() {
                               : "inbox-open-task"
                           }
                           href={`/tasks/${item.taskId}${item.kind === "review" ? "/review" : ""}`}
-                          onClick={() =>
-                            update.mutate({ id: item.id, body: { read: true } })
-                          }
+                          onClick={() => {
+                            if (!busy)
+                              update.mutate({
+                                id: item.id,
+                                body: { read: true },
+                              });
+                          }}
                         >
                           <ArrowUpRight size={14} aria-hidden="true" />
                           {t(
@@ -193,7 +237,7 @@ export function InboxView() {
                       )}
                       <Button
                         className="button-quiet"
-                        disabled={update.isPending}
+                        disabled={busy}
                         onClick={() =>
                           update.mutate({
                             id: item.id,
@@ -211,7 +255,7 @@ export function InboxView() {
                       <Button
                         data-testid="inbox-snooze"
                         className="button-quiet"
-                        disabled={update.isPending}
+                        disabled={busy}
                         onClick={() =>
                           update.mutate(
                             {

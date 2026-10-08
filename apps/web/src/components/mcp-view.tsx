@@ -11,11 +11,22 @@ import {
   type Scope,
   scopeSchema,
 } from "@taff/schemas";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError, errorKey, request } from "../lib/api";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
+import {
+  isCurrentSnapshot,
+  restoreQueries,
+  snapshotQueries,
+} from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -54,7 +65,9 @@ export function McpView() {
   const [memberId, setMemberId] = useState("");
   const [scopes, setScopes] = useState<Scope[]>(["tasks:read"]);
   const [validationError, setValidationError] = useState(false);
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const create = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: async (body: CreateAgentToken) =>
       issuedAgentTokenSchema.parse(
         await request("/api/agent-tokens", {
@@ -62,19 +75,42 @@ export function McpView() {
           body: JSON.stringify(body),
         }),
       ),
-    onSuccess: (token) => {
+    onMutate: async (body) => {
+      const snapshot = await snapshotQueries(client, [tokensKey]);
+      const id = `optimistic:${crypto.randomUUID()}`;
+      client.setQueryData<AgentToken[]>(tokensKey, (current = []) => [
+        {
+          ...body,
+          id,
+          createdBy: workspace.memberId,
+          prefix: "",
+          createdAt: new Date().toISOString(),
+          revokedAt: null,
+          lastUsedAt: null,
+        },
+        ...current,
+      ]);
+      return { snapshot, id };
+    },
+    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
+    onSuccess: (token, _, context) => {
+      if (!isCurrentSnapshot(client, context.snapshot)) return;
+      const { token: _secret, ...metadata } = token;
+      client.setQueryData<AgentToken[]>(tokensKey, (current) =>
+        current?.map((item) => (item.id === context.id ? metadata : item)),
+      );
       setIssued(token);
       setCopied(false);
       setName("");
-      void client.invalidateQueries({ queryKey: tokensKey });
     },
+    onSettled: () => client.invalidateQueries({ queryKey: tokensKey }),
   });
   const revoke = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: async (id: string) =>
       request<AgentToken>(`/api/agent-tokens/${id}`, { method: "DELETE" }),
     onMutate: async (id) => {
-      await client.cancelQueries({ queryKey: tokensKey });
-      const previous = client.getQueryData<AgentToken[]>(tokensKey);
+      const snapshot = await snapshotQueries(client, [tokensKey]);
       client.setQueryData<AgentToken[]>(tokensKey, (current = []) =>
         current.map((token) =>
           token.id === id
@@ -83,10 +119,10 @@ export function McpView() {
         ),
       );
       setConfirming(null);
-      return { previous };
+      return snapshot;
     },
     onError: (_, __, context) => {
-      if (context?.previous) client.setQueryData(tokensKey, context.previous);
+      restoreQueries(client, context);
     },
     onSettled: () => client.invalidateQueries({ queryKey: tokensKey }),
   });
@@ -246,7 +282,7 @@ export function McpView() {
                 data-testid="token-submit"
                 className="button-primary"
                 type="submit"
-                disabled={create.isPending || !agents.length}
+                disabled={busy || !agents.length}
               >
                 {t(create.isPending ? "working" : "mcp.createToken")}
               </Button>
@@ -274,7 +310,13 @@ export function McpView() {
                       <span
                         className={`status ${token.revokedAt ? "" : "status-done"}`}
                       >
-                        {t(token.revokedAt ? "mcp.revoked" : "mcp.active")}
+                        {t(
+                          token.id.startsWith("optimistic:")
+                            ? "working"
+                            : token.revokedAt
+                              ? "mcp.revoked"
+                              : "mcp.active",
+                        )}
                       </span>
                       <span className="task-due">
                         {token.lastUsedAt
@@ -294,7 +336,7 @@ export function McpView() {
                           <Button
                             type="button"
                             className="button-primary"
-                            disabled={revoke.isPending}
+                            disabled={busy}
                             onClick={() => revoke.mutate(token.id)}
                           >
                             {t("mcp.confirmRevoke")}
@@ -312,6 +354,11 @@ export function McpView() {
                           <Button
                             type="button"
                             className="button-quiet"
+                            disabled={
+                              revoke.isPending ||
+                              create.isPending ||
+                              token.id.startsWith("optimistic:")
+                            }
                             onClick={() => setConfirming(token.id)}
                           >
                             {t("mcp.revoke")}

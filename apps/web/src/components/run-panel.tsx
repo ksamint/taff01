@@ -6,7 +6,11 @@ import {
   type RunDetail,
   runSchema,
 } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   Check,
   CircleAlert,
@@ -21,6 +25,14 @@ import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { invalidateM3 } from "../lib/m3-queries";
+import {
+  m3MutationKey,
+  patchRun,
+  patchTask,
+  resolveInbox,
+  snapshotM3,
+} from "../lib/optimistic-m3";
+import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 
@@ -36,12 +48,32 @@ export function RunPanel({
   const client = useQueryClient();
   const dialog = useRef<HTMLDialogElement>(null);
   const { run } = detail;
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const control = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (body: ControlRun) =>
       request(`/api/runs/${run.id}/control`, {
         method: "POST",
         body: JSON.stringify(controlRunSchema.parse(body)),
       }).then(runSchema.parse),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      patchRun(client, run.id, {
+        status:
+          body.action === "pause"
+            ? "paused"
+            : body.action === "resume"
+              ? "running"
+              : "canceled",
+      });
+      patchTask(client, run.taskId, {
+        status: body.action === "cancel" ? "todo" : "in_progress",
+      });
+      if (body.action === "cancel")
+        resolveInbox(client, (item) => item.runId === run.id);
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: () => dialog.current?.close(),
     onSettled: () => invalidateM3(client),
   });
@@ -97,7 +129,7 @@ export function RunPanel({
             {run.status === "running" ? (
               <Button
                 data-testid="run-pause"
-                disabled={control.isPending}
+                disabled={busy}
                 onClick={() =>
                   control.mutate({ action: "pause", version: run.version })
                 }
@@ -108,7 +140,7 @@ export function RunPanel({
             ) : (
               <Button
                 data-testid="run-resume"
-                disabled={control.isPending}
+                disabled={busy}
                 onClick={() =>
                   control.mutate({ action: "resume", version: run.version })
                 }
@@ -120,7 +152,7 @@ export function RunPanel({
             <Button
               data-testid="run-cancel"
               className="button-quiet"
-              disabled={control.isPending}
+              disabled={busy}
               onClick={() => dialog.current?.showModal()}
             >
               {t("run.cancel")}
@@ -130,6 +162,7 @@ export function RunPanel({
         <Button
           data-testid="run-refresh"
           className="button-quiet"
+          disabled={busy}
           onClick={refresh}
         >
           <RefreshCw size={14} aria-hidden="true" />
@@ -198,7 +231,7 @@ export function RunPanel({
         <p>{t("run.cancelHint")}</p>
         <div className="action-row">
           <Button
-            disabled={control.isPending}
+            disabled={busy}
             className="button-primary"
             onClick={() =>
               control.mutate({ action: "cancel", version: run.version })
@@ -206,10 +239,7 @@ export function RunPanel({
           >
             {t("run.cancel")}
           </Button>
-          <Button
-            disabled={control.isPending}
-            onClick={() => dialog.current?.close()}
-          >
+          <Button disabled={busy} onClick={() => dialog.current?.close()}>
             {t("run.keep")}
           </Button>
         </div>

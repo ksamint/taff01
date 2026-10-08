@@ -1,11 +1,23 @@
 "use client";
 
-import { type DecideGrant, decideGrantSchema, type Grant } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  type AgentProfile,
+  type DecideGrant,
+  decideGrantSchema,
+  type Grant,
+} from "@taff/schemas";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { invalidateM3 } from "../lib/m3-queries";
+import { agentKey, invalidateM3 } from "../lib/m3-queries";
+import { m3MutationKey, resolveInbox, snapshotM3 } from "../lib/optimistic-m3";
+import { restoreQueries } from "../lib/query-snapshot";
+import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 
@@ -19,12 +31,43 @@ export function GrantActions({
   const { t } = useTranslation();
   const client = useQueryClient();
   const [hours, setHours] = useState(24);
+  const { workspace } = useWorkspace();
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const decide = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (body: DecideGrant) =>
       request(`/api/grants/${grant.id}/decision`, {
         method: "POST",
         body: JSON.stringify(decideGrantSchema.parse(body)),
       }),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      client.setQueryData<AgentProfile>(agentKey(grant.agentId), (current) =>
+        current
+          ? {
+              ...current,
+              grants: current.grants.map((item) =>
+                item.id === grant.id
+                  ? {
+                      ...item,
+                      status:
+                        body.decision === "allow"
+                          ? "allowed"
+                          : body.decision === "deny"
+                            ? "denied"
+                            : "revoked",
+                      expiresAt: body.expiresAt ?? item.expiresAt,
+                      decidedBy: workspace.memberId,
+                    }
+                  : item,
+              ),
+            }
+          : current,
+      );
+      resolveInbox(client, (item) => item.grantId === grant.id);
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
   });
   if (!canDecide) return null;
@@ -51,7 +94,7 @@ export function GrantActions({
             <Button
               data-testid="grant-allow"
               className="button-primary"
-              disabled={decide.isPending}
+              disabled={busy || grant.id.startsWith("optimistic:")}
               onClick={() =>
                 decide.mutate({
                   decision: "allow",
@@ -65,7 +108,7 @@ export function GrantActions({
             </Button>
             <Button
               data-testid="grant-deny"
-              disabled={decide.isPending}
+              disabled={busy || grant.id.startsWith("optimistic:")}
               onClick={() => decide.mutate({ decision: "deny" })}
             >
               {t("grants.deny")}
@@ -76,7 +119,7 @@ export function GrantActions({
       {grant.status === "allowed" && (
         <Button
           data-testid="grant-revoke"
-          disabled={decide.isPending}
+          disabled={busy || grant.id.startsWith("optimistic:")}
           onClick={() => decide.mutate({ decision: "revoke" })}
         >
           {t("grants.revoke")}

@@ -19,8 +19,10 @@ import {
   type AgentToken,
   type AssignTask,
   assignTaskSchema,
+  type ChangeEvent,
   type CreateAgentToken,
   type CreateTask,
+  changeEventSchema,
   createAgentTokenSchema,
   createTaskSchema,
   type IssuedAgentToken,
@@ -119,6 +121,75 @@ export function createCore(options: {
     throw new Error("TOKEN_PEPPER must be at least 16 characters");
   const connection = connectDatabase(options.databaseUrl);
   const { db } = connection;
+  type Subscriber = {
+    listener: (event: ChangeEvent) => void | Promise<void>;
+    onReconnect?: () => void | Promise<void>;
+  };
+  const subscribers = new Set<Subscriber>();
+  let listening: ReturnType<typeof connection.client.listen> | undefined;
+  let started = false;
+  let closing = false;
+  let closed: Promise<void> | undefined;
+  function safely(callback: () => void | Promise<void>) {
+    try {
+      void Promise.resolve(callback()).catch(() => {});
+    } catch {
+      /* A consumer cannot disrupt other subscribers or the database listener. */
+    }
+  }
+  async function subscribeChanges(
+    listener: Subscriber["listener"],
+    onReconnect?: Subscriber["onReconnect"],
+  ): Promise<() => Promise<void>> {
+    if (closing) throw new Error("Core is closed");
+    const subscriber = { listener, onReconnect };
+    subscribers.add(subscriber);
+    // Postgres.js recreates listener identities on reconnect. Keep one owned
+    // dispatcher so local unsubscribe still works after a connection is replaced.
+    listening ??= connection.client.listen(
+      "taff_changes",
+      (payload) => {
+        let event: ChangeEvent;
+        try {
+          const parsed = changeEventSchema.safeParse(JSON.parse(payload));
+          if (!parsed.success) return;
+          event = parsed.data;
+        } catch {
+          return;
+        }
+        for (const current of subscribers)
+          safely(() => current.listener(event));
+      },
+      () => {
+        if (started)
+          for (const current of subscribers)
+            if (current.onReconnect) safely(current.onReconnect);
+        started = true;
+      },
+    );
+    try {
+      await listening;
+    } catch {
+      subscribers.delete(subscriber);
+      listening = undefined;
+      started = false;
+      throw new Error("Realtime subscription unavailable");
+    }
+    if (closing) subscribers.delete(subscriber);
+    return async () => {
+      subscribers.delete(subscriber);
+    };
+  }
+  async function close(): Promise<void> {
+    if (closed) return closed;
+    closing = true;
+    subscribers.clear();
+    closed = (async () => {
+      await listening?.catch(() => {});
+      await connection.close();
+    })();
+    return closed;
+  }
   const auth = betterAuth({
     logger: { disabled: true },
     baseURL: options.authUrl,
@@ -695,7 +766,8 @@ export function createCore(options: {
     authenticateAgentToken,
     recordMcpCall,
     listMcpCalls,
-    close: connection.close,
+    subscribeChanges,
+    close,
   };
 }
 export type Core = ReturnType<typeof createCore>;

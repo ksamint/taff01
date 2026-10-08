@@ -125,6 +125,7 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
   await expect(page.getByTestId("run-status")).toHaveText(
     labels[locale].running,
   );
+  await expect(page.getByTestId("run-pause")).toBeEnabled();
   const taskId = new URL(page.url()).pathname.split("/")[2];
   const runsResponse = await page.request.get(
     `/api/runs?workspaceId=${workspace.id}`,
@@ -245,6 +246,7 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
     await expect(page.getByTestId("run-status")).toHaveText(
       labels[locale].changes,
     );
+    await expect(page.getByTestId("review-readonly")).toBeVisible();
     detail = await get();
     payload(
       await client.callTool({
@@ -376,7 +378,7 @@ test("agent permission settings persist, Inbox grants expire, and cancel support
     .locator(`select[id="grant-expiry-${grant.id}"]`)
     .selectOption("1");
   await grantCard.getByTestId("grant-allow").click();
-  await expect(grantCard.getByTestId("grant-revoke")).toBeVisible();
+  await expect(grantCard.getByTestId("grant-revoke")).toBeEnabled();
   const updatedProfile = agentProfileSchema.parse(
     await (await page.request.get(`/api/agents/${agent.id}`)).json(),
   );

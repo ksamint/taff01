@@ -3,16 +3,32 @@
 import {
   type AssignTask,
   assignTaskSchema,
+  type Run,
+  type RunDetail,
+  runSchema,
   startRunSchema,
   taskSchema,
 } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { ArrowLeft, Play, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { invalidateM3, useRun, useRuns, useTask } from "../lib/m3-queries";
+import {
+  invalidateM3,
+  runKey,
+  runsKey,
+  useRun,
+  useRuns,
+  useTask,
+} from "../lib/m3-queries";
+import { m3MutationKey, patchTask, snapshotM3 } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
+import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
 import { RunPanel } from "./run-panel";
@@ -23,6 +39,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
   const { me, workspace } = useWorkspace();
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const task = useTask(taskId);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
@@ -31,6 +48,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
   const detail = useRun(latest?.id);
   const assign = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: async (body: AssignTask) =>
       taskSchema.parse(
         await request(`/api/tasks/${taskId}/assignment`, {
@@ -38,15 +56,65 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
           body: JSON.stringify(assignTaskSchema.parse(body)),
         }),
       ),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      patchTask(client, taskId, { workerId: body.workerId });
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
   });
   const start = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: () =>
       request(`/api/tasks/${taskId}/runs`, {
         method: "POST",
         body: JSON.stringify(startRunSchema.parse({})),
-      }),
-    onSettled: () => invalidateM3(client),
+      }).then(runSchema.parse),
+    onMutate: async () => {
+      const snapshot = await snapshotM3(client);
+      const id = `optimistic:${crypto.randomUUID()}`;
+      const now = new Date().toISOString();
+      const run: Run = {
+        id,
+        workspaceId: workspace.id,
+        taskId,
+        agentId: task.data!.workerId!,
+        status: "running",
+        version: 1,
+        summary: "",
+        startedAt: now,
+        finishedAt: null,
+        updatedAt: now,
+        durationMs: 0,
+        costMicros: 0,
+      };
+      client.setQueryData<Run[]>(runsKey(workspace.id), (current = []) => [
+        run,
+        ...current,
+      ]);
+      client.setQueryData<RunDetail>(runKey(id), {
+        run,
+        events: [],
+        artifacts: [],
+        canControl: false,
+        canSubmit: false,
+      });
+      patchTask(client, taskId, { status: "in_progress" });
+      return { snapshot, id };
+    },
+    onSuccess: (run, _, context) => {
+      if (!isCurrentSnapshot(client, context.snapshot)) return;
+      client.setQueryData<Run[]>(runsKey(workspace.id), (current) =>
+        current?.map((item) => (item.id === context.id ? run : item)),
+      );
+    },
+    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
+    onSettled: (_, __, ___, context) => {
+      if (context)
+        client.removeQueries({ queryKey: runKey(context.id), exact: true });
+      return invalidateM3(client);
+    },
   });
   if (task.isPending) return <p className="loading">{t("loading")}</p>;
   if (task.isError)
@@ -108,7 +176,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
               id="detail-worker"
               data-testid="detail-worker"
               value={task.data.workerId ?? ""}
-              disabled={assign.isPending || !!active || !members.data}
+              disabled={busy || !!active || !members.data}
               onChange={(event) =>
                 assign.mutate({ workerId: event.target.value || null })
               }
@@ -129,7 +197,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
                 <Button
                   className="button-primary"
                   data-testid="run-start"
-                  disabled={start.isPending || runs.isPending || runs.isError}
+                  disabled={busy || runs.isPending || runs.isError}
                   onClick={() => start.mutate()}
                 >
                   <Play size={16} aria-hidden="true" />

@@ -9,6 +9,7 @@ import {
   user,
   workspaces,
 } from "@taff/db";
+import type { ChangeEvent } from "@taff/schemas";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
@@ -46,9 +47,9 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
     await migrateDatabase(options.databaseUrl);
     core = createCore(options);
     connection = connectDatabase(options.databaseUrl);
-    await connection.client.listen("taff_changes", (payload) =>
-      notifications.push(JSON.parse(payload)),
-    );
+    await core.subscribeChanges((event) => {
+      notifications.push(event);
+    });
     const signup = await core.auth.api.signUpEmail({
       body: {
         name: "Test Person",
@@ -394,6 +395,145 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
         ),
       ).toHaveLength(2),
     );
+  });
+  it("delivers safe profile metadata, ignores malformed notifications and isolates subscriber failures", async () => {
+    const received: ChangeEvent[] = [];
+    const unsub = await core.subscribeChanges((event) => {
+      received.push(event);
+    });
+    const failSync = await core.subscribeChanges(() => {
+      throw new Error("consumer failure");
+    });
+    const failAsync = await core.subscribeChanges(async () => {
+      throw new Error("async consumer failure");
+    });
+    try {
+      const malformedId = randomUUID();
+      await connection.client.notify("taff_changes", "not json");
+      await connection.client.notify(
+        "taff_changes",
+        JSON.stringify({
+          activityId: randomUUID(),
+          workspaceId,
+          resourceId: malformedId,
+          action: "tasks.insert",
+          actorId: userId,
+          userId: null,
+          token: "must not be forwarded",
+        }),
+      );
+      await core.updateProfile(userId, { locale: "en", tz: "Asia/Singapore" });
+      await vi.waitFor(() =>
+        expect(
+          received.some(
+            (event) =>
+              event.action === "users.update" && event.userId === userId,
+          ),
+        ).toBe(true),
+      );
+      const profile = received.find(
+        (event) => event.action === "users.update" && event.userId === userId,
+      );
+      expect(profile).toMatchObject({
+        workspaceId: null,
+        resourceId: userId,
+        actorId: userId,
+        userId,
+      });
+      expect(Object.keys(profile!).sort()).toEqual([
+        "action",
+        "activityId",
+        "actorId",
+        "resourceId",
+        "userId",
+        "workspaceId",
+      ]);
+      expect(received.some((event) => event.resourceId === malformedId)).toBe(
+        false,
+      );
+      await unsub();
+      const before = received.length;
+      const task = await core.createTask(userPrincipal(userId), {
+        workspaceId,
+        ownerId,
+        workerId: null,
+        dueAt: null,
+        title: "After unsubscribe",
+      });
+      await vi.waitFor(() =>
+        expect(
+          notifications.some((event) => event.resourceId === task.id),
+        ).toBe(true),
+      );
+      expect(received).toHaveLength(before);
+    } finally {
+      await unsub();
+      await failSync();
+      await failAsync();
+    }
+  });
+  it("resubscribes after a dropped listener connection and keeps unsubscribe/close reliable", async () => {
+    const database = new URL(options.databaseUrl);
+    const applicationName = `taff-realtime-test-${randomUUID()}`;
+    database.searchParams.set("application_name", applicationName);
+    const subscribingCore = createCore({
+      ...options,
+      databaseUrl: database.toString(),
+    });
+    const received: ChangeEvent[] = [];
+    let reconnected = 0;
+    const unsubscribe = await subscribingCore.subscribeChanges(
+      (event) => {
+        received.push(event);
+      },
+      () => {
+        reconnected++;
+      },
+    );
+    try {
+      expect(reconnected).toBe(0);
+      const [backend] = await connection.client<
+        { pid: number }[]
+      >`select pid from pg_stat_activity where application_name=${applicationName} and query='listen "taff_changes"'`;
+      expect(backend).toBeDefined();
+      await connection.client`select pg_terminate_backend(${backend.pid})`;
+      await vi.waitFor(() => expect(reconnected).toBe(1), { timeout: 5000 });
+      const task = await core.createTask(userPrincipal(userId), {
+        workspaceId,
+        ownerId,
+        workerId: null,
+        dueAt: null,
+        title: "After reconnect",
+      });
+      await vi.waitFor(() =>
+        expect(received.some((event) => event.resourceId === task.id)).toBe(
+          true,
+        ),
+      );
+      await unsubscribe();
+      const before = received.length;
+      const next = await core.createTask(userPrincipal(userId), {
+        workspaceId,
+        ownerId,
+        workerId: null,
+        dueAt: null,
+        title: "After reconnect unsubscribe",
+      });
+      await vi.waitFor(() =>
+        expect(
+          notifications.some((event) => event.resourceId === next.id),
+        ).toBe(true),
+      );
+      expect(received).toHaveLength(before);
+      await subscribingCore.close();
+      await subscribingCore.close();
+      await expect(subscribingCore.subscribeChanges(() => {})).rejects.toThrow(
+        "Core is closed",
+      );
+    } finally {
+      await unsubscribe();
+      await subscribingCore.close();
+    }
   });
   it("seeds exactly five people and three agents idempotently without changing credentials", async () => {
     const first = await seedDemo({ ...options, password });

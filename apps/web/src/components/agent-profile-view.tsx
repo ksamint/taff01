@@ -11,15 +11,21 @@ import {
   type ReviewPolicy,
   requestGrantSchema,
 } from "@taff/schemas";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useIsMutating,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { historyActor, historyMessage } from "../lib/agent-history";
 import { errorKey, request } from "../lib/api";
-import { invalidateM3, useAgent } from "../lib/m3-queries";
+import { agentKey, invalidateM3, useAgent } from "../lib/m3-queries";
+import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
 import { useMembers, useTasks } from "../lib/queries";
+import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { GrantActions } from "./grant-actions";
 import { Button } from "./ui/button";
@@ -61,28 +67,102 @@ function AgentEditor({ data }: { data: AgentProfile }) {
     useState<(typeof capabilitySchema.options)[number]>("web.search");
   const [taskId, setTaskId] = useState("");
   const [reason, setReason] = useState("");
+  const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
+  useEffect(() => {
+    if (busy) return;
+    setSupervisorId(data.supervisorId ?? "");
+    setPolicy(data.reviewPolicy);
+    setDuration(
+      data.maxDurationMs === null ? "" : String(data.maxDurationMs / 1000),
+    );
+    setCost(
+      data.maxCostMicros === null ? "" : String(data.maxCostMicros / 1_000_000),
+    );
+  }, [
+    busy,
+    data.supervisorId,
+    data.reviewPolicy,
+    data.maxDurationMs,
+    data.maxCostMicros,
+  ]);
   const save = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (body: AgentProfileInput) =>
       request(`/api/agents/${data.member.id}`, {
         method: "PATCH",
         body: JSON.stringify(agentProfileInputSchema.parse(body)),
       }),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      client.setQueryData<AgentProfile>(agentKey(data.member.id), (current) =>
+        current ? { ...current, ...body } : current,
+      );
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
   });
   const permission = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (body: AgentPermissionInput) =>
       request(`/api/agents/${data.member.id}/permissions`, {
         method: "PUT",
         body: JSON.stringify(agentPermissionInputSchema.parse(body)),
       }),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      client.setQueryData<AgentProfile>(agentKey(data.member.id), (current) =>
+        current
+          ? {
+              ...current,
+              permissions: current.permissions.map((item) =>
+                item.capability === body.capability ? body : item,
+              ),
+            }
+          : current,
+      );
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
   });
   const grant = useMutation({
+    mutationKey: m3MutationKey,
     mutationFn: (body: RequestGrant) =>
       request(`/api/agents/${data.member.id}/grants`, {
         method: "POST",
         body: JSON.stringify(requestGrantSchema.parse(body)),
       }),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      const now = new Date().toISOString();
+      client.setQueryData<AgentProfile>(agentKey(data.member.id), (current) =>
+        current
+          ? {
+              ...current,
+              grants: [
+                {
+                  id: `optimistic:${crypto.randomUUID()}`,
+                  workspaceId: workspace.id,
+                  agentId: data.member.id,
+                  capability: body.capability,
+                  taskId: body.taskId ?? null,
+                  runId: body.runId ?? null,
+                  reason: body.reason,
+                  status: "pending",
+                  expiresAt: null,
+                  decidedBy: null,
+                  createdAt: now,
+                  updatedAt: now,
+                },
+                ...current.grants,
+              ],
+            }
+          : current,
+      );
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: () => setReason(""),
     onSettled: () => invalidateM3(client),
   });
@@ -159,7 +239,7 @@ function AgentEditor({ data }: { data: AgentProfile }) {
                         type="button"
                         key={decision}
                         data-testid={`permission-${item.capability}-${decision}`}
-                        disabled={!data.canManage || permission.isPending}
+                        disabled={!data.canManage || busy}
                         aria-pressed={item.decision === decision}
                         onClick={() =>
                           permission.mutate({
@@ -185,7 +265,7 @@ function AgentEditor({ data }: { data: AgentProfile }) {
             <h2>{t("agentProfile.settings")}</h2>
             <form onSubmit={submit} noValidate>
               <fieldset
-                disabled={!data.canManage || save.isPending}
+                disabled={!data.canManage || busy}
                 className="plain-fieldset"
               >
                 <div className="field">
@@ -397,10 +477,7 @@ function AgentEditor({ data }: { data: AgentProfile }) {
                   />
                 </div>
                 <div className="action-row">
-                  <Button
-                    type="submit"
-                    disabled={grant.isPending || !reason.trim()}
-                  >
+                  <Button type="submit" disabled={busy || !reason.trim()}>
                     {t("grants.request")}
                   </Button>
                 </div>

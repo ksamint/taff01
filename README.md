@@ -15,11 +15,14 @@ tools over core, a per-token rate limit, a call log and the MCP settings page.
 Milestone 03 adds agent runs, actual events and artifacts, scoped permissions and
 expiring grants, a review workspace with comments and checklist, and a managed
 Inbox. MCP now exposes twelve tools, including `files.attach` and run controls.
+Milestone 04 adds authenticated workspace WebSockets, cache reconciliation after
+disconnects, and optimistic writes with rollback across tasks, runs, reviews,
+permissions, Inbox and settings.
 Core owns database access, workspace permissions and
 transactional activity/notification behavior. The worker connects to Redis; no
 background job handlers are exposed yet.
 
-WebSocket fan-out, the full calendar,
+The full calendar,
 recurrence, IndexedDB persistence, PWA installation and release gates follow in
 later milestones (see the implementation plan).
 This is a development foundation, not a production release. Milestone reports
@@ -55,7 +58,8 @@ Open [the local app](http://localhost:3000). Sign in as `alex@taff.local` using 
 three agents. Re-running the seed preserves existing accounts, passwords and tasks.
 Changing `DEMO_PASSWORD` after seeding does not reset existing passwords.
 
-Web runs on port 3000 and proxies `/api` to the API on port 3001. PostgreSQL 18 and
+Web runs on port 3000 and proxies `/api`, including `/api/realtime` WebSockets,
+to the API on port 3001. PostgreSQL 18 and
 Valkey 9 bind locally to 55432 and 56379. `AUTH_URL` defines the browser origin;
 `API_INTERNAL_URL` defines the web-to-API proxy target. `.env.example` documents all
 configuration. Secrets stay in the ignored `.env` file.
@@ -96,13 +100,15 @@ outputs: assigning or starting a run does not launch an LLM or simulate progress
 Run duration and cost limits pause further submissions from reported metrics;
 external runtimes must enforce their own process limits. See
 [the agent run contract](docs/agent-runs.md) for versioned inputs and scope rules.
+See [the realtime contract](docs/realtime.md) for socket authorization and cache
+reconciliation behavior.
 
 ## Structure
 
 | Path | Responsibility |
 | --- | --- |
 | `apps/web` | Next.js mobile UI, bilingual strings, cache-first queries and optimistic mutations |
-| `apps/api` | Thin Hono REST/auth adapters, the `/mcp` Streamable HTTP adapter, rate limiting, validation and sanitized logging |
+| `apps/api` | Thin Hono REST/auth adapters, workspace WebSocket fan-out, `/mcp` Streamable HTTP, rate limiting, validation and sanitized logging |
 | `apps/worker` | BullMQ 6 connection to Valkey and rejection of unsupported jobs |
 | `packages/schemas` | Shared Zod schemas and inferred client types |
 | `packages/db` | Drizzle schema, migrations, PostgreSQL connection and audit triggers |

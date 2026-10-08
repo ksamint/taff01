@@ -32,6 +32,7 @@ import { cors } from "hono/cors";
 import type { Logger } from "pino";
 import { createMcpHttpHandler, describeCall } from "./mcp";
 import type { RateLimiter } from "./rate-limit";
+import type { Realtime } from "./realtime";
 
 type Core = ReturnType<typeof createCore>;
 
@@ -40,9 +41,12 @@ export function createApp(
   authUrl: string,
   logger: Logger,
   rateLimiter: RateLimiter,
+  realtime?: Realtime,
 ) {
   const origin = new URL(authUrl).origin;
-  const app = new Hono<{ Variables: { userId: string } }>();
+  const app = new Hono<{
+    Variables: { userId: string; sessionExpiresAt: number };
+  }>();
   const mcp = createMcpHttpHandler(core);
   app.use(
     "/mcp",
@@ -144,7 +148,17 @@ export function createApp(
     }
     if (!session) return c.json({ error: "unauthorized" }, 401);
     c.set("userId", session.user.id);
+    c.set("sessionExpiresAt", session.session.expiresAt.getTime());
     await next();
+  });
+  app.get("/api/realtime", async (c) => {
+    if (c.req.header("origin") !== origin)
+      return c.json({ error: "forbidden" }, 403);
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    const userId = c.get("userId");
+    await core.listMembers(userPrincipal(userId), workspaceId);
+    if (!realtime) return c.json({ error: "unavailable" }, 503);
+    return realtime.upgrade(c, userId, workspaceId, c.get("sessionExpiresAt"));
   });
   app.get("/api/me", async (c) => c.json(await core.getMe(c.get("userId"))));
   app.get("/api/members", async (c) => {
