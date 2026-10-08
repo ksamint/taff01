@@ -1,4 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
+
+const apiUrl = process.env.API_INTERNAL_URL ?? "http://127.0.0.1:3001";
+const reuseExistingServer = !process.env.CI;
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -8,10 +12,21 @@ export default defineConfig({
     { name: "en", use: { ...devices["Pixel 7"], locale: "en-US" } },
     { name: "zh-CN", use: { ...devices["Pixel 7"], locale: "zh-CN" } },
   ],
-  webServer: {
-    command: "pnpm dev",
-    url: `${process.env.AUTH_URL}/api/health`,
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
-  },
+  // One entry per service so Playwright owns each process group and can stop it
+  // on teardown. The combined `pnpm dev` runner detaches its children, which
+  // survive the runner's SIGKILL and keep `pnpm e2e` from exiting.
+  webServer: [
+    {
+      command: "pnpm --filter @taff/api dev",
+      url: `${apiUrl}/api/health`,
+      reuseExistingServer,
+      timeout: 120_000,
+    },
+    {
+      command: "pnpm --filter @taff/web dev",
+      url: `${process.env.AUTH_URL}/api/health`,
+      reuseExistingServer,
+      timeout: 120_000,
+    },
+  ],
 });
