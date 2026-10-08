@@ -4,6 +4,7 @@ import {
   createTaskSchema,
   idSchema,
   profileSchema,
+  SchemaError,
   signInSchema,
   signOutSchema,
   signUpSchema,
@@ -13,7 +14,6 @@ import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import type { Logger } from "pino";
-import { ZodError } from "zod";
 
 type Core = ReturnType<typeof createCore>;
 
@@ -90,7 +90,7 @@ export function createApp(core: Core, authUrl: string, logger: Logger) {
   });
   app.notFound((c) => c.json({ error: "not_found" }, 404));
   app.onError((error, c) => {
-    if (error instanceof ZodError || error instanceof SyntaxError)
+    if (error instanceof SchemaError || error instanceof SyntaxError)
       return c.json({ error: "invalid_input" }, 400);
     if (error instanceof CoreError) {
       const status = error.status;

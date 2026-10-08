@@ -34,7 +34,7 @@ export const user = pgTable(
     tz: text("tz").default("UTC").notNull(),
     ...dates,
   },
-  (t) => [check("users_locale", sql`${t.locale} in ('en', 'zh-CN')`)],
+  (t) => [check("users_locale", sql`${t.locale} in ('en', 'zh-CN', 'zh-HK')`)],
 );
 export const session = pgTable(
   "sessions",

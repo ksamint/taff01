@@ -19,11 +19,11 @@ import {
   type Member,
   type Profile,
   profileSchema,
+  SchemaError,
   type Task,
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
 import { and, desc, eq, sql } from "drizzle-orm";
-import { ZodError } from "zod";
 import { type Action, can, type Resource } from "./permissions";
 
 export class CoreError extends Error {
@@ -43,7 +43,7 @@ function parse<T>(validate: { parse(input: unknown): T }, input: unknown): T {
   try {
     return validate.parse(input);
   } catch (error) {
-    if (error instanceof ZodError) throw new CoreError("invalid_input", 400);
+    if (error instanceof SchemaError) throw new CoreError("invalid_input", 400);
     throw error;
   }
 }
