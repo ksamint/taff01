@@ -22,6 +22,13 @@
       "when": 1791471530918,
       "tag": "0002_locale_zh_hk",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791472687107,
+      "tag": "0003_agent_tokens",
+      "breakpoints": true
     }
   ]
 }

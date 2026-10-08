@@ -4,6 +4,7 @@ import {
   check,
   foreignKey,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
@@ -172,5 +173,67 @@ export const activity = pgTable(
   },
   (t) => [
     index("activity_workspace_created_idx").on(t.workspaceId, t.createdAt),
+  ],
+);
+
+export const agentTokens = pgTable(
+  "agent_tokens",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    memberId: uuid("member_id").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    name: text("name").notNull(),
+    // sha256(token + TOKEN_PEPPER); the raw token is shown once and never stored.
+    hash: text("hash").notNull().unique(),
+    prefix: text("prefix").notNull(),
+    scopes: text("scopes").array().notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    ...dates,
+  },
+  (t) => [
+    index("agent_tokens_workspace_idx").on(t.workspaceId, t.createdAt),
+    foreignKey({
+      columns: [t.workspaceId, t.memberId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "agent_tokens_member_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.createdBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "agent_tokens_creator_fk",
+    }),
+    check("agent_tokens_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 100`),
+  ],
+);
+export const mcpCallStatus = pgEnum("mcp_call_status", [
+  "ok",
+  "error",
+  "denied",
+  "rate_limited",
+]);
+// Append-only call log for the MCP page; the tool's own mutation is audited.
+export const mcpCalls = pgTable(
+  "mcp_calls",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    tokenId: uuid("token_id")
+      .notNull()
+      .references(() => agentTokens.id, { onDelete: "cascade" }),
+    method: text("method").notNull(),
+    tool: text("tool"),
+    status: mcpCallStatus("status").notNull(),
+    durationMs: integer("duration_ms").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("mcp_calls_workspace_created_idx").on(t.workspaceId, t.createdAt),
   ],
 );

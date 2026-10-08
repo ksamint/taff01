@@ -14,6 +14,7 @@ export async function seedDemo(options: {
   databaseUrl: string;
   authUrl: string;
   authSecret: string;
+  tokenPepper: string;
   password: string;
 }) {
   if (options.password.length < 8 || options.password.length > 128)
@@ -122,15 +123,23 @@ export async function seedDemo(options: {
   }
 }
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const { DATABASE_URL, AUTH_URL, AUTH_SECRET, DEMO_PASSWORD } = process.env;
-  if (!DATABASE_URL || !AUTH_URL || !AUTH_SECRET || !DEMO_PASSWORD)
+  const { DATABASE_URL, AUTH_URL, AUTH_SECRET, TOKEN_PEPPER, DEMO_PASSWORD } =
+    process.env;
+  if (
+    !DATABASE_URL ||
+    !AUTH_URL ||
+    !AUTH_SECRET ||
+    !TOKEN_PEPPER ||
+    !DEMO_PASSWORD
+  )
     throw new Error(
-      "DATABASE_URL, AUTH_URL, AUTH_SECRET and DEMO_PASSWORD are required",
+      "DATABASE_URL, AUTH_URL, AUTH_SECRET, TOKEN_PEPPER and DEMO_PASSWORD are required",
     );
   const result = await seedDemo({
     databaseUrl: DATABASE_URL,
     authUrl: AUTH_URL,
     authSecret: AUTH_SECRET,
+    tokenPepper: TOKEN_PEPPER,
     password: DEMO_PASSWORD,
   });
   console.info(

@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import {
   activity,
+  agentTokens,
   connectDatabase,
   members,
   session,
@@ -11,7 +12,7 @@ import {
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
-import { type Core, createCore } from "./index";
+import { type Core, createCore, userPrincipal } from "./index";
 import { seedDemo } from "./seed";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
@@ -27,6 +28,7 @@ const options = {
   databaseUrl: databaseUrl ?? "",
   authUrl: "http://localhost:3000",
   authSecret: "integration-test-secret-minimum-32-characters",
+  tokenPepper: "integration-test-pepper-16-chars",
 };
 const password = `test-${randomUUID()}`;
 
@@ -83,7 +85,9 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
     const me = await core.getMe(userId);
     expect(me.user).toMatchObject({ locale: "en", tz: "UTC" });
     expect(me.workspaces).toHaveLength(1);
-    expect(await core.listMembers(userId, workspaceId)).toMatchObject([
+    expect(
+      await core.listMembers(userPrincipal(userId), workspaceId),
+    ).toMatchObject([
       { id: ownerId, kind: "person", role: "admin" },
       { id: agentId, kind: "agent" },
     ]);
@@ -105,14 +109,14 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
     );
   });
   it("creates and assigns a task with activity and notifications", async () => {
-    const created = await core.createTask(userId, {
+    const created = await core.createTask(userPrincipal(userId), {
       workspaceId,
       ownerId,
       workerId: null,
       dueAt: null,
       title: "Integration task",
     });
-    const assigned = await core.assignTask(userId, created.id, {
+    const assigned = await core.assignTask(userPrincipal(userId), created.id, {
       workerId: agentId,
     });
     expect(assigned).toMatchObject({
@@ -120,7 +124,9 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       workerId: agentId,
       status: "todo",
     });
-    expect(await core.listTasks(userId, workspaceId)).toContainEqual(assigned);
+    expect(
+      await core.listTasks(userPrincipal(userId), workspaceId),
+    ).toContainEqual(assigned);
     const rows = await connection.db
       .select()
       .from(activity)
@@ -142,11 +148,11 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       .select()
       .from(activity)
       .where(eq(activity.workspaceId, workspaceId));
-    await expect(core.listTasks(outsiderId, workspaceId)).rejects.toMatchObject(
-      { code: "forbidden", status: 403 },
-    );
     await expect(
-      core.createTask(outsiderId, {
+      core.listTasks(userPrincipal(outsiderId), workspaceId),
+    ).rejects.toMatchObject({ code: "forbidden", status: 403 });
+    await expect(
+      core.createTask(userPrincipal(outsiderId), {
         workspaceId,
         ownerId,
         workerId: null,
@@ -155,7 +161,7 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       }),
     ).rejects.toMatchObject({ code: "forbidden" });
     await expect(
-      core.createTask(userId, {
+      core.createTask(userPrincipal(userId), {
         workspaceId,
         ownerId: agentId,
         workerId: null,
@@ -164,7 +170,7 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       }),
     ).rejects.toMatchObject({ code: "invalid_input" });
     await expect(
-      core.createTask(userId, {
+      core.createTask(userPrincipal(userId), {
         workspaceId,
         ownerId,
         workerId: outsiderMemberId,
@@ -392,12 +398,14 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
   it("seeds exactly five people and three agents idempotently without changing credentials", async () => {
     const first = await seedDemo({ ...options, password });
     const team = await core.listMembers(
-      (
-        await connection.db
-          .select()
-          .from(user)
-          .where(eq(user.email, first.email))
-      )[0].id,
+      userPrincipal(
+        (
+          await connection.db
+            .select()
+            .from(user)
+            .where(eq(user.email, first.email))
+        )[0].id,
+      ),
       first.workspaceId,
     );
     expect(team.filter((member) => member.kind === "person")).toHaveLength(5);
@@ -428,4 +436,100 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
         .where(eq(workspaces.seedKey, "demo-v1")),
     ).toHaveLength(1);
   }, 30000);
+  it("issues, authenticates, scopes and revokes agent tokens", async () => {
+    const asUser = userPrincipal(userId);
+    const issued = await core.createAgentToken(asUser, {
+      workspaceId,
+      memberId: agentId,
+      name: "Research client",
+      scopes: ["tasks:read", "tasks:write"],
+    });
+    expect(issued.token.startsWith("taff_")).toBe(true);
+    expect(issued.prefix).toBe(issued.token.slice(0, 12));
+    const stored = await connection.db
+      .select()
+      .from(agentTokens)
+      .where(eq(agentTokens.id, issued.id));
+    expect(stored[0].hash).not.toContain(issued.token.slice(5, 20));
+    expect(
+      (await core.listAgentTokens(asUser, workspaceId)).map((t) => t.id),
+    ).toContain(issued.id);
+    await expect(
+      core.createAgentToken(userPrincipal(outsiderId), {
+        workspaceId,
+        memberId: agentId,
+        name: "Outsider",
+        scopes: ["tasks:read"],
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.createAgentToken(asUser, {
+        workspaceId,
+        memberId: ownerId,
+        name: "Person token",
+        scopes: ["tasks:read"],
+      }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    const agent = await core.authenticateAgentToken(issued.token);
+    expect(agent).toMatchObject({
+      kind: "agent",
+      memberId: agentId,
+      workspaceId,
+      scopes: ["tasks:read", "tasks:write"],
+    });
+    if (!agent) throw new Error("token did not authenticate");
+    expect(await core.authenticateAgentToken("taff_wrong")).toBeNull();
+    const task = await core.createTask(agent, {
+      workspaceId,
+      ownerId,
+      workerId: agentId,
+      dueAt: null,
+      title: "Agent-created task",
+    });
+    expect(task.workerId).toBe(agentId);
+    const started = await core.updateTaskStatus(agent, task.id, {
+      status: "in_progress",
+    });
+    expect(started.status).toBe("in_progress");
+    await expect(
+      core.updateTaskStatus(agent, task.id, { status: "needs_review" }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.updateTaskStatus(agent, task.id, { status: "done" }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.scheduleTask(agent, task.id, { dueAt: "2026-10-09T09:00:00Z" }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    const actorRows = await connection.db
+      .select()
+      .from(activity)
+      .where(eq(activity.resourceId, task.id));
+    expect(actorRows.map((row) => row.actorId)).toEqual([
+      `agent:${agentId}`,
+      `agent:${agentId}`,
+    ]);
+    const reviewed = await core.updateTaskStatus(asUser, task.id, {
+      status: "done",
+    });
+    expect(reviewed.status).toBe("done");
+    await core.recordMcpCall({
+      tokenId: issued.id,
+      workspaceId,
+      method: "tools/call",
+      tool: "tasks.list",
+      status: "ok",
+      durationMs: 12,
+    });
+    const [listed] = await core.listAgentTokens(asUser, workspaceId);
+    expect(listed.lastUsedAt).not.toBeNull();
+    expect(await core.listMcpCalls(asUser, workspaceId)).toMatchObject([
+      { tool: "tasks.list", status: "ok" },
+    ]);
+    await expect(core.listMcpCalls(agent, workspaceId)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    const revoked = await core.revokeAgentToken(asUser, issued.id);
+    expect(revoked.revokedAt).not.toBeNull();
+    expect(await core.authenticateAgentToken(issued.token)).toBeNull();
+  });
 });

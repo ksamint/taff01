@@ -1,7 +1,9 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import {
+  agentTokens,
   connectDatabase,
+  mcpCalls,
   members,
   type Transaction,
   tasks,
@@ -10,21 +12,30 @@ import {
 } from "@taff/db";
 import * as schema from "@taff/db/schema";
 import {
+  type AgentToken,
   type AssignTask,
   assignTaskSchema,
+  type CreateAgentToken,
   type CreateTask,
+  createAgentTokenSchema,
   createTaskSchema,
+  type IssuedAgentToken,
   idSchema,
+  type McpCall,
   type Me,
   type Member,
   type Profile,
   profileSchema,
   SchemaError,
+  type Scope,
+  scheduleTaskSchema,
   type Task,
+  type TaskStatus,
+  updateTaskStatusSchema,
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
-import { and, desc, eq, sql } from "drizzle-orm";
-import { type Action, can, type Resource } from "./permissions";
+import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
+import { type Action, type Actor, can, type Resource } from "./permissions";
 
 export class CoreError extends Error {
   constructor(
@@ -55,11 +66,52 @@ function toTask(row: typeof tasks.$inferSelect): Task {
     updatedAt: row.updatedAt.toISOString(),
   };
 }
+/** Who is calling core: a signed-in person, or an agent through a token. */
+export type Principal =
+  | { kind: "user"; userId: string }
+  | {
+      kind: "agent";
+      tokenId: string;
+      memberId: string;
+      workspaceId: string;
+      scopes: Scope[];
+    };
+export function userPrincipal(userId: string): Principal {
+  return { kind: "user", userId };
+}
+function toAgentToken(
+  row: typeof agentTokens.$inferSelect,
+  lastUsedAt: Date | null,
+): AgentToken {
+  return {
+    id: row.id,
+    workspaceId: row.workspaceId,
+    memberId: row.memberId,
+    createdBy: row.createdBy,
+    name: row.name,
+    prefix: row.prefix,
+    scopes: row.scopes as Scope[],
+    createdAt: row.createdAt.toISOString(),
+    revokedAt: row.revokedAt?.toISOString() ?? null,
+    lastUsedAt: lastUsedAt?.toISOString() ?? null,
+  };
+}
+function toMcpCall(row: typeof mcpCalls.$inferSelect): McpCall {
+  return { ...row, createdAt: row.createdAt.toISOString() };
+}
+export function hashToken(token: string, pepper: string): string {
+  return createHash("sha256")
+    .update(token + pepper)
+    .digest("hex");
+}
 export function createCore(options: {
   databaseUrl: string;
   authUrl: string;
   authSecret: string;
+  tokenPepper: string;
 }) {
+  if (options.tokenPepper.length < 16)
+    throw new Error("TOKEN_PEPPER must be at least 16 characters");
   const connection = connectDatabase(options.databaseUrl);
   const { db } = connection;
   const auth = betterAuth({
@@ -91,31 +143,60 @@ export function createCore(options: {
     },
     advanced: { database: { generateId: () => randomUUID() } },
   });
-  async function requireMember(
+  async function loadActor(
     query: typeof db | Transaction,
-    userId: string,
+    principal: Principal,
     workspaceId: string,
-    action: Action,
-    resource: Resource = { workspaceId },
-  ): Promise<Member> {
-    const [actor] = await query
+  ): Promise<Actor | null> {
+    if (principal.kind === "agent") {
+      if (principal.workspaceId !== workspaceId) return null;
+      const [member] = await query
+        .select()
+        .from(members)
+        .where(
+          and(
+            eq(members.id, principal.memberId),
+            eq(members.workspaceId, workspaceId),
+          ),
+        )
+        .limit(1);
+      return member ? { ...member, scopes: principal.scopes } : null;
+    }
+    const [member] = await query
       .select()
       .from(members)
       .where(
-        and(eq(members.userId, userId), eq(members.workspaceId, workspaceId)),
+        and(
+          eq(members.userId, principal.userId),
+          eq(members.workspaceId, workspaceId),
+        ),
       )
       .limit(1);
-    if (!can(actor ?? null, action, resource))
+    return member ?? null;
+  }
+  async function requireMember(
+    query: typeof db | Transaction,
+    principal: Principal,
+    workspaceId: string,
+    action: Action,
+    resource: Resource = { workspaceId },
+  ): Promise<Actor> {
+    const actor = await loadActor(query, principal, workspaceId);
+    if (!actor || !can(actor, action, resource))
       throw new CoreError("forbidden", 403);
     return actor;
   }
   async function mutation<T>(
-    userId: string,
+    principal: Principal,
     run: (tx: Transaction) => Promise<T>,
   ): Promise<T> {
+    const actorId =
+      principal.kind === "user"
+        ? principal.userId
+        : `agent:${principal.memberId}`;
     return db.transaction(async (tx) => {
       await tx.execute(
-        sql`select set_config('taff.actor_id', ${userId}, true)`,
+        sql`select set_config('taff.actor_id', ${actorId}, true)`,
       );
       return run(tx);
     });
@@ -152,11 +233,11 @@ export function createCore(options: {
     };
   }
   async function listMembers(
-    userId: string,
+    principal: Principal,
     workspaceId: string,
   ): Promise<Member[]> {
     parse(idSchema, workspaceId);
-    await requireMember(db, userId, workspaceId, "workspace:read");
+    await requireMember(db, principal, workspaceId, "workspace:read");
     return db
       .select()
       .from(members)
@@ -164,18 +245,25 @@ export function createCore(options: {
       .orderBy(members.createdAt);
   }
   async function listTasks(
-    userId: string,
+    principal: Principal,
     workspaceId: string,
+    filter: { status?: TaskStatus } = {},
   ): Promise<Task[]> {
     parse(idSchema, workspaceId);
-    await requireMember(db, userId, workspaceId, "workspace:read");
-    return (
-      await db
-        .select()
-        .from(tasks)
-        .where(eq(tasks.workspaceId, workspaceId))
-        .orderBy(desc(tasks.createdAt), tasks.id)
-    ).map(toTask);
+    await requireMember(db, principal, workspaceId, "workspace:read");
+    const rows = await db
+      .select()
+      .from(tasks)
+      .where(
+        filter.status
+          ? and(
+              eq(tasks.workspaceId, workspaceId),
+              eq(tasks.status, filter.status),
+            )
+          : eq(tasks.workspaceId, workspaceId),
+      )
+      .orderBy(desc(tasks.createdAt), tasks.id);
+    return rows.map(toTask);
   }
   async function validateAssignees(
     tx: Transaction,
@@ -201,10 +289,13 @@ export function createCore(options: {
       if (!worker) throw new CoreError("invalid_input", 400);
     }
   }
-  async function createTask(userId: string, input: CreateTask): Promise<Task> {
+  async function createTask(
+    principal: Principal,
+    input: CreateTask,
+  ): Promise<Task> {
     const body = parse(createTaskSchema, input);
-    return mutation(userId, async (tx) => {
-      await requireMember(tx, userId, body.workspaceId, "task:create");
+    return mutation(principal, async (tx) => {
+      await requireMember(tx, principal, body.workspaceId, "task:create");
       await validateAssignees(
         tx,
         body.workspaceId,
@@ -218,24 +309,30 @@ export function createCore(options: {
       return toTask(task);
     });
   }
+  async function lockTask(tx: Transaction, taskId: string) {
+    parse(idSchema, taskId);
+    const [task] = await tx
+      .select()
+      .from(tasks)
+      .where(eq(tasks.id, taskId))
+      .limit(1)
+      .for("update");
+    if (!task) throw new CoreError("not_found", 404);
+    return task;
+  }
   async function assignTask(
-    userId: string,
+    principal: Principal,
     taskId: string,
     input: AssignTask,
   ): Promise<Task> {
-    parse(idSchema, taskId);
     const body = parse(assignTaskSchema, input);
-    return mutation(userId, async (tx) => {
-      const [task] = await tx
-        .select()
-        .from(tasks)
-        .where(eq(tasks.id, taskId))
-        .limit(1)
-        .for("update");
-      if (!task) throw new CoreError("not_found", 404);
-      await requireMember(tx, userId, task.workspaceId, "task:assign", {
+    return mutation(principal, async (tx) => {
+      const task = await lockTask(tx, taskId);
+      await requireMember(tx, principal, task.workspaceId, "task:assign", {
         workspaceId: task.workspaceId,
         ownerId: task.ownerId,
+        workerId: task.workerId,
+        toWorkerId: body.workerId,
       });
       await validateAssignees(
         tx,
@@ -251,12 +348,65 @@ export function createCore(options: {
       return toTask(updated);
     });
   }
+  async function updateTaskStatus(
+    principal: Principal,
+    taskId: string,
+    input: { status: TaskStatus },
+  ): Promise<Task> {
+    const body = parse(updateTaskStatusSchema, input);
+    return mutation(principal, async (tx) => {
+      const task = await lockTask(tx, taskId);
+      const resource = {
+        workspaceId: task.workspaceId,
+        ownerId: task.ownerId,
+        workerId: task.workerId,
+        to: body.status,
+      };
+      await requireMember(
+        tx,
+        principal,
+        task.workspaceId,
+        body.status === "done" ? "task:review" : "task:status",
+        resource,
+      );
+      const [updated] = await tx
+        .update(tasks)
+        .set({ status: body.status, updatedAt: new Date() })
+        .where(eq(tasks.id, taskId))
+        .returning();
+      return toTask(updated);
+    });
+  }
+  async function scheduleTask(
+    principal: Principal,
+    taskId: string,
+    input: { dueAt: string | null },
+  ): Promise<Task> {
+    const body = parse(scheduleTaskSchema, input);
+    return mutation(principal, async (tx) => {
+      const task = await lockTask(tx, taskId);
+      await requireMember(tx, principal, task.workspaceId, "task:schedule", {
+        workspaceId: task.workspaceId,
+        ownerId: task.ownerId,
+        workerId: task.workerId,
+      });
+      const [updated] = await tx
+        .update(tasks)
+        .set({
+          dueAt: body.dueAt ? new Date(body.dueAt) : null,
+          updatedAt: new Date(),
+        })
+        .where(eq(tasks.id, taskId))
+        .returning();
+      return toTask(updated);
+    });
+  }
   async function updateProfile(
     userId: string,
     input: Profile,
   ): Promise<Me["user"]> {
     const body = parse(profileSchema, input);
-    return mutation(userId, async (tx) => {
+    return mutation(userPrincipal(userId), async (tx) => {
       const [actor] = await tx
         .select()
         .from(members)
@@ -277,6 +427,142 @@ export function createCore(options: {
       };
     });
   }
+  async function createAgentToken(
+    principal: Principal,
+    input: CreateAgentToken,
+  ): Promise<IssuedAgentToken> {
+    const body = parse(createAgentTokenSchema, input);
+    if (principal.kind !== "user") throw new CoreError("forbidden", 403);
+    return mutation(principal, async (tx) => {
+      const actor = await requireMember(
+        tx,
+        principal,
+        body.workspaceId,
+        "token:manage",
+      );
+      const [agent] = await tx
+        .select()
+        .from(members)
+        .where(
+          and(
+            eq(members.workspaceId, body.workspaceId),
+            eq(members.id, body.memberId),
+          ),
+        )
+        .limit(1);
+      if (!agent || agent.kind !== "agent")
+        throw new CoreError("invalid_input", 400);
+      const token = `taff_${randomBytes(32).toString("base64url")}`;
+      const [row] = await tx
+        .insert(agentTokens)
+        .values({
+          workspaceId: body.workspaceId,
+          memberId: body.memberId,
+          createdBy: actor.id,
+          name: body.name,
+          hash: hashToken(token, options.tokenPepper),
+          prefix: token.slice(0, 12),
+          scopes: [...new Set(body.scopes)],
+        })
+        .returning();
+      return { ...toAgentToken(row, null), token };
+    });
+  }
+  async function listAgentTokens(
+    principal: Principal,
+    workspaceId: string,
+  ): Promise<AgentToken[]> {
+    parse(idSchema, workspaceId);
+    await requireMember(db, principal, workspaceId, "token:manage");
+    const lastUsed = db
+      .select({
+        tokenId: mcpCalls.tokenId,
+        lastUsedAt: max(mcpCalls.createdAt).as("last_used_at"),
+      })
+      .from(mcpCalls)
+      .groupBy(mcpCalls.tokenId)
+      .as("last_used");
+    const rows = await db
+      .select({ token: agentTokens, lastUsedAt: lastUsed.lastUsedAt })
+      .from(agentTokens)
+      .leftJoin(lastUsed, eq(lastUsed.tokenId, agentTokens.id))
+      .where(eq(agentTokens.workspaceId, workspaceId))
+      .orderBy(desc(agentTokens.createdAt));
+    return rows.map(({ token, lastUsedAt }) =>
+      toAgentToken(token, lastUsedAt ? new Date(lastUsedAt) : null),
+    );
+  }
+  async function revokeAgentToken(
+    principal: Principal,
+    tokenId: string,
+  ): Promise<AgentToken> {
+    parse(idSchema, tokenId);
+    return mutation(principal, async (tx) => {
+      const [row] = await tx
+        .select()
+        .from(agentTokens)
+        .where(eq(agentTokens.id, tokenId))
+        .limit(1)
+        .for("update");
+      if (!row) throw new CoreError("not_found", 404);
+      await requireMember(tx, principal, row.workspaceId, "token:manage");
+      if (row.revokedAt) return toAgentToken(row, null);
+      const [updated] = await tx
+        .update(agentTokens)
+        .set({ revokedAt: new Date(), updatedAt: new Date() })
+        .where(eq(agentTokens.id, tokenId))
+        .returning();
+      return toAgentToken(updated, null);
+    });
+  }
+  /** Resolves a raw bearer token to an agent principal, or null. */
+  async function authenticateAgentToken(
+    token: string,
+  ): Promise<Principal | null> {
+    if (!token.startsWith("taff_") || token.length > 200) return null;
+    const [row] = await db
+      .select()
+      .from(agentTokens)
+      .where(
+        and(
+          eq(agentTokens.hash, hashToken(token, options.tokenPepper)),
+          isNull(agentTokens.revokedAt),
+        ),
+      )
+      .limit(1);
+    if (!row) return null;
+    return {
+      kind: "agent",
+      tokenId: row.id,
+      memberId: row.memberId,
+      workspaceId: row.workspaceId,
+      scopes: row.scopes as Scope[],
+    };
+  }
+  async function recordMcpCall(entry: {
+    tokenId: string;
+    workspaceId: string;
+    method: string;
+    tool: string | null;
+    status: McpCall["status"];
+    durationMs: number;
+  }): Promise<void> {
+    await db.insert(mcpCalls).values(entry);
+  }
+  async function listMcpCalls(
+    principal: Principal,
+    workspaceId: string,
+  ): Promise<McpCall[]> {
+    parse(idSchema, workspaceId);
+    await requireMember(db, principal, workspaceId, "token:manage");
+    const rows = await db
+      .select()
+      .from(mcpCalls)
+      .where(eq(mcpCalls.workspaceId, workspaceId))
+      .orderBy(desc(mcpCalls.createdAt))
+      .limit(200);
+    return rows.map(toMcpCall);
+  }
   function getSession(headers: Headers) {
     return auth.api.getSession({ headers, returnHeaders: true });
   }
@@ -288,7 +574,15 @@ export function createCore(options: {
     listTasks,
     createTask,
     assignTask,
+    updateTaskStatus,
+    scheduleTask,
     updateProfile,
+    createAgentToken,
+    listAgentTokens,
+    revokeAgentToken,
+    authenticateAgentToken,
+    recordMcpCall,
+    listMcpCalls,
     close: connection.close,
   };
 }

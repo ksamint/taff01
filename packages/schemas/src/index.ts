@@ -11,7 +11,9 @@ import {
   maxLength,
   minLength,
   nullable,
+  number,
   object,
+  optional,
   refine,
   strictObject,
   string,
@@ -31,6 +33,12 @@ const timeZone = (tz: string) => {
 };
 
 export const localeSchema = zodEnum(["en", "zh-CN", "zh-HK"]);
+export const taskStatusSchema = zodEnum([
+  "todo",
+  "in_progress",
+  "needs_review",
+  "done",
+]);
 export const idSchema = uuid();
 export const workspaceQuerySchema = strictObject({ workspaceId: idSchema });
 export const createTaskSchema = strictObject({
@@ -72,7 +80,7 @@ export const taskSchema = object({
   title: string(),
   ownerId: idSchema,
   workerId: nullable(idSchema),
-  status: zodEnum(["todo", "in_progress", "needs_review", "done"]),
+  status: taskStatusSchema,
   dueAt: nullable(iso.datetime()),
   createdAt: iso.datetime(),
   updatedAt: iso.datetime(),
@@ -100,6 +108,75 @@ export const errorSchema = object({
     "internal_error",
   ]),
 });
+export const updateTaskStatusSchema = strictObject({
+  status: taskStatusSchema,
+});
+export const scheduleTaskSchema = strictObject({
+  dueAt: nullable(iso.datetime({ offset: true })),
+});
+/** MCP token scopes, as shown on the MCP page. */
+export const scopeSchema = zodEnum([
+  "tasks:read",
+  "tasks:write",
+  "calendar:write",
+  "inbox:review",
+]);
+export const createAgentTokenSchema = strictObject({
+  workspaceId: idSchema,
+  memberId: idSchema,
+  name: string().check(trim(), minLength(1), maxLength(100)),
+  scopes: array(scopeSchema).check(minLength(1)),
+});
+export const agentTokenSchema = object({
+  id: idSchema,
+  workspaceId: idSchema,
+  memberId: idSchema,
+  createdBy: idSchema,
+  name: string(),
+  prefix: string(),
+  scopes: array(scopeSchema),
+  createdAt: iso.datetime(),
+  revokedAt: nullable(iso.datetime()),
+  lastUsedAt: nullable(iso.datetime()),
+});
+export const agentTokenListSchema = array(agentTokenSchema);
+/** Returned once, right after creation. */
+export const issuedAgentTokenSchema = extend(agentTokenSchema, {
+  token: string(),
+});
+export const mcpCallSchema = object({
+  id: idSchema,
+  workspaceId: idSchema,
+  tokenId: idSchema,
+  method: string(),
+  tool: nullable(string()),
+  status: zodEnum(["ok", "error", "denied", "rate_limited"]),
+  durationMs: number(),
+  createdAt: iso.datetime(),
+});
+export const mcpCallListSchema = array(mcpCallSchema);
+/* MCP tool arguments. The token fixes the workspace, so no tool takes one. */
+export const mcpTasksListArgs = strictObject({
+  status: optional(taskStatusSchema),
+});
+export const mcpTasksCreateArgs = strictObject({
+  title: string().check(trim(), minLength(1), maxLength(200)),
+  ownerId: idSchema,
+  dueAt: optional(nullable(iso.datetime({ offset: true }))),
+});
+export const mcpTasksUpdateArgs = strictObject({
+  taskId: idSchema,
+  status: optional(zodEnum(["in_progress", "needs_review"])),
+  workerId: optional(nullable(idSchema)),
+});
+export const mcpCalendarScheduleArgs = strictObject({
+  taskId: idSchema,
+  dueAt: nullable(iso.datetime({ offset: true })),
+});
+export const mcpInboxRequestReviewArgs = strictObject({
+  taskId: idSchema,
+  note: optional(string().check(maxLength(2000))),
+});
 /** Thrown by every schema above on invalid input. */
 export const SchemaError = $ZodError;
 export type CreateTask = Infer<typeof createTaskSchema>;
@@ -109,3 +186,9 @@ export type Member = Infer<typeof memberSchema>;
 export type Task = Infer<typeof taskSchema>;
 export type Me = Infer<typeof meSchema>;
 export type Locale = Infer<typeof localeSchema>;
+export type Scope = Infer<typeof scopeSchema>;
+export type TaskStatus = Infer<typeof taskStatusSchema>;
+export type CreateAgentToken = Infer<typeof createAgentTokenSchema>;
+export type AgentToken = Infer<typeof agentTokenSchema>;
+export type IssuedAgentToken = Infer<typeof issuedAgentTokenSchema>;
+export type McpCall = Infer<typeof mcpCallSchema>;
