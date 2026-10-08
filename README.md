@@ -106,5 +106,8 @@ value in `.env.example`.
 ## License
 
 The application source is [MIT](LICENSE). Third-party dependencies retain their
-own licenses; the prescribed stack's transitive license exceptions are pending
-user review; Phase 1 publication was explicitly authorized.
+own licenses. The prescribed Next.js and Tailwind stack carries two transitive
+MPL-2.0 components, accepted as documented exceptions in
+[ADR 0003](docs/adr/0003-transitive-license-decision.md); GPL, AGPL and SSPL
+code is not permitted. The local Redis image is pinned to the BSD-licensed 7.2
+line for the same reason.

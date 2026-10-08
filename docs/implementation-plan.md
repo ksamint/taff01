@@ -28,8 +28,11 @@ mutation tests pass; web, API and worker start; the demo workspace has five peop
 and three agents. Task owners are people and worker assignments accept agents.
 
 Phase 1 implementation and validation are recorded in
-[the checkpoint](phase-1-checkpoint.md). The user authorized committing and pushing Phase 1 on 2026-10-08. The transitive-
-license policy decision remains open; review is required before Phase 2.
+[the checkpoint](phase-1-checkpoint.md). The user authorized committing and
+pushing Phase 1 on 2026-10-08. The transitive-license decision is closed in
+[ADR 0003](adr/0003-transitive-license-decision.md). A stack version review is
+proposed in [ADR 0004](adr/0004-stack-version-review.md). Phase 1 awaits the
+user's review before Phase 2 starts.
 
 ## Phase 2 — Agent collaboration and realtime
 
