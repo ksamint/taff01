@@ -8,7 +8,10 @@ const config: NextConfig = {
     const api = process.env.API_INTERNAL_URL;
     if (!api) throw new Error("API_INTERNAL_URL is required");
     new URL(api);
-    return [{ source: "/api/:path*", destination: `${api}/api/:path*` }];
+    return [
+      { source: "/api/:path*", destination: `${api}/api/:path*` },
+      { source: "/mcp", destination: `${api}/mcp` },
+    ];
   },
 };
 export default config;

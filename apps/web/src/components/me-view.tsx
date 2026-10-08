@@ -1,6 +1,7 @@
 "use client";
 
 import type { Locale } from "@taff/schemas";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { applyTheme, readTheme, type ThemePreference } from "../lib/theme";
@@ -48,6 +49,13 @@ export function MeView() {
             ))}
           </select>
         </div>
+      </section>
+      <section className="me-section" aria-labelledby="integrations-heading">
+        <h2 id="integrations-heading">{t("mcp.title")}</h2>
+        <p className="section-hint">{t("mcp.subtitle")}</p>
+        <Link className="button" href="/me/mcp" data-testid="open-mcp">
+          {t("mcp.open")}
+        </Link>
       </section>
       <section className="me-section" aria-labelledby="preferences-heading">
         <h2 id="preferences-heading">{t("me.preferences")}</h2>

@@ -100,5 +100,52 @@
     "light": "浅色",
     "dark": "深色",
     "system": "跟随系统"
+  },
+  "mcp": {
+    "title": "MCP 服务器",
+    "subtitle": "通过 Model Context Protocol 把智能体接入此工作空间。",
+    "open": "打开 MCP 设置",
+    "endpoint": "端点",
+    "endpointUrl": "Streamable HTTP 地址",
+    "endpointHint": "使用个人访问令牌授权：Authorization: Bearer <token>。OAuth 2.1 将在发布里程碑提供。",
+    "adminOnly": "只有工作空间管理员可以管理智能体令牌。",
+    "newToken": "新令牌",
+    "showOnce": "请立即复制，令牌只显示一次。",
+    "copyToken": "复制令牌",
+    "copied": "已复制",
+    "dismiss": "关闭",
+    "clientConfig": "客户端配置",
+    "tokenName": "令牌名称",
+    "tokenNamePlaceholder": "例如：Claude Desktop",
+    "scopes": "权限范围",
+    "scope": {
+      "tasks:read": "读取任务",
+      "tasks:write": "创建与更新任务",
+      "calendar:write": "修改日程",
+      "inbox:review": "提交审核"
+    },
+    "createToken": "创建令牌",
+    "tokens": "令牌",
+    "noTokens": "还没有令牌。",
+    "active": "有效",
+    "revoked": "已撤销",
+    "lastUsed": "最近使用：{{date}}",
+    "neverUsed": "从未使用",
+    "revoke": "撤销",
+    "confirmRevoke": "确认撤销",
+    "cancel": "取消",
+    "callLog": "调用日志",
+    "noCalls": "还没有调用。",
+    "when": "时间",
+    "method": "方法",
+    "tool": "工具",
+    "status": "状态",
+    "duration": "耗时",
+    "callStatus": {
+      "ok": "成功",
+      "error": "错误",
+      "denied": "已拒绝",
+      "rate_limited": "已限流"
+    }
   }
 }

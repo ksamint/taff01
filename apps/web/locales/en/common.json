@@ -101,5 +101,52 @@
     "light": "Light",
     "dark": "Dark",
     "system": "Follow system"
+  },
+  "mcp": {
+    "title": "MCP server",
+    "subtitle": "Connect agents to this workspace with the Model Context Protocol.",
+    "open": "Open MCP settings",
+    "endpoint": "Endpoint",
+    "endpointUrl": "Streamable HTTP URL",
+    "endpointHint": "Authorize with a personal access token: Authorization: Bearer <token>. OAuth 2.1 arrives with the release milestone.",
+    "adminOnly": "Only workspace admins manage agent tokens.",
+    "newToken": "New token",
+    "showOnce": "Copy it now. It is shown only once.",
+    "copyToken": "Copy token",
+    "copied": "Copied",
+    "dismiss": "Dismiss",
+    "clientConfig": "Client configuration",
+    "tokenName": "Token name",
+    "tokenNamePlaceholder": "For example: Claude Desktop",
+    "scopes": "Scopes",
+    "scope": {
+      "tasks:read": "Read tasks",
+      "tasks:write": "Create and update tasks",
+      "calendar:write": "Change events",
+      "inbox:review": "Submit for review"
+    },
+    "createToken": "Create token",
+    "tokens": "Tokens",
+    "noTokens": "No tokens yet.",
+    "active": "Active",
+    "revoked": "Revoked",
+    "lastUsed": "Last used {{date}}",
+    "neverUsed": "Never used",
+    "revoke": "Revoke",
+    "confirmRevoke": "Confirm revoke",
+    "cancel": "Cancel",
+    "callLog": "Call log",
+    "noCalls": "No calls yet.",
+    "when": "When",
+    "method": "Method",
+    "tool": "Tool",
+    "status": "Status",
+    "duration": "Duration",
+    "callStatus": {
+      "ok": "OK",
+      "error": "Error",
+      "denied": "Denied",
+      "rate_limited": "Rate limited"
+    }
   }
 }
