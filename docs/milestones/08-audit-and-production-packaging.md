@@ -57,6 +57,64 @@ client applies a Chinese locale; optional versions on three task endpoints.
   server bundles, the bundle budget, Playwright in three locales, the MCP smoke
   against the bundled API, and builds the three images.
 
+## Performance (M7 acceptance)
+
+`pnpm perf:lcp` measures the signed-in Today route on the production build
+with Playwright and CDP: 1.6 Mbps down, 750 Kbps up, 150 ms RTT, 4× CPU
+slowdown, HTTP cache cleared, service worker blocked (a first visit), median
+of three runs. The first honest measurement was 2,012 ms, with the Chinese
+locales at 3.3 s. The timeline showed why, and each cause is fixed:
+
+| Cause | Fix |
+| --- | --- |
+| `/api/me` started only after the JavaScript had downloaded and run | The root layout preloads it with the HTML |
+| Returning browsers fetched their locale file and first reads late | An inline head script preloads the stored locale and the last workspace's tasks and members |
+| The first socket open invalidated every family with cancellation, aborting and repeating the initial reads | The first open only marks families stale; later opens, which follow a disconnect, refetch |
+| The first identity record purged queries fetched under the same cookie | Only an identity change or a sign-out purges |
+| The demo workspace rendered 82 task cards with a member select each (1,790 DOM nodes) | Today renders 20 cards and a "Show N more" button |
+| Web fonts competed with the JavaScript on the slow link and shifted the layout | `font-display: optional`: a slow first visit keeps the system font, later visits use the cached fonts |
+
+Result on this container (shared 4-core sandbox, Chromium 141):
+
+| Locale | LCP median | Limit |
+| --- | --- | --- |
+| en | 1,944 ms | 2,000 ms |
+| zh-HK | 2,340 ms | 2,000 ms |
+
+English passes with a small margin. The Chinese locales still miss by about
+0.3 s: after hydration the page spends one render and layout pass applying
+the locale before the list pass, and CJK text shaping with this container's
+fallback font costs 2.5× the Latin layout. Both cost less on a phone with
+PingFang or Noto Sans CJK installed, but that is not measured. Open work,
+in order of expected gain: cut the 200 KiB of route JavaScript (the shared
+schema chunk and i18next are 38 KiB together), render the locale from a
+cookie on the server to remove the locale pass, and measure on a device.
+The `font-display: optional` change means the first visit on a slow link
+shows the system font; revert the three declarations in `tokens.css` to
+`swap` if brand fidelity on first paint matters more than 100–150 ms.
+
 ## Validation
 
-See the table at the end of this file once the final run completes.
+| Check | Result |
+| --- | --- |
+| `pnpm lint` | 166 files clean |
+| `pnpm typecheck` | 6 packages |
+| `pnpm test` | 392 passed (27 files) on PostgreSQL 18.4 and Valkey |
+| `pnpm build` | standalone output |
+| `pnpm perf:budget` | 195.7 KiB gzipped Today JavaScript (budget 200 KiB) |
+| `pnpm licence:check` | 201 packages, 6 documented exceptions |
+| `pnpm build:server` | api, worker and migrate bundles run |
+| `pnpm mcp:smoke` | passed against the dev API |
+| `pnpm e2e` | see below |
+| `pnpm perf:lcp` | en 1,944 ms; zh-HK 2,340 ms (over) |
+
+`pnpm e2e` on the final code: 75 passed in en, zh-CN and zh-HK (10.1 min).
+Two environment notes from the earlier runs: the offline-shell case needs
+Playwright's service-worker network emulation flag, which the config now
+sets, and this sandbox drives Chromium 141 with a temporary `@playwright/test`
+1.56 install because the pinned 1.64 cannot navigate that browser; the
+committed pin stays 1.64 and CI installs its matching browser.
+
+The three Docker images could not be built here (no Docker in the sandbox);
+the CI `images` job builds them on every push.
+

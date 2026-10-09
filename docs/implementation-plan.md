@@ -88,7 +88,9 @@ reviews. The agent prompt that drives this is `agent-goal.md`.
   notification preferences, daily digest job on BullMQ, performance budget script
   (initial JS ≤ 200 KB gzipped, LCP ≤ 2 s on simulated 4G, Lighthouse ≥ 90).
   Acceptance: budget script passes on the Today route. Done: `pnpm perf:budget`
-  and `pnpm perf:lcp` (Playwright + CDP throttling, no Lighthouse) pass; the
+  passes and `pnpm perf:lcp` (Playwright + CDP throttling, no Lighthouse)
+  passes in English (1.94 s); zh-CN and zh-HK measure 2.34 s and stay open
+  (route JavaScript diet, server-rendered locale; see milestone 08). The
   Lighthouse score waits on the axe-core (MPL-2.0) licence decision of ADR 0003.
 
 ### Phase 4 — Release

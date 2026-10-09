@@ -38,7 +38,9 @@ worker and locale caches) and adds production packaging: server bundles,
 Docker images, a production compose file with Caddy, a licence gate, an LCP
 measurement on simulated slow 4G and a GitHub Actions pipeline.
 Lighthouse's axe-core dependency (MPL-2.0) still needs the licence decision of
-ADR 0003; `pnpm perf:lcp` covers the LCP limit without it.
+ADR 0003; `pnpm perf:lcp` covers the LCP limit without it: English passes
+(1.94 s on simulated slow 4G), the Chinese locales measure 2.34 s and remain
+open.
 See [the deployment guide](docs/deploy.md) and the M8 milestone report.
 
 Open items for release: OAuth 2.1 metadata on `/mcp` (needs an authorization
@@ -112,7 +114,9 @@ sample users/tasks to the local app database.
 the Today page's gzipped JavaScript against the 200 KiB budget, and
 `pnpm perf:lcp` measures Today's Largest Contentful Paint on the production
 build under a simulated slow-4G phone (median of three runs, limit 2 s; set
-`CHROMIUM_PATH` to use a system browser). `pnpm licence:check` verifies every
+`CHROMIUM_PATH` to use a system browser, `LCP_LOCALE` to measure zh-CN or
+zh-HK, `LCP_DEBUG=1` or `LCP_TRACE=1` for a request, long-task and layout
+timeline). It needs the production server's port free (`AUTH_URL`). `pnpm licence:check` verifies every
 installed package against the licence policy. API and worker run from
 TypeScript during development; `pnpm build:server` bundles them, with the
 migrator, for the production images described in
