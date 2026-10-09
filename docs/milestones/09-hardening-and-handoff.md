@@ -242,6 +242,13 @@ as `taff` from the application host with certificate identity verification and
 TLS active; the dedicated database remains unmigrated and the probe container
 was removed.
 
+The browser-zone lookup consumed 29.8 ms before the greeting's final paint in
+the corrected cold capture. The module initializer consumed 85.3 ms sampled
+self time and 127.6 ms inclusive time; the card map consumed only 9 ms, so no
+larger card refactor is proposed. ADR 0007 records a measured candidate using
+the installed Next version's Webpack production build through the existing
+package script. Its full validation and any performance gain are pending.
+
 ## Remaining work and open decisions
 
 M9 is not complete. The local performance targets passed while preserving
