@@ -39,6 +39,7 @@
   "focusHint": "未安排日期的任务，以及今天到期的任务。",
   "emptyTitle": "清爽的一天。",
   "emptyDescription": "在上方添加任务，开始今天的工作。",
+  "showMore": "再显示 {{count}} 项",
   "ownedBy": "负责人：{{name}}",
   "unknownMember": "团队成员",
   "due": "到期：{{date}}",

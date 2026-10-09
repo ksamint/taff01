@@ -30,7 +30,12 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { browserTimeZone, readPreference, savePreference } from "../lib/i18n";
+import {
+  browserTimeZone,
+  LAST_WORKSPACE_KEY,
+  readPreference,
+  savePreference,
+} from "../lib/i18n";
 import { useInbox } from "../lib/m3-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { meKey, useMeQuery } from "../lib/queries";
@@ -190,13 +195,18 @@ export function AppShell({ children }: { children: ReactNode }) {
         const saved = window.sessionStorage.getItem(key);
         if (saved && me.data.workspaces.some((item) => item.id === saved)) {
           setWorkspaceId(saved);
+          window.localStorage.setItem(LAST_WORKSPACE_KEY, saved);
           return;
         }
       }
       const selected =
         me.data.workspaces.find((item) => item.id === workspaceId) ??
         me.data.workspaces[0];
-      if (selected) window.sessionStorage.setItem(key, selected.id);
+      if (selected) {
+        window.sessionStorage.setItem(key, selected.id);
+        // The head boot script preloads this workspace's first reads next time.
+        window.localStorage.setItem(LAST_WORKSPACE_KEY, selected.id);
+      }
     } catch {
       /* The current page selection still works when storage is blocked. */
     }

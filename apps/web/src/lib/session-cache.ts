@@ -43,16 +43,22 @@ export function synchronizeSession(
   scope = "",
 ) {
   if (sessionMatches(client, userId, scope)) return;
+  // Everything fetched before the first identity of this page used the same
+  // cookie as that identity, so only a change of identity, or a sign-out,
+  // purges the cache.
+  const changed = identities.has(client) || userId === null;
   identities.set(client, {
     userId,
     scope,
     version: sessionVersion(client) + 1,
   });
-  const protectedQuery = ({ queryKey }: { queryKey: readonly unknown[] }) =>
-    queryKey[0] !== "me";
-  void client.cancelQueries({ predicate: protectedQuery });
-  client.removeQueries({ predicate: protectedQuery });
-  // Pending requests can still complete; their captured version guards callbacks.
-  client.getMutationCache().clear();
+  if (changed) {
+    const protectedQuery = ({ queryKey }: { queryKey: readonly unknown[] }) =>
+      queryKey[0] !== "me";
+    void client.cancelQueries({ predicate: protectedQuery });
+    client.removeQueries({ predicate: protectedQuery });
+    // Pending requests can still complete; their captured version guards callbacks.
+    client.getMutationCache().clear();
+  }
   for (const listener of listeners.get(client) ?? []) listener();
 }

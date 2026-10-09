@@ -1,11 +1,14 @@
 /* TABLE AI design tokens for Taff. Source: docs/ui/prototype/_ds/table-ai-design-system/tokens.
    Light values come from the design system; dark values from the approved prototype. */
+/* Text keeps the system font on a slow first visit (no swap, no layout shift,
+   no bandwidth taken from the JavaScript); the web fonts are cached for the
+   next visit. Phones ship good Latin and CJK system fonts. */
 @font-face {
   font-family: "Manrope";
   src: url("/fonts/Manrope.woff2") format("woff2");
   font-weight: 200 800;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   unicode-range: U+0100-052F, U+1E00-1EFF, U+E000-E00F;
 }
 @font-face {
@@ -13,7 +16,7 @@
   src: url("/fonts/Manrope-latin.woff2") format("woff2");
   font-weight: 200 800;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
   unicode-range: U+0000-00FF, U+2000-2FFF, U+FB00-FB06;
 }
 @font-face {
@@ -21,7 +24,7 @@
   src: url("/fonts/NotoSansTC-ui.woff2") format("woff2");
   font-weight: 300 600;
   font-style: normal;
-  font-display: swap;
+  font-display: optional;
 }
 :root {
   /* Base palette */

@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
+import { preload } from "react-dom";
 import english from "../locales/en/common.json";
 import { Providers } from "../src/components/providers";
+import { preloadBootScript } from "../src/lib/i18n";
 import { themeBootScript } from "../src/lib/theme";
 import "./globals.css";
 
@@ -21,10 +23,19 @@ export const viewport: Viewport = {
   ],
 };
 export default function RootLayout({ children }: { children: ReactNode }) {
+  // The session request gates every signed-in view; start it with the HTML
+  // instead of after the JavaScript has downloaded and run.
+  preload("/api/me", { as: "fetch", crossOrigin: "anonymous" });
   return (
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning>
-        <script dangerouslySetInnerHTML={{ __html: themeBootScript }} />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              themeBootScript +
+              preloadBootScript(process.env.NEXT_PUBLIC_ASSET_VERSION ?? "dev"),
+          }}
+        />
         <Providers english={english}>{children}</Providers>
       </body>
     </html>

@@ -40,6 +40,7 @@
   "focusHint": "未安排日期的任務，以及今天到期的任務。",
   "emptyTitle": "清爽的一天。",
   "emptyDescription": "在上方新增任務，開始今天的工作。",
+  "showMore": "再顯示 {{count}} 項",
   "ownedBy": "負責人：{{name}}",
   "unknownMember": "團隊成員",
   "due": "到期：{{date}}",

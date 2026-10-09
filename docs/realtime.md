@@ -37,4 +37,8 @@ agent tokens remain server-authorized; optimistic state never fabricates them.
 
 This is cache reconciliation, without offline write queues or durable event
 replay. PostgreSQL notifications may be lost during a disconnection; refetching
-on reconnect obtains current authorized state.
+on reconnect obtains current authorized state. The first open of a page
+only marks the families stale instead of refetching them: the initial reads
+are in flight or seconds old at that moment, and a change inside that
+handshake window is picked up on the next focus, mount or event. Every later
+open follows a disconnect and refetches.

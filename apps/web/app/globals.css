@@ -304,6 +304,9 @@ footer.tagline {
   background: var(--accent-wash);
   box-shadow: none;
 }
+.show-more {
+  margin-top: var(--space-md);
+}
 .button-full {
   width: 100%;
 }

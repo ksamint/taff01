@@ -39,6 +39,7 @@
   "focusHint": "Unscheduled tasks and tasks due today.",
   "emptyTitle": "A clear day ahead.",
   "emptyDescription": "Add a task above to get started.",
+  "showMore": "Show {{count}} more",
   "ownedBy": "Owned by {{name}}",
   "unknownMember": "Team member",
   "due": "Due {{date}}",

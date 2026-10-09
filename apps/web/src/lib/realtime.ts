@@ -37,18 +37,20 @@ export function connectWorkspace(
   let timer: ReturnType<typeof setTimeout> | undefined;
   let attempt = 0;
   let dirty = false;
-  const flush = () => {
+  let opened = false;
+  const flush = (options?: { refetchType: "none" }) => {
     if (stopped || !dirty || client.isMutating()) return;
     dirty = false;
     void client.invalidateQueries({
       predicate: ({ queryKey }) => FAMILIES.includes(String(queryKey[0])),
+      ...options,
     });
   };
-  const invalidate = () => {
+  const invalidate = (options?: { refetchType: "none" }) => {
     dirty = true;
-    flush();
+    flush(options);
   };
-  const unsubscribe = client.getMutationCache().subscribe(flush);
+  const unsubscribe = client.getMutationCache().subscribe(() => flush());
   function connect() {
     if (stopped) return;
     const url = new URL("/api/realtime", window.location.origin);
@@ -59,7 +61,11 @@ export function connectWorkspace(
     current.onopen = () => {
       if (!stopped && current === socket) {
         attempt = 0;
-        invalidate();
+        // The first open overlaps the page's initial reads: it only marks them
+        // stale, so nothing is fetched twice and the next focus or mount
+        // re-validates. Later opens follow a disconnect and refetch everything.
+        invalidate(opened ? undefined : { refetchType: "none" });
+        opened = true;
       }
     };
     current.onmessage = (message) => {

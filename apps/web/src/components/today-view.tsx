@@ -34,6 +34,8 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
+const TODAY_PAGE = 20;
+
 type TaskMutation =
   | { kind: "create"; body: CreateTask }
   | { kind: "assign"; id: string; body: AssignTask };
@@ -118,6 +120,11 @@ export function TodayView() {
     onSettled: () => client.invalidateQueries({ queryKey: taskKey }),
   });
   const visibleTasks = todayTasks(tasks.data ?? [], me.user.tz);
+  // A long backlog renders in pages: the first screen paints fast on a phone
+  // and the rest arrives on request.
+  const [showAll, setShowAll] = useState(false);
+  const shownTasks = showAll ? visibleTasks : visibleTasks.slice(0, TODAY_PAGE);
+  const hiddenCount = visibleTasks.length - shownTasks.length;
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const date = new Intl.DateTimeFormat(locale, {
     timeZone: me.user.tz,
@@ -307,7 +314,7 @@ export function TodayView() {
             </div>
           ) : (
             <ul className="task-list" aria-live="polite">
-              {visibleTasks.map((task) => (
+              {shownTasks.map((task) => (
                 <li key={task.id} data-testid="task-card" className="task-card">
                   <div className="task-card-top">
                     <span className={`status status-${task.status}`}>
@@ -365,6 +372,18 @@ export function TodayView() {
                 </li>
               ))}
             </ul>
+          )}
+          {hiddenCount > 0 && (
+            <button
+              type="button"
+              className="button button-full show-more"
+              data-testid="today-show-more"
+              onClick={() => setShowAll(true)}
+            >
+              {t("showMore", {
+                count: new Intl.NumberFormat(locale).format(hiddenCount),
+              })}
+            </button>
           )}
         </section>
       </div>
