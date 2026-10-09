@@ -25,17 +25,17 @@ the runnable production API and checks that the owned process stays alive.
 | --- | --- |
 | Lint and workspace type checking | Passed |
 | Licence gate | Passed; axe-core is the documented exception |
-| Vitest | 394 passed across 29 files; includes external-database/TLS/isolation regression |
+| Vitest | 400 passed across 31 files; includes schema leaves, locale persistence/parity and external-database/TLS/isolation regressions |
 | Web and server builds | Passed; API and worker production dependency trees prepared |
-| Today JavaScript budget | 200,270 gzip bytes / 204,800 limit |
-| Lighthouse en, actual mobile throttling | Performance 94, accessibility 96, best practices 100 |
-| Lighthouse zh-CN, actual mobile throttling | Performance 92, accessibility 96, best practices 100 |
-| Lighthouse zh-HK, actual mobile throttling | Performance 92, accessibility 96, best practices 100 |
+| Today JavaScript budget | 199,050 gzip bytes / 204,800 limit |
+| Lighthouse en, actual mobile throttling | Performance 93, accessibility 96, best practices 100 |
+| Lighthouse zh-CN, actual mobile throttling | Performance 90, accessibility 96, best practices 100 |
+| Lighthouse zh-HK, actual mobile throttling | Performance 91, accessibility 96, best practices 100 |
 | Audit script type checking and report credential assertions | Passed |
-| Playwright, all three locales | 75 passed (5.7 minutes); corrected month drag passed in every locale without retries |
+| Playwright, all three locales | 78 passed (6.0 minutes), 26 per locale; all corrected locale, digest, cache and calendar flows passed without retries |
 | MCP smoke against the production API | Passed; every tool, rate limiting, revocation and call logging |
 | Docker API image | Local build blocked before execution by Docker Hub's TLS certificate mismatch |
-| GitHub Actions and report upload | Run 37879586044 built all three images and passed actual-throttling Lighthouse: performance 93/90/91, accessibility 96 and best practices 100. Browser flows passed 74/75; the desktop month-drag fixture correction is awaiting CI. |
+| GitHub Actions and report upload | Run 37881130403 built all three images and passed lint, types, licences, unit tests, builds and the bundle budget, but Lighthouse performance 89/87/88 failed. The current startup changes pass local Lighthouse 93/90/91; new CI is pending. |
 
 Lighthouse now uses its supported DevTools throttling method with unchanged
 mobile network and CPU settings. The earlier unthrottled gather and simulated
@@ -49,7 +49,51 @@ selected day-number text instead of starting a drag. The desktop month fixture
 now uses locator hover to wait for
 stable geometry before pressing, retaining the native gesture, single-write,
 recurrence and deadline assertions. The full corrected local suite passed;
-remote CI remains the release gate.
+remote CI remains the deployment gate.
+
+## Today startup and private PostgreSQL TLS checkpoint — 2026-10-09
+
+Today now imports actual schema leaves for its reads, mutations, session and
+change events. Root exports retain the same validator objects; non-Today
+feature modules remain lazy. Query keys, validation and private cache guards
+are unchanged. Tests assert leaf identity and strict input validation.
+
+The server reads an allowlisted presentation-only `taff-locale` cookie and
+renders the document language and stored dictionary before JavaScript. Other
+locale dictionaries, including English, load on demand. All three dictionaries
+have identical key sets; the two Chinese dictionaries include the unused
+singular review-count alias for exact parity. The current dictionary avoids a
+competing JSON preload; older browser-only locale preferences and workspace
+reads retain their preloads. `/api/me` remains fresh and authorizes private
+reads. Cookie persistence, blocked-storage behavior, stale locale requests and
+English switching have regression coverage. The loader is installed before
+child rendering: react-i18next snapshots language methods during render, so
+a passive-effect installation could bypass dictionary loading. Cleanup cancels
+in-flight resource requests while retaining a stable method for those snapshots. Browser checks also verify that
+copying only the locale cookie never authenticates a session.
+
+The latest three-run LCP medians are **en 1,844 ms, zh-CN 2,020 ms and zh-HK
+2,032 ms**, with 20 cards in every run. Step 2 is not accepted yet. Existing
+resource logs show the 166 KiB optional CJK font starting around 530 ms in
+Chinese versus 1,431 ms in English, overlapping critical JavaScript downloads.
+Font/network competition is the remaining hypothesis; no performance threshold
+has been relaxed. A transient local audit stall did not reproduce; the latest
+full Lighthouse run passed all three locales. Audit failures now print only a
+phase and error class, and presentation cookie values cannot corrupt report
+field names during credential redaction.
+
+The external database URL now uses its certificate DNS name,
+`postgres01.internal.apuch.art`, mapped to private `10.206.103.13` in the
+migrator, API and worker. This preserves verified TLS identity with the installed
+Postgres.js client; its IP-literal connection path does not send a TLS server
+name. The Compose regression checks these mappings and the read-only CA mount.
+Production provisioning and the new DNS route remain pending successful CI.
+The expanded browser run exposed locale-switch regressions and clock/Origin
+fixture assumptions; the corrected full suite passed 78/78, and MCP smoke passed against the healthy
+production API. All nine required validation commands passed before this push. Auth fixtures now
+provide the trusted Origin when a presentation cookie survives logout, wait
+for the browser time-zone save, and generate future digests after the latest
+configured daily slot. The production clock and origin enforcement are unchanged.
 
 ## Remaining work and open decisions
 
