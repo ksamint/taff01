@@ -25,17 +25,23 @@ the runnable production API and checks that the owned process stays alive.
 | --- | --- |
 | Lint and workspace type checking | Passed |
 | Licence gate | Passed; axe-core is the documented exception |
-| Vitest | 393 passed across 28 files |
+| Vitest | 394 passed across 29 files; includes external-database/TLS/isolation regression |
 | Web and server builds | Passed; API and worker production dependency trees prepared |
 | Today JavaScript budget | 200,270 gzip bytes / 204,800 limit |
-| Lighthouse en | Performance 96, accessibility 96, best practices 100 |
-| Lighthouse zh-CN | Performance 95, accessibility 96, best practices 100 |
-| Lighthouse zh-HK | Performance 95, accessibility 96, best practices 100 |
+| Lighthouse en, actual mobile throttling | Performance 94, accessibility 96, best practices 100 |
+| Lighthouse zh-CN, actual mobile throttling | Performance 92, accessibility 96, best practices 100 |
+| Lighthouse zh-HK, actual mobile throttling | Performance 92, accessibility 96, best practices 100 |
 | Audit script type checking and report credential assertions | Passed |
-| Playwright, all three locales | 75 passed (6.4 minutes) |
+| Playwright, all three locales | 75 passed (6.0 minutes) |
 | MCP smoke against the production API | Passed; every tool, rate limiting, revocation and call logging |
 | Docker API image | Local build blocked before execution by Docker Hub's TLS certificate mismatch |
-| GitHub Actions and report upload | Pending branch push |
+| GitHub Actions and report upload | Run 37877547564 uploaded reports and built all three images; simulated performance 87/89/86 failed the threshold. Actual-throttling correction pending CI validation. |
+
+Lighthouse now uses its supported DevTools throttling method with unchanged
+mobile network and CPU settings. The earlier unthrottled gather and simulated
+4G prediction chose optional downloaded fonts differently across Mac and Linux;
+actual throttling lets Chrome apply the real font download deadline. The score
+thresholds, cold-cache setup, signed-in checks and locale checks are unchanged.
 
 ## Remaining work and open decisions
 

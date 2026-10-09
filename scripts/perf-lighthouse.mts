@@ -156,6 +156,8 @@ try {
         port,
         logLevel: "error",
         formFactor: "mobile",
+        // Optional fonts must see the actual mobile download deadline.
+        throttlingMethod: "devtools",
         disableStorageReset: true,
         onlyCategories: ["performance", "accessibility", "best-practices"],
       },

@@ -124,7 +124,8 @@ for the production images described in
 [the deployment guide](docs/deploy.md).
 After `pnpm build && pnpm build:server`, `pnpm perf:lighthouse` starts the
 production API and web servers, signs in a dedicated test account and audits
-Today in all three locales using the mobile preset. Both configured service
+Today in all three locales using the mobile preset with actual network and CPU
+throttling, so optional fonts follow the mobile download deadline. Both configured service
 ports must be free. Each performance, accessibility and best-practices score
 must reach 90; sanitized JSON reports go to the ignored `lighthouse-reports/`
 directory and are uploaded by CI. The audit adds sample tasks to the local
