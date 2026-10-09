@@ -129,7 +129,17 @@ ranges covering the original 540 mappings. The source font is retained.
 Regeneration reproduced both assets byte for byte; axes, outlines, horizontal
 and vertical metrics at six weights and cross-subset kerning were verified.
 The family, optional display, advertised weights, preloads and 20-card limit
-are preserved. Runtime performance improvement is not yet measured.
+are preserved. The isolated Linux measurement improved performance to 91/89/90
+for en/zh-CN/zh-HK, with accessibility 96 and best practices 100. Simplified
+Chinese still missed the required 90, so this candidate was not pushed or
+deployed. Its first seven required checks passed; the failing performance gate
+stopped the run before LCP, browser tests and MCP smoke.
+
+Today now shares one locale/time-zone time formatter across its visible cards
+per render, instead of constructing one for every due date. Number formatting
+also reuses one instance for the count and pagination label. Formatting options,
+locale updates, task filtering and the 20-card limit are unchanged. The isolated
+runner will measure this change with the original performance settings.
 
 ## Remaining work and open decisions
 

@@ -136,7 +136,13 @@ export function TodayView() {
     month: "long",
     day: "numeric",
   }).format(new Date());
-  const count = new Intl.NumberFormat(locale).format(visibleTasks.length);
+  const time = new Intl.DateTimeFormat(locale, {
+    timeZone: me.user.tz,
+    hour: "numeric",
+    minute: "2-digit",
+  });
+  const numbers = new Intl.NumberFormat(locale);
+  const count = numbers.format(visibleTasks.length);
   const people =
     members.data?.filter((member) => member.kind === "person") ?? [];
   const agents = new Map(
@@ -327,11 +333,7 @@ export function TodayView() {
                     {task.dueAt && (
                       <span className="task-due">
                         {t("due", {
-                          date: new Intl.DateTimeFormat(locale, {
-                            timeZone: me.user.tz,
-                            hour: "numeric",
-                            minute: "2-digit",
-                          }).format(new Date(task.dueAt)),
+                          date: time.format(new Date(task.dueAt)),
                         })}
                       </span>
                     )}
@@ -385,7 +387,7 @@ export function TodayView() {
               onClick={() => setShowAll(true)}
             >
               {t("showMore", {
-                count: new Intl.NumberFormat(locale).format(hiddenCount),
+                count: numbers.format(hiddenCount),
               })}
             </button>
           )}
