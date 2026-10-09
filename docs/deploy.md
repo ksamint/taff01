@@ -135,6 +135,31 @@ The current app has no Neo4j driver or graph data model, so no graph connection
 is claimed or configured. Graph functionality and its isolation need an explicit
 scope decision before changing that shared service.
 
+### Deployed checkpoint — 2026-10-09
+
+`https://taff.apuch.cn` serves release
+`ef7f52c3052db173d2e56ec7828d0ed400092c8e` from
+`/srv/taff/releases/ef7f52c3052db173d2e56ec7828d0ed400092c8e` on
+`ins-ag5pnvc0`. Its separate `taff` project runs web, API, worker, Caddy and
+Valkey; the one-shot migrator exited successfully. The private runtime env and
+public PostgreSQL CA live under `/srv/taff/secrets/`. No Taff container publishes
+a host port. Only Taff's Caddy joins the shared edge network.
+
+DNSPod's A record points to `146.56.215.142` with a 600-second TTL. The route
+file is `/srv/tiansight/traefik/dynamic/taff.yaml`. Trusted HTTPS, public health,
+signup, sign-in/out, task create/read/update, rejected foreign origins and
+WebSocket-driven UI updates passed through the public origin. PostgreSQL uses
+the dedicated `taff` database and role on `ins-nx2vm7pc`; authenticated app
+connections used TLS 1.3. All six neighboring containers retained their IDs,
+start times and health, and PostgreSQL was not restarted. The deployment lock
+was released after verification. Neo4j integration remains pending the graph
+scope decision above.
+
+The exact deployed commit passed local validation and both required GitHub CI
+runs: [feature 37923784208](https://github.com/ksamint/taff01/actions/runs/37923784208)
+and [main 37924781365](https://github.com/ksamint/taff01/actions/runs/37924781365).
+The later documentation checkpoint does not change the running release.
+
 ## Operations
 
 - Health: `GET /api/health` on the API; Caddy proxies it at `AUTH_URL/api/health`.

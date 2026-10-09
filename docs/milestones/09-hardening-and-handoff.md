@@ -307,7 +307,50 @@ GitHub's default branch and required CI from the controller before startup.
 It retains the existing Compose publisher and rollback. The DNS rollback now
 reconciles an interrupted creation with the exact SHA-owned intent and rejects
 ambiguous or foreign records; seven simulated recovery cases passed. Validation
-of this documented transport correction is pending. The public site is not live.
+of this documented transport correction was pending at that checkpoint; the
+public site was not yet live.
+
+### First successful public deployment — 2026-10-09
+
+Candidate `ef7f52c3` passed the unchanged nine-command validation before push:
+409 unit tests in 33 files, 87 production browser cases and MCP smoke. Initial
+JavaScript is 191,397 gzip bytes; EN/CN/HK Lighthouse performance is 99/99/98,
+accessibility 96 and best practices 100. Lighthouse LCP is 1,422/1,400/1,411 ms;
+the separate three-run LCP medians are 536/568/564 ms. Feature CI
+[37923784208](https://github.com/ksamint/taff01/actions/runs/37923784208) and main CI
+[37924781365](https://github.com/ksamint/taff01/actions/runs/37924781365) both passed
+for the exact SHA `ef7f52c3052db173d2e56ec7828d0ed400092c8e`.
+
+The single native attempt for this SHA succeeded. The controller relayed and
+verified the tracked Git bundle, built with the host's existing default builder,
+rechecked the exact default-branch SHA and CI under the deployment lock, then
+started the separate `taff` Compose project on `ins-ag5pnvc0`. Migrations exited
+zero; API and Valkey were healthy, worker jobs completed, and Caddy exposed no
+host ports. The owned Traefik route and DNSPod A record now serve
+[taff.apuch.cn](https://taff.apuch.cn) with a trusted Let's Encrypt certificate.
+
+The public mobile smoke passed signup, Secure/HttpOnly session cookies, task
+create/read/update, foreign-origin rejection, WebSocket-driven UI updates,
+sign-out and sign-in, with no browser page errors. The dedicated PostgreSQL
+database and restricted role on `ins-nx2vm7pc` use verified TLS; all nine observed
+authenticated app connections used TLS 1.3. The six neighboring containers'
+IDs, start times and health were unchanged; PostgreSQL retained its start time
+and read-only configuration/TLS mounts. The deployment lock was released.
+First-deployment rollback remains scoped to Taff's owned route/DNS/project,
+preserving the database, role and volumes.
+
+Runtime image IDs:
+
+| Service | Image ID |
+| --- | --- |
+| Web | `sha256:51712d8c7dd0c18ea987e1bc7a3b8ea1bdaa24cf57da9b1c35d362ddc13646b0` |
+| API / migrator | `sha256:22129b773b2d05182cf62033285c054487265ef8236cb84a90eef140da099b7b` |
+| Worker | `sha256:e961006814cb85fab43b62c9cb2ebb4d2cc967286d7774342d770928c4eb5343` |
+
+Neo4j on `ins-aj5kmjag` remains unchanged: the app has no graph model or driver,
+and the requested graph data/feature and shared-server isolation need a scope
+decision. The deployment checkpoint documents the live release; it does not
+claim M9 completion or create a release tag.
 
 ## Remaining work and open decisions
 

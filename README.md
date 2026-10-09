@@ -4,6 +4,11 @@ An open-source, performance-first task and calendar app where people and AI
 agents work as one team. Mobile web and PWA first, in English, Simplified Chinese
 and Traditional Chinese (Hong Kong).
 
+Live app: [taff.apuch.cn](https://taff.apuch.cn). See
+[the deployment checkpoint](docs/deploy.md#deployed-checkpoint--2026-10-09)
+for the running release and server layout. Neo4j integration is pending its
+graph data and isolation scope.
+
 ## Status
 
 Phase 1 provides a mobile Today view, email/password sign-up and sign-in,
@@ -40,7 +45,10 @@ measurement on simulated slow 4G and a GitHub Actions pipeline.
 Lighthouse's axe-core dependency (MPL-2.0) is approved for development and CI
 only in ADR 0003. The M8 `pnpm perf:lcp` baseline is: English passes
 (1.94 s on simulated slow 4G), the Chinese locales measure 2.34 s and remain
-open.
+open at that checkpoint. The deployed M9 candidate passes the unchanged
+performance budgets in all three locales; the
+[M9 report](docs/milestones/09-hardening-and-handoff.md#first-successful-public-deployment--2026-10-09)
+records its measurements and CI evidence.
 See [the deployment guide](docs/deploy.md) and the M8 milestone report.
 
 Open items for release: OAuth 2.1 metadata on `/mcp` (needs an authorization
