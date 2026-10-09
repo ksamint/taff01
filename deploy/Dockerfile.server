@@ -1,0 +1,29 @@
+# syntax=docker/dockerfile:1.7
+# One image for the API, the worker and the migrator; TARGET picks the entry.
+FROM node:24-alpine AS build
+RUN npm install -g pnpm@12.10.1
+WORKDIR /repo
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY apps/api/package.json apps/api/
+COPY apps/worker/package.json apps/worker/
+COPY apps/web/package.json apps/web/
+COPY packages/core/package.json packages/core/
+COPY packages/db/package.json packages/db/
+COPY packages/schemas/package.json packages/schemas/
+RUN pnpm install --frozen-lockfile
+COPY . .
+RUN pnpm build:server
+ARG TARGET=api
+# A flat production node_modules so the bundle's external imports resolve.
+RUN pnpm --filter @taff/${TARGET} deploy --prod --legacy --config.node-linker=hoisted /out
+
+FROM node:24-alpine
+ENV NODE_ENV=production MIGRATIONS_DIR=/app/migrations API_HOST=0.0.0.0
+WORKDIR /app
+COPY --from=build /out/node_modules ./node_modules
+COPY --from=build /repo/dist/server ./dist
+COPY --from=build /repo/dist/server/migrations ./migrations
+USER node
+ARG TARGET=api
+ENV TAFF_TARGET=${TARGET}
+CMD ["sh", "-c", "node dist/${TAFF_TARGET}.mjs"]

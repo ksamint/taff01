@@ -18,13 +18,17 @@
     "db:seed": "node --env-file=.env node_modules/tsx/dist/cli.mjs packages/core/src/seed.ts",
     "e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test",
     "perf:budget": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/bundle-budget.mts",
-    "mcp:smoke": "node --env-file=.env node_modules/tsx/dist/cli.mjs apps/api/scripts/mcp-smoke.mts"
+    "mcp:smoke": "node --env-file=.env node_modules/tsx/dist/cli.mjs apps/api/scripts/mcp-smoke.mts",
+    "build:server": "node node_modules/tsx/dist/cli.mjs scripts/build-server.mts",
+    "licence:check": "node node_modules/tsx/dist/cli.mjs scripts/licence-gate.mts",
+    "perf:lcp": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/perf-lcp.mts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
     "@modelcontextprotocol/client": "^2.3.1",
     "@playwright/test": "^1.64.0",
     "@types/node": "^24.0.0",
+    "esbuild": "^0.28.2",
     "tsx": "^4.23.0",
     "turbo": "^2.11.0",
     "typescript": "~7.0.2",

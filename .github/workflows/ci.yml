@@ -1,0 +1,112 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  POSTGRES_PASSWORD: ci-password
+  DATABASE_URL: postgres://taff:ci-password@127.0.0.1:55432/taff
+  TEST_DATABASE_URL: postgres://taff:ci-password@127.0.0.1:55432/taff_test
+  REDIS_URL: redis://127.0.0.1:56379
+  AUTH_URL: http://localhost:3000
+  AUTH_SECRET: ci-only-secret-with-at-least-32-characters
+  API_INTERNAL_URL: http://127.0.0.1:3001
+  API_PORT: "3001"
+  DEMO_EMAIL: alex@taff.local
+  DEMO_PASSWORD: ci-demo-password
+  TOKEN_PEPPER: ci-only-pepper-16-chars
+  MCP_RATE_LIMIT: "60"
+  CI: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: taff
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: taff
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U taff -d taff" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+      valkey:
+        image: valkey/valkey:9-alpine
+        ports: ["56379:6379"]
+        options: >-
+          --health-cmd "valkey-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: printf 'CI=1\n' > .env
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm licence:check
+      - name: Create the test database
+        run: PGPASSWORD=ci-password psql -h 127.0.0.1 -p 55432 -U taff -d taff -c 'CREATE DATABASE taff_test'
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm build:server
+      - run: pnpm perf:budget
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Browser flows in en, zh-CN and zh-HK
+        run: pnpm e2e
+      - name: MCP smoke against the bundled API
+        run: |
+          node dist/server/api.mjs > api.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3001/api/health && break; sleep 1; done
+          pnpm mcp:smoke
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            test-results
+            api.log
+          retention-days: 7
+  images:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build the API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.server
+          build-args: TARGET=api
+          push: false
+          tags: taff-api:ci
+      - name: Build the worker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.server
+          build-args: TARGET=worker
+          push: false
+          tags: taff-worker:ci
+      - name: Build the web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile.web
+          push: false
+          tags: taff-web:ci

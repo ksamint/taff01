@@ -1,0 +1,13 @@
+# SITE_ADDRESS is the public host (automatic HTTPS) or ":80" behind another proxy.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	@backend path /api/* /mcp /mcp/*
+	reverse_proxy @backend api:3001
+	reverse_proxy web:3000
+}

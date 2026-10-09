@@ -1,0 +1,99 @@
+# Production: docker compose --env-file .env.production -f compose.prod.yaml up -d
+name: taff
+services:
+  postgres:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: taff
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+      POSTGRES_DB: taff
+    volumes:
+      - postgres18_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taff -d taff"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  valkey:
+    image: valkey/valkey:9-alpine
+    restart: unless-stopped
+    command: ["valkey-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+  migrate:
+    image: ${TAFF_IMAGE_API:-taff-api}:${TAFF_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.server
+      args: { TARGET: api }
+    command: ["node", "dist/migrate.mjs"]
+    environment:
+      DATABASE_URL: postgres://taff:${POSTGRES_PASSWORD}@postgres:5432/taff
+    depends_on:
+      postgres: { condition: service_healthy }
+  api:
+    image: ${TAFF_IMAGE_API:-taff-api}:${TAFF_TAG:-latest}
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://taff:${POSTGRES_PASSWORD}@postgres:5432/taff
+      REDIS_URL: redis://valkey:6379
+      AUTH_URL: ${AUTH_URL:?Set AUTH_URL to the public origin}
+      AUTH_SECRET: ${AUTH_SECRET:?Set AUTH_SECRET}
+      TOKEN_PEPPER: ${TOKEN_PEPPER:?Set TOKEN_PEPPER}
+      MCP_RATE_LIMIT: ${MCP_RATE_LIMIT:-60}
+      API_PORT: "3001"
+      API_HOST: 0.0.0.0
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      valkey: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3001/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+  worker:
+    image: ${TAFF_IMAGE_API:-taff-api}:${TAFF_TAG:-latest}
+    restart: unless-stopped
+    command: ["node", "dist/worker.mjs"]
+    environment:
+      DATABASE_URL: postgres://taff:${POSTGRES_PASSWORD}@postgres:5432/taff
+      REDIS_URL: redis://valkey:6379
+      AUTH_URL: ${AUTH_URL}
+      AUTH_SECRET: ${AUTH_SECRET}
+      TOKEN_PEPPER: ${TOKEN_PEPPER}
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+      valkey: { condition: service_healthy }
+  web:
+    image: ${TAFF_IMAGE_WEB:-taff-web}:${TAFF_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+      args: { API_INTERNAL_URL: http://api:3001 }
+    restart: unless-stopped
+    depends_on:
+      api: { condition: service_healthy }
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?Set SITE_ADDRESS, e.g. taff.example.com or :80}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - api
+volumes:
+  postgres18_data:
+  caddy_data:
+  caddy_config:
