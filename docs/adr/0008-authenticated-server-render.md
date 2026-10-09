@@ -31,4 +31,7 @@ Private HTML must remain uncached. Existing Me, locale and workspace preloads,
 client reconciliation, validation, optional fonts and the 20-card fixture stay
 in place. Account replacement during hydration, failed browser reads, session
 renewal and all unchanged performance/browser gates must pass before adoption.
-No dependency or framework version changes. Validation is pending.
+No dependency or framework version changes. Candidate `d06d2fc4` passed all
+nine checks, including the aged-session renewal regression and all nine
+account replacement/retry browser cases, plus the unchanged Lighthouse/LCP
+checks and both exact-commit GitHub CI runs. The server render is accepted.

@@ -20,7 +20,9 @@ is added.
 Adoption requires the same bundle budget, signed-in three-locale Lighthouse
 audit, three-run LCP measurements, browser flows, MCP smoke and exact-commit CI.
 No threshold, audit setting, data fixture, font behavior or authorization guard
-is relaxed. This candidate has not yet passed those checks.
+is relaxed. Candidate `d06d2fc4` passed every check, including both exact-commit
+GitHub CI runs on the feature branch and main. The production selection is
+accepted with ADR 0008's authenticated server render.
 
 ## Consequences
 

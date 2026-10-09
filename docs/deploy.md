@@ -91,6 +91,27 @@ docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.
 The explicit default builder uses this host's existing Tencent registry mirror.
 It leaves the builder selected for neighboring projects unchanged.
 
+If the host cannot reach GitHub, relay a Git bundle from the clean, validated
+workspace over the existing SSH connection. This transfers tracked Git objects
+and history, not working-tree files or runtime secrets:
+
+```sh
+test -z "$(git status --porcelain)"
+git bundle create /tmp/taff-release.bundle HEAD
+openssl dgst -sha256 /tmp/taff-release.bundle
+```
+
+Create the destination file without overwriting an existing artifact. Verify
+the same SHA-256 on the host, run `git bundle verify` from an existing Git
+checkout, then clone the bundle with `--no-checkout` into the new release path.
+Check out the pinned 40-character SHA with `--detach`, verify `HEAD` and a clean
+tree, and set `origin` back to `https://github.com/ksamint/taff01.git`.
+The controller must check the remote default branch and exact required CI from
+the connected workspace while holding the host deployment lock, both before
+building and again before container startup. The host's direct GitHub connection
+is not used for these checks. Retain the same isolated Compose build, migration,
+readiness, HTTPS/DNS smoke and scoped rollback procedure.
+
 The override disables the bundled PostgreSQL service and removes published
 ports. Only Taff's Caddy container joins the existing `tableai-can01-edge`
 network, with alias `taff-caddy`. API, worker, web and Valkey use Taff's own

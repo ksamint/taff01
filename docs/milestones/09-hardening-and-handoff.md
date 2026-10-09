@@ -284,13 +284,36 @@ session lookup. Its bootstrap remains provisional until the browser confirms:
 Today reads, mutations, persisted data, profile effects, notifications and
 realtime are gated, and other protected routes retain the loading gate.
 Browser session renewal is preserved. Focused unit and type checks pass;
-account-switch/retry browser regressions and the full unchanged gates are pending.
+account-switch/retry browser regressions and the full unchanged gates were pending
+at implementation time.
+
+Candidate `d06d2fc4` subsequently passed all nine checks: 409 unit tests in 33
+files, 87 production browser tests including all nine SSR account-switch/retry
+cases, and MCP smoke. Initial JavaScript is 191,399 gzip bytes. Lighthouse
+EN/CN/HK performance is 98/99/98, accessibility 96 and best practices 100;
+Lighthouse LCP is 1,469/1,433/1,424 ms. Separate unchanged three-run LCP
+medians are 556/544/544 ms. Chinese audits additionally load the unchanged
+114,724-byte optional CJK font. Both GitHub CI runs passed: feature
+[37919940000](https://github.com/ksamint/taff01/actions/runs/37919940000) and
+main [37920840689](https://github.com/ksamint/taff01/actions/runs/37920840689).
+
+The one native deployment attempt for this SHA failed before build or startup:
+the host could not connect to GitHub TCP port 443 after 133 seconds. No Taff
+containers, route, DNS record or migrations were created. The previous image
+tag was restored byte-for-byte, existing credentials retained, and the host
+lock released. The next transport relays a checksum-verified Git bundle over
+the existing SSH connection, checks the pinned clean checkout, and reconfirms
+GitHub's default branch and required CI from the controller before startup.
+It retains the existing Compose publisher and rollback. The DNS rollback now
+reconciles an interrupted creation with the exact SHA-owned intent and rejects
+ambiguous or foreign records; seven simulated recovery cases passed. Validation
+of this documented transport correction is pending. The public site is not live.
 
 ## Remaining work and open decisions
 
 M9 is not complete. The local performance targets passed while preserving
-the M8 preloads, optional fonts and 20-card Today limit; main CI still needs
-sufficient CPU headroom.
+the M8 preloads, optional fonts and 20-card Today limit; both exact-commit CI runs
+passed with the accepted SSR/Webpack build.
 Next: finish the full accessibility and keyboard pass, i18n parity and
 route screenshots, faithful idempotent prototype seed, verified invitation
 email, and the clean-checkout deployment walkthrough and release notes.
