@@ -3,7 +3,6 @@
 // Today route stays within its JavaScript budget.
 import {
   array,
-  iso,
   maxLength,
   minLength,
   nullable,
@@ -50,12 +49,6 @@ export const taskFields = {
   projectId: optional(nullable(idSchema)),
   labels: optional(labelsSchema),
 };
-export const calendarInstantSchema = iso.datetime({ offset: true }).check(
-  refine((value) => {
-    const ms = Date.parse(value);
-    return ms >= Date.UTC(1970, 0, 1) && ms < Date.UTC(2201, 0, 1);
-  }),
-);
 export const nonnegativeInteger = number().check(
   refine((value) => Number.isSafeInteger(value) && value >= 0),
 );

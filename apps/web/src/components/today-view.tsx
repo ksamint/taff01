@@ -3,11 +3,10 @@
 import {
   type AssignTask,
   assignTaskSchema,
-  type CreateTask,
-  createTaskSchema,
   type Task,
   taskSchema,
 } from "@taff/schemas/base";
+import type { CreateTask } from "@taff/schemas/task-create";
 import {
   useIsMutating,
   useMutation,
@@ -17,7 +16,7 @@ import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
+import { ApiError, errorKey, request } from "../lib/api";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import {
   tasksKey,
@@ -33,7 +32,7 @@ import {
 } from "../lib/query-snapshot";
 import { todayTasks } from "../lib/today";
 import { useWorkspace } from "./app-shell";
-import { MemberOptions } from "./member-options";
+import { memberOptions } from "./member-options";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -70,7 +69,7 @@ export function TodayView() {
             method: input.kind === "create" ? "POST" : "PATCH",
             body: JSON.stringify(
               input.kind === "create"
-                ? createTaskSchema.parse(input.body)
+                ? input.body
                 : assignTaskSchema.parse(input.body),
             ),
           },
@@ -78,6 +77,19 @@ export function TodayView() {
       ),
     onMutate: async (input) => {
       const snapshot = await snapshotQueries(client, [taskKey]);
+      if (input.kind === "create") {
+        const { createTaskSchema } = await import(
+          "@taff/schemas/task-create"
+        ).catch(() => {
+          throw new ApiError("network");
+        });
+        if (!isCurrentSnapshot(client, snapshot))
+          throw new ApiError("unauthorized", 401);
+        const parsed = createTaskSchema.safeParse(input.body);
+        setValidationError(!parsed.success);
+        if (!parsed.success) throw new ApiError("invalid_input", 400);
+        input.body = parsed.data;
+      }
       const temporaryId = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(taskKey, (current = []) =>
@@ -130,6 +142,10 @@ export function TodayView() {
   const shownTasks = showAll ? visibleTasks : visibleTasks.slice(0, TODAY_PAGE);
   const hiddenCount = visibleTasks.length - shownTasks.length;
   const locale = i18n.resolvedLanguage ?? me.user.locale;
+  const workerOptions = useMemo(
+    () => memberOptions(members.data ?? [], t),
+    [members.data, t],
+  );
   const { dateFormatter, time, numbers } = useMemo(
     () => ({
       dateFormatter: new Intl.DateTimeFormat(locale, {
@@ -164,14 +180,16 @@ export function TodayView() {
     t("unknownMember");
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const parsed = createTaskSchema.safeParse({
-      workspaceId: workspace.id,
-      title,
-      ownerId,
-      workerId: workerId || null,
+    setValidationError(false);
+    mutation.mutate({
+      kind: "create",
+      body: {
+        workspaceId: workspace.id,
+        title,
+        ownerId,
+        workerId: workerId || null,
+      },
     });
-    setValidationError(!parsed.success);
-    if (parsed.success) mutation.mutate({ kind: "create", body: parsed.data });
   }
   return (
     <>
@@ -264,7 +282,7 @@ export function TodayView() {
                     !access.data?.canCreateTasks || !members.data || busy
                   }
                 >
-                  <MemberOptions members={members.data ?? []} />
+                  {workerOptions}
                 </select>
               </div>
             </div>
@@ -378,7 +396,7 @@ export function TodayView() {
                         })
                       }
                     >
-                      <MemberOptions members={members.data ?? []} />
+                      {workerOptions}
                     </select>
                   </div>
                 </li>

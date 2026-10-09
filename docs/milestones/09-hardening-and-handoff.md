@@ -169,8 +169,25 @@ the release checkout. They will be reused for the next validated candidate.
 
 Today now memoizes its date, time and number formatter objects by locale and
 time zone across renders. The current date and task filtering are still evaluated
-on each render. Its performance gain is pending measurement; no new candidate
-has been deployed.
+on each render. Candidate `729e7061` passed all nine isolated checks, including
+400 unit tests, 78 browser cases and MCP smoke; JavaScript was 199,388 gzip bytes.
+Lighthouse was 92/90/90 and three-run LCP medians were 1,768/1,956/1,952 ms.
+Same-host TBT changed by less than 3 ms, so no material CPU improvement was
+demonstrated. CI run
+[37904550921](https://github.com/ksamint/taff01/actions/runs/37904550921) failed
+performance at 86/87/85 on a lower CPU benchmark. Accessibility remained 96 and
+best practices 100; all image builds passed. Main was not advanced, and no
+deployment was attempted for that candidate.
+
+Creation and calendar-input schemas now live in a lazy creation leaf, retaining
+their exact definitions and root-package exports. Today loads that validation
+inside its mutation lifecycle, checks the captured session after the download,
+then normalizes input before optimism and the request. The repeated Worker
+selectors reuse one translated option projection instead of mounting 21
+translation subscriptions. Browser regression coverage delays the validator
+download across remote session revocation, checks that no write escapes, and
+verifies whitespace rejection, canonical title trimming and translated options.
+The new candidate's performance and full validation are pending.
 
 ## Remaining work and open decisions
 

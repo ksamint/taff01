@@ -1,4 +1,4 @@
-import type { CalendarScheduleInput } from "./base";
+import type { CalendarScheduleInput } from "./task-create";
 
 const DAY = 86400000;
 const zoneCache = new Map<string, string>();

@@ -7,6 +7,7 @@ import * as root from "./index";
 import * as preferences from "./notification-preferences";
 import * as projects from "./project-read";
 import * as runs from "./run-read";
+import * as creation from "./task-create";
 import * as workspace from "./workspace-read";
 
 describe("startup schema leaves", () => {
@@ -25,6 +26,11 @@ describe("startup schema leaves", () => {
         expect(Reflect.get(root, name), name).toBe(value);
       }
     }
+    expect(root.createTaskSchema).toBe(creation.createTaskSchema);
+    expect(root.calendarScheduleInputSchema).toBe(
+      creation.calendarScheduleInputSchema,
+    );
+    expect(base).not.toHaveProperty("createTaskSchema");
     const id = "00000000-0000-4000-8000-000000000001";
     const input = {
       workspaceId: id,
@@ -36,13 +42,13 @@ describe("startup schema leaves", () => {
         timeZone: "+08:00",
       },
     };
-    expect(base.createTaskSchema.parse(input)).toEqual({
+    expect(creation.createTaskSchema.parse(input)).toEqual({
       ...input,
       title: "Atomic task",
       workerId: null,
       calendar: { ...input.calendar, rrule: null },
     });
-    expect(base.createTaskSchema.parse(input)).not.toHaveProperty("dueAt");
+    expect(creation.createTaskSchema.parse(input)).not.toHaveProperty("dueAt");
     for (const body of [
       { ...input, status: "done" },
       { ...input, ownerId: "outside-boundary" },
@@ -55,7 +61,7 @@ describe("startup schema leaves", () => {
         calendar: { ...input.calendar, timeZone: "invalid" },
       },
     ]) {
-      expect(base.createTaskSchema.safeParse(body).success).toBe(false);
+      expect(creation.createTaskSchema.safeParse(body).success).toBe(false);
       expect(() => root.createTaskSchema.parse(body)).toThrow(base.SchemaError);
     }
     expect(
