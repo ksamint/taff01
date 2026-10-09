@@ -1,9 +1,17 @@
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 
 it("keeps Taff isolated while using the private PostgreSQL server and shared TLS proxy", () => {
+  const exampleDatabase = readFileSync(".env.production.example", "utf8").match(
+    /^DATABASE_URL=(.+)$/m,
+  )?.[1];
+  expect(exampleDatabase).toBeDefined();
+  const exampleUrl = new URL(exampleDatabase ?? "");
+  expect(exampleUrl.hostname).toBe("postgres01.internal.apuch.art");
+  expect(exampleUrl.searchParams.get("sslmode")).toBe("verify-full");
   const database =
-    "postgres://taff:compose-test@10.206.103.13:5432/taff?sslmode=verify-full";
+    "postgres://taff:compose-test@postgres01.internal.apuch.art:5432/taff?sslmode=verify-full";
   const config = JSON.parse(
     execFileSync(
       "docker",
@@ -38,6 +46,9 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
   expect(config.services.migrate.depends_on ?? {}).toEqual({});
   for (const service of ["migrate", "api", "worker"]) {
     expect(config.services[service].environment.DATABASE_URL).toBe(database);
+    expect(config.services[service].extra_hosts).toEqual([
+      "postgres01.internal.apuch.art=10.206.103.13",
+    ]);
     expect(config.services[service].environment.NODE_EXTRA_CA_CERTS).toBe(
       "/run/secrets/postgresql-ca.crt",
     );

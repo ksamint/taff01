@@ -4,6 +4,8 @@ services:
   postgres:
     profiles: [local-database]
   migrate:
+    extra_hosts:
+      postgres01.internal.apuch.art: "10.206.103.13"
     environment:
       DATABASE_URL: ${DATABASE_URL:?Set the private external PostgreSQL URL}
       NODE_EXTRA_CA_CERTS: /run/secrets/postgresql-ca.crt
@@ -11,12 +13,16 @@ services:
       - ${POSTGRES_CA_FILE:?Set the external PostgreSQL CA path}:/run/secrets/postgresql-ca.crt:ro
     depends_on: !reset {}
   api:
+    extra_hosts:
+      postgres01.internal.apuch.art: "10.206.103.13"
     environment:
       DATABASE_URL: ${DATABASE_URL:?Set the private external PostgreSQL URL}
       NODE_EXTRA_CA_CERTS: /run/secrets/postgresql-ca.crt
     volumes:
       - ${POSTGRES_CA_FILE:?Set the external PostgreSQL CA path}:/run/secrets/postgresql-ca.crt:ro
   worker:
+    extra_hosts:
+      postgres01.internal.apuch.art: "10.206.103.13"
     image: ${TAFF_IMAGE_WORKER:-taff-worker}:${TAFF_TAG:-latest}
     build:
       context: .
