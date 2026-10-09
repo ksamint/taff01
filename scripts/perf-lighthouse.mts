@@ -49,6 +49,7 @@ let context:
   | Awaited<ReturnType<typeof chromium.launchPersistentContext>>
   | undefined;
 let auditor: Puppeteer.Browser | undefined;
+let phase = "service readiness";
 try {
   let ready = false;
   for (let attempt = 0; attempt < 60; attempt++) {
@@ -75,6 +76,7 @@ try {
     args: ["--remote-debugging-port=0"],
     serviceWorkers: "block",
   });
+  phase = "signed-in fixture";
   const password = randomUUID();
   const created = await context.request.post(
     `${origin.origin}/api/auth/sign-up/email`,
@@ -124,6 +126,7 @@ try {
   const cdp = await context.newCDPSession(warm);
   const failures: string[] = [];
   for (const locale of ["en", "zh-CN", "zh-HK"] as const) {
+    phase = `${locale} profile and warm-up`;
     const changed = await context.request.patch(
       `${origin.origin}/api/profile`,
       {
@@ -150,6 +153,7 @@ try {
       origin: origin.origin,
       storageTypes: "indexeddb,cache_storage,service_workers",
     });
+    phase = `${locale} audit`;
     const result = await lighthouse(
       origin.origin,
       {
@@ -184,7 +188,9 @@ try {
       password,
       process.env.AUTH_SECRET ?? "",
       process.env.TOKEN_PEPPER ?? "",
-      ...cookies.map((cookie) => cookie.value),
+      ...cookies
+        .filter((cookie) => cookie.name !== "taff-locale")
+        .map((cookie) => cookie.value),
     ];
     await writeFile(
       join(reports, `${locale}.report.json`),
@@ -211,11 +217,18 @@ try {
         lighthouse: result.lhr.lighthouseVersion,
       }),
     );
+    await auditPage.goto("about:blank");
   }
   assert(
     failures.length === 0,
     `Lighthouse scores below 90: ${failures.join(", ")}`,
   );
+} catch (error) {
+  // Playwright transport errors include request cookies in their message and stack.
+  console.error(
+    `Lighthouse failed during ${phase} (${error instanceof Error ? error.name : "Error"})`,
+  );
+  process.exitCode = 1;
 } finally {
   await auditor?.disconnect();
   await context?.close();
