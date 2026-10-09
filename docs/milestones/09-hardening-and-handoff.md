@@ -113,6 +113,24 @@ Validation moved to temporary, private PostgreSQL 18 and Valkey 9 containers on
 the application server, separate from the production database and edge proxy.
 These validation services are disposable and must be removed after the checks.
 
+The isolated Linux run for `55648a49` passed all nine commands: 400 unit tests,
+78 browser tests and MCP smoke, with initial JavaScript at 199,344 gzip bytes.
+Its temporary containers were removed. CI run
+[37892789265](https://github.com/ksamint/taff01/actions/runs/37892789265)
+passed all Docker builds but reported Lighthouse performance 88/86/85 for
+en/zh-CN/zh-HK; accessibility was 96 and best practices 100 in every locale.
+Deployment is still blocked on the required performance gate; PostgreSQL,
+the production application, the shared route and DNS remain unmodified.
+
+The reports show the 169,180-byte Noto UI font competing with startup scripts
+in every locale, including English. It is now split into a 47,620-byte shared
+UI/Today asset and its 114,440-byte complement, with exact disjoint Unicode
+ranges covering the original 540 mappings. The source font is retained.
+Regeneration reproduced both assets byte for byte; axes, outlines, horizontal
+and vertical metrics at six weights and cross-subset kerning were verified.
+The family, optional display, advertised weights, preloads and 20-card limit
+are preserved. Runtime performance improvement is not yet measured.
+
 ## Remaining work and open decisions
 
 M9 is not complete. Next: reduce Chinese-locale LCP to a three-run median of
