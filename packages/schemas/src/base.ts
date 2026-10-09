@@ -5,6 +5,7 @@
 import {
   _default,
   array,
+  boolean,
   email,
   extend,
   type infer as Infer,
@@ -16,6 +17,7 @@ import {
   object,
   optional,
   refine,
+  regex,
   strictObject,
   string,
   trim,
@@ -78,6 +80,17 @@ export const signUpSchema = extend(signInSchema, {
   name: string().check(trim(), minLength(1), maxLength(100)),
 });
 export const signOutSchema = strictObject({});
+/** Initial SMS rollout accepts canonical mainland mobile numbers only. */
+export const mainlandPhoneSchema = string().check(regex(/^\+861[3-9]\d{9}$/));
+export const sendPhoneOtpSchema = strictObject({
+  phoneNumber: mainlandPhoneSchema,
+});
+export const verifyPhoneOtpSchema = strictObject({
+  phoneNumber: mainlandPhoneSchema,
+  code: string().check(regex(/^\d{6}$/)),
+});
+export const authMethodsSchema = strictObject({ smsEnabled: boolean() });
+export type AuthMethods = Infer<typeof authMethodsSchema>;
 export const profileSchema = strictObject({
   locale: localeSchema,
   tz: string().check(
@@ -138,6 +151,9 @@ export const errorSchema = object({
     "invalid_input",
     "conflict",
     "internal_error",
+    "rate_limited",
+    "sms_unavailable",
+    "sms_invalid_code",
   ]),
 });
 export const SchemaError = $ZodError;

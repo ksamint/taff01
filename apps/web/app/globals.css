@@ -357,7 +357,7 @@ select:focus-visible,
 }
 .field-hint {
   font-size: var(--text-label-sm);
-  color: var(--text-subtle);
+  color: var(--text-muted);
 }
 .panel {
   background: var(--bg);

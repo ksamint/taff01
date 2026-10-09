@@ -32,6 +32,10 @@ export const user = pgTable(
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
+    phoneNumber: text("phone_number").unique(),
+    phoneNumberVerified: boolean("phone_number_verified")
+      .default(false)
+      .notNull(),
     locale: text("locale").default("en").notNull(),
     tz: text("tz").default("UTC").notNull(),
     ...dates,
@@ -90,6 +94,45 @@ export const verification = pgTable(
     ...dates,
   },
   (t) => [index("verifications_identifier_idx").on(t.identifier)],
+);
+/** Private auth state: never store an OTP or phone number in these rows. */
+export const smsAuthChallenges = pgTable(
+  "sms_auth_challenges",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    phoneHash: text("phone_hash").notNull().unique(),
+    codeHash: text("code_hash"),
+    ready: boolean("ready").default(false).notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    lastSentAt: timestamp("last_sent_at", { withTimezone: true }).notNull(),
+    windowStartedAt: timestamp("window_started_at", {
+      withTimezone: true,
+    }).notNull(),
+    sendCount: integer("send_count").notNull(),
+    ...dates,
+  },
+  (t) => [
+    check("sms_auth_challenges_attempts", sql`${t.attempts} between 0 and 3`),
+    check("sms_auth_challenges_sends", sql`${t.sendCount} between 1 and 5`),
+    check(
+      "sms_auth_challenges_hashes",
+      sql`${t.phoneHash} ~ '^[a-f0-9]{64}$' and (${t.codeHash} is null or ${t.codeHash} ~ '^[a-f0-9]{64}$')`,
+    ),
+  ],
+);
+export const smsAuthLimits = pgTable(
+  "sms_auth_limits",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    bucket: text("bucket").notNull().unique(),
+    windowStartedAt: timestamp("window_started_at", {
+      withTimezone: true,
+    }).notNull(),
+    count: integer("count").notNull(),
+    ...dates,
+  },
+  (t) => [check("sms_auth_limits_count", sql`${t.count} between 1 and 30`)],
 );
 export const workspaces = pgTable("workspaces", {
   id: uuid("id").defaultRandom().primaryKey(),

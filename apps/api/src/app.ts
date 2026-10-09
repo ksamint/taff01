@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { getConnInfo } from "@hono/node-server/conninfo";
 import {
   CoreError,
   type createCore,
@@ -30,6 +31,7 @@ import {
   SchemaError,
   scheduleTaskSchema,
   searchInputSchema,
+  sendPhoneOtpSchema,
   setTaskCalendarSchema,
   signInSchema,
   signOutSchema,
@@ -41,6 +43,7 @@ import {
   updateNotificationPreferencesSchema,
   updateTaskSchema,
   updateTaskStatusSchema,
+  verifyPhoneOtpSchema,
   workspaceCreateSchema,
   workspaceInviteAcceptSchema,
   workspaceInviteInputSchema,
@@ -183,6 +186,44 @@ export function createApp(
     await next();
   });
   app.get("/api/health", (c) => c.json({ status: "ok" }));
+  app.get("/api/auth/methods", (c) => {
+    c.header("Cache-Control", "no-store");
+    return c.json(core.getAuthMethods());
+  });
+  for (const [path, validator] of [
+    ["/api/auth/phone-number/send-otp", sendPhoneOtpSchema],
+    ["/api/auth/phone-number/verify", verifyPhoneOtpSchema],
+  ] as const) {
+    app.post(path, async (c) => {
+      validator.parse(await c.req.raw.clone().json());
+      let peer = "unknown";
+      try {
+        peer = getConnInfo(c).remote.address ?? peer;
+      } catch {
+        /* In-process adapters have no socket. */
+      }
+      const response = await core.handlePhoneAuth(c.req.raw, peer);
+      for (const cookie of response.headers.getSetCookie())
+        c.header("Set-Cookie", cookie, { append: true });
+      c.header("Cache-Control", "no-store");
+      const retry =
+        response.headers.get("Retry-After") ??
+        response.headers.get("X-Retry-After");
+      if (
+        retry &&
+        /^\d{1,5}$/.test(retry) &&
+        Number(retry) > 0 &&
+        Number(retry) <= 3600
+      )
+        c.header("Retry-After", retry);
+      if (response.ok) return c.json({ status: true });
+      if (response.status === 429)
+        return c.json({ error: "rate_limited" }, 429);
+      if (response.status >= 500)
+        return c.json({ error: "sms_unavailable" }, 503);
+      return c.json({ error: "sms_invalid_code" }, 400);
+    });
+  }
   app.post("/api/auth/sign-in/email", async (c) => {
     signInSchema.parse(await c.req.raw.clone().json());
     return core.auth.handler(c.req.raw);

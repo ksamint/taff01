@@ -36,14 +36,26 @@ import {
   SchemaError,
   type Scope,
   scheduleTaskSchema,
+  sendPhoneOtpSchema,
   type Task,
   type TaskFilter,
   type TaskStatus,
   taskFilterSchema,
   updateTaskStatusSchema,
   updateTaskWorkSchema,
+  verifyPhoneOtpSchema,
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
+import { createSmsAuth } from "./sms-auth";
+import type { SmsProvider } from "./tencent-sms";
+
+export type { SmsProvider } from "./tencent-sms";
+export {
+  createTencentSmsProvider,
+  createTencentSmsProviderFromEnv,
+  SmsProviderError,
+} from "./tencent-sms";
+
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { createCalendarOperations } from "./calendar";
 import { createNotificationOperations } from "./notifications";
@@ -123,6 +135,7 @@ export function createCore(options: {
   authUrl: string;
   authSecret: string;
   tokenPepper: string;
+  sms?: SmsProvider;
 }) {
   if (options.tokenPepper.length < 16)
     throw new Error("TOKEN_PEPPER must be at least 16 characters");
@@ -197,7 +210,11 @@ export function createCore(options: {
     })();
     return closed;
   }
+  const sms = options.sms
+    ? createSmsAuth(db, options.authSecret, options.sms)
+    : undefined;
   const auth = betterAuth({
+    plugins: sms ? [sms.plugin] : [],
     logger: { disabled: true },
     baseURL: options.authUrl,
     secret: options.authSecret,
@@ -906,6 +923,22 @@ export function createCore(options: {
       lockTask,
     }),
     auth,
+    getAuthMethods: () => ({ smsEnabled: Boolean(sms) }),
+    handlePhoneAuth: async (request: Request, peerAddress: string) => {
+      const path = new URL(request.url).pathname;
+      const validator =
+        path === "/api/auth/phone-number/send-otp"
+          ? sendPhoneOtpSchema
+          : path === "/api/auth/phone-number/verify"
+            ? verifyPhoneOtpSchema
+            : null;
+      if (request.method !== "POST" || !validator)
+        return new Response(null, { status: 404 });
+      validator.parse(await request.clone().json());
+      if (!sms)
+        return Response.json({ error: "sms_unavailable" }, { status: 503 });
+      return auth.handler(sms.request(request, peerAddress));
+    },
     getSession,
     getMe,
     listMembers,

@@ -162,6 +162,32 @@ The later documentation checkpoint does not change the running release.
 
 ## Operations
 
+### Optional Tencent SMS login
+
+Configure `TENCENT_SECRET_ID`, `TENCENT_SECRET_KEY`, `TENCENT_SMS_SDK_APP_ID`,
+`TENCENT_SMS_SIGN_NAME` and `TENCENT_SMS_TEMPLATE_ID` together from the approved
+SMS secret manager. Never copy a personal Tencent CLI profile into production.
+`TENCENT_SMS_REGION` defaults to `ap-guangzhou`. Empty credentials disable the
+SMS method; a partial configuration fails startup. Only the API needs these
+values. Preserve the private env file's unrelated values and mode 0600.
+
+Before enabling, use the dedicated SMS identity to confirm the configured
+application, approved sign, approved one-parameter template and package-query
+readiness. Apply the additive migrations and deploy the validated release
+through the existing publisher. Verify health, existing email login and
+`GET /api/auth/methods` returning `{"smsEnabled":true}`. Test real delivery only
+with an explicitly authorized recipient; never send to fixture numbers.
+
+SMS supports mainland `+86` mobile numbers. First verification creates a
+separate phone account; existing email accounts are not automatically linked.
+Reverse-proxy users share conservative socket-peer rate limits until a trusted
+client-IP chain is explicitly configured. See [ADR 0009](adr/0009-tencent-sms-login.md).
+
+For configuration rollback, retain the previous env backup and image tags.
+Remove all five SMS values together, recreate only the API when the release
+itself is unchanged, then verify email login and SMS availability is false.
+Keep the additive schema and data.
+
 - Health: `GET /api/health` on the API; Caddy proxies it at `AUTH_URL/api/health`.
 - Logs: `docker compose -f compose.prod.yaml logs -f api worker web caddy`.
   pino redacts cookies, authorization headers, passwords and tokens.

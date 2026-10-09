@@ -551,5 +551,22 @@
     "emptyHint": "Enabled digests appear here and in the Inbox at the selected local time.",
     "truncated": "Counts include all matches; each list shows up to 20.",
     "historyLimit": "Showing the newest 31 digests."
+  },
+  "sms": {
+    "title": "Sign in with SMS",
+    "accountHint": "Your first verification creates a new phone account. For an existing email account, use email sign-in.",
+    "phone": "Mobile number",
+    "phoneHint": "Mainland China mobile numbers (+86).",
+    "code": "Verification code",
+    "sent": "Check your phone for the six-digit code. It expires in 5 minutes.",
+    "send": "Send code",
+    "verify": "Verify and sign in",
+    "resend": "Resend code",
+    "resendIn": "Resend in {{count}}s",
+    "changePhone": "Use another number",
+    "emailInstead": "Sign in with email",
+    "rateLimited": "Too many requests. Wait before trying again.",
+    "invalidCode": "Couldn’t sign in. Check the code or request a new one.",
+    "sendFailed": "Couldn’t send a code. Try again shortly or use email sign-in."
   }
 }

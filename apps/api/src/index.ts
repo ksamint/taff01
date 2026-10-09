@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { createCore } from "@taff/core";
+import { createCore, createTencentSmsProviderFromEnv } from "@taff/core";
 import pino from "pino";
 import { z } from "zod";
 import { createApp } from "./app";
@@ -32,6 +32,7 @@ const core = createCore({
   authUrl: env.AUTH_URL,
   authSecret: env.AUTH_SECRET,
   tokenPepper: env.TOKEN_PEPPER,
+  sms: createTencentSmsProviderFromEnv(process.env),
 });
 const rateLimiter = createRateLimiter(env.REDIS_URL, env.MCP_RATE_LIMIT);
 const realtime = await createRealtime(core);

@@ -354,10 +354,60 @@ claim M9 completion or create a release tag.
 
 ## Remaining work and open decisions
 
+### Tencent SMS login implementation — 2026-10-09
+
+The requested SMS login uses the installed Better Auth phone/session lifecycle
+with Core-owned HMAC OTP state and atomic PostgreSQL consumption. The provider
+uses Node fetch/TC3 signing without new dependencies. Six-digit codes expire
+after five minutes; three wrong attempts exhaust them. Persistent phone, peer
+and global send limits retain reservations after failed or ambiguous delivery.
+The API accepts only strict send/verify bodies, sanitizes responses, preserves
+cookies and Retry-After, and rejects untrusted forwarding headers. The redundant
+phone plugin memory limit and unused phone operations are removed. Reverse-proxy
+users deliberately share the conservative socket-peer budget (ADR 0009).
+
+The translated mobile form supports mainland `+86` numbers, cooldowns, provider
+failures and email fallback. A first verification creates a separate phone
+identity; email identities are not automatically merged. Migration 0019 is
+additive, and private auth audit/NOTIFY records contain UUID metadata only.
+
+Implementation `d0bbe4785f6385cded3143047c76535252207485` passed all nine
+unchanged validation gates. All 428 unit/integration tests passed, including
+seven real-PG SMS cases for the production auth limiter, concurrency,
+wrong/expired/replayed codes, account separation, provider-failure cooldowns,
+distributed budgets and private audit events. All 96 browser cases passed,
+including nine mocked SMS cases across three locales; MCP smoke passed.
+Today JS is 191,576 gzip bytes. Lighthouse EN/CN/HK performance is 99/98/98,
+accessibility 96 and best practices 100; Lighthouse LCP is
+1426.827/1405.683/1389.468 ms. Separate default three-run LCP medians are
+552/564/560 ms. No performance threshold or fixture was weakened.
+
+The first full-suite candidate caught a misplaced account-separation test
+nested inside the expiry test (426 passed, one failed). The test is collected
+at suite level in the accepted implementation; failed-run evidence is retained.
+
+Mobile visual checks passed in all three locales without page errors.
+The shared field-hint style used a light color with 4.476:1 contrast. A one-line
+change to the existing muted token gives measured browser contrast of 9.327:1
+in light and 10.666:1 in dark. The final contrast/report checkpoint follows the
+same gates before push. The broader M9 route/theme/keyboard audit remains open.
+
+The final contrast/report tree also passed all nine gates (428 unit/integration,
+96 browser and MCP smoke; Lighthouse 98/98/98, LCP medians 560/544/544 ms,
+191,577 gzip bytes). GitHub push protection then rejected the public Tencent
+example Secret ID in the signing test. It is replaced by an obvious placeholder
+that does not change the expected signature. Unpublished commits are rewritten
+to remove that value, while local validation proofs remain preserved; the new
+candidate must pass the same gates before push.
+
+The [quick review report](../reviews/2026-10-09-development-review.md) records
+the deployed baseline and prioritized next work. SMS credentials/readiness and
+live activation remain pending 1Password unlock. No real SMS has been sent.
+
 M9 is not complete. The local performance targets passed while preserving
 the M8 preloads, optional fonts and 20-card Today limit; both exact-commit CI runs
 passed with the accepted SSR/Webpack build.
-Next: finish the full accessibility and keyboard pass, i18n parity and
+Next: finish the full accessibility and keyboard pass, locale typography and
 route screenshots, faithful idempotent prototype seed, verified invitation
 email, and the clean-checkout deployment walkthrough and release notes.
 No release tag has been created.

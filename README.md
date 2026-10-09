@@ -56,6 +56,12 @@ server decision), outgoing email for invitations, the M9 accessibility and i18n
 pass, prototype seed data and release notes. Milestone reports record working
 behavior and validation; development continues while they are reviewed.
 
+Tencent Cloud SMS login is optional: configure the approved provider values
+as described in [deployment](docs/deploy.md#optional-tencent-sms-login).
+It supports mainland `+86` mobile numbers and separate verified phone accounts.
+The [development quick review](docs/reviews/2026-10-09-development-review.md)
+records the current production checkpoint and next steps.
+
 ## Quick start
 
 Install Node 24, pnpm 12 and Docker with Compose, then:
