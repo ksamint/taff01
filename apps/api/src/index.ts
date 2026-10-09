@@ -12,6 +12,8 @@ const env = z
     AUTH_URL: z.url(),
     AUTH_SECRET: z.string().min(32),
     API_PORT: z.coerce.number().int().min(1).max(65535).default(3001),
+    // Loopback by default; containers set 0.0.0.0 behind the reverse proxy.
+    API_HOST: z.string().min(1).default("127.0.0.1"),
     TOKEN_PEPPER: z.string().min(16),
     REDIS_URL: z.url(),
     MCP_RATE_LIMIT: z.coerce.number().int().min(1).default(60),
@@ -38,7 +40,7 @@ const server = serve(
   {
     fetch: app.fetch,
     port: env.API_PORT,
-    hostname: "127.0.0.1",
+    hostname: env.API_HOST,
     websocket: { server: realtime.server },
   },
   () => {

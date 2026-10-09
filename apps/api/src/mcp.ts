@@ -60,6 +60,7 @@ import {
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
 type CallState = { failed?: McpCall["status"] };
+type ErrorLogger = { error(details: object, message: string): void };
 
 function ok(payload: unknown): CallToolResult {
   return {
@@ -67,8 +68,17 @@ function ok(payload: unknown): CallToolResult {
     structuredContent: { result: payload } as Record<string, unknown>,
   };
 }
-function failure(error: unknown, state: CallState): CallToolResult {
+function failure(
+  error: unknown,
+  state: CallState,
+  logger?: ErrorLogger,
+): CallToolResult {
   const code = error instanceof CoreError ? error.code : "internal_error";
+  if (!(error instanceof CoreError))
+    logger?.error(
+      { errorName: error instanceof Error ? error.name : typeof error },
+      "MCP tool failed",
+    );
   state.failed = code === "forbidden" ? "denied" : "error";
   return { isError: true, content: [{ type: "text", text: code }] };
 }
@@ -78,13 +88,14 @@ export function createMcpServer(
   core: Core,
   principal: AgentPrincipal,
   state: CallState,
+  logger?: ErrorLogger,
 ) {
   const server = new McpServer({ name: "taff", version: "0.1.0" });
   const run = async (fn: () => Promise<unknown>) => {
     try {
       return ok(await fn());
     } catch (error) {
-      return failure(error, state);
+      return failure(error, state, logger);
     }
   };
   server.registerTool(
@@ -122,20 +133,13 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpTasksUpdateArgs),
     },
     (args) =>
-      run(async () => {
-        let task =
-          args.workerId !== undefined
-            ? await core.assignTask(principal, args.taskId, {
-                workerId: args.workerId,
-              })
-            : null;
-        if (args.status)
-          task = await core.updateTaskStatus(principal, args.taskId, {
-            status: args.status,
-          });
-        if (!task) throw new CoreError("invalid_input", 400);
-        return task;
-      }),
+      // Worker and status change together or not at all.
+      run(() =>
+        core.updateTaskWork(principal, args.taskId, {
+          workerId: args.workerId,
+          status: args.status,
+        }),
+      ),
   );
   server.registerTool(
     "tasks.edit",
@@ -324,14 +328,14 @@ export function createMcpServer(
   return server;
 }
 
-export function createMcpHttpHandler(core: Core) {
+export function createMcpHttpHandler(core: Core, logger?: ErrorLogger) {
   return createMcpHandler(
     (ctx) => {
       const extra = ctx.authInfo?.extra as
         | { principal: AgentPrincipal; state: CallState }
         | undefined;
       if (!extra) throw new CoreError("unauthorized", 401);
-      return createMcpServer(core, extra.principal, extra.state);
+      return createMcpServer(core, extra.principal, extra.state, logger);
     },
     { responseMode: "json", maxRequestBodySize: 1_048_576 },
   );
@@ -346,8 +350,15 @@ export function describeCall(body: unknown): {
   if (!first || typeof first !== "object")
     return { method: "invalid", tool: null };
   const message = first as { method?: unknown; params?: { name?: unknown } };
+  const method = message.method;
+  const tool = message.params?.name;
+  // The log keeps bounded identifiers only; anything else is recorded as unknown.
   return {
-    method: typeof message.method === "string" ? message.method : "invalid",
-    tool: typeof message.params?.name === "string" ? message.params.name : null,
+    method:
+      typeof method === "string" && /^[A-Za-z][\w./-]{0,63}$/.test(method)
+        ? method
+        : "invalid",
+    tool:
+      typeof tool === "string" && /^[\w.-]{1,100}$/.test(tool) ? tool : null,
   };
 }

@@ -1,4 +1,10 @@
-import { CoreError, type createCore, userPrincipal } from "@taff/core";
+import { createHash } from "node:crypto";
+import {
+  CoreError,
+  type createCore,
+  type Principal,
+  userPrincipal,
+} from "@taff/core";
 import {
   agentPermissionInputSchema,
   agentProfileInputSchema,
@@ -50,6 +56,22 @@ import type { Realtime } from "./realtime";
 
 type Core = ReturnType<typeof createCore>;
 
+/** Tool results that the SDK itself rejected (bad arguments, unknown tool) still count as errors. */
+async function callStatus(response: Response): Promise<"ok" | "error"> {
+  if (!response.ok) return "error";
+  const type = response.headers.get("content-type") ?? "";
+  const length = Number(response.headers.get("content-length") ?? 0);
+  if (!type.includes("application/json") || length > 65_536) return "ok";
+  const payload = (await response
+    .clone()
+    .json()
+    .catch(() => null)) as {
+    error?: unknown;
+    result?: { isError?: boolean };
+  } | null;
+  return payload?.error || payload?.result?.isError ? "error" : "ok";
+}
+
 export function createApp(
   core: Core,
   authUrl: string,
@@ -59,9 +81,9 @@ export function createApp(
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<{
-    Variables: { userId: string; sessionExpiresAt: number };
+    Variables: { userId: string; sessionId: string; sessionExpiresAt: number };
   }>();
-  const mcp = createMcpHttpHandler(core);
+  const mcp = createMcpHttpHandler(core, logger);
   app.use(
     "/mcp",
     bodyLimit({
@@ -76,8 +98,7 @@ export function createApp(
       return c.json({ error: "forbidden" }, 403);
     const header = c.req.header("authorization") ?? "";
     const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
-    const principal = token ? await core.authenticateAgentToken(token) : null;
-    if (!principal || principal.kind !== "agent") {
+    if (!token || token.length > 200) {
       c.header("WWW-Authenticate", 'Bearer realm="taff"');
       return c.json({ error: "unauthorized" }, 401);
     }
@@ -89,8 +110,13 @@ export function createApp(
             .json()
             .catch(() => null)
         : null;
+    // A batch would carry many calls under one rate-limit hit and one log row.
+    if (Array.isArray(body)) return c.json({ error: "invalid_input" }, 400);
     const { method, tool } = describeCall(body);
-    const record = (status: "ok" | "error" | "denied" | "rate_limited") =>
+    const record = (
+      principal: Extract<Principal, { kind: "agent" }>,
+      status: "ok" | "error" | "denied" | "rate_limited",
+    ) =>
       core
         .recordMcpCall({
           tokenId: principal.tokenId,
@@ -103,9 +129,23 @@ export function createApp(
         .catch((error: Error) =>
           logger.error({ errorName: error.name }, "MCP call log failed"),
         );
-    if (!(await rateLimiter.hit(principal.tokenId).catch(() => false))) {
-      await record("rate_limited");
+    // Count before looking the token up, so floods never reach the database.
+    const limit = await rateLimiter
+      .hit(createHash("sha256").update(token).digest("hex"))
+      .catch(() => ({ allowed: false, count: 0 }));
+    if (!limit.allowed) {
+      // Log the first refusal of a window only; a flood must not fan out.
+      if (limit.count === rateLimiter.limit + 1) {
+        const principal = await core.authenticateAgentToken(token);
+        if (principal?.kind === "agent")
+          await record(principal, "rate_limited");
+      }
       return c.json({ error: "rate_limited" }, 429);
+    }
+    const principal = await core.authenticateAgentToken(token);
+    if (!principal || principal.kind !== "agent") {
+      c.header("WWW-Authenticate", 'Bearer realm="taff"');
+      return c.json({ error: "unauthorized" }, 401);
     }
     const state: { failed?: "error" | "denied" } = {};
     const response = await mcp.fetch(c.req.raw, {
@@ -117,7 +157,7 @@ export function createApp(
       },
       parsedBody: body ?? undefined,
     });
-    await record(state.failed ?? (response.ok ? "ok" : "error"));
+    await record(principal, state.failed ?? (await callStatus(response)));
     return response;
   });
   app.use("/api/*", cors({ origin, credentials: true }));
@@ -164,6 +204,7 @@ export function createApp(
     }
     if (!session) return c.json({ error: "unauthorized" }, 401);
     c.set("userId", session.user.id);
+    c.set("sessionId", session.session.id);
     c.set("sessionExpiresAt", session.session.expiresAt.getTime());
     await next();
   });
@@ -174,7 +215,13 @@ export function createApp(
     const userId = c.get("userId");
     await core.listMembers(userPrincipal(userId), workspaceId);
     if (!realtime) return c.json({ error: "unavailable" }, 503);
-    return realtime.upgrade(c, userId, workspaceId, c.get("sessionExpiresAt"));
+    return realtime.upgrade(
+      c,
+      userId,
+      workspaceId,
+      c.get("sessionId"),
+      c.get("sessionExpiresAt"),
+    );
   });
   app.get("/api/me", async (c) => c.json(await core.getMe(c.get("userId"))));
   app.get("/api/me/notifications", async (c) =>

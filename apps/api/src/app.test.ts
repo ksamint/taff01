@@ -12,7 +12,11 @@ const core = createCore({
 });
 const rateLimiter = { hits: 0, limit: 2 };
 const app = createApp(core, "http://localhost:3000", pino({ enabled: false }), {
-  hit: async () => ++rateLimiter.hits <= rateLimiter.limit,
+  limit: 2,
+  hit: async () => ({
+    allowed: ++rateLimiter.hits <= rateLimiter.limit,
+    count: rateLimiter.hits,
+  }),
   close: async () => {},
 });
 const id = "00000000-0000-4000-8000-000000000001";

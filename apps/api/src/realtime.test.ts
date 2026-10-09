@@ -95,7 +95,8 @@ beforeAll(async () => {
     origin,
     pino({ enabled: false }),
     {
-      hit: async () => true,
+      limit: 60,
+      hit: async () => ({ allowed: true, count: 1 }),
       close: async () => {},
     },
     realtime,
@@ -208,8 +209,23 @@ describe("authenticated realtime boundaries", () => {
     allowed.add(`alice:${workspace}`);
     expect(bob.readyState).toBe(WebSocket.OPEN);
     const bobClosed = closed(bob);
+    // Revoking another of Bob's sessions leaves this device connected.
     await deliver(
-      change({ workspaceId: null, userId: "bob", action: "sessions.delete" }),
+      change({
+        workspaceId: null,
+        userId: "bob",
+        resourceId: "bob-phone",
+        action: "sessions.delete",
+      }),
+    );
+    expect(bob.readyState).toBe(WebSocket.OPEN);
+    await deliver(
+      change({
+        workspaceId: null,
+        userId: "bob",
+        resourceId: "bob",
+        action: "sessions.delete",
+      }),
     );
     expect(await bobClosed).toBe(1012);
     const next = await connect("alice");

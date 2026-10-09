@@ -526,12 +526,21 @@ try {
   check(`rate limit of ${limit}/minute triggers 429`, limited);
   await client.close();
   await core.revokeAgentToken(asUser, issued.id);
+  // The limiter runs before authentication, so the exhausted token above
+  // keeps answering 429 for the rest of its window; revoke a fresh one.
+  const second = await core.createAgentToken(asUser, {
+    workspaceId: workspace.id,
+    memberId: agent.id,
+    name: `smoke revoked ${new Date().toISOString()}`,
+    scopes: ["tasks:read"],
+  });
+  await core.revokeAgentToken(asUser, second.id);
   const revokedClient = new Client({ name: "taff-smoke", version: "0.1.0" });
   let unauthorized = false;
   try {
     await revokedClient.connect(
       new StreamableHTTPClientTransport(apiUrl, {
-        authProvider: { token: async () => issued.token },
+        authProvider: { token: async () => second.token },
       }),
     );
   } catch (error) {
