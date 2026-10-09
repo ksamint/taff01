@@ -427,14 +427,13 @@ test("calendar real day drag, bottom-edge resize and whole-series undo preserve 
         monthWrites++;
     };
     desktop.on("request", countMonth);
-    const monthAck = patchAck(desktop, task.id);
-    const monthBox = await monthAnchor.boundingBox();
+    // Locator hover waits for scrolling and view geometry to settle before pressing.
+    await monthAnchor.hover({ position: { x: 12, y: 10 } });
     const monthCell = await desktop
       .locator(`.sx__month-grid-day[data-date="${date}"]`)
       .boundingBox();
-    if (!monthBox || !monthCell)
-      throw new Error("Missing native month geometry");
-    await desktop.mouse.move(monthBox.x + 12, monthBox.y + 10);
+    if (!monthCell) throw new Error("Missing native month geometry");
+    const monthAck = patchAck(desktop, task.id);
     await desktop.mouse.down();
     await desktop.waitForTimeout(250);
     await desktop.mouse.move(

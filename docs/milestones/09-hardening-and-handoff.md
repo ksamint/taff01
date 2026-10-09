@@ -32,16 +32,24 @@ the runnable production API and checks that the owned process stays alive.
 | Lighthouse zh-CN, actual mobile throttling | Performance 92, accessibility 96, best practices 100 |
 | Lighthouse zh-HK, actual mobile throttling | Performance 92, accessibility 96, best practices 100 |
 | Audit script type checking and report credential assertions | Passed |
-| Playwright, all three locales | 75 passed (6.0 minutes) |
+| Playwright, all three locales | 75 passed (5.7 minutes); corrected month drag passed in every locale without retries |
 | MCP smoke against the production API | Passed; every tool, rate limiting, revocation and call logging |
 | Docker API image | Local build blocked before execution by Docker Hub's TLS certificate mismatch |
-| GitHub Actions and report upload | Run 37877547564 uploaded reports and built all three images; simulated performance 87/89/86 failed the threshold. Actual-throttling correction pending CI validation. |
+| GitHub Actions and report upload | Run 37879586044 built all three images and passed actual-throttling Lighthouse: performance 93/90/91, accessibility 96 and best practices 100. Browser flows passed 74/75; the desktop month-drag fixture correction is awaiting CI. |
 
 Lighthouse now uses its supported DevTools throttling method with unchanged
 mobile network and CPU settings. The earlier unthrottled gather and simulated
 4G prediction chose optional downloaded fonts differently across Mac and Linux;
 actual throttling lets Chrome apply the real font download deadline. The score
 thresholds, cold-cache setup, signed-in checks and locale checks are unchanged.
+
+The failed Chinese calendar trace shows Schedule-X's 300 ms range-change
+animation moving the event after the test captured its coordinates; the press
+selected day-number text instead of starting a drag. The desktop month fixture
+now uses locator hover to wait for
+stable geometry before pressing, retaining the native gesture, single-write,
+recurrence and deadline assertions. The full corrected local suite passed;
+remote CI remains the release gate.
 
 ## Remaining work and open decisions
 
