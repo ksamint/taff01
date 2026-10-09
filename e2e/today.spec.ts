@@ -63,9 +63,12 @@ test("sign in, create a task and assign it to an agent", async ({
   await page.getByTestId("task-title").fill("   ");
   await expect(page.getByTestId("task-submit")).toBeEnabled();
   await page.getByTestId("task-submit").click();
-  await expect(page.getByRole("alert")).toHaveText(
-    messages[locale].errors.invalid_input,
-  );
+  await expect(
+    page
+      .locator("form")
+      .filter({ has: page.getByTestId("task-title") })
+      .getByRole("alert"),
+  ).toHaveText(messages[locale].errors.invalid_input);
   await page.getByTestId("task-title").fill(`  ${title}  `);
   await expect(page.getByTestId("task-submit")).toBeEnabled();
   const agentOption = page

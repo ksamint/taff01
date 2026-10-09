@@ -7,8 +7,9 @@ import {
 import { inboxSchema } from "@taff/schemas/inbox-read";
 import { runListSchema } from "@taff/schemas/run-read";
 import { workspaceAccessSchema } from "@taff/schemas/workspace-read";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, request } from "./api";
+import { m3MutationKey } from "./optimistic-m3";
 
 export const meKey = ["me"] as const;
 export const tasksKey = (workspaceId: string) =>
@@ -57,7 +58,10 @@ export const inboxKey = (workspaceId: string) =>
   ["inbox", workspaceId] as const;
 
 export function useInbox(workspaceId: string) {
+  const client = useQueryClient();
   return useQuery({
+    refetchOnMount: () =>
+      client.isMutating({ mutationKey: m3MutationKey }) === 0,
     staleTime: 0,
     queryKey: inboxKey(workspaceId),
     queryFn: async () =>

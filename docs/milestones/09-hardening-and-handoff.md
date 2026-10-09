@@ -249,6 +249,24 @@ larger card refactor is proposed. ADR 0007 records a measured candidate using
 the installed Next version's Webpack production build through the existing
 package script. Its full validation and any performance gain are pending.
 
+Candidate `42521a2e` passed the first seven required checks, including 402 unit
+tests. Webpack produced 190,690 gzip bytes of initial JavaScript; Lighthouse
+performance was 90/90/90, accessibility 96 and best practices 100. Three-run
+LCP medians were 1,676/1,844/1,852 ms. Blocking time increased relative to the
+previous candidate, so these results establish byte and LCP improvements,
+not a CPU improvement. Production browser testing finished with 73 passes and
+five failures; MCP smoke was not reached, and this candidate was not pushed.
+
+Three failures exposed a test selector collision with Next's production route
+announcer. The validation assertion now scopes the exact translated alert to
+the task composer. The other two traces show an Inbox GET starting about 16 ms
+after a held snooze PATCH, overwriting its optimistic removal. The shared Inbox
+query now reuses Calendar's mutation-aware mount-refetch guard, preventing a
+late notification observer from issuing that read during a pending write.
+Settlement still reconciles the authoritative Inbox. An actual QueryObserver
+regression fails without the guard and passes with it, including rejected-write
+rollback and the settlement read. Full validation of this repair is pending.
+
 ## Remaining work and open decisions
 
 M9 is not complete. The local performance targets passed while preserving
