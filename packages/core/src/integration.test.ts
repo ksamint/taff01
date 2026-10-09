@@ -674,4 +674,83 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       code: "forbidden",
     });
   });
+  it("applies worker and status atomically and hides foreign tasks", async () => {
+    const asUser = userPrincipal(userId);
+    const issued = await core.createAgentToken(asUser, {
+      workspaceId,
+      memberId: agentId,
+      name: "Atomic client",
+      scopes: ["tasks:read", "tasks:write", "inbox:review"],
+    });
+    const agent = await core.authenticateAgentToken(issued.token);
+    if (!agent) throw new Error("token did not authenticate");
+    const task = await core.createTask(agent, {
+      workspaceId,
+      ownerId,
+      workerId: agentId,
+      dueAt: null,
+      title: "Atomic work",
+    });
+    // Reassigning to the owner then moving status fails as a whole: nothing persists.
+    await expect(
+      core.updateTaskWork(agent, task.id, {
+        workerId: ownerId,
+        status: "in_progress",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    const unchanged = (await core.listTasks(asUser, workspaceId)).find(
+      (item) => item.id === task.id,
+    );
+    expect(unchanged).toMatchObject({ workerId: agentId, status: "todo" });
+    const moved = await core.updateTaskWork(agent, task.id, {
+      status: "in_progress",
+    });
+    expect(moved.status).toBe("in_progress");
+    await expect(core.updateTaskWork(agent, task.id, {})).rejects.toMatchObject(
+      { code: "invalid_input" },
+    );
+    // An agent may not create work assigned to a person.
+    await expect(
+      core.createTask(agent, {
+        workspaceId,
+        ownerId,
+        workerId: ownerId,
+        dueAt: null,
+        title: "Handed off",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    // Outsiders learn nothing: not_found instead of a version conflict or 403.
+    await expect(
+      core.assignTask(userPrincipal(outsiderId), task.id, {
+        workerId: null,
+        version: 999,
+      }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await expect(
+      core.recordMcpCall({
+        tokenId: issued.id,
+        workspaceId,
+        method: "tools/call",
+        tool: "x".repeat(101),
+        status: "ok",
+        durationMs: 1,
+      }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    await expect(
+      connection.db.insert(agentTokens).values({
+        workspaceId,
+        memberId: ownerId,
+        createdBy: ownerId,
+        name: "person token",
+        hash: "h".repeat(64),
+        prefix: "taff_person0",
+        scopes: ["tasks:read"],
+      }),
+    ).rejects.toSatisfy((error: unknown) =>
+      /member_id must reference a agent member/.test(
+        String((error as { cause?: Error }).cause?.message ?? error),
+      ),
+    );
+    await core.revokeAgentToken(asUser, issued.id);
+  });
 });

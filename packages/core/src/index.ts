@@ -30,6 +30,7 @@ import {
   type McpCall,
   type Me,
   type Member,
+  mcpCallEntrySchema,
   type Profile,
   profileSchema,
   SchemaError,
@@ -40,6 +41,7 @@ import {
   type TaskStatus,
   taskFilterSchema,
   updateTaskStatusSchema,
+  updateTaskWorkSchema,
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
@@ -450,6 +452,7 @@ export function createCore(options: {
       await requireMember(tx, principal, body.workspaceId, "task:create", {
         workspaceId: body.workspaceId,
         taskId: body.parentId ?? undefined,
+        toWorkerId: body.workerId,
       });
       let parent: typeof tasks.$inferSelect | undefined;
       if (body.parentId) {
@@ -499,6 +502,116 @@ export function createCore(options: {
     if (!task) throw new CoreError("not_found", 404);
     return task;
   }
+  /** Locks a task the principal belongs to; outsiders see not_found, never a version or 403. */
+  async function lockTaskAs(
+    tx: Transaction,
+    principal: Principal,
+    taskId: string,
+  ) {
+    const task = await lockTask(tx, taskId);
+    if (!(await loadActor(tx, principal, task.workspaceId)))
+      throw new CoreError("not_found", 404);
+    return task;
+  }
+  async function applyAssignment(
+    tx: Transaction,
+    principal: Principal,
+    task: typeof tasks.$inferSelect,
+    workerId: string | null,
+  ) {
+    await requireMember(tx, principal, task.workspaceId, "task:assign", {
+      workspaceId: task.workspaceId,
+      ownerId: task.ownerId,
+      workerId: task.workerId,
+      taskId: task.id,
+      runId: await currentRunId(tx, task.id),
+      toWorkerId: workerId,
+    });
+    const active = await tx
+      .select({ id: runs.id })
+      .from(runs)
+      .where(
+        and(
+          eq(runs.taskId, task.id),
+          sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
+        ),
+      );
+    if (active.length) throw new CoreError("conflict", 409);
+    await validateAssignees(tx, task.workspaceId, task.ownerId, workerId);
+    const [updated] = await tx
+      .update(tasks)
+      .set({ workerId, updatedAt: new Date() })
+      .where(eq(tasks.id, task.id))
+      .returning();
+    return updated;
+  }
+  async function applyStatus(
+    tx: Transaction,
+    principal: Principal,
+    task: typeof tasks.$inferSelect,
+    status: TaskStatus,
+  ) {
+    const resource = {
+      workspaceId: task.workspaceId,
+      ownerId: task.ownerId,
+      workerId: task.workerId,
+      taskId: task.id,
+      runId: await currentRunId(tx, task.id),
+      to: status,
+    };
+    await requireMember(
+      tx,
+      principal,
+      task.workspaceId,
+      status === "done" ? "task:review" : "task:status",
+      resource,
+    );
+    const active = await tx
+      .select({ id: runs.id })
+      .from(runs)
+      .where(
+        and(
+          eq(runs.taskId, task.id),
+          sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
+        ),
+      );
+    if (
+      active.length ||
+      status === "needs_review" ||
+      (status === "done" &&
+        task.workerId !== null &&
+        (
+          await tx.select().from(members).where(eq(members.id, task.workerId))
+        )[0]?.kind === "agent")
+    )
+      throw new CoreError("conflict", 409);
+    const [updated] = await tx
+      .update(tasks)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(tasks.id, task.id))
+      .returning();
+    return updated;
+  }
+  /** Worker and status change in one transaction: both apply or neither. */
+  async function updateTaskWork(
+    principal: Principal,
+    taskId: string,
+    input: { workerId?: string | null; status?: TaskStatus; version?: number },
+  ): Promise<Task> {
+    const body = parse(updateTaskWorkSchema, input);
+    if (body.workerId === undefined && body.status === undefined)
+      throw new CoreError("invalid_input", 400);
+    return mutation(principal, async (tx) => {
+      let task = await lockTaskAs(tx, principal, taskId);
+      if (body.version !== undefined && body.version !== task.version)
+        throw new CoreError("conflict", 409);
+      if (body.workerId !== undefined)
+        task = await applyAssignment(tx, principal, task, body.workerId);
+      if (body.status !== undefined)
+        task = await applyStatus(tx, principal, task, body.status);
+      return toTask(task);
+    });
+  }
   async function currentRunId(
     tx: typeof db | Transaction,
     taskId: string,
@@ -521,39 +634,10 @@ export function createCore(options: {
   ): Promise<Task> {
     const body = parse(assignTaskSchema, input);
     return mutation(principal, async (tx) => {
-      const task = await lockTask(tx, taskId);
+      const task = await lockTaskAs(tx, principal, taskId);
       if (body.version !== undefined && body.version !== task.version)
         throw new CoreError("conflict", 409);
-      await requireMember(tx, principal, task.workspaceId, "task:assign", {
-        workspaceId: task.workspaceId,
-        ownerId: task.ownerId,
-        workerId: task.workerId,
-        taskId: task.id,
-        runId: await currentRunId(tx, task.id),
-        toWorkerId: body.workerId,
-      });
-      const active = await tx
-        .select({ id: runs.id })
-        .from(runs)
-        .where(
-          and(
-            eq(runs.taskId, taskId),
-            sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
-          ),
-        );
-      if (active.length) throw new CoreError("conflict", 409);
-      await validateAssignees(
-        tx,
-        task.workspaceId,
-        task.ownerId,
-        body.workerId,
-      );
-      const [updated] = await tx
-        .update(tasks)
-        .set({ workerId: body.workerId, updatedAt: new Date() })
-        .where(eq(tasks.id, taskId))
-        .returning();
-      return toTask(updated);
+      return toTask(await applyAssignment(tx, principal, task, body.workerId));
     });
   }
   async function updateTaskStatus(
@@ -563,49 +647,10 @@ export function createCore(options: {
   ): Promise<Task> {
     const body = parse(updateTaskStatusSchema, input);
     return mutation(principal, async (tx) => {
-      const task = await lockTask(tx, taskId);
+      const task = await lockTaskAs(tx, principal, taskId);
       if (body.version !== undefined && body.version !== task.version)
         throw new CoreError("conflict", 409);
-      const resource = {
-        workspaceId: task.workspaceId,
-        ownerId: task.ownerId,
-        workerId: task.workerId,
-        taskId: task.id,
-        runId: await currentRunId(tx, task.id),
-        to: body.status,
-      };
-      await requireMember(
-        tx,
-        principal,
-        task.workspaceId,
-        body.status === "done" ? "task:review" : "task:status",
-        resource,
-      );
-      const active = await tx
-        .select({ id: runs.id })
-        .from(runs)
-        .where(
-          and(
-            eq(runs.taskId, taskId),
-            sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
-          ),
-        );
-      if (
-        active.length ||
-        body.status === "needs_review" ||
-        (body.status === "done" &&
-          task.workerId !== null &&
-          (
-            await tx.select().from(members).where(eq(members.id, task.workerId))
-          )[0]?.kind === "agent")
-      )
-        throw new CoreError("conflict", 409);
-      const [updated] = await tx
-        .update(tasks)
-        .set({ status: body.status, updatedAt: new Date() })
-        .where(eq(tasks.id, taskId))
-        .returning();
-      return toTask(updated);
+      return toTask(await applyStatus(tx, principal, task, body.status));
     });
   }
   async function scheduleTask(
@@ -615,7 +660,7 @@ export function createCore(options: {
   ): Promise<Task> {
     const body = parse(scheduleTaskSchema, input);
     return mutation(principal, async (tx) => {
-      const task = await lockTask(tx, taskId);
+      const task = await lockTaskAs(tx, principal, taskId);
       if (body.version !== undefined && body.version !== task.version)
         throw new CoreError("conflict", 409);
       await requireMember(tx, principal, task.workspaceId, "task:schedule", {
@@ -789,21 +834,22 @@ export function createCore(options: {
     status: McpCall["status"];
     durationMs: number;
   }): Promise<void> {
+    const row = parse(mcpCallEntrySchema, entry);
     await db.transaction(async (tx) => {
       const [token] = await tx
         .select()
         .from(agentTokens)
         .where(
           and(
-            eq(agentTokens.id, entry.tokenId),
-            eq(agentTokens.workspaceId, entry.workspaceId),
+            eq(agentTokens.id, row.tokenId),
+            eq(agentTokens.workspaceId, row.workspaceId),
           ),
         );
       if (!token) throw new CoreError("forbidden", 403);
       await tx.execute(
         sql`select set_config('taff.actor_id', ${`agent:${token.memberId}`}, true)`,
       );
-      await tx.insert(mcpCalls).values(entry);
+      await tx.insert(mcpCalls).values(row);
     });
   }
   async function listMcpCalls(
@@ -863,6 +909,7 @@ export function createCore(options: {
     createTask,
     assignTask,
     updateTaskStatus,
+    updateTaskWork,
     scheduleTask,
     updateProfile,
     createAgentToken,

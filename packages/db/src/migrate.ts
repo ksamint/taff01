@@ -5,9 +5,10 @@ export async function migrateDatabase(databaseUrl: string) {
   const connection = connectDatabase(databaseUrl);
   try {
     await migrate(connection.db, {
-      migrationsFolder: fileURLToPath(
-        new URL("../migrations", import.meta.url),
-      ),
+      // Bundled builds ship the SQL files separately and point here.
+      migrationsFolder:
+        process.env.MIGRATIONS_DIR ??
+        fileURLToPath(new URL("../migrations", import.meta.url)),
     });
   } finally {
     await connection.close();

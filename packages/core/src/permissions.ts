@@ -223,6 +223,9 @@ export function can(
       return resource.workerId === actor.id
         ? resource.toWorkerId === null || resource.toWorkerId === actor.id
         : resource.workerId == null && resource.toWorkerId === actor.id;
+    if (action === "task:create")
+      // A task an agent creates is its own work or unassigned, never someone else's.
+      return !resource.toWorkerId || resource.toWorkerId === actor.id;
     return true;
   }
   switch (action) {

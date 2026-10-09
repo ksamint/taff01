@@ -8,8 +8,11 @@ import {
   email,
   extend,
   type infer as Infer,
+  int,
   iso,
+  maximum,
   maxLength,
+  minimum,
   minLength,
   nullable,
   number,
@@ -178,6 +181,20 @@ export const updateTaskStatusSchema = strictObject({
     number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
   ),
   status: taskStatusSchema,
+});
+export const updateTaskWorkSchema = strictObject({
+  workerId: optional(nullable(idSchema)),
+  status: optional(zodEnum(["todo", "in_progress", "needs_review", "done"])),
+  version: optional(number().check(int(), minimum(1))),
+});
+/** Call-log row written by the MCP adapter; strings are bounded here too. */
+export const mcpCallEntrySchema = strictObject({
+  tokenId: idSchema,
+  workspaceId: idSchema,
+  method: string().check(regex(/^[A-Za-z][\w./-]{0,63}$/)),
+  tool: nullable(string().check(regex(/^[\w.-]{1,100}$/))),
+  status: zodEnum(["ok", "error", "denied", "rate_limited"]),
+  durationMs: number().check(int(), minimum(0), maximum(2_147_483_647)),
 });
 export const scheduleTaskSchema = strictObject({
   version: optional(

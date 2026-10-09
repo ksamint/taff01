@@ -661,6 +661,7 @@ export function createPlanningOperations({
     input: QuickAddInput,
   ): Promise<QuickAddResult> {
     const body = parse(quickAddInputSchema, input);
+    parse(idSchema, w);
     const actor = await requireMember(db, p, w, "workspace:read");
     const roster = await db
       .select()
@@ -688,6 +689,7 @@ export function createPlanningOperations({
     input: SearchInput,
   ): Promise<SearchResult[]> {
     const body = parse(searchInputSchema, input);
+    parse(idSchema, w);
     await requireMember(db, p, w, "workspace:read");
     const memberships =
       p.kind === "user" && body.scope === "all"

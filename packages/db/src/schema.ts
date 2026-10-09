@@ -373,9 +373,15 @@ export const runs = pgTable(
     finishedAt: timestamp("finished_at", { withTimezone: true }),
     durationMs: bigint("duration_ms", { mode: "number" }).default(0).notNull(),
     costMicros: bigint("cost_micros", { mode: "number" }).default(0).notNull(),
+    // Who paused the run: a person's pause holds until a person resumes.
+    pausedBy: text("paused_by"),
     ...dates,
   },
   (t) => [
+    check(
+      "runs_paused_by",
+      sql`${t.pausedBy} IS NULL OR ${t.pausedBy} IN ('person', 'agent', 'limit')`,
+    ),
     unique("runs_workspace_id_unique").on(t.workspaceId, t.id),
     foreignKey({
       columns: [t.workspaceId, t.taskId],

@@ -152,6 +152,20 @@ describe("permissions", () => {
       false,
     ],
     [
+      "agent creates unassigned or self-assigned work",
+      agent,
+      "task:create",
+      { workspaceId: "workspace", toWorkerId: "agent" },
+      true,
+    ],
+    [
+      "agent cannot create work for someone else",
+      agent,
+      "task:create",
+      { workspaceId: "workspace", toWorkerId: "owner" },
+      false,
+    ],
+    [
       "agent releases its task",
       agent,
       "task:assign",

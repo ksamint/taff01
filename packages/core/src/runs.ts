@@ -373,13 +373,20 @@ export function createRunOperations({
   ): Promise<Run> {
     const body = parse(controlRunSchema, input);
     return mutation(principal, async (tx) => {
-      const { run, task } = await lockedRun(
+      const { run, task, actor } = await lockedRun(
         tx,
         principal,
         runId,
         body.version,
         "run:control",
       );
+      // A pause by a person holds until a person lifts it.
+      if (
+        body.action === "resume" &&
+        run.pausedBy === "person" &&
+        actor.kind === "agent"
+      )
+        throw new CoreError("forbidden", 403);
       const next: Run["status"] =
         body.action === "pause"
           ? "paused"
@@ -416,6 +423,7 @@ export function createRunOperations({
       }
       const updated = await bump(tx, run, {
         status: next,
+        pausedBy: body.action === "pause" ? actor.kind : null,
         finishedAt: body.action === "cancel" ? new Date() : null,
       });
       await tx
@@ -508,7 +516,7 @@ export function createRunOperations({
       await bump(tx, run, {
         durationMs,
         costMicros,
-        ...(limited ? { status: "paused" as const } : {}),
+        ...(limited ? { status: "paused" as const, pausedBy: "limit" } : {}),
       });
       if (limited)
         await notifyPeople(
@@ -871,6 +879,9 @@ export function createRunOperations({
       member.workspaceId,
       "workspace:read",
     );
+    // An agent sees only its own permissions, grants and history.
+    if (actor.kind === "agent" && actor.id !== agentId)
+      throw new CoreError("forbidden", 403);
     const [profile] = await db
       .select()
       .from(agentProfiles)
