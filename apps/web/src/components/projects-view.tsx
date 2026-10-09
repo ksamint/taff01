@@ -605,6 +605,7 @@ function BoardCard({
           className="button-quiet drag-handle"
           disabled={busy || !access.data?.allowedStatuses.length}
           aria-label={t("projects.drag")}
+          tabIndex={-1}
           onPointerDown={(event) =>
             dragStart(event, task, access.data?.allowedStatuses ?? [])
           }

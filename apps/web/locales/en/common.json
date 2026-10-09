@@ -174,7 +174,9 @@
     "appearance": "Appearance",
     "light": "Light",
     "dark": "Dark",
-    "system": "Follow system"
+    "system": "Follow system",
+    "timeZone": "Time zone",
+    "timeZoneHint": "Dates and times follow this zone on every device. It was detected from your first browser."
   },
   "mcp": {
     "title": "MCP server",

@@ -10,10 +10,26 @@ import { useWorkspace } from "./app-shell";
 import { Label } from "./ui/label";
 
 const THEMES: ThemePreference[] = ["light", "dark", "system"];
+/** Every zone the browser knows, with the saved one first when it is unknown here. */
+function timeZones(current: string): string[] {
+  let known: string[] = [];
+  try {
+    known = Intl.supportedValuesOf("timeZone");
+  } catch {
+    known = ["UTC"];
+  }
+  return known.includes(current) ? known : [current, ...known];
+}
 
 export function MeView() {
-  const { me, workspace, setWorkspaceId, setLocale, localePending } =
-    useWorkspace();
+  const {
+    me,
+    workspace,
+    setWorkspaceId,
+    setLocale,
+    setTimeZone,
+    localePending,
+  } = useWorkspace();
   const { t, i18n } = useTranslation();
   const members = useMembers(workspace.id);
   const [theme, setTheme] = useState<ThemePreference>("system");
@@ -92,6 +108,23 @@ export function MeView() {
             <option value="zh-CN">{t("zh-CN")}</option>
             <option value="zh-HK">{t("zh-HK")}</option>
           </select>
+        </div>
+        <div className="field">
+          <Label htmlFor="me-tz">{t("me.timeZone")}</Label>
+          <select
+            id="me-tz"
+            data-testid="me-tz"
+            value={me.user.tz}
+            disabled={localePending}
+            onChange={(event) => setTimeZone(event.target.value)}
+          >
+            {timeZones(me.user.tz).map((zone) => (
+              <option key={zone} value={zone}>
+                {zone}
+              </option>
+            ))}
+          </select>
+          <p className="field-hint">{t("me.timeZoneHint")}</p>
         </div>
         <fieldset
           className="field"

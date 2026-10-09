@@ -95,8 +95,12 @@ export function connectWorkspace(
       void client.invalidateQueries({ queryKey: ["me"] });
       if (!revoked) invalidate();
       if (event.code === 1008) return;
+      // Jitter spreads reconnects when a server event closes many sockets at once.
       if (attempt < 8)
-        timer = setTimeout(connect, Math.min(10_000, 250 * 2 ** attempt++));
+        timer = setTimeout(
+          connect,
+          Math.min(10_000, 250 * 2 ** attempt++) * (0.5 + Math.random() / 2),
+        );
     };
   }
   const reconnect = () => {

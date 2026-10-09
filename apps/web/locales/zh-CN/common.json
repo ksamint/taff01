@@ -173,7 +173,9 @@
     "appearance": "外观",
     "light": "浅色",
     "dark": "深色",
-    "system": "跟随系统"
+    "system": "跟随系统",
+    "timeZone": "时区",
+    "timeZoneHint": "所有设备上的日期和时间都按此时区显示；首次登录时已从浏览器检测。"
   },
   "mcp": {
     "title": "MCP 服务器",

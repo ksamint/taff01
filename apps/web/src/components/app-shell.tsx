@@ -30,7 +30,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { savePreference } from "../lib/i18n";
+import { browserTimeZone, readPreference, savePreference } from "../lib/i18n";
 import { useInbox } from "../lib/m3-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { meKey, useMeQuery } from "../lib/queries";
@@ -74,6 +74,7 @@ type WorkspaceValue = {
   workspace: Workspace;
   setWorkspaceId: (id: string) => void;
   setLocale: (locale: Locale) => void;
+  setTimeZone: (tz: string) => void;
   localePending: boolean;
 };
 const WorkspaceContext = createContext<WorkspaceValue | null>(null);
@@ -221,28 +222,30 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [me.data?.user.locale, i18n]);
   const profile = useMutation({
     mutationKey: m3MutationKey,
-    mutationFn: (locale: Locale) =>
+    mutationFn: ({ locale, tz }: { locale: Locale; tz: string }) =>
       request("/api/profile", {
         method: "PATCH",
-        body: JSON.stringify(
-          profileSchema.parse({ locale, tz: me.data?.user.tz }),
-        ),
+        body: JSON.stringify(profileSchema.parse({ locale, tz })),
       }),
-    onMutate: async (locale) => {
+    onMutate: async ({ locale, tz }) => {
       const snapshot = await snapshotQueries(client, [meKey]);
       const previous = i18n.language;
       client.setQueryData<Me | null>(meKey, (current) =>
-        current ? { ...current, user: { ...current.user, locale } } : current,
+        current
+          ? { ...current, user: { ...current.user, locale, tz } }
+          : current,
       );
       setSessionError(null);
       void i18n.changeLanguage(locale);
       return { previous, snapshot };
     },
-    onSuccess: (_, locale, context) => {
+    onSuccess: (_, { locale, tz }, context) => {
       if (!isCurrentSnapshot(client, context.snapshot)) return;
       savePreference(locale);
       client.setQueryData<Me | null>(meKey, (current) =>
-        current ? { ...current, user: { ...current.user, locale } } : current,
+        current
+          ? { ...current, user: { ...current.user, locale, tz } }
+          : current,
       );
     },
     onError: (_, __, context) => {
@@ -261,17 +264,41 @@ export function AppShell({ children }: { children: ReactNode }) {
       client.clear();
       client.setQueryData(meKey, null);
       setWorkspaceId("");
+      // A pending invitation belongs to the account that opened it.
+      setInvitation(null);
       setSessionError(null);
     },
     onError: (error) => setSessionError(errorKey(error)),
   });
   const setLocale = (locale: Locale) => {
-    if (me.data) profile.mutate(locale);
+    if (me.data) profile.mutate({ locale, tz: me.data.user.tz });
     else {
       void i18n.changeLanguage(locale);
       savePreference(locale);
     }
   };
+  const setTimeZone = (tz: string) => {
+    if (me.data) profile.mutate({ locale: me.data.user.locale, tz });
+  };
+  // Accounts start on UTC because sign-up never asks; the first signed-in
+  // browser sets the real zone, and the chosen language survives sign-up.
+  const detected = useRef(false);
+  useEffect(() => {
+    if (!me.data || detected.current || profile.isPending) return;
+    const zone = browserTimeZone();
+    const chosen = readPreference();
+    const locale =
+      chosen && chosen !== me.data.user.locale && me.data.user.locale === "en"
+        ? chosen
+        : me.data.user.locale;
+    if (me.data.user.tz === "UTC" && zone !== "UTC") {
+      detected.current = true;
+      profile.mutate({ locale, tz: zone });
+    } else if (locale !== me.data.user.locale) {
+      detected.current = true;
+      profile.mutate({ locale, tz: me.data.user.tz });
+    }
+  }, [me.data, profile]);
   const workspace =
     me.data?.workspaces.find(({ id }) => id === workspaceId) ??
     me.data?.workspaces[0];
@@ -374,6 +401,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             workspace,
             setWorkspaceId,
             setLocale,
+            setTimeZone,
             localePending: profile.isPending,
           }}
         >

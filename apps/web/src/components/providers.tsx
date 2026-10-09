@@ -15,14 +15,16 @@ import { detectLocale, htmlLang, readPreference } from "../lib/i18n";
 import { installLocaleLoader } from "../lib/locale-loader";
 
 // English arrives as server data; Chinese resources are cached JSON on demand.
+const localeUrl = (locale: string) =>
+  `/locales/${locale}?v=${process.env.NEXT_PUBLIC_ASSET_VERSION ?? "dev"}`;
 const loaders: Record<Exclude<Locale, "en">, () => Promise<object>> = {
   "zh-CN": () =>
-    fetch("/locales/zh-CN").then((response) => {
+    fetch(localeUrl("zh-CN")).then((response) => {
       if (!response.ok) throw new Error("locale_load_failed");
       return response.json();
     }),
   "zh-HK": () =>
-    fetch("/locales/zh-HK").then((response) => {
+    fetch(localeUrl("zh-HK")).then((response) => {
       if (!response.ok) throw new Error("locale_load_failed");
       return response.json();
     }),

@@ -1,4 +1,7 @@
-const CACHE = "taff-public-m7-v1";
+// The build stamps its version into the registration URL; a new build gets a
+// fresh cache and the activate step drops the old one.
+const VERSION = new URL(self.location.href).searchParams.get("v") || "dev";
+const CACHE = `taff-public-${VERSION}`;
 const OFFLINE = "/offline";
 const PUBLIC =
   /^\/(?:_next\/static\/|fonts\/|icons\/|locales\/(?:en|zh-CN|zh-HK)$|manifest\.webmanifest$)/;
@@ -8,12 +11,14 @@ self.addEventListener("install", (event) => {
     caches
       .open(CACHE)
       .then((cache) =>
-        cache.addAll([
-          OFFLINE,
-          "/icons/taff-192.png",
-          "/icons/taff-512.png",
-          "/manifest.webmanifest",
-        ]),
+        cache.addAll(
+          [
+            OFFLINE,
+            "/icons/taff-192.png",
+            "/icons/taff-512.png",
+            "/manifest.webmanifest",
+          ].map((path) => new Request(path, { cache: "reload" })),
+        ),
       )
       .then(() => self.skipWaiting()),
   );

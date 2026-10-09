@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+// Offline emulation and routing reach service-worker fetches only with this
+// flag; without it the offline shell test sees the worker fetch the real page.
+process.env.PW_EXPERIMENTAL_SERVICE_WORKER_NETWORK_EVENTS ??= "1";
 const apiUrl = process.env.API_INTERNAL_URL ?? "http://127.0.0.1:3001";
 const reuseExistingServer = !process.env.CI;
 

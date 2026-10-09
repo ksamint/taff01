@@ -1,7 +1,15 @@
+import path from "node:path";
 import type { NextConfig } from "next";
+
+// Changes with every build so installed service workers and cached locale
+// files refresh after a deploy.
+const assetVersion = process.env.ASSET_VERSION || Date.now().toString(36);
 
 const config: NextConfig = {
   agentRules: false,
+  output: "standalone",
+  outputFileTracingRoot: path.join(__dirname, "../../"),
+  env: { NEXT_PUBLIC_ASSET_VERSION: assetVersion },
   transpilePackages: ["@taff/schemas"],
   images: { unoptimized: true },
   async headers() {

@@ -304,7 +304,10 @@ test("PWA caches only public resources refreshes stable locales and falls back t
     "512x512",
   ]);
   const refreshed = await page.evaluate(async (language) => {
-    const cache = await caches.open("taff-public-m7-v1");
+    const name =
+      (await caches.keys()).find((key) => key.startsWith("taff-public-")) ??
+      "taff-public-dev";
+    const cache = await caches.open(name);
     await cache.put(
       `/locales/${language}`,
       new Response(JSON.stringify({ today: "Outdated cached locale" }), {

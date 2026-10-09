@@ -33,6 +33,15 @@ export function detectLocale(languages: readonly string[]): Locale {
   return "en";
 }
 
+/** The browser's IANA zone, or UTC when the platform cannot say. */
+export function browserTimeZone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
 export function savePreference(locale: Locale) {
   try {
     localStorage.setItem("taff-locale", locale);
