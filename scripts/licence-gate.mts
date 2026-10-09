@@ -19,8 +19,11 @@ const ALLOWED = new Set([
   "Python-2.0",
   "MIT-0",
 ]);
-/** MPL-2.0 components of the prescribed Next.js and Tailwind stack. */
-const MPL_EXCEPTIONS = new Set(["lightningcss", "@vercel/og"]);
+/**
+ * MPL-2.0 components of the prescribed Next.js and Tailwind stack, plus
+ * axe-core as a development-only Lighthouse dependency (ADR 0003 amendment).
+ */
+const MPL_EXCEPTIONS = new Set(["lightningcss", "@vercel/og", "axe-core"]);
 /** Packages without a manifest licence field whose LICENSE file is verified. */
 const FILE_VERIFIED: Record<string, { file: string; sha256: string }> = {
   "@schedule-x/resize": {

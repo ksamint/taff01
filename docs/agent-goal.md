@@ -1,123 +1,138 @@
-# Agent goal: build Taff from the approved prototype
+# Agent goal: finish Taff M9 and hand over
 
 Paste everything below this line as the goal for a coding agent working in
-`ksamint/taff01`. It is self-contained; the files it names are in the repository.
+`ksamint/taff01`. It is self-contained; the files it names are in the
+repository.
 
 ---
 
-Build Taff, an open-source (MIT), performance-first, AI-native task and calendar
-app where people and AI agents work as one team, from the approved prototype in
-`docs/ui/prototype/` on the stack and rules in `instruction_v0.md`. Deliver the
-milestones M1 to M9 defined in `docs/implementation-plan.md`, in order, without
-waiting for approval between them. The result must be ready for user testing on
-phones (H5 / PWA) and desktop, and deployable with Docker Compose and Caddy.
+Finish milestone M9 of Taff, an open-source (MIT), performance-first,
+AI-native task and calendar app where people and AI agents work as one team,
+and leave `main` ready for a production deployment with Docker Compose and
+Caddy. Milestones M1 to M8 are merged on `main`; read their reports before
+touching code. Work on a branch, push often, and never wait for approval
+between steps: the user reviews asynchronously.
 
 Read first, in this order: `AGENTS.md`, `instruction_v0.md`,
-`docs/implementation-plan.md`, `docs/ui/README.md`,
-`docs/ui/prototype/audit-and-upgrade-plan.md`, `docs/adr/*.md`,
-`docs/upgrade-plan.md`, `docs/milestones/*.md`, `README.md`. Then open
-`docs/ui/prototype/team-tasks.dc.html` through a static server and walk every
-screen in both languages before writing UI code; its inline script is the
-behavioural reference (data in `PEOPLE`, `AGENTS`, `ORGS`, `PERMS`,
-`REVIEW_CHECKS`, `MCP_SCOPES`, `TOOLD`).
+`docs/implementation-plan.md`, `docs/milestones/08-*.md` (the audit fixes,
+packaging and the performance analysis), the other `docs/milestones/*.md`,
+`docs/adr/*.md` (0003 carries the licence decisions, amended for axe-core),
+`docs/deploy.md`, `docs/ui/README.md`, `docs/realtime.md`, `README.md`. Read
+each package's installed docs under `node_modules` before using an API; the
+versions moved in 2026 and training data is stale.
 
 Standing rules that override anything else:
 
 - Architecture: `packages/core` is the only code that touches the database;
-  `apps/api` REST and MCP are thin adapters over it. `packages/schemas` (Zod) is
-  the single definition of every body, tool argument and client type. Members
-  are people or agents; a task's owner is always a person; a worker may be an
-  agent; agent output waits in `needs_review` unless the agent's review policy
-  says otherwise (ADR 0005). Every mutation runs in one transaction, writes an
-  `activity` row with the actor and emits `NOTIFY taff_changes`. Permissions go
-  through `can(actor, action, resource)` with a table-driven test per rule.
-- Stack (fixed, already installed and validated): Node 24, pnpm 12, Turborepo 2,
-  TypeScript 7, Next.js 16 App Router, React 19, Tailwind 4, shadcn/ui on the
-  TABLE AI tokens, TanStack Query 5 with IndexedDB persistence, @schedule-x/react,
-  i18next 26, date-fns + rrule, Hono 4 + @hono/node-server 2, better-auth,
-  @modelcontextprotocol/server and client 2 (Streamable HTTP, spec 2026-07-28),
-  ws, pino 10, Drizzle + postgres driver, PostgreSQL 18, Valkey 9 + BullMQ 6,
-  Biome 2, Vitest 5, Playwright, Docker Compose + Caddy. Read each package's
-  installed docs under `node_modules` before using an API; the versions moved in
-  2026 and training data is stale. Propose any stack change in an ADR, never swap.
-- Design: implement the prototype faithfully. Tokens from
-  `docs/ui/prototype/_ds/table-ai-design-system/tokens/` through Tailwind
-  `@theme`; Manrope and Noto Sans TC; Lucide icons; agent icon `sparkles`;
-  square cards, 2px controls, hairlines, gold at most 8% of a view; 44px touch
-  targets, 12px minimum text, focus management, keyboard alternatives to drag.
-  No second CSS system, no second palette.
+  `apps/api` REST and MCP are thin adapters over it. `packages/schemas` (Zod)
+  is the single definition of every body, tool argument and client type.
+  Every mutation runs in one transaction, writes an `activity` row with the
+  actor and emits `NOTIFY taff_changes`. Permissions go through
+  `can(actor, action, resource)` with a table-driven test per rule.
+- Stack is fixed and installed (Node 24, pnpm 12, Next.js 16, React 19,
+  Tailwind 4, TanStack Query 5, @schedule-x, i18next 26, Hono 4, better-auth,
+  MCP SDK v2, Drizzle, PostgreSQL 18, Valkey 9, BullMQ 6, Biome 2, Vitest 5,
+  Playwright). Propose any stack change in an ADR, never swap.
+- Design: the TABLE AI tokens in `apps/web/src/styles/tokens.css` and the
+  prototype in `docs/ui/prototype/` are the reference. 44 px touch targets,
+  12 px minimum text, visible focus, keyboard alternatives to drag. No second
+  CSS system, no second palette.
 - i18n: every string through i18next with keys in
   `apps/web/locales/{en,zh-CN,zh-HK}/*.json`, all three in the same commit.
-  Dates and numbers in the user's locale and time zone, never a fixed zone on
-  the server.
+  Dates and numbers in the user's locale and time zone.
 - Security: agent tokens stored only as `sha256(token + TOKEN_PEPPER)`, shown
-  once, never logged; `/mcp` rate-limited per token in Valkey; every MCP tool
-  validates with the shared Zod schema before calling core; CORS locked to
-  `AUTH_URL`; secrets only from env; `.env.example` lists every variable.
-- Performance budget: mobile Today initial JS ≤ 200 KB gzipped, LCP ≤ 2 s on
-  simulated 4G, Lighthouse ≥ 90; cache first then reconcile; optimistic
-  mutations with rollback; no client dependency over 20 KB gzipped without an
-  ADR. No offline sync in v1.
-- Licences: MIT, Apache-2.0, BSD, ISC. Never GPL, AGPL, SSPL, LGPL or commercial.
-  State the licence of each new dependency in its commit message.
+  once, never logged; `/mcp` rate-limited per token in Valkey before any
+  database access; JSON-RPC batches rejected; CORS locked to `AUTH_URL`;
+  secrets only from env; `.env.example` and `.env.production.example` list
+  every variable; never commit secrets.
+- Performance budget: mobile Today initial JS ≤ 200 KiB gzipped
+  (`pnpm perf:budget`), LCP ≤ 2 s on simulated slow 4G (`pnpm perf:lcp`, run
+  it with `LCP_LOCALE=en`, `zh-CN` and `zh-HK`), Lighthouse mobile scores
+  ≥ 90. No client dependency over 20 KB gzipped without an ADR.
+- Licences: MIT, Apache-2.0, BSD, ISC. Never GPL, AGPL, SSPL, LGPL or
+  commercial. The only MPL-2.0 exceptions are `lightningcss`, `@vercel/og`
+  and, as a devDependency only, `axe-core` for Lighthouse (ADR 0003).
+  `pnpm licence:check` enforces this; state the licence of each new
+  dependency in its commit message.
 - Working rules: conventional commits, small and one change each; tests ship
-  with the code (Vitest for core, api and schemas; Playwright for the key flows
-  in all three locales); design decisions in `docs/adr/NNNN-title.md`; keep the
-  README quick start true; never commit secrets.
+  with the code; design decisions in `docs/adr/NNNN-title.md`; keep the
+  README quick start and `docs/deploy.md` true.
 
-Validation before every push: `pnpm lint && pnpm typecheck && pnpm test &&
-pnpm build && pnpm e2e`, plus `pnpm mcp:smoke` once it exists. A push that
-turns these red is not done.
+Validation before every push, all green:
+`pnpm lint && pnpm typecheck && pnpm licence:check && pnpm test && pnpm build
+&& pnpm build:server && pnpm perf:budget && pnpm e2e && pnpm mcp:smoke`
+(`mcp:smoke` needs `pnpm dev` running; `e2e` starts the services itself).
+`.github/workflows/ci.yml` runs the same set and builds the three images;
+keep it green.
 
-Milestone protocol (no gates): finish a milestone, run the validation, push to
-the working branch, write `docs/milestones/NN-title.md` with what works, what is
-missing, open decisions and the validation evidence, then start the next
-milestone immediately. The user reviews asynchronously and may redirect by
-message. Stop and ask only for decisions that change the product contract:
-licences, deleting data, publishing outside the repository, or a stack change.
+Milestone protocol (no gates): finish an item, validate, push, update
+`docs/milestones/09-hardening-and-handoff.md` with what works, what is
+missing, open decisions and the validation evidence, then continue. Stop and
+ask only for decisions that change the product contract: licences, deleting
+data, publishing outside the repository, or a stack change.
 
-Decisions already taken (do not reopen): Traditional Chinese (Hong Kong) is the
-source Chinese and ships beside Simplified and English; agent icon `sparkles`;
-review policy per agent defaulting to "always review"; Valkey instead of Redis;
-MCP SDK v2 packages; the two MPL-2.0 components of Next and Tailwind are the
-only copyleft exceptions; the combined `pnpm dev` runner stays and Playwright
-starts services per entry.
+Decisions already taken (do not reopen): Traditional Chinese (Hong Kong) is
+the source Chinese and ships beside Simplified and English; agent icon
+`sparkles`; review policy per agent defaulting to "always review"; Valkey
+instead of Redis; MCP SDK v2; bearer agent tokens remain the MCP contract
+until an authorization server is chosen; `font-display: optional` on the web
+fonts (a slow first visit shows the system font); Today renders 20 cards
+and a "Show more" button.
 
-Milestones, in order, with acceptance (details in `docs/implementation-plan.md`
-and the route table in `docs/ui/README.md`):
+M9 scope, in this order, each with acceptance:
 
-1. M1 Design system foundation: tokens, fonts, icons, restyled primitives,
-   phone and desktop shells, light and dark themes, three locales seeded from
-   the prototype. Acceptance: Today matches the prototype on phone and desktop
-   in every locale; Playwright screenshots; bundle within budget.
-2. M2 Agent tokens and MCP: hashed scoped tokens; `/mcp` with the six tools over
-   core; Valkey rate limit; `mcp_calls`; MCP page; `pnpm mcp:smoke`.
-   Acceptance: smoke test exercises every tool and the limit; `can()` tests for
-   scopes.
-3. M3 Agent runs and review: runs with events; start, pause, resume, cancel;
-   agent profile with Allow / Ask / Deny permissions, scoped expiring grants with
-   history and review policy; review workspace with checklist, approve and
-   request changes; Inbox with tabs, unread, snooze, grouping; Today's
-   agents-at-work card. Acceptance: Playwright assign → status → approve from
-   Inbox in all locales.
-4. M4 Realtime and optimistic cache: `NOTIFY` → WebSocket hub → TanStack
-   invalidation; every mutation optimistic with rollback. Acceptance: two
-   browsers converge within a second.
-5. M5 Task model and views: editable fields, subtasks, labels, board with drag,
-   list with filters and sorting, Search (⌘K), organizations with invites and
-   roles, quick add. Acceptance: Playwright board drag and search.
-6. M6 Calendar: @schedule-x day, week, month; drag to move and resize; tap to
-   create; unscheduled tray; agent background lane; rrule; time zones.
-   Acceptance: Playwright drag in all locales; recurrence and time-zone tests.
-7. M7 Cache, PWA and notifications: IndexedDB persistence, PWA manifest and
-   service worker, notification preferences, daily digest on BullMQ,
-   performance budget script. Acceptance: budget script passes on Today.
-8. M8 Production and CI: Docker images, Caddy, production compose, CI with
-   every check and the licence gate, OAuth 2.1 metadata for `/mcp`, security
-   pass, README verified from a clean checkout.
-9. M9 Hardening and handoff: accessibility floor, i18n QA, prototype seed data,
-   release notes.
+1. Lighthouse in CI. Add `lighthouse` as a devDependency (its `axe-core`
+   dependency is the approved MPL-2.0 exception; the gate already allows it)
+   and a `pnpm perf:lighthouse` script that audits the signed-in Today route
+   on the production build with the mobile preset in en, zh-CN and zh-HK,
+   failing below 90 on performance, accessibility and best practices. Run it
+   in `ci.yml` after `perf:budget`. Acceptance: the script and CI pass; the
+   report JSON is uploaded as a CI artifact.
+2. Chinese-locale LCP ≤ 2 s. Milestone 08 measured en 1.94 s and zh-HK
+   2.34 s and names the causes. Expected order of gain: cut route JavaScript
+   (split `@taff/schemas` so Today ships only the schemas it parses; lazy-load
+   i18next resources and non-Today code; check `pnpm perf:budget` chunk list);
+   render the stored locale on the server from a cookie so the client applies
+   no locale pass; keep `/api/me`, locale and workspace preloads working.
+   Acceptance: `LCP_LOCALE=zh-HK pnpm perf:lcp` and `zh-CN` medians ≤ 2,000 ms
+   on three runs, en still ≤ 2,000 ms, bundle budget still met.
+3. Accessibility pass against the floor in `docs/ui/README.md`: every
+   interactive element reachable and operable by keyboard, visible focus,
+   names on icon-only buttons, dialogs trap focus and restore it, live
+   regions for optimistic results and errors, 44 px targets on phone,
+   contrast at AA in light and dark. Fix what Lighthouse accessibility and a
+   manual keyboard walk of every route find. Acceptance: Lighthouse
+   accessibility ≥ 90 in all locales and a Playwright keyboard-only flow that
+   creates a task, assigns it, opens it and approves a review in all locales.
+4. i18n QA: no hard-coded strings (grep every JSX text node and `title`,
+   `aria-label`, `placeholder`), key parity across the three files with a
+   test that fails on a missing or extra key, Chinese typography (full-width
+   punctuation, no orphaned Latin plural rules), plural and count forms,
+   dates and numbers through `Intl` in every view, `lang` attribute follows
+   the locale. Acceptance: the parity test and a Playwright screenshot of
+   every route in every locale committed under `docs/ui/screenshots/`.
+5. Prototype seed data: extend `pnpm db:seed` so a fresh database shows the
+   prototype's people, agents, organizations, permissions, grants, review
+   items, tasks, projects, calendar entries and digests from
+   `docs/ui/prototype/team-tasks.dc.html` (`PEOPLE`, `AGENTS`, `ORGS`,
+   `PERMS`, `REVIEW_CHECKS`, `MCP_SCOPES`, `TOOLD`), idempotent and safe to
+   re-run, with the demo credentials from `.env.example`. Acceptance: seed on
+   an empty database, then every route has content in every locale and the
+   e2e suite still passes.
+6. Outgoing email for invitations: add an SMTP sender (nodemailer, MIT)
+   behind an `EMAIL_*` env group with a logging fallback when unset; send the
+   invitation link and verify the invitee's address on acceptance; document
+   the variables in both env examples and `docs/deploy.md`. Acceptance:
+   integration test with a fake transport; the invite flow e2e passes with
+   the fallback.
+7. Release readiness: run the README quick start and `docs/deploy.md` from a
+   clean checkout and fix every gap; write `CHANGELOG.md` with the M1–M9
+   release notes; tag `v0.1.0` only when every validation command and CI are
+   green; write `docs/milestones/09-hardening-and-handoff.md` with the final
+   evidence and the list of open decisions (OAuth 2.1 authorization server,
+   BullMQ PostgreSQL backend ADR, scheduled upgrades in
+   `docs/upgrade-plan.md`).
 
-Scheduled upgrades to apply when their dates arrive, per `docs/upgrade-plan.md`:
-Node 26 after 2026-10-28, PostgreSQL 19 after GA, TypeScript 7.1 in November,
-Drizzle 1.0 when final.
+Scheduled upgrades to apply when their dates arrive, per
+`docs/upgrade-plan.md`: Node 26 after 2026-10-28, PostgreSQL 19 after GA,
+TypeScript 7.1 in November, Drizzle 1.0 when final.

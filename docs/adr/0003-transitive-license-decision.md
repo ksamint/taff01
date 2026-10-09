@@ -39,6 +39,15 @@ The application's own source remains MIT.
   GPL, AGPL, SSPL, LGPL or unknown licences and allows only the two MPL-2.0
   components listed above.
 
+## Amendment (2026-10-09)
+
+The user approved `axe-core` (MPL-2.0), a dependency of Lighthouse, as a
+development-only tool. It may be installed as a devDependency and run in CI
+for the Lighthouse audit of the Today route; it is never bundled into or
+shipped with the application, and the licence gate lists it as the third
+MPL-2.0 exception with that scope. The milestone acceptance "Lighthouse ≥ 90"
+is therefore measurable in CI.
+
 ## Verification
 
 On 2026-10-08 a scan of every `package.json` under `node_modules/.pnpm`

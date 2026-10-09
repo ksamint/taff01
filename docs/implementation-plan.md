@@ -104,8 +104,12 @@ reviews. The agent prompt that drives this is `agent-goal.md`.
   the licence gate and the audit security pass. Open: OAuth 2.1 metadata (needs
   an authorization server decision; bearer tokens remain the contract until
   then), outgoing email for invitations, a clean-checkout quick-start run.
-- **M9 Hardening and handoff.** Accessibility pass against the floor in
-  `ui/README.md`, i18n QA in all locales, prototype seed data, release notes.
+- **M9 Hardening and handoff.** Lighthouse CI audit of Today (axe-core
+  approved dev-only, ADR 0003 amendment) with mobile performance,
+  accessibility and best-practice scores ≥ 90; Chinese-locale LCP ≤ 2 s
+  (route JavaScript diet, server-rendered locale); accessibility pass
+  against the floor in `docs/ui/README.md`; i18n QA in all locales;
+  prototype seed data; release notes; clean-checkout quick start verified.
 
 ## Review protocol
 
