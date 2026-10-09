@@ -14,7 +14,11 @@ Compose runs everything; the same images work on any container platform.
 
 `pnpm build:server` bundles the API, worker and migrator with esbuild; workspace
 packages are inlined and npm packages come from a flat production
-`node_modules` produced by `pnpm deploy`. The web image bakes
+`node_modules` produced by `pnpm deploy` under `dist/runtime/{api,worker}`.
+The API can also run locally as `node --env-file=.env dist/runtime/api/api.mjs`.
+The production dependency trees reject Lighthouse and axe-core; Docker build
+context excludes local dependency trees, build outputs and environment files.
+The web image bakes
 `API_INTERNAL_URL=http://api:3001` into its rewrites; behind Caddy the `/api`
 and `/mcp` paths go straight to the API and never reach Next.js.
 
