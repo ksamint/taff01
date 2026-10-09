@@ -95,6 +95,15 @@ provide the trusted Origin when a presentation cookie survives logout, wait
 for the browser time-zone save, and generate future digests after the latest
 configured daily slot. The production clock and origin enforcement are unchanged.
 
+CI run [37885596403](https://github.com/ksamint/taff01/actions/runs/37885596403)
+passed Lighthouse, all three Docker builds and 77/78 browser checks. The remaining
+Chinese board-drag test read the optimistic destination before the server commit:
+its trace shows the PATCH returning `in_progress`, version 3, while the concurrent
+GET returned `todo`, version 2. Both desktop and mobile drag assertions now await
+the matching successful PATCH before retaining their independent GET and UI
+checks. No application behavior or timeout was changed. Production remains
+unmodified until the corrected commit passes CI.
+
 ## Remaining work and open decisions
 
 M9 is not complete. Next: reduce Chinese-locale LCP to a three-run median of

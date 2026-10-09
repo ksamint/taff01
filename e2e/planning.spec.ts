@@ -190,7 +190,15 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
     destination.y + 90,
     { steps: 12 },
   );
+  const movedResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === "PATCH" &&
+      new URL(response.url()).pathname === `/api/tasks/${created.id}`,
+  );
   await page.mouse.up();
+  const moved = await movedResponse;
+  expect(moved.status()).toBe(200);
+  expect(taskSchema.parse(await moved.json()).status).toBe("in_progress");
   await expect(
     page
       .getByTestId("board-column-in_progress")
@@ -240,7 +248,15 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
     mobileDone.y + 90,
     { steps: 5 },
   );
+  const childMovedResponse = page.waitForResponse(
+    (response) =>
+      response.request().method() === "PATCH" &&
+      new URL(response.url()).pathname === `/api/tasks/${child.id}`,
+  );
   await page.mouse.up();
+  const childMoved = await childMovedResponse;
+  expect(childMoved.status()).toBe(200);
+  expect(taskSchema.parse(await childMoved.json()).status).toBe("done");
   await expect(
     page
       .getByTestId("board-column-done")
