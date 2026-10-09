@@ -1,4 +1,4 @@
-import { changeEventSchema } from "@taff/schemas";
+import { changeEventSchema } from "@taff/schemas/changes";
 import type { QueryClient } from "@tanstack/react-query";
 import { synchronizeSession } from "./session-cache";
 

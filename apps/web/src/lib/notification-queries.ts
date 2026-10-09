@@ -8,6 +8,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "./api";
 import { invalidateM3 } from "./m3-queries";
+import { notificationPreferencesKey } from "./notification-preferences";
 import { m3MutationKey } from "./optimistic-m3";
 import {
   isCurrentSnapshot,
@@ -15,17 +16,6 @@ import {
   snapshotQueries,
 } from "./query-snapshot";
 
-export const notificationPreferencesKey = ["notificationPreferences"] as const;
-export function useNotificationPreferences() {
-  return useQuery({
-    queryKey: notificationPreferencesKey,
-    staleTime: 0,
-    queryFn: async () =>
-      notificationPreferencesSchema.parse(
-        await request("/api/me/notifications"),
-      ),
-  });
-}
 export function useUpdateNotificationPreferences() {
   const client = useQueryClient();
   return useMutation({
@@ -73,24 +63,11 @@ export function useDailyDigest(id: string) {
       dailyDigestSchema.parse(await request(`/api/digests/${id}`)),
   });
 }
-export function deviceAlertsKey(userId: string) {
-  return `taff-device-alerts:${userId}`;
-}
-const devices = new Map<string, boolean>();
-export function deviceAlertsEnabled(userId: string) {
-  if (devices.has(userId)) return devices.get(userId)!;
-  try {
-    return localStorage.getItem(deviceAlertsKey(userId)) === "true";
-  } catch {
-    return false;
-  }
-}
-export function setDeviceAlertsEnabled(userId: string, enabled: boolean) {
-  devices.set(userId, enabled);
-  try {
-    if (enabled) localStorage.setItem(deviceAlertsKey(userId), "true");
-    else localStorage.removeItem(deviceAlertsKey(userId));
-  } catch {
-    /* The active page still remembers the explicit choice. */
-  }
-}
+
+export {
+  deviceAlertsEnabled,
+  deviceAlertsKey,
+  notificationPreferencesKey,
+  setDeviceAlertsEnabled,
+  useNotificationPreferences,
+} from "./notification-preferences";

@@ -1,32 +1,16 @@
 import {
   agentProfileSchema,
-  inboxSchema,
   reviewWorkspaceSchema,
   runDetailSchema,
-  runListSchema,
   taskSchema,
 } from "@taff/schemas";
 import { type QueryClient, useQuery } from "@tanstack/react-query";
 import { request } from "./api";
 
-export const runsKey = (workspaceId: string) => ["runs", workspaceId] as const;
 export const runKey = (id: string) => ["run", id] as const;
 export const taskDetailKey = (id: string) => ["task", id] as const;
 export const reviewKey = (id: string) => ["review", id] as const;
 export const agentKey = (id: string) => ["agent", id] as const;
-export const inboxKey = (workspaceId: string) =>
-  ["inbox", workspaceId] as const;
-
-export function useRuns(workspaceId: string) {
-  return useQuery({
-    staleTime: 0,
-    queryKey: runsKey(workspaceId),
-    queryFn: async () =>
-      runListSchema.parse(
-        await request(`/api/runs?workspaceId=${workspaceId}`),
-      ),
-  });
-}
 export function useRun(id: string | undefined) {
   return useQuery({
     staleTime: 0,
@@ -61,14 +45,6 @@ export function useAgent(id: string) {
     retry: false,
   });
 }
-export function useInbox(workspaceId: string) {
-  return useQuery({
-    staleTime: 0,
-    queryKey: inboxKey(workspaceId),
-    queryFn: async () =>
-      inboxSchema.parse(await request(`/api/inbox?workspaceId=${workspaceId}`)),
-  });
-}
 export function invalidateM3(client: QueryClient) {
   if (client.isMutating() > 1) return Promise.resolve();
   return client.invalidateQueries({
@@ -97,3 +73,5 @@ export function invalidateM3(client: QueryClient) {
       ].includes(String(queryKey[0])),
   });
 }
+
+export { inboxKey, runsKey, useInbox, useRuns } from "./queries";

@@ -147,6 +147,7 @@
     "blockers": "阻塞",
     "zero": "收件箱已清空",
     "zeroSub": "新的审核请求和阻塞会出现在这里。",
+    "needsReview_one": "{{count}} 项待你审核",
     "needsReview_other": "{{count}} 项待你审核",
     "unread": "{{count}} 条未读",
     "snoozed": "已延后 24 小时。",

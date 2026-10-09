@@ -5,7 +5,6 @@ import {
   taskSchema,
   type UpdateTask,
   updateTaskSchema,
-  workspaceAccessSchema,
 } from "@taff/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "./api";
@@ -65,14 +64,4 @@ export function useEditTask() {
   });
 }
 
-export function useWorkspaceAccess(id: string) {
-  return useQuery({
-    queryKey: ["workspace-access", id],
-    staleTime: 0,
-    queryFn: async () =>
-      workspaceAccessSchema.parse(
-        await request(`/api/workspaces/${id}/access`),
-      ),
-    retry: false,
-  });
-}
+export { useWorkspaceAccess } from "./queries";

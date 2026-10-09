@@ -7,7 +7,7 @@ import {
   createTaskSchema,
   type Task,
   taskSchema,
-} from "@taff/schemas";
+} from "@taff/schemas/base";
 import {
   useIsMutating,
   useMutation,
@@ -18,10 +18,14 @@ import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { useRuns } from "../lib/m3-queries";
-import { useWorkspaceAccess } from "../lib/m5-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
-import { tasksKey, useMembers, useTasks } from "../lib/queries";
+import {
+  tasksKey,
+  useMembers,
+  useRuns,
+  useTasks,
+  useWorkspaceAccess,
+} from "../lib/queries";
 import {
   isCurrentSnapshot,
   restoreQueries,

@@ -1,16 +1,14 @@
 "use client";
-import {
-  type InboxItem,
-  shouldShowForegroundNotification,
-} from "@taff/schemas";
+import type { InboxItem } from "@taff/schemas/inbox-read";
+import { shouldShowForegroundNotification } from "@taff/schemas/notification-preferences";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInbox } from "../lib/m3-queries";
 import {
   deviceAlertsEnabled,
   useNotificationPreferences,
-} from "../lib/notification-queries";
+} from "../lib/notification-preferences";
+import { useInbox } from "../lib/queries";
 import "../styles/notifications.css";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";

@@ -315,7 +315,7 @@ test("real worker digest opens from Inbox with immutable due review and measured
     "e2e/support/generate-digest.mts",
     me.user.id,
     workspace.id,
-    future.toISOString(),
+    calendarWallToInstant(`${day}T18:01`, me.user.tz),
   ]);
   const { digestId } = JSON.parse(generated.stdout) as { digestId: string };
   if (!digestId) throw new Error("Persisted workspace digest required");

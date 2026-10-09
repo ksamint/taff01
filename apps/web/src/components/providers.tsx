@@ -14,21 +14,9 @@ import { I18nextProvider, initReactI18next } from "react-i18next";
 import { detectLocale, htmlLang, readPreference } from "../lib/i18n";
 import { installLocaleLoader } from "../lib/locale-loader";
 
-// English arrives as server data; Chinese resources are cached JSON on demand.
+// Only the stored locale arrives as server data; others load on demand.
 const localeUrl = (locale: string) =>
   `/locales/${locale}?v=${process.env.NEXT_PUBLIC_ASSET_VERSION ?? "dev"}`;
-const loaders: Record<Exclude<Locale, "en">, () => Promise<object>> = {
-  "zh-CN": () =>
-    fetch(localeUrl("zh-CN")).then((response) => {
-      if (!response.ok) throw new Error("locale_load_failed");
-      return response.json();
-    }),
-  "zh-HK": () =>
-    fetch(localeUrl("zh-HK")).then((response) => {
-      if (!response.ok) throw new Error("locale_load_failed");
-      return response.json();
-    }),
-};
 
 const WorkspaceSelection = createContext<{
   id: string;
@@ -44,10 +32,12 @@ export function useWorkspaceSelection() {
 
 export function Providers({
   children,
-  english,
+  initialLocale,
+  messages,
 }: {
   children: ReactNode;
-  english: ResourceLanguage;
+  initialLocale: Locale | null;
+  messages: ResourceLanguage;
 }) {
   const [workspaceId, setWorkspaceId] = useState("");
   const [invitation, setInvitation] = useState<string | null>(null);
@@ -83,25 +73,31 @@ export function Providers({
       cleanup?.();
     };
   }, [client]);
-  const [i18n] = useState(() => {
+  const [{ i18n, initialChoice, cancelLocaleLoad }] = useState(() => {
     const instance = createInstance();
     void instance.use(initReactI18next).init({
-      resources: { en: { translation: english } },
-      lng: "en",
+      resources: {
+        [initialLocale ?? "en"]: { translation: messages },
+      },
+      lng: initialLocale ?? "en",
       fallbackLng: "en",
       supportedLngs: ["en", "zh-CN", "zh-HK"],
       initAsync: false,
       interpolation: { escapeValue: false },
     });
-    return instance;
+    // react-i18next snapshots methods during render, before passive effects.
+    const cancelLocaleLoad = installLocaleLoader(instance, async (language) => {
+      const response = await fetch(localeUrl(language));
+      if (!response.ok) throw new Error("locale_load_failed");
+      return response.json();
+    });
+    return { i18n: instance, initialChoice: initialLocale, cancelLocaleLoad };
   });
   useEffect(() => {
-    const restore = installLocaleLoader(i18n, (language) =>
-      loaders[language](),
-    );
-    void i18n.changeLanguage(
-      readPreference() ?? detectLocale(navigator.languages),
-    );
+    if (!initialChoice) {
+      const language = readPreference() ?? detectLocale(navigator.languages);
+      if (i18n.language !== language) void i18n.changeLanguage(language);
+    }
     const updateLang = (language: string) => {
       document.documentElement.lang = htmlLang(language);
     };
@@ -109,9 +105,9 @@ export function Providers({
     updateLang(i18n.language);
     return () => {
       i18n.off("languageChanged", updateLang);
-      restore();
+      cancelLocaleLoad();
     };
-  }, [i18n]);
+  }, [i18n, initialChoice, cancelLocaleLoad]);
   return (
     <QueryClientProvider client={client}>
       <I18nextProvider i18n={i18n}>

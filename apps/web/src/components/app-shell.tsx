@@ -1,7 +1,7 @@
 "use client";
 
 import type { Locale, Me } from "@taff/schemas";
-import { profileSchema } from "@taff/schemas";
+import { profileSchema } from "@taff/schemas/base";
 import {
   useIsMutating,
   useMutation,
@@ -36,9 +36,8 @@ import {
   readPreference,
   savePreference,
 } from "../lib/i18n";
-import { useInbox } from "../lib/m3-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
-import { meKey, useMeQuery } from "../lib/queries";
+import { meKey, useInbox, useMeQuery } from "../lib/queries";
 import {
   isCurrentSnapshot,
   restoreQueries,
@@ -226,7 +225,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   ]);
   useEffect(() => {
     if (me.data) {
-      void i18n.changeLanguage(me.data.user.locale);
+      if (i18n.language !== me.data.user.locale)
+        void i18n.changeLanguage(me.data.user.locale);
       savePreference(me.data.user.locale);
     }
   }, [me.data?.user.locale, i18n]);

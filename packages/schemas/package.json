@@ -5,7 +5,15 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./base": "./src/base.ts",
+    "./run-read": "./src/run-read.ts",
+    "./inbox-read": "./src/inbox-read.ts",
+    "./changes": "./src/changes.ts",
+    "./project-read": "./src/project-read.ts",
+    "./workspace-read": "./src/workspace-read.ts",
+    "./calendar-read": "./src/calendar-read.ts",
+    "./notification-preferences": "./src/notification-preferences.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

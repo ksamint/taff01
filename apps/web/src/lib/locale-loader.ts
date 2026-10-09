@@ -1,8 +1,9 @@
+import type { Locale } from "@taff/schemas/base";
 import type { i18n } from "i18next";
 import { isLocale } from "./i18n";
 export function installLocaleLoader(
   instance: i18n,
-  load: (language: "zh-CN" | "zh-HK") => Promise<object>,
+  load: (language: Locale) => Promise<object>,
 ) {
   const original = instance.changeLanguage.bind(instance);
   let generation = 0;
@@ -10,7 +11,6 @@ export function installLocaleLoader(
     const request = ++generation;
     if (
       isLocale(language) &&
-      language !== "en" &&
       !instance.hasResourceBundle(language, "translation")
     ) {
       const bundle = await load(language);
@@ -22,6 +22,6 @@ export function installLocaleLoader(
   };
   return () => {
     generation++;
-    instance.changeLanguage = original;
+    // Keep copied React methods stable across effect cleanup and remount.
   };
 }

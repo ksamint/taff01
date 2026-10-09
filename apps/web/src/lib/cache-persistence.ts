@@ -1,9 +1,6 @@
-import {
-  calendarViewDataSchema,
-  type Me,
-  projectSchema,
-  taskListSchema,
-} from "@taff/schemas";
+import { type Me, taskListSchema } from "@taff/schemas/base";
+import { calendarViewDataSchema } from "@taff/schemas/calendar-read";
+import { projectSchema } from "@taff/schemas/project-read";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import { registerPublicWorker } from "./pwa";
 import {

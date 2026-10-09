@@ -26,156 +26,42 @@ import {
   string,
   trim,
   unknown,
-  uuid,
   enum as zodEnum,
 } from "zod/mini";
-import { $ZodError } from "zod/v4/core";
+import {
+  calendarScheduleInputSchema,
+  createTaskSchema,
+  memberSchema,
+  taskSchema,
+} from "./base";
+import {
+  boundedText,
+  calendarInstantSchema,
+  idSchema,
+  labelsSchema,
+  localeSchema,
+  memberRoleSchema,
+  nonnegativeInteger,
+  positiveInteger,
+  prioritySchema,
+  taskFields,
+  taskStatusSchema,
+  timeZone,
+  versionSchema,
+} from "./primitives";
 
-const timeZone = (tz: string) => {
-  try {
-    new Intl.DateTimeFormat("en", { timeZone: tz });
-    return true;
-  } catch {
-    return false;
-  }
-};
+import { runSchema, runStatusSchema } from "./run-read";
 
-export const localeSchema = zodEnum(["en", "zh-CN", "zh-HK"]);
-export const taskStatusSchema = zodEnum([
-  "todo",
-  "in_progress",
-  "needs_review",
-  "done",
-]);
-export const idSchema = uuid();
-export const workspaceQuerySchema = strictObject({ workspaceId: idSchema });
-export const prioritySchema = number().check(
-  refine((v) => Number.isInteger(v) && v >= 1 && v <= 4),
-);
-export const labelsSchema = array(
-  string().check(trim(), minLength(1), maxLength(40)),
-).check(
-  maxLength(20),
-  refine((v) => new Set(v).size === v.length),
-);
-export const memberRoleSchema = zodEnum(["admin", "member", "guest"]);
-const taskFields = {
-  description: optional(string().check(maxLength(20000))),
-  priority: optional(prioritySchema),
-  projectId: optional(nullable(idSchema)),
-  labels: optional(labelsSchema),
-};
-const calendarInstantSchema = iso.datetime({ offset: true }).check(
-  refine((value) => {
-    const ms = Date.parse(value);
-    return ms >= Date.UTC(1970, 0, 1) && ms < Date.UTC(2201, 0, 1);
-  }),
-);
-export const calendarScheduleInputSchema = strictObject({
-  startAt: calendarInstantSchema,
-  endAt: calendarInstantSchema,
-  timeZone: string().check(
-    minLength(1),
-    maxLength(100),
-    refine(timeZone, "Invalid time zone"),
-  ),
-  rrule: _default(
-    nullable(string().check(trim(), minLength(1), maxLength(500))),
-    null,
-  ),
-}).check(
-  refine((value) => {
-    const duration = Date.parse(value.endAt) - Date.parse(value.startAt);
-    return duration > 0 && duration <= 7 * 86400000;
-  }),
-);
-export type CalendarScheduleInput = Infer<typeof calendarScheduleInputSchema>;
-export const createTaskSchema = strictObject({
-  calendar: optional(calendarScheduleInputSchema),
-  ...taskFields,
-  parentId: optional(nullable(idSchema)),
-  workspaceId: idSchema,
-  title: string().check(trim(), minLength(1), maxLength(200)),
-  ownerId: idSchema,
-  workerId: _default(nullable(idSchema), null),
-  dueAt: optional(nullable(iso.datetime({ offset: true }))),
-});
-export const assignTaskSchema = strictObject({
-  workerId: nullable(idSchema),
-  version: optional(
-    number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
-  ),
-});
-export const signInSchema = strictObject({
-  email: email(),
-  password: string().check(minLength(8), maxLength(128)),
-});
-export const signUpSchema = extend(signInSchema, {
-  name: string().check(trim(), minLength(1), maxLength(100)),
-});
-export const signOutSchema = strictObject({});
-export const profileSchema = strictObject({
-  locale: localeSchema,
-  tz: string().check(
-    minLength(1),
-    maxLength(100),
-    refine(timeZone, "Invalid time zone"),
-  ),
-});
-export const memberSchema = object({
-  id: idSchema,
-  workspaceId: idSchema,
-  userId: nullable(string()),
-  name: string(),
-  kind: zodEnum(["person", "agent"]),
-  role: memberRoleSchema,
-});
-export const memberListSchema = array(memberSchema);
-export const taskSchema = object({
-  description: string(),
-  priority: prioritySchema,
-  projectId: nullable(idSchema),
-  labels: labelsSchema,
-  parentId: nullable(idSchema),
-  version: number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
-  id: idSchema,
-  workspaceId: idSchema,
-  title: string(),
-  ownerId: idSchema,
-  workerId: nullable(idSchema),
-  status: taskStatusSchema,
-  dueAt: nullable(iso.datetime()),
-  createdAt: iso.datetime(),
-  updatedAt: iso.datetime(),
-});
-export const taskListSchema = array(taskSchema);
-export const meSchema = object({
-  user: object({
-    id: string(),
-    name: string(),
-    email: email(),
-    locale: localeSchema,
-    tz: string(),
-  }),
-  workspaces: array(
-    object({
-      id: idSchema,
-      name: string(),
-      memberId: idSchema,
-      role: memberRoleSchema,
-    }),
-  ),
-});
-export const errorSchema = object({
-  error: zodEnum([
-    "unauthorized",
-    "forbidden",
-    "not_found",
-    "invalid_input",
-    "conflict",
-    "internal_error",
-  ]),
-});
+export * from "./base";
+
+export * from "./calendar-read";
+export * from "./changes";
+export * from "./inbox-read";
+export * from "./notification-preferences";
+export * from "./project-read";
+export * from "./run-read";
+export * from "./workspace-read";
+
 export const updateTaskStatusSchema = strictObject({
   version: optional(
     number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
@@ -265,16 +151,8 @@ export const mcpInboxRequestReviewArgs = strictObject({
   note: optional(string().check(maxLength(2000))),
 });
 /** Thrown by every schema above on invalid input. */
-export const SchemaError = $ZodError;
-export type CreateTask = Infer<typeof createTaskSchema>;
-export type AssignTask = Infer<typeof assignTaskSchema>;
-export type Profile = Infer<typeof profileSchema>;
-export type Member = Infer<typeof memberSchema>;
-export type Task = Infer<typeof taskSchema>;
-export type Me = Infer<typeof meSchema>;
-export type Locale = Infer<typeof localeSchema>;
+
 export type Scope = Infer<typeof scopeSchema>;
-export type TaskStatus = Infer<typeof taskStatusSchema>;
 export type CreateAgentToken = Infer<typeof createAgentTokenSchema>;
 export type AgentToken = Infer<typeof agentTokenSchema>;
 export type IssuedAgentToken = Infer<typeof issuedAgentTokenSchema>;
@@ -297,24 +175,6 @@ export const capabilitySchema = zodEnum([
 ]);
 export const permissionDecisionSchema = zodEnum(["allow", "ask", "deny"]);
 export const reviewPolicySchema = zodEnum(["always_review", "ask_only"]);
-export const runStatusSchema = zodEnum([
-  "running",
-  "paused",
-  "needs_review",
-  "changes_requested",
-  "completed",
-  "canceled",
-  "failed",
-]);
-const nonnegativeInteger = number().check(
-  refine((value) => Number.isSafeInteger(value) && value >= 0),
-);
-const positiveInteger = number().check(
-  refine((value) => Number.isSafeInteger(value) && value > 0),
-);
-const versionSchema = positiveInteger;
-const boundedText = (max: number) =>
-  string().check(trim(), minLength(1), maxLength(max));
 const httpUrlSchema = string().check(
   maxLength(2000),
   refine((value) => {
@@ -416,21 +276,6 @@ export const inboxItemInputSchema = strictObject({
     (value) => value.read !== undefined || value.snoozedUntil !== undefined,
   ),
 );
-export const runSchema = object({
-  id: idSchema,
-  workspaceId: idSchema,
-  taskId: idSchema,
-  agentId: idSchema,
-  status: runStatusSchema,
-  version: versionSchema,
-  summary: string(),
-  startedAt: iso.datetime(),
-  finishedAt: nullable(iso.datetime()),
-  updatedAt: iso.datetime(),
-  durationMs: nonnegativeInteger,
-  costMicros: nonnegativeInteger,
-});
-export const runListSchema = array(runSchema);
 export const runEventSchema = object({
   id: idSchema,
   workspaceId: idSchema,
@@ -515,31 +360,6 @@ export const agentProfileSchema = object({
   canManage: boolean(),
   canDecideGrants: boolean(),
 });
-export const inboxItemSchema = object({
-  id: idSchema,
-  workspaceId: idSchema,
-  memberId: idSchema,
-  agentId: nullable(idSchema),
-  taskId: nullable(idSchema),
-  runId: nullable(idSchema),
-  grantId: nullable(idSchema),
-  kind: zodEnum(["review", "blocker", "mention", "done", "digest"]),
-  digestId: nullable(idSchema),
-  title: string(),
-  readAt: nullable(iso.datetime()),
-  snoozedUntil: nullable(iso.datetime()),
-  resolvedAt: nullable(iso.datetime()),
-  createdAt: iso.datetime(),
-});
-export const inboxSchema = object({
-  items: array(inboxItemSchema),
-  groups: array(
-    object({ taskId: nullable(idSchema), items: array(inboxItemSchema) }),
-  ),
-  unreadCount: nonnegativeInteger,
-  reviewCount: nonnegativeInteger,
-  blockerCount: nonnegativeInteger,
-});
 export const mcpFilesAttachArgs = extend(attachRunArtifactSchema, {
   runId: idSchema,
 });
@@ -556,7 +376,7 @@ export const mcpGrantsRequestArgs = extend(requestGrantSchema, {
 export type Capability = Infer<typeof capabilitySchema>;
 export type PermissionDecision = Infer<typeof permissionDecisionSchema>;
 export type ReviewPolicy = Infer<typeof reviewPolicySchema>;
-export type Run = Infer<typeof runSchema>;
+
 export type RunDetail = Infer<typeof runDetailSchema>;
 export type RunEvent = Infer<typeof runEventSchema>;
 export type RunArtifact = Infer<typeof runArtifactSchema>;
@@ -565,8 +385,6 @@ export type ReviewWorkspace = Infer<typeof reviewWorkspaceSchema>;
 export type ReviewComment = Infer<typeof reviewCommentDtoSchema>;
 export type Grant = Infer<typeof grantSchema>;
 export type AgentProfile = Infer<typeof agentProfileSchema>;
-export type InboxItem = Infer<typeof inboxItemSchema>;
-export type Inbox = Infer<typeof inboxSchema>;
 export type StartRun = Infer<typeof startRunSchema>;
 export type ControlRun = Infer<typeof controlRunSchema>;
 export type AppendRunEvent = Infer<typeof appendRunEventSchema>;
@@ -579,22 +397,6 @@ export type AgentPermissionInput = Infer<typeof agentPermissionInputSchema>;
 export type RequestGrant = Infer<typeof requestGrantSchema>;
 export type DecideGrant = Infer<typeof decideGrantSchema>;
 export type InboxItemInput = Infer<typeof inboxItemInputSchema>;
-
-/** Safe routing metadata emitted transactionally by PostgreSQL taff_changes. */
-export const changeEventSchema = strictObject({
-  recipientOnly: optional(boolean()),
-  activityId: idSchema,
-  workspaceId: nullable(idSchema),
-  resourceId: string().check(minLength(1), maxLength(200)),
-  action: string().check(
-    regex(
-      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites|task_calendar|notification_preferences|daily_digests)\.(insert|update|delete)$/,
-    ),
-  ),
-  actorId: string().check(minLength(1), maxLength(200)),
-  userId: nullable(string().check(minLength(1), maxLength(200))),
-});
-export type ChangeEvent = Infer<typeof changeEventSchema>;
 
 // M5 planning, collaboration and organizations.
 export const updateTaskSchema = strictObject({
@@ -643,15 +445,6 @@ export const projectUpdateSchema = strictObject({
   name: optional(boundedText(100)),
   archived: optional(boolean()),
 }).check(refine((v) => v.name !== undefined || v.archived !== undefined));
-export const projectSchema = object({
-  id: idSchema,
-  workspaceId: idSchema,
-  name: string(),
-  archived: boolean(),
-  version: versionSchema,
-  createdAt: iso.datetime(),
-  updatedAt: iso.datetime(),
-});
 export const workspaceCreateSchema = strictObject({
   name: boundedText(100),
   agentIds: optional(
@@ -747,7 +540,6 @@ export type TaskCommentInput = Infer<typeof taskCommentInputSchema>;
 export type TaskComment = Infer<typeof taskCommentSchema>;
 export type ProjectInput = Infer<typeof projectInputSchema>;
 export type ProjectUpdate = Infer<typeof projectUpdateSchema>;
-export type Project = Infer<typeof projectSchema>;
 export type WorkspaceCreate = Infer<typeof workspaceCreateSchema>;
 export type Workspace = Infer<typeof workspaceSchema>;
 export type WorkspaceInviteInput = Infer<typeof workspaceInviteInputSchema>;
@@ -771,14 +563,6 @@ export const taskAccessSchema = object({
 });
 export type TaskAccess = Infer<typeof taskAccessSchema>;
 
-export const workspaceAccessSchema = object({
-  canCreateTasks: boolean(),
-  canManageProjects: boolean(),
-  canInvite: boolean(),
-  canManageRoles: boolean(),
-});
-export type WorkspaceAccess = Infer<typeof workspaceAccessSchema>;
-
 export const calendarRangeSchema = strictObject({
   from: calendarInstantSchema,
   to: calendarInstantSchema,
@@ -793,43 +577,12 @@ export const setTaskCalendarSchema = strictObject({
   version: versionSchema,
   schedule: nullable(calendarScheduleInputSchema),
 });
-export const calendarScheduleSchema = object({
-  taskId: idSchema,
-  workspaceId: idSchema,
-  startAt: iso.datetime(),
-  endAt: iso.datetime(),
-  timeZone: string(),
-  rrule: nullable(string()),
-});
-export const taskCalendarSchema = object({
-  task: taskSchema,
-  schedule: nullable(calendarScheduleSchema),
-  canSchedule: boolean(),
-});
-export const calendarOccurrenceSchema = object({
-  id: string().check(minLength(1), maxLength(100)),
-  task: taskSchema,
-  schedule: calendarScheduleSchema,
-  startAt: iso.datetime(),
-  endAt: iso.datetime(),
-  canSchedule: boolean(),
-  isAgent: boolean(),
-});
-export const calendarViewDataSchema = object({
-  occurrences: array(calendarOccurrenceSchema),
-  unscheduled: array(taskCalendarSchema),
-  truncated: boolean(),
-});
 export const mcpCalendarListArgs = calendarRangeSchema;
 export const mcpCalendarSetArgs = extend(setTaskCalendarSchema, {
   taskId: idSchema,
 });
 export type CalendarRange = Infer<typeof calendarRangeSchema>;
 export type SetTaskCalendar = Infer<typeof setTaskCalendarSchema>;
-export type CalendarSchedule = Infer<typeof calendarScheduleSchema>;
-export type TaskCalendar = Infer<typeof taskCalendarSchema>;
-export type CalendarOccurrence = Infer<typeof calendarOccurrenceSchema>;
-export type CalendarViewData = Infer<typeof calendarViewDataSchema>;
 export {
   calendarCivilTime,
   calendarWallToInstant,
@@ -837,18 +590,6 @@ export {
   shiftCalendarSeries,
 } from "./calendar";
 
-export const notificationPreferencesSchema = strictObject({
-  version: versionSchema,
-  review: boolean(),
-  block: boolean(),
-  mention: boolean(),
-  done: boolean(),
-  digest: boolean(),
-  digestAt: zodEnum(["08:00", "09:00", "18:00"]),
-  quiet: boolean(),
-});
-export const updateNotificationPreferencesSchema =
-  notificationPreferencesSchema;
 const digestTaskLinkSchema = object({ taskId: idSchema, title: string() });
 export const digestSnapshotSchema = object({
   reviews: object({
@@ -911,12 +652,6 @@ export const digestJobResultSchema = object({
   status: zodEnum(["generated", "skipped"]),
   digestIds: array(idSchema),
 });
-export type NotificationPreferences = Infer<
-  typeof notificationPreferencesSchema
->;
-export type UpdateNotificationPreferences = Infer<
-  typeof updateNotificationPreferencesSchema
->;
 export type DigestSnapshot = Infer<typeof digestSnapshotSchema>;
 export type DailyDigest = Infer<typeof dailyDigestSchema>;
 export type DailyDigestList = Infer<typeof dailyDigestListSchema>;

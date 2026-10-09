@@ -43,6 +43,12 @@ export function browserTimeZone(): string {
 }
 
 export function savePreference(locale: Locale) {
+  if (!isLocale(locale)) return;
+  try {
+    document.cookie = `taff-locale=${locale}; Path=/; Max-Age=31536000; SameSite=Lax${window.location.protocol === "https:" ? "; Secure" : ""}`;
+  } catch {
+    /* Cookies may be disabled; the browser preference still works. */
+  }
   try {
     localStorage.setItem("taff-locale", locale);
   } catch {
@@ -58,8 +64,12 @@ export const LAST_WORKSPACE_KEY = "taff:last-workspace";
  * has downloaded and run. The API authorizes every request, so a stale or
  * foreign id only wastes one small response.
  */
-export function preloadBootScript(version: string) {
-  return `try{var p=function(h){var k=document.createElement("link");k.rel="preload";k.as="fetch";k.crossOrigin="anonymous";k.href=h;document.head.appendChild(k)};var l=localStorage.getItem("taff-locale");if(l==="zh-CN"||l==="zh-HK")p("/locales/"+l+"?v=${version}");var w=localStorage.getItem("${LAST_WORKSPACE_KEY}");if(w&&/^[0-9a-f-]{36}$/.test(w)){p("/api/tasks?workspaceId="+w);p("/api/members?workspaceId="+w)}}catch(e){}`;
+export function preloadBootScript(
+  version: string,
+  loadedLocale: Locale = "en",
+) {
+  // Server-supplied resources need no competing JSON download.
+  return `try{var p=function(h){var k=document.createElement("link");k.rel="preload";k.as="fetch";k.crossOrigin="anonymous";k.href=h;document.head.appendChild(k)};var l=localStorage.getItem("taff-locale");if((l==="zh-CN"||l==="zh-HK")&&l!==${JSON.stringify(loadedLocale)})p("/locales/"+l+"?v=${version}");var w=localStorage.getItem("${LAST_WORKSPACE_KEY}");if(w&&/^[0-9a-f-]{36}$/.test(w)){p("/api/tasks?workspaceId="+w);p("/api/members?workspaceId="+w)}}catch(e){}`;
 }
 
 export function readPreference(): Locale | null {

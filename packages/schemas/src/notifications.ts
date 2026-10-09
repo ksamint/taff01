@@ -1,5 +1,5 @@
 import { calendarCivilTime } from "./calendar";
-import type { NotificationPreferences } from "./index";
+import type { NotificationPreferences } from "./notification-preferences";
 export const DEFAULT_NOTIFICATION_PREFERENCES: NotificationPreferences = {
   version: 1,
   review: true,

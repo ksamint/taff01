@@ -1,4 +1,4 @@
-import { errorSchema } from "@taff/schemas";
+import { errorSchema } from "@taff/schemas/base";
 
 export class ApiError extends Error {
   constructor(

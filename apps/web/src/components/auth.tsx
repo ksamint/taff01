@@ -1,6 +1,6 @@
 "use client";
 
-import { signInSchema, signUpSchema } from "@taff/schemas";
+import { signInSchema, signUpSchema } from "@taff/schemas/base";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
