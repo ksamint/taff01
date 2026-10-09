@@ -15,7 +15,7 @@ import {
 } from "@tanstack/react-query";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { m3MutationKey } from "../lib/optimistic-m3";
@@ -130,18 +130,24 @@ export function TodayView() {
   const shownTasks = showAll ? visibleTasks : visibleTasks.slice(0, TODAY_PAGE);
   const hiddenCount = visibleTasks.length - shownTasks.length;
   const locale = i18n.resolvedLanguage ?? me.user.locale;
-  const date = new Intl.DateTimeFormat(locale, {
-    timeZone: me.user.tz,
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  }).format(new Date());
-  const time = new Intl.DateTimeFormat(locale, {
-    timeZone: me.user.tz,
-    hour: "numeric",
-    minute: "2-digit",
-  });
-  const numbers = new Intl.NumberFormat(locale);
+  const { dateFormatter, time, numbers } = useMemo(
+    () => ({
+      dateFormatter: new Intl.DateTimeFormat(locale, {
+        timeZone: me.user.tz,
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      }),
+      time: new Intl.DateTimeFormat(locale, {
+        timeZone: me.user.tz,
+        hour: "numeric",
+        minute: "2-digit",
+      }),
+      numbers: new Intl.NumberFormat(locale),
+    }),
+    [locale, me.user.tz],
+  );
+  const date = dateFormatter.format(new Date());
   const count = numbers.format(visibleTasks.length);
   const people =
     members.data?.filter((member) => member.kind === "person") ?? [];

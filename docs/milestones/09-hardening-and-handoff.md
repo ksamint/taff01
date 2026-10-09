@@ -139,13 +139,45 @@ Today now shares one locale/time-zone time formatter across its visible cards
 per render, instead of constructing one for every due date. Number formatting
 also reuses one instance for the count and pagination label. Formatting options,
 locale updates, task filtering and the 20-card limit are unchanged. The isolated
-runner will measure this change with the original performance settings.
+runner measured this change with the original performance settings.
+
+Candidate `cca2cede5a26d72b6a57b275d2414cbcd45d345d` passed all nine required
+commands in the isolated Linux runner: 400 unit tests, 78 browser tests and MCP
+smoke. Initial JavaScript was 199,346 gzip bytes. Signed-in, 20-card mobile
+Lighthouse performance was 92/90/90 for en/zh-CN/zh-HK; accessibility was 96 and
+best practices 100 throughout. The separate three-run slow-4G, 4x-CPU LCP check
+reported medians of 1,752/1,956/1,960 ms, all below 2,000 ms. The runner exited
+zero at 2026-10-09 07:07:11 UTC with a fresh completion marker. Temporary test
+containers, network and runtime image were removed. This candidate is pushed;
+CI run [37897438084](https://github.com/ksamint/taff01/actions/runs/37897438084)
+passed, including all Docker builds, 78 browser checks and MCP smoke. After the
+fast-forward to main, run
+[37898540544](https://github.com/ksamint/taff01/actions/runs/37898540544) failed
+Lighthouse at 89/87/87. Initial transferred JavaScript was unchanged and its CPU
+benchmark was 16–21% lower; CPU headroom is the current hypothesis. The required
+thresholds and audit settings remain unchanged.
+
+The first native image build failed downloading the Dockerfile frontend through
+the host's selected container builder. A separate public-image probe passed
+through the existing default Docker builder and its Tencent registry mirror.
+No Taff application containers, public route or DNS record were created; the
+deployment lock was released. A dedicated PostgreSQL database and restricted
+role are provisioned on ins-nx2vm7pc, with verified TLS and access restricted to
+the application host. Existing database and proxy containers were not restarted.
+Private application credentials and the public database CA are installed outside
+the release checkout. They will be reused for the next validated candidate.
+
+Today now memoizes its date, time and number formatter objects by locale and
+time zone across renders. The current date and task filtering are still evaluated
+on each render. Its performance gain is pending measurement; no new candidate
+has been deployed.
 
 ## Remaining work and open decisions
 
-M9 is not complete. Next: reduce Chinese-locale LCP to a three-run median of
-2 seconds while preserving the M8 preloads, optional fonts and 20-card Today
-limit. Then finish the full accessibility and keyboard pass, i18n parity and
+M9 is not complete. The local performance targets passed while preserving
+the M8 preloads, optional fonts and 20-card Today limit; main CI still needs
+sufficient CPU headroom.
+Next: finish the full accessibility and keyboard pass, i18n parity and
 route screenshots, faithful idempotent prototype seed, verified invitation
 email, and the clean-checkout deployment walkthrough and release notes.
 No release tag has been created.
