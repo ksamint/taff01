@@ -104,8 +104,22 @@ test("IndexedDB restores authorized lists board and calendar before real reconci
   await expect(
     page.getByRole("link", { name: task.title, exact: true }),
   ).toBeVisible();
+  await expect
+    .poll(async () =>
+      (await readCache(page))?.queries.some(
+        (query) => query.key[0] === "tasks",
+      ),
+    )
+    .toBe(true);
   await page.goto(`/projects/${project.id}`);
   await expect(page.getByRole("heading", { name: project.name })).toBeVisible();
+  await expect
+    .poll(async () =>
+      (await readCache(page))?.queries.some(
+        (query) => query.key[0] === "projects",
+      ),
+    )
+    .toBe(true);
   await page.goto("/calendar");
   await expect(
     page.locator(".sx__event").filter({ hasText: task.title }),
@@ -241,9 +255,14 @@ test("durable cache never records pending rollback data and revocation rejects a
     storageState: await page.context().storageState(),
   });
   try {
-    expect((await remote.request.post("/api/auth/sign-out")).status()).toBe(
-      200,
-    );
+    expect(
+      (
+        await remote.request.post("/api/auth/sign-out", {
+          data: {},
+          headers: { Origin: process.env.AUTH_URL! },
+        })
+      ).status(),
+    ).toBe(200);
     await expect(page.getByTestId("auth-submit")).toBeVisible({
       timeout: 1000,
     });

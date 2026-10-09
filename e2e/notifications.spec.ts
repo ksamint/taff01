@@ -1,4 +1,5 @@
-import { mock } from "node:test";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import {
   Client,
   StreamableHTTPClientTransport,
@@ -6,7 +7,6 @@ import {
 import { expect, test } from "@playwright/test";
 import {
   calendarWallToInstant,
-  type DigestJobCursor,
   dailyDigestSchema,
   inboxSchema,
   issuedAgentTokenSchema,
@@ -36,13 +36,16 @@ test("notification preferences save optimistically roll back failure and muted b
         response.request().method() === "PATCH",
     );
   let saved = patch();
-  await page.getByTestId("notification-review").uncheck();
+  await page.getByTestId("notification-review").click();
+  await expect(page.getByTestId("notification-review")).not.toBeChecked();
   expect((await saved).status()).toBe(200);
   saved = patch();
-  await page.getByTestId("notification-time-18:00").check();
+  await page.getByTestId("notification-time-18:00").click();
+  await expect(page.getByTestId("notification-time-18:00")).toBeChecked();
   expect((await saved).status()).toBe(200);
   saved = patch();
-  await page.getByTestId("notification-quiet").check();
+  await page.getByTestId("notification-quiet").click();
+  await expect(page.getByTestId("notification-quiet")).toBeChecked();
   expect((await saved).status()).toBe(200);
   const actual = notificationPreferencesSchema.parse(
     await (await page.request.get("/api/me/notifications")).json(),
@@ -65,7 +68,8 @@ test("notification preferences save optimistically roll back failure and muted b
     await gate;
     await route.fulfill({ status: 403, json: { error: "forbidden" } });
   });
-  await page.getByTestId("notification-block").uncheck();
+  await page.getByTestId("notification-block").click();
+  await expect(page.getByTestId("notification-block")).not.toBeChecked();
   await expect(page.getByTestId("notification-block")).not.toBeChecked();
   await expect(page.getByTestId("notification-review")).toBeDisabled();
   release();
@@ -78,7 +82,7 @@ test("notification preferences save optimistically roll back failure and muted b
   await page.unroute("**/api/me/notifications");
   expect(
     (
-      await page.request.patch(`/api/agents/${agent.id}/permissions`, {
+      await page.request.put(`/api/agents/${agent.id}/permissions`, {
         data: { capability: "web.search", decision: "ask" },
       })
     ).status(),
@@ -111,7 +115,8 @@ test("notification preferences save optimistically roll back failure and muted b
     .getByRole("button", { name: messages[locale].planning.close })
     .click();
   saved = patch();
-  await page.getByTestId("notification-block").uncheck();
+  await page.getByTestId("notification-block").click();
+  await expect(page.getByTestId("notification-block")).not.toBeChecked();
   expect((await saved).status()).toBe(200);
   const otherTask = taskSchema.parse(
     await (
@@ -305,51 +310,14 @@ test("real worker digest opens from Inbox with immutable due review and measured
   await expect(
     page.getByTestId("inbox-item").filter({ hasText: task.title }),
   ).toBeVisible();
-  const { createCore } = await import("../packages/core/src/index");
-  const core = createCore({
-    databaseUrl: process.env.DATABASE_URL!,
-    authUrl: process.env.AUTH_URL!,
-    authSecret: process.env.AUTH_SECRET!,
-    tokenPepper: process.env.TOKEN_PEPPER!,
-  });
-  let digestId: string | undefined;
-  try {
-    let cursor: DigestJobCursor | undefined;
-    let job:
-      | { userId: string; scheduledAt: string; preferenceVersion: number }
-      | undefined;
-    do {
-      const found = await core.listDueDigestJobs(
-        future.toISOString(),
-        500,
-        cursor,
-      );
-      job = found.jobs.find((item) => item.userId === me.user.id);
-      cursor = found.nextCursor ?? undefined;
-    } while (!job && cursor);
-    if (!job) throw new Error("Real due digest marker required");
-    // Only the trusted helper's Node clock advances; browser/API clocks stay real.
-    mock.timers.enable({ apis: ["Date"], now: future });
-    try {
-      const generated = await core.generateDailyDigest(
-        job.userId,
-        job.scheduledAt,
-        job.preferenceVersion,
-      );
-      expect(generated.status).toBe("generated");
-      for (const id of generated.digestIds) {
-        const value = await core.getDailyDigest(
-          { kind: "user", userId: me.user.id },
-          id,
-        );
-        if (value.workspaceId === workspace.id) digestId = id;
-      }
-    } finally {
-      mock.timers.reset();
-    }
-  } finally {
-    await core.close();
-  }
+  const generated = await promisify(execFile)(process.execPath, [
+    "node_modules/tsx/dist/cli.mjs",
+    "e2e/support/generate-digest.mts",
+    me.user.id,
+    workspace.id,
+    future.toISOString(),
+  ]);
+  const { digestId } = JSON.parse(generated.stdout) as { digestId: string };
   if (!digestId) throw new Error("Persisted workspace digest required");
   const snapshot = dailyDigestSchema.parse(
     await (await page.request.get(`/api/digests/${digestId}`)).json(),

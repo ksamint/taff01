@@ -29,8 +29,9 @@ Milestone 07 is a progress checkpoint: authenticated IndexedDB persistence,
 public-only PWA caching, notification preferences and recipient-scoped daily
 digests are implemented. Core owns database access, workspace permissions and
 transactional activity/notification behavior; BullMQ retries digest generation.
-Browser and performance acceptance remain pending, including a licence decision
-for the proposed Lighthouse audit dependency. See the M7 milestone report.
+All 75 production browser cases pass. Performance acceptance remains pending,
+including a licence decision for the proposed Lighthouse audit dependency.
+See the M7 milestone report.
 
 Production and release gates follow in later milestones (see the implementation plan).
 This is a development foundation, not a production release. Milestone reports

@@ -26,6 +26,7 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
@@ -41,6 +42,8 @@ import {
 import { connectWorkspace } from "../lib/realtime";
 import {
   sessionMatches,
+  sessionVersion,
+  subscribeSession,
   synchronizeSession,
   workspaceFingerprint,
 } from "../lib/session-cache";
@@ -170,11 +173,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const userId = me.data?.user.id ?? null;
   const scope = me.data ? workspaceFingerprint(me.data) : "";
   const identityKey = `${userId ?? "signed-out"}:${scope}`;
-  const [checkedIdentity, setCheckedIdentity] = useState<
-    string | null | undefined
-  >(undefined);
-  const identityReady =
-    checkedIdentity === identityKey && sessionMatches(client, userId, scope);
+  useSyncExternalStore(
+    (listener) => subscribeSession(client, listener),
+    () => sessionVersion(client),
+    () => 0,
+  );
+  const identityReady = sessionMatches(client, userId, scope);
   const selectionUser = useRef<string | null>(null);
   useEffect(() => {
     if (!me.data || !identityReady) return;
@@ -200,12 +204,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (me.isPending || me.isError || me.isFetching) return;
     synchronizeSession(client, userId, scope);
-    setCheckedIdentity(identityKey);
   }, [
     client,
     userId,
     scope,
-    identityKey,
     me.isPending,
     me.isError,
     me.isFetching,

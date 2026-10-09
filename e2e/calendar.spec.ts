@@ -193,8 +193,6 @@ async function safeBox(locator: Locator) {
       behavior: "instant",
     }),
   );
-  const box = await locator.boundingBox();
-  if (!box) throw new Error("Missing gesture geometry");
   await expect
     .poll(() =>
       locator.evaluate((element) => {
@@ -210,6 +208,8 @@ async function safeBox(locator: Locator) {
       }),
     )
     .toBe(true);
+  const box = await locator.boundingBox();
+  if (!box) throw new Error("Missing gesture geometry");
   return box;
 }
 async function touchGesture(
@@ -712,6 +712,19 @@ test("calendar real agent lane separates concurrent human time and preserves nat
   await expect(humanEvent).toBeVisible();
   await expect(agentEvent).toBeVisible();
   await safeBox(agentEvent);
+  await expect
+    .poll(async () => {
+      const human = await humanEvent.boundingBox();
+      const agent = await agentEvent.boundingBox();
+      return (
+        human !== null &&
+        agent !== null &&
+        Math.abs(human.y - agent.y) < 1 &&
+        Math.abs(human.height - agent.height) < 1 &&
+        human.x + human.width <= agent.x
+      );
+    })
+    .toBe(true);
   const humanBox = await humanEvent.boundingBox();
   const agentBox = await agentEvent.boundingBox();
   if (!humanBox || !agentBox)
