@@ -87,7 +87,9 @@ reviews. The agent prompt that drives this is `agent-goal.md`.
   first, then reconcile), PWA manifest and service worker (no offline sync),
   notification preferences, daily digest job on BullMQ, performance budget script
   (initial JS ≤ 200 KB gzipped, LCP ≤ 2 s on simulated 4G, Lighthouse ≥ 90).
-  Acceptance: budget script passes on the Today route.
+  Acceptance: budget script passes on the Today route. Done: `pnpm perf:budget`
+  and `pnpm perf:lcp` (Playwright + CDP throttling, no Lighthouse) pass; the
+  Lighthouse score waits on the axe-core (MPL-2.0) licence decision of ADR 0003.
 
 ### Phase 4 — Release
 
@@ -95,7 +97,11 @@ reviews. The agent prompt that drives this is `agent-goal.md`.
   production compose; CI running lint, typecheck, unit and integration tests, e2e
   in all locales, MCP smoke, licence gate and performance budget; OAuth 2.1
   metadata for `/mcp`; security pass (CORS, rate limits, token redaction);
-  README quick start verified from a clean checkout.
+  README quick start verified from a clean checkout. Done in M8: server bundles,
+  the three Dockerfiles, `compose.prod.yaml` with Caddy, `.github/workflows/ci.yml`,
+  the licence gate and the audit security pass. Open: OAuth 2.1 metadata (needs
+  an authorization server decision; bearer tokens remain the contract until
+  then), outgoing email for invitations, a clean-checkout quick-start run.
 - **M9 Hardening and handoff.** Accessibility pass against the floor in
   `ui/README.md`, i18n QA in all locales, prototype seed data, release notes.
 

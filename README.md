@@ -29,13 +29,22 @@ Milestone 07 is a progress checkpoint: authenticated IndexedDB persistence,
 public-only PWA caching, notification preferences and recipient-scoped daily
 digests are implemented. Core owns database access, workspace permissions and
 transactional activity/notification behavior; BullMQ retries digest generation.
-All 75 production browser cases pass. Performance acceptance remains pending,
-including a licence decision for the proposed Lighthouse audit dependency.
-See the M7 milestone report.
+All 75 production browser cases pass.
+Milestone 08 fixes the findings of a full audit of M3–M7 (atomic MCP task
+updates, batch rejection, limiter before token lookup, scoped socket closes,
+heartbeats and caps, person-held run pauses, agent task creation limits,
+database kind and vocabulary checks, browser time zone, versioned service
+worker and locale caches) and adds production packaging: server bundles,
+Docker images, a production compose file with Caddy, a licence gate, an LCP
+measurement on simulated slow 4G and a GitHub Actions pipeline.
+Lighthouse's axe-core dependency (MPL-2.0) still needs the licence decision of
+ADR 0003; `pnpm perf:lcp` covers the LCP limit without it.
+See [the deployment guide](docs/deploy.md) and the M8 milestone report.
 
-Production and release gates follow in later milestones (see the implementation plan).
-This is a development foundation, not a production release. Milestone reports
-record working behavior and validation; development continues while they are reviewed.
+Open items for release: OAuth 2.1 metadata on `/mcp` (needs an authorization
+server decision), outgoing email for invitations, the M9 accessibility and i18n
+pass, prototype seed data and release notes. Milestone reports record working
+behavior and validation; development continues while they are reviewed.
 
 ## Quick start
 
@@ -100,8 +109,14 @@ the seeded demo password and starts the development services if needed. It adds
 sample users/tasks to the local app database.
 
 `pnpm build` builds the web production bundle; `pnpm perf:budget` then measures
-the Today page's gzipped JavaScript against the 200 KiB budget. API and worker run from
-TypeScript during development; production packaging is a later phase.
+the Today page's gzipped JavaScript against the 200 KiB budget, and
+`pnpm perf:lcp` measures Today's Largest Contentful Paint on the production
+build under a simulated slow-4G phone (median of three runs, limit 2 s; set
+`CHROMIUM_PATH` to use a system browser). `pnpm licence:check` verifies every
+installed package against the licence policy. API and worker run from
+TypeScript during development; `pnpm build:server` bundles them, with the
+migrator, for the production images described in
+[the deployment guide](docs/deploy.md).
 `pnpm mcp:smoke` connects the official MCP client to the running API, exercises
 every tool, measured events, artifacts, grants, review changes, the rate limit
 and revocation; run it with `pnpm dev` up. Agents must submit their own real

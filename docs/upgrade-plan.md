@@ -51,7 +51,7 @@ verify the legacy plugin bridge.
 | November 2026 (TypeScript 7.1) | Nothing to change; 7.1 restores the JS API for tools that need it. | `pnpm up typescript`. | `pnpm typecheck`, `pnpm build`. |
 | When Drizzle 1.0 is final | 0.45 → 1.0 | Read the 1.0 migration guide; regenerate migration snapshots. | Integration tests. |
 | Phase 2 decision | BullMQ PostgreSQL backend | Separate ADR: it would remove Valkey, move MCP rate limiting into PostgreSQL and change the worker's backend factory. | Load test of job throughput and rate-limit accuracy. |
-| When BullMQ documents support | ioredis 5 → 6 | 6.0.0 shipped on 2026-10-07; BullMQ 6 declares `ioredis >=5` but has not released against 6. Bump the worker and API together. | `pnpm test`, `pnpm mcp:smoke`, worker reaches ready. |
+| When BullMQ documents support | ioredis 5 → 6 (worker) | 6.0.0 shipped on 2026-10-07; BullMQ 6 declares `ioredis >=5` but has not released against 6. The API already runs ioredis 6 for the rate limiter; the worker stays on 5 until BullMQ confirms 6. | `pnpm test`, `pnpm mcp:smoke`, worker reaches ready. |
 | With each Node major | `@types/node` | Tracks the runtime major (24 now), not the newest types package (26). | `pnpm typecheck`. |
 | Monthly | Minor and patch bumps | `pnpm up --latest` within the fixed majors; pnpm's release-age policy delays packages younger than its cutoff. | Full check set. |
 
