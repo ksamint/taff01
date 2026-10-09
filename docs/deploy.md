@@ -55,6 +55,52 @@ docker compose --env-file .env.production -f compose.prod.yaml up -d
 Migrations are additive and run before the new API starts. Take a backup
 first: `docker compose -f compose.prod.yaml exec -T postgres pg_dump -U taff taff > backup.sql`.
 
+## Apuch server layout
+
+The requested deployment uses a separate Docker Compose project, `taff`, on
+`ins-ag5pnvc0` (private `10.206.103.6`, public `146.56.215.142`). PostgreSQL
+stays on `ins-nx2vm7pc` at `10.206.103.13:5432`; use a dedicated `taff` role
+and database, with no access to the other applications' databases.
+
+Copy `.env.production.example` to a private, mode-0600 `.env.production`.
+Set `AUTH_URL=https://taff.apuch.cn` and a URL-encoded password in
+`DATABASE_URL`, retaining `sslmode=verify-full`. Copy only the public
+`/srv/postgresql/tls/ca.crt` from the PostgreSQL host to
+`/srv/taff/secrets/postgresql-ca.crt` and set `POSTGRES_CA_FILE` accordingly.
+The app, worker and migrator mount this CA read-only and trust it via
+`NODE_EXTRA_CA_CERTS`; the PostgreSQL host requires TLS.
+Generate independent `AUTH_SECRET` and `TOKEN_PEPPER` values.
+`POSTGRES_PASSWORD` is unused by this layout but remains required while Compose
+parses the base file. Set `TAFF_TAG` to the exact released Git SHA.
+
+```sh
+docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.yaml build
+docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.yaml up -d
+```
+
+The override disables the bundled PostgreSQL service and removes published
+ports. Only Taff's Caddy container joins the existing `tableai-can01-edge`
+network, with alias `taff-caddy`. API, worker, web and Valkey use Taff's own
+network. The override builds a separate worker image.
+
+The host already serves other applications on ports 80/443 through Traefik.
+After verifying Taff's containers and migrations, install
+`deploy/taff-traefik.yaml` as a new file in
+`/srv/tiansight/traefik/dynamic/`; the existing watcher picks it up without a
+proxy restart. It routes only `taff.apuch.cn` and uses the existing `dnspod`
+certificate resolver. Add the DNSPod A record `taff.apuch.cn → 146.56.215.142`.
+Verify HTTPS, `/api/health`, sign-in and a task write through the public origin.
+
+For a first-deployment rollback, remove only the new Taff route file and DNS
+record, then stop this Compose project. Preserve the PostgreSQL database,
+role and volumes. For upgrades, retain the previous image tags and restore
+those tags if health checks fail; additive migrations remain in place.
+
+`ins-aj5kmjag` hosts Neo4j Community at private `10.206.103.5:7687`.
+The current app has no Neo4j driver or graph data model, so no graph connection
+is claimed or configured. Graph functionality and its isolation need an explicit
+scope decision before changing that shared service.
+
 ## Operations
 
 - Health: `GET /api/health` on the API; Caddy proxies it at `AUTH_URL/api/health`.

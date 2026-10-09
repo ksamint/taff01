@@ -1,0 +1,41 @@
+# ins-ag5pnvc0: isolated Taff services behind the existing HTTPS proxy.
+# Use with compose.prod.yaml; PostgreSQL lives on ins-nx2vm7pc.
+services:
+  postgres:
+    profiles: [local-database]
+  migrate:
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set the private external PostgreSQL URL}
+      NODE_EXTRA_CA_CERTS: /run/secrets/postgresql-ca.crt
+    volumes:
+      - ${POSTGRES_CA_FILE:?Set the external PostgreSQL CA path}:/run/secrets/postgresql-ca.crt:ro
+    depends_on: !reset {}
+  api:
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set the private external PostgreSQL URL}
+      NODE_EXTRA_CA_CERTS: /run/secrets/postgresql-ca.crt
+    volumes:
+      - ${POSTGRES_CA_FILE:?Set the external PostgreSQL CA path}:/run/secrets/postgresql-ca.crt:ro
+  worker:
+    image: ${TAFF_IMAGE_WORKER:-taff-worker}:${TAFF_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.server
+      args: { TARGET: worker }
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?Set the private external PostgreSQL URL}
+      NODE_EXTRA_CA_CERTS: /run/secrets/postgresql-ca.crt
+    volumes:
+      - ${POSTGRES_CA_FILE:?Set the external PostgreSQL CA path}:/run/secrets/postgresql-ca.crt:ro
+  caddy:
+    ports: !reset []
+    environment:
+      SITE_ADDRESS: ":80"
+    networks:
+      default: {}
+      edge:
+        aliases: [taff-caddy]
+networks:
+  edge:
+    external: true
+    name: tableai-can01-edge

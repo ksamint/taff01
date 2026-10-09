@@ -1,0 +1,24 @@
+# Add this file to the existing proxy's watched dynamic directory.
+http:
+  routers:
+    taff-http:
+      rule: Host(`taff.apuch.cn`)
+      entryPoints: [web]
+      middlewares: [taff-https]
+      service: taff
+    taff-https:
+      rule: Host(`taff.apuch.cn`)
+      entryPoints: [websecure]
+      service: taff
+      tls:
+        certResolver: dnspod
+  middlewares:
+    taff-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+  services:
+    taff:
+      loadBalancer:
+        servers:
+          - url: http://taff-caddy:80
