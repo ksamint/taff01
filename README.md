@@ -37,8 +37,8 @@ database kind and vocabulary checks, browser time zone, versioned service
 worker and locale caches) and adds production packaging: server bundles,
 Docker images, a production compose file with Caddy, a licence gate, an LCP
 measurement on simulated slow 4G and a GitHub Actions pipeline.
-Lighthouse's axe-core dependency (MPL-2.0) still needs the licence decision of
-ADR 0003; `pnpm perf:lcp` covers the LCP limit without it: English passes
+Lighthouse's axe-core dependency (MPL-2.0) is approved for development and CI
+only in ADR 0003. The M8 `pnpm perf:lcp` baseline is: English passes
 (1.94 s on simulated slow 4G), the Chinese locales measure 2.34 s and remain
 open.
 See [the deployment guide](docs/deploy.md) and the M8 milestone report.
@@ -119,8 +119,16 @@ zh-HK, `LCP_DEBUG=1` or `LCP_TRACE=1` for a request, long-task and layout
 timeline). It needs the production server's port free (`AUTH_URL`). `pnpm licence:check` verifies every
 installed package against the licence policy. API and worker run from
 TypeScript during development; `pnpm build:server` bundles them, with the
-migrator, for the production images described in
+migrator, and prepares production dependencies under `dist/runtime/{api,worker}`
+for the production images described in
 [the deployment guide](docs/deploy.md).
+After `pnpm build && pnpm build:server`, `pnpm perf:lighthouse` starts the
+production API and web servers, signs in a dedicated test account and audits
+Today in all three locales using the mobile preset. Both configured service
+ports must be free. Each performance, accessibility and best-practices score
+must reach 90; sanitized JSON reports go to the ignored `lighthouse-reports/`
+directory and are uploaded by CI. The audit adds sample tasks to the local
+database. Lighthouse and axe-core remain development dependencies.
 `pnpm mcp:smoke` connects the official MCP client to the running API, exercises
 every tool, measured events, artifacts, grants, review changes, the rate limit
 and revocation; run it with `pnpm dev` up. Agents must submit their own real

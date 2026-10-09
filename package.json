@@ -21,7 +21,8 @@
     "mcp:smoke": "node --env-file=.env node_modules/tsx/dist/cli.mjs apps/api/scripts/mcp-smoke.mts",
     "build:server": "node node_modules/tsx/dist/cli.mjs scripts/build-server.mts",
     "licence:check": "node node_modules/tsx/dist/cli.mjs scripts/licence-gate.mts",
-    "perf:lcp": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/perf-lcp.mts"
+    "perf:lcp": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/perf-lcp.mts",
+    "perf:lighthouse": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/perf-lighthouse.mts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",
@@ -29,6 +30,7 @@
     "@playwright/test": "^1.64.0",
     "@types/node": "^24.0.0",
     "esbuild": "^0.28.2",
+    "lighthouse": "13.5.0",
     "tsx": "^4.23.0",
     "turbo": "^2.11.0",
     "typescript": "~7.0.2",

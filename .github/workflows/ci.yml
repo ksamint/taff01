@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main]
+    branches: [main, claude/m9-hardening]
   pull_request:
 concurrency:
   group: ci-${{ github.ref }}
@@ -66,12 +66,26 @@ jobs:
       - run: pnpm perf:budget
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm perf:lighthouse
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: lighthouse-reports/*.report.json
+          retention-days: 7
       - name: Browser flows in en, zh-CN and zh-HK
         run: pnpm e2e
       - name: MCP smoke against the bundled API
         run: |
-          node dist/server/api.mjs > api.log 2>&1 &
-          for i in $(seq 1 30); do curl -sf http://127.0.0.1:3001/api/health && break; sleep 1; done
+          node dist/runtime/api/api.mjs > api.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid"' EXIT
+          for i in $(seq 1 30); do
+            kill -0 "$api_pid"
+            if curl -sf http://127.0.0.1:3001/api/health; then break; fi
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:3001/api/health
           pnpm mcp:smoke
       - uses: actions/upload-artifact@v4
         if: failure()
