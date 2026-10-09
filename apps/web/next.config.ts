@@ -4,6 +4,17 @@ const config: NextConfig = {
   agentRules: false,
   transpilePackages: ["@taff/schemas"],
   images: { unoptimized: true },
+  async headers() {
+    return [
+      {
+        source: "/sw.js",
+        headers: [
+          { key: "Cache-Control", value: "no-cache" },
+          { key: "Service-Worker-Allowed", value: "/" },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     const api = process.env.API_INTERNAL_URL;
     if (!api) throw new Error("API_INTERNAL_URL is required");

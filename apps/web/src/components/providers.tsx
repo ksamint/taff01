@@ -2,7 +2,7 @@
 
 import type { Locale } from "@taff/schemas";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createInstance } from "i18next";
+import { createInstance, type ResourceLanguage } from "i18next";
 import {
   createContext,
   type ReactNode,
@@ -11,11 +11,10 @@ import {
   useState,
 } from "react";
 import { I18nextProvider, initReactI18next } from "react-i18next";
-import en from "../../locales/en/common.json";
 import { detectLocale, htmlLang, readPreference } from "../lib/i18n";
 import { installLocaleLoader } from "../lib/locale-loader";
 
-// Only English ships as JavaScript; Chinese resources are cached JSON on demand.
+// English arrives as server data; Chinese resources are cached JSON on demand.
 const loaders: Record<Exclude<Locale, "en">, () => Promise<object>> = {
   "zh-CN": () =>
     fetch("/locales/zh-CN").then((response) => {
@@ -41,7 +40,13 @@ export function useWorkspaceSelection() {
   return value;
 }
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  english,
+}: {
+  children: ReactNode;
+  english: ResourceLanguage;
+}) {
   const [workspaceId, setWorkspaceId] = useState("");
   const [invitation, setInvitation] = useState<string | null>(null);
   useEffect(() => {
@@ -63,10 +68,23 @@ export function Providers({ children }: { children: ReactNode }) {
         defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
       }),
   );
+  useEffect(() => {
+    let disposed = false;
+    let cleanup: (() => void) | undefined;
+    void import("../lib/cache-persistence")
+      .then(({ installCachePersistence }) => {
+        if (!disposed) cleanup = installCachePersistence(client);
+      })
+      .catch(() => {});
+    return () => {
+      disposed = true;
+      cleanup?.();
+    };
+  }, [client]);
   const [i18n] = useState(() => {
     const instance = createInstance();
     void instance.use(initReactI18next).init({
-      resources: { en: { translation: en } },
+      resources: { en: { translation: english } },
       lng: "en",
       fallbackLng: "en",
       supportedLngs: ["en", "zh-CN", "zh-HK"],

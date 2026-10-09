@@ -200,6 +200,22 @@ export function InboxView() {
                     </div>
                     <h3>{item.title}</h3>
                     <div className="action-row">
+                      {item.digestId && (
+                        <Link
+                          className="button button-primary"
+                          href={`/digests/${item.digestId}`}
+                          data-testid="inbox-open-digest"
+                          onClick={() => {
+                            if (!busy)
+                              update.mutate({
+                                id: item.id,
+                                body: { read: true },
+                              });
+                          }}
+                        >
+                          {t("notifications.openDigest")}
+                        </Link>
+                      )}
                       {item.taskId && (
                         <Link
                           className="button button-primary"

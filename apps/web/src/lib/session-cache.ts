@@ -1,4 +1,26 @@
+import type { Me } from "@taff/schemas";
 import type { QueryClient } from "@tanstack/react-query";
+
+const listeners = new WeakMap<QueryClient, Set<() => void>>();
+export function subscribeSession(client: QueryClient, listener: () => void) {
+  const subscribers = listeners.get(client) ?? new Set<() => void>();
+  listeners.set(client, subscribers);
+  subscribers.add(listener);
+  return () => {
+    subscribers.delete(listener);
+  };
+}
+export function currentSession(client: QueryClient) {
+  return identities.get(client);
+}
+export function workspaceFingerprint(me: Me) {
+  return me.workspaces
+    .map((workspace) =>
+      [workspace.id, workspace.memberId, workspace.role].join(":"),
+    )
+    .sort()
+    .join(",");
+}
 
 const identities = new WeakMap<
   QueryClient,
@@ -32,4 +54,5 @@ export function synchronizeSession(
   client.removeQueries({ predicate: protectedQuery });
   // Pending requests can still complete; their captured version guards callbacks.
   client.getMutationCache().clear();
+  for (const listener of listeners.get(client) ?? []) listener();
 }

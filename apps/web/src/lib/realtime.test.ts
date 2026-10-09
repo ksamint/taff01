@@ -135,15 +135,11 @@ describe("workspace realtime lifecycle", () => {
     Socket.instances[0].close(1012);
     expect(invalidate).toHaveBeenCalledTimes(1);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["me"] });
-    expect(client.getQueryState(["tasks", workspaceId])?.isInvalidated).toBe(
-      false,
-    );
+    expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
     finish();
     await result;
-    expect(invalidate).toHaveBeenCalledTimes(2);
-    expect(client.getQueryState(["tasks", workspaceId])?.isInvalidated).toBe(
-      true,
-    );
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
   });
   it("backs off, stops after eight failures, resumes on focus, and cleans up stale callbacks", () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
@@ -179,7 +175,9 @@ describe("workspace realtime lifecycle", () => {
     cleanup = connectWorkspace(client, workspaceId, userId);
     Socket.instances[0].close(1008);
     vi.advanceTimersByTime(100000);
-    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["me"] });
+    expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
     expect(Socket.instances).toHaveLength(1);
   });
 });

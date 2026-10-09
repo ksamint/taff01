@@ -117,6 +117,16 @@ export function MeView() {
           </div>
         </fieldset>
       </section>
+      <section className="me-section">
+        <Link
+          className="button"
+          href="/me/notifications"
+          data-testid="open-notifications"
+        >
+          {t("notifications.title")}
+        </Link>
+        <p className="section-hint">{t("pwa.cacheHint")}</p>
+      </section>
     </>
   );
 }

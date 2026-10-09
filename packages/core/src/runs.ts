@@ -626,7 +626,17 @@ export function createRunOperations({
         .update(inboxItems)
         .set({ resolvedAt: new Date(), updatedAt: new Date() })
         .where(and(eq(inboxItems.runId, runId), isNull(inboxItems.grantId)));
-      if (!maySkip)
+      if (maySkip)
+        await notifyPeople(
+          tx,
+          task,
+          run,
+          "done",
+          task.title,
+          null,
+          profile?.supervisorId ?? null,
+        );
+      else
         await notifyPeople(
           tx,
           task,

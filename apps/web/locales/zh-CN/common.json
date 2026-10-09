@@ -155,7 +155,9 @@
     "kind": {
       "review": "待审核",
       "blocker": "已阻塞",
-      "mention": "提及"
+      "mention": "提及",
+      "digest": "每日摘要",
+      "done": "智能体完成"
     },
     "openTask": "打开任务",
     "grantAccess": "授予访问权限",
@@ -496,5 +498,54 @@
     },
     "current": "当前组织",
     "roleFor": "{{name}}的角色"
+  },
+  "pwa": {
+    "description": "人与智能体协作的任务和日历。",
+    "offlineTitle": "当前已离线",
+    "offlineHint": "请重新联网，验证账号并载入任务。Taff 不会排队保存离线修改。",
+    "reconnect": "重试",
+    "cacheHint": "登录后，近期的任务、项目和日历视图会保存在此设备上。退出登录会将其清除。"
+  },
+  "notifications": {
+    "title": "通知",
+    "delivery": "应用内提醒与收件箱摘要。",
+    "foreground": "前台提醒",
+    "review": "审核请求",
+    "reviewHint": "当同事或智能体提交成果时。",
+    "block": "阻塞",
+    "blockHint": "当智能体需要权限或信息时。",
+    "mention": "提及",
+    "mentionHint": "当有人提及你时。",
+    "done": "智能体完成",
+    "doneHint": "当策略批准智能体的成果时。",
+    "digest": "每日摘要",
+    "digestHint": "待审核、今日到期任务与智能体已报告的进展。",
+    "quiet": "22:00 至 08:00 免打扰",
+    "quietHint": "阻塞提醒仍会送达。",
+    "quietTitle": "免打扰时段",
+    "time": "时间",
+    "inboxNote": "关闭的通知类型仍会出现在收件箱。",
+    "history": "摘要历史",
+    "openDigest": "打开摘要",
+    "device": "设备提醒",
+    "deviceHint": "可选的提醒，仅在 Taff 打开时发送。不提供后台推送或邮件。",
+    "enableDevice": "在此设备开启",
+    "disableDevice": "在此设备关闭",
+    "denied": "浏览器设置已阻止设备提醒。",
+    "unavailable": "此浏览器不支持设备提醒，应用内提醒仍可使用。"
+  },
+  "digest": {
+    "summary": "{{reviews}} 项审核 · {{due}} 项到期 · {{agents}} 个智能体运行",
+    "generated": "生成于 {{date}} · 快照时区 {{zone}}",
+    "reviews": "待审核",
+    "due": "当天到期",
+    "agents": "智能体进展",
+    "events": "{{count}} 个事件",
+    "lastEvent": "最后事件 {{date}}",
+    "none": "无",
+    "empty": "暂无摘要",
+    "emptyHint": "开启后，摘要会在所选的本地时间出现在这里和收件箱。",
+    "truncated": "统计包含全部结果，每个列表最多显示 20 项。",
+    "historyLimit": "显示最近 31 份摘要。"
   }
 }

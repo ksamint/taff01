@@ -9,6 +9,8 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@taff/core": "workspace:*",
+    "@taff/schemas": "workspace:*",
     "bullmq": "^6.3.0",
     "pino": "^10.4.0",
     "zod": "^4.6.0",

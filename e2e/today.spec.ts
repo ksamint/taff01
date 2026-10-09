@@ -150,7 +150,12 @@ test("failed optimistic creation and assignment restore the previous list", asyn
       tz: "Asia/Singapore",
     },
     workspaces: [
-      { id: workspaceId, name: "Test workspace", memberId: ownerId },
+      {
+        id: workspaceId,
+        name: "Test workspace",
+        memberId: ownerId,
+        role: "admin",
+      },
     ],
   };
   const task: Task = {

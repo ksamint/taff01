@@ -19,6 +19,7 @@ const SETTINGS = [
   { key: "organization.team", href: "/orgs#team" },
   { key: "language", href: "/me#me-locale" },
   { key: "me.appearance", href: "/me#preferences-heading" },
+  { key: "notifications.title", href: "/me/notifications" },
   { key: "mcp.title", href: "/me/mcp" },
 ];
 export function SearchDialog({ onClose }: { onClose: () => void }) {

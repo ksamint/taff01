@@ -601,6 +601,73 @@ export const reviewItems = pgTable(
     ),
   ],
 );
+export const notificationPreferences = pgTable(
+  "notification_preferences",
+  {
+    id: text("id")
+      .primaryKey()
+      .references(() => user.id, { onDelete: "cascade" }),
+    version: integer("version").default(1).notNull(),
+    review: boolean("review").default(true).notNull(),
+    block: boolean("block").default(true).notNull(),
+    mention: boolean("mention").default(true).notNull(),
+    done: boolean("done").default(true).notNull(),
+    digest: boolean("digest").default(true).notNull(),
+    digestAt: text("digest_at").default("09:00").notNull(),
+    quiet: boolean("quiet").default(false).notNull(),
+    nextDigestAt: timestamp("next_digest_at", {
+      withTimezone: true,
+      precision: 3,
+    })
+      .defaultNow()
+      .notNull(),
+    ...dates,
+  },
+  (t) => [
+    index("notification_preferences_due_idx").on(t.nextDigestAt, t.id),
+    check("notification_preferences_version", sql`${t.version}>0`),
+    check(
+      "notification_preferences_time",
+      sql`${t.digestAt} IN ('08:00','09:00','18:00')`,
+    ),
+  ],
+);
+export const dailyDigests = pgTable(
+  "daily_digests",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    workspaceId: uuid("workspace_id").notNull(),
+    memberId: uuid("member_id").notNull(),
+    localDate: text("local_date").notNull(),
+    timeZone: text("time_zone").notNull(),
+    locale: text("locale").notNull(),
+    snapshot: jsonb("snapshot").notNull(),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.memberId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "daily_digests_member_fk",
+    }).onDelete("cascade"),
+    unique("daily_digests_user_workspace_day").on(
+      t.userId,
+      t.workspaceId,
+      t.localDate,
+    ),
+    index("daily_digests_recipient_date_idx").on(
+      t.userId,
+      t.workspaceId,
+      t.localDate,
+    ),
+    check("daily_digests_date", sql`${t.localDate} ~ '^\\d{4}-\\d{2}-\\d{2}$'`),
+    check("daily_digests_locale", sql`${t.locale} IN ('en','zh-CN','zh-HK')`),
+  ],
+);
+
 export const inboxItems = pgTable(
   "inbox_items",
   {
@@ -611,6 +678,9 @@ export const inboxItems = pgTable(
     taskId: uuid("task_id"),
     runId: uuid("run_id"),
     grantId: uuid("grant_id"),
+    digestId: uuid("digest_id").references(() => dailyDigests.id, {
+      onDelete: "cascade",
+    }),
     kind: text("kind").notNull(),
     title: text("title").notNull(),
     readAt: timestamp("read_at", { withTimezone: true }),
@@ -645,7 +715,10 @@ export const inboxItems = pgTable(
       name: "inbox_items_grant_fk",
     }),
     index("inbox_items_member_created_idx").on(t.memberId, t.createdAt),
-    check("inbox_items_kind", sql`${t.kind} IN ('review','blocker','mention')`),
+    check(
+      "inbox_items_kind",
+      sql`${t.kind} IN ('review','blocker','mention','done','digest')`,
+    ),
   ],
 );
 

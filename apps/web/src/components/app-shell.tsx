@@ -39,8 +39,11 @@ import {
   snapshotQueries,
 } from "../lib/query-snapshot";
 import { connectWorkspace } from "../lib/realtime";
-import { sessionMatches, synchronizeSession } from "../lib/session-cache";
-import { Auth } from "./auth";
+import {
+  sessionMatches,
+  synchronizeSession,
+  workspaceFingerprint,
+} from "../lib/session-cache";
 import { useWorkspaceSelection } from "./providers";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -49,8 +52,16 @@ const SearchDialog = dynamic(
   () => import("./search-dialog").then((module) => module.SearchDialog),
   { ssr: false },
 );
+const Auth = dynamic(() => import("./auth").then((module) => module.Auth), {
+  ssr: false,
+});
 const QuickAddDialog = dynamic(
   () => import("./quick-add-dialog").then((module) => module.QuickAddDialog),
+  { ssr: false },
+);
+const NotificationAlerts = dynamic(
+  () =>
+    import("./notification-alerts").then((module) => module.NotificationAlerts),
   { ssr: false },
 );
 
@@ -157,11 +168,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [sessionError, setSessionError] = useState<string | null>(null);
   const me = useMeQuery();
   const userId = me.data?.user.id ?? null;
-  const scope =
-    me.data?.workspaces
-      .map(({ id }) => id)
-      .sort()
-      .join(",") ?? "";
+  const scope = me.data ? workspaceFingerprint(me.data) : "";
   const identityKey = `${userId ?? "signed-out"}:${scope}`;
   const [checkedIdentity, setCheckedIdentity] = useState<
     string | null | undefined
@@ -191,10 +198,19 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [me.data, identityReady, workspaceId, setWorkspaceId]);
   const busy = useIsMutating() > 0;
   useEffect(() => {
-    if (me.isPending || me.isError) return;
+    if (me.isPending || me.isError || me.isFetching) return;
     synchronizeSession(client, userId, scope);
     setCheckedIdentity(identityKey);
-  }, [client, userId, scope, identityKey, me.isPending, me.isError]);
+  }, [
+    client,
+    userId,
+    scope,
+    identityKey,
+    me.isPending,
+    me.isError,
+    me.isFetching,
+    me.dataUpdatedAt,
+  ]);
   useEffect(() => {
     if (me.data) {
       void i18n.changeLanguage(me.data.user.locale);
@@ -373,6 +389,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             )}
             {children}
+            <NotificationAlerts key={`${identityKey}:${workspace.id}`} />
             {overlay === "search" && (
               <SearchDialog
                 key={workspace.id}

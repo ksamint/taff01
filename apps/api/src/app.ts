@@ -32,6 +32,7 @@ import {
   submitRunSchema,
   taskCommentInputSchema,
   taskFilterSchema,
+  updateNotificationPreferencesSchema,
   updateTaskSchema,
   updateTaskStatusSchema,
   workspaceCreateSchema,
@@ -176,6 +177,33 @@ export function createApp(
     return realtime.upgrade(c, userId, workspaceId, c.get("sessionExpiresAt"));
   });
   app.get("/api/me", async (c) => c.json(await core.getMe(c.get("userId"))));
+  app.get("/api/me/notifications", async (c) =>
+    c.json(
+      await core.getNotificationPreferences(userPrincipal(c.get("userId"))),
+    ),
+  );
+  app.patch("/api/me/notifications", async (c) =>
+    c.json(
+      await core.updateNotificationPreferences(
+        userPrincipal(c.get("userId")),
+        updateNotificationPreferencesSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.get("/api/digests", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.listDailyDigests(userPrincipal(c.get("userId")), workspaceId),
+    );
+  });
+  app.get("/api/digests/:id", async (c) =>
+    c.json(
+      await core.getDailyDigest(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
   app.get("/api/members", async (c) => {
     const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
     return c.json(

@@ -155,7 +155,12 @@ export const meSchema = object({
     tz: string(),
   }),
   workspaces: array(
-    object({ id: idSchema, name: string(), memberId: idSchema }),
+    object({
+      id: idSchema,
+      name: string(),
+      memberId: idSchema,
+      role: memberRoleSchema,
+    }),
   ),
 });
 export const errorSchema = object({
@@ -501,7 +506,8 @@ export const inboxItemSchema = object({
   taskId: nullable(idSchema),
   runId: nullable(idSchema),
   grantId: nullable(idSchema),
-  kind: zodEnum(["review", "blocker", "mention"]),
+  kind: zodEnum(["review", "blocker", "mention", "done", "digest"]),
+  digestId: nullable(idSchema),
   title: string(),
   readAt: nullable(iso.datetime()),
   snoozedUntil: nullable(iso.datetime()),
@@ -559,12 +565,13 @@ export type InboxItemInput = Infer<typeof inboxItemInputSchema>;
 
 /** Safe routing metadata emitted transactionally by PostgreSQL taff_changes. */
 export const changeEventSchema = strictObject({
+  recipientOnly: optional(boolean()),
   activityId: idSchema,
   workspaceId: nullable(idSchema),
   resourceId: string().check(minLength(1), maxLength(200)),
   action: string().check(
     regex(
-      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites|task_calendar)\.(insert|update|delete)$/,
+      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites|task_calendar|notification_preferences|daily_digests)\.(insert|update|delete)$/,
     ),
   ),
   actorId: string().check(minLength(1), maxLength(200)),
@@ -812,3 +819,95 @@ export {
   canonicalCalendarTimeZone,
   shiftCalendarSeries,
 } from "./calendar";
+
+export const notificationPreferencesSchema = strictObject({
+  version: versionSchema,
+  review: boolean(),
+  block: boolean(),
+  mention: boolean(),
+  done: boolean(),
+  digest: boolean(),
+  digestAt: zodEnum(["08:00", "09:00", "18:00"]),
+  quiet: boolean(),
+});
+export const updateNotificationPreferencesSchema =
+  notificationPreferencesSchema;
+const digestTaskLinkSchema = object({ taskId: idSchema, title: string() });
+export const digestSnapshotSchema = object({
+  reviews: object({
+    count: nonnegativeInteger,
+    items: array(
+      extend(digestTaskLinkSchema, { runId: nullable(idSchema) }),
+    ).check(maxLength(20)),
+  }),
+  dueToday: object({
+    count: nonnegativeInteger,
+    items: array(extend(digestTaskLinkSchema, { dueAt: iso.datetime() })).check(
+      maxLength(20),
+    ),
+  }),
+  agents: object({
+    count: nonnegativeInteger,
+    items: array(
+      extend(digestTaskLinkSchema, {
+        runId: idSchema,
+        agentId: idSchema,
+        status: runStatusSchema,
+        lastEventAt: nullable(iso.datetime()),
+        eventCount: nonnegativeInteger,
+        durationMs: nonnegativeInteger,
+        costMicros: nonnegativeInteger,
+      }),
+    ).check(maxLength(20)),
+  }),
+  truncated: boolean(),
+});
+export const dailyDigestSchema = object({
+  id: idSchema,
+  userId: string(),
+  workspaceId: idSchema,
+  memberId: idSchema,
+  localDate: string().check(regex(/^\d{4}-\d{2}-\d{2}$/)),
+  timeZone: string(),
+  locale: localeSchema,
+  snapshot: digestSnapshotSchema,
+  createdAt: iso.datetime(),
+});
+export const dailyDigestListSchema = object({
+  items: array(dailyDigestSchema).check(maxLength(31)),
+  truncated: boolean(),
+});
+export const digestJobSchema = strictObject({
+  userId: string().check(minLength(1), maxLength(200)),
+  scheduledAt: iso.datetime({ offset: true }),
+  preferenceVersion: versionSchema,
+});
+export const digestJobCursorSchema = strictObject({
+  userId: string().check(minLength(1), maxLength(200)),
+  scheduledAt: iso.datetime({ offset: true }),
+});
+export const dueDigestJobsSchema = object({
+  jobs: array(digestJobSchema),
+  nextCursor: nullable(digestJobCursorSchema),
+});
+export const digestJobResultSchema = object({
+  status: zodEnum(["generated", "skipped"]),
+  digestIds: array(idSchema),
+});
+export type NotificationPreferences = Infer<
+  typeof notificationPreferencesSchema
+>;
+export type UpdateNotificationPreferences = Infer<
+  typeof updateNotificationPreferencesSchema
+>;
+export type DigestSnapshot = Infer<typeof digestSnapshotSchema>;
+export type DailyDigest = Infer<typeof dailyDigestSchema>;
+export type DailyDigestList = Infer<typeof dailyDigestListSchema>;
+export type DigestJob = Infer<typeof digestJobSchema>;
+export type DigestJobCursor = Infer<typeof digestJobCursorSchema>;
+export type DueDigestJobs = Infer<typeof dueDigestJobsSchema>;
+export type DigestJobResult = Infer<typeof digestJobResultSchema>;
+export {
+  DEFAULT_NOTIFICATION_PREFERENCES,
+  shouldShowForegroundNotification,
+} from "./notifications";

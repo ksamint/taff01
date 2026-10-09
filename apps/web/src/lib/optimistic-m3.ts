@@ -30,6 +30,9 @@ const FAMILIES = [
   "workspace-access",
   "members",
   "org-drafts",
+  "notificationPreferences",
+  "dailyDigests",
+  "dailyDigest",
 ];
 export const m3MutationKey = ["m3-write"] as const;
 export function snapshotM3(client: QueryClient, extraKeys: QueryKey[] = []) {

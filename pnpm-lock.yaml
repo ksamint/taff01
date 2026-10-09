@@ -303,6 +303,12 @@ importers:
 
   apps/worker:
     dependencies:
+      '@taff/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@taff/schemas':
+        specifier: workspace:*
+        version: link:../../packages/schemas
       bullmq:
         specifier: ^6.3.0
         version: 6.3.11(ioredis@5.11.1)

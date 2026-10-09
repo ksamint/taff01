@@ -1,0 +1,2 @@
+ALTER TABLE "notification_preferences" ALTER COLUMN "next_digest_at" SET DATA TYPE timestamp (3) with time zone;--> statement-breakpoint
+ALTER TABLE "notification_preferences" ALTER COLUMN "next_digest_at" SET DEFAULT now();

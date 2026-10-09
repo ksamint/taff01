@@ -24,6 +24,9 @@ export type Action =
   | "task:review"
   | "token:manage"
   | "profile:update"
+  | "notification:read"
+  | "notification:update"
+  | "digest:read"
   | "run:start"
   | "run:control"
   | "run:submit"
@@ -81,6 +84,8 @@ export function can(
 ): boolean {
   if (!actor) return false;
   if (
+    action === "notification:read" ||
+    action === "notification:update" ||
     action === "profile:update" ||
     action === "workspace:create" ||
     action === "workspace:join"
@@ -97,7 +102,9 @@ export function can(
     return false;
   if (
     actor.role === "guest" &&
-    !["workspace:read", "inbox:read", "inbox:update"].includes(action)
+    !["workspace:read", "inbox:read", "inbox:update", "digest:read"].includes(
+      action,
+    )
   )
     return false;
   if (action === "workspace:manage" || action === "project:manage")
@@ -125,7 +132,11 @@ export function can(
             capabilityScope(resource.capability ?? "tasks.write"),
           )
       : owns;
-  if (action === "inbox:read" || action === "inbox:update")
+  if (
+    action === "inbox:read" ||
+    action === "inbox:update" ||
+    action === "digest:read"
+  )
     return (
       actor.kind === "person" &&
       (resource.memberId === undefined || resource.memberId === actor.id)

@@ -3,8 +3,7 @@ export default defineConfig({
   test: {
     include: [
       "packages/*/src/**/*.test.ts",
-      "apps/api/src/**/*.test.ts",
-      "apps/web/src/**/*.test.ts",
+      "apps/*/src/**/*.test.ts",
       "scripts/**/*.test.ts",
     ],
     testTimeout: 20_000,

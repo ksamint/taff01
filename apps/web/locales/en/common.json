@@ -156,7 +156,9 @@
     "kind": {
       "review": "Needs review",
       "blocker": "Blocked",
-      "mention": "Mention"
+      "mention": "Mention",
+      "digest": "Daily digest",
+      "done": "Agent finished"
     },
     "openTask": "Open task",
     "grantAccess": "Grant access",
@@ -497,5 +499,54 @@
     },
     "current": "Current organization",
     "roleFor": "Role for {{name}}"
+  },
+  "pwa": {
+    "description": "Tasks and calendars for people and agents.",
+    "offlineTitle": "You’re offline",
+    "offlineHint": "Reconnect to verify your account and load your tasks. Taff does not queue offline changes.",
+    "reconnect": "Try again",
+    "cacheHint": "Recent task, project and calendar views are saved on this device after sign-in. Signing out clears them."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "delivery": "In-app alerts and Inbox digests.",
+    "foreground": "Foreground alerts",
+    "review": "Review requests",
+    "reviewHint": "When a person or agent submits work.",
+    "block": "Blockers",
+    "blockHint": "When an agent needs access or input.",
+    "mention": "Mentions",
+    "mentionHint": "When someone mentions you.",
+    "done": "Agent finished",
+    "doneHint": "When policy approves an agent’s work.",
+    "digest": "Daily digest",
+    "digestHint": "Pending reviews, tasks due today and reported agent progress.",
+    "quiet": "Quiet from 22:00 to 08:00",
+    "quietHint": "Blockers still come through.",
+    "quietTitle": "Quiet hours",
+    "time": "Time",
+    "inboxNote": "Muted categories still appear in the Inbox.",
+    "history": "Digest history",
+    "openDigest": "Open digest",
+    "device": "Device alerts",
+    "deviceHint": "Optional alerts while Taff is open. No background push or email delivery.",
+    "enableDevice": "Enable on this device",
+    "disableDevice": "Turn off on this device",
+    "denied": "Device alerts are blocked in browser settings.",
+    "unavailable": "Device alerts are unavailable here. In-app alerts still work."
+  },
+  "digest": {
+    "summary": "{{reviews}} reviews · {{due}} due · {{agents}} agent runs",
+    "generated": "Created {{date}} · snapshot zone {{zone}}",
+    "reviews": "Pending reviews",
+    "due": "Due that day",
+    "agents": "Agent progress",
+    "events": "{{count}} events",
+    "lastEvent": "Last event {{date}}",
+    "none": "None",
+    "empty": "No digests yet",
+    "emptyHint": "Enabled digests appear here and in the Inbox at the selected local time.",
+    "truncated": "Counts include all matches; each list shows up to 20.",
+    "historyLimit": "Showing the newest 31 digests."
   }
 }

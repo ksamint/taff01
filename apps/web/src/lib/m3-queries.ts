@@ -91,6 +91,9 @@ export function invalidateM3(client: QueryClient) {
         "workspace-access",
         "members",
         "org-drafts",
+        "notificationPreferences",
+        "dailyDigests",
+        "dailyDigest",
       ].includes(String(queryKey[0])),
   });
 }

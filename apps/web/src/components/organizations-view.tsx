@@ -1,7 +1,6 @@
 "use client";
 import {
   issuedWorkspaceInviteSchema,
-  type Me,
   type Member,
   memberRoleInputSchema,
   type WorkspaceCreate,
@@ -75,19 +74,6 @@ export function OrganizationsView() {
       client.invalidateQueries({ queryKey: meKey }),
     ]);
   };
-  const addWorkspace = (value: Me["workspaces"][number]) => {
-    client.setQueryData<Me | null>(meKey, (current) =>
-      current
-        ? {
-            ...current,
-            workspaces: current.workspaces.some((item) => item.id === value.id)
-              ? current.workspaces
-              : [...current.workspaces, value],
-          }
-        : current,
-    );
-    setWorkspaceId(value.id);
-  };
   const create = useMutation({
     mutationKey: m3MutationKey,
     mutationFn: (body: WorkspaceCreate) =>
@@ -106,7 +92,7 @@ export function OrganizationsView() {
       client.removeQueries({ queryKey: drafts });
       setDialog(null);
       setName("");
-      addWorkspace(value);
+      setWorkspaceId(value.id);
     },
     onSettled: invalidate,
   });
@@ -123,7 +109,7 @@ export function OrganizationsView() {
     onSuccess: (value, _, snapshot) => {
       if (!isCurrentSnapshot(client, snapshot)) return;
       setInvitation(null);
-      addWorkspace(value);
+      setWorkspaceId(value.id);
     },
     onSettled: invalidate,
   });

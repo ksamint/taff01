@@ -155,7 +155,9 @@
     "kind": {
       "review": "待審核",
       "blocker": "已阻塞",
-      "mention": "提及"
+      "mention": "提及",
+      "digest": "每日摘要",
+      "done": "代理完成"
     },
     "openTask": "開啟任務",
     "grantAccess": "授予存取權限",
@@ -496,5 +498,54 @@
     },
     "current": "目前組織",
     "roleFor": "{{name}}的角色"
+  },
+  "pwa": {
+    "description": "人與代理協作的任務和日曆。",
+    "offlineTitle": "目前已離線",
+    "offlineHint": "請重新連線，驗證帳戶並載入任務。Taff 不會排程儲存離線修改。",
+    "reconnect": "重試",
+    "cacheHint": "登入後，近期的任務、專案和日曆檢視會儲存在此裝置上。登出會將其清除。"
+  },
+  "notifications": {
+    "title": "通知",
+    "delivery": "應用程式內提醒與收件匣摘要。",
+    "foreground": "前景提醒",
+    "review": "審核請求",
+    "reviewHint": "當同事或代理提交成果時。",
+    "block": "阻塞",
+    "blockHint": "當代理需要權限或資訊時。",
+    "mention": "提及",
+    "mentionHint": "當有人提及你時。",
+    "done": "代理完成",
+    "doneHint": "當政策批准代理的成果時。",
+    "digest": "每日摘要",
+    "digestHint": "待審核、今日到期任務與代理已回報的進展。",
+    "quiet": "22:00 至 08:00 免打擾",
+    "quietHint": "阻塞提醒仍會送達。",
+    "quietTitle": "免打擾時段",
+    "time": "時間",
+    "inboxNote": "關閉的通知類型仍會出現在收件匣。",
+    "history": "摘要歷史",
+    "openDigest": "開啟摘要",
+    "device": "裝置提醒",
+    "deviceHint": "可選的提醒，僅在 Taff 開啟時傳送。不提供背景推播或電郵。",
+    "enableDevice": "在此裝置啟用",
+    "disableDevice": "在此裝置關閉",
+    "denied": "瀏覽器設定已封鎖裝置提醒。",
+    "unavailable": "此瀏覽器不支援裝置提醒，應用程式內提醒仍可使用。"
+  },
+  "digest": {
+    "summary": "{{reviews}} 項審核 · {{due}} 項到期 · {{agents}} 個代理執行",
+    "generated": "產生於 {{date}} · 快照時區 {{zone}}",
+    "reviews": "待審核",
+    "due": "當天到期",
+    "agents": "代理進展",
+    "events": "{{count}} 個事件",
+    "lastEvent": "最後事件 {{date}}",
+    "none": "無",
+    "empty": "暫無摘要",
+    "emptyHint": "啟用後，摘要會在所選的本地時間出現在這裡和收件匣。",
+    "truncated": "統計包含全部結果，每個清單最多顯示 20 項。",
+    "historyLimit": "顯示最近 31 份摘要。"
   }
 }

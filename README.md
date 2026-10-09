@@ -25,12 +25,14 @@ Milestone 06 adds day/week/month calendars, moves and resizes with Undo,
 atomic slot creation, an unscheduled tray and agent time. Calendar intervals
 and bounded recurrence have their own saved time zone and preserve task
 deadlines. MCP exposes twenty tools.
-Core owns database access, workspace permissions and
-transactional activity/notification behavior. The worker connects to Redis; no
-background job handlers are exposed yet.
+Milestone 07 is a progress checkpoint: authenticated IndexedDB persistence,
+public-only PWA caching, notification preferences and recipient-scoped daily
+digests are implemented. Core owns database access, workspace permissions and
+transactional activity/notification behavior; BullMQ retries digest generation.
+Browser and performance acceptance remain pending, including a licence decision
+for the proposed Lighthouse audit dependency. See the M7 milestone report.
 
-IndexedDB persistence, PWA installation and release gates follow in
-later milestones (see the implementation plan).
+Production and release gates follow in later milestones (see the implementation plan).
 This is a development foundation, not a production release. Milestone reports
 record working behavior and validation; development continues while they are reviewed.
 

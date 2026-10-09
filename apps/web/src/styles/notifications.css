@@ -1,0 +1,83 @@
+.notification-preference {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 64px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+.notification-preference > span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.notification-preference strong {
+  font-weight: 500;
+}
+.notification-preference input {
+  flex: none;
+  accent-color: var(--accent);
+  width: 24px;
+  height: 24px;
+}
+.notification-times {
+  border: 0;
+  margin: 20px 0;
+  padding: 0;
+}
+.notification-times legend {
+  margin-bottom: 12px;
+}
+.notification-alerts {
+  position: fixed;
+  z-index: 65;
+  inset: auto 16px 84px auto;
+  width: min(360px, calc(100vw - 32px));
+  display: grid;
+  gap: 8px;
+}
+.notification-alert {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 20px #0002;
+  border-radius: var(--radius-control);
+}
+.notification-alert > div {
+  min-width: 0;
+}
+.notification-alert p {
+  margin: 6px 0;
+  overflow-wrap: anywhere;
+}
+.digest-section {
+  margin: 24px 0;
+}
+.digest-section .task-list {
+  margin-top: 12px;
+}
+.digest-section li {
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+}
+.digest-section a {
+  overflow-wrap: anywhere;
+}
+.digest-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+@media (min-width: 900px) {
+  .notification-alerts {
+    bottom: 24px;
+  }
+}

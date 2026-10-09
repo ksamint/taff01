@@ -217,6 +217,26 @@ describe("authenticated realtime boundaries", () => {
     await reconnect();
     expect(await nextClosed).toBe(1012);
   });
+  it("delivers private digest, preference and Inbox metadata only to its recipient", async () => {
+    const alice = await connect("alice");
+    const charlie = await connect("charlie");
+    const observed: ChangeEvent[] = [];
+    charlie.on("message", (data) => observed.push(JSON.parse(data.toString())));
+    for (const action of [
+      "notification_preferences.update",
+      "daily_digests.insert",
+      "inbox_items.insert",
+    ]) {
+      const event = change({ action, userId: "alice", recipientOnly: true });
+      const received = message(alice);
+      await deliver(event);
+      expect(await received).toEqual(event);
+    }
+    const publicEvent = message(charlie);
+    await deliver(change());
+    expect(await publicEvent).toEqual(change());
+    expect(observed).toEqual([change()]);
+  });
   it("routes new membership to its workspace and affected user without notifying unrelated users", async () => {
     const alice = await connect("alice");
     const bob = await connect("bob", otherWorkspace);

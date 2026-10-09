@@ -1,4 +1,5 @@
 import { CoreError, createCore } from "@taff/core";
+import { DEFAULT_NOTIFICATION_PREFERENCES } from "@taff/schemas";
 import pino from "pino";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { createApp } from "./app";
@@ -45,6 +46,87 @@ afterEach(() => {
   rateLimiter.limit = 2;
 });
 afterAll(() => core.close());
+describe("notification and digest REST boundaries", () => {
+  it("reads preferences with the session identity and rejects a supplied recipient", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const read = vi
+      .spyOn(core, "getNotificationPreferences")
+      .mockResolvedValue(DEFAULT_NOTIFICATION_PREFERENCES);
+    const response = await app.request("/api/me/notifications");
+    expect(response.status).toBe(200);
+    expect(read).toHaveBeenCalledWith({ kind: "user", userId: id });
+    const write = vi.spyOn(core, "updateNotificationPreferences");
+    const invalid = await app.request("/api/me/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...DEFAULT_NOTIFICATION_PREFERENCES,
+        userId: "other",
+      }),
+    });
+    expect(invalid.status).toBe(400);
+    expect(write).not.toHaveBeenCalled();
+  });
+  it("preserves preference conflicts without accepting a partial or invalid update", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const write = vi
+      .spyOn(core, "updateNotificationPreferences")
+      .mockRejectedValue(new CoreError("conflict", 409));
+    for (const data of [
+      { version: 1, quiet: true },
+      { ...DEFAULT_NOTIFICATION_PREFERENCES, digestAt: "25:00" },
+    ]) {
+      const response = await app.request("/api/me/notifications", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      expect(response.status).toBe(400);
+    }
+    expect(write).not.toHaveBeenCalled();
+    const response = await app.request("/api/me/notifications", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(DEFAULT_NOTIFICATION_PREFERENCES),
+    });
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({ error: "conflict" });
+    expect(write).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      DEFAULT_NOTIFICATION_PREFERENCES,
+    );
+  });
+  it("forwards validated digest reads to recipient-authorized core operations", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const list = vi
+      .spyOn(core, "listDailyDigests")
+      .mockResolvedValue({ items: [], truncated: false });
+    expect((await app.request("/api/digests?workspaceId=bad")).status).toBe(
+      400,
+    );
+    expect(list).not.toHaveBeenCalled();
+    expect((await app.request(`/api/digests?workspaceId=${id}`)).status).toBe(
+      200,
+    );
+    expect(list).toHaveBeenCalledWith({ kind: "user", userId: id }, id);
+    const read = vi
+      .spyOn(core, "getDailyDigest")
+      .mockRejectedValue(new CoreError("forbidden", 403));
+    expect((await app.request("/api/digests/bad")).status).toBe(400);
+    expect(read).not.toHaveBeenCalled();
+    expect((await app.request(`/api/digests/${id}`)).status).toBe(403);
+    expect(read).toHaveBeenCalledWith({ kind: "user", userId: id }, id);
+  });
+});
 describe("REST adapter boundaries", () => {
   it("requires a session before core task reads", async () => {
     vi.spyOn(core, "getSession").mockResolvedValue({

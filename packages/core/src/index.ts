@@ -44,6 +44,7 @@ import {
 import { betterAuth } from "better-auth";
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { createCalendarOperations } from "./calendar";
+import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRunOperations } from "./runs";
@@ -339,6 +340,7 @@ export function createCore(options: {
         id: workspaces.id,
         name: workspaces.name,
         memberId: members.id,
+        role: members.role,
       })
       .from(members)
       .innerJoin(workspaces, eq(members.workspaceId, workspaces.id))
@@ -355,7 +357,10 @@ export function createCore(options: {
         locale: person.locale as Me["user"]["locale"],
         tz: person.tz,
       },
-      workspaces: joined,
+      workspaces: joined.map((row) => ({
+        ...row,
+        role: row.role as Member["role"],
+      })),
     };
   }
   async function listMembers(
@@ -637,6 +642,11 @@ export function createCore(options: {
   ): Promise<Me["user"]> {
     const body = parse(profileSchema, input);
     return mutation(userPrincipal(userId), async (tx) => {
+      const [person] = await tx
+        .select()
+        .from(user)
+        .where(eq(user.id, userId))
+        .for("update");
       const [actor] = await tx
         .select()
         .from(members)
@@ -649,6 +659,8 @@ export function createCore(options: {
         .set({ ...body, updatedAt: new Date() })
         .where(eq(user.id, userId))
         .returning();
+      if (person?.tz !== body.tz)
+        await notifications.rescheduleForProfile(tx, userId, body.tz);
       return {
         id: updated.id,
         name: updated.name,
@@ -811,6 +823,11 @@ export function createCore(options: {
   function getSession(headers: Headers) {
     return auth.api.getSession({ headers, returnHeaders: true });
   }
+  const notifications = createNotificationOperations({
+    db,
+    mutation,
+    requireMember,
+  });
   const calendar = createCalendarOperations({
     db,
     mutation,
@@ -828,6 +845,7 @@ export function createCore(options: {
     tokenPepper: options.tokenPepper,
   });
   return {
+    ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,
     ...createRunOperations({

@@ -1,5 +1,6 @@
 import { changeEventSchema } from "@taff/schemas";
 import type { QueryClient } from "@tanstack/react-query";
+import { synchronizeSession } from "./session-cache";
 
 const FAMILIES = [
   "tasks",
@@ -21,6 +22,9 @@ const FAMILIES = [
   "search",
   "invites",
   "workspace-access",
+  "notificationPreferences",
+  "dailyDigests",
+  "dailyDigest",
 ];
 
 export function connectWorkspace(
@@ -82,9 +86,14 @@ export function connectWorkspace(
     current.onerror = () => current.close();
     current.onclose = (event) => {
       if (stopped || current !== socket) return;
+      const revoked = event.code === 1012 || event.code === 1008;
+      if (revoked) {
+        dirty = false;
+        synchronizeSession(client, null);
+      }
       // Auth revocation must be checked even while a write is pending.
       void client.invalidateQueries({ queryKey: ["me"] });
-      invalidate();
+      if (!revoked) invalidate();
       if (event.code === 1008) return;
       if (attempt < 8)
         timer = setTimeout(connect, Math.min(10_000, 250 * 2 ** attempt++));

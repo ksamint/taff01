@@ -18,7 +18,7 @@ export function useMeQuery() {
     queryKey: meKey,
     queryFn: async (): Promise<Me | null> => {
       try {
-        return meSchema.parse(await request("/api/me"));
+        return meSchema.parse(await request("/api/me", { cache: "no-store" }));
       } catch (error) {
         if (error instanceof ApiError && error.status === 401) return null;
         throw error;
