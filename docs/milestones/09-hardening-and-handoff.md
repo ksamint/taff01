@@ -104,6 +104,15 @@ the matching successful PATCH before retaining their independent GET and UI
 checks. No application behavior or timeout was changed. Production remains
 unmodified until the corrected commit passes CI.
 
+The next local run passed the corrected drag case, then stalled across unrelated
+authenticated flows. Direct PostgreSQL connections timed out, Docker container
+listing stalled, and recent database/cache health checks reported that they
+could not start. API and proxy health still responded in 20–42 ms. The failed
+run was stopped with its traces retained; shared Docker was not restarted.
+Validation moved to temporary, private PostgreSQL 18 and Valkey 9 containers on
+the application server, separate from the production database and edge proxy.
+These validation services are disposable and must be removed after the checks.
+
 ## Remaining work and open decisions
 
 M9 is not complete. Next: reduce Chinese-locale LCP to a three-run median of
