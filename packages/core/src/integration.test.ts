@@ -356,10 +356,16 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
           eq(activity.action, "sessions.update"),
         ),
       );
-    const renewed = await core.auth.api.getSession({
-      headers,
-      returnHeaders: true,
-    });
+    const bootstrap = await core.getSession(headers, true);
+    expect(bootstrap.response?.user.id).toBe(userId);
+    expect(bootstrap.headers.getSetCookie()).toEqual([]);
+    const [notRenewed] = await connection.db
+      .select()
+      .from(session)
+      .where(eq(session.id, sessionId));
+    expect(notRenewed.updatedAt.getTime()).toBe(agedUpdatedAt.getTime());
+    expect(notRenewed.expiresAt.getTime()).toBe(agedExpiresAt.getTime());
+    const renewed = await core.getSession(headers);
     expect(renewed.response?.user.id).toBe(userId);
     expect(
       renewed.headers

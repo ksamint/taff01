@@ -45,6 +45,7 @@ import {
 } from "../lib/query-snapshot";
 import { connectWorkspace } from "../lib/realtime";
 import {
+  currentSession,
   sessionMatches,
   sessionVersion,
   subscribeSession,
@@ -159,6 +160,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [overlay, setOverlay] = useState<"search" | "quick" | null>(null);
   useEffect(() => {
     const open = (event: KeyboardEvent) => {
+      if (currentSession(client)?.confirmed === false) return;
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault();
         setOverlay("search");
@@ -166,7 +168,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
     window.addEventListener("keydown", open);
     return () => window.removeEventListener("keydown", open);
-  }, []);
+  }, [client]);
   const {
     id: workspaceId,
     setId: setWorkspaceId,
@@ -184,9 +186,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     () => 0,
   );
   const identityReady = sessionMatches(client, userId, scope);
+  const confirmed = currentSession(client)?.confirmed !== false;
+  const provisionalToday =
+    !confirmed && identityReady && pathname === "/" && !!me.data;
   const selectionUser = useRef<string | null>(null);
   useEffect(() => {
-    if (!me.data || !identityReady) return;
+    if (!me.data || !identityReady || !confirmed) return;
     try {
       const key = `taff:workspace:${me.data.user.id}`;
       if (selectionUser.current !== me.data.user.id) {
@@ -209,10 +214,11 @@ export function AppShell({ children }: { children: ReactNode }) {
     } catch {
       /* The current page selection still works when storage is blocked. */
     }
-  }, [me.data, identityReady, workspaceId, setWorkspaceId]);
-  const busy = useIsMutating() > 0;
+  }, [me.data, identityReady, workspaceId, setWorkspaceId, confirmed]);
+  const busy = useIsMutating() > 0 || !confirmed;
   useEffect(() => {
     if (me.isPending || me.isError || me.isFetching) return;
+    if (!confirmed && me.dataUpdatedAt === 0) return;
     synchronizeSession(client, userId, scope);
   }, [
     client,
@@ -222,14 +228,15 @@ export function AppShell({ children }: { children: ReactNode }) {
     me.isError,
     me.isFetching,
     me.dataUpdatedAt,
+    confirmed,
   ]);
   useEffect(() => {
-    if (me.data) {
+    if (me.data && confirmed) {
       if (i18n.language !== me.data.user.locale)
         void i18n.changeLanguage(me.data.user.locale);
       savePreference(me.data.user.locale);
     }
-  }, [me.data?.user.locale, i18n]);
+  }, [me.data?.user.locale, i18n, confirmed]);
   const profile = useMutation({
     mutationKey: m3MutationKey,
     mutationFn: ({ locale, tz }: { locale: Locale; tz: string }) =>
@@ -294,7 +301,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   // browser sets the real zone, and the chosen language survives sign-up.
   const detected = useRef(false);
   useEffect(() => {
-    if (!me.data || detected.current || profile.isPending) return;
+    if (!confirmed || !me.data || detected.current || profile.isPending) return;
     const zone = browserTimeZone(me.data.user.tz);
     const chosen = readPreference();
     const locale =
@@ -308,25 +315,29 @@ export function AppShell({ children }: { children: ReactNode }) {
       detected.current = true;
       profile.mutate({ locale, tz: me.data.user.tz });
     }
-  }, [me.data, profile]);
+  }, [me.data, profile, confirmed]);
   const workspace =
     me.data?.workspaces.find(({ id }) => id === workspaceId) ??
     me.data?.workspaces[0];
   useEffect(() => {
-    if (identityReady && workspace && me.data)
+    if (confirmed && identityReady && workspace && me.data)
       return connectWorkspace(client, workspace.id, me.data.user.id);
-  }, [client, workspace?.id, me.data?.user.id, identityReady]);
+  }, [client, workspace?.id, me.data?.user.id, identityReady, confirmed]);
   return (
     <div className="app-shell">
       {me.data && (
-        <aside className="sidebar">
+        <aside className="sidebar" inert={!confirmed}>
           <Wordmark label={t("app")} />
           <nav aria-label={t("nav.label")}>
-            <NavItems pathname={pathname} t={t} workspaceId={workspace?.id} />
+            <NavItems
+              pathname={pathname}
+              t={t}
+              workspaceId={confirmed ? workspace?.id : undefined}
+            />
           </nav>
         </aside>
       )}
-      <header className="topbar">
+      <header className="topbar" inert={!confirmed}>
         <Wordmark label={t("app")} />
         <div className="header-actions">
           {me.data && (
@@ -375,7 +386,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           )}
         </div>
       </header>
-      {me.isPending || (!identityReady && !me.isError) ? (
+      {(me.isPending && !provisionalToday) ||
+      ((!identityReady || !confirmed) && !provisionalToday && !me.isError) ? (
         <main className="loading" aria-live="polite">
           {t("loading")}
         </main>
@@ -415,7 +427,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             localePending: profile.isPending,
           }}
         >
-          <main className="content">
+          <main className="content" inert={!confirmed}>
             {sessionError && (
               <p className="alert" role="alert">
                 {t(sessionError)}
@@ -429,7 +441,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             )}
             {children}
-            <NotificationAlerts key={`${identityKey}:${workspace.id}`} />
+            {confirmed && (
+              <NotificationAlerts key={`${identityKey}:${workspace.id}`} />
+            )}
             {overlay === "search" && (
               <SearchDialog
                 key={workspace.id}
@@ -449,8 +463,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       )}
       <footer className="tagline">{t("tagline")}</footer>
       {me.data && (
-        <nav className="tabbar" aria-label={t("nav.label")}>
-          <NavItems pathname={pathname} t={t} workspaceId={workspace?.id} />
+        <nav className="tabbar" aria-label={t("nav.label")} inert={!confirmed}>
+          <NavItems
+            pathname={pathname}
+            t={t}
+            workspaceId={confirmed ? workspace?.id : undefined}
+          />
         </nav>
       )}
     </div>

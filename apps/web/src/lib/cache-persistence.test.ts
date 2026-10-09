@@ -7,7 +7,11 @@ import {
   type ReadSnapshot,
   type ReadStorage,
 } from "./cache-persistence";
-import { synchronizeSession, workspaceFingerprint } from "./session-cache";
+import {
+  bootstrapSession,
+  synchronizeSession,
+  workspaceFingerprint,
+} from "./session-cache";
 
 const workspaceId = "11111111-1111-4111-8111-111111111111";
 const memberId = "22222222-2222-4222-8222-222222222222";
@@ -94,6 +98,21 @@ function authenticate(identity = me()) {
   client.setQueryData(["me"], identity);
   synchronizeSession(client, identity.user.id, workspaceFingerprint(identity));
 }
+
+it("does not restore durable reads from a server bootstrap before fresh browser identity confirmation", async () => {
+  const identity = me();
+  const store = memory(saved(identity));
+  client.setQueryData(["me"], identity, { updatedAt: 0 });
+  bootstrapSession(client, identity);
+  dispose = installCachePersistence(client, store);
+  await flush();
+  expect(store.read).not.toHaveBeenCalled();
+  expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
+  authenticate(identity);
+  await flush();
+  expect(store.read).toHaveBeenCalledOnce();
+  expect(client.getQueryData(["tasks", workspaceId])).toEqual([task]);
+});
 
 it("waits for live authenticated identity and restores only authorized reads, always stale", async () => {
   const store = memory(saved());

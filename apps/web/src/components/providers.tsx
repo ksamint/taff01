@@ -1,6 +1,6 @@
 "use client";
 
-import type { Locale } from "@taff/schemas";
+import type { Locale, Me } from "@taff/schemas";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createInstance, type ResourceLanguage } from "i18next";
 import {
@@ -13,6 +13,7 @@ import {
 import { I18nextProvider, initReactI18next } from "react-i18next";
 import { detectLocale, htmlLang, readPreference } from "../lib/i18n";
 import { installLocaleLoader } from "../lib/locale-loader";
+import { bootstrapSession } from "../lib/session-cache";
 
 // Only the stored locale arrives as server data; others load on demand.
 const localeUrl = (locale: string) =>
@@ -34,10 +35,12 @@ export function Providers({
   children,
   initialLocale,
   messages,
+  initialMe,
 }: {
   children: ReactNode;
   initialLocale: Locale | null;
   messages: ResourceLanguage;
+  initialMe: Me | null | undefined;
 }) {
   const [workspaceId, setWorkspaceId] = useState("");
   const [invitation, setInvitation] = useState<string | null>(null);
@@ -54,12 +57,16 @@ export function Providers({
       setInvitation(token);
     }
   }, []);
-  const [client] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
-      }),
-  );
+  const [client] = useState(() => {
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
+    });
+    if (initialMe !== undefined) {
+      queryClient.setQueryData(["me"], initialMe, { updatedAt: 0 });
+      bootstrapSession(queryClient, initialMe);
+    }
+    return queryClient;
+  });
   useEffect(() => {
     let disposed = false;
     let cleanup: (() => void) | undefined;

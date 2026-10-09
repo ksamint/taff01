@@ -161,6 +161,7 @@ export function installCachePersistence(
     !disposed &&
     generation === identityGeneration &&
     accepted?.scope === scope &&
+    currentSession(client)?.confirmed !== false &&
     currentSession(client)?.version === version &&
     client.isMutating() === 0;
   const persist = () => {
@@ -227,7 +228,7 @@ export function installCachePersistence(
   };
   const sessionChanged = () => {
     const session = currentSession(client);
-    if (!session || disposed) return;
+    if (!session || !session.confirmed || disposed) return;
     generation++;
     clearTimeout(timer);
     hydrated = false;

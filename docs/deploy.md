@@ -21,6 +21,10 @@ context excludes local dependency trees, build outputs and environment files.
 The web image bakes
 `API_INTERNAL_URL=http://api:3001` into its rewrites; behind Caddy the `/api`
 and `/mcp` paths go straight to the API and never reach Next.js.
+Compose also supplies that URL at runtime for the authenticated server render.
+Its `/api/bootstrap` read does not renew sessions; the browser's `/api/me`
+request performs confirmation and receives any renewal cookie. If the internal
+API is unavailable, the web page retains its client loading and retry behavior.
 
 ## First deployment
 

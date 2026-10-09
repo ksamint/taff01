@@ -7,6 +7,7 @@ import simplified from "../locales/zh-CN/common.json";
 import traditional from "../locales/zh-HK/common.json";
 import { Providers } from "../src/components/providers";
 import { htmlLang, isLocale, preloadBootScript } from "../src/lib/i18n";
+import { readServerMe } from "../src/lib/server-me";
 import { themeBootScript } from "../src/lib/theme";
 import "./globals.css";
 
@@ -30,11 +31,27 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  const preference = (await cookies()).get("taff-locale")?.value;
+  const cookieStore = await cookies();
+  const sessionCookie = cookieStore
+    .getAll()
+    .filter(({ name }) =>
+      [
+        "better-auth.session_token",
+        "__Secure-better-auth.session_token",
+      ].includes(name),
+    )
+    .map(({ name, value }) => `${name}=${encodeURIComponent(value)}`)
+    .join("; ");
+  const initialMe = await readServerMe(
+    sessionCookie,
+    process.env.API_INTERNAL_URL,
+  );
+  const preference =
+    initialMe?.user.locale ?? cookieStore.get("taff-locale")?.value;
   const initialLocale = isLocale(preference) ? preference : null;
   const locale = initialLocale ?? "en";
   const messages = { en: english, "zh-CN": simplified, "zh-HK": traditional };
-  // The session request gates every signed-in view; start it with the HTML
+  // Browser confirmation gates protected reads/writes; start it with the HTML
   // instead of after the JavaScript has downloaded and run.
   preload("/api/me", { as: "fetch", crossOrigin: "anonymous" });
   return (
@@ -50,7 +67,11 @@ export default async function RootLayout({
               ),
           }}
         />
-        <Providers initialLocale={initialLocale} messages={messages[locale]}>
+        <Providers
+          initialLocale={initialLocale}
+          messages={messages[locale]}
+          initialMe={initialMe}
+        >
           {children}
         </Providers>
       </body>

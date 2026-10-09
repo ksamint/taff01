@@ -10,6 +10,7 @@ import { workspaceAccessSchema } from "@taff/schemas/workspace-read";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, request } from "./api";
 import { m3MutationKey } from "./optimistic-m3";
+import { currentSession } from "./session-cache";
 
 export const meKey = ["me"] as const;
 export const tasksKey = (workspaceId: string) =>
@@ -33,7 +34,9 @@ export function useMeQuery() {
 }
 
 export function useMembers(workspaceId: string) {
+  const client = useQueryClient();
   return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
     queryKey: membersKey(workspaceId),
     queryFn: async () =>
       memberListSchema.parse(
@@ -43,7 +46,9 @@ export function useMembers(workspaceId: string) {
 }
 
 export function useTasks(workspaceId: string) {
+  const client = useQueryClient();
   return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
     queryKey: tasksKey(workspaceId),
     queryFn: async () =>
       taskListSchema.parse(
@@ -62,6 +67,7 @@ export function useInbox(workspaceId: string) {
   return useQuery({
     refetchOnMount: () =>
       client.isMutating({ mutationKey: m3MutationKey }) === 0,
+    enabled: currentSession(client)?.confirmed !== false,
     staleTime: 0,
     queryKey: inboxKey(workspaceId),
     queryFn: async () =>
@@ -70,7 +76,9 @@ export function useInbox(workspaceId: string) {
 }
 
 export function useWorkspaceAccess(id: string) {
+  const client = useQueryClient();
   return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
     queryKey: ["workspace-access", id],
     staleTime: 0,
     queryFn: async () =>
@@ -82,7 +90,9 @@ export function useWorkspaceAccess(id: string) {
 }
 
 export function useRuns(workspaceId: string) {
+  const client = useQueryClient();
   return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
     staleTime: 0,
     queryKey: runsKey(workspaceId),
     queryFn: async () =>

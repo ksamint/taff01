@@ -198,6 +198,7 @@ export function createApp(
   app.use("/api/*", async (c, next) => {
     const { response: session, headers } = await core.getSession(
       c.req.raw.headers,
+      c.req.path === "/api/bootstrap",
     );
     for (const cookie of headers.getSetCookie()) {
       c.header("Set-Cookie", cookie, { append: true });
@@ -224,6 +225,10 @@ export function createApp(
     );
   });
   app.get("/api/me", async (c) => c.json(await core.getMe(c.get("userId"))));
+  app.get("/api/bootstrap", async (c) => {
+    c.header("Cache-Control", "private, no-store");
+    return c.json(await core.getMe(c.get("userId")));
+  });
   app.get("/api/me/notifications", async (c) =>
     c.json(
       await core.getNotificationPreferences(userPrincipal(c.get("userId"))),

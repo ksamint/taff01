@@ -75,6 +75,8 @@ services:
       dockerfile: deploy/Dockerfile.web
       args: { API_INTERNAL_URL: http://api:3001 }
     restart: unless-stopped
+    environment:
+      API_INTERNAL_URL: http://api:3001
     depends_on:
       api: { condition: service_healthy }
   caddy:

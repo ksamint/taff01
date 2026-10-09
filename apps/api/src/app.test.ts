@@ -299,6 +299,34 @@ describe("REST adapter boundaries", () => {
     expect(response.status).toBe(200);
     expect(response.headers.getSetCookie()).toEqual(headers.getSetCookie());
   });
+  it("keeps server bootstrap authenticated, private and nonrenewing", async () => {
+    const sessionRead = vi
+      .spyOn(core, "getSession")
+      .mockResolvedValue({ response: null, headers: new Headers() });
+    const meRead = vi.spyOn(core, "getMe").mockResolvedValue({
+      user: {
+        id,
+        name: "Person",
+        email: "person@example.test",
+        locale: "en",
+        tz: "UTC",
+      },
+      workspaces: [],
+    });
+    expect((await app.request("/api/bootstrap")).status).toBe(401);
+    expect(meRead).not.toHaveBeenCalled();
+    sessionRead.mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const response = await app.request("/api/bootstrap");
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(sessionRead.mock.calls.at(-1)?.[1]).toBe(true);
+    expect(meRead).toHaveBeenCalledWith(id);
+    await app.request("/api/me");
+    expect(sessionRead.mock.calls.at(-1)?.[1]).toBe(false);
+  });
   it("preserves the auth request body after shared validation", async () => {
     const credentials = {
       email: "person@example.com",

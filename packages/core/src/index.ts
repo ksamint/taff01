@@ -866,8 +866,12 @@ export function createCore(options: {
       .limit(200);
     return rows.map(toMcpCall);
   }
-  function getSession(headers: Headers) {
-    return auth.api.getSession({ headers, returnHeaders: true });
+  function getSession(headers: Headers, disableRefresh = false) {
+    return auth.api.getSession({
+      headers,
+      query: { disableRefresh },
+      returnHeaders: true,
+    });
   }
   const notifications = createNotificationOperations({
     db,

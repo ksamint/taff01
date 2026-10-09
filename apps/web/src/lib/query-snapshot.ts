@@ -1,13 +1,15 @@
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
 
 import { ApiError } from "./api";
-import { sessionVersion } from "./session-cache";
+import { currentSession, sessionVersion } from "./session-cache";
 
 // Cancel reads before taking the rollback snapshot, using TanStack's own cache.
 export async function snapshotQueries(
   client: QueryClient,
   keys: readonly QueryKey[],
 ) {
+  if (currentSession(client)?.confirmed === false)
+    throw new ApiError("unauthorized", 401);
   const version = sessionVersion(client);
   await Promise.all(keys.map((queryKey) => client.cancelQueries({ queryKey })));
   if (version !== sessionVersion(client))

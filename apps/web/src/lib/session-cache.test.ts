@@ -1,11 +1,33 @@
 import { QueryClient } from "@tanstack/react-query";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
 import {
   isCurrentSnapshot,
   restoreQueries,
   snapshotQueries,
 } from "./query-snapshot";
-import { synchronizeSession } from "./session-cache";
+import {
+  bootstrapSession,
+  currentSession,
+  synchronizeSession,
+} from "./session-cache";
+
+it("keeps server bootstrap read-only until the browser confirms and purges provisional data on promotion", async () => {
+  const client = new QueryClient();
+  bootstrapSession(client, null);
+  const cancel = vi.spyOn(client, "cancelQueries");
+  await expect(snapshotQueries(client, [["me"]])).rejects.toMatchObject({
+    code: "unauthorized",
+  });
+  expect(cancel).not.toHaveBeenCalled();
+  expect(() => bootstrapSession(client, null)).toThrow("already initialized");
+  client.setQueryData(["inbox", "provisional"], "unconfirmed recipient data");
+  synchronizeSession(client, null);
+  expect(currentSession(client)?.confirmed).toBe(true);
+  expect(client.getQueryData(["inbox", "provisional"])).toBeUndefined();
+  const snapshot = await snapshotQueries(client, [["task", "confirmed"]]);
+  expect(isCurrentSnapshot(client, snapshot)).toBe(true);
+  client.clear();
+});
 
 it("clears private data and rejects an old principal's late rollback after account switching", async () => {
   const client = new QueryClient();

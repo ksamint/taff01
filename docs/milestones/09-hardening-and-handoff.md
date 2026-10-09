@@ -267,6 +267,25 @@ Settlement still reconciles the authoritative Inbox. An actual QueryObserver
 regression fails without the guard and passes with it, including rejected-write
 rollback and the settlement read. Full validation of this repair is pending.
 
+Candidate `ad533b45` passed the first seven checks and 403 unit tests, with
+190,730 gzip bytes. Lighthouse was 91/89/89, so the full browser suite and MCP
+smoke did not run. LCP medians passed at 1,688/1,848/1,868 ms. A focused
+production diagnostic passed all six create/assign and Inbox rollback cases;
+source and build hashes stayed unchanged. It was not pushed or deployed.
+
+One cold zh-HK capture reproduced the greeting's 3,096 ms LCP. The first Today
+date filter accounted for 29.4 ms sampled self time in the final long task;
+later calls were small and after paint. This is consistent with first Intl
+initialization moving from the browser-zone lookup to the date filter, so no
+large memoization saving is claimed. The Me preload still finished at 1,183 ms.
+
+ADR 0008 introduces an authenticated server render through a nonrenewing Core
+session lookup. Its bootstrap remains provisional until the browser confirms:
+Today reads, mutations, persisted data, profile effects, notifications and
+realtime are gated, and other protected routes retain the loading gate.
+Browser session renewal is preserved. Focused unit and type checks pass;
+account-switch/retry browser regressions and the full unchanged gates are pending.
+
 ## Remaining work and open decisions
 
 M9 is not complete. The local performance targets passed while preserving

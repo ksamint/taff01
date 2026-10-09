@@ -24,8 +24,17 @@ export function workspaceFingerprint(me: Me) {
 
 const identities = new WeakMap<
   QueryClient,
-  { userId: string | null; scope: string; version: number }
+  { userId: string | null; scope: string; version: number; confirmed: boolean }
 >();
+export function bootstrapSession(client: QueryClient, me: Me | null) {
+  if (identities.has(client)) throw new Error("Session already initialized");
+  identities.set(client, {
+    userId: me?.user.id ?? null,
+    scope: me ? workspaceFingerprint(me) : "",
+    version: 1,
+    confirmed: false,
+  });
+}
 export function sessionVersion(client: QueryClient) {
   return identities.get(client)?.version ?? 0;
 }
@@ -42,15 +51,19 @@ export function synchronizeSession(
   userId: string | null,
   scope = "",
 ) {
-  if (sessionMatches(client, userId, scope)) return;
-  // Everything fetched before the first identity of this page used the same
-  // cookie as that identity, so only a change of identity, or a sign-out,
-  // purges the cache.
+  if (
+    sessionMatches(client, userId, scope) &&
+    identities.get(client)?.confirmed
+  )
+    return;
+  // Confirmation purges provisional reads; later reads keep the cache until
+  // the identity/access changes or the user signs out.
   const changed = identities.has(client) || userId === null;
   identities.set(client, {
     userId,
     scope,
     version: sessionVersion(client) + 1,
+    confirmed: true,
   });
   if (changed) {
     const protectedQuery = ({ queryKey }: { queryKey: readonly unknown[] }) =>
