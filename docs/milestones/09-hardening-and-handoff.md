@@ -187,7 +187,36 @@ selectors reuse one translated option projection instead of mounting 21
 translation subscriptions. Browser regression coverage delays the validator
 download across remote session revocation, checks that no write escapes, and
 verifies whitespace rejection, canonical title trimming and translated options.
-The new candidate's performance and full validation are pending.
+Candidate `92e24fc6` passed the first seven required commands, including 400
+unit tests. Initial JavaScript increased to 201,995 gzip bytes. Lighthouse
+performance was 90/90/89, with accessibility 96 and best practices 100; the
+required performance gate stopped the full run before browser tests and MCP
+smoke. Three-run LCP medians passed at 1,780/1,984/1,992 ms. The split added
+startup chunks and did not demonstrate a CPU improvement; this candidate was
+not pushed or deployed.
+
+A separate six-case browser diagnostic passed the three existing create/assign
+cases. All three new delayed-validator cases timed out at `await seen`, after
+the submit click and before any sign-out request. They ran against the
+development server, which did not request the expected post-submit chunk.
+The production-build diagnostic produced the same three passes and three
+timeouts at `await seen`, before sign-out; artifact hashes stayed unchanged.
+A single zh-HK CPU capture observed
+five Today renders and approximately 6.5 ms of sampled inclusive card mapping
+work. Its warm-session storage was retained, so it is a diagnostic rather than
+an equivalent Lighthouse cold-storage measurement; no large CPU saving has
+been established.
+
+The lazy creation split is removed because it increased startup bytes and did
+not improve the measured blocking time. Creation again uses the original shared
+synchronous validation; the translated member-option projection is retained.
+Today task links now disable speculative route prefetch. The actual Lighthouse
+network log contained two task-route RSC fetches without a navigation, but no
+full task-detail script download, so no large CPU saving is claimed. The existing
+three-locale create/assign case checks whitespace rejection, canonical title
+trimming, absence of speculative task navigation and successful detail navigation.
+CI browser tests start the built API and web servers; local development commands
+retain their existing behavior. Full validation of this candidate is pending.
 
 ## Remaining work and open decisions
 

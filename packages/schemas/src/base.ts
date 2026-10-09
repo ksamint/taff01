@@ -3,6 +3,7 @@
 // Today route stays within its JavaScript budget.
 
 import {
+  _default,
   array,
   email,
   extend,
@@ -23,15 +24,46 @@ import {
 import { $ZodError } from "zod/v4/core";
 
 import {
+  calendarInstantSchema,
   idSchema,
   labelsSchema,
   localeSchema,
   memberRoleSchema,
   prioritySchema,
+  taskFields,
   taskStatusSchema,
   timeZone,
   workspaceQuerySchema,
 } from "./primitives";
+export const calendarScheduleInputSchema = strictObject({
+  startAt: calendarInstantSchema,
+  endAt: calendarInstantSchema,
+  timeZone: string().check(
+    minLength(1),
+    maxLength(100),
+    refine(timeZone, "Invalid time zone"),
+  ),
+  rrule: _default(
+    nullable(string().check(trim(), minLength(1), maxLength(500))),
+    null,
+  ),
+}).check(
+  refine((value) => {
+    const duration = Date.parse(value.endAt) - Date.parse(value.startAt);
+    return duration > 0 && duration <= 7 * 86400000;
+  }),
+);
+export type CalendarScheduleInput = Infer<typeof calendarScheduleInputSchema>;
+export const createTaskSchema = strictObject({
+  calendar: optional(calendarScheduleInputSchema),
+  ...taskFields,
+  parentId: optional(nullable(idSchema)),
+  workspaceId: idSchema,
+  title: string().check(trim(), minLength(1), maxLength(200)),
+  ownerId: idSchema,
+  workerId: _default(nullable(idSchema), null),
+  dueAt: optional(nullable(iso.datetime({ offset: true }))),
+});
 export const assignTaskSchema = strictObject({
   workerId: nullable(idSchema),
   version: optional(
@@ -109,6 +141,7 @@ export const errorSchema = object({
   ]),
 });
 export const SchemaError = $ZodError;
+export type CreateTask = Infer<typeof createTaskSchema>;
 export type AssignTask = Infer<typeof assignTaskSchema>;
 export type Profile = Infer<typeof profileSchema>;
 export type Member = Infer<typeof memberSchema>;

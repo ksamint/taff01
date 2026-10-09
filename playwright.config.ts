@@ -21,13 +21,17 @@ export default defineConfig({
   // survive the runner's SIGKILL and keep `pnpm e2e` from exiting.
   webServer: [
     {
-      command: "pnpm --filter @taff/api dev",
+      command: process.env.CI
+        ? "node dist/runtime/api/api.mjs"
+        : "pnpm --filter @taff/api dev",
       url: `${apiUrl}/api/health`,
       reuseExistingServer,
       timeout: 120_000,
     },
     {
-      command: "pnpm --filter @taff/web dev",
+      command: process.env.CI
+        ? "pnpm --filter @taff/web start"
+        : "pnpm --filter @taff/web dev",
       url: `${process.env.AUTH_URL}/api/health`,
       reuseExistingServer,
       timeout: 120_000,

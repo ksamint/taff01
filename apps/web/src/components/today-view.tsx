@@ -3,10 +3,11 @@
 import {
   type AssignTask,
   assignTaskSchema,
+  type CreateTask,
+  createTaskSchema,
   type Task,
   taskSchema,
 } from "@taff/schemas/base";
-import type { CreateTask } from "@taff/schemas/task-create";
 import {
   useIsMutating,
   useMutation,
@@ -16,7 +17,7 @@ import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ApiError, errorKey, request } from "../lib/api";
+import { errorKey, request } from "../lib/api";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import {
   tasksKey,
@@ -69,7 +70,7 @@ export function TodayView() {
             method: input.kind === "create" ? "POST" : "PATCH",
             body: JSON.stringify(
               input.kind === "create"
-                ? input.body
+                ? createTaskSchema.parse(input.body)
                 : assignTaskSchema.parse(input.body),
             ),
           },
@@ -77,19 +78,6 @@ export function TodayView() {
       ),
     onMutate: async (input) => {
       const snapshot = await snapshotQueries(client, [taskKey]);
-      if (input.kind === "create") {
-        const { createTaskSchema } = await import(
-          "@taff/schemas/task-create"
-        ).catch(() => {
-          throw new ApiError("network");
-        });
-        if (!isCurrentSnapshot(client, snapshot))
-          throw new ApiError("unauthorized", 401);
-        const parsed = createTaskSchema.safeParse(input.body);
-        setValidationError(!parsed.success);
-        if (!parsed.success) throw new ApiError("invalid_input", 400);
-        input.body = parsed.data;
-      }
       const temporaryId = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(taskKey, (current = []) =>
@@ -180,16 +168,14 @@ export function TodayView() {
     t("unknownMember");
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setValidationError(false);
-    mutation.mutate({
-      kind: "create",
-      body: {
-        workspaceId: workspace.id,
-        title,
-        ownerId,
-        workerId: workerId || null,
-      },
+    const parsed = createTaskSchema.safeParse({
+      workspaceId: workspace.id,
+      title,
+      ownerId,
+      workerId: workerId || null,
     });
+    setValidationError(!parsed.success);
+    if (parsed.success) mutation.mutate({ kind: "create", body: parsed.data });
   }
   return (
     <>
@@ -221,7 +207,11 @@ export function TodayView() {
           <ul>
             {agentWork.map((run) => (
               <li key={run.id}>
-                <Link className="task-title-link" href={`/tasks/${run.taskId}`}>
+                <Link
+                  className="task-title-link"
+                  href={`/tasks/${run.taskId}`}
+                  prefetch={false}
+                >
                   {tasks.data?.find((task) => task.id === run.taskId)?.title ??
                     t("agentProfile.task")}
                 </Link>
@@ -371,6 +361,7 @@ export function TodayView() {
                       <Link
                         className="task-title-link"
                         href={`/tasks/${task.id}`}
+                        prefetch={false}
                       >
                         {task.title}
                       </Link>

@@ -80,9 +80,12 @@ Generate independent `AUTH_SECRET` and `TOKEN_PEPPER` values.
 parses the base file. Set `TAFF_TAG` to the exact released Git SHA.
 
 ```sh
-docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.yaml build
+docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.yaml build --builder default
 docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.yaml up -d
 ```
+
+The explicit default builder uses this host's existing Tencent registry mirror.
+It leaves the builder selected for neighboring projects unchanged.
 
 The override disables the bundled PostgreSQL service and removes published
 ports. Only Taff's Caddy container joins the existing `tableai-can01-edge`

@@ -52,10 +52,21 @@ test("sign in, create a task and assign it to an agent", async ({
   page,
 }, info) => {
   const locale = info.project.name as TestLocale;
+  const taskNavigations: string[] = [];
+  page.on("request", (request) => {
+    if (new URL(request.url()).pathname.startsWith("/tasks/"))
+      taskNavigations.push(request.url());
+  });
   await signIn(page);
   await useLocale(page, locale);
   const title = `Agent task ${locale} ${Date.now()}`;
-  await page.getByTestId("task-title").fill(title);
+  await page.getByTestId("task-title").fill("   ");
+  await expect(page.getByTestId("task-submit")).toBeEnabled();
+  await page.getByTestId("task-submit").click();
+  await expect(page.getByRole("alert")).toHaveText(
+    messages[locale].errors.invalid_input,
+  );
+  await page.getByTestId("task-title").fill(`  ${title}  `);
   await expect(page.getByTestId("task-submit")).toBeEnabled();
   const agentOption = page
     .getByTestId("task-worker")
@@ -70,7 +81,15 @@ test("sign in, create a task and assign it to an agent", async ({
       .locator("option")
       .filter({ hasText: labels[locale].agent }),
   ).toHaveCount(0);
+  const created = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/tasks" &&
+      response.request().method() === "POST",
+  );
   await page.getByTestId("task-submit").click();
+  const response = await created;
+  expect(response.status()).toBe(201);
+  expect(response.request().postDataJSON().title).toBe(title);
   const card = page
     .getByTestId("task-card")
     .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
@@ -98,96 +117,21 @@ test("sign in, create a task and assign it to an agent", async ({
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[otherLocale].today,
   );
+  await page.waitForLoadState("networkidle");
+  expect(taskNavigations).toEqual([]);
+  await card.getByRole("link", { name: title, exact: true }).click();
+  await expect(page.getByTestId("task-detail-heading")).toHaveText(title);
+  await expect(page.getByTestId("detail-worker")).toHaveValue(
+    agentId as string,
+  );
+  await page.goto("/");
+  await expect(page.getByTestId("today-heading")).toHaveText(
+    labels[otherLocale].today,
+  );
   await page
     .getByRole("button", { name: labels[otherLocale].signout, exact: true })
     .click();
   await expect(page.getByTestId("auth-submit")).toBeVisible();
-});
-
-test("lazy creation validation rejects a revoked session and normalizes the next account's input", async ({
-  page,
-  browser,
-}, info) => {
-  const locale = info.project.name as TestLocale;
-  await freshAccount(page, locale);
-  await page.waitForLoadState("networkidle");
-  const remote = await browser.newContext({
-    storageState: await page.context().storageState(),
-    baseURL: process.env.AUTH_URL,
-  });
-  let release!: () => void;
-  let arrived!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const seen = new Promise<void>((resolve) => {
-    arrived = resolve;
-  });
-  const writes: string[] = [];
-  let held = false;
-  page.on("request", (request) => {
-    if (
-      new URL(request.url()).pathname === "/api/tasks" &&
-      request.method() === "POST"
-    )
-      writes.push(request.postData() ?? "");
-  });
-  await page.route("**/_next/static/chunks/*.js", async (route) => {
-    if (!held) {
-      held = true;
-      arrived();
-      await gate;
-    }
-    await route.continue();
-  });
-  const privateTitle = `Revoked lazy creation ${locale} ${Date.now()}`;
-  try {
-    await page.getByTestId("task-title").fill(privateTitle);
-    await expect(page.getByTestId("task-submit")).toBeEnabled();
-    await page.getByTestId("task-submit").click();
-    await seen;
-    expect(
-      (
-        await remote.request.post("/api/auth/sign-out", {
-          headers: { Origin: process.env.AUTH_URL! },
-          data: {},
-        })
-      ).status(),
-    ).toBe(200);
-    await expect(page.getByTestId("auth-submit")).toBeVisible();
-    release();
-    await page.waitForLoadState("networkidle");
-    expect(writes).toEqual([]);
-    await page.unroute("**/_next/static/chunks/*.js");
-    await freshAccount(page, locale);
-    await expect(page.getByText(privateTitle, { exact: true })).toHaveCount(0);
-    await page.getByTestId("task-title").fill("   ");
-    await expect(page.getByTestId("task-submit")).toBeEnabled();
-    await page.getByTestId("task-submit").click();
-    await expect(page.getByRole("alert")).toHaveText(
-      messages[locale].errors.invalid_input,
-    );
-    expect(writes).toEqual([]);
-    const title = `Normalized creation ${locale} ${Date.now()}`;
-    await page.getByTestId("task-title").fill(`  ${title}  `);
-    await expect(page.getByTestId("task-submit")).toBeEnabled();
-    const created = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname === "/api/tasks" &&
-        response.request().method() === "POST",
-    );
-    await page.getByTestId("task-submit").click();
-    expect((await created).status()).toBe(201);
-    expect(writes).toHaveLength(1);
-    expect(JSON.parse(writes[0]).title).toBe(title);
-    await expect(
-      page.getByRole("link", { name: title, exact: true }),
-    ).toBeVisible();
-  } finally {
-    release();
-    await page.unroute("**/_next/static/chunks/*.js");
-    await remote.close();
-  }
 });
 
 test("create an account with a workspace, then sign in again", async ({

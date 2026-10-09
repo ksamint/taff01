@@ -28,9 +28,15 @@ import {
   unknown,
   enum as zodEnum,
 } from "zod/mini";
-import { memberSchema, taskSchema } from "./base";
+import {
+  calendarScheduleInputSchema,
+  createTaskSchema,
+  memberSchema,
+  taskSchema,
+} from "./base";
 import {
   boundedText,
+  calendarInstantSchema,
   idSchema,
   labelsSchema,
   localeSchema,
@@ -45,25 +51,15 @@ import {
 } from "./primitives";
 
 import { runSchema, runStatusSchema } from "./run-read";
-import {
-  calendarInstantSchema,
-  calendarScheduleInputSchema,
-  createTaskSchema,
-} from "./task-create";
 
 export * from "./base";
+
 export * from "./calendar-read";
 export * from "./changes";
 export * from "./inbox-read";
 export * from "./notification-preferences";
 export * from "./project-read";
 export * from "./run-read";
-export {
-  type CalendarScheduleInput,
-  type CreateTask,
-  calendarScheduleInputSchema,
-  createTaskSchema,
-} from "./task-create";
 export * from "./workspace-read";
 
 export const updateTaskStatusSchema = strictObject({
