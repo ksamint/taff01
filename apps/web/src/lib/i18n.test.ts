@@ -4,13 +4,34 @@ import english from "../../locales/en/common.json";
 import simplified from "../../locales/zh-CN/common.json";
 import traditional from "../../locales/zh-HK/common.json";
 import {
+  browserTimeZone,
   LAST_WORKSPACE_KEY,
   preloadBootScript,
   readPreference,
   savePreference,
 } from "./i18n";
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
+
+it("keeps a chosen time zone without probing the browser", () => {
+  const formatter = vi.spyOn(Intl, "DateTimeFormat").mockImplementation(() => {
+    throw new Error("unavailable");
+  });
+  expect(browserTimeZone("Asia/Tokyo")).toBe("Asia/Tokyo");
+  expect(formatter).not.toHaveBeenCalled();
+  expect(browserTimeZone("UTC")).toBe("UTC");
+  expect(formatter).toHaveBeenCalledOnce();
+});
+
+it("detects the browser time zone for a new UTC account", () => {
+  const expected = new Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const formatter = vi.spyOn(Intl, "DateTimeFormat");
+  expect(browserTimeZone("UTC")).toBe(expected);
+  expect(formatter).toHaveBeenCalledOnce();
+});
 
 it("supplies every translation key in each independently loaded locale", () => {
   const keys = (value: object, prefix = ""): string[] =>

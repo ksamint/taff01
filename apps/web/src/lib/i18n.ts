@@ -33,8 +33,9 @@ export function detectLocale(languages: readonly string[]): Locale {
   return "en";
 }
 
-/** The browser's IANA zone, or UTC when the platform cannot say. */
-export function browserTimeZone(): string {
+/** Keep a chosen zone; detect the browser zone for a new UTC account. */
+export function browserTimeZone(currentTimeZone: string): string {
+  if (currentTimeZone !== "UTC") return currentTimeZone;
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   } catch {

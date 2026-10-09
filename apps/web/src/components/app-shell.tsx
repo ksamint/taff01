@@ -295,7 +295,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const detected = useRef(false);
   useEffect(() => {
     if (!me.data || detected.current || profile.isPending) return;
-    const zone = browserTimeZone();
+    const zone = browserTimeZone(me.data.user.tz);
     const chosen = readPreference();
     const locale =
       chosen && chosen !== me.data.user.locale && me.data.user.locale === "en"

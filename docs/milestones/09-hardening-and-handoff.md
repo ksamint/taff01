@@ -218,6 +218,30 @@ trimming, absence of speculative task navigation and successful detail navigatio
 CI browser tests start the built API and web servers; local development commands
 retain their existing behavior. Full validation of this candidate is pending.
 
+Candidate `a6ad6a49` passed the first seven commands and 400 unit tests, with
+199,433 gzip bytes of initial JavaScript. Lighthouse was 91/89/90; Simplified
+Chinese failed the unchanged gate, so browser tests and MCP smoke did not run.
+The three-run LCP medians passed at 1,728/1,952/1,944 ms. All three Lighthouse
+network logs contained zero speculative task-route requests.
+
+A corrected cold zh-HK capture cleared IndexedDB, cache storage and service
+workers, retained the authenticated cookie and workspace preference, and used
+the installed Lighthouse DevTools settings: 562.5 ms request latency,
+1,474.56 Kbps down, 675 Kbps up, 4x CPU and the Moto G Power viewport.
+It reproduced the greeting's 3,368 ms LCP and confirmed that the `/api/me`
+preload completed at 1,179 ms. The eleven bootstrap scripts were requested
+with the parser; the last AppShell script completed at 3,109 ms. The agents
+request completed after LCP, so preloading it is not proposed as an LCP fix.
+
+The capture also identified an unnecessary browser time-zone lookup for an
+account that already had a chosen zone. The shared helper now returns that
+zone directly, retaining browser detection and the UTC fallback for new UTC
+accounts. Six i18n tests and all package type checks passed; full validation
+of this change is pending. A separate read-only PostgreSQL probe authenticated
+as `taff` from the application host with certificate identity verification and
+TLS active; the dedicated database remains unmigrated and the probe container
+was removed.
+
 ## Remaining work and open decisions
 
 M9 is not complete. The local performance targets passed while preserving
