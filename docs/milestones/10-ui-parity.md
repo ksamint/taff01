@@ -47,7 +47,7 @@ app. No production database will be seeded for this work.
 | 5 — Inbox | Visuals accepted at `e5165f9`; behavioral gates pending | Four production captures, compact inactive desktop rows and focus-visible 44 px actions; source 280–322/1010–1034. |
 | 6 — Calendar | Pending | |
 | 7 — Me | Visuals accepted at `e5165f9`; behavioral gates pending | Four production captures, source 323–375; real identity, members and preferences. |
-| 8 — type, density and dark theme | Pending | |
+| 8 — type, density and dark theme | Visuals accepted at `e5165f9`; behavioral gates pending | Eight production light/dark captures; actual source scale, existing tokens, 12 px/44 px floor. |
 
 Before each push: lint, typecheck, licence gate, unit tests, web build,
 server build, bundle budget, Playwright and MCP smoke. Final performance
@@ -454,3 +454,20 @@ All 4 native images were inspected by root. Independent production comparisons p
 | phone-zh-HK / me | ![Prototype](../ui/reference/phone-zh-me.png) | ![App](../ui/screenshots/ui-parity/me/phone-zh-HK-app.png) |
 | desktop-en / me | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/me/desktop-en-app.png) |
 | desktop-zh-HK / me | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/me/desktop-zh-HK-app.png) |
+
+## type visual checkpoint — production `e5165f9`
+
+Source 223–279/935–1214 and TH.dark supplies the type, board density and light/dark tokens. Phone title is 28 px; card text follows the actual source at 14 px phone and 13 px desktop; metadata respects the 12 px minimum. The later source-port instruction takes precedence over a uniform 15 px card scale. Focused desktop controls occupy their own 44 px row. Dark background, surfaces, inverse buttons, text, borders and restrained gold map existing tokens; no legacy white-control leakage remains. Existing data/order, paused runs, actual counts, extra task fields and 44 px accessible controls retain the documented Projects/Task differences. These captures demonstrate the scale on the real Projects board; no separate fictional type-scale route is introduced.
+
+All 8 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/type/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / type | ![Prototype](../ui/reference/phone-en-projects.png) | ![App](../ui/screenshots/ui-parity/type/phone-en-type-app.png) |
+| phone-en / type-dark | ![Prototype](../ui/reference/dark/phone-en-projects.png) | ![App](../ui/screenshots/ui-parity/type/phone-en-type-dark-app.png) |
+| phone-zh-HK / type | ![Prototype](../ui/reference/phone-zh-projects.png) | ![App](../ui/screenshots/ui-parity/type/phone-zh-HK-type-app.png) |
+| phone-zh-HK / type-dark | ![Prototype](../ui/reference/dark/phone-zh-projects.png) | ![App](../ui/screenshots/ui-parity/type/phone-zh-HK-type-dark-app.png) |
+| desktop-en / type | ![Prototype](../ui/reference/desktop-en-board.png) | ![App](../ui/screenshots/ui-parity/type/desktop-en-type-app.png) |
+| desktop-en / type-dark | ![Prototype](../ui/reference/dark/desktop-en-board.png) | ![App](../ui/screenshots/ui-parity/type/desktop-en-type-dark-app.png) |
+| desktop-zh-HK / type | ![Prototype](../ui/reference/desktop-zh-board.png) | ![App](../ui/screenshots/ui-parity/type/desktop-zh-HK-type-app.png) |
+| desktop-zh-HK / type-dark | ![Prototype](../ui/reference/dark/desktop-zh-board.png) | ![App](../ui/screenshots/ui-parity/type/desktop-zh-HK-type-dark-app.png) |

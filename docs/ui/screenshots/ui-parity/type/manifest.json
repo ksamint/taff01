@@ -1,0 +1,78 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 223\u2013279/935\u20131214 and TH.dark supplies the type, board density and light/dark tokens. Phone title is 28 px; card text follows the actual source at 14 px phone and 13 px desktop; metadata respects the 12 px minimum. The later source-port instruction takes precedence over a uniform 15 px card scale. Focused desktop controls occupy their own 44 px row. Dark background, surfaces, inverse buttons, text, borders and restrained gold map existing tokens; no legacy white-control leakage remains. Existing data/order, paused runs, actual counts, extra task fields and 44 px accessible controls retain the documented Projects/Task differences. These captures demonstrate the scale on the real Projects board; no separate fictional type-scale route is introduced.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "type",
+      "app": "docs/ui/screenshots/ui-parity/type/phone-en-type-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/type.png",
+      "sha256": "7a0a24f5239e57d85511bc65593c85717378f52cc72a032bd20a1e0b7e614b68",
+      "reference": "docs/ui/reference/phone-en-projects.png",
+      "referenceSha256": "4afe6ae6ea198bd57cfe84c052e279b55e2f71c6ecd0ea9ff0ef97bf35711162"
+    },
+    {
+      "project": "phone-en",
+      "variant": "type-dark",
+      "app": "docs/ui/screenshots/ui-parity/type/phone-en-type-dark-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/type-dark.png",
+      "sha256": "6b02c23e096373cda468ee4cea090d15f0b0955cb33308de54cb34e647c2f1c9",
+      "reference": "docs/ui/reference/dark/phone-en-projects.png",
+      "referenceSha256": "36d6c81bdd6dd9473939757ec94f44e828d9a3ced8302619ab3e38af5331ef9c"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "type",
+      "app": "docs/ui/screenshots/ui-parity/type/phone-zh-HK-type-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/type.png",
+      "sha256": "0dfad169dbb23640090ab15267908e75ebd9aa06f8ac73e27f15c18d4cc32289",
+      "reference": "docs/ui/reference/phone-zh-projects.png",
+      "referenceSha256": "881da74c7dc0afb03402df7a49c9a3b5d2bccb13d362b9e20b27c4ae59c26bbc"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "type-dark",
+      "app": "docs/ui/screenshots/ui-parity/type/phone-zh-HK-type-dark-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/type-dark.png",
+      "sha256": "f7116cc36978eee733d790e3df6a4b9699a68205e3625eff9ae547ee065b9cc9",
+      "reference": "docs/ui/reference/dark/phone-zh-projects.png",
+      "referenceSha256": "34195f08b6e1e9405b1c0caea08b7c426a9c3f5c289feeb320335b5fbc9bdd9b"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "type",
+      "app": "docs/ui/screenshots/ui-parity/type/desktop-en-type-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/type.png",
+      "sha256": "5f8dd3e2bf93817b804398db519ef84dd4df04e48e45d3291a92efc1cc3cf307",
+      "reference": "docs/ui/reference/desktop-en-board.png",
+      "referenceSha256": "714bc54d59e4ccf47dca8c971789883b6e12fed02ce809f6ac6ff71fba2af7b6"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "type-dark",
+      "app": "docs/ui/screenshots/ui-parity/type/desktop-en-type-dark-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/type-dark.png",
+      "sha256": "0cf473f93d23249e9e260b6c6a45bb1662edc723f808833dbef19add257a1e4d",
+      "reference": "docs/ui/reference/dark/desktop-en-board.png",
+      "referenceSha256": "20b7322e55e69dff3a6d38cee8c8f56e7d1d1b4cc2ec5d991638bb5988b14943"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "type",
+      "app": "docs/ui/screenshots/ui-parity/type/desktop-zh-HK-type-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/type.png",
+      "sha256": "5b56c2c24d2c4ab4c685b2d194f9e450f047bd901d43a1f0c0ff0b57960bbd0a",
+      "reference": "docs/ui/reference/desktop-zh-board.png",
+      "referenceSha256": "68d1a3bfc4c3a00bcbae5c3e0fb5cbf0f949482a5cefd44fc9f238c0d0b012a0"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "type-dark",
+      "app": "docs/ui/screenshots/ui-parity/type/desktop-zh-HK-type-dark-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/type-dark.png",
+      "sha256": "db8ee9db421b471627cbb3a4a96b6e2b999beed713e2e44413ffe57d8173c7a1",
+      "reference": "docs/ui/reference/dark/desktop-zh-board.png",
+      "referenceSha256": "aa1463bc246a55153b6703694d1038eba7111e5e0dd2965c8d6116a98ac70a4d"
+    }
+  ]
+}
