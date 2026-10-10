@@ -230,11 +230,15 @@ footer.tagline {
   box-shadow: var(--shadow-lift);
 }
 .tabbar {
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
   min-height: 56px;
   border-color: var(--border-line);
 }
 .tab {
   position: relative;
+  padding: 4px var(--space-xs);
+  font-size: 12px;
+  line-height: 1.2;
   gap: 3px;
   border: 0;
   color: var(--text-subtle);
