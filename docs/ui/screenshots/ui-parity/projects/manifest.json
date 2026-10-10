@@ -1,0 +1,78 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 223\u2013279 and 935\u20131045 supplies the phone board/grouped list and desktop board/table/header. Existing queries, card selection, parent navigation, menus, filters and keyboard move controls remain bound. Desktop action controls occupy their own row on hover/focus; phone list actions reserve space beside avatars and agent chips. Actual ordering, dates, counts, paused runs and 0/5 subtasks remain truthful. The 12 px text and 44 px target floor enlarges source controls. The detail panel retains real metadata, description and permission notice; review is separately captured below them. No synthetic OS chrome.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "projects",
+      "app": "docs/ui/screenshots/ui-parity/projects/phone-en-projects-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/projects.png",
+      "sha256": "7a0a24f5239e57d85511bc65593c85717378f52cc72a032bd20a1e0b7e614b68",
+      "reference": "docs/ui/reference/phone-en-projects.png",
+      "referenceSha256": "4afe6ae6ea198bd57cfe84c052e279b55e2f71c6ecd0ea9ff0ef97bf35711162"
+    },
+    {
+      "project": "phone-en",
+      "variant": "projects-list",
+      "app": "docs/ui/screenshots/ui-parity/projects/phone-en-projects-list-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/projects-list.png",
+      "sha256": "73c31567ef2019b0d78f731abc204244db81ec7c061889b981a54e86f10c22f6",
+      "reference": "docs/ui/reference/extra/phone-en-projects-list.png",
+      "referenceSha256": "5fcc43bc08b473005177cc44cd93d33a6b7a1b0c6a7ae89bb35c3c9a0a36330b"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "projects",
+      "app": "docs/ui/screenshots/ui-parity/projects/phone-zh-HK-projects-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/projects.png",
+      "sha256": "0dfad169dbb23640090ab15267908e75ebd9aa06f8ac73e27f15c18d4cc32289",
+      "reference": "docs/ui/reference/phone-zh-projects.png",
+      "referenceSha256": "881da74c7dc0afb03402df7a49c9a3b5d2bccb13d362b9e20b27c4ae59c26bbc"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "projects-list",
+      "app": "docs/ui/screenshots/ui-parity/projects/phone-zh-HK-projects-list-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/projects-list.png",
+      "sha256": "61ab02b6728b70c524c396ef09f48bc7f3878b63a6e65a60473e8816bb1f8a6b",
+      "reference": "docs/ui/reference/extra/phone-zh-projects-list.png",
+      "referenceSha256": "ba2a2d32c9b4a405956949fd8b7fa1516b75d1d048dfbfb1308f7e244759ce10"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "projects",
+      "app": "docs/ui/screenshots/ui-parity/projects/desktop-en-projects-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/projects.png",
+      "sha256": "5f8dd3e2bf93817b804398db519ef84dd4df04e48e45d3291a92efc1cc3cf307",
+      "reference": "docs/ui/reference/desktop-en-projects.png",
+      "referenceSha256": "714bc54d59e4ccf47dca8c971789883b6e12fed02ce809f6ac6ff71fba2af7b6"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "projects-list",
+      "app": "docs/ui/screenshots/ui-parity/projects/desktop-en-projects-list-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/projects-list.png",
+      "sha256": "83b3830417cb1a65a88c36ef37fc65003b1ea01ded3cb0ceeabf33c1f4ef3546",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "projects",
+      "app": "docs/ui/screenshots/ui-parity/projects/desktop-zh-HK-projects-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/projects.png",
+      "sha256": "60d4b074b0245cb9fee77d986d357c5e76dc6c46db9c71dd5dce21c8db4ae26f",
+      "reference": "docs/ui/reference/desktop-zh-projects.png",
+      "referenceSha256": "68d1a3bfc4c3a00bcbae5c3e0fb5cbf0f949482a5cefd44fc9f238c0d0b012a0"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "projects-list",
+      "app": "docs/ui/screenshots/ui-parity/projects/desktop-zh-HK-projects-list-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/projects-list.png",
+      "sha256": "84c3356aff0db6f4569893608a6f568c53cb3a57a3f81d0857fff0c0b357ac20",
+      "reference": null,
+      "referenceSha256": null
+    }
+  ]
+}

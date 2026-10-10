@@ -42,7 +42,7 @@ app. No production database will be seeded for this work.
 | 0 — offline prototype and capture tooling | Accepted locally; strict checks before push pending | 38 native zh/en reference captures; independent full navigation rerun passed with zero external requests or browser errors. [Matrix and provenance](../ui/reference/README.md). |
 | 1 — shell | Visuals accepted at `dfcbefb`; committed-baseline and behavioral gates pending | Six native element captures personally inspected by the root agent; reference/app comparisons below. Phone tabs/FAB from lines 376–410, desktop sidebar from 940–953; existing session/cache guards retained. |
 | 2 — Today and Northwind seed | Phone accepted at `e1c2d1a`, corrected desktop at `e5165f9`; behavioral gates pending | Four native captures inspected; independent comparison passed. Source 47–114, existing real schedule/tasks/run bindings. |
-| 3 — Projects | Pending | |
+| 3 — Projects | Visuals accepted at `e5165f9`; behavioral gates pending | Eight production board/list captures, source 223–279/935–1045; side-by-side evidence below. |
 | 4 — task detail and review | Pending | |
 | 5 — Inbox | Pending | |
 | 6 — Calendar | Pending | |
@@ -374,3 +374,20 @@ evidence is retained and owned disposable resources removed. Production and
 the previously accepted QA environment are unchanged. The next capture run
 uses a production build/start, the explicit sidebar readiness checks and the
 unchanged pixel-comparison settings, matching CI's rendering path.
+
+## projects visual checkpoint — production `e5165f9`
+
+Source 223–279 and 935–1045 supplies the phone board/grouped list and desktop board/table/header. Existing queries, card selection, parent navigation, menus, filters and keyboard move controls remain bound. Desktop action controls occupy their own row on hover/focus; phone list actions reserve space beside avatars and agent chips. Actual ordering, dates, counts, paused runs and 0/5 subtasks remain truthful. The 12 px text and 44 px target floor enlarges source controls. The detail panel retains real metadata, description and permission notice; review is separately captured below them. No synthetic OS chrome.
+
+All 8 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/projects/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / projects | ![Prototype](../ui/reference/phone-en-projects.png) | ![App](../ui/screenshots/ui-parity/projects/phone-en-projects-app.png) |
+| phone-en / projects-list | ![Prototype](../ui/reference/extra/phone-en-projects-list.png) | ![App](../ui/screenshots/ui-parity/projects/phone-en-projects-list-app.png) |
+| phone-zh-HK / projects | ![Prototype](../ui/reference/phone-zh-projects.png) | ![App](../ui/screenshots/ui-parity/projects/phone-zh-HK-projects-app.png) |
+| phone-zh-HK / projects-list | ![Prototype](../ui/reference/extra/phone-zh-projects-list.png) | ![App](../ui/screenshots/ui-parity/projects/phone-zh-HK-projects-list-app.png) |
+| desktop-en / projects | ![Prototype](../ui/reference/desktop-en-projects.png) | ![App](../ui/screenshots/ui-parity/projects/desktop-en-projects-app.png) |
+| desktop-en / projects-list | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/projects/desktop-en-projects-list-app.png) |
+| desktop-zh-HK / projects | ![Prototype](../ui/reference/desktop-zh-projects.png) | ![App](../ui/screenshots/ui-parity/projects/desktop-zh-HK-projects-app.png) |
+| desktop-zh-HK / projects-list | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/projects/desktop-zh-HK-projects-list-app.png) |
