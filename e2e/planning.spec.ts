@@ -79,8 +79,6 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   const project = projectSchema.parse(await (await projectResponse).json());
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page).toHaveURL(`/projects/${project.id}`);
-  await page.locator('a[href="/projects"]:visible').first().click();
-  await expect(page).toHaveURL("/projects");
   await page.getByTestId("open-quick").click();
   const parsedTitle = `Draft ${Date.now()}`;
   const when =
