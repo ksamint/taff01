@@ -1,5 +1,8 @@
 # Agent goal: finish Taff M9 and hand over
 
+> Run `docs/agent-goal-ui-parity.md` first: the UI review of 2026-10-10
+> found the app far from the approved prototype on every screen.
+
 Paste everything below this line as the goal for a coding agent working in
 `ksamint/taff01`. It is self-contained; the files it names are in the
 repository.
