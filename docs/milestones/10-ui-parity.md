@@ -45,7 +45,7 @@ app. No production database will be seeded for this work.
 | 3 — Projects | Visuals accepted at `e5165f9`; behavioral gates pending | Eight production board/list captures, source 223–279/935–1045; side-by-side evidence below. |
 | 4 — task detail and review | Visuals accepted at `e5165f9`; behavioral gates pending | Four task and eight review production captures; source 791–934/1034–1214 and sticky phone toolbar. |
 | 5 — Inbox | Visuals accepted at `e5165f9`; behavioral gates pending | Four production captures, compact inactive desktop rows and focus-visible 44 px actions; source 280–322/1010–1034. |
-| 6 — Calendar | Pending | |
+| 6 — Calendar | Visuals accepted at `a93ca59`; behavioral gates pending | Twelve production day/week/month captures, source 115–222; exact day hatch and inverse month date fill. |
 | 7 — Me | Visuals accepted at `e5165f9`; behavioral gates pending | Four production captures, source 323–375; real identity, members and preferences. |
 | 8 — type, density and dark theme | Visuals accepted at `e5165f9`; behavioral gates pending | Eight production light/dark captures; actual source scale, existing tokens, 12 px/44 px floor. |
 
@@ -575,3 +575,50 @@ All 4 native images were inspected by root. Independent production comparisons p
 | phone-zh-HK / organizations | ![Prototype](../ui/reference/phone-zh-organizations.png) | ![App](../ui/screenshots/ui-parity/organizations/phone-zh-HK-app.png) |
 | desktop-en / organizations | ![Prototype](../ui/reference/desktop-en-organizations.png) | ![App](../ui/screenshots/ui-parity/organizations/desktop-en-app.png) |
 | desktop-zh-HK / organizations | ![Prototype](../ui/reference/desktop-zh-organizations.png) | ![App](../ui/screenshots/ui-parity/organizations/desktop-zh-HK-app.png) |
+
+## Server cleanup and capture transport — 2026-10-10
+
+A fresh stage stopped at the unchanged 12 GiB free-space guard. Eleven
+superseded, unvalidated UI candidates retained duplicate dependencies and
+build output. Removed only their dependency/build caches, preserving source
+archives, tracked source and every screenshot/report; archive and evidence
+hashes remained unchanged. Docker reclaimed another 3.582 GB of unused
+build cache. Free space reached 25.01 GiB, approximately 13 GiB recovered.
+Running services, database volumes, pinned/rollback images and accepted QA
+passed preservation checks. Other projects' live data and backups remain.
+
+Intermittent direct SSH download timeouts also delayed captures. The
+existing configured SSH hop fetched the four immutable MCP PNGs successfully
+and matched every original SHA-256 hash. Remaining validation uses that
+transport; source ownership, runtime, fixture and test guards stay unchanged.
+
+## team visual checkpoint — production `9d395f8`
+
+Source 667–710 supplies Back navigation, 28 px Team title, People and Agents sections, 36 px member avatars, supervisor/status/capability groups and the 44 px Invite row. Agent icons now align beside their names, matching the source. Existing member, agent-profile, task and run queries supply five people, three agents, actual supervisors, roles and open-task counts; ten actual permission capabilities replace unavailable fictional skill/client metadata and make real agent rows taller. Invite uses the existing authorized dialog and canInvite guard; role controls retain canManageRoles, session/snapshot and core authorization. Actual Admin/member controls remain accessible, and all three locale workload labels accurately say open tasks. Phone is a push view without tabs/FAB; desktop retains Sidebar as an extension without a native desktop reference. No data or authorization rules change.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/team/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / team | ![Prototype](../ui/reference/extra/phone-en-team.png) | ![App](../ui/screenshots/ui-parity/team/phone-en-app.png) |
+| phone-zh-HK / team | ![Prototype](../ui/reference/extra/phone-zh-team.png) | ![App](../ui/screenshots/ui-parity/team/phone-zh-HK-app.png) |
+| desktop-en / team | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/team/desktop-en-app.png) |
+| desktop-zh-HK / team | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/team/desktop-zh-HK-app.png) |
+
+## Integrated visual acceptance ready for validation
+
+All 16 screen sets now have 86 accepted native app/baseline images with
+source and reference provenance. Root inspected each native capture;
+independent source reviews and unchanged candidate comparisons passed.
+The CI loop now names all 16 sets explicitly and cannot update snapshots.
+The offline prototype reference matrix also includes six dark-theme and
+14 supplemental views, totaling 58 native reference screens.
+
+Team's last repair (`57eeb39`) is a one-line source alignment correction.
+No behavioral feature, data contract, authorization rule, comparator mask
+or performance threshold was removed or weakened. Full committed-baseline,
+120 behavioral cases, nine gates, Lighthouse and three LCP measurements
+per locale are still required before pushing. Capture generation is not
+a substitute for those checks. Transport compression round-tripped the
+38 MiB archive byte-identically at approximately 20 MiB; the original
+archive SHA-256 and source manifests remain the validation boundary.

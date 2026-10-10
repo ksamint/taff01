@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "9d395f82c795cb839f4be2e905256a621e2f5c23",
+  "source": "Source 667\u2013710 supplies Back navigation, 28 px Team title, People and Agents sections, 36 px member avatars, supervisor/status/capability groups and the 44 px Invite row. Agent icons now align beside their names, matching the source. Existing member, agent-profile, task and run queries supply five people, three agents, actual supervisors, roles and open-task counts; ten actual permission capabilities replace unavailable fictional skill/client metadata and make real agent rows taller. Invite uses the existing authorized dialog and canInvite guard; role controls retain canManageRoles, session/snapshot and core authorization. Actual Admin/member controls remain accessible, and all three locale workload labels accurately say open tasks. Phone is a push view without tabs/FAB; desktop retains Sidebar as an extension without a native desktop reference. No data or authorization rules change.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "team",
+      "app": "docs/ui/screenshots/ui-parity/team/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/team.png",
+      "sha256": "53cdf95e96d23b2c41006e4a95bde1a0cb9888cd46fc96eb46dbad1199934a57",
+      "reference": "docs/ui/reference/extra/phone-en-team.png",
+      "referenceSha256": "bea302cd8a3daa765c06af93e0f2e7f39f1c07ba01ab360c2679714b517ba629"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "team",
+      "app": "docs/ui/screenshots/ui-parity/team/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/team.png",
+      "sha256": "7c30516a4ba3c703bc74f38e353779c30c1171e61980bea5c2d80b1922b4d279",
+      "reference": "docs/ui/reference/extra/phone-zh-team.png",
+      "referenceSha256": "354ce1cf37f72d5954a09a311aa32ab533c7ef4fd3887c8448bd059996bf7622"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "team",
+      "app": "docs/ui/screenshots/ui-parity/team/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/team.png",
+      "sha256": "006e12ea457c2766ed47b3deea08349514cdd0a7fd91087df8cc16d13aa2e2ed",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "team",
+      "app": "docs/ui/screenshots/ui-parity/team/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/team.png",
+      "sha256": "66dc5bcb42b958d5dc121004309f8d0c7ef79b4e2c385735d9d8680391e51bb7",
+      "reference": null,
+      "referenceSha256": null
+    }
+  ]
+}
