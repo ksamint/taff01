@@ -58,7 +58,7 @@ of 100–900; CSS advertises the narrower range used by the application.
 
 | Asset | Unicode mappings | Bytes | SHA-256 |
 | --- | ---: | ---: | --- |
-| NotoSansTC-ui-common.woff2 | 198 | 56,860 | `5a285acc674b649bcddacd61f75ebe0cca9a8a0d9b09c2e083b9098b545e6fa7` |
+| NotoSansTC-ui-common.woff2 | 198 | 56,892 | `b8380f48c9b26fb7e903e5db72063d3ae437382840dbf640accef90ba00e026e` |
 | NotoSansTC-ui-remaining.woff2 | 516 | 162,604 | `15dab34a82c8df28482b0f6e058f09ad00de3f9d21695f34a34585e4340c808f` |
 
 The common set retains every prior common mapping. It contains supported
@@ -77,11 +77,22 @@ reusing the approved full source and temporary tools, with no download or runtim
 dependency. All 714 outlines and horizontal/vertical metrics were compared with
 the preceding runtime assets at weights 100, 300, 400, 500, 600 and 900 and matched
 exactly. Units per em, line metrics and variable axes also match. The previous
-171/543 mapping split used 47,620/169,500 bytes; the new combined size is 219,464
-bytes (2,344 more): common grows by 9,240 bytes and remaining shrinks by 6,896
+171/543 mapping split used 47,620/169,500 bytes; the new combined size is 219,496
+bytes (2,376 more): common grows by 9,272 bytes and remaining shrinks by 6,896
 bytes. Optional display controls swapping; matching fonts still
 consume bandwidth. Browser request/performance evidence belongs to the release
 checks; the offline character check does not establish a cold-page measurement.
+
+The common asset omits the full source's seven-byte `prep` program (SCANCTRL
+511 / SCANTYPE 4), matching the preceding Google-derived common asset's raster
+control tables. Every glyph instruction program is empty and there are no `cvt `
+or `fpgm` tables. The only removed table is `prep`; all retained tables are
+byte-identical to the expanded common asset apart from the derived `head` checksum
+adjustment. Its GSUB/GPOS tables, 198 mappings, outlines, metrics and axes remain
+unchanged. The remaining asset retains its existing source raster controls and
+is byte-for-byte unchanged. This is a source-preservation repair; it does not
+claim a browser pixel comparison pass. WOFF2 compression makes the common asset
+32 bytes larger despite removing that small table.
 
 Regenerate from the repository root using those tool versions. The existing
 runtime cmaps are the coverage boundary; retain their exact union. Node 24's Intl
@@ -174,6 +185,18 @@ for name, points in (("common", common), ("remaining", coverage - common)):
     font.flavor = "woff2"
     target = fonts / f"NotoSansTC-ui-{name}.woff2"
     font.save(target)
+    if name == "common":
+        # Match the original Google UI common raster controls. Round-trip the
+        # expanded subset first so the only subsequent table removal is prep.
+        font = TTFont(target, recalcTimestamp=False)
+        assert "cvt " not in font and "fpgm" not in font
+        assert all(
+            not (getattr(font["glyf"][glyph], "program", None)
+                 and font["glyf"][glyph].program.getBytecode())
+            for glyph in font.getGlyphOrder()
+        )
+        del font["prep"]
+        font.save(target)
     assert set(TTFont(target).getBestCmap()) == points
     print(name, len(points), target.stat().st_size, hashlib.sha256(target.read_bytes()).hexdigest())
     print("unicode-range:", ranges(points))
