@@ -64,8 +64,8 @@ test("Me switches real organizations and preserves theme, time-zone rollback and
   await expect(
     page
       .getByRole("dialog")
-      .getByRole("link", { name: m.organization.title, exact: true }),
-  ).toHaveAttribute("href", "/orgs");
+      .getByRole("link", { name: m.organization.create, exact: true }),
+  ).toHaveAttribute("href", "/orgs#create");
   await page.getByTestId(`me-workspace-${workspace.id}`).click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByTestId("me-organization")).toContainText(
@@ -87,6 +87,20 @@ test("Me switches real organizations and preserves theme, time-zone rollback and
   await expect(
     page.getByRole("heading", { name: m.organization.team, exact: true }),
   ).toBeVisible();
+  await expect(
+    page.locator(".organizations-view > .page-heading"),
+  ).toBeHidden();
+  await expect(page.locator(".tabbar")).toBeHidden();
+  await page.goto("/me");
+  await page.getByTestId("me-organization").click();
+  await page.getByTestId("organization-create-entry").click();
+  await expect(page).toHaveURL(/\/orgs#create$/);
+  await expect(page.locator("#org-name")).toBeVisible();
+  await page
+    .getByRole("dialog")
+    .locator(":scope > .section-heading")
+    .getByRole("button")
+    .click();
   await page.goto("/me");
   await expect(page.getByTestId("open-notifications")).toContainText(
     `${m.me.notificationSummary.replace("{{count}}", "2")} · ${m.me.digestSummary.replace("{{time}}", "18:00")}`,

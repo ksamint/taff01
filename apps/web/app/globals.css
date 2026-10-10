@@ -37,3 +37,22 @@
   --radius-dialog: var(--radius-dialog);
   --ease-standard: var(--ease-standard);
 }
+
+/* Source push views cover the phone tabs and retain their own Back action. */
+@media (max-width: 1023px) {
+  .app-shell:has(
+    :is(
+        .agent-profile-parity,
+        .mcp-view,
+        .notifications-parity,
+        .organizations-view.team-only
+      )
+  ) {
+    > .tabbar {
+      display: none;
+    }
+    > .content {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
+}

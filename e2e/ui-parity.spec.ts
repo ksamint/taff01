@@ -205,6 +205,11 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       }
       if (screen === "notifications")
         await expect(page.getByTestId("notification-review")).toBeEnabled();
+      if (
+        !desktop &&
+        ["agent", "mcp", "team", "notifications"].includes(screen)
+      )
+        await expect(page.locator(".tabbar")).toBeHidden();
       await expect(
         page.getByText(messages[locale].loading, { exact: true }),
       ).toHaveCount(0);

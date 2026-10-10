@@ -53,7 +53,10 @@ import { SheetDialog } from "./ui/sheet-dialog";
 export function OrganizationsView() {
   const [teamOnly, setTeamOnly] = useState(false);
   useEffect(() => {
-    const sync = () => setTeamOnly(window.location.hash === "#team");
+    const sync = () => {
+      setTeamOnly(window.location.hash === "#team");
+      if (window.location.hash === "#create") setDialog("create");
+    };
     sync();
     window.addEventListener("hashchange", sync);
     window.addEventListener("popstate", sync);
