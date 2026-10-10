@@ -316,3 +316,19 @@ geometry remains coherent. The existing 24-hour scheduling range and
 15-minute drag/resize snapping stay. Its existing phone flow now verifies
 both grid scales across view changes; browser execution and fresh Calendar
 captures remain pending.
+
+The `e1c2d1a` diagnostic run passed strict comparisons for Shell, Today,
+Projects board/list, task detail, review plus scrolled deliverables, Inbox and
+Me. Native inspection prompted three final source repairs: desktop board
+controls occupy their own row when visible, the phone task toolbar remains
+sticky, and inactive desktop Inbox rows use the source's compact typography
+and spacing. Selected, hovered or keyboard-focused Inbox rows expand their
+existing actions to preserve the 44 px target floor. No handlers, permissions
+or data are replaced with prototype simulations.
+
+Me's desktop diagnostic captures exposed a capture readiness gap: the lazy
+sidebar had not mounted when the body was captured. Both capture runners now
+wait explicitly for the sidebar and its three real agent links. Those blank
+sidebar images are not approved baselines. Fresh captures of the final source
+and the complete behavior/performance gates remain required; diagnostic
+generation followed by self-comparison alone does not approve a screen.
