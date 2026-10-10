@@ -1,5 +1,5 @@
 /* Native #team shows the source directory; /orgs keeps management controls. */
-.organizations-view:has(> .team-directory:target)
+.organizations-view.team-only
 > :is(.organization-toolbar, .page-heading, .org-grid, .button, .me-section) {
   display: none;
 }

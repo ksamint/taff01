@@ -25,7 +25,7 @@ import {
 } from "@tanstack/react-query";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { invalidateM3 } from "../lib/m3-queries";
@@ -51,6 +51,17 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
 export function OrganizationsView() {
+  const [teamOnly, setTeamOnly] = useState(false);
+  useEffect(() => {
+    const sync = () => setTeamOnly(window.location.hash === "#team");
+    sync();
+    window.addEventListener("hashchange", sync);
+    window.addEventListener("popstate", sync);
+    return () => {
+      window.removeEventListener("hashchange", sync);
+      window.removeEventListener("popstate", sync);
+    };
+  }, []);
   const { me, workspace, setWorkspaceId } = useWorkspace();
   const { invitation, setInvitation } = useWorkspaceSelection();
   const { t, i18n } = useTranslation();
@@ -224,7 +235,7 @@ export function OrganizationsView() {
     members.error ??
     invites.error;
   return (
-    <div className="organizations-view">
+    <div className={`organizations-view${teamOnly ? " team-only" : ""}`}>
       <header className="organization-toolbar">
         <Link className="button button-quiet" href="/me">
           <ArrowLeft size={16} aria-hidden="true" />

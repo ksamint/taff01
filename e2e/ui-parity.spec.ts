@@ -194,10 +194,15 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         await expect(page.getByTestId("agent-profile-heading")).toBeVisible();
       if (screen === "mcp")
         await expect(page.getByTestId("mcp-endpoint")).toBeVisible();
-      if (screen === "team")
+      if (screen === "team") {
         await expect(page.locator(".team-directory-list li")).toHaveCount(
           members.length,
         );
+        await expect(
+          page.locator(".organizations-view > .page-heading"),
+        ).toBeHidden();
+        await expect(page.locator(".team-directory > h1")).toBeInViewport();
+      }
       if (screen === "notifications")
         await expect(page.getByTestId("notification-review")).toBeEnabled();
       await expect(

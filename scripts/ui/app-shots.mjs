@@ -251,6 +251,9 @@ try {
               await expect(page).toHaveURL(`${base}/orgs#team`);
               await expect(page.locator("#team")).toBeVisible();
               await expect(
+                page.locator(".organizations-view > .page-heading"),
+              ).toBeHidden();
+              await expect(
                 page.locator(".team-directory-list > li"),
               ).toHaveCount(members.length);
             } else if (view === "quick-add") {
