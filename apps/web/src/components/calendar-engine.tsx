@@ -82,8 +82,8 @@ export function CalendarEngine(props: CalendarEngineProps) {
       firstDayOfWeek: 1,
       dayBoundaries: { start: "00:00", end: "24:00" },
       weekOptions: {
-        gridHeight: 1344,
-        gridStep: 30,
+        gridHeight: props.view === "week" ? 1056 : 1344,
+        gridStep: 60,
         eventWidth: 96,
         timeAxisFormatOptions: {
           hour: "2-digit",
@@ -135,6 +135,12 @@ export function CalendarEngine(props: CalendarEngineProps) {
   }, [ready, plugins.events, props.events]);
   useEffect(() => {
     if (!ready) return;
+    if (props.view !== "month-grid") {
+      const gridHeight = props.view === "week" ? 1056 : 1344;
+      const options = plugins.controls.getWeekOptions();
+      if (options.gridHeight !== gridHeight || options.gridStep !== 60)
+        plugins.controls.setWeekOptions({ gridHeight, gridStep: 60 });
+    }
     if (plugins.controls.getView() !== props.view)
       plugins.controls.setView(props.view);
     if (plugins.controls.getDate().toString() !== props.date)
@@ -155,7 +161,8 @@ export function CalendarEngine(props: CalendarEngineProps) {
         frame = requestAnimationFrame(positionView);
         return;
       }
-      container.scrollTop = props.view === "month-grid" ? 0 : 8 * 56;
+      container.scrollTop =
+        props.view === "month-grid" ? 0 : 8 * (props.view === "week" ? 44 : 56);
     };
     frame = requestAnimationFrame(positionView);
     return () => cancelAnimationFrame(frame);

@@ -940,14 +940,25 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
   await page.getByTestId("calendar-week").click();
   await expect(page.locator(".sx__week-grid__date")).toHaveCount(7);
   const weekScroll = page.locator(".calendar-engine-week .sx__view-container");
+  await expect(
+    page.locator(".calendar-engine-week .sx__week-grid__hour-text"),
+  ).toHaveCount(24);
+  await expect
+    .poll(() =>
+      page
+        .locator(".calendar-engine-week .sx__time-grid-day")
+        .first()
+        .evaluate((el) => el.getBoundingClientRect().height),
+    )
+    .toBe(24 * 44);
   await expect
     .poll(() => weekScroll.evaluate((el) => el.scrollTop))
-    .toBe(8 * 56);
+    .toBe(8 * 44);
   // A month must start at its first week regardless of the time-grid position.
   await weekScroll.evaluate((el) => {
-    el.scrollTop = 12 * 56;
+    el.scrollTop = 12 * 44;
   });
-  expect(await weekScroll.evaluate((el) => el.scrollTop)).toBe(12 * 56);
+  expect(await weekScroll.evaluate((el) => el.scrollTop)).toBe(12 * 44);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -1001,6 +1012,9 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
   await page.getByTestId("calendar-day").click();
   const surface = page.locator(".sx__time-grid-day");
   await expect(surface).toBeVisible();
+  await expect
+    .poll(() => surface.evaluate((el) => el.getBoundingClientRect().height))
+    .toBe(24 * 56);
   await page.locator(".sx__view-container").evaluate(async (element) => {
     element.scrollIntoView({ block: "center", behavior: "instant" });
     await new Promise(requestAnimationFrame);

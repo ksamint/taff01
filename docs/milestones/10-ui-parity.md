@@ -285,3 +285,12 @@ A fresh comparison of these deliberately approved baselines and the complete
 runner remain required. Desktop card parent IDs now use available width;
 agent status wraps when its translated label cannot fit, and the selected
 Board/List underline uses the source's gold token.
+
+The corrected Shell baselines pass strictly at `e1c2d1a`, with all four
+projects using unchanged comparison settings. Calendar's final density
+refinement follows source line 1973: 56 px day hours, 44 px week hours and
+hourly labels, applied through the installed controls API so native gesture
+geometry remains coherent. The existing 24-hour scheduling range and
+15-minute drag/resize snapping stay. Its existing phone flow now verifies
+both grid scales across view changes; browser execution and fresh Calendar
+captures remain pending.
