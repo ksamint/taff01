@@ -49,6 +49,40 @@ async function useLocale(page: Page, locale: TestLocale) {
   );
 }
 
+test("loading the desktop sidebar keeps Today visible and resizing restores phone navigation", async ({
+  page,
+}) => {
+  await signIn(page);
+  await expect(page.getByTestId("task-card").first()).toBeVisible();
+  await expect(page.locator("aside.sidebar")).toHaveCount(0);
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let held = 0;
+  await page.route("**/_next/static/chunks/*.js", async (route) => {
+    held++;
+    await pending;
+    await route.continue();
+  });
+  try {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await expect.poll(() => held).toBeGreaterThan(0);
+    await expect(page.getByTestId("today-heading")).toBeVisible();
+    await expect(page.getByTestId("task-card").first()).toBeVisible();
+    await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
+    release();
+    await expect(page.locator("aside.sidebar")).toBeVisible();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(page.locator("aside.sidebar")).toHaveCount(0);
+    await expect(page.locator("nav.tabbar")).toBeVisible();
+    await expect(page.getByTestId("task-card").first()).toBeVisible();
+  } finally {
+    release();
+    await page.unrouteAll({ behavior: "wait" });
+  }
+});
+
 test("sign in, create a task and assign it to an agent", async ({
   page,
 }, info) => {

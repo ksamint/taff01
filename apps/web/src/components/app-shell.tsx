@@ -71,8 +71,9 @@ const NotificationAlerts = dynamic(
     import("./notification-alerts").then((module) => module.NotificationAlerts),
   { ssr: false },
 );
-const Sidebar = dynamic(() =>
-  import("./sidebar").then((module) => module.Sidebar),
+const Sidebar = dynamic(
+  () => import("./sidebar").then((module) => module.Sidebar),
+  { loading: () => null },
 );
 
 type Workspace = Me["workspaces"][number];
@@ -167,6 +168,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [overlay, setOverlay] = useState<"search" | "quick" | null>(null);
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setDesktop(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   useEffect(() => {
     const open = (event: KeyboardEvent) => {
       if (currentSession(client)?.confirmed === false) return;
@@ -411,7 +420,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             signOutPending: busy,
           }}
         >
-          {confirmed && <Sidebar />}
+          {confirmed && desktop && <Sidebar />}
           <main className="content" inert={!confirmed}>
             {sessionError && (
               <p className="alert" role="alert">
