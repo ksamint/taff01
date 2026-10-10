@@ -528,3 +528,24 @@ canonical name presenter (`d595c78`), preserving edited names and option IDs.
 Local lint (265 files) and all six type checks pass. There are 62 accepted
 native captures; Calendar, Team, MCP and Organizations (24 captures) await
 fresh production inspection. Full browser and performance gates remain pending.
+
+## calendar visual checkpoint — production `a93ca59`
+
+Source 115–222 supplies the compact month navigation, segmented day/week/month controls, week strip, unscheduled chips and time grids. Existing ScheduleX gestures, recurring events, keyboard scheduling and resize handlers remain bound to real data. Day uses 56 px and week 44 px hourly axes, with the existing 08:00 initial scroll and month top reset. Dashed agent work restores the exact 135-degree 6 px source hatch in day view, and month today uses inverse tokens. Five actual unscheduled tasks and four unread items, real durations/run states, 44 px controls/short events, 12 px text floor, additional scheduling controls behind the hint, unscheduled tray in all modes and a wrapped year-bearing phone header remain explicit behavior/data/accessibility differences. Native SDK event chips use accessible height, increasing populated month rows; no visual-only times or task counts are fabricated. Desktop is an adaptive extension, without a desktop Calendar prototype.
+
+All 12 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/calendar/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / calendar | ![Prototype](../ui/reference/phone-en-calendar.png) | ![App](../ui/screenshots/ui-parity/calendar/phone-en-calendar-app.png) |
+| phone-en / calendar-week | ![Prototype](../ui/reference/extra/phone-en-calendar-week.png) | ![App](../ui/screenshots/ui-parity/calendar/phone-en-calendar-week-app.png) |
+| phone-en / calendar-month | ![Prototype](../ui/reference/extra/phone-en-calendar-month.png) | ![App](../ui/screenshots/ui-parity/calendar/phone-en-calendar-month-app.png) |
+| phone-zh-HK / calendar | ![Prototype](../ui/reference/phone-zh-calendar.png) | ![App](../ui/screenshots/ui-parity/calendar/phone-zh-HK-calendar-app.png) |
+| phone-zh-HK / calendar-week | ![Prototype](../ui/reference/extra/phone-zh-calendar-week.png) | ![App](../ui/screenshots/ui-parity/calendar/phone-zh-HK-calendar-week-app.png) |
+| phone-zh-HK / calendar-month | ![Prototype](../ui/reference/extra/phone-zh-calendar-month.png) | ![App](../ui/screenshots/ui-parity/calendar/phone-zh-HK-calendar-month-app.png) |
+| desktop-en / calendar | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-en-calendar-app.png) |
+| desktop-en / calendar-week | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-en-calendar-week-app.png) |
+| desktop-en / calendar-month | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-en-calendar-month-app.png) |
+| desktop-zh-HK / calendar | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-app.png) |
+| desktop-zh-HK / calendar-week | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-week-app.png) |
+| desktop-zh-HK / calendar-month | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-month-app.png) |

@@ -1,0 +1,114 @@
+{
+  "appCaptureCommit": "a93ca59d549b2c8575bb01ffb1fa6d77b48c0934",
+  "source": "Source 115\u2013222 supplies the compact month navigation, segmented day/week/month controls, week strip, unscheduled chips and time grids. Existing ScheduleX gestures, recurring events, keyboard scheduling and resize handlers remain bound to real data. Day uses 56 px and week 44 px hourly axes, with the existing 08:00 initial scroll and month top reset. Dashed agent work restores the exact 135-degree 6 px source hatch in day view, and month today uses inverse tokens. Five actual unscheduled tasks and four unread items, real durations/run states, 44 px controls/short events, 12 px text floor, additional scheduling controls behind the hint, unscheduled tray in all modes and a wrapped year-bearing phone header remain explicit behavior/data/accessibility differences. Native SDK event chips use accessible height, increasing populated month rows; no visual-only times or task counts are fabricated. Desktop is an adaptive extension, without a desktop Calendar prototype.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "calendar",
+      "app": "docs/ui/screenshots/ui-parity/calendar/phone-en-calendar-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar.png",
+      "sha256": "c09e7f2deaf7433616eb8470d9b2d4b7726e2c4a75502037193e68b5dd31c18d",
+      "reference": "docs/ui/reference/phone-en-calendar.png",
+      "referenceSha256": "c7d7e75dae87fff1c74e6c381c104a7b3367afa986d8e1d95335f38f2e05be51"
+    },
+    {
+      "project": "phone-en",
+      "variant": "calendar-week",
+      "app": "docs/ui/screenshots/ui-parity/calendar/phone-en-calendar-week-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar-week.png",
+      "sha256": "ac7f7aa0d6b24ca80ec075e91e589d07d1702b0f0a765e6a9737061df899d020",
+      "reference": "docs/ui/reference/extra/phone-en-calendar-week.png",
+      "referenceSha256": "a17b33899c7de3714d734f8b108f98a24c064bf8483108374e31bfefaa9acea3"
+    },
+    {
+      "project": "phone-en",
+      "variant": "calendar-month",
+      "app": "docs/ui/screenshots/ui-parity/calendar/phone-en-calendar-month-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar-month.png",
+      "sha256": "f277dd579430653f27f07b40ef885cf06e0f95db184102c2097507b1115531bc",
+      "reference": "docs/ui/reference/extra/phone-en-calendar-month.png",
+      "referenceSha256": "040672ce7dc847750def36cf1836fd2b3c5bf9ad157fff610653d7daebf53df8"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "calendar",
+      "app": "docs/ui/screenshots/ui-parity/calendar/phone-zh-HK-calendar-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar.png",
+      "sha256": "db9b5e35c0b9822e101137306ff4322f07de8ed520e71f0fa1e5fc5e986fac29",
+      "reference": "docs/ui/reference/phone-zh-calendar.png",
+      "referenceSha256": "580c159ccb29e5730ed7d39d4c3ce7ff76ef7b6bdad017961f1138600e249358"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "calendar-week",
+      "app": "docs/ui/screenshots/ui-parity/calendar/phone-zh-HK-calendar-week-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar-week.png",
+      "sha256": "40fb0124a935647e4c76ee7781f44e117b497cf721f7a0260349ccd133f06d37",
+      "reference": "docs/ui/reference/extra/phone-zh-calendar-week.png",
+      "referenceSha256": "c7c23c42190b7cd2eafeaa59cf9b8a7cda14488c214c759c955682bc3c6977c0"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "calendar-month",
+      "app": "docs/ui/screenshots/ui-parity/calendar/phone-zh-HK-calendar-month-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar-month.png",
+      "sha256": "f6abe5b9fa47287d46d3e5d001aef18679fe99e1ee6df4afc8ee452df7f53a6d",
+      "reference": "docs/ui/reference/extra/phone-zh-calendar-month.png",
+      "referenceSha256": "b01130dc093dadce3e37c5c19b234b9e0968d8cbd26d47729b50e3d4f0218592"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "calendar",
+      "app": "docs/ui/screenshots/ui-parity/calendar/desktop-en-calendar-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar.png",
+      "sha256": "980073a309fb26b0c17fca216bf8fccf2ae900c91bcb29dd4ea0522c36e27cc2",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-en",
+      "variant": "calendar-week",
+      "app": "docs/ui/screenshots/ui-parity/calendar/desktop-en-calendar-week-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar-week.png",
+      "sha256": "f1141f2817f65767ba64e265866890fac99c02f87c2d0592342e5c8334503486",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-en",
+      "variant": "calendar-month",
+      "app": "docs/ui/screenshots/ui-parity/calendar/desktop-en-calendar-month-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar-month.png",
+      "sha256": "f6a9a243fdbdadc2395dcd0ea13df02bf3d98ec540da22b8e6f3d472e5eea594",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "calendar",
+      "app": "docs/ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar.png",
+      "sha256": "5eeb8ea783b15f96235a0f6e9fde4c32793b6c0ee540e31a355144508c9b9a3a",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "calendar-week",
+      "app": "docs/ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-week-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar-week.png",
+      "sha256": "ecf4b6015575fcacf0274873f8fc286d0bfc05209f0484ec00ceca14d993c4c0",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "calendar-month",
+      "app": "docs/ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-month-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar-month.png",
+      "sha256": "ec731b04321e6e731cbf4fd37d5c622a421b252d3a76ae6d6d33c597283d42ac",
+      "reference": null,
+      "referenceSha256": null
+    }
+  ]
+}
