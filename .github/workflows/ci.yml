@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main, claude/m9-hardening, codex/ui-parity]
+    branches: [main, claude/m9-hardening, codex/ui-parity, codex/prototype-release]
   pull_request:
 concurrency:
   group: ci-${{ github.ref }}
