@@ -1,4 +1,5 @@
 "use client";
+import "../styles/task-detail.css";
 
 import {
   type AssignTask,

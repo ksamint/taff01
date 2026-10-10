@@ -1,4 +1,5 @@
 "use client";
+import "../styles/me.css";
 
 import type { Locale } from "@taff/schemas/base";
 import {

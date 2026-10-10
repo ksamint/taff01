@@ -1,4 +1,5 @@
 "use client";
+import "../styles/search-parity.css";
 import {
   type Locale,
   type SearchInput,

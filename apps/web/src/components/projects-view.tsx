@@ -1,4 +1,5 @@
 "use client";
+import "../styles/projects.css";
 import {
   type Project,
   type ProjectInput,
@@ -126,7 +127,9 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     ? projects.data?.find((item) => item.id === projectId)
     : searchParams.get("all") === "1"
       ? undefined
-      : projects.data?.find((item) => !item.archived);
+      : projects.data
+          ?.filter((item) => !item.archived)
+          .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
   const selectedProjectId = selected?.id ?? projectId;
   const locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
   const projectName = selected ? selected.name : t("projects.allProjects");

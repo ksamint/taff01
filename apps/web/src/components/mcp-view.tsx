@@ -1,4 +1,5 @@
 "use client";
+import "../styles/mcp-parity.css";
 
 import {
   type AgentToken,

@@ -45,8 +45,8 @@ import { normalizeCalendarSchedule } from "./calendar-recurrence";
 import { type Actor, can } from "./permissions";
 
 type Person = typeof user.$inferSelect;
-const sample =
-  "原型示例資料；未執行外部工具、測試、部署或真實訪談。 / Prototype sample data; no external tools, tests, deployments, or real interviews were executed.";
+// Prototype sample data; no external tools, tests, deployments or interviews ran.
+const sample = "原型示例資料；未執行外部工具、測試、部署或真實訪談。";
 const stepTitles = [
   "讀取任務與上下文",
   "整理資料與方案",

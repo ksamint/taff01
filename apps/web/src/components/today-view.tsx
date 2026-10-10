@@ -37,6 +37,8 @@ import { Button } from "./ui/button";
 import { StatusGlyph } from "./ui/status-glyph";
 
 const TODAY_PAGE = 20;
+/** Unscheduled agent work shown on Today before it points to Projects. */
+const TODAY_RUNS = 6;
 
 // Prototype Today, lines 47–114: schedules and deadlines are distinct reads.
 export function TodayView({ initialNow }: { initialNow: number }) {
@@ -272,7 +274,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
                 </span>
               </li>
               {afterNow.map(scheduleBlock)}
-              {unscheduledRuns.map((run) => {
+              {unscheduledRuns.slice(0, TODAY_RUNS).map((run) => {
                 const task = tasks.data?.find((item) => item.id === run.taskId);
                 return (
                   <li className="today-timeline-row" key={run.id}>
@@ -302,6 +304,15 @@ export function TodayView({ initialNow }: { initialNow: number }) {
                 );
               })}
             </ol>
+            {unscheduledRuns.length > TODAY_RUNS && (
+              <p className="today-message quiet">
+                <Link href="/projects">
+                  {t("moreAgentWork", {
+                    count: numbers.format(unscheduledRuns.length - TODAY_RUNS),
+                  })}
+                </Link>
+              </p>
+            )}
             {occurrences.length === 0 &&
               unscheduledRuns.length === 0 &&
               !calendar.isError &&

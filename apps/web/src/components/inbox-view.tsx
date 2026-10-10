@@ -1,4 +1,5 @@
 "use client";
+import "../styles/inbox.css";
 
 import {
   type Inbox,
@@ -332,15 +333,28 @@ export function InboxView() {
                             ? "notifications.title"
                             : "unknownMember",
                         );
-                    const title = task ? task.title : item.title;
+                    const digestDay =
+                      item.digestId && /^\d{4}-\d{2}-\d{2}$/.test(item.title)
+                        ? new Intl.DateTimeFormat(locale, {
+                            dateStyle: "long",
+                            timeZone: "UTC",
+                          }).format(new Date(`${item.title}T00:00:00Z`))
+                        : null;
+                    const title = task
+                      ? task.title
+                      : digestDay
+                        ? t("notifications.digestDay", { date: digestDay })
+                        : item.title;
                     const run = runs.data?.find(
                       (entry) => entry.id === item.runId,
                     );
                     const excerpt =
                       item.kind === "blocker"
                         ? item.title
-                        : run?.summary ||
-                          (task ? task.description : item.title);
+                        : digestDay
+                          ? t("notifications.digestExcerpt")
+                          : run?.summary ||
+                            (task ? task.description : item.title);
                     const reference = task
                       ? taskReference(workspace.key, task.number)
                       : null;

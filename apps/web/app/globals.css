@@ -3,16 +3,9 @@
 /* House defaults stay below each source-port screen's CSS. */
 @import "../src/styles/base.css" layer(taff-base);
 @import "../src/styles/today.css";
-@import "../src/styles/me.css";
-@import "../src/styles/projects.css";
-@import "../src/styles/inbox.css";
-@import "../src/styles/task-detail.css";
-@import "../src/styles/run-panel-parity.css";
-@import "../src/styles/team-parity.css";
-@import "../src/styles/search-parity.css";
-@import "../src/styles/agent-profile-parity.css";
-@import "../src/styles/mcp-parity.css";
-@import "../src/styles/calendar-parity.css";
+/* Route stylesheets are imported by the component that owns their classes, so
+   a route ships only the CSS it renders (projects.css from projects-view.tsx,
+   calendar-parity.css from calendar-scene.tsx, and so on). */
 
 @theme inline {
   --color-bg: var(--bg);

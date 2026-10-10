@@ -52,7 +52,7 @@ it("supplies every translation key in each independently loaded locale", () => {
 it("preloads missing locale resources and workspace reads without duplicating server resources", () => {
   const workspace = "00000000-0000-4000-8000-000000000001";
   for (const loadedLocale of ["en", "zh-CN"] as const) {
-    const links: { href: string }[] = [];
+    const links: { href: string; fetchPriority: string }[] = [];
     runInNewContext(preloadBootScript("test", loadedLocale), {
       localStorage: {
         getItem: (key: string) =>
@@ -60,13 +60,19 @@ it("preloads missing locale resources and workspace reads without duplicating se
       },
       document: {
         createElement: () => ({}),
-        head: { appendChild: (link: { href: string }) => links.push(link) },
+        head: {
+          appendChild: (link: { href: string; fetchPriority: string }) =>
+            links.push(link),
+        },
       },
     });
-    expect(links.map((link) => link.href)).toEqual([
-      ...(loadedLocale === "en" ? ["/locales/zh-CN?v=test"] : []),
-      `/api/tasks?workspaceId=${workspace}`,
-      `/api/members?workspaceId=${workspace}`,
+    // The locale file gates the first paint; workspace reads must not take
+    // bandwidth from the scripts, so they are low priority.
+    expect(links.map((link) => [link.href, link.fetchPriority])).toEqual([
+      ...(loadedLocale === "en" ? [["/locales/zh-CN?v=test", "high"]] : []),
+      [`/api/tasks?workspaceId=${workspace}`, "low"],
+      [`/api/members?workspaceId=${workspace}`, "low"],
+      [`/api/runs?workspaceId=${workspace}`, "low"],
     ]);
   }
 });

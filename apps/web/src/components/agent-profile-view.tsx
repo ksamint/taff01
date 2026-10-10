@@ -1,4 +1,5 @@
 "use client";
+import "../styles/agent-profile-parity.css";
 
 import {
   type AgentPermissionInput,

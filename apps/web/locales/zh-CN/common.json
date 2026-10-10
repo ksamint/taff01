@@ -562,7 +562,9 @@
     "enableDevice": "在此设备开启",
     "disableDevice": "在此设备关闭",
     "denied": "浏览器设置已阻止设备提醒。",
-    "unavailable": "此浏览器不支持设备提醒，应用内提醒仍可使用。"
+    "unavailable": "此浏览器不支持设备提醒，应用内提醒仍可使用。",
+    "digestDay": "{{date}} 每日摘要",
+    "digestExcerpt": "今天到期的任务、待审核项目与昨日以来的智能体工作。"
   },
   "digest": {
     "summary": "{{reviews}} 项审核 · {{due}} 项到期 · {{agents}} 个智能体运行",
@@ -600,5 +602,6 @@
   },
   "todayDue": "今天到期",
   "todayScheduleEmpty": "今天没有日程。",
-  "todayNow": "现在"
+  "todayNow": "现在",
+  "moreAgentWork": "还有 {{count}} 项，见项目"
 }

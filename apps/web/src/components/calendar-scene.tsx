@@ -1,4 +1,5 @@
 "use client";
+import "../styles/calendar-parity.css";
 import "temporal-polyfill/global";
 import type { CalendarEvent } from "@schedule-x/calendar";
 import {

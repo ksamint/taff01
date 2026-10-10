@@ -562,7 +562,9 @@
     "enableDevice": "Enable on this device",
     "disableDevice": "Turn off on this device",
     "denied": "Device alerts are blocked in browser settings.",
-    "unavailable": "Device alerts are unavailable here. In-app alerts still work."
+    "unavailable": "Device alerts are unavailable here. In-app alerts still work.",
+    "digestDay": "Daily digest for {{date}}",
+    "digestExcerpt": "Tasks due today, reviews waiting and agent work since yesterday."
   },
   "digest": {
     "summary": "{{reviews}} reviews · {{due}} due · {{agents}} agent runs",
@@ -600,5 +602,6 @@
   },
   "todayDue": "Due today",
   "todayScheduleEmpty": "No appointments today.",
-  "todayNow": "Now"
+  "todayNow": "Now",
+  "moreAgentWork": "{{count}} more in Projects"
 }

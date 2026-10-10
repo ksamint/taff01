@@ -562,7 +562,9 @@
     "enableDevice": "在此裝置啟用",
     "disableDevice": "在此裝置關閉",
     "denied": "瀏覽器設定已封鎖裝置提醒。",
-    "unavailable": "此瀏覽器不支援裝置提醒，應用程式內提醒仍可使用。"
+    "unavailable": "此瀏覽器不支援裝置提醒，應用程式內提醒仍可使用。",
+    "digestDay": "{{date}} 每日摘要",
+    "digestExcerpt": "今天到期的任務、待審核項目與昨日以來的智能體工作。"
   },
   "digest": {
     "summary": "{{reviews}} 項審核 · {{due}} 項到期 · {{agents}} 個代理執行",
@@ -600,5 +602,6 @@
   },
   "todayDue": "今天到期",
   "todayScheduleEmpty": "今天沒有日程。",
-  "todayNow": "現在"
+  "todayNow": "現在",
+  "moreAgentWork": "還有 {{count}} 項，見項目"
 }

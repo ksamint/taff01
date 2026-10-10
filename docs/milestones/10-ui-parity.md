@@ -698,3 +698,52 @@ exited 1 before the 120 behavioral cases and MCP smoke. This is a failed
 candidate, not release acceptance; no push or UI deployment is claimed.
 The [space inventory and deployment handoff](../reviews/2026-10-10-server-space-and-deployment-readiness.md)
 lists retained material, removed targets and the remaining deployment checks.
+
+## Review fixes (2026-10-10, after PR #2 review)
+
+The review in `docs/ui/review-2026-10-10/pr-2-review.md` found the port
+right and the branch not mergeable. Fixed on the branch:
+
+- **Real task references.** `workspaces.key` and `tasks.number` (migration
+  0021 backfills existing rows: key from the name, numbers in creation
+  order) replace the fixture-only `prototypeTaskReference`. Core assigns the
+  next number under the workspace row lock; `taskReference(key, number)`
+  renders `NW-141` for any workspace, and search hits carry the workspace
+  key. The prototype seed sets `NW`, `QS` and `ME` and the prototype numbers.
+- **No fixture code in the client.** `presentPrototypeField`, the fixture
+  team label and the agent-chip hack are gone from `apps/web`; stored names
+  and titles render as stored. The seed's review disclaimer is zh-HK only.
+- **Browser suite.** The seven failing cases pass: a screen heading for
+  assistive tech beside the calendar's month label; the calendar editor
+  closes when its task link opens the task sheet; schedule fields show
+  minutes unless an instant carries seconds; board card controls keep their
+  position on hover, sit above the footer chips and columns stretch to the
+  board height so a drag reaches its handle and every column is a drop
+  target; the invitation list element is always present; the scroll, cache
+  and held-chunk tests assert what the layout guarantees.
+- **Smaller items.** Today shows six unscheduled runs and links to Projects
+  for the rest; digest Inbox rows carry a dated title and a real excerpt;
+  desktop Projects opens the most recently updated project.
+- **Critical CSS.** Route stylesheets are imported by the component that owns
+  their classes, so Today ships 13 KB of CSS gzipped instead of 21 KB; the
+  session request is a real `<link rel="preload">` (the `preload()` call
+  emitted nothing in the production HTML); the CJK face is no longer
+  preloaded; the head script preloads tasks, members and runs at low
+  priority.
+
+Still open:
+
+- **LCP.** On this sandbox the production build measures about 2.3–2.5 s in
+  en and 2.5–2.7 s in zh-HK with ±150 ms run-to-run noise, no better than
+  before the CSS changes. The trace shows why: after the scripts arrive
+  (~1.7 s on simulated slow 4G) the shell needs about 650 ms of main-thread
+  work before the first list paints, and the layout's client chunk
+  (`app/layout-*.js`) is not among the initial scripts, so hydration waits
+  one more round trip for it, then for the cache-persistence chunk. Getting
+  under 2 s needs the shell's hydration cascade shortened (one render pass
+  from preloaded data, confirmation not gating the first paint) and that
+  chunk in the initial script list.
+- **Visual baselines.** The English captures that showed fixture
+  translations, the Today run cap, the digest row and the board columns
+  changed; regenerate the committed baselines with the parity runner on the
+  Linux Chromium that CI uses (this sandbox cannot download that build).

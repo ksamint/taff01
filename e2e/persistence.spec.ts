@@ -131,9 +131,7 @@ test("IndexedDB restores authorized lists board and calendar before real reconci
     .poll(async () =>
       [
         ...new Set(
-          (await readCache(page))?.queries.map((query) =>
-            String(query.key[0]),
-          ),
+          (await readCache(page))?.queries.map((query) => String(query.key[0])),
         ),
       ]
         .sort()
