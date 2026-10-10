@@ -873,3 +873,16 @@ regression: Save stayed enabled after a failed reconciliation. The repair
 requires a successful member query for calendar editor writes, preserving
 cached display data, form state and Retry. The failing case is retained;
 complete validation must be repeated at the repaired commit before push.
+
+The next candidate (`3766e82`) again passed the seven checks preceding
+Playwright. Its durable fallback test expected the old IndexedDB title after
+blocking browser reads, but the new server bootstrap correctly supplied the
+current title. The fixture now omits cookies only from native document
+requests, proves the HTML contains no protected Today/task data, and verifies
+the real browser account and confirmed controls before asserting restoration.
+Service workers are blocked only for that fallback case so navigation routing
+can intercept the document; the separate PWA test is unchanged. All original
+cache, read-only calendar and later reconciliation assertions remain. All
+nine focused persistence/security/PWA cases passed across EN/CN/HK on the
+production build. Exact-SHA full validation and both required CI runs remain
+pending; production is unchanged.

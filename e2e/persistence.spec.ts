@@ -3,6 +3,7 @@ import type { ReadSnapshot } from "../apps/web/src/lib/cache-persistence";
 import {
   type CalendarViewData,
   calendarWallToInstant,
+  meSchema,
   projectSchema,
   taskSchema,
 } from "../packages/schemas/src/index";
@@ -66,163 +67,206 @@ async function writeCache(page: Page, value: ReadSnapshot) {
   );
 }
 
-test("IndexedDB restores authorized lists board and calendar before real reconciliation in the saved locale", async ({
-  page,
-}, info) => {
-  const locale = info.project.name as TestLocale;
-  const me = await freshAccount(page, locale);
-  const workspace = me.workspaces[0];
-  const date = new Intl.DateTimeFormat("en-CA", {
-    timeZone: me.user.tz,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-  const project = projectSchema.parse(
-    await (
-      await page.request.post(`/api/projects?workspaceId=${workspace.id}`, {
-        data: { name: `Saved project ${locale}` },
-      })
-    ).json(),
-  );
-  const task = taskSchema.parse(
-    await (
-      await page.request.post("/api/tasks", {
-        data: {
-          workspaceId: workspace.id,
-          ownerId: workspace.memberId,
-          workerId: null,
-          projectId: project.id,
-          title: `Cached task ${locale}`,
-          calendar: {
-            startAt: calendarWallToInstant(`${date}T10:00`, me.user.tz),
-            endAt: calendarWallToInstant(`${date}T11:00`, me.user.tz),
-            timeZone: me.user.tz,
-            rrule: null,
+test.describe("durable fallback without server reads", () => {
+  // A controlling worker owns navigation fetches, preventing the document
+  // route below from isolating the empty server bootstrap. PWA has its own suite.
+  test.use({ serviceWorkers: "block" });
+
+  test("IndexedDB restores authorized lists board and calendar before real reconciliation in the saved locale", async ({
+    page,
+  }, info) => {
+    const locale = info.project.name as TestLocale;
+    const me = await freshAccount(page, locale);
+    const workspace = me.workspaces[0];
+    const date = new Intl.DateTimeFormat("en-CA", {
+      timeZone: me.user.tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const project = projectSchema.parse(
+      await (
+        await page.request.post(`/api/projects?workspaceId=${workspace.id}`, {
+          data: { name: `Saved project ${locale}` },
+        })
+      ).json(),
+    );
+    const task = taskSchema.parse(
+      await (
+        await page.request.post("/api/tasks", {
+          data: {
+            workspaceId: workspace.id,
+            ownerId: workspace.memberId,
+            workerId: null,
+            projectId: project.id,
+            title: `Cached task ${locale}`,
+            calendar: {
+              startAt: calendarWallToInstant(`${date}T10:00`, me.user.tz),
+              endAt: calendarWallToInstant(`${date}T11:00`, me.user.tz),
+              timeZone: me.user.tz,
+              rrule: null,
+            },
           },
-        },
-      })
-    ).json(),
-  );
-  await expect(
-    page.getByRole("link", { name: task.title, exact: true }),
-  ).toBeVisible();
-  await expect
-    .poll(async () =>
-      (await readCache(page))?.queries.some(
-        (query) => query.key[0] === "tasks",
-      ),
-    )
-    .toBe(true);
-  await page.goto(`/projects/${project.id}`);
-  await expect(page.getByRole("heading", { name: project.name })).toBeVisible();
-  await expect
-    .poll(async () =>
-      (await readCache(page))?.queries.some(
-        (query) => query.key[0] === "projects",
-      ),
-    )
-    .toBe(true);
-  await page.goto("/calendar");
-  await expect(
-    page.locator(".sx__event").filter({ hasText: task.title }),
-  ).toBeVisible();
-  // The calendar persists one read per visible range (day, strip, month).
-  await expect
-    .poll(async () =>
-      [
-        ...new Set(
-          (await readCache(page))?.queries.map((query) => String(query.key[0])),
+        })
+      ).json(),
+    );
+    await expect(
+      page.getByRole("link", { name: task.title, exact: true }),
+    ).toBeVisible();
+    await expect
+      .poll(async () =>
+        (await readCache(page))?.queries.some(
+          (query) => query.key[0] === "tasks",
         ),
-      ]
-        .sort()
-        .join(","),
-    )
-    .toBe("calendar,projects,tasks");
-  // The gate below also blocks the snapshot writer, so the day read the
-  // calendar restores must already hold the task durably.
-  const nextDate = new Date(`${date}T00:00:00Z`);
-  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
-  const dayKey = JSON.stringify([
-    "calendar",
-    workspace.id,
-    calendarWallToInstant(`${date}T00:00`, me.user.tz),
-    calendarWallToInstant(
-      `${nextDate.toISOString().slice(0, 10)}T00:00`,
-      me.user.tz,
-    ),
-  ]);
-  await expect
-    .poll(async () =>
-      (await readCache(page))?.queries.some(
-        (query) =>
-          JSON.stringify(query.key) === dayKey &&
-          (query.data as CalendarViewData).occurrences.some(
-            (item) => item.task.id === task.id,
+      )
+      .toBe(true);
+    await page.goto(`/projects/${project.id}`);
+    await expect(
+      page.getByRole("heading", { name: project.name }),
+    ).toBeVisible();
+    await expect
+      .poll(async () =>
+        (await readCache(page))?.queries.some(
+          (query) => query.key[0] === "projects",
+        ),
+      )
+      .toBe(true);
+    await page.goto("/calendar");
+    await expect(
+      page.locator(".sx__event").filter({ hasText: task.title }),
+    ).toBeVisible();
+    // The calendar persists one read per visible range (day, strip, month).
+    await expect
+      .poll(async () =>
+        [
+          ...new Set(
+            (await readCache(page))?.queries.map((query) =>
+              String(query.key[0]),
+            ),
           ),
+        ]
+          .sort()
+          .join(","),
+      )
+      .toBe("calendar,projects,tasks");
+    // The gate below also blocks the snapshot writer, so the day read the
+    // calendar restores must already hold the task durably.
+    const nextDate = new Date(`${date}T00:00:00Z`);
+    nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+    const dayKey = JSON.stringify([
+      "calendar",
+      workspace.id,
+      calendarWallToInstant(`${date}T00:00`, me.user.tz),
+      calendarWallToInstant(
+        `${nextDate.toISOString().slice(0, 10)}T00:00`,
+        me.user.tz,
       ),
-    )
-    .toBe(true);
-  const before = await readCache(page);
-  expect(before?.userId).toBe(me.user.id);
-  expect(
-    before?.queries.some(
-      (query) =>
-        !["tasks", "projects", "calendar"].includes(String(query.key[0])),
-    ),
-  ).toBe(false);
-  let release!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  for (const pattern of ["**/api/tasks?**", "**/api/calendar?**"])
-    await page.route(pattern, async (route) => {
-      await gate;
-      await route.continue();
+    ]);
+    await expect
+      .poll(async () =>
+        (await readCache(page))?.queries.some(
+          (query) =>
+            JSON.stringify(query.key) === dayKey &&
+            (query.data as CalendarViewData).occurrences.some(
+              (item) => item.task.id === task.id,
+            ),
+        ),
+      )
+      .toBe(true);
+    const before = await readCache(page);
+    expect(before?.userId).toBe(me.user.id);
+    expect(
+      before?.queries.some(
+        (query) =>
+          !["tasks", "projects", "calendar"].includes(String(query.key[0])),
+      ),
+    ).toBe(false);
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
     });
-  const renamed = `${task.title} updated`;
-  const changed = await page.request.patch(`/api/tasks/${task.id}`, {
-    data: { version: task.version, title: renamed },
+    for (const pattern of ["**/api/tasks?**", "**/api/calendar?**"])
+      await page.route(pattern, async (route) => {
+        await gate;
+        await route.continue();
+      });
+    const renamed = `${task.title} updated`;
+    const changed = await page.request.patch(`/api/tasks/${task.id}`, {
+      data: { version: task.version, title: renamed },
+    });
+    expect(changed.status()).toBe(200);
+    // Keep the real browser session, but omit cookies from the native document
+    // fetch so this case exercises IDB fallback rather than current server reads.
+    // Fresh server data wins over older IDB data in the separate bootstrap tests.
+    await page.route("**/*", async (route) => {
+      const request = route.request();
+      if (
+        !request.isNavigationRequest() ||
+        request.resourceType() !== "document"
+      ) {
+        await route.fallback();
+        return;
+      }
+      const response = await route.fetch({
+        headers: { ...request.headers(), cookie: "" },
+      });
+      expect(response.status()).toBe(200);
+      const html = await response.text();
+      expect(html).toContain('<main class="loading"');
+      expect(html).not.toContain('data-testid="today-heading"');
+      expect(html).not.toContain(task.title);
+      expect(html).not.toContain(renamed);
+      await route.fulfill({ response });
+    });
+    await page.goto("/");
+    await expect(page.getByTestId("open-quick")).toBeEnabled();
+    await page.reload();
+    await expect(page.getByTestId("open-quick")).toBeEnabled();
+    const confirmed = await page.request.get("/api/me");
+    expect(confirmed.status()).toBe(200);
+    expect(meSchema.parse(await confirmed.json()).user.id).toBe(me.user.id);
+    await expect(page.getByTestId("today-heading")).toHaveText(
+      messages[locale].today,
+    );
+    await expect(
+      page.getByRole("link", { name: task.title, exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: renamed, exact: true }),
+    ).toHaveCount(0);
+    await page.goto(`/projects/${project.id}`);
+    await expect(
+      page.getByRole("heading", { name: project.name }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: task.title, exact: true }),
+    ).toBeVisible();
+    await page.goto("/calendar");
+    await openCalendarTools(page);
+    await page.getByTestId("calendar-list").click();
+    const item = page
+      .locator(".calendar-list-item")
+      .filter({ hasText: task.title });
+    await expect(item).toBeVisible();
+    await item.getByRole("button").first().click();
+    await expect(page.getByTestId("schedule-save")).toBeDisabled();
+    await page
+      .getByRole("button", {
+        name: messages[locale].planning.close,
+        exact: true,
+      })
+      .click();
+    release();
+    await expect(
+      page.getByRole("link", { name: renamed, exact: true }),
+    ).toBeVisible();
+    await expect
+      .poll(async () => JSON.stringify((await readCache(page))?.queries))
+      .toContain(renamed);
+    await expect(page.locator("body")).not.toContainText(
+      /(?:notifications|digest|pwa)\.[a-zA-Z]+/,
+    );
   });
-  expect(changed.status()).toBe(200);
-  await page.goto("/");
-  await page.reload();
-  await expect(page.getByTestId("today-heading")).toHaveText(
-    messages[locale].today,
-  );
-  await expect(
-    page.getByRole("link", { name: task.title, exact: true }),
-  ).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: renamed, exact: true }),
-  ).toHaveCount(0);
-  await page.goto(`/projects/${project.id}`);
-  await expect(page.getByRole("heading", { name: project.name })).toBeVisible();
-  await expect(
-    page.getByRole("link", { name: task.title, exact: true }),
-  ).toBeVisible();
-  await page.goto("/calendar");
-  await openCalendarTools(page);
-  await page.getByTestId("calendar-list").click();
-  const item = page
-    .locator(".calendar-list-item")
-    .filter({ hasText: task.title });
-  await expect(item).toBeVisible();
-  await item.getByRole("button").first().click();
-  await expect(page.getByTestId("schedule-save")).toBeDisabled();
-  await page
-    .getByRole("button", { name: messages[locale].planning.close, exact: true })
-    .click();
-  release();
-  await expect(
-    page.getByRole("link", { name: renamed, exact: true }),
-  ).toBeVisible();
-  await expect
-    .poll(async () => JSON.stringify((await readCache(page))?.queries))
-    .toContain(renamed);
-  await expect(page.locator("body")).not.toContainText(
-    /(?:notifications|digest|pwa)\.[a-zA-Z]+/,
-  );
 });
 
 test("durable cache never records pending rollback data and revocation rejects a previous account snapshot", async ({
