@@ -149,6 +149,30 @@ export function CalendarEngine(props: CalendarEngineProps) {
     return () => cancelAnimationFrame(frame);
   }, [ready, props.view]);
   useEffect(() => {
+    if (!ready || props.view === "month-grid") return;
+    let line: HTMLDivElement | undefined;
+    const refresh = () => {
+      line?.remove();
+      const now = Temporal.Now.zonedDateTimeISO(latest.current.timeZone);
+      const grid = root.current?.querySelector(
+        `[data-time-grid-date="${now.toPlainDate().toString()}"]`,
+      );
+      if (!grid) return;
+      line = document.createElement("div");
+      line.className = "calendar-source-now-line";
+      line.setAttribute("aria-hidden", "true");
+      line.style.top = `${((now.hour * 60 + now.minute) / 1440) * 100}%`;
+      grid.append(line);
+    };
+    const frame = requestAnimationFrame(refresh);
+    const timer = window.setInterval(refresh, 60_000);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+      line?.remove();
+    };
+  }, [ready, props.date, props.view, props.timeZone, props.events]);
+  useEffect(() => {
     const element = root.current;
     if (!element) return;
     let active = false;

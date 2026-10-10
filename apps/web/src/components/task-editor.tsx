@@ -9,12 +9,23 @@ import {
   updateTaskSchema,
 } from "@taff/schemas";
 import {
+  type PrototypeLocale,
+  presentPrototypeField,
+} from "@taff/schemas/prototype-data";
+import {
   useIsMutating,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useCallback, useEffect, useState } from "react";
+import {
+  type FormEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { invalidateM3 } from "../lib/m3-queries";
@@ -33,9 +44,24 @@ import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
+import { SheetDialog } from "./ui/sheet-dialog";
+import { StatusGlyph } from "./ui/status-glyph";
 
-export function TaskEditor({ task }: { task: Task }) {
-  const { me, workspace } = useWorkspace();
+export function TaskEditor({
+  task,
+  workerControl,
+  scheduleControl,
+  runControl,
+}: {
+  task: Task;
+  workerControl: ReactNode;
+  scheduleControl: ReactNode;
+  runControl: ReactNode;
+}) {
+  const { me } = useWorkspace();
+  const authorId = me.workspaces.find(
+    ({ id }) => id === task.workspaceId,
+  )?.memberId;
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const members = useMembers(task.workspaceId);
@@ -63,6 +89,19 @@ export function TaskEditor({ task }: { task: Task }) {
     form: fields(task),
   }));
   const [editing, setEditing] = useState(false);
+  const [picker, setPicker] = useState<
+    | "text"
+    | "owner"
+    | "due"
+    | "priority"
+    | "project"
+    | "labels"
+    | "status"
+    | null
+  >(null);
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const presentName = (id: string, value: string) =>
+    presentPrototypeField(id, "name", value, locale);
   const [invalid, setInvalid] = useState<string | null>(null);
   const [subtaskTitle, setSubtaskTitle] = useState("");
   const [comment, setComment] = useState("");
@@ -137,20 +176,21 @@ export function TaskEditor({ task }: { task: Task }) {
     onMutate: async (body) => {
       const snapshot = await snapshotM3(client);
       const id = `optimistic:${crypto.randomUUID()}`;
-      client.setQueryData<TaskComment[]>(
-        commentsKey(task.id),
-        (current = []) => [
-          ...current,
-          {
-            id,
-            workspaceId: task.workspaceId,
-            taskId: task.id,
-            authorId: workspace.memberId,
-            body,
-            createdAt: new Date().toISOString(),
-          },
-        ],
-      );
+      if (authorId)
+        client.setQueryData<TaskComment[]>(
+          commentsKey(task.id),
+          (current = []) => [
+            ...current,
+            {
+              id,
+              workspaceId: task.workspaceId,
+              taskId: task.id,
+              authorId,
+              body,
+              createdAt: new Date().toISOString(),
+            },
+          ],
+        );
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -200,7 +240,10 @@ export function TaskEditor({ task }: { task: Task }) {
     edit.mutate(
       { id: task.id, body: parsed.data },
       {
-        onSuccess: () => setEditing(false),
+        onSuccess: () => {
+          setEditing(false);
+          setPicker(null);
+        },
       },
     );
   }
@@ -217,138 +260,315 @@ export function TaskEditor({ task }: { task: Task }) {
             t("agentProfile.task")}
         </Link>
       )}
-      <form className="task-field-editor" onSubmit={save}>
-        <fieldset disabled={!writable || busy}>
-          <div className="field">
-            <Label htmlFor="edit-title">{t("taskTitle")}</Label>
-            <Input
-              id="edit-title"
-              data-testid="edit-title"
-              value={form.title}
-              maxLength={200}
-              disabled={!access.data?.canEdit}
-              onChange={(event) => change("title", event.target.value)}
-            />
-          </div>
-          <div className="field">
-            <Label htmlFor="edit-description">
-              {t("planning.description")}
-            </Label>
-            <textarea
-              id="edit-description"
-              data-testid="edit-description"
-              className="input"
-              value={form.description}
-              maxLength={20000}
-              rows={4}
-              disabled={!access.data?.canEdit}
-              onChange={(event) => change("description", event.target.value)}
-            />
-          </div>
-          <div className="field">
-            <Label htmlFor="edit-owner">{t("owner")}</Label>
-            <select
-              id="edit-owner"
-              data-testid="edit-owner"
-              value={form.ownerId}
-              disabled={!access.data?.canEdit}
-              onChange={(event) => change("ownerId", event.target.value)}
-            >
+      <div className="task-source-heading">
+        <span className="task-project-label">
+          {projects.data?.find((item) => item.id === task.projectId)?.name
+            ? presentName(
+                task.projectId!,
+                projects.data!.find((item) => item.id === task.projectId)!.name,
+              )
+            : t("planning.noProject")}
+        </span>
+        <h1 data-testid="task-detail-heading">
+          <Button
+            type="button"
+            className="button-quiet task-edit-text"
+            data-testid="task-field-text"
+            disabled={!access.data?.canEdit || busy}
+            onClick={() => setPicker("text")}
+          >
+            {presentPrototypeField(task.id, "title", task.title, locale)}
+          </Button>
+        </h1>
+      </div>
+      {runControl}
+      <div className="task-field-rows">
+        <Button
+          type="button"
+          className="task-field-row"
+          data-testid="task-field-status"
+          onClick={() => setPicker("status")}
+          disabled={busy || !access.data?.allowedStatuses.length}
+        >
+          <span>{t("planning.status")}</span>
+          <span>
+            <StatusGlyph status={task.status} />
+            {t(`status.${task.status}`)}
+          </span>
+          <ChevronDown size={14} aria-hidden="true" />
+        </Button>
+        <Button
+          type="button"
+          className="task-field-row"
+          data-testid="task-field-owner"
+          onClick={() => setPicker("owner")}
+          disabled={!access.data?.canEdit || busy}
+        >
+          <span>{t("owner")}</span>
+          <span>
+            <span className="task-person-avatar" aria-hidden="true">
               {members.data
-                ?.filter((member) => member.kind === "person")
-                .map((member) => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
-            </select>
-          </div>
-          <div className="field-grid">
-            <div className="field">
-              <Label htmlFor="edit-date">{t("planning.dueDate")}</Label>
-              <Input
-                id="edit-date"
-                data-testid="edit-date"
-                type="date"
-                value={form.date}
-                onChange={(event) => change("date", event.target.value)}
-              />
-            </div>
-            <div className="field">
-              <Label htmlFor="edit-time">{t("planning.dueTime")}</Label>
-              <Input
-                id="edit-time"
-                data-testid="edit-time"
-                type="time"
-                value={form.time}
-                disabled={!form.date}
-                onChange={(event) => change("time", event.target.value)}
-              />
-            </div>
-          </div>
-          <p className="field-hint">
-            {t("planning.endOfDay", { zone: me.user.tz })}
-          </p>
-          <div className="field-grid">
-            <div className="field">
-              <Label htmlFor="edit-priority">{t("planning.priority")}</Label>
-              <select
-                id="edit-priority"
-                data-testid="edit-priority"
-                value={form.priority}
-                onChange={(event) => change("priority", event.target.value)}
-              >
-                {["urgent", "high", "medium", "low"].map((key, index) => (
-                  <option key={key} value={index + 1}>
-                    {t(`planning.${key}`)}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="field">
-              <Label htmlFor="edit-project">{t("planning.project")}</Label>
-              <select
-                id="edit-project"
-                data-testid="edit-project"
-                value={form.projectId}
-                onChange={(event) => change("projectId", event.target.value)}
-              >
-                <option value="">{t("planning.noProject")}</option>
-                {projects.data
-                  ?.filter(
-                    (item) => !item.archived || item.id === task.projectId,
-                  )
-                  .map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </div>
-          <div className="field">
-            <Label htmlFor="edit-labels">{t("planning.labels")}</Label>
-            <Input
-              id="edit-labels"
-              data-testid="edit-labels"
-              value={form.labels}
-              onChange={(event) => change("labels", event.target.value)}
-              aria-describedby="labels-hint"
-            />
-            <p id="labels-hint" className="field-hint">
-              {t("planning.labelsHint")}
-            </p>
-          </div>
+                ?.find((item) => item.id === form.ownerId)
+                ?.name.slice(0, 1)}
+            </span>
+            {members.data?.find((item) => item.id === form.ownerId)
+              ? presentName(
+                  form.ownerId,
+                  members.data.find((item) => item.id === form.ownerId)!.name,
+                )
+              : t("unknownMember")}
+          </span>
+          <ChevronDown size={14} aria-hidden="true" />
+        </Button>
+        {workerControl}
+        <Button
+          type="button"
+          className="task-field-row"
+          data-testid="task-field-due"
+          onClick={() => setPicker("due")}
+          disabled={!writable || busy}
+        >
+          <span>{t("planning.dueDate")}</span>
+          <span>
+            {form.date
+              ? !editing && task.dueAt
+                ? new Intl.DateTimeFormat(locale, {
+                    timeZone: me.user.tz,
+                    month: "short",
+                    day: "numeric",
+                    ...(form.time
+                      ? { hour: "2-digit" as const, minute: "2-digit" as const }
+                      : {}),
+                  }).format(new Date(task.dueAt))
+                : `${form.date} ${form.time}`.trim()
+              : t("taskDetail.unscheduled")}
+          </span>
+          <ChevronDown size={14} aria-hidden="true" />
+        </Button>
+        {scheduleControl}
+        <Button
+          type="button"
+          className="task-field-row"
+          data-testid="task-field-priority"
+          onClick={() => setPicker("priority")}
+          disabled={!writable || busy}
+        >
+          <span>{t("planning.priority")}</span>
+          <span>
+            {t(
+              `planning.${["urgent", "high", "medium", "low"][Number(form.priority) - 1]}`,
+            )}
+          </span>
+          <ChevronDown size={14} aria-hidden="true" />
+        </Button>
+        <Button
+          type="button"
+          className="task-field-row"
+          data-testid="task-field-project"
+          onClick={() => setPicker("project")}
+          disabled={!writable || busy}
+        >
+          <span>{t("planning.project")}</span>
+          <span>
+            {projects.data?.find((item) => item.id === form.projectId)
+              ? presentName(
+                  form.projectId,
+                  projects.data.find((item) => item.id === form.projectId)!
+                    .name,
+                )
+              : t("planning.noProject")}
+          </span>
+          <ChevronDown size={14} aria-hidden="true" />
+        </Button>
+        <Button
+          type="button"
+          className="task-field-row"
+          data-testid="task-field-labels"
+          onClick={() => setPicker("labels")}
+          disabled={!writable || busy}
+        >
+          <span>{t("planning.labels")}</span>
+          <span>{form.labels || "—"}</span>
+          <ChevronDown size={14} aria-hidden="true" />
+        </Button>
+      </div>
+      <form className="task-field-editor" onSubmit={save}>
+        {editing && (
           <Button
             data-testid="edit-save"
-            disabled={!editing}
+            disabled={!writable || busy}
             type="submit"
             className="button-primary"
           >
             {t(edit.isPending ? "working" : "planning.save")}
           </Button>
-        </fieldset>
+        )}
+        {picker && picker !== "status" && (
+          <SheetDialog
+            title={t(
+              picker === "text"
+                ? "taskTitle"
+                : picker === "owner"
+                  ? "owner"
+                  : `planning.${{ due: "dueDate", priority: "priority", project: "project", labels: "labels" }[picker]}`,
+            )}
+            onClose={() => setPicker(null)}
+          >
+            <fieldset
+              className={`task-picker task-picker-${picker}`}
+              disabled={!writable || busy}
+            >
+              <div className="field">
+                <Label htmlFor="edit-title">{t("taskTitle")}</Label>
+                <Input
+                  id="edit-title"
+                  data-testid="edit-title"
+                  value={form.title}
+                  maxLength={200}
+                  disabled={!access.data?.canEdit}
+                  onChange={(event) => change("title", event.target.value)}
+                />
+              </div>
+              <div className="field">
+                <Label htmlFor="edit-description">
+                  {t("planning.description")}
+                </Label>
+                <textarea
+                  id="edit-description"
+                  data-testid="edit-description"
+                  className="input"
+                  value={form.description}
+                  maxLength={20000}
+                  rows={4}
+                  disabled={!access.data?.canEdit}
+                  onChange={(event) =>
+                    change("description", event.target.value)
+                  }
+                />
+              </div>
+              <div className="field">
+                <Label htmlFor="edit-owner">{t("owner")}</Label>
+                <select
+                  id="edit-owner"
+                  data-testid="edit-owner"
+                  value={form.ownerId}
+                  disabled={!access.data?.canEdit}
+                  onChange={(event) => change("ownerId", event.target.value)}
+                >
+                  {members.data
+                    ?.filter((member) => member.kind === "person")
+                    .map((member) => (
+                      <option key={member.id} value={member.id}>
+                        {member.name}
+                      </option>
+                    ))}
+                </select>
+              </div>
+              <div className="field-grid">
+                <div className="field">
+                  <Label htmlFor="edit-date">{t("planning.dueDate")}</Label>
+                  <Input
+                    id="edit-date"
+                    data-testid="edit-date"
+                    type="text"
+                    placeholder="YYYY-MM-DD"
+                    value={form.date}
+                    onChange={(event) => change("date", event.target.value)}
+                  />
+                </div>
+                <div className="field">
+                  <Label htmlFor="edit-time">{t("planning.dueTime")}</Label>
+                  <Input
+                    id="edit-time"
+                    data-testid="edit-time"
+                    type="text"
+                    placeholder="HH:mm"
+                    value={form.time}
+                    disabled={!form.date}
+                    onChange={(event) => change("time", event.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="field-grid">
+                <div className="field">
+                  <Label htmlFor="edit-priority">
+                    {t("planning.priority")}
+                  </Label>
+                  <select
+                    id="edit-priority"
+                    data-testid="edit-priority"
+                    value={form.priority}
+                    onChange={(event) => change("priority", event.target.value)}
+                  >
+                    {["urgent", "high", "medium", "low"].map((key, index) => (
+                      <option key={key} value={index + 1}>
+                        {t(`planning.${key}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <Label htmlFor="edit-project">{t("planning.project")}</Label>
+                  <select
+                    id="edit-project"
+                    data-testid="edit-project"
+                    value={form.projectId}
+                    onChange={(event) =>
+                      change("projectId", event.target.value)
+                    }
+                  >
+                    <option value="">{t("planning.noProject")}</option>
+                    {projects.data
+                      ?.filter(
+                        (item) => !item.archived || item.id === task.projectId,
+                      )
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {item.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              </div>
+              <div className="field">
+                <Label htmlFor="edit-labels">{t("planning.labels")}</Label>
+                <Input
+                  id="edit-labels"
+                  data-testid="edit-labels"
+                  value={form.labels}
+                  onChange={(event) => change("labels", event.target.value)}
+                  aria-describedby="labels-hint"
+                />
+                <p id="labels-hint" className="field-hint">
+                  {t("planning.labelsHint")}
+                </p>
+              </div>
+            </fieldset>
+            {(invalid || edit.isError) && (
+              <p className="alert" role="alert">
+                {t(invalid ?? errorKey(edit.error))}
+              </p>
+            )}
+            <Button
+              className="button-primary"
+              type="button"
+              onClick={() => setPicker(null)}
+            >
+              {t("planning.close")}
+            </Button>
+          </SheetDialog>
+        )}
       </form>
+      {task.description && (
+        <p className="task-description preserve-text">
+          {presentPrototypeField(
+            task.id,
+            "description",
+            task.description,
+            locale,
+          )}
+        </p>
+      )}
       {!access.data?.canEdit && (
         <p className="section-hint">{t("planning.readOnly")}</p>
       )}
@@ -379,39 +599,50 @@ export function TaskEditor({ task }: { task: Task }) {
           {t("planning.saved")}
         </p>
       )}
-      <div className="field">
-        <Label htmlFor="edit-status">{t("planning.status")}</Label>
-        <select
-          id="edit-status"
-          data-testid="edit-status"
-          disabled={busy || !access.data?.allowedStatuses.length}
-          value={task.status}
-          onChange={(event) =>
-            edit.mutate({
-              id: task.id,
-              body: {
-                version: task.version,
-                status: event.target.value as Task["status"],
-              },
-            })
-          }
+      {picker === "status" && (
+        <SheetDialog
+          title={t("planning.status")}
+          onClose={() => setPicker(null)}
         >
-          {[
-            ...new Set([task.status, ...(access.data?.allowedStatuses ?? [])]),
-          ].map((status) => (
-            <option
-              key={status}
-              value={status}
-              disabled={
-                status !== task.status &&
-                !access.data?.allowedStatuses.includes(status)
+          {" "}
+          <div className="field">
+            <Label htmlFor="edit-status">{t("planning.status")}</Label>
+            <select
+              id="edit-status"
+              data-testid="edit-status"
+              disabled={busy || !access.data?.allowedStatuses.length}
+              value={task.status}
+              onChange={(event) =>
+                edit.mutate({
+                  id: task.id,
+                  body: {
+                    version: task.version,
+                    status: event.target.value as Task["status"],
+                  },
+                })
               }
             >
-              {t(`status.${status}`)}
-            </option>
-          ))}
-        </select>
-      </div>
+              {[
+                ...new Set([
+                  task.status,
+                  ...(access.data?.allowedStatuses ?? []),
+                ]),
+              ].map((status) => (
+                <option
+                  key={status}
+                  value={status}
+                  disabled={
+                    status !== task.status &&
+                    !access.data?.allowedStatuses.includes(status)
+                  }
+                >
+                  {t(`status.${status}`)}
+                </option>
+              ))}
+            </select>
+          </div>
+        </SheetDialog>
+      )}
       <section className="profile-section">
         <h2>
           {t("planning.subtasks")}{" "}

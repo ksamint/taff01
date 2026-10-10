@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import { memberListSchema, meSchema } from "../packages/schemas/src/index";
 import { chooseLocale, selectLocale } from "./support/preferences";
+import { openQuickAdd } from "./support/tasks";
 
 const labels = {
   en: { today: "Today", running: "Working", paused: "Paused" },
@@ -72,14 +73,15 @@ test("two authenticated browsers converge through real workspace WebSockets with
     await trackConnection(other);
     await signIn(other, locale);
     const title = `Realtime ${locale} ${Date.now()}`;
-    await page.getByTestId("task-title").fill(title);
-    await page.getByTestId("task-worker").selectOption(agent.id);
+    await openQuickAdd(page);
+    await page.getByTestId("quick-title").fill(title);
+    await page.getByTestId("quick-worker").selectOption(agent.id);
     const created = page.waitForResponse(
       (response) =>
         response.url().endsWith("/api/tasks") &&
         response.request().method() === "POST",
     );
-    await page.getByTestId("task-submit").click();
+    await page.getByTestId("quick-create").click();
     const response = await created;
     expect(response.status()).toBe(201);
     const task = await response.json();

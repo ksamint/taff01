@@ -1,8 +1,20 @@
 import { defineConfig } from "@playwright/test";
 import behavior from "./playwright.config";
 
-if (process.env.UI_SCREEN !== "shell")
-  throw new Error("Set UI_SCREEN=shell; other screen ports are still pending.");
+if (
+  ![
+    "shell",
+    "today",
+    "projects",
+    "task-detail",
+    "review",
+    "inbox",
+    "calendar",
+    "me",
+    "type",
+  ].includes(process.env.UI_SCREEN ?? "")
+)
+  throw new Error("Set UI_SCREEN to an implemented parity screen.");
 
 export default defineConfig({
   ...behavior,

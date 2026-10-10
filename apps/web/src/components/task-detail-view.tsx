@@ -10,12 +10,18 @@ import {
   taskSchema,
 } from "@taff/schemas";
 import {
+  type PrototypeLocale,
+  presentPrototypeField,
+  prototypeTaskReference,
+} from "@taff/schemas/prototype-data";
+import {
   useIsMutating,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ArrowLeft, Play, Sparkles } from "lucide-react";
+import { ArrowLeft, ChevronDown, Play, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import {
@@ -32,21 +38,34 @@ import { useMembers } from "../lib/queries";
 import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
+import { ReviewView } from "./review-view";
 import { RunPanel } from "./run-panel";
 import { TaskEditor } from "./task-editor";
 import { TaskScheduleButton } from "./task-schedule-button";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
+import { SheetDialog } from "./ui/sheet-dialog";
 
-export function TaskDetailView({ taskId }: { taskId: string }) {
-  const { workspace } = useWorkspace();
-  const { t } = useTranslation();
+export function TaskDetailView({
+  taskId,
+  embedded = false,
+  onClose,
+}: {
+  taskId: string;
+  embedded?: boolean;
+  onClose?: () => void;
+}) {
+  const { me, workspace } = useWorkspace();
+  const { t, i18n } = useTranslation();
+  const [workerEditing, setWorkerEditing] = useState(false);
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
   const client = useQueryClient();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const task = useTask(taskId);
   const access = useTaskAccess(taskId);
-  const members = useMembers(workspace.id);
-  const runs = useRuns(workspace.id);
+  const workspaceId = task.data?.workspaceId ?? workspace.id;
+  const members = useMembers(workspaceId);
+  const runs = useRuns(workspaceId);
   const latest = runs.data
     ?.filter((run) => run.taskId === taskId)
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
@@ -81,7 +100,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
       const now = new Date().toISOString();
       const run: Run = {
         id,
-        workspaceId: workspace.id,
+        workspaceId: task.data!.workspaceId,
         taskId,
         agentId: task.data!.workerId!,
         status: "running",
@@ -93,7 +112,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
         durationMs: 0,
         costMicros: 0,
       };
-      client.setQueryData<Run[]>(runsKey(workspace.id), (current = []) => [
+      client.setQueryData<Run[]>(runsKey(workspaceId), (current = []) => [
         run,
         ...current,
       ]);
@@ -109,7 +128,7 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
     },
     onSuccess: (run, _, context) => {
       if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<Run[]>(runsKey(workspace.id), (current) =>
+      client.setQueryData<Run[]>(runsKey(workspaceId), (current) =>
         current?.map((item) => (item.id === context.id ? run : item)),
       );
     },
@@ -135,111 +154,160 @@ export function TaskDetailView({ taskId }: { taskId: string }) {
     ["running", "paused", "needs_review", "changes_requested"].includes(
       latest.status,
     );
+  const hasReview =
+    !!latest &&
+    ["needs_review", "changes_requested", "completed"].includes(latest.status);
+  const workerName = worker
+    ? presentPrototypeField(worker.id, "name", worker.name, locale)
+    : t("unassigned");
+  const workerControl = (
+    <div className="task-worker-controls">
+      <Button
+        type="button"
+        className="task-field-row"
+        data-testid="task-field-worker"
+        disabled={busy || !!active || !members.data || !access.data?.canAssign}
+        onClick={() => setWorkerEditing(true)}
+      >
+        <span>{t("worker")}</span>
+        <span>
+          {worker?.kind === "agent" && (
+            <span className="task-agent-avatar">
+              <Sparkles size={13} aria-hidden="true" />
+            </span>
+          )}
+          <span className="task-worker-name">{workerName}</span>
+          {latest && (
+            <span className="task-worker-state">
+              <span
+                className={`agent-status-dot agent-status-${latest.status}`}
+                aria-hidden="true"
+              />
+              {t(`run.status.${latest.status}`)}
+            </span>
+          )}
+        </span>
+        <ChevronDown size={14} aria-hidden="true" />
+      </Button>
+      {worker?.kind === "agent" && !active && task.data.status !== "done" && (
+        <Button
+          type="button"
+          className="button-primary task-start"
+          data-testid="run-start"
+          disabled={
+            busy || runs.isPending || runs.isError || !access.data?.canAssign
+          }
+          onClick={() => start.mutate()}
+        >
+          <Play size={14} aria-hidden="true" />
+          {t("run.start")}
+        </Button>
+      )}
+      {workerEditing && (
+        <SheetDialog
+          title={t("worker")}
+          onClose={() => setWorkerEditing(false)}
+        >
+          <Label htmlFor="detail-worker">{t("worker")}</Label>
+          <select
+            id="detail-worker"
+            data-testid="detail-worker"
+            value={task.data.workerId ?? ""}
+            disabled={
+              busy || !!active || !members.data || !access.data?.canAssign
+            }
+            onChange={(event) =>
+              assign.mutate(
+                {
+                  workerId: event.target.value || null,
+                  version: task.data.version,
+                },
+                { onSuccess: () => setWorkerEditing(false) },
+              )
+            }
+          >
+            <MemberOptions members={members.data ?? []} />
+          </select>
+          {assign.isError && (
+            <p className="alert" role="alert">
+              {t(errorKey(assign.error))}
+            </p>
+          )}
+        </SheetDialog>
+      )}
+    </div>
+  );
   return (
-    <>
-      <Link className="back-link" href="/">
-        <ArrowLeft size={16} aria-hidden="true" />
-        {t("taskDetail.back")}
-      </Link>
-      <section className="page-heading">
+    <article
+      className={`task-detail-view${embedded ? " task-detail-embedded" : ""}`}
+    >
+      <header className="task-detail-toolbar">
+        {onClose ? (
+          <Button
+            className="button-quiet"
+            onClick={onClose}
+            aria-label={t("taskDetail.back")}
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+          </Button>
+        ) : (
+          <Link className="button button-quiet" href="/">
+            {t("taskDetail.back")}
+          </Link>
+        )}
+        <span>
+          {prototypeTaskReference(task.data.id) ?? task.data.id.slice(0, 8)}
+        </span>
         <span
           className={`status status-${task.data.status}`}
           data-testid="task-status"
         >
           {t(`status.${task.data.status}`)}
         </span>
-        <h1 data-testid="task-detail-heading">{task.data.title}</h1>
-      </section>
-      <div className="detail-layout">
-        <div>
-          <TaskEditor task={task.data} />
-          <TaskScheduleButton taskId={taskId} />
-          <div className="field">
-            <Label htmlFor="detail-worker">{t("worker")}</Label>
-            <select
-              id="detail-worker"
-              data-testid="detail-worker"
-              value={task.data.workerId ?? ""}
-              disabled={
-                busy || !!active || !members.data || !access.data?.canAssign
-              }
-              onChange={(event) =>
-                assign.mutate({
-                  workerId: event.target.value || null,
-                  version: task.data.version,
-                })
-              }
-            >
-              <MemberOptions members={members.data ?? []} />
-            </select>
-          </div>
-          {worker?.kind === "agent" && (
-            <div className="action-row">
-              <Link
-                className="button button-quiet"
-                href={`/agents/${worker.id}`}
-              >
-                <Sparkles size={16} aria-hidden="true" />
-                {worker.name}
-              </Link>
-              {!active && task.data.status !== "done" && (
-                <Button
-                  className="button-primary"
-                  data-testid="run-start"
-                  disabled={
-                    busy ||
-                    runs.isPending ||
-                    runs.isError ||
-                    !access.data?.canAssign
-                  }
-                  onClick={() => start.mutate()}
-                >
-                  <Play size={16} aria-hidden="true" />
-                  {t("run.start")}
-                </Button>
-              )}
-            </div>
-          )}
-          {(assign.isError ||
-            start.isError ||
-            members.isError ||
-            runs.isError) && (
-            <p className="alert" role="alert">
-              {t(
-                errorKey(
-                  assign.error ?? start.error ?? members.error ?? runs.error,
-                ),
-              )}
-            </p>
-          )}
-          {task.data.status === "needs_review" && (
+      </header>
+      <div className="task-detail-body">
+        <TaskEditor
+          task={task.data}
+          workerControl={workerControl}
+          scheduleControl={<TaskScheduleButton taskId={taskId} />}
+          runControl={
+            detail.isError ? (
+              <p className="alert" role="alert">
+                {t(errorKey(detail.error))}
+              </p>
+            ) : detail.data && !hasReview ? (
+              <RunPanel
+                detail={detail.data}
+                refresh={() => void invalidateM3(client)}
+              />
+            ) : null
+          }
+        />
+        {(assign.isError ||
+          start.isError ||
+          members.isError ||
+          runs.isError) && (
+          <p className="alert" role="alert">
+            {t(
+              errorKey(
+                assign.error ?? start.error ?? members.error ?? runs.error,
+              ),
+            )}
+          </p>
+        )}
+        {hasReview && (
+          <>
             <Link
               data-testid="open-review"
-              className="button button-primary"
+              className="task-review-link"
               href={`/tasks/${taskId}/review`}
             >
               {t("review.open")}
             </Link>
-          )}
-        </div>
-        <div>
-          {detail.isError ? (
-            <p className="alert" role="alert">
-              {t(errorKey(detail.error))}
-            </p>
-          ) : detail.data ? (
-            <RunPanel
-              detail={detail.data}
-              refresh={() => void invalidateM3(client)}
-            />
-          ) : (
-            <section className="empty-state">
-              <Sparkles size={20} aria-hidden="true" />
-              <p>{t(latest ? "loading" : "run.notStarted")}</p>
-            </section>
-          )}
-        </div>
+            <ReviewView taskId={taskId} embedded />
+          </>
+        )}
       </div>
-    </>
+    </article>
   );
 }

@@ -5,6 +5,7 @@ import { preload } from "react-dom";
 import english from "../locales/en/common.json";
 import simplified from "../locales/zh-CN/common.json";
 import traditional from "../locales/zh-HK/common.json";
+import { AppShell } from "../src/components/app-shell";
 import { Providers } from "../src/components/providers";
 import { htmlLang, isLocale, preloadBootScript } from "../src/lib/i18n";
 import { readServerMe } from "../src/lib/server-me";
@@ -28,8 +29,10 @@ export const viewport: Viewport = {
 };
 export default async function RootLayout({
   children,
+  modal,
 }: {
   children: ReactNode;
+  modal?: ReactNode;
 }) {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore
@@ -72,7 +75,10 @@ export default async function RootLayout({
           messages={messages[locale]}
           initialMe={initialMe}
         >
-          {children}
+          <AppShell>
+            {children}
+            {modal}
+          </AppShell>
         </Providers>
       </body>
     </html>

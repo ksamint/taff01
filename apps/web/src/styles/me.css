@@ -1,0 +1,196 @@
+/* Port of prototype Me, team-tasks.dc.html lines 323–375. */
+.me-view {
+  padding: 8px 0 24px;
+}
+.me-title {
+  padding: 0 20px 8px;
+  margin: 0;
+  font-size: var(--type-product-h1-size);
+  font-weight: var(--weight-heading);
+  line-height: 1.2;
+}
+.me-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px 24px;
+}
+.me-avatar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-avatar);
+  background: var(--bg-container-high);
+  font-size: 20px;
+  font-weight: var(--weight-label);
+}
+.me-profile-copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.me-profile-copy strong {
+  font-size: 18px;
+  font-weight: var(--weight-label);
+}
+.me-profile-copy > span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.me-rows {
+  border-top: var(--hairline) solid var(--border-line);
+}
+.me-view .me-row-control,
+.me-preference-row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: initial;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--border-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: start;
+  text-decoration: none;
+}
+.me-view .me-row-control:hover:not(:disabled) {
+  background: var(--bg-container-low);
+  box-shadow: none;
+}
+.me-row-control > svg,
+.me-preference-row > svg {
+  flex: none;
+  color: var(--text-muted);
+}
+.me-row-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: var(--weight-medium);
+}
+.me-row-value {
+  min-width: 0;
+  max-width: 45%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: var(--weight-body);
+  color: var(--text-subtle);
+}
+.me-workspace-mark {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-dialog);
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+}
+.me-section-label {
+  margin: 0;
+  padding: 32px 20px 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: var(--ls-track-sm);
+  text-transform: uppercase;
+}
+.me-segmented {
+  display: inline-flex;
+  flex: none;
+  gap: 2px;
+  padding: 2px;
+  background: var(--bg-container);
+  border-radius: var(--radius-control);
+}
+.me-view .me-segmented .button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: var(--weight-body);
+}
+.me-view .me-segmented .button[aria-pressed="true"] {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: var(--weight-label);
+}
+.me-view .me-segmented .button:hover:not(:disabled) {
+  background: var(--bg-container-low);
+  box-shadow: none;
+}
+.me-view .me-notification-row {
+  min-height: 64px;
+  padding-block: 8px;
+}
+.me-notification-copy {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+.me-row-summary {
+  font-size: 12px;
+  font-weight: var(--weight-body);
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+.me-view .me-signout {
+  color: var(--danger);
+}
+.me-signout > svg {
+  color: inherit;
+}
+.me-org-choices {
+  display: grid;
+  gap: 8px;
+}
+.me-org-choices > .button {
+  justify-content: space-between;
+}
+.me-org-choices > .button[aria-pressed="true"] {
+  background: var(--bg-container);
+}
+.me-manage-link {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text);
+}
+.me-account-details {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 0 0 24px;
+  font-size: 13px;
+}
+.me-account-details dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.me-theme-options {
+  padding: 0;
+  border: 0;
+}
+.me-theme-options legend {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: var(--weight-label);
+}

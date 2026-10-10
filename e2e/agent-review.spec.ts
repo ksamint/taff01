@@ -10,7 +10,10 @@ import {
   meSchema,
   runDetailSchema,
 } from "../packages/schemas/src/index";
+import { presentPrototypeField } from "../packages/schemas/src/prototype-data";
+import { openDisclosure } from "./support/disclosures";
 import { selectLocale } from "./support/preferences";
+import { openQuickAdd } from "./support/tasks";
 
 const labels = {
   en: {
@@ -94,8 +97,12 @@ function payload(result: {
   isError?: boolean;
   content: { type: string; text?: string }[];
 }) {
-  expect(result.isError).not.toBe(true);
   const block = result.content.find((item) => item.type === "text");
+  const errorCode =
+    result.isError && /^[a-z_]+$/.test(block?.text ?? "")
+      ? block?.text
+      : "MCP call failed";
+  expect(result.isError, errorCode).not.toBe(true);
   if (!block?.text) throw new Error("MCP result needs text content.");
   return JSON.parse(block.text);
 }
@@ -106,11 +113,13 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
   const locale = info.project.name as TestLocale;
   const { workspace, agent } = await signIn(page, locale);
   const title = `Review flow ${locale} ${Date.now()}`;
-  await page.getByTestId("task-title").fill(title);
-  await expect(page.getByTestId("task-worker")).toBeEnabled();
-  await page.getByTestId("task-worker").selectOption(agent.id);
-  await page.getByTestId("task-submit").click();
-  await expect(page.getByTestId("task-submit")).toBeEnabled();
+  await openQuickAdd(page);
+  await page.getByTestId("quick-title").fill(title);
+  await expect(page.getByTestId("quick-worker")).toBeEnabled();
+  await page.getByTestId("quick-worker").selectOption(agent.id);
+  await page.getByTestId("quick-create").click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByTestId("open-quick")).toBeEnabled();
   await page.getByRole("link", { name: title, exact: true }).click();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(title);
   await page.getByTestId("run-start").click();
@@ -278,6 +287,7 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
         },
       }),
     );
+    await page.getByTestId("run-details").locator(":scope > summary").click();
     await page.getByTestId("run-refresh").click();
     await expect(page.getByTestId("run-status")).toHaveText(
       labels[locale].review,
@@ -321,18 +331,20 @@ test("agent permission settings persist, Inbox grants expire, and cancel support
   const { workspace, agent } = await signIn(page, locale);
   await page.goto(`/agents/${agent.id}`);
   await expect(page.getByTestId("agent-profile-heading")).toHaveText(
-    agent.name,
+    presentPrototypeField(agent.id, "name", agent.name, locale),
   );
   await page.getByTestId("permission-web.search-ask").click();
   await expect(page.getByTestId("permission-web.search-ask")).toHaveAttribute(
     "aria-pressed",
     "true",
   );
+  await openDisclosure(page, "agent-settings-details");
   await page.getByTestId("agent-policy").selectOption("always_review");
   await page.getByTestId("agent-supervisor").selectOption(workspace.memberId);
   await page.getByTestId("agent-save").click();
   await expect(page.getByTestId("agent-save")).toBeEnabled();
   await page.reload();
+  await openDisclosure(page, "agent-settings-details");
   await expect(page.getByTestId("agent-policy")).toHaveValue("always_review");
   await expect(page.getByTestId("agent-supervisor")).toHaveValue(
     workspace.memberId,
@@ -340,7 +352,11 @@ test("agent permission settings persist, Inbox grants expire, and cancel support
   const profile = agentProfileSchema.parse(
     await (await page.request.get(`/api/agents/${agent.id}`)).json(),
   );
+  await openDisclosure(page, "agent-change-history");
   expect(profile.history.length).toBeGreaterThan(0);
+  await expect(
+    page.getByTestId("agent-change-history").locator(".history-list > li"),
+  ).toHaveCount(profile.history.length);
   await page.screenshot({
     path: `/tmp/taff-m3-profile-${locale}.png`,
     fullPage: true,
@@ -398,9 +414,9 @@ test("agent permission settings persist, Inbox grants expire, and cancel support
   ).toHaveCount(0);
   await page.goto(`/tasks/${task.id}`);
   await page.getByTestId("run-cancel").click();
-  await expect(page.getByRole("dialog")).toBeVisible();
+  await expect(page.locator("dialog.confirm-dialog")).toBeVisible();
   await page.keyboard.press("Escape");
-  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(page.locator("dialog.confirm-dialog")).not.toBeVisible();
   await expect(page.getByTestId("run-cancel")).toBeFocused();
   await page.getByTestId("run-cancel").click();
   const cancel =
@@ -410,10 +426,10 @@ test("agent permission settings persist, Inbox grants expire, and cancel support
         ? "取消执行"
         : "取消執行";
   await page
-    .getByRole("dialog")
+    .locator("dialog.confirm-dialog")
     .getByRole("button", { name: cancel, exact: true })
     .click();
-  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await expect(page.locator("dialog.confirm-dialog")).not.toBeVisible();
   const canceled =
     locale === "en" ? "Canceled" : locale === "zh-CN" ? "已取消" : "已取消";
   await expect(page.getByTestId("run-status")).toHaveText(canceled);

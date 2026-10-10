@@ -6,10 +6,15 @@ import {
   agentProfileSchema,
   memberListSchema,
   meSchema,
+  reviewRunSchema,
+  reviewWorkspaceSchema,
   runSchema,
   taskSchema,
+  workspaceSchema,
 } from "../packages/schemas/src/index";
+import { openDisclosure } from "./support/disclosures";
 import { chooseLocale, openMe, selectLocale } from "./support/preferences";
+import { closeTaskField, openTaskField } from "./support/task-fields";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
 type Locale = keyof typeof messages;
@@ -101,12 +106,14 @@ test("rejected run start, assignment and control restore task and run caches", a
     `/api/tasks/${task.id}/assignment`,
     "PATCH",
   );
+  await openTaskField(page, "worker");
   await page.getByTestId("detail-worker").selectOption("");
   await denied.seen;
   await expect(page.getByTestId("detail-worker")).toHaveValue("");
   await denied.reject();
   await failure(page, locale);
   await expect(page.getByTestId("detail-worker")).toHaveValue(task.workerId!);
+  await closeTaskField(page, "worker");
   denied = await rejectLater(page, `/api/tasks/${task.id}/runs`);
   await page.getByTestId("run-start").click();
   await denied.seen;
@@ -148,7 +155,10 @@ test("rejected run start, assignment and control restore task and run caches", a
   denied = await rejectLater(page, `/api/runs/${run.id}/control`);
   await page.getByTestId("run-pause").click();
   await denied.seen;
-  await page.locator(`a[href="/agents/${agent.id}"]`).first().click();
+  await page
+    .getByTestId("run-panel")
+    .locator(`a[href="/agents/${agent.id}"]`)
+    .click();
   await expect(page.locator("html")).toHaveAttribute(
     "data-document-marker",
     "same",
@@ -157,7 +167,11 @@ test("rejected run start, assignment and control restore task and run caches", a
   await expect(page.getByTestId("agent-save")).toBeDisabled();
   await denied.reject();
   await expect(page.getByTestId("permission-web.search-ask")).toBeEnabled();
-  await page.getByRole("link", { name: task.title, exact: true }).click();
+  await openDisclosure(page, "agent-run-history");
+  await page
+    .getByTestId("agent-run-history")
+    .getByRole("link", { name: task.title, exact: true })
+    .click();
   await expect(page.getByTestId("run-status")).toHaveText(
     messages[locale].run.status.running,
   );
@@ -175,6 +189,7 @@ test("rejected profile, capability, grants, tokens and language changes restore 
   let denied = await rejectLater(page, `/api/agents/${agent.id}`, "PATCH");
   const policy =
     before.reviewPolicy === "always_review" ? "ask_only" : "always_review";
+  await openDisclosure(page, "agent-settings-details");
   await page.getByTestId("agent-policy").selectOption(policy);
   await page.getByTestId("agent-save").click();
   await denied.seen;
@@ -205,6 +220,7 @@ test("rejected profile, capability, grants, tokens and language changes restore 
   ).toHaveAttribute("aria-pressed", "true");
   const reason = `Rejected grant ${Date.now()}`;
   denied = await rejectLater(page, `/api/agents/${agent.id}/grants`);
+  await openDisclosure(page, "agent-request-details");
   await page.locator("#grant-task").selectOption(task.id);
   await page.locator("#grant-reason").fill(reason);
   await page
@@ -251,7 +267,7 @@ test("rejected profile, capability, grants, tokens and language changes restore 
   const next = locale === "en" ? "zh-HK" : "en";
   await chooseLocale(page, next);
   await denied.seen;
-  await page.locator('a[href="/"]:visible').first().click();
+  await page.locator('nav.tabbar a[href="/"]').click();
   await expect(page.getByTestId("today-heading")).toHaveText(
     messages[next].today,
   );
@@ -361,6 +377,177 @@ test("rejected review comments, approval and Inbox snooze restore drafts and cou
   await expect(page.getByTestId("review-approve")).toBeEnabled();
 });
 
+test("embedded review approval failure preserves decisions and drafts through task/run rollback", async ({
+  page,
+}, info) => {
+  test.setTimeout(60000);
+  const locale = info.project.name as Locale;
+  const { agent: originalAgent } = await signIn(page, locale);
+  const createdWorkspace = await page.request.post("/api/workspaces", {
+    data: {
+      name: `Embedded review ${locale} ${crypto.randomUUID()}`,
+      agentIds: [originalAgent.id],
+    },
+  });
+  expect(createdWorkspace.status()).toBe(201);
+  const workspace = workspaceSchema.parse(await createdWorkspace.json());
+  const members = memberListSchema.parse(
+    await (
+      await page.request.get(`/api/members?workspaceId=${workspace.id}`)
+    ).json(),
+  );
+  const agent = members.find((member) => member.kind === "agent");
+  if (!agent) throw new Error("Copied review agent is required");
+  expect(agent.id).not.toBe(originalAgent.id);
+  const configured = await page.request.patch(`/api/agents/${agent.id}`, {
+    data: {
+      supervisorId: workspace.memberId,
+      reviewPolicy: "always_review",
+      maxDurationMs: null,
+      maxCostMicros: null,
+    },
+  });
+  expect(configured.status()).toBe(200);
+  const created = await page.request.post("/api/tasks", {
+    data: {
+      workspaceId: workspace.id,
+      ownerId: workspace.memberId,
+      workerId: agent.id,
+      title: `Embedded approval ${locale} ${crypto.randomUUID()}`,
+    },
+  });
+  expect(created.status()).toBe(201);
+  const task = taskSchema.parse(await created.json());
+  const started = await page.request.post(`/api/tasks/${task.id}/runs`, {
+    data: {},
+  });
+  expect(started.status()).toBe(201);
+  let run = runSchema.parse(await started.json());
+  const attached = await page.request.post(`/api/runs/${run.id}/artifacts`, {
+    data: {
+      version: run.version,
+      name: "embedded-rollback.txt",
+      mimeType: "text/plain",
+      content: "Real isolated embedded review evidence",
+    },
+  });
+  expect(attached.status()).toBe(201);
+  run = runSchema.parse(
+    (await (await page.request.get(`/api/runs/${run.id}`)).json()).run,
+  );
+  const submitted = await page.request.post(`/api/runs/${run.id}/submit`, {
+    data: { version: run.version, summary: "Embedded review rollback fixture" },
+  });
+  expect(submitted.status()).toBe(200);
+  await page.goto("/orgs");
+  await page.getByTestId(`workspace-${workspace.id}`).click();
+  await page.goto(`/tasks/${task.id}`);
+  const review = page.locator(".task-review-block");
+  const artifact = review.getByTestId("review-artifact");
+  await expect(review).toBeVisible();
+  await expect(artifact.getByTestId("artifact-preview")).toHaveText(
+    "Real isolated embedded review evidence",
+  );
+  await expect(review.getByTestId("review-approve")).toBeDisabled();
+  const artifactComment = `Artifact approval draft ${locale}`;
+  const overallComment = `Overall approval draft ${locale}`;
+  await artifact.getByTestId("item-comment").fill(artifactComment);
+  await artifact.getByTestId("item-approve").click();
+  for (const key of ["matchesDescription", "verifiable", "withinPermissions"])
+    await review.getByTestId(`review-check-${key}`).check();
+  await review.getByTestId("review-comment").fill(overallComment);
+  await expect(review.getByTestId("review-approve")).toBeEnabled();
+  const approvalBodies: unknown[] = [];
+  const recordApproval = (request: import("@playwright/test").Request) => {
+    if (
+      request.method() === "POST" &&
+      new URL(request.url()).pathname === `/api/runs/${run.id}/review`
+    )
+      approvalBodies.push(reviewRunSchema.parse(request.postDataJSON()));
+  };
+  page.on("request", recordApproval);
+  const denied = await rejectLater(page, `/api/runs/${run.id}/review`);
+  try {
+    await review.getByTestId("review-approve").click();
+    await denied.seen;
+    await expect(page.getByTestId("task-status")).toHaveText(
+      messages[locale].status.done,
+    );
+    await expect(review.getByTestId("run-status")).toHaveText(
+      messages[locale].run.status.completed,
+    );
+    await expect(review).toBeVisible();
+    await expect(review.getByTestId("review-readonly")).toHaveCount(0);
+    await expect(review.getByTestId("review-approve")).toBeDisabled();
+    await denied.reject();
+    const restored = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === `/api/tasks/${task.id}/review` &&
+        response.status() === 200,
+    );
+    await review.getByTestId("run-details").locator(":scope > summary").click();
+    await expect(review.getByTestId("run-refresh")).toBeEnabled();
+    await review.getByTestId("run-refresh").click();
+    await restored;
+    await expect(page.getByTestId("task-status")).toHaveText(
+      messages[locale].status.needs_review,
+    );
+    await expect(review.getByTestId("run-status")).toHaveText(
+      messages[locale].run.status.needs_review,
+    );
+    await expect(review.getByRole("alert")).toHaveText(
+      messages[locale].errors.forbidden,
+    );
+    for (const key of ["matchesDescription", "verifiable", "withinPermissions"])
+      await expect(review.getByTestId(`review-check-${key}`)).toBeChecked();
+    await expect(artifact.getByTestId("item-approve")).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(artifact.getByTestId("item-changes")).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await expect(artifact.getByTestId("item-comment")).toHaveValue(
+      artifactComment,
+    );
+    await expect(review.getByTestId("review-comment")).toHaveValue(
+      overallComment,
+    );
+    await expect(review.getByTestId("review-approve")).toBeEnabled();
+    expect(approvalBodies).toHaveLength(1);
+    expect(approvalBodies[0]).toMatchObject({
+      decision: "approve",
+      checks: {
+        matchesDescription: true,
+        verifiable: true,
+        withinPermissions: true,
+      },
+      comment: overallComment,
+      items: [{ decision: "approve", comment: artifactComment }],
+    });
+    const stored = reviewWorkspaceSchema.parse(
+      await (await page.request.get(`/api/tasks/${task.id}/review`)).json(),
+    );
+    expect(stored.task.status).toBe("needs_review");
+    expect(stored.run.status).toBe("needs_review");
+    expect(stored.checks).toEqual({
+      matchesDescription: false,
+      verifiable: false,
+      withinPermissions: false,
+    });
+    expect(
+      stored.comments.some((comment) =>
+        [artifactComment, overallComment].includes(comment.body),
+      ),
+    ).toBe(false);
+  } finally {
+    if (approvalBodies.length) await denied.reject();
+    page.off("request", recordApproval);
+    await page.unroute(`**/api/runs/${run.id}/review`);
+  }
+});
+
 test("remote session revocation clears private caches and an old write cannot restore them for another account", async ({
   page,
   browser,
@@ -374,6 +561,7 @@ test("remote session revocation clears private caches and an old write cannot re
     `/api/tasks/${task.id}/assignment`,
     "PATCH",
   );
+  await openTaskField(page, "worker");
   await page.getByTestId("detail-worker").selectOption("");
   await denied.seen;
   const remote = await browser.newContext({

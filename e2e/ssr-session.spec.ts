@@ -29,7 +29,7 @@ async function account(
   return meSchema.parse(await (await request.get("/api/me")).json());
 }
 
-test("server greeting stays private and read-only until the browser confirms its current account", async ({
+test("server account identity stays private and read-only until the browser confirms its current account", async ({
   page,
   browser,
 }, info) => {
@@ -56,6 +56,8 @@ test("server greeting stays private and read-only until the browser confirms its
         "/api/tasks",
         "/api/members",
         "/api/runs",
+        "/api/calendar",
+        "/api/projects",
         "/api/inbox",
         "/api/me/notifications",
         "/api/workspace-access",
@@ -105,8 +107,9 @@ test("server greeting stays private and read-only until the browser confirms its
       name.includes("session_token"),
     ))
       expect(html.includes(cookie.value)).toBe(false);
-    await expect(page.locator(".greeting")).toHaveText(
-      messages[locale].hello.replace("{{name}}", alice.user.name),
+    await expect(page.locator(".today-avatar-link")).toHaveAttribute(
+      "aria-label",
+      messages[locale].me.signedInAs.replace("{{name}}", alice.user.name),
     );
     releaseScripts();
     await expect(page.locator("html")).toHaveAttribute(
@@ -115,6 +118,8 @@ test("server greeting stays private and read-only until the browser confirms its
     );
     await expect(page.locator("main.content")).toHaveAttribute("inert", "");
     await expect(page.getByTestId("open-quick")).toBeDisabled();
+    await expect(page.getByTestId("quick-title")).toHaveCount(0);
+    await expect(page.getByTestId("quick-create")).toHaveCount(0);
     await page.keyboard.press("Control+k");
     await expect(page.getByRole("dialog")).toHaveCount(0);
     expect(profileWrites).toEqual([]);
@@ -125,9 +130,10 @@ test("server greeting stays private and read-only until the browser confirms its
     await expect(page.getByTestId("today-heading")).toHaveText(
       messages[bobLocale].today,
     );
-    await expect(page.getByTestId("task-submit")).toBeEnabled();
-    await expect(page.locator(".greeting")).toHaveText(
-      messages[bobLocale].hello.replace("{{name}}", bob.user.name),
+    await expect(page.getByTestId("open-quick")).toBeEnabled();
+    await expect(page.locator(".today-avatar-link")).toHaveAttribute(
+      "aria-label",
+      messages[bobLocale].me.signedInAs.replace("{{name}}", bob.user.name),
     );
     const confirmed = meSchema.parse(
       await (await page.request.get("/api/me")).json(),
@@ -170,7 +176,7 @@ for (const signedIn of [false, true]) {
     await expect(retry).toBeEnabled();
     failing = false;
     await retry.click();
-    if (signedIn) await expect(page.getByTestId("task-submit")).toBeEnabled();
+    if (signedIn) await expect(page.getByTestId("open-quick")).toBeEnabled();
     else await expect(page.getByTestId("auth-submit")).toBeVisible();
     await expect(
       page.getByTestId(signedIn ? "open-quick" : "locale-select"),

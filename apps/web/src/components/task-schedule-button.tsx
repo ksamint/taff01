@@ -24,7 +24,8 @@ export function TaskScheduleButton({ taskId }: { taskId: string }) {
   return (
     <>
       <Button
-        className="button-quiet"
+        type="button"
+        className="task-field-row"
         data-testid="task-schedule"
         disabled={busy || !current.data?.canSchedule}
         onClick={() => {
@@ -32,7 +33,18 @@ export function TaskScheduleButton({ taskId }: { taskId: string }) {
           setEditing(current.data);
         }}
       >
-        {t(current.data?.schedule ? "calendar.edit" : "calendar.schedule")}
+        <span>{t("calendar.schedule")}</span>
+        <span>
+          {current.data?.schedule
+            ? new Intl.DateTimeFormat(me.user.locale, {
+                timeZone: me.user.tz,
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }).format(new Date(current.data.schedule.startAt))
+            : t("taskDetail.unscheduled")}
+        </span>
       </Button>
       {current.error && (
         <p role="alert" className="alert">

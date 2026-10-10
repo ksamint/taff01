@@ -1,5 +1,4 @@
 import { AgentProfileView } from "../../../src/components/agent-profile-view";
-import { AppShell } from "../../../src/components/app-shell";
 
 export default async function Page({
   params,
@@ -8,8 +7,8 @@ export default async function Page({
 }) {
   const { id } = await params;
   return (
-    <AppShell>
+    <>
       <AgentProfileView agentId={id} />
-    </AppShell>
+    </>
   );
 }

@@ -11,7 +11,13 @@ import {
   taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
+import { openCalendarTools } from "./support/calendar";
 import { selectLocale } from "./support/preferences";
+import {
+  closeFieldSheet,
+  closeTaskField,
+  openTaskField,
+} from "./support/task-fields";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
 type Locale = keyof typeof messages;
@@ -58,6 +64,7 @@ test("calendar member fetch failure explains disabled editor and Retry restores 
       .filter({ hasText: messages[locale].errors.internal_error }),
   ).toBeVisible();
   expect(failedRequests).toBeGreaterThanOrEqual(2);
+  await openCalendarTools(page);
   await page.getByTestId("calendar-list").click();
   await page
     .locator(".calendar-list-item")
@@ -567,19 +574,19 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
     const stale = patchAck(second, task.id);
     await second.getByTestId("schedule-save").click();
     expect((await stale).status()).toBe(409);
-    await expect(second.getByRole("dialog").getByRole("alert")).toHaveText(
-      messages[locale].errors.conflict,
-    );
+    await expect(
+      second
+        .getByTestId("schedule-start")
+        .locator("xpath=ancestor::dialog[1]")
+        .getByRole("alert"),
+    ).toHaveText(messages[locale].errors.conflict);
     await expect(second.getByTestId("schedule-start")).toHaveValue(
       `${date}T12:00`,
     );
     expect((await stored(page, task.id)).schedule?.startAt).toBe(
       v3.schedule?.startAt,
     );
-    await second
-      .getByRole("dialog")
-      .getByRole("button", { name: messages[locale].planning.close })
-      .click();
+    await closeFieldSheet(second, "schedule-start");
     await expect(second.getByTestId("task-schedule")).toBeEnabled();
     await second.getByTestId("task-schedule").click();
     await expect(second.getByTestId("schedule-start")).toHaveValue(
@@ -603,9 +610,13 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
     });
     await second.getByTestId("schedule-save").click();
     await seen;
+    await closeFieldSheet(second, "schedule-start");
     await second
-      .getByRole("dialog")
-      .getByRole("button", { name: messages[locale].planning.close })
+      .locator(".task-detail-toolbar")
+      .getByRole("button", {
+        name: messages[locale].taskDetail.back,
+        exact: true,
+      })
       .click();
     await second
       .getByRole("navigation", { name: messages[locale].nav.label })
@@ -645,6 +656,11 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
   expect(folded.status()).toBe(201);
   const foldTask = taskSchema.parse(await folded.json());
   await page.goto(`/tasks/${foldTask.id}`);
+  const metadataDraft = `Unsubmitted title ${locale}`;
+  await openTaskField(page, "text");
+  await page.getByTestId("edit-title").fill(metadataDraft);
+  await closeTaskField(page, "text");
+  await expect(page.getByTestId("edit-save")).toBeEnabled();
   await expect(page.getByTestId("task-schedule")).toBeEnabled();
   await page.getByTestId("task-schedule").click();
   await expect(page.getByTestId("schedule-zone")).toHaveValue(
@@ -655,6 +671,19 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
   );
   await page.getByTestId("schedule-repeat").selectOption("daily");
   await page.getByTestId("schedule-count").fill("2");
+  const submittedPaths: string[] = [];
+  const recordScheduleSubmit = (
+    request: import("@playwright/test").Request,
+  ) => {
+    const path = new URL(request.url()).pathname;
+    if (
+      request.method() === "PATCH" &&
+      (path === `/api/tasks/${foldTask.id}/calendar` ||
+        path === `/api/tasks/${foldTask.id}`)
+    )
+      submittedPaths.push(path);
+  };
+  page.on("request", recordScheduleSubmit);
   const foldSaved = patchAck(page, foldTask.id);
   await page.getByTestId("schedule-save").click();
   expect((await foldSaved).status()).toBe(200);
@@ -662,7 +691,14 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
   expect(savedFold.schedule?.startAt).toBe(fold.startAt);
   expect(savedFold.schedule?.endAt).toBe(fold.endAt);
   expect(savedFold.schedule?.timeZone).toBe(fold.timeZone);
-  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(page.getByTestId("schedule-start")).toHaveCount(0);
+  await expect(page.locator("dialog.task-detail-sheet")).toBeVisible();
+  await openTaskField(page, "text");
+  await expect(page.getByTestId("edit-title")).toHaveValue(metadataDraft);
+  await closeTaskField(page, "text");
+  expect(savedFold.task.title).toBe(foldTask.title);
+  expect(submittedPaths).toEqual([`/api/tasks/${foldTask.id}/calendar`]);
+  page.off("request", recordScheduleSubmit);
   await expect(page.getByTestId("task-schedule")).toBeEnabled();
   await page.getByTestId("task-schedule").click();
   await expect(page.getByTestId("schedule-repeat")).toHaveValue("daily");
@@ -980,6 +1016,7 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
   );
   expect((await stored(page, newTask.id)).task.dueAt).toBeNull();
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await openCalendarTools(page);
   await page.getByTestId("calendar-list").click();
   await expect(
     page.locator(".calendar-list-item").filter({ hasText: title }),
@@ -999,6 +1036,7 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
   await expect(
     page.locator(".calendar-list-item").filter({ hasText: title }),
   ).toHaveCount(1);
+  await openCalendarTools(page);
   await page.getByTestId("calendar-list").click();
   const createdEvent = page
     .locator(".sx__time-grid-event")

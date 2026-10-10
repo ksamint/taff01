@@ -6,6 +6,8 @@ import {
   taskSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
+import { openCalendarTools } from "./support/calendar";
+import { openQuickAdd } from "./support/tasks";
 
 test.use({ actionTimeout: 15000 });
 async function readCache(page: Page): Promise<ReadSnapshot | null> {
@@ -171,6 +173,7 @@ test("IndexedDB restores authorized lists board and calendar before real reconci
     page.getByRole("link", { name: task.title, exact: true }),
   ).toBeVisible();
   await page.goto("/calendar");
+  await openCalendarTools(page);
   await page.getByTestId("calendar-list").click();
   const item = page
     .locator(".calendar-list-item")
@@ -238,8 +241,9 @@ test("durable cache never records pending rollback data and revocation rejects a
     await route.fulfill({ status: 403, json: { error: "forbidden" } });
   });
   const pending = `Pending never saved ${locale}`;
-  await page.getByTestId("task-title").fill(pending);
-  await page.getByTestId("task-submit").click();
+  await openQuickAdd(page);
+  await page.getByTestId("quick-title").fill(pending);
+  await page.getByTestId("quick-create").click();
   await requested;
   await expect(page.getByText(pending, { exact: true })).toBeVisible();
   await page.waitForTimeout(250);

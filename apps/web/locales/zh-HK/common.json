@@ -115,7 +115,10 @@
     "invalid": "請檢查日期、時長、時區及重複規則。",
     "openTask": "開啟任務",
     "selectView": "檢視",
-    "noEvents": "沒有日程任務"
+    "noEvents": "沒有日程任務",
+    "tools": "日曆控制",
+    "dragHint": "拖動以移動；使用列表以鍵盤安排",
+    "goToDate": "前往日期"
   },
   "projects": {
     "title": "項目",
@@ -169,7 +172,12 @@
     "grantAccess": "授予存取權限",
     "markUnread": "標為未讀",
     "markRead": "標為已讀",
-    "snoozeDay": "延後 24 小時"
+    "snoozeDay": "延後 24 小時",
+    "markAllRead": "全部已讀",
+    "view": "查看",
+    "tomorrow": "延後到明天",
+    "snoozedTomorrow": "已延後到明天",
+    "closeDetail": "關閉詳情"
   },
   "me": {
     "title": "我的",
@@ -181,7 +189,15 @@
     "dark": "深色",
     "system": "跟隨系統",
     "timeZone": "時區",
-    "timeZoneHint": "所有裝置上的日期和時間都按此時區顯示；首次登入時已從瀏覽器偵測。"
+    "timeZoneHint": "所有裝置上的日期和時間都按此時區顯示；首次登入時已從瀏覽器偵測。",
+    "teamSummary": "{{people}} 人 · {{agents}} 個智能體",
+    "settings": "設定",
+    "advanced": "更多設定",
+    "notificationSummary": "{{count}} 項已開啟",
+    "notificationsOff": "已關閉",
+    "digestSummary": "每日摘要 {{time}}",
+    "languageHK": "繁體中文",
+    "languageCN": "简体"
   },
   "mcp": {
     "title": "MCP 伺服器",
@@ -252,7 +268,10 @@
       "requestGrant": "請求權限",
       "calendarList": "列出實際日程項目",
       "calendarSet": "設定整個系列的日程"
-    }
+    },
+    "back": "返回",
+    "copyEndpoint": "複製端點",
+    "copyConfig": "複製設定"
   },
   "taskDetail": {
     "back": "返回今天",
@@ -449,7 +468,9 @@
     "empty": "沒有結果，請更換關鍵字或搜尋範圍。",
     "keyboard": "↑ ↓ 導覽 · Enter 開啟 · Esc 關閉",
     "matchingComment": "符合評論",
-    "matchingDescription": "符合描述"
+    "matchingDescription": "符合描述",
+    "cancel": "取消",
+    "clear": "清除搜尋"
   },
   "quickAdd": {
     "title": "快速新增",
@@ -505,7 +526,8 @@
       "expired": "已過期"
     },
     "current": "目前組織",
-    "roleFor": "{{name}}的角色"
+    "roleFor": "{{name}}的角色",
+    "people": "人員"
   },
   "pwa": {
     "description": "人與代理協作的任務和日曆。",
@@ -575,5 +597,8 @@
   },
   "shell": {
     "view": "查看"
-  }
+  },
+  "todayDue": "今天到期",
+  "todayScheduleEmpty": "今天沒有日程。",
+  "todayNow": "現在"
 }

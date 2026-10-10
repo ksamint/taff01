@@ -2,6 +2,8 @@ import { expect, type Page, test } from "@playwright/test";
 import type { Me, Task } from "@taff/schemas";
 import { freshAccount, messages } from "./support/account";
 import { selectLocale, signOutFromMe } from "./support/preferences";
+import { closeTaskField, openTaskField } from "./support/task-fields";
+import { openQuickAdd } from "./support/tasks";
 
 const labels = {
   en: {
@@ -59,19 +61,20 @@ test("sign in, create a task and assign it to an agent", async ({
   await signIn(page);
   await useLocale(page, locale);
   const title = `Agent task ${locale} ${Date.now()}`;
-  await page.getByTestId("task-title").fill("   ");
-  await expect(page.getByTestId("task-submit")).toBeEnabled();
-  await page.getByTestId("task-submit").click();
+  await openQuickAdd(page);
+  await page.getByTestId("quick-title").fill("   ");
+  await expect(page.getByTestId("quick-create")).toBeEnabled();
+  await page.getByTestId("quick-create").click();
   await expect(
     page
       .locator("form")
-      .filter({ has: page.getByTestId("task-title") })
+      .filter({ has: page.getByTestId("quick-title") })
       .getByRole("alert"),
   ).toHaveText(messages[locale].errors.invalid_input);
-  await page.getByTestId("task-title").fill(`  ${title}  `);
-  await expect(page.getByTestId("task-submit")).toBeEnabled();
+  await page.getByTestId("quick-title").fill(`  ${title}  `);
+  await expect(page.getByTestId("quick-create")).toBeEnabled();
   const agentOption = page
-    .getByTestId("task-worker")
+    .getByTestId("quick-worker")
     .locator("option")
     .filter({ hasText: labels[locale].agent })
     .first();
@@ -79,7 +82,7 @@ test("sign in, create a task and assign it to an agent", async ({
   expect(agentId).toBeTruthy();
   await expect(
     page
-      .getByTestId("task-owner")
+      .getByTestId("quick-owner")
       .locator("option")
       .filter({ hasText: labels[locale].agent }),
   ).toHaveCount(0);
@@ -88,14 +91,21 @@ test("sign in, create a task and assign it to an agent", async ({
       new URL(response.url()).pathname === "/api/tasks" &&
       response.request().method() === "POST",
   );
-  await page.getByTestId("task-submit").click();
+  await page.getByTestId("quick-create").click();
   const response = await created;
   expect(response.status()).toBe(201);
   expect(response.request().postDataJSON().title).toBe(title);
   const card = page
     .getByTestId("task-card")
-    .filter({ has: page.getByRole("heading", { name: title, exact: true }) });
+    .filter({ has: page.getByRole("link", { name: title, exact: true }) });
+  await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(card).toBeVisible();
+  await openQuickAdd(page);
+  await expect(page.getByTestId("quick-title")).toHaveValue("");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: messages[locale].planning.close, exact: true })
+    .click();
   await expect(card.getByTestId("assignment-select")).toBeEnabled();
   await card.getByTestId("assignment-select").selectOption(agentId as string);
   await expect(card.getByTestId("assignment-select")).toBeEnabled();
@@ -123,9 +133,11 @@ test("sign in, create a task and assign it to an agent", async ({
   expect(taskNavigations).toEqual([]);
   await card.getByRole("link", { name: title, exact: true }).click();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(title);
+  await openTaskField(page, "worker");
   await expect(page.getByTestId("detail-worker")).toHaveValue(
     agentId as string,
   );
+  await closeTaskField(page, "worker");
   await page.goto("/");
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[otherLocale].today,
@@ -150,13 +162,20 @@ test("create an account with a workspace, then sign in again", async ({
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
   await useLocale(page, locale);
-  await page.getByTestId("task-title").fill(`First task ${locale}`);
-  await expect(page.getByTestId("task-submit")).toBeEnabled();
-  await page.getByTestId("task-submit").click();
+  await openQuickAdd(page);
+  await page.getByTestId("quick-title").fill(`First task ${locale}`);
+  await expect(page.getByTestId("quick-create")).toBeEnabled();
+  await page.getByTestId("quick-create").click();
   await expect(
-    page.getByRole("heading", { name: `First task ${locale}`, exact: true }),
+    page.getByRole("link", { name: `First task ${locale}`, exact: true }),
   ).toBeVisible();
-  await expect(page.getByTestId("task-submit")).toBeEnabled();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await openQuickAdd(page);
+  await expect(page.getByTestId("quick-title")).toHaveValue("");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: messages[locale].planning.close, exact: true })
+    .click();
   await signOutFromMe(page, locale);
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
@@ -165,7 +184,7 @@ test("create an account with a workspace, then sign in again", async ({
     labels[locale].today,
   );
   await expect(
-    page.getByRole("heading", { name: `First task ${locale}`, exact: true }),
+    page.getByRole("link", { name: `First task ${locale}`, exact: true }),
   ).toBeVisible();
 });
 
@@ -266,22 +285,28 @@ test("failed optimistic creation and assignment restore the previous list", asyn
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
-  await page.getByTestId("task-title").fill("Rejected task");
-  await expect(page.getByTestId("task-submit")).toBeEnabled();
-  await page.getByTestId("task-submit").click();
+  await openQuickAdd(page);
+  await page.getByTestId("quick-title").fill("Rejected task");
+  await expect(page.getByTestId("quick-create")).toBeEnabled();
+  await page.getByTestId("quick-create").click();
   await expect(
-    page.getByRole("heading", { name: "Rejected task", exact: true }),
+    page.locator(".today-task-title").filter({ hasText: "Rejected task" }),
   ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Rejected task", exact: true }),
   ).toHaveCount(0);
   rejectCreate();
   await expect(
-    page.getByRole("heading", { name: "Rejected task", exact: true }),
+    page.locator(".today-task-title").filter({ hasText: "Rejected task" }),
   ).toHaveCount(0);
   await expect(
     page.getByRole("alert").filter({ hasText: labels[locale].failure }),
   ).toHaveText(labels[locale].failure);
+  await expect(page.getByTestId("quick-title")).toHaveValue("Rejected task");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: messages[locale].planning.close, exact: true })
+    .click();
   const assignment = page
     .getByTestId("task-card")
     .filter({ hasText: "Existing task" })

@@ -115,7 +115,10 @@
     "invalid": "Check dates, duration, zone and repeat.",
     "openTask": "Open task",
     "selectView": "View",
-    "noEvents": "No scheduled tasks"
+    "noEvents": "No scheduled tasks",
+    "tools": "Calendar controls",
+    "dragHint": "Drag to move; use list for keyboard scheduling",
+    "goToDate": "Go to date"
   },
   "projects": {
     "title": "Projects",
@@ -169,7 +172,12 @@
     "grantAccess": "Grant access",
     "markUnread": "Mark unread",
     "markRead": "Mark read",
-    "snoozeDay": "Snooze 24 hours"
+    "snoozeDay": "Snooze 24 hours",
+    "markAllRead": "Mark all read",
+    "view": "View",
+    "tomorrow": "Tomorrow",
+    "snoozedTomorrow": "Snoozed until tomorrow",
+    "closeDetail": "Close detail"
   },
   "me": {
     "title": "Me",
@@ -181,7 +189,15 @@
     "dark": "Dark",
     "system": "Follow system",
     "timeZone": "Time zone",
-    "timeZoneHint": "Dates and times follow this zone on every device. It was detected from your first browser."
+    "timeZoneHint": "Dates and times follow this zone on every device. It was detected from your first browser.",
+    "teamSummary": "{{people}} people · {{agents}} agents",
+    "settings": "Settings",
+    "advanced": "More settings",
+    "notificationSummary": "{{count}} on",
+    "notificationsOff": "Off",
+    "digestSummary": "Daily digest {{time}}",
+    "languageHK": "繁體中文",
+    "languageCN": "简体"
   },
   "mcp": {
     "title": "MCP server",
@@ -252,7 +268,10 @@
       "requestGrant": "Request permission",
       "calendarList": "List actual scheduled occurrences",
       "calendarSet": "Set a whole-series calendar schedule"
-    }
+    },
+    "back": "Back",
+    "copyEndpoint": "Copy endpoint",
+    "copyConfig": "Copy configuration"
   },
   "taskDetail": {
     "back": "Back to Today",
@@ -449,7 +468,9 @@
     "empty": "No results. Try another phrase or scope.",
     "keyboard": "↑ ↓ navigate · Enter opens · Esc closes",
     "matchingComment": "Matched a comment",
-    "matchingDescription": "Matched the description"
+    "matchingDescription": "Matched the description",
+    "cancel": "Cancel",
+    "clear": "Clear search"
   },
   "quickAdd": {
     "title": "Quick add",
@@ -505,7 +526,8 @@
       "expired": "Expired"
     },
     "current": "Current organization",
-    "roleFor": "Role for {{name}}"
+    "roleFor": "Role for {{name}}",
+    "people": "People"
   },
   "pwa": {
     "description": "Tasks and calendars for people and agents.",
@@ -575,5 +597,8 @@
   },
   "shell": {
     "view": "View"
-  }
+  },
+  "todayDue": "Due today",
+  "todayScheduleEmpty": "No appointments today.",
+  "todayNow": "Now"
 }

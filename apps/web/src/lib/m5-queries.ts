@@ -11,11 +11,14 @@ import { request } from "./api";
 import { invalidateM3 } from "./m3-queries";
 import { m3MutationKey, patchTask, snapshotM3 } from "./optimistic-m3";
 import { isCurrentSnapshot, restoreQueries } from "./query-snapshot";
+import { currentSession } from "./session-cache";
 export const projectsKey = (id: string) => ["projects", id] as const;
 export const commentsKey = (id: string) => ["task-comments", id] as const;
 export const accessKey = (id: string) => ["task-access", id] as const;
 export function useProjects(id: string) {
+  const client = useQueryClient();
   return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
     queryKey: projectsKey(id),
     queryFn: async () =>
       (await request<unknown[]>(`/api/projects?workspaceId=${id}`)).map(
@@ -24,7 +27,9 @@ export function useProjects(id: string) {
   });
 }
 export function useTaskComments(id: string) {
+  const client = useQueryClient();
   return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
     queryKey: commentsKey(id),
     queryFn: async () =>
       (await request<unknown[]>(`/api/tasks/${id}/comments`)).map((value) =>
@@ -33,9 +38,12 @@ export function useTaskComments(id: string) {
   });
 }
 export function useTaskAccess(id: string) {
+  const client = useQueryClient();
   return useQuery({
     queryKey: accessKey(id),
-    enabled: !id.startsWith("optimistic:"),
+    enabled:
+      !id.startsWith("optimistic:") &&
+      currentSession(client)?.confirmed !== false,
     staleTime: 0,
     queryFn: async () =>
       taskAccessSchema.parse(await request(`/api/tasks/${id}/access`)),

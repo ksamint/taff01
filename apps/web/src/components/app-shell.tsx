@@ -78,11 +78,13 @@ const Sidebar = dynamic(() =>
 type Workspace = Me["workspaces"][number];
 type WorkspaceValue = {
   me: Me;
+  confirmed: boolean;
   workspace: Workspace;
   setWorkspaceId: (id: string) => void;
   setLocale: (locale: Locale) => void;
   setTimeZone: (tz: string) => void;
   localePending: boolean;
+  profileError: string | null;
   openSearch: () => void;
   openQuick: () => void;
   signOut: () => void;
@@ -307,9 +309,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
   // Accounts start on UTC because sign-up never asks; the first signed-in
   // browser sets the real zone, and the chosen language survives sign-up.
-  const detected = useRef(false);
+  const detected = useRef<string | null>(null);
   useEffect(() => {
-    if (!confirmed || !me.data || detected.current || profile.isPending) return;
+    if (
+      !confirmed ||
+      !me.data ||
+      detected.current === me.data.user.id ||
+      profile.isPending
+    )
+      return;
     const zone = browserTimeZone(me.data.user.tz);
     const chosen = readPreference();
     const locale =
@@ -317,10 +325,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         ? chosen
         : me.data.user.locale;
     if (me.data.user.tz === "UTC" && zone !== "UTC") {
-      detected.current = true;
+      detected.current = me.data.user.id;
       profile.mutate({ locale, tz: zone });
     } else if (locale !== me.data.user.locale) {
-      detected.current = true;
+      detected.current = me.data.user.id;
       profile.mutate({ locale, tz: me.data.user.tz });
     }
   }, [me.data, profile, confirmed]);
@@ -389,11 +397,14 @@ export function AppShell({ children }: { children: ReactNode }) {
         <WorkspaceContext.Provider
           value={{
             me: me.data,
+            confirmed,
             workspace,
             setWorkspaceId,
             setLocale,
             setTimeZone,
             localePending: profile.isPending,
+            profileError:
+              sessionError === "errors.profile" ? sessionError : null,
             openSearch: () => setOverlay("search"),
             openQuick: () => setOverlay("quick"),
             signOut: () => signOut.mutate(),

@@ -6,10 +6,12 @@ export function SheetDialog({
   title,
   onClose,
   children,
+  className = "",
 }: {
   title: string;
   onClose: () => void;
   children: ReactNode;
+  className?: string;
 }) {
   const { t } = useTranslation();
   const ref = useRef<HTMLDialogElement>(null);
@@ -27,10 +29,11 @@ export function SheetDialog({
   return (
     <dialog
       ref={ref}
-      className="sheet-dialog"
+      className={`sheet-dialog ${className}`}
       aria-labelledby={titleId}
       onCancel={(event) => {
         event.preventDefault();
+        event.stopPropagation();
         onClose();
       }}
       onClick={(event) => {
@@ -48,6 +51,7 @@ export function SheetDialog({
       <div className="section-heading">
         <h2 id={titleId}>{title}</h2>
         <Button
+          type="button"
           className="button-quiet"
           onClick={onClose}
           aria-label={t("planning.close")}

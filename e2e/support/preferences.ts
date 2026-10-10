@@ -67,7 +67,7 @@ export async function selectLocale(page: Page, locale: TestLocale) {
   if (saved) expect((await saved).status()).toBe(200);
   await expectLocaleReady(page);
   if (previous.pathname !== "/me") {
-    // Next links retain AppShell and its profile mutation state.
+    // Leave preferences only after its mutation has settled.
     const link = page.locator(`a[href="${previous.pathname}"]:visible`).first();
     if (await link.count()) {
       await link.click();

@@ -3,9 +3,30 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { chromium, expect } from "@playwright/test";
+import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
 
 const out = path.resolve(process.argv[2] ?? "docs/ui/screenshots/ui-parity");
 const base = process.env.AUTH_URL ?? "http://localhost:3000";
+const screen = process.env.UI_SCREEN ?? "all";
+assert(
+  [
+    "all",
+    "shell",
+    "today",
+    "calendar",
+    "projects",
+    "inbox",
+    "me",
+    "mcp",
+    "organizations",
+    "task-detail",
+    "agent",
+    "review",
+    "search",
+    "type",
+  ].includes(screen),
+  "Unknown UI_SCREEN",
+);
 const email = process.env.DEMO_EMAIL ?? "alex@taff.local";
 const password = process.env.DEMO_PASSWORD;
 assert(
@@ -27,9 +48,13 @@ try {
         viewport,
         deviceScaleFactor: 1,
         locale: locale === "en" ? "en-US" : locale,
+        timezoneId: "UTC",
+        isMobile: device === "phone",
+        hasTouch: device === "phone",
       });
       try {
         const page = await context.newPage();
+        await page.clock.setFixedTime(new Date("2026-10-08T11:20:00Z"));
         const login = await page.request.post(
           `${base}/api/auth/sign-in/email`,
           {
@@ -49,7 +74,7 @@ try {
         assert.equal(
           (
             await page.request.patch(`${base}/api/profile`, {
-              data: { locale, tz: me.user.tz },
+              data: { locale, tz: "UTC" },
               headers: { Origin: base },
             })
           ).status(),
@@ -74,9 +99,19 @@ try {
         assert.equal(membersResponse.status(), 200);
         const tasks = await tasksResponse.json();
         const members = await membersResponse.json();
-        const agent = members.find((member) => member.kind === "agent");
+        const agent =
+          members.find(
+            (member) => member.id === prototypeId("member", "nw", 1),
+          ) ?? members.find((member) => member.kind === "agent");
         const task =
-          tasks.find((item) => item.status === "needs_review") ?? tasks[0];
+          tasks.find((item) => item.id === prototypeId("task", "nw", 145)) ??
+          tasks[0];
+        const reviewTask =
+          tasks.find(
+            (item) =>
+              item.id === prototypeId("task", "nw", 141) &&
+              item.status === "needs_review",
+          ) ?? tasks.find((item) => item.status === "needs_review");
         assert(task && agent, "Seed must include tasks and agents");
         const routes = [
           ["today", "/"],
@@ -88,40 +123,51 @@ try {
           ["organizations", "/orgs"],
           ["task-detail", `/tasks/${task.id}`],
           ["agent", `/agents/${agent.id}`],
-          ...(task.status === "needs_review"
-            ? [["review", `/tasks/${task.id}/review`]]
-            : []),
+          ...(reviewTask ? [["review", `/tasks/${reviewTask.id}`]] : []),
         ];
-        for (const [screen, route] of routes) {
+        for (const [view, route] of routes) {
+          if (
+            screen !== "all" &&
+            screen !== "shell" &&
+            screen !== "type" &&
+            view !== screen
+          )
+            continue;
+          if (screen === "type" && view !== "projects") continue;
           const response = await page.goto(`${base}${route}`, {
             waitUntil: "networkidle",
           });
-          assert.equal(response.status(), 200, `${screen} did not load`);
+          assert.equal(response.status(), 200, `${view} did not load`);
           await expect(page.locator("main.content")).not.toHaveAttribute(
             "inert",
             "",
           );
           await page.evaluate(() => document.fonts.ready);
           await page.screenshot({
-            path: path.join(out, `${device}-${locale}-${screen}.png`),
+            path: path.join(out, `${device}-${locale}-${view}.png`),
             animations: "disabled",
           });
-          captures.push({ device, locale, screen, route, viewport });
+          captures.push({ device, locale, screen: view, route, viewport });
         }
-        await page.goto(`${base}/`, { waitUntil: "networkidle" });
-        await page.keyboard.press("Control+k");
-        await expect(page.getByRole("dialog")).toBeVisible();
-        await page.screenshot({
-          path: path.join(out, `${device}-${locale}-search.png`),
-          animations: "disabled",
-        });
-        captures.push({ device, locale, screen: "search", viewport });
+        if (screen === "all" || screen === "search") {
+          await page.goto(`${base}/`, { waitUntil: "networkidle" });
+          await page.keyboard.press("Control+k");
+          await expect(page.getByRole("dialog")).toBeVisible();
+          await page.screenshot({
+            path: path.join(out, `${device}-${locale}-search.png`),
+            animations: "disabled",
+          });
+          captures.push({ device, locale, screen: "search", viewport });
+        }
       } finally {
         await context.close();
       }
     }
   }
-  assert(captures.length >= 60, "Incomplete capture matrix");
+  assert(
+    captures.length >= (screen === "all" || screen === "shell" ? 60 : 6),
+    "Incomplete capture matrix",
+  );
   await writeFile(
     path.join(out, "manifest.json"),
     `${JSON.stringify({ captures }, null, 2)}\n`,

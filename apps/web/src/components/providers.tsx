@@ -3,6 +3,7 @@
 import type { Locale, Me } from "@taff/schemas";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createInstance, type ResourceLanguage } from "i18next";
+import { useRouter } from "next/navigation";
 import {
   createContext,
   type ReactNode,
@@ -42,6 +43,7 @@ export function Providers({
   messages: ResourceLanguage;
   initialMe: Me | null | undefined;
 }) {
+  const router = useRouter();
   const [workspaceId, setWorkspaceId] = useState("");
   const [invitation, setInvitation] = useState<string | null>(null);
   useEffect(() => {
@@ -54,9 +56,13 @@ export function Providers({
         "",
         window.location.pathname + window.location.search,
       );
+      // Keep Next's canonical URL in sync so navigation cannot restore the token.
+      router.replace(window.location.pathname + window.location.search, {
+        scroll: false,
+      });
       setInvitation(token);
     }
-  }, []);
+  }, [router]);
   const [client] = useState(() => {
     const queryClient = new QueryClient({
       defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },

@@ -13,7 +13,8 @@ import {
 import { runListSchema } from "../packages/schemas/src/run-read";
 import { messages } from "./support/messages";
 
-test("shell uses the real Northwind fixture", async ({ page }, info) => {
+const screen = process.env.UI_SCREEN ?? "shell";
+test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   if (!process.env.DEMO_PASSWORD) throw new Error("DEMO_PASSWORD is required");
   const locale = info.project.name.endsWith("zh-HK") ? "zh-HK" : "en";
   const desktop = info.project.name.startsWith("desktop-");
@@ -36,7 +37,7 @@ test("shell uses the real Northwind fixture", async ({ page }, info) => {
   ).toBeDefined();
   const profile = await page.request.patch("/api/profile", {
     headers: { Origin: process.env.AUTH_URL! },
-    data: { locale, tz: "Asia/Shanghai" },
+    data: { locale, tz: screen === "shell" ? "Asia/Shanghai" : "UTC" },
   });
   expect(profile.status()).toBe(200);
   const tasksResponse = await page.request.get(
@@ -87,10 +88,73 @@ test("shell uses the real Northwind fixture", async ({ page }, info) => {
     },
     { userId: me.user.id, workspaceId },
   );
-  const loaded = await page.goto(desktop ? "/projects" : "/");
+  if (screen !== "shell")
+    await page.clock.setFixedTime(new Date("2026-10-08T11:20:00Z"));
+  const routes: Record<string, string> = {
+    today: "/",
+    projects: "/projects",
+    inbox: "/inbox",
+    calendar: "/calendar",
+    me: "/me",
+    "task-detail": `/tasks/${prototypeId("task", "nw", 145)}`,
+    review: `/tasks/${prototypeId("task", "nw", 141)}`,
+    type: "/projects",
+  };
+  const loaded = await page.goto(
+    screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
+  );
   expect(loaded?.status()).toBe(200);
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
+  if (screen !== "shell") {
+    await expect(
+      page.getByText(messages[locale].loading, { exact: true }),
+    ).toHaveCount(0);
+    if (screen === "today") {
+      await expect(page.getByTestId("today-schedule")).toHaveCount(7);
+      await expect(page.getByTestId("task-card")).toHaveCount(2);
+    } else if (screen === "projects" || screen === "type") {
+      await expect(page.getByTestId("board-task")).toHaveCount(12);
+    } else if (screen === "task-detail" || screen === "review") {
+      await expect(page.getByTestId("task-detail-heading")).toBeVisible();
+    } else if (screen === "calendar") {
+      await expect(page.locator(".sx__calendar")).toBeVisible();
+    } else if (screen === "inbox") {
+      await expect(page.getByTestId("inbox-item")).toHaveCount(
+        inbox.items.length,
+      );
+    }
+    await page.evaluate(() => document.fonts.ready);
+    await expect(page).toHaveScreenshot(`${screen}.png`, {
+      animations: "disabled",
+    });
+    if (screen === "projects") {
+      await page.getByTestId("project-view-list").click();
+      await expect(page).toHaveScreenshot("projects-list.png", {
+        animations: "disabled",
+      });
+    }
+    if (screen === "calendar") {
+      await page.getByTestId("calendar-week").click();
+      await expect(page).toHaveScreenshot("calendar-week.png", {
+        animations: "disabled",
+      });
+      await page.getByTestId("calendar-month-grid").click();
+      await expect(page).toHaveScreenshot("calendar-month.png", {
+        animations: "disabled",
+      });
+    }
+    if (screen === "type") {
+      await page.evaluate(() => {
+        localStorage.setItem("taff-theme", "dark");
+        document.documentElement.dataset.theme = "dark";
+      });
+      await expect(page).toHaveScreenshot("type-dark.png", {
+        animations: "disabled",
+      });
+    }
+    return;
+  }
   const shell = page.locator(desktop ? "aside.sidebar" : "nav.tabbar");
   await expect(shell).toBeVisible();
   await expect(shell.locator('a[href="/inbox"]')).toContainText(

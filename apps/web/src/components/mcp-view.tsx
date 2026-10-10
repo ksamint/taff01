@@ -17,6 +17,8 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { ArrowLeft, ChevronDown, Copy, Cpu } from "lucide-react";
+import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError, errorKey, request } from "../lib/api";
@@ -81,7 +83,9 @@ export function McpView() {
     retry: false,
   });
   const [issued, setIssued] = useState<IssuedAgentToken | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<"endpoint" | "config" | "token" | null>(
+    null,
+  );
   const [confirming, setConfirming] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [memberId, setMemberId] = useState("");
@@ -122,7 +126,7 @@ export function McpView() {
         current?.map((item) => (item.id === context.id ? metadata : item)),
       );
       setIssued(token);
-      setCopied(false);
+      setCopied(null);
       setName("");
     },
     onSettled: () => client.invalidateQueries({ queryKey: tokensKey }),
@@ -186,59 +190,127 @@ export function McpView() {
     setValidationError(!parsed.success);
     if (parsed.success) create.mutate(parsed.data);
   }
-  async function copy(value: string) {
+  async function copy(value: string, target: "endpoint" | "config" | "token") {
     try {
       await navigator.clipboard.writeText(value);
-      setCopied(true);
+      setCopied(target);
     } catch {
-      setCopied(false);
+      setCopied(null);
     }
   }
+  const catalog = (
+    <details className="mcp-catalog">
+      <summary className="mcp-section-label">
+        <span>{t("mcp.tools")}</span>
+        <span>{TOOLS.length}</span>
+        <ChevronDown className="mcp-chevron" size={16} aria-hidden="true" />
+      </summary>
+      <ul className="mcp-tool-list">
+        {TOOLS.map(([name, key]) => (
+          <li key={name}>
+            <code>{name}</code>
+            <p>{t(`mcp.toolNames.${key}`)}</p>
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
   return (
-    <>
-      <section className="page-heading">
-        <p className="eyebrow">{workspace.name}</p>
+    <div className="mcp-view">
+      {/* Source: team-tasks.dc.html 711–790. Unsupported OAuth/client health
+          and mutable tool switches are replaced by the actual PAT controls. */}
+      <header className="mcp-backbar">
+        <Link href="/me" className="button button-quiet mcp-back">
+          <ArrowLeft size={16} aria-hidden="true" />
+          {t("mcp.back")}
+        </Link>
+      </header>
+      <div className="mcp-intro">
+        <p className="mcp-settings-label">{t("me.settings")}</p>
         <h1>{t("mcp.title")}</h1>
-        <p className="task-count">{t("mcp.subtitle")}</p>
-      </section>
-      <details className="me-section">
-        <summary>{t("mcp.tools")}</summary>
-        <ul className="history-list">
-          {TOOLS.map(([name, key]) => (
-            <li key={name}>
-              <code>{name}</code>
-              <p className="quiet">{t(`mcp.toolNames.${key}`)}</p>
-            </li>
-          ))}
-        </ul>
-      </details>
-      <section className="me-section" aria-labelledby="endpoint-heading">
-        <h2 id="endpoint-heading">{t("mcp.endpoint")}</h2>
-        <dl className="me-row">
-          <dt>{t("mcp.endpointUrl")}</dt>
-          <dd>
-            <code data-testid="mcp-endpoint">{endpoint}</code>
-          </dd>
-        </dl>
-        <p className="field-hint">{t("mcp.endpointHint")}</p>
-      </section>
+        <p className="mcp-introduction">{t("mcp.subtitle")}</p>
+        {!tokens.isPending && !tokens.isError && (
+          <p className="mcp-token-count">
+            {t("mcp.tokens")} · {tokens.data.length}
+          </p>
+        )}
+      </div>
+      <div className="mcp-connection">
+        <section className="mcp-block" aria-labelledby="endpoint-heading">
+          <h2 id="endpoint-heading" className="mcp-section-label">
+            {t("mcp.endpoint")}
+          </h2>
+          <div className="mcp-copy-row">
+            <code data-testid="mcp-endpoint" title={endpoint}>
+              {endpoint}
+            </code>
+            <Button
+              type="button"
+              className="button-quiet mcp-copy-button"
+              aria-label={t("mcp.copyEndpoint")}
+              onClick={() => void copy(endpoint, "endpoint")}
+            >
+              <Copy size={16} aria-hidden="true" />
+            </Button>
+          </div>
+          {copied === "endpoint" && (
+            <p className="mcp-copy-feedback" role="status">
+              {t("mcp.copied")}
+            </p>
+          )}
+          <p className="mcp-endpoint-label">{t("mcp.endpointUrl")}</p>
+          <p className="mcp-auth-body">{t("mcp.endpointHint")}</p>
+        </section>
+        <section className="mcp-block" aria-labelledby="config-heading">
+          <h2 id="config-heading" className="mcp-section-label">
+            {t("mcp.clientConfig")}
+          </h2>
+          <div className="mcp-config-wrap">
+            <pre className="mcp-config">{config}</pre>
+            <Button
+              type="button"
+              className="button-quiet mcp-copy-button"
+              aria-label={t("mcp.copyConfig")}
+              onClick={() => void copy(config, "config")}
+            >
+              <Copy size={16} aria-hidden="true" />
+            </Button>
+          </div>
+          {copied === "config" && (
+            <p className="mcp-copy-feedback" role="status">
+              {t("mcp.copied")}
+            </p>
+          )}
+        </section>
+      </div>
       {forbidden ? (
-        <section className="me-section">
-          <p className="alert" role="status">
+        <>
+          <p className="mcp-notice alert" role="status">
             {t("mcp.adminOnly")}
           </p>
-        </section>
+          {catalog}
+        </>
       ) : (
         <>
-          <section className="me-section" aria-labelledby="new-token-heading">
-            <h2 id="new-token-heading">{t("mcp.newToken")}</h2>
+          <section
+            className="mcp-token-create"
+            aria-labelledby="new-token-heading"
+          >
+            <h2 id="new-token-heading" className="mcp-section-label">
+              {t("mcp.newToken")}
+            </h2>
             {issued && (
-              <div className="panel token-reveal" data-testid="issued-token">
-                <p className="label">{t("mcp.showOnce")}</p>
-                <code className="token-value">{issued.token}</code>
-                <div className="radio-row">
-                  <Button type="button" onClick={() => void copy(issued.token)}>
-                    {t(copied ? "mcp.copied" : "mcp.copyToken")}
+              <div className="mcp-issued" data-testid="issued-token">
+                <p className="mcp-show-once">{t("mcp.showOnce")}</p>
+                <code className="mcp-token-value">{issued.token}</code>
+                <div className="mcp-actions">
+                  <Button
+                    type="button"
+                    className="button-quiet"
+                    onClick={() => void copy(issued.token, "token")}
+                  >
+                    <Copy size={16} aria-hidden="true" />
+                    {t(copied === "token" ? "mcp.copied" : "mcp.copyToken")}
                   </Button>
                   <Button
                     type="button"
@@ -248,8 +320,6 @@ export function McpView() {
                     {t("mcp.dismiss")}
                   </Button>
                 </div>
-                <p className="label">{t("mcp.clientConfig")}</p>
-                <pre className="config-block">{config}</pre>
               </div>
             )}
             <form onSubmit={submit} noValidate>
@@ -281,26 +351,25 @@ export function McpView() {
                   ))}
                 </select>
               </div>
-              <fieldset className="field" style={{ border: 0, padding: 0 }}>
-                <legend className="label">{t("mcp.scopes")}</legend>
-                <div className="radio-row">
-                  {SCOPES.map((scope) => (
-                    <label key={scope}>
-                      <input
-                        type="checkbox"
-                        checked={scopes.includes(scope)}
-                        onChange={(event) =>
-                          setScopes((current) =>
-                            event.target.checked
-                              ? [...current, scope]
-                              : current.filter((item) => item !== scope),
-                          )
-                        }
-                      />
-                      {t(`mcp.scope.${scope}`)}
-                    </label>
-                  ))}
-                </div>
+              <fieldset className="mcp-scopes">
+                <legend className="mcp-section-label">{t("mcp.scopes")}</legend>
+                {SCOPES.map((scope) => (
+                  <label key={scope}>
+                    <span>{t(`mcp.scope.${scope}`)}</span>
+                    <code>{scope}</code>
+                    <input
+                      type="checkbox"
+                      checked={scopes.includes(scope)}
+                      onChange={(event) =>
+                        setScopes((current) =>
+                          event.target.checked
+                            ? [...current, scope]
+                            : current.filter((item) => item !== scope),
+                        )
+                      }
+                    />
+                  </label>
+                ))}
               </fieldset>
               {(validationError || create.isError) && (
                 <p className="alert" role="alert">
@@ -321,134 +390,174 @@ export function McpView() {
               </Button>
             </form>
           </section>
-          <section className="me-section" aria-labelledby="tokens-heading">
-            <h2 id="tokens-heading">{t("mcp.tokens")}</h2>
+          <section className="mcp-tokens" aria-labelledby="tokens-heading">
+            <h2
+              id="tokens-heading"
+              className="mcp-section-label mcp-list-heading"
+            >
+              {t("mcp.tokens")}
+            </h2>
+            {revoke.isError && (
+              <p className="mcp-notice alert" role="alert">
+                {t(errorKey(revoke.error))}
+              </p>
+            )}
             {tokens.isPending ? (
-              <p aria-live="polite">{t("loading")}</p>
+              <p className="mcp-notice" aria-live="polite">
+                {t("loading")}
+              </p>
             ) : tokens.isError ? (
-              <p className="alert" role="alert">
+              <p className="mcp-notice alert" role="alert">
                 {t(errorKey(tokens.error))}
               </p>
             ) : tokens.data.length === 0 ? (
-              <p className="section-hint">{t("mcp.noTokens")}</p>
+              <p className="mcp-notice">{t("mcp.noTokens")}</p>
             ) : (
-              <ul className="task-list">
+              <ul className="mcp-token-list">
                 {tokens.data.map((token) => (
-                  <li
-                    key={token.id}
-                    className="task-card"
-                    data-testid="token-card"
-                  >
-                    <div className="task-card-top">
-                      <span
-                        className={`status ${token.revokedAt ? "" : "status-done"}`}
-                      >
-                        {t(
-                          token.id.startsWith("optimistic:")
-                            ? "working"
-                            : token.revokedAt
-                              ? "mcp.revoked"
-                              : "mcp.active",
-                        )}
-                      </span>
-                      <span className="task-due">
-                        {token.lastUsedAt
-                          ? t("mcp.lastUsed", { date: when(token.lastUsedAt) })
-                          : t("mcp.neverUsed")}
-                      </span>
-                    </div>
-                    <h3>{token.name}</h3>
-                    <p className="task-owner">
-                      {agents.find((agent) => agent.id === token.memberId)
-                        ?.name ?? t("unknownMember")}{" "}
-                      · <code>{token.prefix}…</code> · {token.scopes.join(", ")}
-                    </p>
-                    {!token.revokedAt &&
-                      (confirming === token.id ? (
-                        <div className="radio-row">
-                          <Button
-                            type="button"
-                            className="button-primary"
-                            disabled={busy}
-                            onClick={() => revoke.mutate(token.id)}
-                          >
-                            {t("mcp.confirmRevoke")}
-                          </Button>
-                          <Button
-                            type="button"
-                            className="button-quiet"
-                            onClick={() => setConfirming(null)}
-                          >
-                            {t("mcp.cancel")}
-                          </Button>
-                        </div>
-                      ) : (
-                        <div>
-                          <Button
-                            type="button"
-                            className="button-quiet"
-                            disabled={
-                              revoke.isPending ||
-                              create.isPending ||
-                              token.id.startsWith("optimistic:")
-                            }
-                            onClick={() => setConfirming(token.id)}
-                          >
-                            {t("mcp.revoke")}
-                          </Button>
-                        </div>
-                      ))}
+                  <li key={token.id} data-testid="token-card">
+                    <details className="mcp-token-details">
+                      <summary>
+                        <span className="mcp-client-icon">
+                          <Cpu size={16} aria-hidden="true" />
+                        </span>
+                        <span className="mcp-client-copy">
+                          <h3>{token.name}</h3>
+                          <span>
+                            {agents.find((agent) => agent.id === token.memberId)
+                              ?.name ?? t("unknownMember")}{" "}
+                            · <code>{token.prefix}…</code>
+                          </span>
+                        </span>
+                        <span
+                          className={`mcp-token-state${!token.revokedAt && !token.id.startsWith("optimistic:") ? " is-active" : ""}`}
+                        >
+                          {t(
+                            token.id.startsWith("optimistic:")
+                              ? "working"
+                              : token.revokedAt
+                                ? "mcp.revoked"
+                                : "mcp.active",
+                          )}
+                        </span>
+                        <ChevronDown
+                          className="mcp-chevron"
+                          size={16}
+                          aria-hidden="true"
+                        />
+                      </summary>
+                      <div className="mcp-client-body">
+                        <p className="mcp-last-used">
+                          {token.lastUsedAt
+                            ? t("mcp.lastUsed", {
+                                date: when(token.lastUsedAt),
+                              })
+                            : t("mcp.neverUsed")}
+                        </p>
+                        <ul className="mcp-granted-scopes">
+                          {token.scopes.map((scope) => (
+                            <li key={scope}>
+                              <span>{t(`mcp.scope.${scope}`)}</span>
+                              <code>{scope}</code>
+                            </li>
+                          ))}
+                        </ul>
+                        {!token.revokedAt &&
+                          (confirming === token.id ? (
+                            <div className="mcp-actions">
+                              <Button
+                                type="button"
+                                className="button-primary"
+                                disabled={busy}
+                                onClick={() => revoke.mutate(token.id)}
+                              >
+                                {t("mcp.confirmRevoke")}
+                              </Button>
+                              <Button
+                                type="button"
+                                className="button-quiet"
+                                onClick={() => setConfirming(null)}
+                              >
+                                {t("mcp.cancel")}
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              type="button"
+                              className="button-quiet"
+                              disabled={
+                                revoke.isPending ||
+                                create.isPending ||
+                                token.id.startsWith("optimistic:")
+                              }
+                              onClick={() => setConfirming(token.id)}
+                            >
+                              {t("mcp.revoke")}
+                            </Button>
+                          ))}
+                      </div>
+                    </details>
                   </li>
                 ))}
               </ul>
             )}
           </section>
-          <section className="me-section" aria-labelledby="calls-heading">
-            <h2 id="calls-heading">{t("mcp.callLog")}</h2>
+          {catalog}
+          <section className="mcp-calls" aria-labelledby="calls-heading">
+            <h2
+              id="calls-heading"
+              className="mcp-section-label mcp-list-heading"
+            >
+              {t("mcp.callLog")}
+            </h2>
             {calls.isPending ? (
-              <p aria-live="polite">{t("loading")}</p>
+              <p className="mcp-notice" aria-live="polite">
+                {t("loading")}
+              </p>
             ) : calls.isError ? (
-              <p className="alert" role="alert">
+              <p className="mcp-notice alert" role="alert">
                 {t(errorKey(calls.error))}
               </p>
             ) : calls.data.length === 0 ? (
-              <p className="section-hint">{t("mcp.noCalls")}</p>
+              <p className="mcp-notice">{t("mcp.noCalls")}</p>
             ) : (
-              <table className="call-log">
-                <thead>
-                  <tr>
-                    <th>{t("mcp.when")}</th>
-                    <th>{t("mcp.method")}</th>
-                    <th>{t("mcp.tool")}</th>
-                    <th>{t("mcp.status")}</th>
-                    <th>{t("mcp.duration")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {calls.data.map((call) => (
-                    <tr key={call.id}>
-                      <td>{when(call.createdAt)}</td>
-                      <td>
-                        <code>{call.method}</code>
-                      </td>
-                      <td>
-                        <code>{call.tool ?? "—"}</code>
-                      </td>
-                      <td>{t(`mcp.callStatus.${call.status}`)}</td>
-                      <td>
-                        {new Intl.NumberFormat(locale, {
-                          style: "unit",
-                          unit: "millisecond",
-                        }).format(call.durationMs)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <ul className="mcp-call-list">
+                {calls.data.map((call) => (
+                  <li key={call.id}>
+                    <div className="mcp-call-copy">
+                      <code>{call.tool ?? "—"}</code>
+                      <dl>
+                        <div>
+                          <dt>{t("mcp.method")}</dt>
+                          <dd>
+                            <code>{call.method}</code>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>{t("mcp.status")}</dt>
+                          <dd>{t(`mcp.callStatus.${call.status}`)}</dd>
+                        </div>
+                        <div>
+                          <dt>{t("mcp.duration")}</dt>
+                          <dd>
+                            {new Intl.NumberFormat(locale, {
+                              style: "unit",
+                              unit: "millisecond",
+                            }).format(call.durationMs)}
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                    <time dateTime={call.createdAt}>
+                      {when(call.createdAt)}
+                    </time>
+                  </li>
+                ))}
+              </ul>
             )}
           </section>
         </>
       )}
-    </>
+    </div>
   );
 }

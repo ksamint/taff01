@@ -155,7 +155,8 @@ export function ScheduleEditor({
             <Input
               id="schedule-start"
               data-testid="schedule-start"
-              type="datetime-local"
+              type="text"
+              placeholder="YYYY-MM-DDTHH:mm"
               step={1}
               required
               value={start}
@@ -167,7 +168,8 @@ export function ScheduleEditor({
             <Input
               id="schedule-end"
               data-testid="schedule-end"
-              type="datetime-local"
+              type="text"
+              placeholder="YYYY-MM-DDTHH:mm"
               step={1}
               required
               value={end}

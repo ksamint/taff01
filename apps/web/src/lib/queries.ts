@@ -4,6 +4,7 @@ import {
   meSchema,
   taskListSchema,
 } from "@taff/schemas/base";
+import { calendarViewDataSchema } from "@taff/schemas/calendar-read";
 import { inboxSchema } from "@taff/schemas/inbox-read";
 import { runListSchema } from "@taff/schemas/run-read";
 import { workspaceAccessSchema } from "@taff/schemas/workspace-read";
@@ -17,6 +18,22 @@ export const tasksKey = (workspaceId: string) =>
   ["tasks", workspaceId] as const;
 export const membersKey = (workspaceId: string) =>
   ["members", workspaceId] as const;
+
+export function useCalendar(id: string, from: string, to: string) {
+  const client = useQueryClient();
+  return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
+    refetchOnMount: () =>
+      client.isMutating({ mutationKey: m3MutationKey }) === 0,
+    queryKey: ["calendar", id, from, to],
+    queryFn: async () =>
+      calendarViewDataSchema.parse(
+        await request(
+          `/api/calendar?${new URLSearchParams({ workspaceId: id, from, to })}`,
+        ),
+      ),
+  });
+}
 
 export function useMeQuery() {
   return useQuery({

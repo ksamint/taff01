@@ -13,11 +13,16 @@ import {
   workspaceSchema,
 } from "@taff/schemas";
 import {
+  type PrototypeLocale,
+  presentPrototypeField,
+} from "@taff/schemas/prototype-data";
+import {
   useIsMutating,
   useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
+import { ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -25,7 +30,13 @@ import { errorKey, request } from "../lib/api";
 import { invalidateM3 } from "../lib/m3-queries";
 import { useWorkspaceAccess } from "../lib/m5-queries";
 import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
-import { meKey, membersKey, useMembers } from "../lib/queries";
+import {
+  meKey,
+  membersKey,
+  useMembers,
+  useRuns,
+  useTasks,
+} from "../lib/queries";
 import {
   isCurrentSnapshot,
   restoreQueries,
@@ -45,6 +56,9 @@ export function OrganizationsView() {
   const client = useQueryClient();
   const access = useWorkspaceAccess(workspace.id);
   const members = useMembers(workspace.id);
+  const tasks = useTasks(workspace.id);
+  const runs = useRuns(workspace.id);
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const key = ["invites", workspace.id] as const;
   const drafts = ["org-drafts", me.user.id] as const;
@@ -209,7 +223,13 @@ export function OrganizationsView() {
     members.error ??
     invites.error;
   return (
-    <>
+    <div className="organizations-view">
+      <header className="organization-toolbar">
+        <Link className="button button-quiet" href="/me">
+          <ArrowLeft size={16} aria-hidden="true" />
+          {t("mcp.back")}
+        </Link>
+      </header>
       <section className="page-heading">
         <h1>{t("organization.title")}</h1>
         <p className="section-hint">{t("organization.switchHint")}</p>
@@ -279,50 +299,128 @@ export function OrganizationsView() {
       >
         {t("organization.create")}
       </Button>
-      <section className="me-section" id="team">
-        <h2>{t("organization.team")}</h2>
-        <ul className="history-list">
-          {members.data?.map((member) => (
-            <li key={member.id} className="member-role-row">
-              <div>
-                {member.kind === "agent" ? (
-                  <Link className="text-link" href={`/agents/${member.id}`}>
-                    {member.name}
-                  </Link>
-                ) : (
-                  <strong>{member.name}</strong>
-                )}
-                <p className="quiet">
-                  {t(
-                    member.kind === "agent"
-                      ? "agent"
-                      : `organization.${member.role}`,
-                  )}
-                </p>
-              </div>
-              {member.kind === "person" && access.data?.canManageRoles && (
-                <select
-                  aria-label={t("organization.roleFor", { name: member.name })}
-                  data-testid={`role-${member.id}`}
-                  value={member.role}
-                  disabled={busy}
-                  onChange={(event) =>
-                    changeRole.mutate({
-                      id: member.id,
-                      next: event.target.value as Member["role"],
-                    })
-                  }
-                >
-                  {["admin", "member", "guest"].map((value) => (
-                    <option key={value} value={value}>
-                      {t(`organization.${value}`)}
-                    </option>
-                  ))}
-                </select>
+      <section className="team-directory" id="team">
+        <header className="organization-toolbar">
+          <Link className="button button-quiet" href="/me">
+            <ArrowLeft size={16} aria-hidden="true" />
+            {t("mcp.back")}
+          </Link>
+        </header>
+        <h1>{t("organization.team")}</h1>
+        {(["person", "agent"] as const).map((kind) => (
+          <section key={kind}>
+            <h2>
+              {t(
+                kind === "person" ? "organization.people" : "agentProfile.team",
+              )}{" "}
+              ·{" "}
+              {new Intl.NumberFormat(locale).format(
+                members.data?.filter((member) => member.kind === kind).length ??
+                  0,
               )}
-            </li>
-          ))}
-        </ul>
+            </h2>
+            <ul className="team-directory-list">
+              {members.data
+                ?.filter((member) => member.kind === kind)
+                .map((member) => {
+                  const name = presentPrototypeField(
+                    member.id,
+                    "name",
+                    member.name,
+                    locale,
+                  );
+                  const latest = runs.data
+                    ?.filter((run) => run.agentId === member.id)
+                    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+                  const assigned = tasks.data?.filter(
+                    (task) =>
+                      task.status !== "done" &&
+                      (task.workerId === member.id ||
+                        task.ownerId === member.id),
+                  ).length;
+                  const content = (
+                    <>
+                      <span
+                        className={`team-avatar team-avatar-${kind}`}
+                        aria-hidden="true"
+                      >
+                        {kind === "agent" ? (
+                          <Sparkles size={18} />
+                        ) : (
+                          name.slice(0, 1)
+                        )}
+                      </span>
+                      <span className="team-member-copy">
+                        <strong>{name}</strong>
+                        <span>
+                          {t(
+                            kind === "agent"
+                              ? "agent"
+                              : `organization.${member.role}`,
+                          )}
+                        </span>
+                        {kind === "agent" && latest && (
+                          <span className="team-agent-status">
+                            <span
+                              className={`agent-status-dot agent-status-${latest.status}`}
+                              aria-hidden="true"
+                            />
+                            {t(`run.status.${latest.status}`)}
+                          </span>
+                        )}
+                      </span>
+                    </>
+                  );
+                  return (
+                    <li key={member.id} className="member-role-row">
+                      {kind === "agent" ? (
+                        <Link
+                          className="team-agent-link"
+                          href={`/agents/${member.id}`}
+                        >
+                          {content}
+                        </Link>
+                      ) : (
+                        content
+                      )}
+                      {assigned !== undefined && (
+                        <span className="team-workload">
+                          {t("taskCount", { count: assigned })}
+                        </span>
+                      )}
+                      {kind === "person" && access.data?.canManageRoles && (
+                        <select
+                          aria-label={t("organization.roleFor", {
+                            name: member.name,
+                          })}
+                          data-testid={`role-${member.id}`}
+                          value={member.role}
+                          disabled={busy}
+                          onChange={(event) =>
+                            changeRole.mutate({
+                              id: member.id,
+                              next: event.target.value as Member["role"],
+                            })
+                          }
+                        >
+                          {["admin", "member", "guest"].map((value) => (
+                            <option key={value} value={value}>
+                              {t(`organization.${value}`)}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+                    </li>
+                  );
+                })}
+            </ul>
+          </section>
+        ))}
+        {(tasks.isError || runs.isError) && (
+          <p className="alert" role="alert">
+            {t(errorKey(tasks.error ?? runs.error))}
+          </p>
+        )}
       </section>
       {access.data?.canInvite && (
         <section className="me-section">
@@ -530,6 +628,6 @@ export function OrganizationsView() {
           )}
         </SheetDialog>
       )}
-    </>
+    </div>
   );
 }

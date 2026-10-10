@@ -6,10 +6,18 @@ import {
   memberListSchema,
   meSchema,
   projectSchema,
+  runSchema,
+  taskCommentSchema,
   taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
 import { selectLocale } from "./support/preferences";
+import {
+  closeFieldSheet,
+  closeTaskField,
+  openProjectFilters,
+  openTaskField,
+} from "./support/task-fields";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
 type Locale = keyof typeof messages;
@@ -67,6 +75,7 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   await signIn(page, locale);
   const workspace = await freshWorkspace(page, locale);
   await page.goto("/projects");
+  await openProjectFilters(page);
   await page.getByTestId("new-project").click();
   const projectName = `Launch ${Date.now()}`;
   await page.getByTestId("project-name").fill(projectName);
@@ -110,15 +119,23 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   expect(created.projectId).toBe(project.id);
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await page.goto(`/tasks/${created.id}`);
+  await openTaskField(page, "text");
   await expect(page.getByTestId("edit-title")).toBeEnabled();
   const editedTitle = `${title} final`;
   const body = `Planning description ${locale} <img src=x onerror=alert(1)>`;
   await page.getByTestId("edit-title").fill(editedTitle);
   await page.getByTestId("edit-description").fill(body);
+  await closeTaskField(page, "text");
+  await openTaskField(page, "priority");
   await page.getByTestId("edit-priority").selectOption("1");
+  await closeTaskField(page, "priority");
+  await openTaskField(page, "labels");
   await page.getByTestId("edit-labels").fill("launch, approved");
+  await closeTaskField(page, "labels");
+  await openTaskField(page, "due");
   await page.getByTestId("edit-date").fill("2027-01-15");
   await page.getByTestId("edit-time").fill("09:45");
+  await closeTaskField(page, "due");
   const editedResponse = page.waitForResponse(
     (response) =>
       response.request().method() === "PATCH" &&
@@ -130,7 +147,7 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   expect(taskSchema.parse(await acknowledgement.json()).description).toBe(body);
   await expect(page.getByTestId("subtask-title")).toBeEnabled();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(editedTitle);
-  await expect(page.getByTestId("edit-save")).toBeDisabled();
+  await expect(page.getByTestId("edit-save")).toHaveCount(0);
   const saved = taskSchema.parse(
     await (await page.request.get(`/api/tasks/${created.id}`)).json(),
   );
@@ -157,9 +174,15 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   await expect(page.locator(".review-comments")).toContainText(comment);
   expect(await page.evaluate(() => "e2eInjected" in window)).toBe(false);
   await page.reload();
+  await openTaskField(page, "text");
   await expect(page.getByTestId("edit-description")).toHaveValue(body);
+  await closeTaskField(page, "text");
+  await openTaskField(page, "priority");
   await expect(page.getByTestId("edit-priority")).toHaveValue("1");
+  await closeTaskField(page, "priority");
+  await openTaskField(page, "due");
   await expect(page.getByTestId("edit-time")).toHaveValue("09:45");
+  await closeTaskField(page, "due");
   await page.goto(`/projects/${project.id}`);
   await page.setViewportSize({ width: 1500, height: 1000 });
   const card = page.getByTestId("board-task").filter({
@@ -271,11 +294,13 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(393);
   await page.getByTestId("project-view-list").click();
+  await openProjectFilters(page);
   await page.getByTestId("project-filter").selectOption("mine");
   await page.getByTestId("project-sort").selectOption("priority");
   await page.getByTestId("project-label").fill("approved");
   await expect(page.getByTestId("board-task")).toHaveCount(1);
   await page.getByTestId("project-label").fill("");
+  await closeFieldSheet(page, "project-select");
   await page.getByTestId("open-search").focus();
   await page.keyboard.press("Control+k");
   await expect(page.getByRole("dialog")).toBeVisible();
@@ -392,11 +417,15 @@ test("organization creation, real invitation fragment acceptance, guest role ref
     ).toHaveAttribute("aria-pressed", "true");
     await expect(guest.getByTestId("accept-invitation")).toHaveCount(0);
     await guest.goto(`/tasks/${task.id}`);
-    await expect(guest.getByTestId("edit-save")).toBeDisabled();
+    await expect(guest.getByTestId("task-field-text")).toBeDisabled();
+    await expect(guest.getByTestId("task-field-due")).toBeDisabled();
+    await expect(guest.getByTestId("edit-save")).toHaveCount(0);
     await expect(guest.getByTestId("task-comment-submit")).toBeDisabled();
     await expect(guest.getByTestId("task-schedule")).toBeDisabled();
     await guest.reload();
-    await expect(guest.getByTestId("edit-save")).toBeDisabled();
+    await expect(guest.getByTestId("task-field-text")).toBeDisabled();
+    await expect(guest.getByTestId("task-field-due")).toBeDisabled();
+    await expect(guest.getByTestId("edit-save")).toHaveCount(0);
     const team = memberListSchema.parse(
       await (
         await page.request.get(`/api/members?workspaceId=${workspace.id}`)
@@ -409,13 +438,16 @@ test("organization creation, real invitation fragment acceptance, guest role ref
     await page.reload();
     await expect(page.getByTestId(`role-${invited.id}`)).toHaveValue("guest");
     await page.getByTestId(`role-${invited.id}`).selectOption("admin");
-    await expect(guest.getByTestId("edit-title")).toBeEnabled({
+    await expect(guest.getByTestId("task-field-text")).toBeEnabled({
       timeout: 3000,
     });
+    await openTaskField(guest, "text");
+    await expect(guest.getByTestId("edit-title")).toBeEnabled();
+    await closeTaskField(guest, "text");
     await expect(guest.getByTestId("task-comment")).toBeEnabled();
     await expect(guest.getByTestId("task-schedule")).toBeEnabled();
     await page.getByTestId(`role-${invited.id}`).selectOption("guest");
-    await expect(guest.getByTestId("edit-save")).toBeDisabled({
+    await expect(guest.getByTestId("task-field-text")).toBeDisabled({
       timeout: 3000,
     });
     await expect(guest.getByTestId("task-schedule")).toBeDisabled({
@@ -454,7 +486,9 @@ test("rejected planning fields, comments, project move and invitation restore ca
   const task = taskSchema.parse(await response.json());
   await page.goto(`/tasks/${task.id}`);
   let denied = await rejectLater(page, `/api/tasks/${task.id}`, "PATCH");
+  await openTaskField(page, "text");
   await page.getByTestId("edit-title").fill("Rejected renamed title");
+  await closeTaskField(page, "text");
   await page.getByTestId("edit-save").click();
   await denied.seen;
   await expect(page.getByTestId("task-detail-heading")).toHaveText(
@@ -462,9 +496,11 @@ test("rejected planning fields, comments, project move and invitation restore ca
   );
   denied.reject();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(task.title);
+  await openTaskField(page, "text");
   await expect(page.getByTestId("edit-title")).toHaveValue(
     "Rejected renamed title",
   );
+  await closeTaskField(page, "text");
   await page.unroute(`**/api/tasks/${task.id}`);
   denied = await rejectLater(page, `/api/tasks/${task.id}/comments`, "POST");
   await page.getByTestId("task-comment").fill("Rejected task comment");
@@ -481,6 +517,7 @@ test("rejected planning fields, comments, project move and invitation restore ca
   await page.goto("/projects");
   const card = page.getByTestId("board-task").filter({ hasText: task.title });
   denied = await rejectLater(page, `/api/tasks/${task.id}`, "PATCH");
+  await card.locator("details > summary").click();
   await card.getByTestId("board-status").selectOption("in_progress");
   await denied.seen;
   await expect(page.getByTestId("board-column-in_progress")).toContainText(
@@ -488,6 +525,8 @@ test("rejected planning fields, comments, project move and invitation restore ca
   );
   denied.reject();
   await expect(page.getByTestId("board-column-todo")).toContainText(task.title);
+  // Optimistic column movement remounts the card, including its collapsed menu.
+  await card.locator("details > summary").click();
   await expect(card.getByTestId("board-status")).toHaveValue("todo");
   await page.goto("/orgs");
   denied = await rejectLater(
@@ -551,7 +590,9 @@ test("concurrent edits reject stale drafts and title-only saves preserve exact D
   });
   const task = taskSchema.parse(await response.json());
   await page.goto(`/tasks/${task.id}`);
+  await openTaskField(page, "due");
   await expect(page.getByTestId("edit-time")).toHaveValue("01:30");
+  await closeTaskField(page, "due");
   const otherContext = await browser.newContext({
     baseURL: process.env.AUTH_URL,
   });
@@ -562,14 +603,18 @@ test("concurrent edits reject stale drafts and title-only saves preserve exact D
     });
     expect(auth.ok()).toBe(true);
     await other.goto(`/tasks/${task.id}`);
+    await openTaskField(other, "text");
     await expect(other.getByTestId("edit-title")).toBeEnabled();
     const draft = "My unsaved title draft";
+    await openTaskField(page, "text");
     await page.getByTestId("edit-title").fill(draft);
+    await closeTaskField(page, "text");
     await other
       .getByTestId("edit-description")
       .fill("Concurrent description from second browser");
+    await closeTaskField(other, "text");
     await other.getByTestId("edit-save").click();
-    await expect(other.getByTestId("edit-save")).toBeDisabled();
+    await expect(other.getByTestId("edit-save")).toHaveCount(0);
     await expect(page.getByTestId("task-detail-heading")).toHaveText(
       task.title,
     );
@@ -582,9 +627,11 @@ test("concurrent edits reject stale drafts and title-only saves preserve exact D
       )
       .toBe(task.version + 1);
     // The live data refresh leaves the editor's original version and draft intact.
+    await openTaskField(page, "text");
     await expect(page.getByTestId("edit-description")).toHaveValue(
       "Original description",
     );
+    await closeTaskField(page, "text");
     const rejected = page.waitForResponse(
       (value) =>
         value.request().method() === "PATCH" &&
@@ -592,7 +639,9 @@ test("concurrent edits reject stale drafts and title-only saves preserve exact D
     );
     await page.getByTestId("edit-save").click();
     expect((await rejected).status()).toBe(409);
+    await openTaskField(page, "text");
     await expect(page.getByTestId("edit-title")).toHaveValue(draft);
+    await closeTaskField(page, "text");
     await expect(
       page.getByRole("alert").filter({ hasText: m.errors.conflict }),
     ).toBeVisible();
@@ -605,10 +654,12 @@ test("concurrent edits reject stale drafts and title-only saves preserve exact D
     );
     expect(current.dueAt).toBe(exactDeadline);
     await page.getByTestId("edit-reload").click();
+    await openTaskField(page, "text");
     await expect(page.getByTestId("edit-description")).toHaveValue(
       current.description,
     );
     await page.getByTestId("edit-title").fill("Resolved title only");
+    await closeTaskField(page, "text");
     await page.getByTestId("edit-save").click();
     await expect(page.getByTestId("task-detail-heading")).toHaveText(
       "Resolved title only",
@@ -621,4 +672,183 @@ test("concurrent edits reject stale drafts and title-only saves preserve exact D
   } finally {
     await otherContext.close();
   }
+});
+
+test("nested field Escape preserves drafts and direct tasks use their own workspace members and latest run", async ({
+  page,
+}, info) => {
+  test.setTimeout(60000);
+  const locale = info.project.name as Locale;
+  const m = messages[locale];
+  const me = await signIn(page, locale);
+  const seedMembers = memberListSchema.parse(
+    await (
+      await page.request.get(`/api/members?workspaceId=${me.workspaces[0].id}`)
+    ).json(),
+  );
+  const originalAgent = seedMembers.find((member) => member.kind === "agent");
+  if (!originalAgent)
+    throw new Error("A readable agent is required for an isolated copy");
+  const ambient = await freshWorkspace(page, locale);
+  const createdWorkspace = await page.request.post("/api/workspaces", {
+    data: {
+      name: `Task scope ${locale} ${crypto.randomUUID()}`,
+      agentIds: [originalAgent.id],
+    },
+  });
+  expect(createdWorkspace.status()).toBe(201);
+  const target = workspaceSchema.parse(await createdWorkspace.json());
+  const targetMembers = memberListSchema.parse(
+    await (
+      await page.request.get(`/api/members?workspaceId=${target.id}`)
+    ).json(),
+  );
+  const worker = targetMembers.find((member) => member.kind === "agent");
+  if (!worker) throw new Error("Copied task worker is required");
+  expect(worker.id).not.toBe(originalAgent.id);
+  expect(target.memberId).not.toBe(ambient.memberId);
+  const createdTask = await page.request.post("/api/tasks", {
+    data: {
+      workspaceId: target.id,
+      ownerId: target.memberId,
+      workerId: worker.id,
+      title: `Cross-workspace task ${locale} ${crypto.randomUUID()}`,
+    },
+  });
+  expect(createdTask.status()).toBe(201);
+  const task = taskSchema.parse(await createdTask.json());
+  await page.goto("/orgs");
+  await page.getByTestId(`workspace-${ambient.id}`).click();
+  await expect(page.getByTestId(`workspace-${ambient.id}`)).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await page.goto(`/tasks/${task.id}`);
+  await expect(page.getByTestId("task-detail-heading")).toHaveText(task.title);
+  const selectedWorkspace = () =>
+    page.evaluate(
+      (userId) => sessionStorage.getItem(`taff:workspace:${userId}`),
+      me.user.id,
+    );
+  await expect.poll(selectedWorkspace).toBe(ambient.id);
+  await expect(page.getByTestId("task-field-worker")).toContainText(
+    worker.name,
+  );
+  await openTaskField(page, "worker");
+  await expect(page.getByTestId("detail-worker")).toHaveValue(worker.id);
+  await expect(
+    page.getByTestId("detail-worker").locator(`option[value="${worker.id}"]`),
+  ).toHaveText(`${worker.name} · ${m.agent}`);
+  await expect(
+    page
+      .getByTestId("detail-worker")
+      .locator(`option[value="${ambient.memberId}"]`),
+  ).toHaveCount(0);
+  await closeTaskField(page, "worker");
+  await openTaskField(page, "owner");
+  await expect(page.getByTestId("edit-owner")).toHaveValue(target.memberId);
+  await expect(
+    page
+      .getByTestId("edit-owner")
+      .locator(`option[value="${ambient.memberId}"]`),
+  ).toHaveCount(0);
+  await closeTaskField(page, "owner");
+  const metadataWrites: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() === "PATCH" &&
+      new URL(request.url()).pathname === `/api/tasks/${task.id}`
+    )
+      metadataWrites.push(request.url());
+  });
+  const draft = `Escape-kept title ${locale}`;
+  await openTaskField(page, "text");
+  await page.getByTestId("edit-title").fill(draft);
+  await page.getByTestId("edit-title").press("Escape");
+  await expect(page.getByTestId("edit-title")).toHaveCount(0);
+  await expect(page.locator("dialog.task-detail-sheet")).toBeVisible();
+  await expect(page).toHaveURL(`/tasks/${task.id}`);
+  await expect(page.getByTestId("task-detail-heading")).toHaveText(task.title);
+  await expect(page.getByTestId("task-field-text")).toBeFocused();
+  await expect(page.getByTestId("edit-save")).toBeEnabled();
+  await openTaskField(page, "text");
+  await expect(page.getByTestId("edit-title")).toHaveValue(draft);
+  await closeTaskField(page, "text");
+  expect(metadataWrites).toEqual([]);
+  expect(
+    taskSchema.parse(
+      await (await page.request.get(`/api/tasks/${task.id}`)).json(),
+    ).title,
+  ).toBe(task.title);
+  const comment = `Task-local author ${locale} ${crypto.randomUUID()}`;
+  let release!: () => void;
+  let arrived!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const seen = new Promise<void>((resolve) => {
+    arrived = resolve;
+  });
+  const commentPath = `**/api/tasks/${task.id}/comments`;
+  await page.route(commentPath, async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    arrived();
+    await gate;
+    await route.continue();
+  });
+  try {
+    const acknowledged = page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname === `/api/tasks/${task.id}/comments`,
+    );
+    await page.getByTestId("task-comment").fill(comment);
+    await page.getByTestId("task-comment-submit").click();
+    await seen;
+    const optimistic = page
+      .locator("dialog.task-detail-sheet .review-comments li")
+      .filter({ hasText: comment });
+    await expect(optimistic).toBeVisible();
+    await expect(optimistic.locator("strong")).toHaveText(me.user.name);
+    release();
+    const response = await acknowledged;
+    expect(response.status()).toBe(201);
+    const saved = taskCommentSchema.parse(await response.json());
+    expect(saved.workspaceId).toBe(target.id);
+    expect(saved.authorId).toBe(target.memberId);
+    await expect(page.getByTestId("task-comment")).toHaveValue("");
+  } finally {
+    release();
+    await page.unroute(commentPath);
+  }
+  const firstResponse = await page.request.post(`/api/tasks/${task.id}/runs`, {
+    data: {},
+  });
+  expect(firstResponse.status()).toBe(201);
+  const first = runSchema.parse(await firstResponse.json());
+  const canceled = await page.request.post(`/api/runs/${first.id}/control`, {
+    data: { version: first.version, action: "cancel" },
+  });
+  expect(canceled.status()).toBe(200);
+  const secondResponse = await page.request.post(`/api/tasks/${task.id}/runs`, {
+    data: {},
+  });
+  expect(secondResponse.status()).toBe(201);
+  const second = runSchema.parse(await secondResponse.json());
+  expect(second.id).not.toBe(first.id);
+  const paused = await page.request.post(`/api/runs/${second.id}/control`, {
+    data: { version: second.version, action: "pause" },
+  });
+  expect(paused.status()).toBe(200);
+  await page.reload();
+  await expect(page.getByTestId("task-detail-heading")).toHaveText(task.title);
+  await expect.poll(selectedWorkspace).toBe(ambient.id);
+  await expect(page.getByTestId("task-field-worker")).toContainText(
+    worker.name,
+  );
+  await expect(page.getByTestId("task-field-worker")).toBeDisabled();
+  await expect(page.getByTestId("run-status")).toHaveText(m.run.status.paused);
+  await expect(page.getByTestId("run-resume")).toBeEnabled();
+  await expect(page.getByTestId("run-start")).toHaveCount(0);
+  await expect(page.getByTestId("run-pause")).toHaveCount(0);
 });

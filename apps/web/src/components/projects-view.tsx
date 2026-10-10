@@ -6,20 +6,36 @@ import {
   projectInputSchema,
   projectSchema,
   projectUpdateSchema,
+  type Run,
   type Task,
 } from "@taff/schemas";
+import {
+  presentPrototypeField,
+  prototypeTaskReference,
+} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { GripVertical, Search } from "lucide-react";
+import {
+  ChevronDown,
+  GripVertical,
+  MoreHorizontal,
+  Plus,
+  Search,
+  SlidersHorizontal,
+  Sparkles,
+  X,
+} from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
+import { isLocale } from "../lib/i18n";
 import { invalidateM3 } from "../lib/m3-queries";
 import {
   projectsKey,
@@ -29,13 +45,18 @@ import {
   useWorkspaceAccess,
 } from "../lib/m5-queries";
 import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
-import { useMembers, useTasks } from "../lib/queries";
+import { useMembers, useRuns, useTasks } from "../lib/queries";
 import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
+import { StatusGlyph } from "./ui/status-glyph";
+
+const TaskDetailView = dynamic(() =>
+  import("./task-detail-view").then((module) => module.TaskDetailView),
+);
 
 const STATUSES: Task["status"][] = [
   "todo",
@@ -44,14 +65,50 @@ const STATUSES: Task["status"][] = [
   "done",
 ];
 
+function projectDueLabel(
+  dueAt: string,
+  locale: string,
+  timeZone: string,
+): string {
+  const dayFormat = new Intl.DateTimeFormat("en", {
+    timeZone,
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  const civilDay = (date: Date) => {
+    const parts = dayFormat.formatToParts(date);
+    const part = (kind: string) =>
+      Number(parts.find((item) => item.type === kind)?.value);
+    return Date.UTC(part("year"), part("month") - 1, part("day"));
+  };
+  const due = new Date(dueAt);
+  const delta = (civilDay(due) - civilDay(new Date())) / 86_400_000;
+  return Math.abs(delta) <= 1
+    ? new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(
+        delta,
+        "day",
+      )
+    : new Intl.DateTimeFormat(locale, {
+        timeZone,
+        month: "short",
+        day: "numeric",
+      }).format(due);
+}
+
 export function ProjectsView({ projectId = "" }: { projectId?: string }) {
-  const { workspace, openSearch } = useWorkspace();
+  const { workspace, openSearch, openQuick } = useWorkspace();
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const client = useQueryClient();
   const tasks = useTasks(workspace.id);
   const members = useMembers(workspace.id);
   const projects = useProjects(workspace.id);
+  const runs = useRuns(workspace.id);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [activeColumn, setActiveColumn] = useState<Task["status"]>("todo");
   const edit = useEditTask();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const [view, setView] = useState<"board" | "list">("board");
@@ -69,7 +126,19 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const [name, setName] = useState("");
   const [invalid, setInvalid] = useState(false);
   const [announcement, setAnnouncement] = useState("");
-  const selected = projects.data?.find((item) => item.id === projectId);
+  const selected = projectId
+    ? projects.data?.find((item) => item.id === projectId)
+    : searchParams.get("all") === "1"
+      ? undefined
+      : projects.data?.find((item) => !item.archived);
+  const selectedProjectId = selected?.id ?? projectId;
+  const locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
+  const projectName = selected
+    ? presentPrototypeField(selected.id, "name", selected.name, locale)
+    : t("projects.allProjects");
+  useEffect(() => {
+    setSelectedTaskId(null);
+  }, [workspace.id, selectedProjectId]);
   const workspaceAccess = useWorkspaceAccess(workspace.id);
   const admin = workspaceAccess.data?.canManageProjects;
   const manage = useMutation({
@@ -127,7 +196,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const visible = (tasks.data ?? [])
     .filter(
       (task) =>
-        (!projectId || task.projectId === projectId) &&
+        (!selectedProjectId || task.projectId === selectedProjectId) &&
         (!label ||
           task.labels.some((item) =>
             item.toLocaleLowerCase().includes(label.toLocaleLowerCase()),
@@ -275,130 +344,217 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     frame = requestAnimationFrame(scroll);
   };
   return (
-    <>
-      <section className="page-heading">
-        <Link className="eyebrow text-link" href="/orgs">
-          {workspace.name}
+    <div className="projects-view">
+      <header className="projects-header">
+        <Link className="projects-org" href="/orgs">
+          {presentPrototypeField(workspace.id, "name", workspace.name, locale)}
+          <ChevronDown size={12} aria-hidden="true" />
         </Link>
-        <h1>{selected?.name ?? t("projects.title")}</h1>
-        <div className="screen-header-actions">
-          <Button
-            className="button-quiet"
-            data-testid="open-search"
-            aria-label={t("search.title")}
-            onClick={openSearch}
-          >
-            <Search size={20} aria-hidden="true" />
-          </Button>
-        </div>
-      </section>
-      <div className="planning-toolbar">
-        <div className="field">
-          <Label htmlFor="project-select">{t("planning.project")}</Label>
-          <select
-            id="project-select"
-            data-testid="project-select"
-            value={projectId}
-            onChange={(event) =>
-              router.push(
-                event.target.value
-                  ? `/projects/${event.target.value}`
-                  : "/projects",
-              )
-            }
-          >
-            <option value="">{t("projects.allProjects")}</option>
-            {projects.data?.map((project) => (
-              <option key={project.id} value={project.id}>
-                {project.name}
-                {project.archived ? ` · ${t("projects.archived")}` : ""}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div
-          className="segmented"
-          role="group"
-          aria-label={t("projects.title")}
-        >
-          {(["board", "list"] as const).map((mode) => (
-            <button
-              key={mode}
-              data-testid={`project-view-${mode}`}
-              type="button"
-              aria-pressed={view === mode}
-              onClick={() => setView(mode)}
+        <div className="projects-header-row">
+          <span className="projects-desktop-label">
+            {t("projects.title")} /
+          </span>
+          <h1>{projectName}</h1>
+          <div className="projects-header-actions">
+            <div
+              className="projects-view-switch"
+              role="group"
+              aria-label={t("projects.title")}
             >
-              {t(`projects.${mode}View`)}
+              {(["board", "list"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  data-testid={`project-view-${mode}`}
+                  type="button"
+                  aria-pressed={view === mode}
+                  onClick={() => setView(mode)}
+                >
+                  {t(`projects.${mode}View`)}
+                </button>
+              ))}
+            </div>
+            <div
+              className="projects-owner-filters"
+              role="group"
+              aria-label={t("projects.filter")}
+            >
+              {["all", "mine", "agents"].map((value) => (
+                <button
+                  type="button"
+                  key={value}
+                  aria-pressed={filter === value}
+                  onClick={() => setFilter(value)}
+                >
+                  {t(
+                    value === "all" ? "projects.allTasks" : `projects.${value}`,
+                  )}
+                </button>
+              ))}
+            </div>
+            <Button
+              className="projects-icon button-quiet"
+              data-testid="project-filters"
+              aria-label={t("projects.filter")}
+              onClick={() => setFiltersOpen(true)}
+            >
+              <SlidersHorizontal size={18} aria-hidden="true" />
+            </Button>
+            <Button
+              className="projects-icon button-quiet"
+              data-testid="open-search"
+              aria-label={t("search.title")}
+              onClick={openSearch}
+            >
+              <Search size={20} aria-hidden="true" />
+            </Button>
+            {workspaceAccess.data?.canCreateTasks && (
+              <Button
+                className="projects-new-task button-primary"
+                onClick={openQuick}
+              >
+                <Plus size={14} aria-hidden="true" />
+                {t("newTask")}
+              </Button>
+            )}
+          </div>
+        </div>
+      </header>
+      {view === "board" && (
+        <div
+          className="projects-status-tabs"
+          role="group"
+          aria-label={t("planning.status")}
+        >
+          {STATUSES.map((status) => (
+            <button
+              type="button"
+              key={status}
+              aria-pressed={activeColumn === status}
+              onClick={() => {
+                setActiveColumn(status);
+                const column = columns.current?.querySelector<HTMLElement>(
+                  `[data-board-status="${status}"]`,
+                );
+                if (column && columns.current)
+                  columns.current.scrollTo({
+                    left: column.offsetLeft - columns.current.offsetLeft - 20,
+                    behavior: "smooth",
+                  });
+              }}
+            >
+              <StatusGlyph status={status} />
+              {t(`status.${status}`)}
+              <span>
+                {visible.filter((task) => task.status === status).length}
+              </span>
             </button>
           ))}
         </div>
-        {admin && (
-          <Button
-            data-testid="new-project"
-            onClick={() => {
-              setName("");
-              setProjectDialog("new");
-            }}
-          >
-            {t("projects.newProject")}
-          </Button>
-        )}
-        {admin && selected && (
-          <Button
-            onClick={() => {
-              setProjectBaseline({
-                id: selected.id,
-                version: selected.version,
-                archived: selected.archived,
-              });
-              setName(selected.name);
-              setProjectDialog("edit");
-            }}
-          >
-            {t("projects.manage")}
-          </Button>
-        )}
-      </div>
-      <div className="planning-toolbar">
-        <div className="field">
-          <Label htmlFor="project-filter">{t("projects.filter")}</Label>
-          <select
-            id="project-filter"
-            data-testid="project-filter"
-            value={filter}
-            onChange={(event) => setFilter(event.target.value)}
-          >
-            <option value="all">{t("projects.allTasks")}</option>
-            <option value="mine">{t("projects.mine")}</option>
-            <option value="agents">{t("projects.agents")}</option>
-          </select>
-        </div>
-        <div className="field">
-          <Label htmlFor="project-sort">{t("projects.sort")}</Label>
-          <select
-            id="project-sort"
-            data-testid="project-sort"
-            value={sort}
-            onChange={(event) => setSort(event.target.value)}
-          >
-            {["created", "due", "priority", "title"].map((key) => (
-              <option key={key} value={key}>
-                {t(`projects.sort${key[0].toUpperCase()}${key.slice(1)}`)}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="field">
-          <Label htmlFor="project-label">{t("projects.labelFilter")}</Label>
-          <Input
-            id="project-label"
-            data-testid="project-label"
-            value={label}
-            onChange={(event) => setLabel(event.target.value)}
-          />
-        </div>
-      </div>
+      )}
+      {filtersOpen && (
+        <SheetDialog
+          title={t("projects.filter")}
+          onClose={() => setFiltersOpen(false)}
+        >
+          <div className="planning-toolbar">
+            <div className="field">
+              <Label htmlFor="project-select">{t("planning.project")}</Label>
+              <select
+                id="project-select"
+                data-testid="project-select"
+                value={selectedProjectId}
+                onChange={(event) =>
+                  router.push(
+                    event.target.value
+                      ? `/projects/${event.target.value}`
+                      : "/projects?all=1",
+                  )
+                }
+              >
+                <option value="">{t("projects.allProjects")}</option>
+                {projects.data?.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {presentPrototypeField(
+                      project.id,
+                      "name",
+                      project.name,
+                      locale,
+                    )}
+                    {project.archived ? ` · ${t("projects.archived")}` : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {admin && (
+              <Button
+                data-testid="new-project"
+                onClick={() => {
+                  setName("");
+                  setFiltersOpen(false);
+                  setProjectDialog("new");
+                }}
+              >
+                {t("projects.newProject")}
+              </Button>
+            )}
+            {admin && selected && (
+              <Button
+                onClick={() => {
+                  setFiltersOpen(false);
+                  setProjectBaseline({
+                    id: selected.id,
+                    version: selected.version,
+                    archived: selected.archived,
+                  });
+                  setName(selected.name);
+                  setProjectDialog("edit");
+                }}
+              >
+                {t("projects.manage")}
+              </Button>
+            )}
+          </div>
+          <div className="planning-toolbar">
+            <div className="field">
+              <Label htmlFor="project-filter">{t("projects.filter")}</Label>
+              <select
+                id="project-filter"
+                data-testid="project-filter"
+                value={filter}
+                onChange={(event) => setFilter(event.target.value)}
+              >
+                <option value="all">{t("projects.allTasks")}</option>
+                <option value="mine">{t("projects.mine")}</option>
+                <option value="agents">{t("projects.agents")}</option>
+              </select>
+            </div>
+            <div className="field">
+              <Label htmlFor="project-sort">{t("projects.sort")}</Label>
+              <select
+                id="project-sort"
+                data-testid="project-sort"
+                value={sort}
+                onChange={(event) => setSort(event.target.value)}
+              >
+                {["created", "due", "priority", "title"].map((key) => (
+                  <option key={key} value={key}>
+                    {t(`projects.sort${key[0].toUpperCase()}${key.slice(1)}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <Label htmlFor="project-label">{t("projects.labelFilter")}</Label>
+              <Input
+                id="project-label"
+                data-testid="project-label"
+                value={label}
+                onChange={(event) => setLabel(event.target.value)}
+              />
+            </div>
+          </div>
+        </SheetDialog>
+      )}
       <p className="section-hint">{t("projects.dragHint")}</p>
       <p className="sr-only" role="status">
         {announcement}
@@ -408,47 +564,141 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           {t(errorKey(tasks.error ?? projects.error ?? edit.error))}
         </p>
       ) : null}
-      {tasks.isPending ? (
-        <p className="loading">{t("loading")}</p>
-      ) : (
-        <div
-          ref={columns}
-          className={`${view === "board" ? "planning-board" : "planning-list"}${drag ? " is-board-dragging" : ""}`}
-        >
-          {STATUSES.map((status) => {
-            const items = visible.filter((task) => task.status === status);
-            return (
-              <section
-                key={status}
-                data-board-status={status}
-                data-testid={`board-column-${status}`}
-                className={`${view === "board" ? "column" : "board-list-group"} ${drag?.target === status ? "is-drop-target" : ""}`}
-              >
-                <h2>
-                  {t(`status.${status}`)}{" "}
-                  <span className="count-badge">{items.length}</span>
-                </h2>
-                {!items.length ? (
-                  <p className="section-hint">{t("projects.empty")}</p>
-                ) : (
-                  <ul className="task-list">
-                    {items.map((task) => (
-                      <BoardCard
-                        key={task.id}
-                        task={task}
-                        busy={busy}
-                        move={move}
-                        dragStart={dragStart}
-                        dragging={drag?.id === task.id}
-                      />
-                    ))}
-                  </ul>
-                )}
-              </section>
-            );
-          })}
+      <div
+        className={`projects-workspace${selectedTaskId ? " has-detail" : ""}`}
+      >
+        <div className="projects-main">
+          {tasks.isPending ? (
+            <p className="loading">{t("loading")}</p>
+          ) : (
+            <div
+              ref={columns}
+              className={`${view === "board" ? "planning-board" : "planning-list"}${drag ? " is-board-dragging" : ""}`}
+              onScroll={() => {
+                if (view !== "board" || !columns.current) return;
+                const board = columns.current;
+                const nearest = [
+                  ...board.querySelectorAll<HTMLElement>("[data-board-status]"),
+                ].sort(
+                  (a, b) =>
+                    Math.abs(
+                      a.offsetLeft - board.offsetLeft - board.scrollLeft - 20,
+                    ) -
+                    Math.abs(
+                      b.offsetLeft - board.offsetLeft - board.scrollLeft - 20,
+                    ),
+                )[0];
+                const status = nearest?.dataset.boardStatus;
+                if (STATUSES.includes(status as Task["status"]))
+                  setActiveColumn(status as Task["status"]);
+              }}
+            >
+              {view === "list" && (
+                <div className="projects-list-heading" aria-hidden="true">
+                  <span>{t("search.tasks")}</span>
+                  <span>{t("worker")}</span>
+                  <span>{t("taskDetail.due")}</span>
+                  <span>{t("planning.priority")}</span>
+                </div>
+              )}
+              {STATUSES.map((status) => {
+                const items = visible.filter((task) => task.status === status);
+                if (view === "list" && !items.length) return null;
+                return (
+                  <section
+                    key={status}
+                    data-board-status={status}
+                    data-testid={`board-column-${status}`}
+                    className={`${view === "board" ? "column" : "board-list-group"} ${drag?.target === status ? "is-drop-target" : ""}`}
+                  >
+                    <h2>
+                      <StatusGlyph status={status} />
+                      {t(`status.${status}`)}{" "}
+                      <span className="count-badge">{items.length}</span>
+                    </h2>
+                    {!items.length ? (
+                      <p
+                        className="projects-column-empty"
+                        aria-label={t("projects.empty")}
+                      >
+                        —
+                      </p>
+                    ) : (
+                      <ul className="task-list">
+                        {items.map((task) => (
+                          <BoardCard
+                            key={task.id}
+                            task={task}
+                            view={view}
+                            latestRun={
+                              runs.data
+                                ?.filter((run) => run.taskId === task.id)
+                                .sort((a, b) =>
+                                  b.startedAt.localeCompare(a.startedAt),
+                                )[0]
+                            }
+                            selected={selectedTaskId === task.id}
+                            onSelect={(event) => {
+                              if (task.id.startsWith("optimistic:")) return;
+                              if (
+                                window.matchMedia("(min-width: 1024px)")
+                                  .matches &&
+                                !event.metaKey &&
+                                !event.ctrlKey &&
+                                !event.shiftKey &&
+                                !event.altKey
+                              ) {
+                                event.preventDefault();
+                                setSelectedTaskId(task.id);
+                              } else if (
+                                !(
+                                  event.currentTarget instanceof
+                                  HTMLAnchorElement
+                                ) &&
+                                !event.metaKey &&
+                                !event.ctrlKey &&
+                                !event.shiftKey &&
+                                !event.altKey
+                              ) {
+                                router.push(`/tasks/${task.id}`);
+                              }
+                            }}
+                            busy={busy}
+                            move={move}
+                            dragStart={dragStart}
+                            dragging={drag?.id === task.id}
+                          />
+                        ))}
+                      </ul>
+                    )}
+                  </section>
+                );
+              })}
+            </div>
+          )}
         </div>
-      )}
+        {selectedTaskId && (
+          <aside
+            className="projects-detail"
+            aria-label={presentPrototypeField(
+              selectedTaskId,
+              "title",
+              tasks.data?.find((task) => task.id === selectedTaskId)?.title ??
+                t("taskTitle"),
+              locale,
+            )}
+          >
+            <Button
+              className="button-quiet projects-detail-close"
+              aria-label={t("planning.close")}
+              onClick={() => setSelectedTaskId(null)}
+            >
+              <X size={18} aria-hidden="true" />
+            </Button>
+            <TaskDetailView key={selectedTaskId} taskId={selectedTaskId} />
+          </aside>
+        )}
+      </div>
       {drag &&
         createPortal(
           <div
@@ -457,7 +707,14 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             style={{ left: drag.left, top: drag.top, width: drag.width }}
           >
             <span className="section-hint">{t("projects.drag")}</span>
-            <h3>{visible.find((task) => task.id === drag.id)?.title}</h3>
+            <h3>
+              {presentPrototypeField(
+                drag.id,
+                "title",
+                visible.find((task) => task.id === drag.id)?.title ?? "",
+                locale,
+              )}
+            </h3>
           </div>,
           document.body,
         )}
@@ -525,11 +782,15 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           </form>
         </SheetDialog>
       )}
-    </>
+    </div>
   );
 }
 function BoardCard({
   task,
+  view,
+  latestRun,
+  selected,
+  onSelect,
   busy,
   move,
   dragStart,
@@ -537,6 +798,10 @@ function BoardCard({
   dragging,
 }: {
   task: Task;
+  view: "board" | "list";
+  latestRun?: Run;
+  selected: boolean;
+  onSelect: (event: React.MouseEvent<HTMLElement>) => void;
   busy: boolean;
   move: (task: Task, status: Task["status"]) => void;
   dragStart: (
@@ -554,60 +819,143 @@ function BoardCard({
   const tasks = useTasks(task.workspaceId);
   const children =
     tasks.data?.filter((item) => item.parentId === task.id) ?? [];
+  const locale = isLocale(i18n.resolvedLanguage)
+    ? i18n.resolvedLanguage
+    : me.user.locale;
+  const owner = members.data?.find((item) => item.id === task.ownerId);
+  const worker = members.data?.find((item) => item.id === task.workerId);
+  const ownerName = owner
+    ? presentPrototypeField(owner.id, "name", owner.name, locale)
+    : t("unknownMember");
+  const workerName = worker
+    ? presentPrototypeField(worker.id, "name", worker.name, locale)
+    : t("unknownMember");
+  // Only untouched known fixture names get the prototype's compact label.
+  const workerShort =
+    worker &&
+    presentPrototypeField(worker.id, "name", worker.name, "en") !== worker.name
+      ? workerName.replace(/ Agent$|智能體$|智能体$/, "")
+      : workerName;
+  const title = presentPrototypeField(task.id, "title", task.title, locale);
+  const reference = prototypeTaskReference(task.id) ?? task.id.slice(0, 8);
+  const parent = tasks.data?.find((item) => item.id === task.parentId);
+  const completed = children.filter((item) => item.status === "done").length;
   return (
     <li
-      className={`task-card board-card ${dragging ? "is-dragging" : ""}`}
+      className={`task-card board-card ${task.parentId ? "is-child" : ""} ${selected ? "is-selected" : ""} ${dragging ? "is-dragging" : ""}`}
       data-testid="board-task"
       data-task-id={task.id}
+      onClick={(event) => {
+        if (
+          !(event.target instanceof Element) ||
+          event.target.closest("a, button, select, details")
+        )
+          return;
+        onSelect(event);
+      }}
       style={style}
     >
       <div className="task-card-top">
-        <span className={`status status-${task.status}`}>
-          {t(`status.${task.status}`)}
-        </span>
-        <span className="task-due">
-          {task.dueAt
-            ? new Intl.DateTimeFormat(i18n.resolvedLanguage ?? me.user.locale, {
-                timeZone: me.user.tz,
-                month: "short",
-                day: "numeric",
-              }).format(new Date(task.dueAt))
-            : t("taskDetail.unscheduled")}
+        <span className="projects-task-reference">{reference}</span>
+        <span
+          className="task-due"
+          aria-label={task.dueAt ? undefined : t("taskDetail.unscheduled")}
+        >
+          {task.dueAt ? projectDueLabel(task.dueAt, locale, me.user.tz) : ""}
         </span>
       </div>
       <h3>
+        {view === "list" && (
+          <span className="projects-list-title-prefix">
+            <StatusGlyph status={task.status} />
+            <span>{reference}</span>
+          </span>
+        )}
         {task.id.startsWith("optimistic:") ? (
           <span className="task-title-link" aria-busy="true">
-            {task.title}
+            {title}
           </span>
         ) : (
-          <Link className="task-title-link" href={`/tasks/${task.id}`}>
-            {task.title}
+          <Link
+            className="task-title-link"
+            href={`/tasks/${task.id}`}
+            prefetch={false}
+            onClick={onSelect}
+          >
+            {title}
           </Link>
         )}
       </h3>
       {task.parentId && (
-        <p className="section-hint">
-          ↳{" "}
-          {tasks.data?.find((item) => item.id === task.parentId)?.title ??
-            t("planning.parent")}
-        </p>
+        <Link
+          className="projects-parent"
+          href={`/tasks/${task.parentId}`}
+          prefetch={false}
+        >
+          <span aria-hidden="true">↳</span>
+          <span>
+            {prototypeTaskReference(task.parentId) ?? ""}{" "}
+            {parent
+              ? presentPrototypeField(parent.id, "title", parent.title, locale)
+              : t("planning.parent")}
+          </span>
+        </Link>
       )}
       {children.length > 0 && (
-        <p className="section-hint">
-          {t("planning.subtasks")}{" "}
-          {children.filter((item) => item.status === "done").length}/
-          {children.length}
-        </p>
+        <div className="projects-subtasks">
+          <span className="projects-subtask-track" aria-hidden="true">
+            <span
+              style={{ width: `${(completed / children.length) * 100}%` }}
+            />
+          </span>
+          <span>
+            {t("planning.subtasks")} {completed}/{children.length}
+          </span>
+        </div>
       )}
-      <p className="task-owner">
-        {members.data?.find((item) => item.id === task.ownerId)?.name ??
-          t("unknownMember")}
-        {task.workerId &&
-          ` · ${members.data?.find((item) => item.id === task.workerId)?.name ?? t("unknownMember")}`}
-      </p>
+      <div className="projects-card-footer">
+        <span
+          className="projects-owner-avatar"
+          title={ownerName}
+          aria-label={t("ownedBy", { name: ownerName })}
+        >
+          {ownerName
+            .split(/\s+/)
+            .map((part) => part[0])
+            .join("")
+            .slice(0, 2)}
+        </span>
+        {worker?.kind === "agent" ? (
+          <span className="projects-agent-chip">
+            <Sparkles size={12} aria-hidden="true" />
+            {workerShort}
+            {latestRun && (
+              <>
+                <span
+                  className={`projects-agent-dot run-${latestRun.status}`}
+                  title={t(`run.status.${latestRun.status}`)}
+                />
+                <span className="projects-agent-state">
+                  {t(`run.status.${latestRun.status}`)}
+                </span>
+              </>
+            )}
+          </span>
+        ) : (
+          <span className="projects-human-worker">
+            {worker ? workerName : view === "list" ? ownerName : ""}
+          </span>
+        )}
+      </div>
+      {view === "list" && (
+        <span className="projects-list-priority">
+          {t(
+            `planning.${["urgent", "high", "medium", "low"][task.priority - 1]}`,
+          )}
+        </span>
+      )}
       {task.labels.length > 0 && (
-        <p className="section-hint">{task.labels.join(" · ")}</p>
+        <p className="projects-card-labels">{task.labels.join(" · ")}</p>
       )}
       <div className="board-card-bottom">
         <Button
@@ -615,33 +963,44 @@ function BoardCard({
           className="button-quiet drag-handle"
           disabled={busy || !access.data?.allowedStatuses.length}
           aria-label={t("projects.drag")}
-          tabIndex={-1}
           onPointerDown={(event) =>
             dragStart(event, task, access.data?.allowedStatuses ?? [])
           }
         >
           <GripVertical size={16} aria-hidden="true" />
         </Button>
-        <select
-          data-testid="board-status"
-          aria-label={t("planning.status")}
-          disabled={busy || !access.data?.allowedStatuses.length}
-          value={task.status}
-          onChange={(event) => move(task, event.target.value as Task["status"])}
-        >
-          {[
-            ...new Set([task.status, ...(access.data?.allowedStatuses ?? [])]),
-          ].map((status) => (
-            <option key={status} value={status}>
-              {t(`status.${status}`)}
-            </option>
-          ))}
-        </select>
-        <span className="section-hint">
-          {t(
-            `planning.${["urgent", "high", "medium", "low"][task.priority - 1]}`,
-          )}
-        </span>
+        <details className="projects-card-menu">
+          <summary aria-label={t("planning.status")}>
+            <MoreHorizontal size={16} aria-hidden="true" />
+          </summary>
+          <div className="projects-card-menu-body">
+            <select
+              data-testid="board-status"
+              aria-label={t("planning.status")}
+              disabled={busy || !access.data?.allowedStatuses.length}
+              value={task.status}
+              onChange={(event) =>
+                move(task, event.target.value as Task["status"])
+              }
+            >
+              {[
+                ...new Set([
+                  task.status,
+                  ...(access.data?.allowedStatuses ?? []),
+                ]),
+              ].map((status) => (
+                <option key={status} value={status}>
+                  {t(`status.${status}`)}
+                </option>
+              ))}
+            </select>
+            <span className="section-hint">
+              {t(
+                `planning.${["urgent", "high", "medium", "low"][task.priority - 1]}`,
+              )}
+            </span>
+          </div>
+        </details>
       </div>
     </li>
   );

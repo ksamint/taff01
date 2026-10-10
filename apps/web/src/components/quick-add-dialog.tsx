@@ -315,7 +315,6 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
           <Button
             data-testid="quick-create"
             type="submit"
-            disabled={!form.title.trim()}
             className="button-primary"
           >
             {t("addTask")}

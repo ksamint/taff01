@@ -12,11 +12,22 @@ import {
   taskSchema,
 } from "@taff/schemas";
 import {
+  type PrototypeLocale,
+  presentPrototypeField,
+  prototypeTaskReference,
+} from "@taff/schemas/prototype-data";
+import {
   useIsMutating,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
+  Sparkles,
+} from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
@@ -24,7 +35,7 @@ import { useCalendar, useSetCalendar } from "../lib/calendar-queries";
 import { invalidateM3 } from "../lib/m3-queries";
 import { useWorkspaceAccess } from "../lib/m5-queries";
 import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
-import { tasksKey, useMembers } from "../lib/queries";
+import { tasksKey, useMembers, useRuns } from "../lib/queries";
 import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import {
@@ -44,6 +55,7 @@ export function CalendarScene() {
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const access = useWorkspaceAccess(workspace.id);
   const members = useMembers(workspace.id);
+  const runs = useRuns(workspace.id);
   const today = Temporal.Now.zonedDateTimeISO(me.user.tz).toPlainDate();
   const [date, setDate] = useState(today.toString());
   const [view, setView] = useState<CalendarMode>("day");
@@ -65,6 +77,16 @@ export function CalendarScene() {
     to: end.toZonedDateTime(me.user.tz).toInstant().toString(),
   };
   const data = useCalendar(workspace.id, range.from, range.to);
+  const weekStart = selected.subtract({ days: selected.dayOfWeek - 1 });
+  const weekData = useCalendar(
+    workspace.id,
+    weekStart.toZonedDateTime(me.user.tz).toInstant().toString(),
+    weekStart
+      .add({ days: 7 })
+      .toZonedDateTime(me.user.tz)
+      .toInstant()
+      .toString(),
+  );
   const update = useSetCalendar();
   const [editor, setEditor] = useState<{
     current?: TaskCalendar;
@@ -186,12 +208,24 @@ export function CalendarScene() {
       void invalidateM3(client);
     }
   };
+  const agentState = (task: Task) => {
+    const run = runs.data
+      ?.filter((item) => item.taskId === task.id)
+      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
+    return t(run ? `run.status.${run.status}` : `status.${task.status}`);
+  };
   const events: CalendarEvent[] = (data.data?.occurrences ?? []).map(
     (item) => ({
       id: `occurrence-${item.task.id.replaceAll(":", "-")}-${Date.parse(item.startAt)}`,
       occurrenceId: item.id,
-      title: item.task.title,
+      title: presentPrototypeField(
+        item.task.id,
+        "title",
+        item.task.title,
+        locale as PrototypeLocale,
+      ),
       isAgent: item.isAgent,
+      location: item.isAgent ? agentState(item.task) : undefined,
       timeLabel: new Intl.DateTimeFormat(locale, {
         timeZone: me.user.tz,
         hour: "2-digit",
@@ -203,11 +237,13 @@ export function CalendarScene() {
       _options: {
         disableDND: busy || !item.canSchedule,
         disableResize: busy || !item.canSchedule,
-        additionalClasses: item.isAgent ? ["taff-agent-event"] : [],
+        additionalClasses: [
+          `taff-event-${item.task.status}`,
+          ...(item.isAgent ? ["taff-agent-event"] : []),
+        ],
       },
     }),
   );
-  const weekStart = selected.subtract({ days: selected.dayOfWeek - 1 });
   const hasAgents = data.data?.occurrences.some((item) => item.isAgent);
   const showEditor = (
     current?: TaskCalendar,
@@ -252,51 +288,40 @@ export function CalendarScene() {
   };
   return (
     <div className="calendar-scene" data-testid="calendar-scene">
-      <section className="page-heading">
-        <p className="eyebrow">{workspace.name}</p>
-        <h1>{t("calendar.title")}</h1>
-        <p className="task-count">{t("calendar.hint")}</p>
-      </section>
-      <div className="calendar-toolbar">
-        <div className="calendar-navigation">
+      <header className="calendar-source-header">
+        <div className="calendar-source-navigation">
+          <h1>
+            {selected.toLocaleString(locale, {
+              month: "long",
+              year: "numeric",
+            })}
+          </h1>
           <Button
             className="button-quiet"
             aria-label={t("calendar.previous")}
             data-testid="calendar-previous"
             onClick={() => step(-1)}
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={18} strokeWidth={1.5} aria-hidden="true" />
           </Button>
-          <strong>
-            {selected.toLocaleString(locale, {
-              month: "long",
-              year: "numeric",
-            })}
-          </strong>
           <Button
             className="button-quiet"
             aria-label={t("calendar.next")}
             data-testid="calendar-next"
             onClick={() => step(1)}
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={18} strokeWidth={1.5} aria-hidden="true" />
           </Button>
         </div>
-        <Button
-          className="button-quiet"
-          onClick={() => setDate(today.toString())}
-        >
-          {t("calendar.today")}
-        </Button>
         <div
-          className="calendar-mode"
+          className="calendar-source-mode"
           role="group"
           aria-label={t("calendar.selectView")}
         >
           {(["day", "week", "month-grid"] as const).map((mode) => (
             <Button
               key={mode}
-              className={view === mode && !list ? "" : "button-quiet"}
+              className="button-quiet"
               aria-pressed={view === mode && !list}
               data-testid={`calendar-${mode}`}
               onClick={() => {
@@ -307,6 +332,21 @@ export function CalendarScene() {
               {t(`calendar.${mode === "month-grid" ? "month" : mode}`)}
             </Button>
           ))}
+        </div>
+      </header>
+      <details className="calendar-source-tools">
+        <summary aria-label={t("calendar.tools")} data-testid="calendar-tools">
+          <GripVertical size={12} strokeWidth={1.5} aria-hidden="true" />
+          <span>{t("calendar.dragHint")}</span>
+          <ChevronDown size={12} strokeWidth={1.5} aria-hidden="true" />
+        </summary>
+        <div className="calendar-source-tool-actions">
+          <Button
+            className="button-quiet"
+            onClick={() => setDate(today.toString())}
+          >
+            {t("calendar.today")}
+          </Button>
           <Button
             className="button-quiet"
             aria-pressed={list}
@@ -315,40 +355,61 @@ export function CalendarScene() {
           >
             {t("calendar.list")}
           </Button>
+          <Button
+            className="button-quiet"
+            data-testid="calendar-create"
+            disabled={busy || !access.data?.canCreateTasks}
+            onClick={() => showEditor()}
+          >
+            {t("calendar.create")}
+          </Button>
         </div>
-        <Button
-          data-testid="calendar-create"
-          disabled={busy || !access.data?.canCreateTasks}
-          onClick={() => showEditor()}
+      </details>
+      {view !== "month-grid" && (
+        <div
+          className={`calendar-source-strip${view === "week" ? " calendar-source-week-strip" : ""}`}
         >
-          {t("calendar.create")}
-        </Button>
-      </div>
-      {view === "day" && (
-        <div className="calendar-day-strip">
           {Array.from({ length: 7 }, (_, index) => {
             const day = weekStart.add({ days: index });
+            const from = day.toZonedDateTime(me.user.tz).epochMilliseconds;
+            const to = day
+              .add({ days: 1 })
+              .toZonedDateTime(me.user.tz).epochMilliseconds;
+            const scheduled = weekData.data?.occurrences.some(
+              (item) =>
+                Date.parse(item.startAt) < to && Date.parse(item.endAt) > from,
+            );
             return (
               <button
                 key={day.toString()}
                 type="button"
                 aria-pressed={day.toString() === date}
-                onClick={() => setDate(day.toString())}
+                onClick={() => {
+                  setDate(day.toString());
+                  if (view === "week") setView("day");
+                }}
               >
                 <span>{day.toLocaleString(locale, { weekday: "short" })}</span>
                 <strong>{day.day}</strong>
+                <span
+                  className={`calendar-source-day-dot${scheduled ? " has-events" : ""}`}
+                  aria-hidden="true"
+                />
               </button>
             );
           })}
         </div>
       )}
-      <section className="calendar-tray" aria-label={t("calendar.unscheduled")}>
-        <h2>
-          {t("calendar.unscheduled")}{" "}
-          <span>{data.data?.unscheduled.length ?? 0}</span>
-        </h2>
-        <div className="calendar-tray-items">
-          {data.data?.unscheduled.map((item) => (
+      {!!data.data?.unscheduled.length && (
+        <section
+          className="calendar-source-tray"
+          aria-label={t("calendar.unscheduled")}
+        >
+          <h2>
+            {t("calendar.unscheduled")}{" "}
+            <span>{data.data.unscheduled.length}</span>
+          </h2>
+          {data.data.unscheduled.map((item) => (
             <Button
               key={item.task.id}
               className="button-quiet"
@@ -356,20 +417,28 @@ export function CalendarScene() {
               disabled={busy || !item.canSchedule}
               onClick={() => showEditor(item)}
             >
-              {item.task.title}
+              <span>
+                {prototypeTaskReference(item.task.id) ??
+                  item.task.id.slice(0, 8)}
+              </span>
+              {presentPrototypeField(
+                item.task.id,
+                "title",
+                item.task.title,
+                locale as PrototypeLocale,
+              )}
             </Button>
           ))}
-        </div>
-        {data.data?.unscheduled.length === 0 && (
-          <p className="muted">{t("calendar.emptyTray")}</p>
-        )}
-      </section>
+        </section>
+      )}
       {data.isPending && (
         <p className="loading" aria-live="polite">
           {t("loading")}
         </p>
       )}
       {(data.error ||
+        weekData.error ||
+        runs.error ||
         update.error ||
         create.error ||
         members.error ||
@@ -379,14 +448,29 @@ export function CalendarScene() {
             ? t("calendar.invalid")
             : t(
                 errorKey(
-                  data.error ?? update.error ?? create.error ?? members.error,
+                  data.error ??
+                    weekData.error ??
+                    runs.error ??
+                    update.error ??
+                    create.error ??
+                    members.error,
                 ),
               )}
-          {members.error && (
+          {(data.error || weekData.error || runs.error || members.error) && (
             <Button
               type="button"
-              disabled={members.isFetching}
-              onClick={() => members.refetch()}
+              disabled={
+                members.isFetching ||
+                data.isFetching ||
+                weekData.isFetching ||
+                runs.isFetching
+              }
+              onClick={() => {
+                void members.refetch();
+                void data.refetch();
+                void weekData.refetch();
+                void runs.refetch();
+              }}
             >
               {t("retry")}
             </Button>
