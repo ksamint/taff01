@@ -20,6 +20,11 @@ and validation in all three locales. The unchanged nine-command gate, all three
 Lighthouse runs and default three-run LCP checks are required before pushing
 this checkpoint; exact-commit CI precedes the production upgrade.
 
+The first isolated run stopped at seed signup because both membership triggers
+used an ambiguous `ORDER BY id`. The migration now qualifies source-table IDs;
+fresh database signup, promotion and future-workspace coverage must pass before
+release. Failed-run evidence is retained separately from acceptance evidence.
+
 Production acceptance checks the private CLI against the immutable API image,
 the scoped administrator's secure session and organization access, the two
 configured system-admin memberships, existing email/task/realtime behavior and

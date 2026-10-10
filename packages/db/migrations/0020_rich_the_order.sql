@@ -25,7 +25,7 @@ CREATE TRIGGER users_system_admin_delete_lock BEFORE DELETE ON users FOR EACH RO
 CREATE FUNCTION taff_workspace_system_admins() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   INSERT INTO members(workspace_id,user_id,name,kind,role)
-    SELECT NEW.id,id,name,'person','admin' FROM users WHERE system_admin ORDER BY id
+    SELECT NEW.id,u.id,u.name,'person','admin' FROM users u WHERE u.system_admin ORDER BY u.id
     ON CONFLICT(workspace_id,user_id) DO UPDATE SET role='admin',updated_at=now()
       WHERE members.role <> 'admin';
   RETURN NEW;
@@ -37,7 +37,7 @@ CREATE TRIGGER workspaces_system_admin_members AFTER INSERT ON workspaces FOR EA
 CREATE FUNCTION taff_user_system_admin_members() RETURNS trigger LANGUAGE plpgsql AS $$
 BEGIN
   INSERT INTO members(workspace_id,user_id,name,kind,role)
-    SELECT id,NEW.id,NEW.name,'person','admin' FROM workspaces ORDER BY id
+    SELECT w.id,NEW.id,NEW.name,'person','admin' FROM workspaces w ORDER BY w.id
     ON CONFLICT(workspace_id,user_id) DO UPDATE SET role='admin',updated_at=now()
       WHERE members.role <> 'admin';
   RETURN NEW;
