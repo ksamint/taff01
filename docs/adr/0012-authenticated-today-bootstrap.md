@@ -35,6 +35,9 @@ reconciliation. All other provisional reads are purged. Account replacement,
 logout or access changes purge every protected read and advance the existing
 version guards. Durable snapshots only fill absent reads; a future device
 timestamp cannot replace current server or browser data.
+Consumers must distinguish cached display data from query success: calendar
+editor writes remain disabled on a member-read error even when cached members
+are available. Retry retains form values and restores writes after success.
 
 A SameSite/Lax presentation cookie mirrors the confirmed user/workspace
 selection, with Secure on HTTPS. Core honors it only for the authenticated

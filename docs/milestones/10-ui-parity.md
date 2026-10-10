@@ -865,3 +865,11 @@ were 696/768/744 ms for EN/CN/HK. Initial JavaScript measured 195,675
 gzip bytes (191.1 KiB), below 204,800 bytes. These measurements precede the
 final immutable candidate; complete exact-SHA validation and both CI runs
 remain required before deployment. No production deployment has occurred.
+
+The first full immutable validation (`c86ca1f`) passed lint, typechecking,
+licences, 492 unit/integration tests, both builds and the bundle gate, but
+the existing calendar member-error browser case exposed a cached-data
+regression: Save stayed enabled after a failed reconciliation. The repair
+requires a successful member query for calendar editor writes, preserving
+cached display data, form state and Retry. The failing case is retained;
+complete validation must be repeated at the repaired commit before push.

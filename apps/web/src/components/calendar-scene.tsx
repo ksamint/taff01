@@ -572,6 +572,7 @@ export function CalendarScene() {
           timeZone={me.user.tz}
           busy={busy || members.isPending}
           canSave={
+            members.isSuccess &&
             !!members.data &&
             (editor.current ? true : (access.data?.canCreateTasks ?? false))
           }
