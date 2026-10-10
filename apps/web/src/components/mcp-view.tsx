@@ -12,6 +12,10 @@ import {
   scopeSchema,
 } from "@taff/schemas";
 import {
+  type PrototypeLocale,
+  presentPrototypeField,
+} from "@taff/schemas/prototype-data";
+import {
   useIsMutating,
   useMutation,
   useQuery,
@@ -62,7 +66,7 @@ export function McpView() {
   const { me, workspace } = useWorkspace();
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
-  const locale = i18n.resolvedLanguage ?? me.user.locale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
   const members = useMembers(workspace.id);
   const tokensKey = ["agent-tokens", workspace.id];
   const callsKey = ["mcp-calls", workspace.id];
@@ -346,7 +350,12 @@ export function McpView() {
                 >
                   {agents.map((agent) => (
                     <option key={agent.id} value={agent.id}>
-                      {agent.name}
+                      {presentPrototypeField(
+                        agent.id,
+                        "name",
+                        agent.name,
+                        locale,
+                      )}
                     </option>
                   ))}
                 </select>
