@@ -59,6 +59,11 @@ docker compose --env-file .env.production -f compose.prod.yaml up -d
 Migrations are additive and run before the new API starts. Take a backup
 first: `docker compose -f compose.prod.yaml exec -T postgres pg_dump -U taff taff > backup.sql`.
 
+The task-reference upgrade applies both 0021 and 0022 before replacing the API.
+0022 assigns missing task numbers for previous API images, preserving task
+creation during the upgrade and after an image rollback. Keep both additive
+migrations and their data when restoring images; see [ADR 0011](adr/0011-task-number-image-rollback.md).
+
 ## Apuch server layout
 
 The requested deployment uses a separate Docker Compose project, `taff`, on
