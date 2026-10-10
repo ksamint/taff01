@@ -431,7 +431,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               />
             )}
           </main>
-          {["/", "/calendar", "/projects"].includes(pathname) && (
+          {(pathname === "/" ||
+            pathname.startsWith("/calendar") ||
+            pathname.startsWith("/projects")) && (
             <Button
               className="quick-fab"
               data-testid="open-quick"
