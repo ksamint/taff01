@@ -1,0 +1,801 @@
+{
+  "formatVersion": 1,
+  "capturedAt": "2026-10-10T05:06:20.688Z",
+  "browser": "156.0.8078.4",
+  "source": "docs/ui/prototype/team-tasks.dc.html",
+  "theme": "dark",
+  "themeSelection": "Actual Me appearance control before navigating each fresh capture",
+  "capturePolicy": "Native screen locator captures; surrounding dual-surface design canvas, labels and outer phone bezel excluded. Product content, synthetic OS status bar/home indicator and rounded screen corners preserved. No scaling.",
+  "seed": {
+    "organization": "Northwind",
+    "date": "2026-10-08",
+    "time": "11:20 Asia/Hong_Kong",
+    "state": "Initial seed; NW-138 working at 2/4, NW-141 and NW-142 review, NW-144 blocked; no toast; simulation clock paused, agentSpeed=20; timers of at least 1 second frozen while short UI/focus/persistence ticks remain enabled. Actual saved task state is asserted for every capture.",
+    "freshPagePerCapture": true
+  },
+  "offline": {
+    "externalRequests": [],
+    "localResources": [
+      "/_ds/table-ai-design-system/_ds_bundle.js",
+      "/_ds/table-ai-design-system/assets/fonts/Manrope[wght].ttf",
+      "/_ds/table-ai-design-system/styles.css",
+      "/_ds/table-ai-design-system/tokens/base.css",
+      "/_ds/table-ai-design-system/tokens/colors.css",
+      "/_ds/table-ai-design-system/tokens/fonts.css",
+      "/_ds/table-ai-design-system/tokens/motion.css",
+      "/_ds/table-ai-design-system/tokens/radius.css",
+      "/_ds/table-ai-design-system/tokens/spacing.css",
+      "/_ds/table-ai-design-system/tokens/typography.css",
+      "/support.js",
+      "/team-tasks.dc.html",
+      "/vendor/NotoSansTC.ttf",
+      "/vendor/react-dom.production.min.js",
+      "/vendor/react.production.min.js"
+    ],
+    "pageErrors": 0
+  },
+  "unsupportedDesktopViews": {
+    "today": "No desktop Today view in source",
+    "calendar": "No desktop Calendar view in source",
+    "me": "No desktop Me view in source",
+    "agent-profile": "Desktop agent links filter the board, no profile pane",
+    "mcp": "MCP only exists in the phone stack; palette result opens that hidden phone stack"
+  },
+  "captures": [
+    {
+      "file": "phone-zh-projects.png",
+      "device": "phone",
+      "language": "zh",
+      "screen": "projects",
+      "theme": "dark",
+      "backgroundColor": "rgb(10, 22, 38)",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "height": 844,
+      "sha256": "34195f08b6e1e9405b1c0caea08b7c426a9c3f5c289feeb320335b5fbc9bdd9b",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "結賬改版",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 2200
+    },
+    {
+      "file": "phone-en-projects.png",
+      "device": "phone",
+      "language": "en",
+      "screen": "projects",
+      "theme": "dark",
+      "backgroundColor": "rgb(10, 22, 38)",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "width": 390,
+      "height": 844,
+      "sha256": "36d6c81bdd6dd9473939757ec94f44e828d9a3ced8302619ab3e38af5331ef9c",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "Checkout v2",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 3550
+    },
+    {
+      "file": "desktop-zh-board.png",
+      "device": "desktop",
+      "language": "zh",
+      "screen": "board",
+      "theme": "dark",
+      "backgroundColor": "rgb(10, 22, 38)",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "width": 1280,
+      "height": 800,
+      "sha256": "aa1463bc246a55153b6703694d1038eba7111e5e0dd2965c8d6116a98ac70a4d",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "結賬改版",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 1750
+    },
+    {
+      "file": "desktop-zh-list.png",
+      "device": "desktop",
+      "language": "zh",
+      "screen": "list",
+      "theme": "dark",
+      "backgroundColor": "rgb(10, 22, 38)",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "width": 1280,
+      "height": 800,
+      "sha256": "c5921bdd234933cdda8926009918729138bc45163b82f819641119f7c2652eed",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "撰寫 v2.4 發佈說明",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 2200
+    },
+    {
+      "file": "desktop-en-board.png",
+      "device": "desktop",
+      "language": "en",
+      "screen": "board",
+      "theme": "dark",
+      "backgroundColor": "rgb(10, 22, 38)",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "width": 1280,
+      "height": 800,
+      "sha256": "20b7322e55e69dff3a6d38cee8c8f56e7d1d1b4cc2ec5d991638bb5988b14943",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "Checkout v2",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 3100
+    },
+    {
+      "file": "desktop-en-list.png",
+      "device": "desktop",
+      "language": "en",
+      "screen": "list",
+      "theme": "dark",
+      "backgroundColor": "rgb(10, 22, 38)",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "width": 1280,
+      "height": 800,
+      "sha256": "d673a0f544a99d69c8b2eaf3e146d44854df6df0d7bfb090aa3e94324df649be",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "Draft v2.4 release notes",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 3550
+    }
+  ],
+  "assets": [
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/README.md",
+      "bytes": 17661,
+      "sha256": "52528841f3b4f8065d74651eb138abb56632fdfb3d046711fa8f884f1eb623e1"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/_adherence.oxlintrc.json",
+      "bytes": 30868,
+      "sha256": "0bc7a117ccf77a9b15d5f5a449e97e47c230d4bc7f21e18a4ccdf6a9fc8a00fc"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/_ds_bundle.js",
+      "bytes": 238077,
+      "sha256": "bbe7e4ef46a01d34d68c4f1d5391a44d28262f7660933da6897f9f744f9e4b0f"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/_ds_manifest.json",
+      "bytes": 31961,
+      "sha256": "5f936028d2af80b48e733d6e7987ed45578544f0020ce9bae54ce754fa42abba"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/assets/fonts/Manrope[wght].ttf",
+      "bytes": 164700,
+      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/styles.css",
+      "bytes": 219,
+      "sha256": "07d79c87250057ef5555418f170287fa8411254872d6f4a968c82f03f4cc3a5a"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/tokens/base.css",
+      "bytes": 1430,
+      "sha256": "f78ebf40362db019ef5f6be7b44755274a6424200705b49f55240703155ac086"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/tokens/colors.css",
+      "bytes": 3082,
+      "sha256": "7b1a06d1b56d6365149993516b5f5b5ba688638065766f16e06be7ed57fe84cf"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/tokens/fonts.css",
+      "bytes": 513,
+      "sha256": "ba27d8a85b70265991efcc7a7c22c8245a901cee1c2ef9b33c25417f1327d36b"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/tokens/motion.css",
+      "bytes": 1163,
+      "sha256": "df424c43d3790daf6fd2ec9cbc7ddc9ffaa462c04faeb74f54c089918a1c42f4"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/tokens/radius.css",
+      "bytes": 585,
+      "sha256": "cbf35309bf3865e37771434a45d687992a22211057be813f152191e4a4f15441"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/tokens/spacing.css",
+      "bytes": 647,
+      "sha256": "bd3481624bade665087aef4babd5f50f12dcb47e5536e223784208546eacc0a6"
+    },
+    {
+      "file": "docs/ui/prototype/_ds/table-ai-design-system/tokens/typography.css",
+      "bytes": 3655,
+      "sha256": "9555e1efdf96bf309712d33be718744bc4d8dc7f0799ad709984636191f50aa1"
+    },
+    {
+      "file": "docs/ui/prototype/agent-teammates.dc.html",
+      "bytes": 206,
+      "sha256": "d3a65cc8ce0e759849eaa1ca985d0fbc49bafb3212f9029731ca08d1bda42293"
+    },
+    {
+      "file": "docs/ui/prototype/audit-and-upgrade-plan.md",
+      "bytes": 9867,
+      "sha256": "be60e0c38d4ad591215014acac7b00abcc3472e3f7da6b39386d4f9f15f3895e"
+    },
+    {
+      "file": "docs/ui/prototype/support.js",
+      "bytes": 69094,
+      "sha256": "6d26a5b2ffb273f266b6d609eb1e79acbfe87bbe0d6ccbee685909d7daee25f9"
+    },
+    {
+      "file": "docs/ui/prototype/team-tasks.dc.html",
+      "bytes": 311751,
+      "sha256": "8389d2f8c63920800eb76dbda8d80b85883910cc6f1bb60d48a0402fe5b85f7b"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/Manrope-OFL.txt",
+      "bytes": 4386,
+      "sha256": "d6a309fcfb963d329a93baf9df66fa5f3c23a4be2b5f67edf24d6cafecde12ac"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/NotoSansTC-OFL.txt",
+      "bytes": 4388,
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/NotoSansTC.ttf",
+      "bytes": 11941968,
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/README.md",
+      "bytes": 1184,
+      "sha256": "91903cea475adb06980f9039c91a11d2036e1fc066d4eeca5f288a9a481cb6ec"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/provenance.json",
+      "bytes": 2391,
+      "sha256": "fb079711b0b02251675cf24c77e5773481cd36298d54fc8f45c7f14eb38e2a8a"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/react-LICENSE.txt",
+      "bytes": 1086,
+      "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/react-dom-LICENSE.txt",
+      "bytes": 1086,
+      "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/react-dom.production.min.js",
+      "bytes": 131835,
+      "sha256": "35f4f974f4b2bcd44da73963347f8952e341f83909e4498227d4e26b98f66f0d"
+    },
+    {
+      "file": "docs/ui/prototype/vendor/react.production.min.js",
+      "bytes": 10751,
+      "sha256": "d949f1c3687aedadcedac85261865f29b17cd273997e7f6b2bfc53b2f9d4c4dd"
+    },
+    {
+      "file": "scripts/ui/prototype-shots.mjs",
+      "bytes": 20167,
+      "sha256": "f5adbde730f81545aed985b02509cc127cdb3edfe36cfbd4432b731c64e2ca53"
+    }
+  ]
+}

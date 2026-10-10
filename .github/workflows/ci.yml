@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main, claude/m9-hardening]
+    branches: [main, claude/m9-hardening, codex/ui-parity]
   pull_request:
 concurrency:
   group: ci-${{ github.ref }}
@@ -15,6 +15,7 @@ env:
   AUTH_SECRET: ci-only-secret-with-at-least-32-characters
   API_INTERNAL_URL: http://127.0.0.1:3001
   API_PORT: "3001"
+  SEED_DATE: "2026-10-08"
   DEMO_EMAIL: alex@taff.local
   DEMO_PASSWORD: ci-demo-password
   TOKEN_PEPPER: ci-only-pepper-16-chars
@@ -73,6 +74,12 @@ jobs:
           name: lighthouse-reports
           path: lighthouse-reports/*.report.json
           retention-days: 7
+      # Behavioral flows edit the seeded fixture; reseeding preserves those edits.
+      - name: Approved visual baselines before fixture mutations
+        run: |
+          for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add; do
+            UI_SCREEN="$screen" pnpm exec playwright test --config playwright.visual.config.ts
+          done
       - name: Browser flows in en, zh-CN and zh-HK
         run: pnpm e2e
       - name: MCP smoke against the bundled API

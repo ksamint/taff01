@@ -30,11 +30,18 @@ import { useMembers } from "../lib/queries";
 import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { RunPanel } from "./run-panel";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-export function ReviewView({ taskId }: { taskId: string }) {
+export function ReviewView({
+  taskId,
+  embedded = false,
+}: {
+  taskId: string;
+  embedded?: boolean;
+}) {
   const { t } = useTranslation();
   const review = useReview(taskId);
   const pending = useIsMutating({ mutationKey: m3MutationKey });
@@ -55,13 +62,28 @@ export function ReviewView({ taskId }: { taskId: string }) {
         <Button onClick={() => void review.refetch()}>{t("retry")}</Button>
       </div>
     );
-  return <ReviewEditor key={cycle ?? statusKey} data={review.data} />;
+  return (
+    <ReviewEditor
+      key={cycle ?? statusKey}
+      data={review.data}
+      embedded={embedded}
+    />
+  );
 }
 
-function ReviewEditor({ data }: { data: ReviewWorkspace }) {
+function ReviewEditor({
+  data,
+  embedded,
+}: {
+  data: ReviewWorkspace;
+  embedded: boolean;
+}) {
   const { t, i18n } = useTranslation();
-  const { me, workspace } = useWorkspace();
-  const members = useMembers(workspace.id);
+  const { me } = useWorkspace();
+  const members = useMembers(data.task.workspaceId);
+  const authorId = me.workspaces.find(
+    ({ id }) => id === data.task.workspaceId,
+  )?.memberId;
   const client = useQueryClient();
   const [checks, setChecks] = useState<ReviewChecks>(data.checks);
   const [comment, setComment] = useState("");
@@ -107,29 +129,30 @@ function ReviewEditor({ data }: { data: ReviewWorkspace }) {
       }),
     onMutate: async (body) => {
       const snapshot = await snapshotM3(client);
-      client.setQueryData<ReviewWorkspace>(
-        reviewKey(data.task.id),
-        (current) =>
-          current
-            ? {
-                ...current,
-                comments: [
-                  ...current.comments,
-                  {
-                    id: `optimistic:${crypto.randomUUID()}`,
-                    workspaceId: workspace.id,
-                    runId: data.run.id,
-                    authorId: workspace.memberId,
-                    body: body.body,
-                    artifactId: body.artifactId ?? null,
-                    eventId: body.eventId ?? null,
-                    line: body.line ?? null,
-                    createdAt: new Date().toISOString(),
-                  },
-                ],
-              }
-            : current,
-      );
+      if (authorId)
+        client.setQueryData<ReviewWorkspace>(
+          reviewKey(data.task.id),
+          (current) =>
+            current
+              ? {
+                  ...current,
+                  comments: [
+                    ...current.comments,
+                    {
+                      id: `optimistic:${crypto.randomUUID()}`,
+                      workspaceId: data.task.workspaceId,
+                      runId: data.run.id,
+                      authorId,
+                      body: body.body,
+                      artifactId: body.artifactId ?? null,
+                      eventId: body.eventId ?? null,
+                      line: body.line ?? null,
+                      createdAt: new Date().toISOString(),
+                    },
+                  ],
+                }
+              : current,
+        );
       return snapshot;
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
@@ -222,22 +245,52 @@ function ReviewEditor({ data }: { data: ReviewWorkspace }) {
       </ul>
     );
   }
+  const approveButton = (
+    <Button
+      data-testid="review-approve"
+      className="button-primary"
+      disabled={busy || !allChecked || !allApproved}
+      onClick={() => decide("approve")}
+    >
+      <Check size={16} aria-hidden="true" />
+      {t("review.approve")}
+    </Button>
+  );
+  const changesButton = (
+    <Button
+      data-testid="review-request-changes"
+      disabled={busy || !hasChangeComment}
+      onClick={() => decide("request_changes")}
+    >
+      {t("review.requestChanges")}
+    </Button>
+  );
+  const actions = (
+    <div className="action-row">
+      {embedded ? changesButton : approveButton}
+      {embedded ? approveButton : changesButton}
+    </div>
+  );
   return (
-    <>
-      <Link className="back-link" href={`/tasks/${data.task.id}`}>
-        <ArrowLeft size={16} aria-hidden="true" />
-        {t("review.back")}
-      </Link>
-      <section className="page-heading">
-        <p className="eyebrow">{t("review.title")}</p>
-        <h1>{data.task.title}</h1>
-        <span
-          className={`status status-${data.task.status}`}
-          data-testid="review-task-status"
-        >
-          {t(`status.${data.task.status}`)}
-        </span>
-      </section>
+    <section className={embedded ? "task-review-block" : "review-view"}>
+      {!embedded && (
+        <>
+          <Link className="back-link" href={`/tasks/${data.task.id}`}>
+            <ArrowLeft size={16} aria-hidden="true" />
+            {t("review.back")}
+          </Link>
+          <section className="page-heading">
+            <p className="eyebrow">{t("review.title")}</p>
+            <h1>{data.task.title}</h1>
+            <Badge
+              className={`status status-${data.task.status}`}
+              data-testid="review-task-status"
+            >
+              {t(`status.${data.task.status}`)}
+            </Badge>
+          </section>
+        </>
+      )}
       <div className="review-layout">
         <div className="deliverables">
           <h2>{t("review.deliverables")}</h2>
@@ -442,24 +495,7 @@ function ReviewEditor({ data }: { data: ReviewWorkspace }) {
                     onChange={(event) => setComment(event.target.value)}
                   />
                 </div>
-                <div className="action-row">
-                  <Button
-                    data-testid="review-approve"
-                    className="button-primary"
-                    disabled={busy || !allChecked || !allApproved}
-                    onClick={() => decide("approve")}
-                  >
-                    <Check size={16} aria-hidden="true" />
-                    {t("review.approve")}
-                  </Button>
-                  <Button
-                    data-testid="review-request-changes"
-                    disabled={busy || !hasChangeComment}
-                    onClick={() => decide("request_changes")}
-                  >
-                    {t("review.requestChanges")}
-                  </Button>
-                </div>
+                {!embedded && actions}
                 <p className="section-hint">{t("review.approveHint")}</p>
               </>
             )}
@@ -488,6 +524,9 @@ function ReviewEditor({ data }: { data: ReviewWorkspace }) {
           </section>
         </aside>
       </div>
-    </>
+      {embedded && eligible && (
+        <footer className="task-review-actions">{actions}</footer>
+      )}
+    </section>
   );
 }

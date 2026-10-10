@@ -20,6 +20,7 @@ const task: Task = {
   workspaceId,
   ownerId: memberId,
   workerId: null,
+  number: 1,
   title: "Saved task",
   description: "",
   status: "todo",
@@ -41,7 +42,9 @@ function me(userId = "alice", role: "admin" | "guest" = "admin"): Me {
       locale: "en",
       tz: "UTC",
     },
-    workspaces: [{ id: workspaceId, memberId, name: "Private", role }],
+    workspaces: [
+      { id: workspaceId, memberId, name: "Private", key: "PR", role },
+    ],
   };
 }
 function saved(identity = me()): ReadSnapshot {

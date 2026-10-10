@@ -1,0 +1,416 @@
+/* Source: prototype phone task detail 410–554 and desktop pane 1022–1119. */
+.task-detail-sheet.sheet-dialog {
+  width: min(100%, 560px);
+  max-width: 100%;
+  max-height: 92dvh;
+  padding: 0;
+  border-radius: 12px 12px 0 0;
+}
+.task-detail-sheet.sheet-dialog > .section-heading {
+  padding: 8px 12px;
+  margin: 0;
+  border-bottom: 1px solid var(--border-line);
+}
+.task-detail-sheet.sheet-dialog > .section-heading h2 {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.task-detail-view {
+  min-width: 0;
+  background: var(--bg);
+}
+.task-detail-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 12px;
+  border-bottom: 1px solid var(--border-line);
+}
+.task-detail-sheet .task-detail-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg);
+}
+.task-detail-toolbar > span:first-of-type {
+  font: 12px var(--font-mono);
+  color: var(--text-muted);
+}
+.task-detail-toolbar .status {
+  font-size: 12px;
+  white-space: nowrap;
+  flex: none;
+}
+.task-detail-body {
+  padding: 20px 20px 32px;
+}
+.task-source-heading {
+  position: relative;
+  margin: 0 0 16px;
+}
+.task-project-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: var(--ls-track-sm);
+  color: var(--text-muted);
+}
+.task-source-heading h1 {
+  font-size: 22px;
+  line-height: 1.35;
+  font-weight: 600;
+  margin: 6px 0 0;
+  text-wrap: pretty;
+}
+.task-edit-text.button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  white-space: normal;
+  justify-content: flex-start;
+}
+.task-edit-text.button:hover {
+  box-shadow: none;
+  background: transparent;
+}
+/* Permissions disable editing, not the readability of the current task. */
+.task-edit-text.button:disabled,
+.task-field-row.button:disabled {
+  opacity: 1;
+  cursor: default;
+}
+.task-field-rows {
+  border-top: 1px solid var(--border-line);
+}
+.task-field-row.button {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 1px solid var(--border-line);
+  border-radius: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  font-weight: 400;
+}
+.task-field-row.button:hover {
+  background: var(--bg-container-low);
+  box-shadow: none;
+}
+.task-field-row.button:disabled:hover {
+  background: transparent;
+}
+.task-field-row > span:first-child {
+  width: 88px;
+  flex: none;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: left;
+}
+.task-field-row > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--text);
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.task-field-row > svg:last-child {
+  flex: none;
+  color: var(--text-subtle);
+}
+.task-field-value {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.task-start.button {
+  margin: 8px 0;
+  font-size: 12px;
+}
+.task-field-editor {
+  margin: 0;
+}
+.task-field-editor > .button-primary {
+  margin: 12px 0;
+}
+.task-field-editor .task-picker {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+.task-picker > .field,
+.task-picker > .field-grid {
+  display: none;
+}
+.task-picker-text > .field:has(#edit-title, #edit-description),
+.task-picker-owner > .field:has(#edit-owner),
+.task-picker-labels > .field:has(#edit-labels),
+.task-picker-due > .field-grid:has(#edit-date),
+.task-picker-priority > .field-grid:has(#edit-priority),
+.task-picker-project > .field-grid:has(#edit-project) {
+  display: grid;
+}
+.task-picker-priority .field:has(#edit-project),
+.task-picker-project .field:has(#edit-priority) {
+  display: none;
+}
+.task-description {
+  padding: 20px 0 4px;
+  font-size: 14px;
+  line-height: 1.7;
+  text-wrap: pretty;
+}
+.task-detail-body .profile-section {
+  margin-top: 20px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border-line);
+}
+.task-detail-body .profile-section h2 {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+.task-detail-body .history-list,
+.task-detail-body .review-comments {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+.task-detail-body .history-list > li {
+  min-height: 44px;
+  border-bottom: 1px solid var(--border-line);
+  gap: 8px;
+  padding: 6px 0;
+}
+.task-detail-body .review-comments > li {
+  font-size: 13px;
+  line-height: 1.6;
+  padding: 8px 0;
+  background: transparent;
+  border: 0;
+}
+.task-review-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.task-review-block {
+  display: contents;
+}
+.task-review-block .review-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+}
+/* Source review actions are outside the scrolling task content. Keep the real
+   controls last in the task's layout, including after its subtasks/comments. */
+.task-detail-has-review .task-detail-body {
+  display: flex;
+  flex-direction: column;
+}
+.task-detail-has-review .task-detail-body:has(.task-review-actions) {
+  padding-bottom: 0;
+}
+.task-review-block .task-review-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  order: 1;
+  flex: none;
+  padding: 16px 20px;
+  margin: 16px -20px 0;
+  border-top: 1px solid var(--border-line);
+  background: var(--bg);
+}
+.task-review-actions > .action-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.task-review-actions .button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  white-space: normal;
+  font-size: 13px;
+}
+.task-review-block h2 {
+  font-size: 13px;
+  font-weight: 600;
+}
+.task-review-block h3,
+.task-review-block h4 {
+  font-size: 12px;
+}
+.task-review-block .deliverables,
+.task-review-block .review-sidebar {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.task-review-block .deliverable,
+.task-review-block .review-evidence,
+.task-review-block .review-checklist {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+.task-review-block .deliverable-heading {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border-line);
+}
+.task-review-block .deliverable-heading > span {
+  display: none;
+}
+.task-review-block .deliverable-body {
+  padding: 12px 0;
+}
+.task-review-block .artifact-preview {
+  font: 13px / 1.6 var(--font-sans);
+  white-space: pre-wrap;
+  background: transparent;
+  padding: 0;
+  border: 0;
+  max-height: none;
+}
+.task-review-block .run-panel {
+  font-size: 12px;
+}
+.task-review-block .check-row {
+  min-height: 44px;
+  font-size: 13px;
+}
+@media (min-width: 1024px) {
+  .task-detail-sheet.sheet-dialog {
+    width: 360px;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0 0 0 auto;
+    border-radius: 0;
+  }
+  .task-detail-embedded .task-detail-body {
+    padding: 16px 20px 32px;
+  }
+  .task-detail-embedded .task-source-heading h1 {
+    font-size: 18px;
+  }
+  .task-detail-embedded .task-project-label {
+    display: none;
+  }
+  .task-detail-embedded .task-detail-toolbar {
+    padding: 0 20px;
+    border-bottom: 0;
+  }
+  /* Projects already supplies the source pane's 20px inset. */
+  .projects-detail .task-detail-toolbar {
+    padding: 0;
+    min-height: 44px;
+    border-bottom: 0;
+    margin-bottom: 16px;
+  }
+  .projects-detail .task-detail-body {
+    padding: 0;
+  }
+  .projects-detail .task-review-actions {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  .task-detail-embedded .task-field-row > span:first-child {
+    width: 80px;
+  }
+  .task-detail-embedded .task-field-row > span:nth-child(2) {
+    font-size: 13px;
+  }
+  .task-detail-embedded .task-field-row.button {
+    padding: 6px 0;
+  }
+}
+
+/* The task toolbar owns the visible close action; keep the dialog name available. */
+.task-detail-sheet.sheet-dialog > .section-heading {
+  display: none;
+}
+.task-person-avatar,
+.task-agent-avatar {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+.task-person-avatar {
+  border-radius: 50%;
+  background: var(--bg-container-high);
+}
+.task-agent-avatar {
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+.task-worker-controls .task-field-row {
+  min-height: 52px;
+}
+.task-worker-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.task-worker-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.task-worker-state {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.task-worker-state .agent-status-dot {
+  flex: none;
+}
+
+.task-parent-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.task-parent-link > svg {
+  flex: none;
+}
+.task-parent-link:hover {
+  color: var(--text);
+}

@@ -1,6 +1,7 @@
 "use client";
 import type { InboxItem } from "@taff/schemas/inbox-read";
 import { shouldShowForegroundNotification } from "@taff/schemas/notification-preferences";
+import { Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,7 +10,6 @@ import {
   useNotificationPreferences,
 } from "../lib/notification-preferences";
 import { useInbox } from "../lib/queries";
-import "../styles/notifications.css";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 
@@ -84,13 +84,18 @@ export function NotificationAlerts() {
           role="status"
           data-testid="foreground-notification"
         >
+          <Sparkles size={16} aria-hidden="true" />
           <div>
             <strong>{t(`inbox.kind.${item.kind}`)}</strong>
             <p>{item.title}</p>
-            <Link href="/inbox" prefetch={false}>
-              {t("inbox.title")}
-            </Link>
           </div>
+          <Link
+            className="notification-view"
+            href={item.taskId ? `/tasks/${item.taskId}` : "/inbox"}
+            prefetch={false}
+          >
+            {t("shell.view")}
+          </Link>
           <Button
             className="button-quiet"
             aria-label={t("planning.close")}
@@ -100,7 +105,7 @@ export function NotificationAlerts() {
               )
             }
           >
-            ×
+            <X size={16} aria-hidden="true" />
           </Button>
         </div>
       ))}

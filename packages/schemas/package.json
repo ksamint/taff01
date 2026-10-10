@@ -13,7 +13,8 @@
     "./project-read": "./src/project-read.ts",
     "./workspace-read": "./src/workspace-read.ts",
     "./calendar-read": "./src/calendar-read.ts",
-    "./notification-preferences": "./src/notification-preferences.ts"
+    "./notification-preferences": "./src/notification-preferences.ts",
+    "./prototype-data": "./src/prototype-data.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

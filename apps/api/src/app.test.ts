@@ -189,6 +189,7 @@ describe("REST adapter boundaries", () => {
       version: 1,
       id,
       workspaceId: id,
+      number: 1,
       ownerId: id,
       workerId: null,
       title: "Task",
@@ -245,6 +246,7 @@ describe("REST adapter boundaries", () => {
       tokenId: id,
       memberId: id,
       workspaceId: id,
+      number: 1,
       scopes: ["tasks:read" as const],
     };
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
@@ -392,6 +394,7 @@ describe("REST adapter boundaries", () => {
     const result = {
       id,
       workspaceId: id,
+      number: 1,
       title: "Task",
       ownerId: id,
       workerId: null,
@@ -713,6 +716,7 @@ describe("REST adapter boundaries", () => {
       ...input,
       id,
       workspaceId: id,
+      number: 1,
       runId: id,
       createdAt: now.toISOString(),
     };
@@ -743,6 +747,7 @@ describe("REST adapter boundaries", () => {
       tokenId: id,
       memberId: id,
       workspaceId: id,
+      number: 1,
       scopes: ["tasks:write" as const, "files:write" as const],
     };
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
@@ -750,6 +755,7 @@ describe("REST adapter boundaries", () => {
     const artifact = {
       id,
       workspaceId: id,
+      number: 1,
       runId: id,
       name: "file.txt",
       mimeType: "text/plain",

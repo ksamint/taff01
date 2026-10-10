@@ -1,15 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import type { ReactNode } from "react";
-import { preload } from "react-dom";
 import english from "../locales/en/common.json";
 import simplified from "../locales/zh-CN/common.json";
 import traditional from "../locales/zh-HK/common.json";
+import { AppShell } from "../src/components/app-shell";
 import { Providers } from "../src/components/providers";
 import { htmlLang, isLocale, preloadBootScript } from "../src/lib/i18n";
 import { readServerMe } from "../src/lib/server-me";
+import { inviteBootScript } from "../src/lib/invite";
 import { themeBootScript } from "../src/lib/theme";
 import "./globals.css";
+import "../src/styles/notifications.css";
 
 export const metadata: Metadata = {
   title: "Taff",
@@ -28,8 +30,10 @@ export const viewport: Viewport = {
 };
 export default async function RootLayout({
   children,
+  modal,
 }: {
   children: ReactNode;
+  modal?: ReactNode;
 }) {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore
@@ -51,16 +55,39 @@ export default async function RootLayout({
   const initialLocale = isLocale(preference) ? preference : null;
   const locale = initialLocale ?? "en";
   const messages = { en: english, "zh-CN": simplified, "zh-HK": traditional };
-  // Browser confirmation gates protected reads/writes; start it with the HTML
-  // instead of after the JavaScript has downloaded and run.
-  preload("/api/me", { as: "fetch", crossOrigin: "anonymous" });
   return (
     <html lang={htmlLang(locale)} suppressHydrationWarning>
+      <head>
+        {/* Optional CJK fonts must not outrank app scripts on cold visits. */}
+        {locale !== "en" && (
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/NotoSansTC-ui-common.woff2"
+            crossOrigin="anonymous"
+            fetchPriority="low"
+          />
+        )}
+        {/* Browser confirmation gates protected reads and writes; it starts
+            with the HTML instead of after the JavaScript has run. Only for a
+            session the server already saw: a preloaded 401 would otherwise be
+            reused by the first read after signing in. */}
+        {initialMe && (
+          <link
+            rel="preload"
+            href="/api/me"
+            as="fetch"
+            crossOrigin="anonymous"
+          />
+        )}
+      </head>
       <body suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
             __html:
               themeBootScript +
+              inviteBootScript +
               preloadBootScript(
                 process.env.NEXT_PUBLIC_ASSET_VERSION ?? "dev",
                 locale,
@@ -72,7 +99,10 @@ export default async function RootLayout({
           messages={messages[locale]}
           initialMe={initialMe}
         >
-          {children}
+          <AppShell>
+            {children}
+            {modal}
+          </AppShell>
         </Providers>
       </body>
     </html>

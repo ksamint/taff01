@@ -45,6 +45,7 @@ import {
   workspaceCreateSchema,
   workspaceInviteAcceptSchema,
   workspaceInviteInputSchema,
+  workspaceKeyFromName,
 } from "@taff/schemas";
 import { and, desc, eq, inArray, isNull, type SQL, sql } from "drizzle-orm";
 import { CoreError, hashToken, type Principal } from "./index";
@@ -440,7 +441,7 @@ export function createPlanningOperations({
       }
       const [workspace] = await tx
         .insert(workspaces)
-        .values({ name: body.name })
+        .values({ name: body.name, key: workspaceKeyFromName(body.name) })
         .returning();
       const [member] = await tx
         .insert(members)
@@ -463,7 +464,12 @@ export function createPlanningOperations({
           kind: "agent",
           role: "member",
         });
-      return { id: workspace.id, name: workspace.name, memberId: member.id };
+      return {
+        id: workspace.id,
+        name: workspace.name,
+        key: workspace.key,
+        memberId: member.id,
+      };
     });
   }
   async function listWorkspaceInvites(
@@ -618,7 +624,12 @@ export function createPlanningOperations({
         .select()
         .from(workspaces)
         .where(eq(workspaces.id, row.workspaceId));
-      return { id: workspace.id, name: workspace.name, memberId: member.id };
+      return {
+        id: workspace.id,
+        name: workspace.name,
+        key: workspace.key,
+        memberId: member.id,
+      };
     });
   }
   async function updateMemberRole(
@@ -786,7 +797,11 @@ export function createPlanningOperations({
       text ? sql`position(${text} in lower(${column}))>0` : sql`true`;
     if (kinds.includes("task")) {
       const rows = await db
-        .select({ task: tasks, workspaceName: workspaces.name })
+        .select({
+          task: tasks,
+          workspaceName: workspaces.name,
+          workspaceKey: workspaces.key,
+        })
         .from(tasks)
         .innerJoin(workspaces, eq(workspaces.id, tasks.workspaceId))
         .where(
@@ -811,6 +826,7 @@ export function createPlanningOperations({
           type: "task",
           workspaceId: row.task.workspaceId,
           workspaceName: row.workspaceName,
+          workspaceKey: row.workspaceKey,
           taskId: row.task.id,
           title: row.task.title,
           snippet: snippet(
@@ -834,6 +850,7 @@ export function createPlanningOperations({
             body: table.body,
             task: tasks,
             workspaceName: workspaces.name,
+            workspaceKey: workspaces.key,
           })
           .from(table)
           .innerJoin(tasks, join)
@@ -847,6 +864,7 @@ export function createPlanningOperations({
             type: "comment",
             workspaceId: row.task.workspaceId,
             workspaceName: row.workspaceName,
+            workspaceKey: row.workspaceKey,
             taskId: row.task.id,
             title: row.task.title,
             snippet: snippet(row.body, text),

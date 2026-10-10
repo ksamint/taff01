@@ -457,6 +457,7 @@ export const workspaceCreateSchema = strictObject({
 export const workspaceSchema = object({
   id: idSchema,
   name: string(),
+  key: string(),
   memberId: idSchema,
 });
 export const workspaceInviteInputSchema = strictObject({
@@ -496,6 +497,7 @@ export const searchResultSchema = object({
   type: zodEnum(["task", "comment"]),
   workspaceId: idSchema,
   workspaceName: string(),
+  workspaceKey: string(),
   taskId: idSchema,
   title: string(),
   snippet: string(),

@@ -1,413 +1,448 @@
 "use client";
+import { type Locale, taskReference } from "@taff/schemas";
 
 import {
   type AssignTask,
   assignTaskSchema,
-  type CreateTask,
-  createTaskSchema,
   type Task,
   taskSchema,
 } from "@taff/schemas/base";
+import {
+  type CalendarOccurrence,
+  calendarCivilTime,
+  calendarWallToInstant,
+} from "@taff/schemas/calendar-read";
 import {
   useIsMutating,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { m3MutationKey } from "../lib/optimistic-m3";
+import { m3MutationKey, patchTask, snapshotM3 } from "../lib/optimistic-m3";
 import {
-  tasksKey,
+  useCalendar,
   useMembers,
   useRuns,
   useTasks,
   useWorkspaceAccess,
 } from "../lib/queries";
-import {
-  isCurrentSnapshot,
-  restoreQueries,
-  snapshotQueries,
-} from "../lib/query-snapshot";
+import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { todayTasks } from "../lib/today";
 import { useWorkspace } from "./app-shell";
-import { memberOptions } from "./member-options";
 import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
+import { StatusGlyph } from "./ui/status-glyph";
 
 const TODAY_PAGE = 20;
+/** Unscheduled agent work shown on Today before it points to Projects. */
+const TODAY_RUNS = 6;
 
-type TaskMutation =
-  | { kind: "create"; body: CreateTask }
-  | { kind: "assign"; id: string; body: AssignTask };
-
-export function TodayView() {
-  const { me, workspace } = useWorkspace();
+// Prototype Today, lines 47–114: schedules and deadlines are distinct reads.
+export function TodayView({ initialNow }: { initialNow: number }) {
+  const { me, workspace, openSearch } = useWorkspace();
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
-  const taskKey = tasksKey(workspace.id);
-  const [title, setTitle] = useState("");
-  const [ownerId, setOwnerId] = useState(workspace.memberId);
-  const [workerId, setWorkerId] = useState("");
-  const [validationError, setValidationError] = useState(false);
   const members = useMembers(workspace.id);
   const access = useWorkspaceAccess(workspace.id);
   const tasks = useTasks(workspace.id);
   const runs = useRuns(workspace.id);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
+  const [now, setNow] = useState(() => new Date(initialNow));
+  // Only the real wall clock advances here; agent state comes from the API.
+  useEffect(() => {
+    setNow(new Date());
+    const timer = window.setInterval(() => setNow(new Date()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const localDate = calendarCivilTime(now, me.user.tz)
+    .toISOString()
+    .slice(0, 10);
+  const range = useMemo(() => {
+    const next = new Date(`${localDate}T00:00:00Z`);
+    next.setUTCDate(next.getUTCDate() + 1);
+    return {
+      from: calendarWallToInstant(`${localDate}T00:00`, me.user.tz),
+      to: calendarWallToInstant(
+        `${next.toISOString().slice(0, 10)}T00:00`,
+        me.user.tz,
+      ),
+    };
+  }, [localDate, me.user.tz]);
+  const calendar = useCalendar(workspace.id, range.from, range.to);
   const mutation = useMutation({
     mutationKey: m3MutationKey,
-    mutationFn: async (input: TaskMutation) =>
+    mutationFn: async (input: { id: string; body: AssignTask }) =>
       taskSchema.parse(
-        await request(
-          input.kind === "create"
-            ? "/api/tasks"
-            : `/api/tasks/${input.id}/assignment`,
-          {
-            method: input.kind === "create" ? "POST" : "PATCH",
-            body: JSON.stringify(
-              input.kind === "create"
-                ? createTaskSchema.parse(input.body)
-                : assignTaskSchema.parse(input.body),
-            ),
-          },
-        ),
+        await request(`/api/tasks/${input.id}/assignment`, {
+          method: "PATCH",
+          body: JSON.stringify(assignTaskSchema.parse(input.body)),
+        }),
       ),
     onMutate: async (input) => {
-      const snapshot = await snapshotQueries(client, [taskKey]);
-      const temporaryId = `optimistic:${crypto.randomUUID()}`;
-      const now = new Date().toISOString();
-      client.setQueryData<Task[]>(taskKey, (current = []) =>
-        input.kind === "create"
-          ? [
-              {
-                ...input.body,
-                dueAt: input.body.dueAt ?? null,
-                description: input.body.description ?? "",
-                priority: input.body.priority ?? 3,
-                projectId: input.body.projectId ?? null,
-                labels: input.body.labels ?? [],
-                parentId: input.body.parentId ?? null,
-                version: 1,
-                id: temporaryId,
-                status: "todo",
-                createdAt: now,
-                updatedAt: now,
-              },
-              ...current,
-            ]
-          : current.map((task) =>
-              task.id === input.id
-                ? { ...task, workerId: input.body.workerId }
-                : task,
-            ),
-      );
-      return { snapshot, temporaryId };
+      const snapshot = await snapshotM3(client);
+      patchTask(client, input.id, { workerId: input.body.workerId });
+      return { snapshot };
     },
-    onError: (_, __, context) => {
-      restoreQueries(client, context?.snapshot);
+    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
+    onSuccess: (task, _, context) => {
+      if (isCurrentSnapshot(client, context.snapshot))
+        patchTask(client, task.id, task);
     },
-    onSuccess: (task, input, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<Task[]>(taskKey, (current = []) =>
-        current.map((item) =>
-          item.id === (input.kind === "create" ? context.temporaryId : input.id)
-            ? task
-            : item,
-        ),
-      );
-      if (input.kind === "create") setTitle("");
+    onSettled: () => {
+      if (client.isMutating({ mutationKey: m3MutationKey }) > 1) return;
+      return client.invalidateQueries({
+        predicate: ({ queryKey }) =>
+          [
+            "tasks",
+            "task",
+            "calendar",
+            "task-calendar",
+            "task-access",
+            "review",
+            "search",
+          ].includes(String(queryKey[0])),
+      });
     },
-    onSettled: () => client.invalidateQueries({ queryKey: taskKey }),
   });
-  const visibleTasks = todayTasks(tasks.data ?? [], me.user.tz);
-  // A long backlog renders in pages: the first screen paints fast on a phone
-  // and the rest arrives on request.
+  const visibleTasks = todayTasks(
+    (tasks.data ?? []).filter(
+      (task) => task.dueAt || !task.labels.includes("meeting"),
+    ),
+    me.user.tz,
+    now,
+  );
   const [showAll, setShowAll] = useState(false);
   const shownTasks = showAll ? visibleTasks : visibleTasks.slice(0, TODAY_PAGE);
   const hiddenCount = visibleTasks.length - shownTasks.length;
-  const locale = i18n.resolvedLanguage ?? me.user.locale;
-  const workerOptions = useMemo(
-    () => memberOptions(members.data ?? [], t),
-    [members.data, t],
-  );
-  const { dateFormatter, time, numbers } = useMemo(
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
+  const { date, time, numbers } = useMemo(
     () => ({
-      dateFormatter: new Intl.DateTimeFormat(locale, {
+      date: new Intl.DateTimeFormat(locale, {
         timeZone: me.user.tz,
-        weekday: "long",
-        month: "long",
+        weekday: "short",
+        month: "short",
         day: "numeric",
       }),
       time: new Intl.DateTimeFormat(locale, {
         timeZone: me.user.tz,
-        hour: "numeric",
+        hour: "2-digit",
         minute: "2-digit",
+        hourCycle: "h23",
       }),
       numbers: new Intl.NumberFormat(locale),
     }),
     [locale, me.user.tz],
   );
-  const date = dateFormatter.format(new Date());
-  const count = numbers.format(visibleTasks.length);
-  const people =
-    members.data?.filter((member) => member.kind === "person") ?? [];
-  const agents = new Map(
-    (members.data ?? [])
-      .filter((member) => member.kind === "agent")
-      .map((member) => [member.id, member.name]),
+  const present = (task: Task) => task.title;
+  const memberName = (id: string | null) => {
+    const member = members.data?.find((item) => item.id === id);
+    return member ? member.name : t("unknownMember");
+  };
+  const occurrences = [...(calendar.data?.occurrences ?? [])].sort((a, b) =>
+    a.startAt.localeCompare(b.startAt),
   );
-  const agentWork = (runs.data ?? []).filter((run) =>
+  const activeRuns = (runs.data ?? []).filter((run) =>
     ["running", "paused", "changes_requested"].includes(run.status),
   );
-  const memberName = (id: string | null) =>
-    members.data?.find((member) => member.id === id)?.name ??
-    t("unknownMember");
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const parsed = createTaskSchema.safeParse({
-      workspaceId: workspace.id,
-      title,
-      ownerId,
-      workerId: workerId || null,
-    });
-    setValidationError(!parsed.success);
-    if (parsed.success) mutation.mutate({ kind: "create", body: parsed.data });
+  const unscheduledRuns = activeRuns.filter(
+    (run) => !occurrences.some((item) => item.task.id === run.taskId),
+  );
+  const beforeNow = occurrences.filter(
+    (item) => Date.parse(item.startAt) <= now.getTime(),
+  );
+  const afterNow = occurrences.filter(
+    (item) => Date.parse(item.startAt) > now.getTime(),
+  );
+  const readError = tasks.error ?? members.error ?? access.error;
+  const scheduleError = calendar.error ?? runs.error;
+  const reference = (task: Task) => taskReference(workspace.key, task.number);
+  function scheduleBlock(item: CalendarOccurrence) {
+    const run = activeRuns.find((entry) => entry.taskId === item.task.id);
+    const meeting = item.task.labels.includes("meeting");
+    const past = Date.parse(item.endAt) <= now.getTime();
+    const isAgent = members.data
+      ? members.data.some(
+          (member) =>
+            member.id === item.task.workerId && member.kind === "agent",
+        )
+      : item.isAgent;
+    const description = item.task.description;
+    const meta = isAgent
+      ? `${memberName(item.task.workerId)} · ${t(run ? `run.status.${run.status}` : `status.${item.task.status}`)}`
+      : description.startsWith("Participants:") ||
+          description.startsWith("參與者：") ||
+          description.startsWith("参与者：")
+        ? description.replace(/^(?:Participants:|參與者：|参与者：)\s*/, "")
+        : memberName(item.task.workerId ?? item.task.ownerId);
+    return (
+      <li
+        className={`today-timeline-row${past ? " today-past" : ""}`}
+        key={item.id}
+      >
+        <time className="today-time" dateTime={item.startAt}>
+          {time.format(new Date(item.startAt))}
+        </time>
+        <Link
+          href={`/tasks/${item.task.id}`}
+          prefetch={false}
+          className={`today-schedule-block${isAgent ? " today-agent-block" : ""}${item.task.status === "done" ? " today-schedule-done" : ""}${meeting ? " today-meeting-block" : ""}`}
+          data-testid="today-schedule"
+        >
+          <span className="today-block-heading">
+            {!meeting && <StatusGlyph status={item.task.status} />}
+            <span className="today-block-title">{present(item.task)}</span>
+            {isAgent && (
+              <Sparkles size={14} strokeWidth={1.5} aria-hidden="true" />
+            )}
+          </span>
+          <span className="today-block-meta">
+            {time.format(new Date(item.startAt))}–
+            {time.format(new Date(item.endAt))} · {meta}
+          </span>
+        </Link>
+      </li>
+    );
   }
   return (
-    <>
-      <section className="page-heading">
-        <p className="eyebrow">{workspace.name}</p>
-        <div className="day-title">
+    <div className="today-view">
+      <header className="today-header">
+        <div className="today-header-title">
+          <time className="today-date" dateTime={localDate}>
+            {date.format(now)}
+          </time>
           <h1 data-testid="today-heading">{t("today")}</h1>
-          <span className="date">{date}</span>
         </div>
-        <p className="greeting">{t("hello", { name: me.user.name })}</p>
-        <p className="task-count">
-          {t(visibleTasks.length === 1 ? "taskCount" : "tasksCount", { count })}
-        </p>
-      </section>
-      <section className="agents-card" aria-labelledby="agents-heading">
-        <h2 id="agents-heading">
-          <Sparkles aria-hidden="true" strokeWidth={1.5} />
-          {t("agentsAtWork")}
+        <div className="today-header-actions">
+          <Button
+            className="today-search"
+            data-testid="open-search"
+            aria-label={t("search.title")}
+            onClick={openSearch}
+          >
+            <Search size={20} strokeWidth={1.5} aria-hidden="true" />
+          </Button>
+          <Link
+            className="today-avatar-link"
+            href="/me"
+            prefetch={false}
+            aria-label={t("me.signedInAs", { name: me.user.name })}
+          >
+            <span className="today-avatar" aria-hidden="true">
+              {me.user.name.slice(0, 1)}
+            </span>
+          </Link>
+        </div>
+      </header>
+      <section
+        className="today-schedule"
+        aria-labelledby="today-schedule-heading"
+      >
+        <h2 className="today-section-label" id="today-schedule-heading">
+          {t("calendar.schedule")}
         </h2>
-        {runs.isPending ? (
-          <p className="quiet">{t("loading")}</p>
-        ) : runs.isError ? (
-          <p className="alert" role="alert">
-            {t(errorKey(runs.error))}
-          </p>
-        ) : agentWork.length === 0 ? (
-          <p className="quiet">{t("agentsIdle")}</p>
-        ) : (
-          <ul>
-            {agentWork.map((run) => (
-              <li key={run.id}>
-                <Link
-                  className="task-title-link"
-                  href={`/tasks/${run.taskId}`}
-                  prefetch={false}
-                >
-                  {tasks.data?.find((task) => task.id === run.taskId)?.title ??
-                    t("agentProfile.task")}
-                </Link>
-                <Link href={`/agents/${run.agentId}`}>
-                  <Sparkles size={12} aria-hidden="true" />
-                  {agents.get(run.agentId) ?? t("agent")} ·{" "}
-                  {t(`run.status.${run.status}`)}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        {scheduleError && (
+          <div className="today-message alert" role="alert">
+            <p>{t(errorKey(scheduleError))}</p>
+            <Button
+              className="button-quiet"
+              onClick={() => {
+                void calendar.refetch();
+                void runs.refetch();
+              }}
+            >
+              {t("retry")}
+            </Button>
+          </div>
         )}
-      </section>
-      <div className="today-grid">
-        <section className="panel composer" aria-labelledby="new-task-heading">
-          <h2 id="new-task-heading">{t("newTask")}</h2>
-          <form onSubmit={submit} noValidate>
-            <div className="field">
-              <Label htmlFor="task-title">{t("taskTitle")}</Label>
-              <Input
-                id="task-title"
-                data-testid="task-title"
-                value={title}
-                disabled={!access.data?.canCreateTasks || busy}
-                onChange={(event) => setTitle(event.target.value)}
-                placeholder={t("taskPlaceholder")}
-                maxLength={200}
-                required
-              />
-            </div>
-            <div className="assignment-fields">
-              <div className="field">
-                <Label htmlFor="task-owner">{t("owner")}</Label>
-                <select
-                  id="task-owner"
-                  data-testid="task-owner"
-                  value={ownerId}
-                  onChange={(event) => setOwnerId(event.target.value)}
-                  disabled={
-                    !access.data?.canCreateTasks || !people.length || busy
-                  }
-                >
-                  {people.map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="field">
-                <Label htmlFor="task-worker">{t("worker")}</Label>
-                <select
-                  id="task-worker"
-                  data-testid="task-worker"
-                  value={workerId}
-                  onChange={(event) => setWorkerId(event.target.value)}
-                  disabled={
-                    !access.data?.canCreateTasks || !members.data || busy
-                  }
-                >
-                  {workerOptions}
-                </select>
-              </div>
-            </div>
-            <p className="field-hint assignment-hint">{t("ownerHint")}</p>
-            {(validationError || mutation.isError) && (
-              <p className="alert" role="alert">
-                {t(
-                  validationError
-                    ? "errors.invalid_input"
-                    : errorKey(mutation.error),
-                )}
+        {calendar.isPending ? (
+          <p className="today-message quiet">{t("loading")}</p>
+        ) : (
+          <>
+            <ol className="today-timeline">
+              {beforeNow.map(scheduleBlock)}
+              <li
+                className="today-now"
+                aria-label={`${t("todayNow")} · ${time.format(now)}`}
+              >
+                <time dateTime={now.toISOString()}>{time.format(now)}</time>
+                <span className="today-now-rule" aria-hidden="true">
+                  <span />
+                  <span />
+                </span>
+              </li>
+              {afterNow.map(scheduleBlock)}
+              {unscheduledRuns.slice(0, TODAY_RUNS).map((run) => {
+                const task = tasks.data?.find((item) => item.id === run.taskId);
+                return (
+                  <li className="today-timeline-row" key={run.id}>
+                    <span className="today-time" aria-hidden="true" />
+                    <Link
+                      className="today-schedule-block today-agent-block"
+                      href={`/tasks/${run.taskId}`}
+                      prefetch={false}
+                      data-testid="today-agent-work"
+                    >
+                      <span className="today-block-heading">
+                        <span className="today-block-title">
+                          {task ? present(task) : t("agentProfile.task")}
+                        </span>
+                        <Sparkles
+                          size={14}
+                          strokeWidth={1.5}
+                          aria-hidden="true"
+                        />
+                      </span>
+                      <span className="today-block-meta">
+                        {t("calendar.unscheduled")} · {memberName(run.agentId)}{" "}
+                        · {t(`run.status.${run.status}`)}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ol>
+            {unscheduledRuns.length > TODAY_RUNS && (
+              <p className="today-message quiet">
+                <Link href="/projects">
+                  {t("moreAgentWork", {
+                    count: numbers.format(unscheduledRuns.length - TODAY_RUNS),
+                  })}
+                </Link>
               </p>
             )}
-            <Button
-              data-testid="task-submit"
-              className="button-primary button-full"
-              type="submit"
-              disabled={
-                !access.data?.canCreateTasks ||
-                busy ||
-                !people.length ||
-                tasks.isPending ||
-                tasks.isError
-              }
-            >
-              {t(
-                busy && mutation.variables?.kind === "create"
-                  ? "adding"
-                  : "addTask",
+            {occurrences.length === 0 &&
+              unscheduledRuns.length === 0 &&
+              !calendar.isError &&
+              !runs.isPending &&
+              !runs.isError && (
+                <p className="today-message quiet">{t("todayScheduleEmpty")}</p>
               )}
+            {calendar.data?.truncated && (
+              <p className="today-message quiet">{t("calendar.truncated")}</p>
+            )}
+          </>
+        )}
+      </section>
+      <section className="today-due" aria-labelledby="today-due-heading">
+        <h2 className="today-section-label" id="today-due-heading">
+          {t("todayDue")}
+        </h2>
+        {readError && (
+          <div className="today-message alert" role="alert">
+            <p>{t(errorKey(readError))}</p>
+            <Button
+              className="button-quiet"
+              onClick={() => {
+                void tasks.refetch();
+                void members.refetch();
+                void access.refetch();
+              }}
+            >
+              {t("retry")}
             </Button>
-          </form>
-        </section>
-        <section className="focus" aria-labelledby="focus-heading">
-          <div className="section-heading">
-            <h2 id="focus-heading">{t("yourFocus")}</h2>
-            <span className="count-badge">{count}</span>
           </div>
-          <p className="section-hint">{t("focusHint")}</p>
-          {(members.isError || tasks.isError) && (
-            <div className="alert" role="alert">
-              <p>{t(errorKey(members.error ?? tasks.error))}</p>
-              <Button
-                className="button-quiet"
-                onClick={() => {
-                  void members.refetch();
-                  void tasks.refetch();
-                }}
-              >
-                {t("retry")}
-              </Button>
-            </div>
-          )}
-          {tasks.isPending ? (
-            <p aria-live="polite">{t("loading")}</p>
-          ) : visibleTasks.length === 0 ? (
-            <div className="empty-state">
-              <span className="empty-mark" aria-hidden="true">
-                ✓
-              </span>
-              <h3>{t("emptyTitle")}</h3>
-              <p>{t("emptyDescription")}</p>
-            </div>
-          ) : (
-            <ul className="task-list" aria-live="polite">
-              {shownTasks.map((task) => (
-                <li key={task.id} data-testid="task-card" className="task-card">
-                  <div className="task-card-top">
-                    <span className={`status status-${task.status}`}>
-                      {t(`status.${task.status}`)}
-                    </span>
-                    {task.dueAt && (
-                      <span className="task-due">
-                        {t("due", {
-                          date: time.format(new Date(task.dueAt)),
-                        })}
-                      </span>
-                    )}
-                  </div>
-                  <h3>
-                    {task.id.startsWith("optimistic:") ? (
-                      <span className="task-title-link" aria-busy="true">
-                        {task.title}
+        )}
+        {mutation.isError && (
+          <p className="today-message alert" role="alert">
+            {t(errorKey(mutation.error))}
+          </p>
+        )}
+        {tasks.isPending ? (
+          <p className="today-message quiet">{t("loading")}</p>
+        ) : shownTasks.length === 0 ? (
+          <p className="today-message quiet">{t("emptyTitle")}</p>
+        ) : (
+          <ul className="today-due-list">
+            {shownTasks.map((task) => {
+              const pending = task.id.startsWith("optimistic:");
+              const worker = members.data?.find(
+                (member) => member.id === task.workerId,
+              );
+              return (
+                <li
+                  className="today-due-row"
+                  key={task.id}
+                  data-testid="task-card"
+                  data-status={task.status}
+                >
+                  <StatusGlyph status={task.status} />
+                  <div className="today-task-copy">
+                    {pending ? (
+                      <span className="today-task-title" aria-busy="true">
+                        {present(task)}
                       </span>
                     ) : (
                       <Link
-                        className="task-title-link"
+                        className="today-task-title"
                         href={`/tasks/${task.id}`}
                         prefetch={false}
                       >
-                        {task.title}
+                        {present(task)}
                       </Link>
                     )}
-                  </h3>
-                  <p className="task-owner">
-                    {t("ownedBy", { name: memberName(task.ownerId) })}
-                  </p>
-                  <div className="task-assignment">
-                    <Label htmlFor={`worker-${task.id}`}>{t("worker")}</Label>
+                    <span className="today-task-meta">
+                      {pending ? t("adding") : reference(task)} ·{" "}
+                      {t(`status.${task.status}`)}
+                    </span>
+                  </div>
+                  <div
+                    className={`today-worker${worker?.kind === "agent" ? " today-worker-agent" : ""}`}
+                  >
+                    <span className="today-worker-label" aria-hidden="true">
+                      {worker?.kind === "agent" && (
+                        <Sparkles size={12} strokeWidth={1.5} />
+                      )}
+                      <span>{worker ? worker.name : t("unassigned")}</span>
+                    </span>
+                    <label className="sr-only" htmlFor={`worker-${task.id}`}>
+                      {t("worker")} · {present(task)}
+                    </label>
                     <select
                       id={`worker-${task.id}`}
                       data-testid="assignment-select"
                       value={task.workerId ?? ""}
                       disabled={
-                        !access.data?.canCreateTasks || busy || !members.data
+                        pending ||
+                        !access.data?.canCreateTasks ||
+                        busy ||
+                        !members.data
                       }
                       onChange={(event) =>
                         mutation.mutate({
-                          kind: "assign",
                           id: task.id,
-                          body: { workerId: event.target.value || null },
+                          body: {
+                            workerId: event.target.value || null,
+                            version: task.version,
+                          },
                         })
                       }
                     >
-                      {workerOptions}
+                      <option value="">{t("unassigned")}</option>
+                      {(members.data ?? []).map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name} · {t(member.kind)}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </li>
-              ))}
-            </ul>
-          )}
-          {hiddenCount > 0 && (
-            <button
-              type="button"
-              className="button button-full show-more"
-              data-testid="today-show-more"
-              onClick={() => setShowAll(true)}
-            >
-              {t("showMore", {
-                count: numbers.format(hiddenCount),
-              })}
-            </button>
-          )}
-        </section>
-      </div>
-    </>
+              );
+            })}
+          </ul>
+        )}
+        {hiddenCount > 0 && (
+          <Button
+            className="today-show-more button-quiet"
+            data-testid="today-show-more"
+            onClick={() => setShowAll(true)}
+          >
+            {t("showMore", { count: numbers.format(hiddenCount) })}
+          </Button>
+        )}
+      </section>
+    </div>
   );
 }

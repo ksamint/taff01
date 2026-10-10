@@ -1,0 +1,40 @@
+{
+  "appCaptureCommit": "e1c2d1a134e47256882562e7b52fc3475aca92ba",
+  "source": "Prototype markup 47\u2013114; real Northwind API data. Root inspected all four original native images and corrected production desktop captures. Original desktop captures missed Sidebar readiness; replacement restores it with zero configured-comparator differences outside x<208. Phone baselines passed unchanged. Behavioral/full-gate acceptance remains pending.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "app": "docs/ui/screenshots/ui-parity/today/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/today.png",
+      "sha256": "3a7982a2e809ff66f2c0c0ee3db150c93e711482433ed4ba72954c5361c4a61d",
+      "reference": "docs/ui/reference/phone-en-today.png",
+      "referenceSha256": "e4f16ad5910726fd3470934184356005aad0b8e68a558028d9e8339505c108c0"
+    },
+    {
+      "project": "phone-zh-HK",
+      "app": "docs/ui/screenshots/ui-parity/today/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/today.png",
+      "sha256": "64288c85ab4a2028f54550da8467094690245c915486f5c4e6592f006ccc7980",
+      "reference": "docs/ui/reference/phone-zh-today.png",
+      "referenceSha256": "3d091a090620bbfc9fb633292b63afa199082f1c812cbf58ec5b87438484d98f"
+    },
+    {
+      "project": "desktop-en",
+      "app": "docs/ui/screenshots/ui-parity/today/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/today.png",
+      "sha256": "f9cbfb5a6970be81045ad62c6f723968bbd3eadd469b2b01a9c2c2a300b23c28",
+      "reference": null,
+      "referenceSha256": null,
+      "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "app": "docs/ui/screenshots/ui-parity/today/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/today.png",
+      "sha256": "12c6b398cef535cf3e87e2ea8ad4b2b2716c5f444604e6f82d43cd41ab5c6843",
+      "reference": null,
+      "referenceSha256": null,
+      "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91"
+    }
+  ]
+}

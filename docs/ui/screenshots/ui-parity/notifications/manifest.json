@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 613\u2013635 supplies Back navigation, compact title, preference rows, digest time and quiet-hours hierarchy. House Switch and existing preference query/update handlers retain real enabled categories, digest 09:00 and disabled quiet hours. Actual UTC, busy/error states, device opt-in and delivery history remain accessible. Phone push view covers tabs and FAB; desktop retains the real Sidebar as a responsive extension. Foreground-alert wording does not promise unsupported device delivery. The 44 px target and 12 px text floor applies; no synthetic OS chrome or desktop prototype is invented.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "notifications",
+      "app": "docs/ui/screenshots/ui-parity/notifications/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/notifications.png",
+      "sha256": "16270a11e5c95a5be4b65d03567f8ebe91d6acea0e08446d2f6a71832d1f3efa",
+      "reference": "docs/ui/reference/extra/phone-en-notifications.png",
+      "referenceSha256": "c8722bb6c1deb410d1e5bba147fdee6d0013d7924b5360beef643f340ff7467e"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "notifications",
+      "app": "docs/ui/screenshots/ui-parity/notifications/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/notifications.png",
+      "sha256": "cb42529f7937952e092ab516fdfecb06704882c91185d4d990c77cb8c07bb5a5",
+      "reference": "docs/ui/reference/extra/phone-zh-notifications.png",
+      "referenceSha256": "1e2d569557d61dee95cdc4a440b56a020c705d9104b6cf8a793ccf269d07fd74"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "notifications",
+      "app": "docs/ui/screenshots/ui-parity/notifications/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/notifications.png",
+      "sha256": "893700ceca70e1a6ce7a85c8fdd26731c1966a2e65eb00c317d4b44251e25d31",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "notifications",
+      "app": "docs/ui/screenshots/ui-parity/notifications/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/notifications.png",
+      "sha256": "ef3cb6e9c9f0baf99e96648958d91db059e93bd1e5840f5081fbed810ecc8128",
+      "reference": null,
+      "referenceSha256": null
+    }
+  ]
+}

@@ -192,9 +192,12 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
         await tx.execute(
           sql`select set_config('taff.actor_id', ${userId}, true)`,
         );
-        await tx
-          .insert(tasks)
-          .values({ workspaceId, ownerId: agentId, title: "Invalid DB owner" });
+        await tx.insert(tasks).values({
+          workspaceId,
+          number: 9001,
+          ownerId: agentId,
+          title: "Invalid DB owner",
+        });
       }),
     ).rejects.toThrow();
     await expect(
@@ -204,6 +207,7 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
         );
         await tx.insert(tasks).values({
           workspaceId,
+          number: 9002,
           ownerId,
           workerId: outsiderMemberId,
           title: "Invalid DB worker",
@@ -218,9 +222,13 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
         await tx.execute(
           sql`select set_config('taff.actor_id', ${userId}, true)`,
         );
-        await tx
-          .insert(tasks)
-          .values({ id, workspaceId, ownerId, title: "Rollback" });
+        await tx.insert(tasks).values({
+          id,
+          workspaceId,
+          number: 9003,
+          ownerId,
+          title: "Rollback",
+        });
         throw new Error("intentional rollback");
       }),
     ).rejects.toThrow("intentional rollback");

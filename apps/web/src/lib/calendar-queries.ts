@@ -1,7 +1,6 @@
 import {
   type CalendarOccurrence,
   type CalendarViewData,
-  calendarViewDataSchema,
   type Member,
   type SetTaskCalendar,
   setTaskCalendarSchema,
@@ -16,31 +15,23 @@ import { m3MutationKey, patchTask, snapshotM3 } from "./optimistic-m3";
 import { membersKey } from "./queries";
 import { isCurrentSnapshot, restoreQueries } from "./query-snapshot";
 
+import { currentSession } from "./session-cache";
+
+export { useCalendar } from "./queries";
+
 export const taskCalendarKey = (id: string) => ["task-calendar", id] as const;
 export function useTaskCalendar(id: string) {
+  const client = useQueryClient();
   return useQuery({
     queryKey: taskCalendarKey(id),
-    enabled: !id.startsWith("optimistic:"),
+    enabled:
+      !id.startsWith("optimistic:") &&
+      currentSession(client)?.confirmed !== false,
     staleTime: 0,
     queryFn: async () =>
       taskCalendarSchema.parse(await request(`/api/tasks/${id}/calendar`)),
   });
 }
-export function useCalendar(id: string, from: string, to: string) {
-  const client = useQueryClient();
-  return useQuery({
-    refetchOnMount: () =>
-      client.isMutating({ mutationKey: m3MutationKey }) === 0,
-    queryKey: ["calendar", id, from, to],
-    queryFn: async () =>
-      calendarViewDataSchema.parse(
-        await request(
-          `/api/calendar?${new URLSearchParams({ workspaceId: id, from, to })}`,
-        ),
-      ),
-  });
-}
-
 export function useSetCalendar() {
   const client = useQueryClient();
   return useMutation({

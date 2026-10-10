@@ -379,8 +379,9 @@ describe.skipIf(!url)(
       await connection.db.transaction(async (tx) => {
         await actor(tx, f.id);
         await tx.insert(tasks).values(
-          Array.from({ length: 24 }, () => ({
+          Array.from({ length: 24 }, (_, index) => ({
             workspaceId: f.w,
+            number: 1000 + index,
             ownerId: f.memberId,
             title: "Today due",
             dueAt: new Date("2026-10-09T15:00:00Z"),

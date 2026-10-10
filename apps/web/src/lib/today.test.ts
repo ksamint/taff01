@@ -7,6 +7,7 @@ describe("Today in the user's time zone", () => {
     const task = {
       id: "1",
       workspaceId: "w",
+      number: 1,
       title: "Task",
       description: "",
       priority: 3,

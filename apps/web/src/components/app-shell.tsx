@@ -10,15 +10,14 @@ import {
 import {
   CalendarDays,
   Inbox,
-  LayoutGrid,
+  KanbanSquare,
   Plus,
-  Search,
   Sun,
   User,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   type ReactNode,
@@ -72,15 +71,25 @@ const NotificationAlerts = dynamic(
     import("./notification-alerts").then((module) => module.NotificationAlerts),
   { ssr: false },
 );
+const Sidebar = dynamic(
+  () => import("./sidebar").then((module) => module.Sidebar),
+  { loading: () => null },
+);
 
 type Workspace = Me["workspaces"][number];
 type WorkspaceValue = {
   me: Me;
+  confirmed: boolean;
   workspace: Workspace;
   setWorkspaceId: (id: string) => void;
   setLocale: (locale: Locale) => void;
   setTimeZone: (tz: string) => void;
   localePending: boolean;
+  profileError: string | null;
+  openSearch: () => void;
+  openQuick: () => void;
+  signOut: () => void;
+  signOutPending: boolean;
 };
 const WorkspaceContext = createContext<WorkspaceValue | null>(null);
 
@@ -93,7 +102,7 @@ export function useWorkspace(): WorkspaceValue {
 const NAV = [
   { href: "/", key: "today", Icon: Sun },
   { href: "/calendar", key: "calendar", Icon: CalendarDays },
-  { href: "/projects", key: "projects", Icon: LayoutGrid },
+  { href: "/projects", key: "projects", Icon: KanbanSquare },
   { href: "/inbox", key: "inbox", Icon: Inbox },
   { href: "/me", key: "me", Icon: User },
 ] as const;
@@ -157,7 +166,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const pathname = usePathname();
+  const router = useRouter();
   const [overlay, setOverlay] = useState<"search" | "quick" | null>(null);
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia("(min-width: 1024px)");
+    const sync = () => setDesktop(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
   useEffect(() => {
     const open = (event: KeyboardEvent) => {
       if (currentSession(client)?.confirmed === false) return;
@@ -284,6 +302,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       // A pending invitation belongs to the account that opened it.
       setInvitation(null);
       setSessionError(null);
+      router.replace("/");
     },
     onError: (error) => setSessionError(errorKey(error)),
   });
@@ -299,9 +318,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   };
   // Accounts start on UTC because sign-up never asks; the first signed-in
   // browser sets the real zone, and the chosen language survives sign-up.
-  const detected = useRef(false);
+  const detected = useRef<string | null>(null);
   useEffect(() => {
-    if (!confirmed || !me.data || detected.current || profile.isPending) return;
+    if (
+      !confirmed ||
+      !me.data ||
+      detected.current === me.data.user.id ||
+      profile.isPending
+    )
+      return;
     const zone = browserTimeZone(me.data.user.tz);
     const chosen = readPreference();
     const locale =
@@ -309,10 +334,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         ? chosen
         : me.data.user.locale;
     if (me.data.user.tz === "UTC" && zone !== "UTC") {
-      detected.current = true;
+      detected.current = me.data.user.id;
       profile.mutate({ locale, tz: zone });
     } else if (locale !== me.data.user.locale) {
-      detected.current = true;
+      detected.current = me.data.user.id;
       profile.mutate({ locale, tz: me.data.user.tz });
     }
   }, [me.data, profile, confirmed]);
@@ -324,68 +349,29 @@ export function AppShell({ children }: { children: ReactNode }) {
       return connectWorkspace(client, workspace.id, me.data.user.id);
   }, [client, workspace?.id, me.data?.user.id, identityReady, confirmed]);
   return (
-    <div className="app-shell">
-      {me.data && (
-        <aside className="sidebar" inert={!confirmed}>
+    <div className={`app-shell${me.data ? " signed-in" : ""}`}>
+      {!me.data && (
+        <header className="topbar" inert={!confirmed}>
           <Wordmark label={t("app")} />
-          <nav aria-label={t("nav.label")}>
-            <NavItems
-              pathname={pathname}
-              t={t}
-              workspaceId={confirmed ? workspace?.id : undefined}
-            />
-          </nav>
-        </aside>
-      )}
-      <header className="topbar" inert={!confirmed}>
-        <Wordmark label={t("app")} />
-        <div className="header-actions">
-          {me.data && (
-            <>
-              <Button
-                data-testid="open-search"
-                className="button-quiet"
-                aria-label={t("search.title")}
-                onClick={() => setOverlay("search")}
-              >
-                <Search size={20} aria-hidden="true" />
-              </Button>
-              <Button
-                data-testid="open-quick"
-                className="button-quiet"
-                aria-label={t("quickAdd.title")}
-                onClick={() => setOverlay("quick")}
-              >
-                <Plus size={20} aria-hidden="true" />
-              </Button>
-            </>
-          )}
-          <Label htmlFor="locale-select">
-            <span className="sr-only">{t("language")}</span>
-          </Label>
-          <select
-            id="locale-select"
-            data-testid="locale-select"
-            className="language-select"
-            value={i18n.resolvedLanguage ?? "en"}
-            disabled={busy || me.isPending}
-            onChange={(event) => setLocale(event.target.value as Locale)}
-          >
-            <option value="en">{t("en")}</option>
-            <option value="zh-CN">{t("zh-CN")}</option>
-            <option value="zh-HK">{t("zh-HK")}</option>
-          </select>
-          {me.data && (
-            <Button
-              className="button-quiet"
-              disabled={busy}
-              onClick={() => signOut.mutate()}
+          <div className="header-actions">
+            <Label htmlFor="locale-select">
+              <span className="sr-only">{t("language")}</span>
+            </Label>
+            <select
+              id="locale-select"
+              data-testid="locale-select"
+              className="language-select"
+              value={i18n.resolvedLanguage ?? "en"}
+              disabled={busy || me.isPending}
+              onChange={(event) => setLocale(event.target.value as Locale)}
             >
-              {t("signOut")}
-            </Button>
-          )}
-        </div>
-      </header>
+              <option value="en">{t("en")}</option>
+              <option value="zh-CN">{t("zh-CN")}</option>
+              <option value="zh-HK">{t("zh-HK")}</option>
+            </select>
+          </div>
+        </header>
+      )}
       {(me.isPending && !provisionalToday) ||
       ((!identityReady || !confirmed) && !provisionalToday && !me.isError) ? (
         <main className="loading" aria-live="polite">
@@ -420,13 +406,21 @@ export function AppShell({ children }: { children: ReactNode }) {
         <WorkspaceContext.Provider
           value={{
             me: me.data,
+            confirmed,
             workspace,
             setWorkspaceId,
             setLocale,
             setTimeZone,
             localePending: profile.isPending,
+            profileError:
+              sessionError === "errors.profile" ? sessionError : null,
+            openSearch: () => setOverlay("search"),
+            openQuick: () => setOverlay("quick"),
+            signOut: () => signOut.mutate(),
+            signOutPending: busy,
           }}
         >
+          {confirmed && desktop && <Sidebar />}
           <main className="content" inert={!confirmed}>
             {sessionError && (
               <p className="alert" role="alert">
@@ -457,6 +451,19 @@ export function AppShell({ children }: { children: ReactNode }) {
               />
             )}
           </main>
+          {(pathname === "/" ||
+            pathname.startsWith("/calendar") ||
+            pathname.startsWith("/projects")) && (
+            <Button
+              className="quick-fab"
+              data-testid="open-quick"
+              aria-label={t("quickAdd.title")}
+              disabled={!confirmed}
+              onClick={() => setOverlay("quick")}
+            >
+              <Plus size={22} aria-hidden="true" />
+            </Button>
+          )}
         </WorkspaceContext.Provider>
       ) : (
         <main className="loading">{t("noWorkspace")}</main>

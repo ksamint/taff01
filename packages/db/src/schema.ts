@@ -145,6 +145,8 @@ export const smsAuthLimits = pgTable(
 export const workspaces = pgTable("workspaces", {
   id: uuid("id").defaultRandom().primaryKey(),
   name: text("name").notNull(),
+  /** Short prefix of every task reference in the workspace, such as NW in NW-141. */
+  key: text("key").default("WS").notNull(),
   seedKey: text("seed_key").unique(),
   ...dates,
 });
@@ -207,6 +209,8 @@ export const tasks = pgTable(
       .notNull()
       .references(() => workspaces.id, { onDelete: "cascade" }),
     title: text("title").notNull(),
+    /** Per-workspace sequence shown as the task reference; assigned by core on create. */
+    number: integer("number").notNull(),
     description: text("description").default("").notNull(),
     priority: integer("priority").default(3).notNull(),
     labels: text("labels").array().default(sql`ARRAY[]::text[]`).notNull(),
@@ -221,6 +225,7 @@ export const tasks = pgTable(
   },
   (t) => [
     unique("tasks_workspace_id_unique").on(t.workspaceId, t.id),
+    unique("tasks_workspace_number_unique").on(t.workspaceId, t.number),
     index("tasks_workspace_created_idx").on(t.workspaceId, t.createdAt),
     foreignKey({
       columns: [t.workspaceId, t.ownerId],

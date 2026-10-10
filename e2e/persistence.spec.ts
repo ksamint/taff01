@@ -1,11 +1,14 @@
 import { expect, type Page, test } from "@playwright/test";
 import type { ReadSnapshot } from "../apps/web/src/lib/cache-persistence";
 import {
+  type CalendarViewData,
   calendarWallToInstant,
   projectSchema,
   taskSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
+import { openCalendarTools } from "./support/calendar";
+import { openQuickAdd } from "./support/tasks";
 
 test.use({ actionTimeout: 15000 });
 async function readCache(page: Page): Promise<ReadSnapshot | null> {
@@ -124,14 +127,42 @@ test("IndexedDB restores authorized lists board and calendar before real reconci
   await expect(
     page.locator(".sx__event").filter({ hasText: task.title }),
   ).toBeVisible();
+  // The calendar persists one read per visible range (day, strip, month).
   await expect
     .poll(async () =>
-      (await readCache(page))?.queries
-        .map((query) => query.key[0])
+      [
+        ...new Set(
+          (await readCache(page))?.queries.map((query) => String(query.key[0])),
+        ),
+      ]
         .sort()
         .join(","),
     )
     .toBe("calendar,projects,tasks");
+  // The gate below also blocks the snapshot writer, so the day read the
+  // calendar restores must already hold the task durably.
+  const nextDate = new Date(`${date}T00:00:00Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  const dayKey = JSON.stringify([
+    "calendar",
+    workspace.id,
+    calendarWallToInstant(`${date}T00:00`, me.user.tz),
+    calendarWallToInstant(
+      `${nextDate.toISOString().slice(0, 10)}T00:00`,
+      me.user.tz,
+    ),
+  ]);
+  await expect
+    .poll(async () =>
+      (await readCache(page))?.queries.some(
+        (query) =>
+          JSON.stringify(query.key) === dayKey &&
+          (query.data as CalendarViewData).occurrences.some(
+            (item) => item.task.id === task.id,
+          ),
+      ),
+    )
+    .toBe(true);
   const before = await readCache(page);
   expect(before?.userId).toBe(me.user.id);
   expect(
@@ -171,6 +202,7 @@ test("IndexedDB restores authorized lists board and calendar before real reconci
     page.getByRole("link", { name: task.title, exact: true }),
   ).toBeVisible();
   await page.goto("/calendar");
+  await openCalendarTools(page);
   await page.getByTestId("calendar-list").click();
   const item = page
     .locator(".calendar-list-item")
@@ -238,8 +270,9 @@ test("durable cache never records pending rollback data and revocation rejects a
     await route.fulfill({ status: 403, json: { error: "forbidden" } });
   });
   const pending = `Pending never saved ${locale}`;
-  await page.getByTestId("task-title").fill(pending);
-  await page.getByTestId("task-submit").click();
+  await openQuickAdd(page);
+  await page.getByTestId("quick-title").fill(pending);
+  await page.getByTestId("quick-create").click();
   await requested;
   await expect(page.getByText(pending, { exact: true })).toBeVisible();
   await page.waitForTimeout(250);

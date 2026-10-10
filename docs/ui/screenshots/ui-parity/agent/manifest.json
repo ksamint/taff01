@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 636\u2013666 supplies Back, 56 px agent icon, 22 px name, tasks and segmented permission rows. Existing member lookup supplies actual supervisor Lin Xiao; NW141 and Needs review use real task/run queries. Ten capability tags represent current permissions, rather than inventing the prototype three skills or client metadata unavailable in the DTO. Allow/Ask/Deny retains authorization, busy/error and session/snapshot guards. Phone push view covers tabs/FAB, and both desktop Sidebars render; desktop is an adaptive extension with no native prototype. The 44 px target and 12 px text floor remains; no provider, health or performance claim is fabricated.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "agent",
+      "app": "docs/ui/screenshots/ui-parity/agent/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/agent.png",
+      "sha256": "7563128df79fe0183ef78f9a58afca3b7a94faa66371d56be182424cf420039e",
+      "reference": "docs/ui/reference/phone-en-agent-profile.png",
+      "referenceSha256": "406cc1088808883d7f4e1ea3e4855bb50154c0c51df5c0c30a3d917db1a5c377"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "agent",
+      "app": "docs/ui/screenshots/ui-parity/agent/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/agent.png",
+      "sha256": "73e4e002069affe354f6ed63f778f433922b8b9cb8291c3f75e5cd2b25bf5421",
+      "reference": "docs/ui/reference/phone-zh-agent-profile.png",
+      "referenceSha256": "1cfe0aff3e39922cc235b5522d29f54ad5d240884f78a5272e6bf576fe580642"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "agent",
+      "app": "docs/ui/screenshots/ui-parity/agent/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/agent.png",
+      "sha256": "2d3cb0da76079978ab728a79a1ffa256ba72a84a8cf2a0ec8cff7d86a5f815e3",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "agent",
+      "app": "docs/ui/screenshots/ui-parity/agent/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/agent.png",
+      "sha256": "914cf13d91e4bdf23bfbd7f7f12e178782f894a81882eef218c7f010a5c84819",
+      "reference": null,
+      "referenceSha256": null
+    }
+  ]
+}

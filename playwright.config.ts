@@ -8,6 +8,8 @@ const reuseExistingServer = !process.env.CI;
 
 export default defineConfig({
   testDir: "./e2e",
+  // Visual baselines run through their explicit viewport/locale configuration.
+  testIgnore: "**/ui-parity.spec.ts",
   fullyParallel: false,
   workers: 1,
   use: { baseURL: process.env.AUTH_URL, trace: "retain-on-failure" },

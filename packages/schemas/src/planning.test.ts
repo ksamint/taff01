@@ -101,6 +101,7 @@ describe("M5 strict shared boundaries", () => {
     const task = {
       id,
       workspaceId: id,
+      number: 1,
       ownerId: id,
       workerId: null,
       title: "Task",

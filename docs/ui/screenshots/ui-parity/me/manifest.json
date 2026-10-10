@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 323\u2013375 supplies the 28 px header, 56 px avatar, hairline navigation rows and segmented preferences. Existing user/workspace/member queries and language/theme/notification/sign-out handlers remain bound. Authenticated Alex, actual Admin role and Northwind remain; no Product team is invented for this user. Team counts five people and three agents use actual members. Notification summary shows four enabled categories and daily digest 09:00. Open MCP settings is honest navigation; no unsupported Running claim appears. More settings retains existing controls, and Sign out replaces the prototype Reset demo action. All three supported locales and 44 px targets remain. Desktop is a responsive extension with real Sidebar; no desktop Me prototype exists.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "me",
+      "app": "docs/ui/screenshots/ui-parity/me/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/me.png",
+      "sha256": "800ea8a3d53874aaae41a9b247a17990a5d545d4c482ae32201acf3e68ba867d",
+      "reference": "docs/ui/reference/phone-en-me.png",
+      "referenceSha256": "f73413da453e0b289573d06cd42fe94287d67e26845043f39d899f2a8d5769ed"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "me",
+      "app": "docs/ui/screenshots/ui-parity/me/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/me.png",
+      "sha256": "ae427c56ffc71044890745893fcf80d5ca5431b65cbe696deae2444cd7499a6c",
+      "reference": "docs/ui/reference/phone-zh-me.png",
+      "referenceSha256": "cb85814427bd10665581766fb1c0210651d5f5a0371fade25a36d21b74082abc"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "me",
+      "app": "docs/ui/screenshots/ui-parity/me/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/me.png",
+      "sha256": "026fc43781ad60634c4a9f402cb5cc5cdfa00d0bbb7021a4cdb650f53635d613",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "me",
+      "app": "docs/ui/screenshots/ui-parity/me/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/me.png",
+      "sha256": "22c7c50d7bd790c941ae5de14f504105a5b48d86b57052097589c32c274ccc63",
+      "reference": null,
+      "referenceSha256": null
+    }
+  ]
+}

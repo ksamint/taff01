@@ -1,0 +1,477 @@
+{
+  "capturedAt": "2026-10-10T09:24:12.857193+00:00",
+  "before": {
+    "main": {
+      "total": 83870699520,
+      "used": 59006275584,
+      "free": 21333970944
+    },
+    "tiansight": {
+      "total": 105072484352,
+      "used": 18174595072,
+      "free": 81513242624
+    }
+  },
+  "after": {
+    "main": {
+      "total": 83870699520,
+      "used": 44052684800,
+      "free": 36287561728
+    },
+    "tiansight": {
+      "total": 105072484352,
+      "used": 18174595072,
+      "free": 81513242624
+    }
+  },
+  "recoveredBytes": 14953590784,
+  "directories": [
+    "32227328\t/srv/taff",
+    "3453534208\t/srv/taff-validation-20261009",
+    "2009378816\t/srv/taff-ui-parity-validation",
+    "18172489728\t/srv/tiansight"
+  ],
+  "removed": [
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/28a67911c590ecee8c3c0f88fae715e3546e9666/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 26820608
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/2abcb5dbeeea0c80d3f49c6009591dfc4d208404/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 25632768
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/3741520f9305669b0890c614925aab713b5ccf25/source/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 919490560
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/3741520f9305669b0890c614925aab713b5ccf25/source/apps/web/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 126976
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/3741520f9305669b0890c614925aab713b5ccf25/source/apps/web/.next",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 220037120
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/3741520f9305669b0890c614925aab713b5ccf25/source/.turbo",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 14737408
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/3741520f9305669b0890c614925aab713b5ccf25/source/dist",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 634519552
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/54dbdc6c4398599a517f6eb33a6b06fc3209bd30/source/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 919502848
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/54dbdc6c4398599a517f6eb33a6b06fc3209bd30/source/apps/web/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 126976
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/54dbdc6c4398599a517f6eb33a6b06fc3209bd30/source/apps/web/.next",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 220049408
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/54dbdc6c4398599a517f6eb33a6b06fc3209bd30/source/.turbo",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 14721024
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/54dbdc6c4398599a517f6eb33a6b06fc3209bd30/source/dist",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 634519552
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/54dbdc6c4398599a517f6eb33a6b06fc3209bd30/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 40009728
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/6483bd0e2afc3981793498e80e6cc44235abbd5c/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 25571328
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/786dbfbc2aa3c1cc24ab0dc5b0c4a44097d15a72/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 27504640
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/7a19fa468c6f0b89f90792c9a6ad4c6693e562d8/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 26001408
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/8489383d7591df4e7f26c2bb32ee43e1fee25b12/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 27496448
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/8c5a40b34cbe4fbdd5d1b924f8712a85baa18b69/source/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 919748608
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/8c5a40b34cbe4fbdd5d1b924f8712a85baa18b69/source/apps/web/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 126976
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/8c5a40b34cbe4fbdd5d1b924f8712a85baa18b69/source/apps/web/.next",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 461479936
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/8c5a40b34cbe4fbdd5d1b924f8712a85baa18b69/source/.turbo",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 203956224
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/8c5a40b34cbe4fbdd5d1b924f8712a85baa18b69/source/dist",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 634519552
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/8c5a40b34cbe4fbdd5d1b924f8712a85baa18b69/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 27516928
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/9d395f82c795cb839f4be2e905256a621e2f5c23/source/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 919547904
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/9d395f82c795cb839f4be2e905256a621e2f5c23/source/apps/web/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 126976
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/9d395f82c795cb839f4be2e905256a621e2f5c23/source/apps/web/.next",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 199720960
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/9d395f82c795cb839f4be2e905256a621e2f5c23/source/.turbo",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 7327744
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/9d395f82c795cb839f4be2e905256a621e2f5c23/source/dist",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 634466304
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/9d395f82c795cb839f4be2e905256a621e2f5c23/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 39505920
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/a93ca59d549b2c8575bb01ffb1fa6d77b48c0934/source/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 919502848
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/a93ca59d549b2c8575bb01ffb1fa6d77b48c0934/source/apps/web/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 126976
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/a93ca59d549b2c8575bb01ffb1fa6d77b48c0934/source/apps/web/.next",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 199729152
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/a93ca59d549b2c8575bb01ffb1fa6d77b48c0934/source/.turbo",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 7327744
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/a93ca59d549b2c8575bb01ffb1fa6d77b48c0934/source/dist",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 634458112
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/a93ca59d549b2c8575bb01ffb1fa6d77b48c0934/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 37048320
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/dfcbefb965854f140f05712d792f9fc2f0108ec2/source/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 919531520
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/dfcbefb965854f140f05712d792f9fc2f0108ec2/source/apps/web/node_modules",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 126976
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/dfcbefb965854f140f05712d792f9fc2f0108ec2/source/apps/web/.next",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 362803200
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/dfcbefb965854f140f05712d792f9fc2f0108ec2/source/.turbo",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 125730816
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/dfcbefb965854f140f05712d792f9fc2f0108ec2/source/dist",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 634519552
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/dfcbefb965854f140f05712d792f9fc2f0108ec2/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 25632768
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/e1c2d1a134e47256882562e7b52fc3475aca92ba/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 27824128
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/e5165f97a240979a2a46b5804661d1ef5e281e91/source/dist",
+      "kind": "unused-candidate-build",
+      "allocatedBytes": 634466304
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/e5165f97a240979a2a46b5804661d1ef5e281e91/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 28897280
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/f07dec32f0eca0902c1bbc8c7f808f439f425d3f/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 26787840
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/f3c4f5bfea32e4c6b24f539b9ebdb5d21e465807/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 27824128
+    },
+    {
+      "path": "/srv/taff-ui-parity-validation/candidates/fb27a5a4cd773d4c2e05b838bf3b420ff42c6290/source.tar",
+      "kind": "redundant-git-archive",
+      "allocatedBytes": 27824128
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T080705Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 447500288
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T080705Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 506814464
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T080705Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633028608
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T084116Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 428613632
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T084116Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 6512640
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T084116Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633036800
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T091051Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 178569216
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T091051Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 6545408
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T091051Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633036800
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T094008Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 88580096
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T094008Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 6512640
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T094008Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633044992
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T095646Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 181215232
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T095646Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7290880
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T095646Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633028608
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T103745Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 181227520
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T103745Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7286784
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T103745Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633032704
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T111726Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 186224640
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T111726Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7294976
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T111726Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633049088
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T120447Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 186220544
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T120447Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7294976
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T120447Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633028608
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T145141Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 186220544
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T145141Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7294976
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T145141Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633032704
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T150019Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 81920
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T151110Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 186662912
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T151110Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7303168
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T151110Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633565184
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T153225Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 186654720
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T153225Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7303168
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261009T153225Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633561088
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261010T020103Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 186654720
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261010T020103Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7303168
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261010T020103Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633577472
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261010T023546Z/apps/web/.next",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 186662912
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261010T023546Z/.turbo",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 7303168
+    },
+    {
+      "path": "/srv/taff-validation-20261009/source-previous-20261010T023546Z/dist",
+      "kind": "unused-previous-qa-build",
+      "allocatedBytes": 633577472
+    }
+  ],
+  "evidenceFilesPreserved": 1092,
+  "finalFilesystem": [
+    "Filesystem                    1B-blocks        Used   Available Use% Mounted on",
+    "/dev/vda3                   83870699520 43992301568 36347944960  55% /",
+    "/dev/mapper/tiansight_data 105072484352 18174595072 81513242624  19% /srv/tiansight"
+  ]
+}

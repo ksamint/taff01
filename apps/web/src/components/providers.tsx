@@ -12,6 +12,7 @@ import {
 } from "react";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 import { detectLocale, htmlLang, readPreference } from "../lib/i18n";
+import { takeInviteToken } from "../lib/invite";
 import { installLocaleLoader } from "../lib/locale-loader";
 import { bootstrapSession } from "../lib/session-cache";
 
@@ -45,17 +46,8 @@ export function Providers({
   const [workspaceId, setWorkspaceId] = useState("");
   const [invitation, setInvitation] = useState<string | null>(null);
   useEffect(() => {
-    const token = new URLSearchParams(window.location.hash.slice(1)).get(
-      "invite",
-    );
-    if (token) {
-      window.history.replaceState(
-        null,
-        "",
-        window.location.pathname + window.location.search,
-      );
-      setInvitation(token);
-    }
+    const token = takeInviteToken();
+    if (token) setInvitation(token);
   }, []);
   const [client] = useState(() => {
     const queryClient = new QueryClient({

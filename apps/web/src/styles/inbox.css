@@ -1,0 +1,324 @@
+/* Source: Inbox phone 280–322, desktop list/detail 1001–1120. */
+.inbox-view,
+.inbox-main {
+  min-width: 0;
+}
+.inbox-header {
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.inbox-header h1 {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.inbox-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.inbox-mark-all.button {
+  font-size: 12px;
+  min-height: 44px;
+  padding: 0 8px;
+}
+.inbox-search.button {
+  padding: 0;
+  min-height: 44px;
+  width: 44px;
+  border: 0;
+}
+.inbox-source-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.inbox-source-tabs .button {
+  flex: none;
+  height: 44px;
+  min-height: 44px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+  gap: 6px;
+  border: 0;
+  border-radius: 0;
+  color: var(--text-muted);
+}
+.inbox-source-tabs .button[aria-pressed="true"] {
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: inset 0 -2px 0 var(--text);
+}
+.inbox-source-tabs .button > span {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.inbox-source-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.inbox-source-row {
+  position: relative;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-line);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.inbox-unread-dot {
+  position: absolute;
+  left: 8px;
+  top: 29px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.inbox-source-avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--bg-container-high);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+.inbox-source-avatar.is-agent {
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+}
+.inbox-source-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.inbox-source-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.inbox-source-meta > span:first-child {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.inbox-source-meta strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.inbox-source-meta time {
+  font-variant-numeric: tabular-nums;
+}
+.inbox-source-status {
+  flex: none;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--bg-container-low);
+  font-size: 12px;
+  line-height: 18px;
+}
+.inbox-source-review {
+  color: var(--accent-text);
+  background: var(--accent-wash);
+}
+.inbox-source-blocker {
+  color: var(--danger-text);
+  background: var(--danger-bg);
+}
+.inbox-source-done {
+  color: var(--success);
+  background: var(--success-bg);
+}
+.inbox-source-title {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
+  min-height: 44px;
+  display: block;
+  padding: 10px 0;
+  margin-block: -8px;
+  overflow-wrap: anywhere;
+}
+.is-unread .inbox-source-title {
+  font-weight: 600;
+}
+.inbox-source-title > span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-right: 6px;
+}
+.inbox-source-excerpt {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-body);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+.inbox-source-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.inbox-source-actions .button {
+  min-height: 44px;
+  padding: 0 4px;
+  font-size: 12px;
+  gap: 6px;
+}
+.inbox-action-spacer {
+  flex: 1;
+}
+.inbox-read-toggle.button {
+  width: 44px;
+  padding: 0;
+  flex: none;
+}
+.inbox-snooze.button {
+  margin-left: auto;
+}
+.inbox-message {
+  margin: 12px 20px;
+  font-size: 13px;
+}
+.inbox-main .inbox-notice {
+  margin: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  gap: 8px;
+}
+.inbox-source-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 96px 40px;
+  text-align: center;
+}
+.inbox-source-empty h2 {
+  font-size: 16px;
+  font-weight: 600;
+}
+.inbox-source-empty p {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.inbox-empty-ring,
+.inbox-empty-ring > span {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.inbox-empty-ring > span {
+  width: 52px;
+  height: 52px;
+}
+.inbox-empty-ring > span > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.inbox-detail-pane {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .inbox-with-detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    align-items: start;
+  }
+  .inbox-header {
+    min-height: 60px;
+  }
+  .inbox-source-row {
+    padding: 14px 20px;
+  }
+  .inbox-source-row:hover {
+    background: var(--bg-container-low);
+  }
+  .inbox-source-row.is-selected {
+    background: var(--bg-container-low);
+    box-shadow: inset 2px 0 0 var(--accent);
+  }
+  .inbox-source-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  .inbox-source-content {
+    gap: 4px;
+  }
+  .inbox-source-meta {
+    font-size: 12px;
+  }
+  .inbox-source-title {
+    font-size: 14px;
+  }
+  .inbox-source-excerpt {
+    font-size: 12px;
+  }
+  /* Source desktop rows omit actions. Keep their existing controls in the
+     keyboard order and expand an active row to retain 44px targets. */
+  .inbox-source-actions {
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    margin-top: -4px;
+  }
+  .inbox-source-row:is(.is-selected, :hover, :focus-within)
+    .inbox-source-actions {
+    height: auto;
+    overflow: visible;
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 4px;
+  }
+  .inbox-source-actions .button {
+    min-width: 44px;
+  }
+  .inbox-detail-pane {
+    display: block;
+    min-width: 0;
+    min-height: calc(100dvh - 60px);
+    border-left: 1px solid var(--border-line);
+    position: sticky;
+    top: 0;
+    max-height: 100dvh;
+    overflow-y: auto;
+    padding: 12px;
+  }
+}

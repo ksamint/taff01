@@ -1,6 +1,5 @@
-import { AppShell } from "../../../src/components/app-shell";
-import { TaskDetailView } from "../../../src/components/task-detail-view";
-
+import { TaskDetailSheet } from "../../../src/components/task-detail-sheet";
+import { TodayView } from "../../../src/components/today-view";
 export default async function Page({
   params,
 }: {
@@ -8,8 +7,9 @@ export default async function Page({
 }) {
   const { id } = await params;
   return (
-    <AppShell>
-      <TaskDetailView taskId={id} />
-    </AppShell>
+    <>
+      <TodayView initialNow={Date.now()} />
+      <TaskDetailSheet taskId={id} direct />
+    </>
   );
 }

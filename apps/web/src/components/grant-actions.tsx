@@ -31,7 +31,10 @@ export function GrantActions({
   const { t } = useTranslation();
   const client = useQueryClient();
   const [hours, setHours] = useState(24);
-  const { workspace } = useWorkspace();
+  const { me } = useWorkspace();
+  const actorId = me.workspaces.find(
+    (workspace) => workspace.id === grant.workspaceId,
+  )?.memberId;
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const decide = useMutation({
     mutationKey: m3MutationKey,
@@ -57,7 +60,7 @@ export function GrantActions({
                             ? "denied"
                             : "revoked",
                       expiresAt: body.expiresAt ?? item.expiresAt,
-                      decidedBy: workspace.memberId,
+                      decidedBy: actorId ?? item.decidedBy,
                     }
                   : item,
               ),

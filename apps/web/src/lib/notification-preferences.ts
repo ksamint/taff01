@@ -1,10 +1,13 @@
 import { notificationPreferencesSchema } from "@taff/schemas/notification-preferences";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "./api";
+import { currentSession } from "./session-cache";
 
 export const notificationPreferencesKey = ["notificationPreferences"] as const;
 export function useNotificationPreferences() {
+  const client = useQueryClient();
   return useQuery({
+    enabled: currentSession(client)?.confirmed !== false,
     queryKey: notificationPreferencesKey,
     staleTime: 0,
     queryFn: async () =>

@@ -564,8 +564,9 @@ describe.skipIf(!url)("M6 PostgreSQL calendar", () => {
       await actor(tx);
       const ids = Array.from({ length: count }, () => randomUUID());
       await tx.insert(tasks).values(
-        ids.map((id) => ({
+        ids.map((id, index) => ({
           id,
+          number: index + 1,
           workspaceId: workspace.id,
           title: "Bounded calendar",
           ownerId: workspace.memberId,
@@ -643,8 +644,9 @@ describe.skipIf(!url)("M6 PostgreSQL calendar", () => {
     await connection.db.transaction(async (tx) => {
       await actor(tx);
       await tx.insert(tasks).values(
-        Array.from({ length: 201 }, () => ({
+        Array.from({ length: 201 }, (_, index) => ({
           workspaceId: tray.id,
+          number: index + 1,
           title: "Unscheduled",
           ownerId: tray.memberId,
         })),

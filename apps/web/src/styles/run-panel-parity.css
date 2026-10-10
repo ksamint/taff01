@@ -1,0 +1,200 @@
+/* Source: prototype task detail active-run/blocker blocks, lines 421–447. */
+.run-panel.run-panel-parity {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  margin: 0 0 20px;
+}
+.run-source-block,
+.run-blocker-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface);
+}
+.run-source-heading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 0;
+}
+.run-panel-parity .run-source-heading h2 {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  min-width: 0;
+}
+.run-source-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-subtle);
+  flex: none;
+}
+.run-source-dot.run-source-running {
+  background: var(--text);
+}
+.run-source-dot.run-source-needs_review {
+  background: var(--accent);
+}
+.run-source-dot.run-source-paused,
+.run-source-dot.run-source-changes_requested {
+  background: var(--warning);
+}
+.run-source-dot.run-source-completed {
+  background: var(--success);
+}
+.run-source-dot.run-source-failed {
+  background: var(--danger);
+}
+.run-source-status {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  border: 0;
+}
+.run-reported-count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-subtle);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.run-source-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.run-source-steps > li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-body);
+}
+.run-step-icon {
+  display: flex;
+  flex: none;
+  color: var(--text-muted);
+}
+.run-source-controls,
+.run-supporting-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+.run-source-controls:empty {
+  display: none;
+}
+.run-source-controls .button,
+.run-supporting-actions .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+.run-blocker-block {
+  margin-top: 12px;
+  border-color: var(--warning);
+  background: var(--warning-bg);
+}
+.run-panel-parity .run-blocker-block h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--warning);
+}
+.run-blocker-block p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-body);
+}
+.run-blocker-capability {
+  font-weight: 500;
+}
+.run-blocker-block > .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  align-self: flex-start;
+  font-size: 13px;
+}
+.run-supporting {
+  border-top: 1px solid var(--border-line);
+  margin-top: 10px;
+}
+.run-supporting > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  list-style: none;
+  min-height: 44px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.run-supporting > summary::-webkit-details-marker {
+  display: none;
+}
+.run-supporting[open] > summary > svg {
+  transform: rotate(180deg);
+}
+.run-supporting-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 13px;
+}
+.run-panel-parity .run-metrics {
+  margin: 0;
+  gap: 12px;
+  font-size: 12px;
+}
+.run-panel-parity .run-events > li {
+  padding: 8px 0;
+  font-size: 12px;
+}
+.run-panel-parity .run-events .section-heading {
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+}
+.run-panel-parity .run-events time {
+  font-size: 12px;
+}
+@media (min-width: 1024px) {
+  .run-source-controls .button {
+    min-height: 44px;
+    font-size: 12px;
+  }
+}
+.run-panel-parity .run-source-heading h2 {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.run-panel-parity .run-source-status {
+  flex: none;
+  color: var(--text-muted);
+  background: transparent;
+  border: 0;
+  white-space: nowrap;
+}

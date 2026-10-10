@@ -82,8 +82,8 @@ export function CalendarEngine(props: CalendarEngineProps) {
       firstDayOfWeek: 1,
       dayBoundaries: { start: "00:00", end: "24:00" },
       weekOptions: {
-        gridHeight: 1344,
-        gridStep: 30,
+        gridHeight: props.view === "week" ? 1056 : 1344,
+        gridStep: 60,
         eventWidth: 96,
         timeAxisFormatOptions: {
           hour: "2-digit",
@@ -135,19 +135,62 @@ export function CalendarEngine(props: CalendarEngineProps) {
   }, [ready, plugins.events, props.events]);
   useEffect(() => {
     if (!ready) return;
+    if (props.view !== "month-grid") {
+      const gridHeight = props.view === "week" ? 1056 : 1344;
+      const options = plugins.controls.getWeekOptions();
+      if (options.gridHeight !== gridHeight || options.gridStep !== 60)
+        plugins.controls.setWeekOptions({ gridHeight, gridStep: 60 });
+    }
     if (plugins.controls.getView() !== props.view)
       plugins.controls.setView(props.view);
     if (plugins.controls.getDate().toString() !== props.date)
       plugins.controls.setDate(Temporal.PlainDate.from(props.date));
   }, [ready, plugins.controls, props.date, props.view]);
   useEffect(() => {
-    if (!ready || props.view === "month-grid") return;
-    const frame = requestAnimationFrame(() => {
+    if (!ready) return;
+    let frame: number;
+    const positionView = () => {
       const container = root.current?.querySelector(".sx__view-container");
-      if (container) container.scrollTop = 8 * 56;
-    });
+      if (!container) return;
+      // The SDK reuses its scroll container. Wait for the new month DOM so
+      // the previous time-grid offset cannot be clamped into the month grid.
+      if (
+        props.view === "month-grid" &&
+        !container.querySelector(".sx__month-grid-wrapper")
+      ) {
+        frame = requestAnimationFrame(positionView);
+        return;
+      }
+      container.scrollTop =
+        props.view === "month-grid" ? 0 : 8 * (props.view === "week" ? 44 : 56);
+    };
+    frame = requestAnimationFrame(positionView);
     return () => cancelAnimationFrame(frame);
   }, [ready, props.view]);
+  useEffect(() => {
+    if (!ready || props.view === "month-grid") return;
+    let line: HTMLDivElement | undefined;
+    const refresh = () => {
+      line?.remove();
+      const now = Temporal.Now.zonedDateTimeISO(latest.current.timeZone);
+      const grid = root.current?.querySelector(
+        `[data-time-grid-date="${now.toPlainDate().toString()}"]`,
+      );
+      if (!grid) return;
+      line = document.createElement("div");
+      line.className = "calendar-source-now-line";
+      line.setAttribute("aria-hidden", "true");
+      line.style.top = `${((now.hour * 60 + now.minute) / 1440) * 100}%`;
+      grid.append(line);
+    };
+    const frame = requestAnimationFrame(refresh);
+    const timer = window.setInterval(refresh, 60_000);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.clearInterval(timer);
+      line?.remove();
+    };
+  }, [ready, props.date, props.view, props.timeZone, props.events]);
   useEffect(() => {
     const element = root.current;
     if (!element) return;

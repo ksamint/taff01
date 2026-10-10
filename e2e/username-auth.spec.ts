@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { messages, type TestLocale } from "./support/account";
+import { selectLocale, signOutFromMe } from "./support/preferences";
 
 // Synthetic accounts only. Every SMS route is blocked even if a test server
 // has the method enabled; these cases never send a real message.
@@ -18,10 +19,7 @@ async function setup(page: Page, locale: TestLocale) {
 }
 
 async function signOut(page: Page, locale: TestLocale) {
-  await page
-    .getByRole("button", { name: messages[locale].signOut, exact: true })
-    .click();
-  await expect(page.getByTestId("auth-submit")).toBeVisible();
+  await signOutFromMe(page, locale);
 }
 
 function authResponse(page: Page, endpoint: string) {
@@ -65,14 +63,7 @@ test("optional username signup, username sign-in and email compatibility", async
   await expect(page.getByTestId("today-heading")).toBeVisible();
   // Persist the test locale before checking localized authenticated controls.
   if (locale !== "en") {
-    await expect(page.getByTestId("locale-select")).toBeEnabled();
-    const saved = page.waitForResponse(
-      (response) =>
-        new URL(response.url()).pathname === "/api/profile" &&
-        response.request().method() === "PATCH",
-    );
-    await page.getByTestId("locale-select").selectOption(locale);
-    expect((await saved).status()).toBe(200);
+    await selectLocale(page, locale);
   }
   await expect(page.getByTestId("today-heading")).toHaveText(m.today);
   await signOut(page, locale);
