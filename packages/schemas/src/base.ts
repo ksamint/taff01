@@ -74,10 +74,22 @@ export const assignTaskSchema = strictObject({
 });
 export const signInSchema = strictObject({
   email: email(),
-  password: string().check(minLength(8), maxLength(128)),
+  password: string().check(minLength(6), maxLength(128)),
+});
+export const usernameSchema = string().check(
+  trim(),
+  minLength(2),
+  maxLength(30),
+  regex(/^[a-zA-Z0-9_.]+$/),
+);
+export const usernameSignInSchema = strictObject({
+  username: usernameSchema,
+  password: string().check(minLength(6), maxLength(128)),
 });
 export const signUpSchema = extend(signInSchema, {
   name: string().check(trim(), minLength(1), maxLength(100)),
+  password: string().check(minLength(8), maxLength(128)),
+  username: optional(usernameSchema),
 });
 export const signOutSchema = strictObject({});
 /** Initial SMS rollout accepts canonical mainland mobile numbers only. */

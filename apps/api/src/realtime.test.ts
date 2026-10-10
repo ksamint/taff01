@@ -69,6 +69,7 @@ beforeAll(async () => {
           name: id,
           email: `${id}@example.com`,
           emailVerified: false,
+          systemAdmin: false,
           image: null,
           createdAt: now,
           updatedAt: now,

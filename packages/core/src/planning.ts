@@ -451,6 +451,10 @@ export function createPlanningOperations({
           kind: "person",
           role: "admin",
         })
+        .onConflictDoUpdate({
+          target: [members.workspaceId, members.userId],
+          set: { role: "admin", updatedAt: new Date() },
+        })
         .returning();
       for (const agent of copied)
         await tx.insert(members).values({

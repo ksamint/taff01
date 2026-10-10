@@ -46,6 +46,7 @@ import {
   verifyPhoneOtpSchema,
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
+import { username } from "better-auth/plugins/username";
 import { createSmsAuth } from "./sms-auth";
 import type { SmsProvider } from "./tencent-sms";
 
@@ -57,6 +58,7 @@ export {
 } from "./tencent-sms";
 
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
+import { createAdministrationOperations } from "./administration";
 import { createCalendarOperations } from "./calendar";
 import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
@@ -214,7 +216,14 @@ export function createCore(options: {
     ? createSmsAuth(db, options.authSecret, options.sms)
     : undefined;
   const auth = betterAuth({
-    plugins: sms ? [sms.plugin] : [],
+    plugins: [
+      username({
+        minUsernameLength: 2,
+        maxUsernameLength: 30,
+        displayUsername: false,
+      }),
+      ...(sms ? [sms.plugin] : []),
+    ],
     logger: { disabled: true },
     baseURL: options.authUrl,
     secret: options.authSecret,
@@ -227,6 +236,12 @@ export function createCore(options: {
     },
     user: {
       additionalFields: {
+        systemAdmin: {
+          type: "boolean",
+          required: false,
+          defaultValue: false,
+          input: false,
+        },
         locale: {
           type: "string",
           required: false,
@@ -912,6 +927,14 @@ export function createCore(options: {
     tokenPepper: options.tokenPepper,
   });
   return {
+    provisionAdministration: async (
+      input: import("@taff/schemas").AdministrationProvision,
+    ) =>
+      createAdministrationOperations(
+        db,
+        options.authSecret,
+        (await auth.$context).password,
+      ).provisionAdministration(input),
     ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,

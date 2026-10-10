@@ -1,7 +1,8 @@
 # Development quick review — 2026-10-09
 
-Updated with the 2026-10-10 live SMS checkpoint. Taff is live at
-[taff.apuch.cn](https://taff.apuch.cn), serving `41ae94ff`. SMS is enabled;
+Updated with the 2026-10-10 live SMS and username administration checkpoints.
+Taff is live at [taff.apuch.cn](https://taff.apuch.cn). The recorded SMS upgrade
+served `41ae94ff`. SMS is enabled;
 one authorized application send was accepted and carrier delivery was confirmed.
 Real OTP login has not yet been verified; the original code expired before
 local session verification completed. M9 and the
@@ -17,6 +18,7 @@ local session verification completed. M9 and the
 | Historical documentation CI | [Main 37928770076](https://github.com/ksamint/taff01/actions/runs/37928770076) and [feature 37928698218](https://github.com/ksamint/taff01/actions/runs/37928698218) passed for the documentation checkpoint. |
 | Live SMS release acceptance | `41ae94ff` passed all nine gates: 428 unit/integration tests, 96 production browser cases and MCP smoke. Today JS is 191,578 gzip bytes; Lighthouse EN/CN/HK is 98/98/98, accessibility 96, best practices 100; separate LCP medians are 544/544/560 ms. Provider readiness passed; exactly one authorized send was accepted and carrier status was `SUCCESS`. Real OTP login has not yet been verified; the original code expired. |
 | Live release CI | [Main 37954047982](https://github.com/ksamint/taff01/actions/runs/37954047982) and [feature 37954048010](https://github.com/ksamint/taff01/actions/runs/37954048010) passed for exact deployed `41ae94ff`. |
+| Username and administration | Email-or-username sign-in, optional signup username and all three translations. Public signup retains eight-character passwords; trusted provisioning supports a configured six-character credential. System administrators use protected actual memberships across current/future organizations; organization administration remains scoped. Private runtime setup contains the requested organization names and identities, with no credentials committed. See the [checkpoint](../milestones/10-username-and-administration.md). |
 
 ## Next development steps
 

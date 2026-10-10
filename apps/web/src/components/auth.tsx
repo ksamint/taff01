@@ -4,6 +4,7 @@ import {
   authMethodsSchema,
   signInSchema,
   signUpSchema,
+  usernameSignInSchema,
 } from "@taff/schemas/base";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
@@ -29,12 +30,17 @@ export function Auth() {
     staleTime: 60_000,
   });
   const auth = useMutation({
-    mutationFn: (
+    mutationFn: ({
+      endpoint,
+      body,
+    }: {
+      endpoint: "sign-up/email" | "sign-in/email" | "sign-in/username";
       body:
         | ReturnType<typeof signUpSchema.parse>
-        | ReturnType<typeof signInSchema.parse>,
-    ) =>
-      request(`/api/auth/${signup ? "sign-up" : "sign-in"}/email`, {
+        | ReturnType<typeof signInSchema.parse>
+        | ReturnType<typeof usernameSignInSchema.parse>;
+    }) =>
+      request(`/api/auth/${endpoint}`, {
         method: "POST",
         body: JSON.stringify(body),
       }),
@@ -45,14 +51,26 @@ export function Auth() {
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const body = {
-      email: form.get("email"),
-      password: form.get("password"),
-      ...(signup ? { name: form.get("name") } : {}),
-    };
-    const parsed = (signup ? signUpSchema : signInSchema).safeParse(body);
+    const identifier = String(form.get("email") ?? "").trim();
+    const username = String(form.get("username") ?? "").trim();
+    const password = form.get("password");
+    const endpoint = signup
+      ? "sign-up/email"
+      : identifier.includes("@")
+        ? "sign-in/email"
+        : "sign-in/username";
+    const parsed = signup
+      ? signUpSchema.safeParse({
+          email: identifier,
+          name: form.get("name"),
+          password,
+          ...(username ? { username } : {}),
+        })
+      : identifier.includes("@")
+        ? signInSchema.safeParse({ email: identifier, password })
+        : usernameSignInSchema.safeParse({ username: identifier, password });
     setValidationError(!parsed.success);
-    if (parsed.success) auth.mutate(parsed.data);
+    if (parsed.success) auth.mutate({ endpoint, body: parsed.data });
   }
   return (
     <div className="auth-layout">
@@ -84,16 +102,36 @@ export function Auth() {
                 </div>
               )}
               <div className="field">
-                <Label htmlFor="auth-email">{t("email")}</Label>
+                <Label htmlFor="auth-email">
+                  {t(signup ? "email" : "emailOrUsername")}
+                </Label>
                 <Input
                   id="auth-email"
                   data-testid="auth-email"
                   name="email"
-                  type="email"
-                  autoComplete="email"
+                  type={signup ? "email" : "text"}
+                  autoComplete={signup ? "email" : "username"}
                   required
                 />
               </div>
+              {signup && (
+                <div className="field">
+                  <Label htmlFor="auth-username">{t("usernameOptional")}</Label>
+                  <Input
+                    id="auth-username"
+                    data-testid="auth-username"
+                    name="username"
+                    autoComplete="username"
+                    minLength={2}
+                    maxLength={30}
+                    pattern="[A-Za-z0-9_.]{2,30}"
+                    aria-describedby="username-hint"
+                  />
+                  <p id="username-hint" className="field-hint">
+                    {t("usernameHint")}
+                  </p>
+                </div>
+              )}
               <div className="field">
                 <Label htmlFor="auth-password">{t("password")}</Label>
                 <Input
@@ -102,13 +140,13 @@ export function Auth() {
                   name="password"
                   type="password"
                   autoComplete={signup ? "new-password" : "current-password"}
-                  minLength={8}
+                  minLength={signup ? 8 : 6}
                   maxLength={128}
                   required
                   aria-describedby="password-hint"
                 />
                 <p id="password-hint" className="field-hint">
-                  {t("passwordHint")}
+                  {t(signup ? "passwordHint" : "signInPasswordHint")}
                 </p>
               </div>
               {(validationError || auth.isError) && (

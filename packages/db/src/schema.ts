@@ -32,6 +32,8 @@ export const user = pgTable(
     email: text("email").notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
+    username: text("username").unique(),
+    systemAdmin: boolean("system_admin").default(false).notNull(),
     phoneNumber: text("phone_number").unique(),
     phoneNumberVerified: boolean("phone_number_verified")
       .default(false)
@@ -40,7 +42,13 @@ export const user = pgTable(
     tz: text("tz").default("UTC").notNull(),
     ...dates,
   },
-  (t) => [check("users_locale", sql`${t.locale} in ('en', 'zh-CN', 'zh-HK')`)],
+  (t) => [
+    check("users_locale", sql`${t.locale} in ('en', 'zh-CN', 'zh-HK')`),
+    check(
+      "users_username",
+      sql`${t.username} is null or ${t.username} ~ '^[a-z0-9_.]{2,30}$'`,
+    ),
+  ],
 );
 export const session = pgTable(
   "sessions",

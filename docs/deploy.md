@@ -196,6 +196,39 @@ services. First-deployment route/DNS removal is not a live-upgrade rollback.
 
 ## Operations
 
+### Username and administrative setup
+
+Sign-in accepts email or a 2–30 character ASCII username (letters, digits,
+underscores and dots; case insensitive). Public signup offers an optional
+username and retains its eight-character password rule. Private deployment
+provisioning can configure a six-character credential; it does not reset an
+existing account's password.
+
+After the additive 0020 migration, use the immutable API image's private CLI
+with a mode-0600 JSON file supplied through stdin. Run from the accepted release
+directory on the application server:
+
+```sh
+docker compose --env-file /srv/taff/secrets/.env.production \
+  -f compose.prod.yaml -f compose.apuch.yaml run --rm --no-deps -T \
+  api node dist/administration.mjs < /private/path/administration.json
+```
+
+The validated input has `workspaceNames`, canonical `systemAdminPhones`, and
+`orgAdmin: { username, password, workspaceName }`; the scoped workspace must be
+included in the organization list. Keep actual identity/password values out of
+the repository, shell arguments and reports. The operation is atomic and
+idempotent for identical input; conflicting ownership or credentials fail
+without reassignment or password reset. Its output contains only IDs and
+organization names. Remove the temporary private input after verification.
+
+System administrators receive protected real admin memberships in every
+existing and future organization, including personal workspaces. The scoped
+organization administrator receives its target membership and its usual
+personal workspace. New phone identities remain unverified until their holders
+complete SMS login; this CLI does not send SMS. No public HTTP/MCP adapter
+exposes this setup operation.
+
 ### Optional Tencent SMS login
 
 Configure `TENCENT_SECRET_ID`, `TENCENT_SECRET_KEY`, `TENCENT_SMS_SDK_APP_ID`,

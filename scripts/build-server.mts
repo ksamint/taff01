@@ -1,4 +1,4 @@
-// Bundles the API, worker and migrator into single ESM files. Workspace
+// Bundles the API, worker, migrator and private setup CLI into ESM files. Workspace
 // packages are inlined; npm packages stay external and come from the deployed
 // node_modules (see deploy/Dockerfile.server).
 
@@ -21,6 +21,7 @@ for (const [entry, name] of [
   ["apps/api/src/index.ts", "api"],
   ["apps/worker/src/index.ts", "worker"],
   ["packages/db/src/migrate.ts", "migrate"],
+  ["packages/core/src/provision-administration.ts", "administration"],
 ] as const) {
   await build({
     entryPoints: [entry],
@@ -57,6 +58,8 @@ for (const target of ["api", "worker"]) {
   );
   await cp(`${out}/${target}.mjs`, `${runtime}/${target}.mjs`);
   await cp(`${out}/migrate.mjs`, `${runtime}/migrate.mjs`);
+  if (target === "api")
+    await cp(`${out}/administration.mjs`, `${runtime}/administration.mjs`);
   await cp(`${out}/migrations`, `${runtime}/migrations`, { recursive: true });
   const require = createRequire(resolve(runtime, `${target}.mjs`));
   for (const auditTool of ["lighthouse", "axe-core"]) {

@@ -36,6 +36,7 @@ const session = {
     id,
     email: "person@example.com",
     emailVerified: false,
+    systemAdmin: false,
     name: "Person",
     createdAt: now,
     updatedAt: now,

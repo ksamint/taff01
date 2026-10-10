@@ -43,6 +43,7 @@ import {
   updateNotificationPreferencesSchema,
   updateTaskSchema,
   updateTaskStatusSchema,
+  usernameSignInSchema,
   verifyPhoneOtpSchema,
   workspaceCreateSchema,
   workspaceInviteAcceptSchema,
@@ -228,9 +229,18 @@ export function createApp(
     signInSchema.parse(await c.req.raw.clone().json());
     return core.auth.handler(c.req.raw);
   });
+  app.post("/api/auth/sign-in/username", async (c) => {
+    const body = usernameSignInSchema.parse(await c.req.raw.clone().json());
+    c.header("Cache-Control", "no-store");
+    return core.auth.handler(
+      new Request(c.req.raw, { body: JSON.stringify(body) }),
+    );
+  });
   app.post("/api/auth/sign-up/email", async (c) => {
-    signUpSchema.parse(await c.req.raw.clone().json());
-    return core.auth.handler(c.req.raw);
+    const body = signUpSchema.parse(await c.req.raw.clone().json());
+    return core.auth.handler(
+      new Request(c.req.raw, { body: JSON.stringify(body) }),
+    );
   });
   app.post("/api/auth/sign-out", async (c) => {
     signOutSchema.parse(await c.req.raw.clone().json());

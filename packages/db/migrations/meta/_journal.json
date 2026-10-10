@@ -141,6 +141,13 @@
       "when": 1791556295687,
       "tag": "0019_wooden_flatman",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1791599122791,
+      "tag": "0020_rich_the_order",
+      "breakpoints": true
     }
   ]
 }
