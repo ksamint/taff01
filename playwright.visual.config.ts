@@ -12,6 +12,13 @@ if (
     "calendar",
     "me",
     "type",
+    "search",
+    "agent",
+    "mcp",
+    "organizations",
+    "team",
+    "notifications",
+    "quick-add",
   ].includes(process.env.UI_SCREEN ?? "")
 )
   throw new Error("Set UI_SCREEN to an implemented parity screen.");

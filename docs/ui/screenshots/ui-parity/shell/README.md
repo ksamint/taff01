@@ -6,6 +6,13 @@ after inspecting each image. App PNGs here and the corresponding files in
 projects use a 390 × 844 viewport; desktop projects use 1280 × 800.
 Behavioral and committed-baseline validation remain pending.
 
+At `8489383`, the root agent separately inspected and approved four corrected
+tab/sidebar captures using the installed Manrope and Noto Sans TC faces.
+The prior optional-font renders selected Linux fallback fonts. The capture-only
+helper loads equivalent faces from the actual stylesheet before capturing;
+production font policy and cold-load performance checks are unchanged. The
+manifest records the replacement hashes; FABs and reference crops are unchanged.
+
 The reference inputs are the existing offline captures in
 [`docs/ui/reference`](../../../reference/README.md). Their Chinese filename
 is `zh`; the prototype's Hong Kong Chinese content maps to app project

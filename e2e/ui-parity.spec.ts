@@ -97,9 +97,16 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     inbox: "/inbox",
     calendar: "/calendar",
     me: "/me",
-    "task-detail": `/tasks/${prototypeId("task", "nw", 145)}`,
-    review: `/tasks/${prototypeId("task", "nw", 141)}`,
+    "task-detail": "/projects",
+    review: desktop ? "/inbox" : "/projects",
     type: "/projects",
+    search: "/projects",
+    agent: `/agents/${prototypeId("member", "nw", 11)}`,
+    mcp: "/me/mcp",
+    organizations: desktop ? "/projects" : "/me",
+    team: "/orgs#team",
+    notifications: "/me/notifications",
+    "quick-add": "/",
   };
   const loaded = await page.goto(
     screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
@@ -108,56 +115,170 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   await page.evaluate(prepareFonts);
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
-  if (screen !== "shell") {
-    await expect(
-      page.getByText(messages[locale].loading, { exact: true }),
-    ).toHaveCount(0);
-    if (screen === "today") {
-      await expect(page.getByTestId("today-schedule")).toHaveCount(5);
-      await expect(page.getByTestId("task-card")).toHaveCount(2);
-      await expect(page.locator(".today-meeting-block")).toHaveCount(3);
-      await expect(page.locator(".today-past")).toHaveCount(1);
-    } else if (screen === "projects" || screen === "type") {
-      await expect(page.getByTestId("board-task")).toHaveCount(12);
-    } else if (screen === "task-detail" || screen === "review") {
-      await expect(page.getByTestId("task-detail-heading")).toBeVisible();
-    } else if (screen === "calendar") {
-      await expect(page.locator(".sx__calendar")).toBeVisible();
-    } else if (screen === "inbox") {
-      await expect(page.getByTestId("inbox-item")).toHaveCount(
-        inbox.items.length,
+  const reviewItem = inbox.items.find(
+    (item) => item.taskId === prototypeId("task", "nw", 141),
+  );
+  if (
+    screen === "task-detail" ||
+    (screen === "review" && !desktop) ||
+    (desktop && (screen === "projects" || screen === "type"))
+  ) {
+    const id = prototypeId("task", "nw", screen === "task-detail" ? 145 : 141);
+    await page.locator(`a.task-title-link[href="/tasks/${id}"]`).click();
+    await expect(page.getByTestId("task-detail-heading")).toBeVisible();
+  }
+  if (screen === "task-detail") {
+    await expect(page.getByTestId("task-field-worker")).toBeEnabled();
+    await expect(page.getByTestId("task-schedule")).toBeEnabled();
+  }
+  let openedReview = false;
+  try {
+    if (screen === "review" && desktop) {
+      expect(reviewItem).toBeDefined();
+      expect(reviewItem!.readAt).toBeNull();
+      const read = page.waitForResponse(
+        (response) =>
+          response.url().endsWith(`/api/inbox/${reviewItem!.id}`) &&
+          response.request().method() === "PATCH",
       );
+      openedReview = true;
+      await page
+        .locator(
+          `a.inbox-source-title[href="/tasks/${reviewItem!.taskId}/review"]`,
+        )
+        .click();
+      expect((await read).status()).toBe(200);
+      await expect(page.getByTestId("task-detail-heading")).toBeVisible();
     }
-    await page.evaluate(() => document.fonts.ready);
-    await expect(page).toHaveScreenshot(`${screen}.png`, {
-      animations: "disabled",
-    });
-    if (screen === "projects") {
-      await page.getByTestId("project-view-list").click();
-      await expect(page).toHaveScreenshot("projects-list.png", {
+    if (screen === "search") {
+      await page.keyboard.press("Control+k");
+      await expect(page.getByTestId("search-input")).toBeVisible();
+    }
+    if (screen === "organizations") {
+      if (desktop) await page.locator(".sidebar-workspace > summary").click();
+      else {
+        await page.getByTestId("me-organization").click();
+        await expect(page.getByRole("dialog")).toBeVisible();
+      }
+    }
+    if (screen === "quick-add") {
+      await page.locator(".quick-fab").click();
+      await expect(page.getByTestId("quick-title")).toBeVisible();
+      await expect(page.getByTestId("quick-title")).toBeEnabled();
+    }
+    if (screen !== "shell") {
+      if (
+        screen === "review" ||
+        (desktop && (screen === "projects" || screen === "type"))
+      ) {
+        await expect(page.getByTestId("review-artifact")).toHaveCount(1);
+        await expect(page.getByTestId("run-details")).toBeVisible();
+        for (const key of [
+          "matchesDescription",
+          "verifiable",
+          "withinPermissions",
+        ])
+          await expect(page.getByTestId(`review-check-${key}`)).toBeVisible();
+      }
+      if (screen === "agent")
+        await expect(page.getByTestId("agent-profile-heading")).toBeVisible();
+      if (screen === "mcp")
+        await expect(page.getByTestId("mcp-endpoint")).toBeVisible();
+      if (screen === "team")
+        await expect(page.locator(".team-directory-list li")).toHaveCount(
+          members.length,
+        );
+      if (screen === "notifications")
+        await expect(page.getByTestId("notification-review")).toBeEnabled();
+      await expect(
+        page.getByText(messages[locale].loading, { exact: true }),
+      ).toHaveCount(0);
+      if (screen === "today") {
+        await expect(page.getByTestId("today-schedule")).toHaveCount(5);
+        await expect(page.getByTestId("task-card")).toHaveCount(2);
+        await expect(page.locator(".today-meeting-block")).toHaveCount(3);
+        await expect(page.locator(".today-past")).toHaveCount(1);
+      } else if (screen === "projects" || screen === "type") {
+        await expect(page.getByTestId("board-task")).toHaveCount(12);
+      } else if (screen === "task-detail" || screen === "review") {
+        await expect(page.getByTestId("task-detail-heading")).toBeVisible();
+      } else if (screen === "calendar") {
+        const lanes = page.locator(".calendar-day-lanes .sx__calendar");
+        await expect(lanes).toHaveCount(2);
+        await expect(lanes.nth(0)).toBeVisible();
+        await expect(lanes.nth(1)).toBeVisible();
+        await expect(page.locator(".sx__time-grid-event")).toHaveCount(5);
+      } else if (screen === "inbox") {
+        await expect(page.getByTestId("inbox-item")).toHaveCount(
+          inbox.items.length,
+        );
+      }
+      await page.evaluate(() => document.fonts.ready);
+      await expect(page).toHaveScreenshot(`${screen}.png`, {
         animations: "disabled",
       });
+      if (screen === "projects") {
+        await page.getByTestId("project-view-list").click();
+        await expect(page).toHaveScreenshot("projects-list.png", {
+          animations: "disabled",
+        });
+      }
+      if (screen === "calendar") {
+        await page.getByTestId("calendar-week").click();
+        await expect(page.locator(".calendar-engine-week")).toBeVisible();
+        await expect(page.locator(".loading")).toHaveCount(0);
+        await expect(
+          page.locator(
+            `.sx__time-grid-event[data-event-id^="occurrence-${prototypeId("task", "nw", 138)}-"]`,
+          ),
+        ).toBeVisible();
+        await expect(page).toHaveScreenshot("calendar-week.png", {
+          animations: "disabled",
+        });
+        await page.getByTestId("calendar-month-grid").click();
+        await expect(page.locator(".calendar-engine-month-grid")).toBeVisible();
+        await expect(page.locator(".loading")).toHaveCount(0);
+        await expect(
+          page.locator(
+            `.sx__month-grid-event[data-event-id^="occurrence-${prototypeId("task", "nw", 138)}-"]`,
+          ),
+        ).toBeVisible();
+        await expect(page).toHaveScreenshot("calendar-month.png", {
+          animations: "disabled",
+        });
+      }
+      if (screen === "type") {
+        await page.evaluate(() => {
+          localStorage.setItem("taff-theme", "dark");
+          document.documentElement.dataset.theme = "dark";
+        });
+        await expect(page).toHaveScreenshot("type-dark.png", {
+          animations: "disabled",
+        });
+      }
+      return;
     }
-    if (screen === "calendar") {
-      await page.getByTestId("calendar-week").click();
-      await expect(page).toHaveScreenshot("calendar-week.png", {
-        animations: "disabled",
-      });
-      await page.getByTestId("calendar-month-grid").click();
-      await expect(page).toHaveScreenshot("calendar-month.png", {
-        animations: "disabled",
-      });
+  } finally {
+    if (openedReview) {
+      // Opening the real Inbox pane marks this isolated recipient's item read.
+      const restored = await page.request.patch(
+        `/api/inbox/${reviewItem!.id}`,
+        {
+          headers: { Origin: process.env.AUTH_URL! },
+          data: { read: false },
+        },
+      );
+      expect(restored.status()).toBe(200);
+      const after = await page.request.get(
+        `/api/inbox?workspaceId=${workspaceId}`,
+      );
+      expect(after.status()).toBe(200);
+      const restoredInbox = inboxSchema.parse(await after.json());
+      expect(restoredInbox.unreadCount).toBe(inbox.unreadCount);
+      expect(
+        restoredInbox.items.find((item) => item.id === reviewItem!.id)?.readAt,
+      ).toBeNull();
     }
-    if (screen === "type") {
-      await page.evaluate(() => {
-        localStorage.setItem("taff-theme", "dark");
-        document.documentElement.dataset.theme = "dark";
-      });
-      await expect(page).toHaveScreenshot("type-dark.png", {
-        animations: "disabled",
-      });
-    }
-    return;
   }
   const shell = page.locator(desktop ? "aside.sidebar" : "nav.tabbar");
   await expect(shell).toBeVisible();

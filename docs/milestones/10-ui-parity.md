@@ -140,6 +140,27 @@ uses the committed baselines and does not update them in CI.
 
 ## Integrated source ports — candidate, acceptance pending
 
+The source ports also include Notifications (613–635), the house Switch,
+and Quick Add (794–812). Preference persistence, parsing, assignment,
+creation and their error paths retain the existing handlers. Twelve further
+offline phone references cover Calendar week/month, Projects list,
+Notifications, Team and Quick Add; the root agent inspected each.
+
+At `8489383`, Today generated four real seeded captures and passed an
+independent comparison without updates. These are diagnostic captures, not
+approved Today baselines: inspection prompted a compact worker-chip styling
+correction. The font harness now loads the four actual stylesheet faces before
+capture. It preserves their families, sources, weights and Unicode ranges;
+product `font-display: optional` and cold performance measurements are unchanged.
+Four Shell tab/sidebar baselines were explicitly reinspected and replaced to
+correct the earlier fallback-font renders, with provenance in the Shell manifest.
+
+Visual navigation now selects the real Project task cards for the phone sheet
+and desktop detail pane. Desktop review opens the real Inbox control, then
+restores the isolated recipient's read state in a `finally` block. Screens wait
+for their dependent data before capture. These runner changes require the next
+sealed browser run; no production deployment or database changes are included.
+
 Today, Projects, task detail and review, Inbox, Calendar and Me now have TSX
 and token CSS ports from the line map. The shared shell persists across routes;
 Next intercepted task routes preserve the preceding phone screen. Desktop
@@ -154,9 +175,9 @@ Review found and repaired nested-dialog Escape propagation, cross-workspace
 task member/run/comment scoping, and account-specific timezone initialization.
 Schedule controls sit outside the metadata form; an embedded approval failure
 keeps checks, item decisions and comment drafts. Existing 105 browser cases
-retain their behavioral assertions; nine regression cases cover Me preferences,
+retain their behavioral assertions; twelve regression cases cover Me preferences,
 schedule-save isolation, approval rollback and cross-workspace nested editing.
-The expanded suite has 114 cases; browser execution is pending.
+The expanded suite has 117 cases; integrated browser execution is pending.
 
 A local production build exposed Next 16 parallel-route validation: an explicit
 implicit-slot fallback now preserves 404 behavior while the modal slot clears
@@ -168,7 +189,7 @@ The immutable Shell candidate `dfcbefb` completed seven required checks and
 all three Lighthouse/LCP locale runs, but failed Playwright (95 passed,
 10 failed); MCP smoke was not reached. Failures concern the held run navigation,
 profile rollback after route changes, consumed invitation URL restoration and
-one MCP source-event response. The integrated candidate addresses the route
+one MCP attachment capability response. The integrated candidate addresses the route
 lifetime and selector issues; it must pass the full runner before any push.
 The failing candidate's evidence is retained and its disposable infrastructure
 removed. Production and the previously accepted validation environment remain

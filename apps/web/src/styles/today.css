@@ -224,6 +224,7 @@
   pointer-events: none;
 }
 .today-worker {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -233,12 +234,14 @@
   min-height: 44px;
   color: var(--text-muted);
 }
-.today-worker > svg {
+.today-worker-label > svg {
   flex: none;
 }
 .today-worker select {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
   min-width: 0;
-  max-width: 112px;
   width: 100%;
   min-height: 44px;
   padding: 0 4px;
@@ -249,11 +252,28 @@
   border-radius: 0;
 }
 .today-worker-agent {
-  border: 1px solid var(--border);
-  padding: 0 6px;
+  max-width: 128px;
 }
-.today-worker-agent select {
-  max-width: 100px;
+.today-worker-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+}
+.today-worker-agent .today-worker-label {
+  border: 1px solid var(--border);
+}
+.today-worker-label > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.today-worker:focus-within {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .today-message {
   margin: 8px 20px;

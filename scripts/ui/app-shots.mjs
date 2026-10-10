@@ -3,8 +3,14 @@ import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { chromium, expect } from "@playwright/test";
+import { tsImport } from "tsx/esm/api";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
 import { prepareFonts } from "./prepare-fonts.ts";
+
+const { inboxSchema } = await tsImport(
+  "../../packages/schemas/src/inbox-read.ts",
+  import.meta.url,
+);
 
 const out = path.resolve(process.argv[2] ?? "docs/ui/screenshots/ui-parity");
 const base = process.env.AUTH_URL ?? "http://localhost:3000";
@@ -19,6 +25,9 @@ assert(
     "inbox",
     "me",
     "mcp",
+    "notifications",
+    "team",
+    "quick-add",
     "organizations",
     "task-detail",
     "agent",
@@ -67,11 +76,10 @@ try {
         const profile = await page.request.get(`${base}/api/me`);
         assert.equal(profile.status(), 200);
         const me = await profile.json();
-        const workspace =
-          me.workspaces.find(
-            (item) => item.name === "Northwind" || item.name === "北風科技",
-          ) ?? me.workspaces.find((item) => item.name === "Taff Demo");
-        assert(workspace, "Run pnpm db:seed before capturing");
+        const workspace = me.workspaces.find(
+          (item) => item.id === prototypeId("workspace", "nw"),
+        );
+        assert(workspace, "Seed must include the Northwind workspace");
         assert.equal(
           (
             await page.request.patch(`${base}/api/profile`, {
@@ -100,20 +108,23 @@ try {
         assert.equal(membersResponse.status(), 200);
         const tasks = await tasksResponse.json();
         const members = await membersResponse.json();
-        const agent =
-          members.find(
-            (member) => member.id === prototypeId("member", "nw", 11),
-          ) ?? members.find((member) => member.kind === "agent");
-        const task =
-          tasks.find((item) => item.id === prototypeId("task", "nw", 145)) ??
-          tasks[0];
-        const reviewTask =
-          tasks.find(
-            (item) =>
-              item.id === prototypeId("task", "nw", 141) &&
-              item.status === "needs_review",
-          ) ?? tasks.find((item) => item.status === "needs_review");
-        assert(task && agent, "Seed must include tasks and agents");
+        const agent = members.find(
+          (member) =>
+            member.id === prototypeId("member", "nw", 11) &&
+            member.kind === "agent",
+        );
+        const task = tasks.find(
+          (item) => item.id === prototypeId("task", "nw", 145),
+        );
+        const reviewTask = tasks.find(
+          (item) =>
+            item.id === prototypeId("task", "nw", 141) &&
+            item.status === "needs_review",
+        );
+        assert(
+          task && agent && reviewTask,
+          "Seed must include the canonical task, agent and awaiting-review task",
+        );
         const routes = [
           ["today", "/"],
           ["calendar", "/calendar"],
@@ -121,10 +132,13 @@ try {
           ["inbox", "/inbox"],
           ["me", "/me"],
           ["mcp", "/me/mcp"],
-          ["organizations", "/orgs"],
-          ["task-detail", `/tasks/${task.id}`],
+          ["organizations", "/me"],
+          ["notifications", "/me"],
+          ["team", "/me"],
+          ["quick-add", "/"],
+          ["task-detail", "/projects"],
           ["agent", `/agents/${agent.id}`],
-          ...(reviewTask ? [["review", `/tasks/${reviewTask.id}`]] : []),
+          ["review", device === "desktop" ? "/inbox" : "/projects"],
         ];
         for (const [view, route] of routes) {
           if (
@@ -143,18 +157,149 @@ try {
             "inert",
             "",
           );
-          await page.evaluate(prepareFonts);
-          await page.screenshot({
-            path: path.join(out, `${device}-${locale}-${view}.png`),
-            animations: "disabled",
-          });
-          captures.push({ device, locale, screen: view, route, viewport });
+          let openedReview = false;
+          let originalInbox;
+          let reviewItem;
+          try {
+            if (
+              view === "task-detail" ||
+              (view === "review" && device === "phone") ||
+              (view === "projects" && device === "desktop")
+            ) {
+              const id = view === "task-detail" ? task.id : reviewTask.id;
+              await page
+                .locator(`a.task-title-link[href="/tasks/${id}"]`)
+                .click();
+              await expect(
+                page.getByTestId("task-detail-heading"),
+              ).toBeVisible();
+            }
+            if (view === "review" && device === "desktop") {
+              const inboxResponse = await page.request.get(
+                `${base}/api/inbox?workspaceId=${workspace.id}`,
+              );
+              assert.equal(inboxResponse.status(), 200);
+              originalInbox = inboxSchema.parse(await inboxResponse.json());
+              reviewItem = originalInbox.items.find(
+                (item) =>
+                  item.taskId === reviewTask.id && item.kind === "review",
+              );
+              assert(
+                reviewItem,
+                "Seed must include this recipient's review item",
+              );
+              assert.equal(
+                reviewItem.readAt,
+                null,
+                "Review item must start unread",
+              );
+              const read = page.waitForResponse(
+                (response) =>
+                  response.url() === `${base}/api/inbox/${reviewItem.id}` &&
+                  response.request().method() === "PATCH",
+              );
+              openedReview = true;
+              await page
+                .locator(
+                  `a.inbox-source-title[href="/tasks/${reviewTask.id}/review"]`,
+                )
+                .click();
+              assert.equal(
+                (await read).status(),
+                200,
+                "Marking review read failed",
+              );
+              await expect(
+                page.getByTestId("task-detail-heading"),
+              ).toBeVisible();
+            }
+            if (
+              view === "review" ||
+              (view === "projects" && device === "desktop")
+            ) {
+              await expect(page.getByTestId("review-artifact")).toHaveCount(1);
+              await expect(page.getByTestId("run-details")).toBeVisible();
+              for (const key of [
+                "matchesDescription",
+                "verifiable",
+                "withinPermissions",
+              ])
+                await expect(
+                  page.getByTestId(`review-check-${key}`),
+                ).toBeVisible();
+            }
+            if (view === "organizations") {
+              await page.getByTestId("me-organization").click();
+              await expect(page.getByRole("dialog")).toBeVisible();
+              await expect(page.locator(".me-org-choices")).toBeVisible();
+            } else if (view === "notifications") {
+              await page.getByTestId("open-notifications").click();
+              await expect(page).toHaveURL(`${base}/me/notifications`);
+              await expect(
+                page.getByTestId("notification-review"),
+              ).toBeEnabled();
+            } else if (view === "team") {
+              await page.getByTestId("me-team").click();
+              await expect(page).toHaveURL(`${base}/orgs#team`);
+              await expect(page.locator("#team")).toBeVisible();
+              await expect(
+                page.locator(".team-directory-list > li"),
+              ).toHaveCount(members.length);
+            } else if (view === "quick-add") {
+              await expect(page.getByTestId("open-quick")).toBeEnabled();
+              await page.getByTestId("open-quick").click();
+              await expect(page.getByRole("dialog")).toBeVisible();
+              await expect(page.getByTestId("quick-title")).toBeEnabled();
+            }
+            await page.waitForLoadState("networkidle");
+            await page.evaluate(prepareFonts);
+            await page.screenshot({
+              path: path.join(out, `${device}-${locale}-${view}.png`),
+              animations: "disabled",
+            });
+            const capturedUrl = new URL(page.url());
+            captures.push({
+              device,
+              locale,
+              screen: view,
+              route: `${capturedUrl.pathname}${capturedUrl.hash}`,
+              viewport,
+            });
+          } finally {
+            if (openedReview) {
+              const restored = await page.request.patch(
+                `${base}/api/inbox/${reviewItem.id}`,
+                { headers: { Origin: base }, data: { read: false } },
+              );
+              assert.equal(
+                restored.status(),
+                200,
+                "Restoring review unread failed",
+              );
+              const afterResponse = await page.request.get(
+                `${base}/api/inbox?workspaceId=${workspace.id}`,
+              );
+              assert.equal(afterResponse.status(), 200);
+              const after = inboxSchema.parse(await afterResponse.json());
+              assert.equal(
+                after.items.find((item) => item.id === reviewItem.id)?.readAt,
+                null,
+                "Review item must be unread again",
+              );
+              assert.equal(
+                after.unreadCount,
+                originalInbox.unreadCount,
+                "Unread count must be restored",
+              );
+            }
+          }
         }
         if (screen === "all" || screen === "search") {
           await page.goto(`${base}/`, { waitUntil: "networkidle" });
-          await page.evaluate(prepareFonts);
           await page.keyboard.press("Control+k");
           await expect(page.getByRole("dialog")).toBeVisible();
+          await page.waitForLoadState("networkidle");
+          await page.evaluate(prepareFonts);
           await page.screenshot({
             path: path.join(out, `${device}-${locale}-search.png`),
             animations: "disabled",
@@ -166,8 +311,9 @@ try {
       }
     }
   }
-  assert(
-    captures.length >= (screen === "all" || screen === "shell" ? 60 : 6),
+  assert.equal(
+    captures.length,
+    screen === "all" ? 84 : screen === "shell" ? 78 : 6,
     "Incomplete capture matrix",
   );
   await writeFile(

@@ -393,13 +393,21 @@ export function TodayView({ initialNow }: { initialNow: number }) {
                   <div
                     className={`today-worker${worker?.kind === "agent" ? " today-worker-agent" : ""}`}
                   >
-                    {worker?.kind === "agent" && (
-                      <Sparkles
-                        size={12}
-                        strokeWidth={1.5}
-                        aria-hidden="true"
-                      />
-                    )}
+                    <span className="today-worker-label" aria-hidden="true">
+                      {worker?.kind === "agent" && (
+                        <Sparkles size={12} strokeWidth={1.5} />
+                      )}
+                      <span>
+                        {worker
+                          ? presentPrototypeField(
+                              worker.id,
+                              "name",
+                              worker.name,
+                              locale,
+                            )
+                          : t("unassigned")}
+                      </span>
+                    </span>
                     <label className="sr-only" htmlFor={`worker-${task.id}`}>
                       {t("worker")} · {present(task)}
                     </label>
