@@ -114,6 +114,7 @@ const labels = {
     notifications: "通知",
     notificationTypes: "推送通知",
     quickAdd: "快速添加",
+    newTask: "新建任務",
   },
   en: {
     today: "Today",
@@ -143,6 +144,7 @@ const labels = {
     notifications: "Notifications",
     notificationTypes: "Push notifications",
     quickAdd: "Quick add",
+    newTask: "New task",
   },
 };
 const phoneScreens = [
@@ -196,7 +198,7 @@ try {
   browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH,
   });
-  for (const device of extra ? ["phone"] : ["phone", "desktop"]) {
+  for (const device of ["phone", "desktop"]) {
     const viewport =
       device === "phone"
         ? { width: 390, height: 844 }
@@ -204,7 +206,9 @@ try {
     for (const lang of ["zh", "en"]) {
       const l = labels[lang];
       const screens = extra
-        ? extraScreens
+        ? device === "phone"
+          ? extraScreens
+          : ["quick-add"]
         : dark
           ? device === "phone"
             ? ["projects"]
@@ -398,6 +402,10 @@ try {
                 .first(),
             );
         } else {
+          if (screen === "quick-add")
+            await click(
+              surface.getByRole("button", { name: l.newTask, exact: true }),
+            );
           if (screen === "inbox")
             await click(surface.getByText(l.inbox, { exact: true }).first());
           if (screen === "list")
@@ -443,11 +451,13 @@ try {
           "projects-list": l.task,
           notifications: l.notificationTypes,
           team: l.agent,
-          "quick-add": l.quickAdd,
+          "quick-add": device === "phone" ? l.quickAdd : l.newTask,
         }[screen];
         const view =
           screen === "quick-add"
-            ? phone.getByRole("dialog")
+            ? device === "phone"
+              ? phone.getByRole("dialog")
+              : surface.locator("textarea").locator("..")
             : screen === "notifications"
               ? phone
                   .getByText(l.notifications, { exact: true })
@@ -577,6 +587,7 @@ try {
       }
     }
   }
+  assert.equal(records.length, extra ? 14 : dark ? 6 : 38);
   const assets = [];
   async function collect(dir) {
     for (const item of await readdir(dir, { withFileTypes: true })) {
@@ -607,7 +618,7 @@ try {
     source: "docs/ui/prototype/team-tasks.dc.html",
     theme: dark ? "dark" : "light",
     matrix: extra
-      ? "extra-phone-views"
+      ? "extra-phone-and-desktop-quick-add"
       : dark
         ? "dark-projects"
         : "primary-light-views",

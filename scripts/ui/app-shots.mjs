@@ -260,6 +260,25 @@ try {
               path: path.join(out, `${device}-${locale}-${view}.png`),
               animations: "disabled",
             });
+            if (view === "review") {
+              await page
+                .getByTestId("review-artifact")
+                .scrollIntoViewIfNeeded();
+              await page.mouse.move(0, 0);
+              await page.screenshot({
+                path: path.join(
+                  out,
+                  `${device}-${locale}-review-deliverable.png`,
+                ),
+                animations: "disabled",
+              });
+              captures.push({
+                device,
+                locale,
+                screen: "review-deliverable",
+                viewport,
+              });
+            }
             const capturedUrl = new URL(page.url());
             captures.push({
               device,
@@ -317,7 +336,13 @@ try {
   }
   assert.equal(
     captures.length,
-    screen === "all" ? 84 : screen === "shell" ? 78 : 6,
+    screen === "all"
+      ? 90
+      : screen === "shell"
+        ? 84
+        : screen === "review"
+          ? 12
+          : 6,
     "Incomplete capture matrix",
   );
   await writeFile(

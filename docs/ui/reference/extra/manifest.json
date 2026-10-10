@@ -1,10 +1,10 @@
 {
   "formatVersion": 1,
-  "capturedAt": "2026-10-10T05:20:45.869Z",
+  "capturedAt": "2026-10-10T06:08:47.456Z",
   "browser": "156.0.8078.4",
   "source": "docs/ui/prototype/team-tasks.dc.html",
   "theme": "light",
-  "matrix": "extra-phone-views",
+  "matrix": "extra-phone-and-desktop-quick-add",
   "themeSelection": "Prototype default light appearance",
   "capturePolicy": "Native screen locator captures; surrounding dual-surface design canvas, labels and outer phone bezel excluded. Product content, synthetic OS status bar/home indicator and rounded screen corners preserved. No scaling.",
   "seed": {
@@ -1278,6 +1278,212 @@
         }
       ],
       "simulatedElapsedMs": 2200
+    },
+    {
+      "file": "desktop-zh-quick-add.png",
+      "device": "desktop",
+      "language": "zh",
+      "screen": "quick-add",
+      "theme": "light",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "width": 1280,
+      "height": 800,
+      "sha256": "33a17a20cfd3033a3ddb674d5f32c30ae2550e50b0835acbc4234f469fd86e55",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "新建任務",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 850
+    },
+    {
+      "file": "desktop-en-quick-add.png",
+      "device": "desktop",
+      "language": "en",
+      "screen": "quick-add",
+      "theme": "light",
+      "backgroundColor": "rgb(255, 255, 255)",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "width": 1280,
+      "height": 800,
+      "sha256": "0a606cf5481022b5af3c15a1326aa55ed3e5fae13689678685e0caf0dfc8b36b",
+      "seedTasks": [
+        {
+          "id": "NW-140",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-141",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-142",
+          "status": "review",
+          "agentState": "review",
+          "progress": 4
+        },
+        {
+          "id": "NW-138",
+          "status": "doing",
+          "agentState": "working",
+          "progress": 2
+        },
+        {
+          "id": "NW-144",
+          "status": "doing",
+          "agentState": "blocked",
+          "progress": 1
+        },
+        {
+          "id": "NW-139",
+          "status": "doing",
+          "agentState": null
+        },
+        {
+          "id": "NW-145",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-146",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-147",
+          "status": "todo",
+          "agentState": null
+        },
+        {
+          "id": "NW-135",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-133",
+          "status": "done",
+          "agentState": "done",
+          "progress": 4
+        },
+        {
+          "id": "NW-136",
+          "status": "done",
+          "agentState": null
+        }
+      ],
+      "assertedText": "New task",
+      "fonts": [
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        },
+        {
+          "family": "Noto Sans TC",
+          "status": "loaded"
+        },
+        {
+          "family": "Manrope",
+          "status": "loaded"
+        }
+      ],
+      "simulatedElapsedMs": 2200
     }
   ],
   "assets": [
@@ -1413,8 +1619,8 @@
     },
     {
       "file": "scripts/ui/prototype-shots.mjs",
-      "bytes": 23712,
-      "sha256": "88bb6ca40c8eddedfe7740e6b4972a7047d0f27224061fae9961b78c06ad2eaa"
+      "bytes": 24160,
+      "sha256": "8d4e9d91af946e25258e1ef22f86f86640289fb24ac7ea44176767f3d9ee3507"
     }
   ]
 }

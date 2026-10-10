@@ -223,6 +223,13 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       await expect(page).toHaveScreenshot(`${screen}.png`, {
         animations: "disabled",
       });
+      if (screen === "review") {
+        await page.getByTestId("review-artifact").scrollIntoViewIfNeeded();
+        await page.mouse.move(0, 0);
+        await expect(page).toHaveScreenshot("review-deliverable.png", {
+          animations: "disabled",
+        });
+      }
       if (screen === "projects") {
         await page.getByTestId("project-view-list").click();
         await page.mouse.move(0, 0);

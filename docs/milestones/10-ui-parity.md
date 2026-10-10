@@ -218,3 +218,39 @@ per-screen output directories and an exclusive, bounded validation lock prevent
 shared artifacts and overlapping browser runs. These diagnostics are retained,
 not accepted baselines. Fresh comparisons and all nine required checks remain
 pending for the sealed revision.
+
+The sealed `8c5a40b` run failed performance acceptance: Today JavaScript was
+197,419 bytes gzipped, but Lighthouse performance was 96 / 78 / 78 and the
+three-run LCP medians were 2,208 / 2,536 / 2,524 ms (en / zh-CN / zh-HK).
+The strict runner stopped before Playwright and MCP smoke; the 117 behavior
+cases were not executed. Its terminal evidence is retained and its owned
+disposable resources are removed. Thresholds and the 20-task fixture stay fixed.
+
+That revision's diagnostic captures and independent comparisons succeeded for
+Shell, Today, Projects, task detail, review, Inbox, Me, type, Search, agent,
+MCP, Team, Notifications and Quick Add. Calendar exposed an Intl prototype
+incompatibility between Playwright's clock and the existing Temporal polyfill;
+the capture helper now preserves the native formatter descriptors. Organization
+capture did not start while the preceding bounded browser lock was held.
+Neither failure is recorded as a visual pass.
+
+Inspection requires further source refinements before accepting these baselines:
+minimum-content card overflow and phone list footer overlap, the translated
+parent link, review content immediately after the task description with the real
+actions in the footer, desktop Search height and Quick Add positioning, and the
+native Team directory context. An additional review capture scrolls to the real
+deliverable. Two offline desktop Quick Add references now complement the twelve
+extra phone references; all fourteen have zero external requests and browser
+errors. Fresh captures, side-by-side approval and the complete unchanged runner
+remain required before any UI push.
+
+The cold-page waterfall identifies another source of delay: the desktop
+Sidebar's default lazy wrapper has no local Suspense boundary. Mounting it
+behind CSS on a phone suspended the containing shell after fresh identity
+confirmation. It now mounts at the existing desktop breakpoint and has its
+own loading boundary. A real held-chunk/resizing regression joins the suite
+(120 locale cases total); session confirmation and provisional-cache purging
+are unchanged. Generic Today labels and every localized month/weekday/date now
+use the common Noto subset. The disjoint font coverage remains exactly 714
+mappings with unchanged outlines, metrics and axes at six weights. Neither
+change is a performance pass until the unchanged cold-browser gates run.
