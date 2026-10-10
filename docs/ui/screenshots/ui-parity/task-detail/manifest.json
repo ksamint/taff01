@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 791\u2013934 and 1034\u20131214 supplies task identity, parent navigation, title, field rows and content hierarchy. Phone opens the existing bottom sheet over Projects; desktop uses the right panel. House field pickers bind real NW145 owner, unassigned worker, due date, schedule, priority, project and labels. Real description precedes subtasks and comments. Project/Labels and existing editing controls stay available; 44 px targets enlarge source rows. The app does not add synthetic OS chrome.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "task-detail",
+      "app": "docs/ui/screenshots/ui-parity/task-detail/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/task-detail.png",
+      "sha256": "b885358cb206c264e5d2a86795fca185c21901f069b19f7c6a99a43009c03da5",
+      "reference": "docs/ui/reference/phone-en-task-detail.png",
+      "referenceSha256": "23ff1b16d1bfad05bb40ac9337a7ddd6ee1a5e470ab038006840a012f85ad366"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "task-detail",
+      "app": "docs/ui/screenshots/ui-parity/task-detail/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/task-detail.png",
+      "sha256": "323d6898095e04a962498311a3aa57d52863bee7d84956994c099f38b8b3d796",
+      "reference": "docs/ui/reference/phone-zh-task-detail.png",
+      "referenceSha256": "e73a2c42a925268360f0229f579c19c5ac61800d8412f0a614a615b2d7b4bad6"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "task-detail",
+      "app": "docs/ui/screenshots/ui-parity/task-detail/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/task-detail.png",
+      "sha256": "9795c160a68114c1713ea84bbe0e603cf00049f2ee62f30f537882a9cc0665f1",
+      "reference": "docs/ui/reference/desktop-en-task-detail.png",
+      "referenceSha256": "733942c0d977f0c744c1a69c97b60b15ee284be51dbb605e4760eebc49c96877"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "task-detail",
+      "app": "docs/ui/screenshots/ui-parity/task-detail/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/task-detail.png",
+      "sha256": "16a4e6ea8dfe1dd5ed0806a828da971954600ae707860ed6aaf0c8ff8a72c374",
+      "reference": "docs/ui/reference/desktop-zh-task-detail.png",
+      "referenceSha256": "0163076cebcb59cb6a74e1a1a55555efb55ab24eafe0b250a88134c9bb59290c"
+    }
+  ]
+}

@@ -77,7 +77,7 @@ jobs:
       # Behavioral flows edit the seeded fixture; reseeding preserves those edits.
       - name: Approved visual baselines before fixture mutations
         run: |
-          for screen in shell today projects search; do
+          for screen in shell today projects task-detail search; do
             UI_SCREEN="$screen" pnpm exec playwright test --config playwright.visual.config.ts
           done
       - name: Browser flows in en, zh-CN and zh-HK

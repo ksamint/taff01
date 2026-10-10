@@ -391,3 +391,16 @@ All 8 native images were inspected by root. Independent production comparisons p
 | desktop-en / projects-list | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/projects/desktop-en-projects-list-app.png) |
 | desktop-zh-HK / projects | ![Prototype](../ui/reference/desktop-zh-projects.png) | ![App](../ui/screenshots/ui-parity/projects/desktop-zh-HK-projects-app.png) |
 | desktop-zh-HK / projects-list | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/projects/desktop-zh-HK-projects-list-app.png) |
+
+## task-detail visual checkpoint — production `e5165f9`
+
+Source 791–934 and 1034–1214 supplies task identity, parent navigation, title, field rows and content hierarchy. Phone opens the existing bottom sheet over Projects; desktop uses the right panel. House field pickers bind real NW145 owner, unassigned worker, due date, schedule, priority, project and labels. Real description precedes subtasks and comments. Project/Labels and existing editing controls stay available; 44 px targets enlarge source rows. The app does not add synthetic OS chrome.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/task-detail/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / task-detail | ![Prototype](../ui/reference/phone-en-task-detail.png) | ![App](../ui/screenshots/ui-parity/task-detail/phone-en-app.png) |
+| phone-zh-HK / task-detail | ![Prototype](../ui/reference/phone-zh-task-detail.png) | ![App](../ui/screenshots/ui-parity/task-detail/phone-zh-HK-app.png) |
+| desktop-en / task-detail | ![Prototype](../ui/reference/desktop-en-task-detail.png) | ![App](../ui/screenshots/ui-parity/task-detail/desktop-en-app.png) |
+| desktop-zh-HK / task-detail | ![Prototype](../ui/reference/desktop-zh-task-detail.png) | ![App](../ui/screenshots/ui-parity/task-detail/desktop-zh-HK-app.png) |
