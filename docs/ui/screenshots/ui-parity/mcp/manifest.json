@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "a93ca59d549b2c8575bb01ffb1fa6d77b48c0934",
+  "source": "Source 711\u2013790 supplies Back navigation, Settings label, 28 px title, introduction, endpoint field/copy action, client configuration panel and credential/tool sections. Existing token issuance, scopes, agent choice, revocation, call logs and clipboard handlers remain bound and authorized. Canonical agent labels translate with the identity-aware presenter; edited names and option IDs remain untouched. Actual Tokens 0 and the local isolated endpoint/config are displayed. OAuth discovery, registration/client metadata and provider health unavailable in the current API remain explicit M9 gaps; no connected badge, DCR toggle, fictional clients or token are invented. Real token controls remain below the initial fold. Phone is a push view without tabs/FAB; desktop is an adaptive extension with Sidebar and no native desktop MCP prototype. All controls retain 44 px targets and 12 px minimum text.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "mcp",
+      "app": "docs/ui/screenshots/ui-parity/mcp/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/mcp.png",
+      "sha256": "f7e5f18b1891065b595e473810469919815b0a02b6286785d7ec1e8f361c231a",
+      "reference": "docs/ui/reference/phone-en-mcp.png",
+      "referenceSha256": "31adbe8d97989163a5c78df426b100f6a01ed98a80d723848a03e6f28a3f9ea4"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "mcp",
+      "app": "docs/ui/screenshots/ui-parity/mcp/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/mcp.png",
+      "sha256": "464fe515faf63733cead90ddf0ad02999165bd62a6b928a2de138f0d7f278f2b",
+      "reference": "docs/ui/reference/phone-zh-mcp.png",
+      "referenceSha256": "28987ade643ec207d01275b5a1207e38c0fcac332ed8291fedeb28cec14f15d9"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "mcp",
+      "app": "docs/ui/screenshots/ui-parity/mcp/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/mcp.png",
+      "sha256": "c091620609f725786c3eb4fb3e0f5431af966897b004d4a478819e2a56055335",
+      "reference": null,
+      "referenceSha256": null
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "mcp",
+      "app": "docs/ui/screenshots/ui-parity/mcp/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/mcp.png",
+      "sha256": "6d95c63e5027dfac886ed14451d3483c8f6f15c4919d7e9e517889c81d081491",
+      "reference": null,
+      "referenceSha256": null
+    }
+  ]
+}

@@ -549,3 +549,29 @@ All 12 native images were inspected by root. Independent production comparisons 
 | desktop-zh-HK / calendar | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-app.png) |
 | desktop-zh-HK / calendar-week | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-week-app.png) |
 | desktop-zh-HK / calendar-month | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/calendar/desktop-zh-HK-calendar-month-app.png) |
+
+## mcp visual checkpoint — production `a93ca59`
+
+Source 711–790 supplies Back navigation, Settings label, 28 px title, introduction, endpoint field/copy action, client configuration panel and credential/tool sections. Existing token issuance, scopes, agent choice, revocation, call logs and clipboard handlers remain bound and authorized. Canonical agent labels translate with the identity-aware presenter; edited names and option IDs remain untouched. Actual Tokens 0 and the local isolated endpoint/config are displayed. OAuth discovery, registration/client metadata and provider health unavailable in the current API remain explicit M9 gaps; no connected badge, DCR toggle, fictional clients or token are invented. Real token controls remain below the initial fold. Phone is a push view without tabs/FAB; desktop is an adaptive extension with Sidebar and no native desktop MCP prototype. All controls retain 44 px targets and 12 px minimum text.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/mcp/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / mcp | ![Prototype](../ui/reference/phone-en-mcp.png) | ![App](../ui/screenshots/ui-parity/mcp/phone-en-app.png) |
+| phone-zh-HK / mcp | ![Prototype](../ui/reference/phone-zh-mcp.png) | ![App](../ui/screenshots/ui-parity/mcp/phone-zh-HK-app.png) |
+| desktop-en / mcp | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/mcp/desktop-en-app.png) |
+| desktop-zh-HK / mcp | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/mcp/desktop-zh-HK-app.png) |
+
+## organizations visual checkpoint — production `a93ca59`
+
+Source phone organization sheet 880–894 and desktop chooser 1124–1135 supply the shared organization choices. Phone uses the bottom sheet, 36 px tiles, 15 px names, real role sublines and Create organization navigation to the existing form. Desktop uses the compact 314 px popover, 24 px tiles, 13 px names, 44 px rows and selected check. Its complete border and selected row now render above board cards through the open-Sidebar stacking context. Both variants show the actual five authorized workspaces and preserve workspace-selection/cache guards; no team/member counts are invented. Alex and actual Admin roles are retained. Tokens, restrained gold selection, keyboard interaction and the 44 px/12 px floors remain.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/organizations/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / organizations | ![Prototype](../ui/reference/phone-en-organizations.png) | ![App](../ui/screenshots/ui-parity/organizations/phone-en-app.png) |
+| phone-zh-HK / organizations | ![Prototype](../ui/reference/phone-zh-organizations.png) | ![App](../ui/screenshots/ui-parity/organizations/phone-zh-HK-app.png) |
+| desktop-en / organizations | ![Prototype](../ui/reference/desktop-en-organizations.png) | ![App](../ui/screenshots/ui-parity/organizations/desktop-en-app.png) |
+| desktop-zh-HK / organizations | ![Prototype](../ui/reference/desktop-zh-organizations.png) | ![App](../ui/screenshots/ui-parity/organizations/desktop-zh-HK-app.png) |

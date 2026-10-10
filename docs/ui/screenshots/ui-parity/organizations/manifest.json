@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "a93ca59d549b2c8575bb01ffb1fa6d77b48c0934",
+  "source": "Source phone organization sheet 880\u2013894 and desktop chooser 1124\u20131135 supply the shared organization choices. Phone uses the bottom sheet, 36 px tiles, 15 px names, real role sublines and Create organization navigation to the existing form. Desktop uses the compact 314 px popover, 24 px tiles, 13 px names, 44 px rows and selected check. Its complete border and selected row now render above board cards through the open-Sidebar stacking context. Both variants show the actual five authorized workspaces and preserve workspace-selection/cache guards; no team/member counts are invented. Alex and actual Admin roles are retained. Tokens, restrained gold selection, keyboard interaction and the 44 px/12 px floors remain.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "organizations",
+      "app": "docs/ui/screenshots/ui-parity/organizations/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/organizations.png",
+      "sha256": "b7a2da5c8b5a494627a1bf0d19b4010aefd202c0a45488b2d762cb780bbdddd7",
+      "reference": "docs/ui/reference/phone-en-organizations.png",
+      "referenceSha256": "2515ad32a473101c79a13fa4cc193ffeaadb19d35fac0ccaf7a1f3d8832fa60b"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "organizations",
+      "app": "docs/ui/screenshots/ui-parity/organizations/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/organizations.png",
+      "sha256": "bd8beb53d6c85f603c5afb9b10d14f22ada25599494103dcf261e3612d288ac6",
+      "reference": "docs/ui/reference/phone-zh-organizations.png",
+      "referenceSha256": "54a9b8da1d1c61eb9a69ebddbc72c4f75b938c4037141e28d5d382b83c99ab84"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "organizations",
+      "app": "docs/ui/screenshots/ui-parity/organizations/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/organizations.png",
+      "sha256": "f44c36e737b3b638123d3b73fa58dbfc178e362ad218b1d215a45f3d147d09c2",
+      "reference": "docs/ui/reference/desktop-en-organizations.png",
+      "referenceSha256": "0745a09ef1074746dc94c146f7ac01d1ef83ea77f6bbc9c1339757bc74df183f"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "organizations",
+      "app": "docs/ui/screenshots/ui-parity/organizations/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/organizations.png",
+      "sha256": "fc441e5b237102ecb0807452b26a7b721d938db71e69ed7eeadef57e97518a5e",
+      "reference": "docs/ui/reference/desktop-zh-organizations.png",
+      "referenceSha256": "8835736e2625a8e38e5eb3877da5cd958fb2857ad70b2be1cdb222f99153ee44"
+    }
+  ]
+}
