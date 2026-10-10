@@ -231,6 +231,65 @@ Prototype UI upgrade checkpoint and releasing the lock. Rollback keeps the
 additive migrations/data and restores the exclusive env backup and verified
 previous API/worker/web image identities; recreate only those three services.
 
+### Prototype UI upgrade checkpoint — 2026-10-11
+
+Released `828443e23c2e08a1f1936aa1dbb23380db496b52` over the actual running
+`55b315b743a18113bed864191eb74c6f1d997d9b`. Under the native deployment lock,
+the release was an ancestor of remote `main` (`21a3372`) and its non-`docs/`
+diff was empty. Both exact-source CI runs passed:
+[feature 38075126595](https://github.com/ksamint/taff01/actions/runs/38075126595)
+and [main 38075126547](https://github.com/ksamint/taff01/actions/runs/38075126547).
+The nine local checks passed 492 tests in 46 files, 123 browser cases and MCP
+smoke. Initial Today JavaScript is 195,718 gzip bytes. Strict Lighthouse
+EN/CN/HK performance is 100/99/99, accessibility 96 throughout and best
+practices 100 throughout. Three-run LCP medians are 704/780/772 ms.
+
+The dedicated Taff custom-format database backup was verified with
+`pg_restore --list` (123,726 bytes), and the prior private environment was
+backed up exclusively with mode 0600. The staged bundle hash and prerequisite
+bundle were verified before the detached, clean checkout and explicit default
+builder. The one-shot migrator exited 0; the journal contains the exact 0021
+and 0022 hashes. No task number or workspace key is NULL, no workspace has
+duplicate task numbers, and the legacy-write numbering trigger is installed.
+Only API, worker and web were replaced, using their recorded immutable images.
+The API is healthy and the worker reports ready.
+
+Public acceptance passed in English and Traditional Chinese (Hong Kong), at
+390×844 phone and 1280×800 desktop viewports: existing email login,
+sign-out/sign-in, Today timeline/due list/FAB, real Quick Add references in
+Today/Projects/detail/search, desktop pointer board drag, phone touch column
+scrolling, calendar list and schedule editor, Inbox tabs/unread count and an
+existing real digest row, Me language/appearance, two-browser realtime updates,
+Secure/HttpOnly cookies, foreign-origin rejection and unchanged SMS availability.
+Fresh invitation recipients landed on `/` with the token removed before and
+after sign-up and accepted the invitation through the UI. Verification records
+are retained. There were no browser JavaScript exceptions; a focused console
+diagnostic found only the expected unauthenticated `/api/me` 401. Private test
+navigation errors were corrected before the accepted runs; no runtime repair or
+rollback was needed. [Sanitized public evidence](ui/review-2026-10-11/public-upgrade.json)
+records each case and the runtime preservation checks.
+
+The revised goal withdraws the live MCP evidence/Inbox approval check for this
+first release. No agent exists in the verification workspace, so a task-specific
+Inbox reference is also not present and is **not claimed verified** here; it
+will be checked with the real review in step 6. The released browser suite covers
+the review flow. No production seed or agent copy was performed.
+
+Caddy, Valkey, every neighboring container, the route file, DNS, private env
+values except `TAFF_TAG`, and the external database/role were retained. Their
+identities, start times and health were checked against the locked baseline.
+PostgreSQL was not restarted; all 12 Taff connections observed used TLS and the
+dedicated role. DNS remains `146.56.215.142` and trusted public HTTPS health is
+200. The env remains mode 0600 with `TAFF_TAG` pinned to the released SHA.
+
+Rollback restores `/srv/taff/secrets/.env.before-828443e23c2e08a1f1936aa1dbb23380db496b52`
+and the verified previous API/worker/web images, then recreates only those three
+services from the previous detached checkout. Retain additive 0021/0022 and
+data, PostgreSQL/role, Caddy, Valkey, neighbors, DNS and the route. Verify the old
+health and preservation checks before releasing the lock. No rollback occurred.
+The lock was released after verification on 2026-10-11, before this documentation
+commit and the agent-creation follow-up.
+
 ## Operations
 
 ### Username and administrative setup

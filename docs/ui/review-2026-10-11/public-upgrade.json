@@ -1,0 +1,174 @@
+{
+  "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+  "remoteMain": "21a3372166e5ce39b3f04655bc1279e421f60da9",
+  "docsOnlyAhead": true,
+  "previousRelease": "55b315b743a18113bed864191eb74c6f1d997d9b",
+  "publicCases": [
+    {
+      "locale": "en",
+      "mode": "phone",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Phone native touch column scrolling",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "10ad7d68-d683-41a7-99f8-010811c96a62",
+      "taskId": "4e29e63f-b9de-4c41-9a65-44d0f2a9dd8d",
+      "reference": "DE-5",
+      "unreadCount": 1,
+      "inboxItems": 1,
+      "digestCount": 1,
+      "invitation": {
+        "fragmentClearedBeforeAndAfterSignup": true,
+        "recipientCreated": true,
+        "guestMembership": true
+      },
+      "pageErrors": 0
+    },
+    {
+      "locale": "en",
+      "mode": "desktop",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Desktop real pointer board drag",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "c8e63676-47b8-445b-b8a9-f793a0d9a432",
+      "taskId": "e9941e47-22c1-46b4-a418-a2bf2014ba33",
+      "reference": "DE-7",
+      "unreadCount": 1,
+      "inboxItems": 1,
+      "digestCount": 1,
+      "pageErrors": 0
+    },
+    {
+      "locale": "zh-HK",
+      "mode": "phone",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Phone native touch column scrolling",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "30570f72-6b7b-48af-8ade-b1bdb76b7aeb",
+      "taskId": "fed1d931-03fd-4b2c-87ce-e4e230e2c3ad",
+      "reference": "DE-8",
+      "unreadCount": 1,
+      "inboxItems": 1,
+      "digestCount": 1,
+      "invitation": {
+        "fragmentClearedBeforeAndAfterSignup": true,
+        "recipientCreated": true,
+        "guestMembership": true
+      },
+      "pageErrors": 0
+    },
+    {
+      "locale": "zh-HK",
+      "mode": "desktop",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Desktop real pointer board drag",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "0ffc92d4-3dcd-4780-9041-18974bd44237",
+      "taskId": "ea2203f5-30ac-47bc-8718-1e7e33917a1e",
+      "reference": "DE-9",
+      "unreadCount": 1,
+      "inboxItems": 1,
+      "digestCount": 1,
+      "pageErrors": 0
+    }
+  ],
+  "runtime": {
+    "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+    "runtime": {
+      "api": {
+        "id": "e0982079f943801b0a634022fe6f26054c00bb02d20b66cb304e2dc3648d86b8",
+        "image": "sha256:fdea97ab658541f0bda317421925a873f68853263550146f8b8eb413dc520819",
+        "running": true,
+        "health": "healthy"
+      },
+      "worker": {
+        "id": "2f90f8caddb0c685850e688a7fbe9fc266cd8bbeb47a3a04f32943e2a002c8ca",
+        "image": "sha256:b331e9d5b38ef793d8c5d11a3c8857f25e9dcad30ac27eef428e0d3347c650ee",
+        "running": true,
+        "health": null
+      },
+      "web": {
+        "id": "096c3b4256a469ddd18d371839ff570a418d4011e358fb2c1b3a5f454cf00f24",
+        "image": "sha256:99e116322e7d3b63ff9c8a306140cbd37ea3e76a11b0e797bf8a651bd0c70b60",
+        "running": true,
+        "health": null
+      }
+    },
+    "workerReady": true,
+    "neighborsUnchanged": true,
+    "caddyValkeyRouteUnchanged": true,
+    "privateEnvPreserved": true,
+    "postgresUnchanged": true
+  },
+  "backfill": {
+    "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+    "missingTaskNumbers": 0,
+    "missingWorkspaceKeys": 0,
+    "duplicateTaskNumbers": 0,
+    "migrations": 2,
+    "legacyTrigger": 1
+  },
+  "postgresTls": {
+    "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+    "taffConnections": 12,
+    "insecureConnections": 0,
+    "dedicatedRole": true
+  },
+  "dnsA": "146.56.215.142",
+  "reviewApproval": "withdrawn for first release; e2e/agent-review.spec.ts covers released source",
+  "inboxTaskReference": "not present: no agent or review item; verify with the step 6 public MCP review",
+  "browserPageErrors": 0,
+  "rawConsoleErrors": {
+    "phoneAttempt": 11,
+    "remainingCases": 24
+  },
+  "focusedConsoleDiagnostic": {
+    "bad": [
+      {
+        "path": "/api/me",
+        "status": 401
+      }
+    ],
+    "consoleKinds": ["resource"],
+    "errors": []
+  },
+  "privateEvidenceHashes": {
+    "public-prototype-acceptance-taff-828-public-20261011-02": "530c0401d22a71da35a44b39fa7789d348a394341bc30af7dc135d129fefb1cb",
+    "public-prototype-acceptance-taff-828-public-20261011-05": "c16bc33d75b433af233571269931b9333dcbfde48b49350d6dd652cc505fbbbd"
+  }
+}
