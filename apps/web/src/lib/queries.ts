@@ -11,13 +11,11 @@ import { workspaceAccessSchema } from "@taff/schemas/workspace-read";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, request } from "./api";
 import { m3MutationKey } from "./optimistic-m3";
+import { calendarKey, membersKey, runsKey, tasksKey } from "./query-keys";
 import { currentSession } from "./session-cache";
 
 export const meKey = ["me"] as const;
-export const tasksKey = (workspaceId: string) =>
-  ["tasks", workspaceId] as const;
-export const membersKey = (workspaceId: string) =>
-  ["members", workspaceId] as const;
+export { membersKey, runsKey, tasksKey } from "./query-keys";
 
 export function useCalendar(id: string, from: string, to: string) {
   const client = useQueryClient();
@@ -25,7 +23,7 @@ export function useCalendar(id: string, from: string, to: string) {
     enabled: currentSession(client)?.confirmed !== false,
     refetchOnMount: () =>
       client.isMutating({ mutationKey: m3MutationKey }) === 0,
-    queryKey: ["calendar", id, from, to],
+    queryKey: calendarKey(id, from, to),
     queryFn: async () =>
       calendarViewDataSchema.parse(
         await request(
@@ -73,8 +71,6 @@ export function useTasks(workspaceId: string) {
       ),
   });
 }
-
-export const runsKey = (workspaceId: string) => ["runs", workspaceId] as const;
 
 export const inboxKey = (workspaceId: string) =>
   ["inbox", workspaceId] as const;

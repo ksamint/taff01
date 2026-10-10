@@ -8,7 +8,10 @@ import { AppShell } from "../src/components/app-shell";
 import { Providers } from "../src/components/providers";
 import { htmlLang, isLocale, preloadBootScript } from "../src/lib/i18n";
 import { inviteBootScript } from "../src/lib/invite";
-import { readServerMe } from "../src/lib/server-me";
+import {
+  readServerToday,
+  workspacePreferenceCookie,
+} from "../src/lib/server-me";
 import { themeBootScript } from "../src/lib/theme";
 import "./globals.css";
 import "../src/styles/notifications.css";
@@ -46,10 +49,14 @@ export default async function RootLayout({
     )
     .map(({ name, value }) => `${name}=${encodeURIComponent(value)}`)
     .join("; ");
-  const initialMe = await readServerMe(
+  const bootstrap = await readServerToday(
     sessionCookie,
     process.env.API_INTERNAL_URL,
+    cookieStore.get(workspacePreferenceCookie)?.value,
   );
+  const initialMe =
+    bootstrap === undefined ? undefined : (bootstrap?.me ?? null);
+  const initialToday = bootstrap?.today;
   const preference =
     initialMe?.user.locale ?? cookieStore.get("taff-locale")?.value;
   const initialLocale = isLocale(preference) ? preference : null;
@@ -98,6 +105,7 @@ export default async function RootLayout({
           initialLocale={initialLocale}
           messages={messages[locale]}
           initialMe={initialMe}
+          initialToday={initialToday}
         >
           <AppShell>
             {children}

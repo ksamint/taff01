@@ -287,6 +287,9 @@ export function installCachePersistence(
           const data = readData(item.key, item.data, identity.workspaces);
           if (
             data === undefined ||
+            // Authenticated server/live reads outrank a durable cache, even
+            // when an old device clock gave the snapshot a future timestamp.
+            client.getQueryData(item.key) !== undefined ||
             (client.getQueryState(item.key)?.dataUpdatedAt ?? 0) >=
               item.updatedAt
           )

@@ -60,6 +60,7 @@ export * from "./inbox-read";
 export * from "./notification-preferences";
 export * from "./project-read";
 export * from "./run-read";
+export * from "./today-bootstrap";
 export * from "./workspace-read";
 
 export const updateTaskStatusSchema = strictObject({

@@ -14,7 +14,8 @@
     "./workspace-read": "./src/workspace-read.ts",
     "./calendar-read": "./src/calendar-read.ts",
     "./notification-preferences": "./src/notification-preferences.ts",
-    "./prototype-data": "./src/prototype-data.ts"
+    "./prototype-data": "./src/prototype-data.ts",
+    "./today-bootstrap": "./src/today-bootstrap.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

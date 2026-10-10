@@ -1,5 +1,9 @@
 import { type APIRequestContext, expect, test } from "@playwright/test";
 import { meSchema } from "../packages/schemas/src/base";
+import {
+  calendarCivilTime,
+  calendarWallToInstant,
+} from "../packages/schemas/src/calendar";
 import { messages, type TestLocale } from "./support/account";
 
 test.use({ timezoneId: "Asia/Tokyo" });
@@ -35,6 +39,43 @@ test("server account identity stays private and read-only until the browser conf
 }, info) => {
   const locale = info.project.name as TestLocale;
   const alice = await account(page.request, locale, "SSR Alice", "UTC");
+  const workspace = alice.workspaces[0];
+  const privateTitle = `SSR private due task ${crypto.randomUUID()}`;
+  const scheduleTitle = `SSR private calendar ${crypto.randomUUID()}`;
+  const localDate = calendarCivilTime(new Date(), alice.user.tz)
+    .toISOString()
+    .slice(0, 10);
+  for (const [title, fields] of [
+    [
+      privateTitle,
+      { dueAt: calendarWallToInstant(`${localDate}T12:00`, alice.user.tz) },
+    ],
+    [
+      scheduleTitle,
+      {
+        labels: ["meeting"],
+        calendar: {
+          startAt: calendarWallToInstant(`${localDate}T12:00`, alice.user.tz),
+          endAt: calendarWallToInstant(`${localDate}T13:00`, alice.user.tz),
+          timeZone: alice.user.tz,
+          rrule: null,
+        },
+      },
+    ],
+  ] as const) {
+    expect(
+      (
+        await page.request.post("/api/tasks", {
+          data: {
+            workspaceId: workspace.id,
+            ownerId: workspace.memberId,
+            title,
+            ...fields,
+          },
+        })
+      ).status(),
+    ).toBe(201);
+  }
   const aliceCookies = await page.context().cookies();
   const other = await browser.newContext({ baseURL: process.env.AUTH_URL });
   let releaseScripts!: () => void;
@@ -103,6 +144,8 @@ test("server account identity stays private and read-only until the browser conf
     expect(response!.headers()["cache-control"]).toContain("private");
     expect(response!.headers()["cache-control"]).toContain("no-store");
     expect(html).toContain("SSR Alice");
+    expect(html).toContain(privateTitle);
+    expect(html).toContain(scheduleTitle);
     for (const cookie of aliceCookies.filter(({ name }) =>
       name.includes("session_token"),
     ))
@@ -111,6 +154,17 @@ test("server account identity stays private and read-only until the browser conf
       "aria-label",
       messages[locale].me.signedInAs.replace("{{name}}", alice.user.name),
     );
+    // App scripts are still held: both the due list and calendar must already
+    // be visible from authenticated HTML, rather than hydration or IDB.
+    await expect(page.getByTestId("task-card")).toHaveCount(1);
+    await expect(page.locator(".today-task-title")).toHaveText(privateTitle);
+    await expect(page.locator(".today-task-title")).toBeVisible();
+    await expect(page.locator(".today-block-title")).toContainText([
+      scheduleTitle,
+    ]);
+    await expect(
+      page.locator(".today-block-title").filter({ hasText: scheduleTitle }),
+    ).toBeVisible();
     releaseScripts();
     await expect(page.locator("html")).toHaveAttribute(
       "data-client-session-read",
@@ -124,13 +178,16 @@ test("server account identity stays private and read-only until the browser conf
     await expect(page.getByRole("dialog")).toHaveCount(0);
     expect(profileWrites).toEqual([]);
     expect(protectedReads).toEqual([]);
-    await expect(page.getByTestId("task-card")).toHaveCount(0);
+    await expect(page.getByTestId("task-card")).toHaveCount(1);
     await expect(page.getByTestId("foreground-notification")).toHaveCount(0);
     releaseMe();
     await expect(page.getByTestId("today-heading")).toHaveText(
       messages[bobLocale].today,
     );
     await expect(page.getByTestId("open-quick")).toBeEnabled();
+    await expect(page.getByTestId("task-card")).toHaveCount(0);
+    await expect(page.getByText(privateTitle, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(scheduleTitle, { exact: true })).toHaveCount(0);
     await expect(page.locator(".today-avatar-link")).toHaveAttribute(
       "aria-label",
       messages[bobLocale].me.signedInAs.replace("{{name}}", bob.user.name),
@@ -148,6 +205,77 @@ test("server account identity stays private and read-only until the browser conf
     releaseScripts();
     releaseMe();
     await other.close();
+  }
+});
+
+test("matching browser confirmation retains the server task while protected reads reconcile", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const me = await account(page.request, locale, "SSR same account");
+  const workspace = me.workspaces[0];
+  const title = `SSR retained task ${crypto.randomUUID()}`;
+  expect(
+    (
+      await page.request.post("/api/tasks", {
+        data: { workspaceId: workspace.id, ownerId: workspace.memberId, title },
+      })
+    ).status(),
+  ).toBe(201);
+  let releaseMe!: () => void;
+  let releaseTasks!: () => void;
+  const confirmation = new Promise<void>((resolve) => {
+    releaseMe = resolve;
+  });
+  const reconciliation = new Promise<void>((resolve) => {
+    releaseTasks = resolve;
+  });
+  await page.route("**/api/me", async (route) => {
+    await confirmation;
+    await route.continue();
+  });
+  await page.route("**/api/tasks?*", async (route) => {
+    await reconciliation;
+    await route.continue();
+  });
+  try {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const task = page.locator(".today-task-title").filter({ hasText: title });
+    await expect(task).toBeVisible();
+    await expect(page.getByTestId("open-quick")).toBeDisabled();
+    await page.evaluate((privateTitle) => {
+      const state = { removed: false };
+      Object.assign(window, { ssrTaskState: state });
+      new MutationObserver((records) => {
+        if (
+          records.some((record) =>
+            Array.from(record.removedNodes).some((node) =>
+              node.textContent?.includes(privateTitle),
+            ),
+          )
+        )
+          state.removed = true;
+      }).observe(document.querySelector("main.content")!, {
+        childList: true,
+        subtree: true,
+      });
+    }, title);
+    releaseMe();
+    await expect(page.getByTestId("open-quick")).toBeEnabled();
+    await expect(task).toBeVisible();
+    expect(
+      await page.evaluate(
+        () =>
+          (window as unknown as { ssrTaskState: { removed: boolean } })
+            .ssrTaskState.removed,
+      ),
+    ).toBe(false);
+    releaseTasks();
+    await expect(task).toBeVisible();
+  } finally {
+    releaseMe();
+    releaseTasks();
+    await page.unrouteAll({ behavior: "wait" });
   }
 });
 

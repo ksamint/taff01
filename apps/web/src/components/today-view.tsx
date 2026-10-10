@@ -31,8 +31,10 @@ import {
   useWorkspaceAccess,
 } from "../lib/queries";
 import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
+import { currentSession } from "../lib/session-cache";
 import { todayTasks } from "../lib/today";
 import { useWorkspace } from "./app-shell";
+import { useInitialTodayTime } from "./providers";
 import { Button } from "./ui/button";
 import { StatusGlyph } from "./ui/status-glyph";
 
@@ -50,7 +52,15 @@ export function TodayView({ initialNow }: { initialNow: number }) {
   const tasks = useTasks(workspace.id);
   const runs = useRuns(workspace.id);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
-  const [now, setNow] = useState(() => new Date(initialNow));
+  const serverNow = useInitialTodayTime();
+  const [now, setNow] = useState(
+    () =>
+      new Date(
+        currentSession(client)?.confirmed === false
+          ? (serverNow ?? initialNow)
+          : initialNow,
+      ),
+  );
   // Only the real wall clock advances here; agent state comes from the API.
   useEffect(() => {
     setNow(new Date());

@@ -838,3 +838,30 @@ Historical screen captures and manifests above remain unchanged. The [fresh mani
 | desktop-en-type-dark | Prototype<br>![comparison](../ui/reference/dark/desktop-en-board.png) | ![reviewed app](../ui/screenshots/ui-parity/release-2026-10-11/desktop-en-type-dark-app.png) | Accepted. Native capture inspected against desktop dark Board reference. NW-141 status at y216 remains readable with drag/menu icons clearly separated at y255 in the dedicated row. Dark token colors, light text, gold selection, English field controls and real NW/stored zh-HK values remain intact. Linux dark-mode geometry checks passed per integration evidence for target size, no footer/status overlap and hover stability. No blocking regression. |
 | desktop-zh-HK-type | Prototype<br>![comparison](../ui/reference/desktop-zh-board.png) | ![reviewed app](../ui/screenshots/ui-parity/release-2026-10-11/desktop-zh-HK-type-app.png) | Accepted. Native1280x800 compared with light Board prototype: consistent readable title/reference/due/parent/owner/status hierarchy across columns, own detail NW-141 and all real counts preserved. Separate action row on selected card remains clear of chips. Larger accessible card heights require existing board scroll without missing data or new blank state. |
 | desktop-zh-HK-type-dark | Prototype<br>![comparison](../ui/reference/dark/desktop-zh-board.png) | ![reviewed app](../ui/screenshots/ui-parity/release-2026-10-11/desktop-zh-HK-type-dark-app.png) | Accepted. Native1280x800 compared with dark Board prototype: inverse typography, card outlines, NW refs, owner/agent/status chips, gold selected border and bright new-task action remain readable. Reserved drag/menu row is clear of chips, fields and Chinese description remain intact. Lower-column viewport cut follows existing scroll; no new dark-on-dark or blank capture. |
+
+## Today bootstrap repair — 2026-10-11
+
+The `7bfb561` candidate passed all nine local checks, but required
+[feature CI](https://github.com/ksamint/taff01/actions/runs/38068952401) and
+[main CI](https://github.com/ksamint/taff01/actions/runs/38068952474) failed
+Lighthouse performance: EN/CN/HK 95/86/85 and 98/88/89 respectively.
+Image builds passed. Visual comparison and subsequent browser/MCP checks
+were not reached, so that SHA is not an accepted release.
+
+The repair supplies authenticated Today reads in the initial HTML while
+retaining browser confirmation for writes and all existing account/access
+guards. [ADR 0012](../adr/0012-authenticated-today-bootstrap.md) records the
+contract, workspace preference and fallbacks. It changes first-paint timing,
+without changing the approved final UI or visual thresholds.
+
+Working-tree diagnostics: focused core/API tests (69), web session/cache
+tests (26), typechecks, production builds, and all 12 SSR browser cases passed.
+Those browser cases cover visible due tasks and calendar titles with scripts
+held, provisional inert content/no writes, matching confirmation without
+blanking, cross-account removal and failed-confirmation retry in all locales.
+The initial diagnostic Lighthouse scored 99/100/99 performance, 96
+accessibility and 100 best practices. Default three-run slow-4G LCP medians
+were 696/768/744 ms for EN/CN/HK. Initial JavaScript measured 195,675
+gzip bytes (191.1 KiB), below 204,800 bytes. These measurements precede the
+final immutable candidate; complete exact-SHA validation and both CI runs
+remain required before deployment. No production deployment has occurred.

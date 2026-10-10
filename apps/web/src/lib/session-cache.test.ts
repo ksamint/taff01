@@ -1,3 +1,5 @@
+import type { Me } from "@taff/schemas";
+import type { TodayBootstrap } from "@taff/schemas/today-bootstrap";
 import { QueryClient } from "@tanstack/react-query";
 import { expect, it, vi } from "vitest";
 import {
@@ -9,7 +11,97 @@ import {
   bootstrapSession,
   currentSession,
   synchronizeSession,
+  workspaceFingerprint,
 } from "./session-cache";
+
+const initialMe: Me = {
+  user: {
+    id: "alice",
+    name: "Alice",
+    email: "alice@example.test",
+    locale: "en",
+    tz: "UTC",
+  },
+  workspaces: [
+    {
+      id: "11111111-1111-4111-8111-111111111111",
+      memberId: "22222222-2222-4222-8222-222222222222",
+      role: "admin",
+      key: "AL",
+      name: "Alice workspace",
+    },
+  ],
+};
+const initialToday: NonNullable<TodayBootstrap["today"]> = {
+  workspaceId: initialMe.workspaces[0].id,
+  now: Date.parse("2026-10-11T12:00:00Z"),
+  from: "2026-10-11T00:00:00.000Z",
+  to: "2026-10-12T00:00:00.000Z",
+  tasks: [],
+  members: [],
+  runs: [],
+  calendar: { occurrences: [], unscheduled: [], truncated: false },
+};
+
+it("retains only authenticated server reads on matching confirmation, reconciles them and still gates writes", async () => {
+  const client = new QueryClient();
+  bootstrapSession(client, initialMe, initialToday);
+  const taskKey = ["tasks", initialToday.workspaceId];
+  client.setQueryData(
+    ["inbox", initialToday.workspaceId],
+    "untrusted provisional data",
+  );
+  const removed: string[] = [];
+  const unsubscribe = client.getQueryCache().subscribe((event) => {
+    if (event.type === "removed") removed.push(String(event.query.queryKey[0]));
+  });
+  expect(client.getQueryData(taskKey)).toEqual([]);
+  await expect(snapshotQueries(client, [taskKey])).rejects.toMatchObject({
+    code: "unauthorized",
+  });
+  synchronizeSession(
+    client,
+    initialMe.user.id,
+    workspaceFingerprint(initialMe),
+  );
+  expect(currentSession(client)?.confirmed).toBe(true);
+  expect(removed).toEqual(["inbox"]);
+  expect(client.getQueryData(taskKey)).toEqual([]);
+  expect(client.getQueryState(taskKey)?.isInvalidated).toBe(true);
+  const snapshot = await snapshotQueries(client, [taskKey]);
+  expect(isCurrentSnapshot(client, snapshot)).toBe(true);
+  synchronizeSession(client, null);
+  expect(client.getQueryData(taskKey)).toBeUndefined();
+  restoreQueries(client, snapshot);
+  expect(client.getQueryData(taskKey)).toBeUndefined();
+  unsubscribe();
+  client.clear();
+});
+
+it.each([
+  { userId: "bob", scope: workspaceFingerprint(initialMe) },
+  { userId: "alice", scope: "membership-revoked" },
+  { userId: null, scope: "" },
+])(
+  "purges server reads when browser confirmation changes identity or access: $userId $scope",
+  ({ userId, scope }) => {
+    const client = new QueryClient();
+    bootstrapSession(client, initialMe, initialToday);
+    synchronizeSession(client, userId, scope);
+    expect(client.getQueryCache().findAll()).toHaveLength(0);
+    client.clear();
+  },
+);
+
+it("does not seed a workspace outside the server identity", () => {
+  const client = new QueryClient();
+  bootstrapSession(client, initialMe, {
+    ...initialToday,
+    workspaceId: "foreign",
+  });
+  expect(client.getQueryCache().findAll()).toHaveLength(0);
+  client.clear();
+});
 
 it("keeps server bootstrap read-only until the browser confirms and purges provisional data on promotion", async () => {
   const client = new QueryClient();

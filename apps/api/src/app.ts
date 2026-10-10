@@ -40,6 +40,7 @@ import {
   submitRunSchema,
   taskCommentInputSchema,
   taskFilterSchema,
+  todayBootstrapQuerySchema,
   updateNotificationPreferencesSchema,
   updateTaskSchema,
   updateTaskStatusSchema,
@@ -247,12 +248,17 @@ export function createApp(
     return core.auth.handler(c.req.raw);
   });
   app.use("/api/*", async (c, next) => {
+    const bootstrap =
+      c.req.path === "/api/bootstrap" || c.req.path === "/api/bootstrap/today";
+    if (bootstrap) c.header("Cache-Control", "private, no-store");
     const { response: session, headers } = await core.getSession(
       c.req.raw.headers,
-      c.req.path === "/api/bootstrap",
+      bootstrap,
     );
-    for (const cookie of headers.getSetCookie()) {
-      c.header("Set-Cookie", cookie, { append: true });
+    if (!bootstrap) {
+      for (const cookie of headers.getSetCookie()) {
+        c.header("Set-Cookie", cookie, { append: true });
+      }
     }
     if (!session) return c.json({ error: "unauthorized" }, 401);
     c.set("userId", session.user.id);
@@ -280,6 +286,14 @@ export function createApp(
     c.header("Cache-Control", "private, no-store");
     return c.json(await core.getMe(c.get("userId")));
   });
+  app.get("/api/bootstrap/today", async (c) =>
+    c.json(
+      await core.getTodayBootstrap(
+        c.get("userId"),
+        todayBootstrapQuerySchema.parse(c.req.query()),
+      ),
+    ),
+  );
   app.get("/api/me/notifications", async (c) =>
     c.json(
       await core.getNotificationPreferences(userPrincipal(c.get("userId"))),

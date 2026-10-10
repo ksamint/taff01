@@ -51,6 +51,7 @@ import {
   synchronizeSession,
   workspaceFingerprint,
 } from "../lib/session-cache";
+import { saveWorkspacePreference } from "../lib/workspace-preference";
 import { useWorkspaceSelection } from "./providers";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -217,6 +218,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         const saved = window.sessionStorage.getItem(key);
         if (saved && me.data.workspaces.some((item) => item.id === saved)) {
           setWorkspaceId(saved);
+          saveWorkspacePreference(me.data.user.id, saved);
           window.localStorage.setItem(LAST_WORKSPACE_KEY, saved);
           return;
         }
@@ -225,6 +227,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         me.data.workspaces.find((item) => item.id === workspaceId) ??
         me.data.workspaces[0];
       if (selected) {
+        saveWorkspacePreference(me.data.user.id, selected.id);
         window.sessionStorage.setItem(key, selected.id);
         // The head boot script preloads this workspace's first reads next time.
         window.localStorage.setItem(LAST_WORKSPACE_KEY, selected.id);

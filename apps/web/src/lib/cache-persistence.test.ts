@@ -150,6 +150,35 @@ it("waits for live authenticated identity and restores only authorized reads, al
   ).toBe(false);
 });
 
+it("never replaces authenticated server reads with a future-clock durable snapshot", async () => {
+  const identity = me();
+  const snapshot = saved(identity);
+  snapshot.queries[0].updatedAt = Date.now() + 3600000;
+  const store = memory(snapshot);
+  client.setQueryData(["me"], identity, { updatedAt: 0 });
+  const serverTask = { ...task, title: "Current server task", version: 2 };
+  bootstrapSession(client, identity, {
+    workspaceId,
+    now: Date.now(),
+    from: "2026-10-09T00:00:00.000Z",
+    to: "2026-10-10T00:00:00.000Z",
+    tasks: [serverTask],
+    members: [],
+    runs: [],
+    calendar: { occurrences: [], unscheduled: [], truncated: false },
+  });
+  dispose = installCachePersistence(client, store);
+  await flush();
+  expect(store.read).not.toHaveBeenCalled();
+  authenticate(identity);
+  await flush();
+  expect(store.read).toHaveBeenCalledOnce();
+  expect(client.getQueryData(["tasks", workspaceId])).toEqual([serverTask]);
+  expect(client.getQueryState(["tasks", workspaceId])?.isInvalidated).toBe(
+    true,
+  );
+});
+
 it.each([me("bob"), me("alice", "guest")])(
   "purges another account or changed membership role before hydration",
   async (identity) => {

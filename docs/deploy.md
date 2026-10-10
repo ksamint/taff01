@@ -22,8 +22,12 @@ The web image bakes
 `API_INTERNAL_URL=http://api:3001` into its rewrites; behind Caddy the `/api`
 and `/mcp` paths go straight to the API and never reach Next.js.
 Compose also supplies that URL at runtime for the authenticated server render.
-Its `/api/bootstrap` read does not renew sessions; the browser's `/api/me`
-request performs confirmation and receives any renewal cookie. If the internal
+Its `/api/bootstrap/today` read supplies authenticated Today data without
+renewing sessions; `/api/bootstrap` remains the Me-only fallback. The browser's
+`/api/me` request confirms identity before writes and receives any renewal
+cookie. Matching confirmation retains server reads for reconciliation;
+account or access changes purge them. See [ADR 0012](adr/0012-authenticated-today-bootstrap.md).
+If the internal
 API is unavailable, the web page retains its client loading and retry behavior.
 
 ## First deployment

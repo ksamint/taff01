@@ -1,6 +1,7 @@
 "use client";
 
 import type { Locale, Me } from "@taff/schemas";
+import type { TodayBootstrap } from "@taff/schemas/today-bootstrap";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createInstance, type ResourceLanguage } from "i18next";
 import {
@@ -26,6 +27,10 @@ const WorkspaceSelection = createContext<{
   invitation: string | null;
   setInvitation: (token: string | null) => void;
 } | null>(null);
+const TodayClock = createContext<number | undefined>(undefined);
+export function useInitialTodayTime() {
+  return useContext(TodayClock);
+}
 export function useWorkspaceSelection() {
   const value = useContext(WorkspaceSelection);
   if (!value) throw new Error("WorkspaceSelection needs Providers");
@@ -37,13 +42,17 @@ export function Providers({
   initialLocale,
   messages,
   initialMe,
+  initialToday,
 }: {
   children: ReactNode;
   initialLocale: Locale | null;
   messages: ResourceLanguage;
   initialMe: Me | null | undefined;
+  initialToday?: TodayBootstrap["today"];
 }) {
-  const [workspaceId, setWorkspaceId] = useState("");
+  const [workspaceId, setWorkspaceId] = useState(
+    initialToday?.workspaceId ?? "",
+  );
   const [invitation, setInvitation] = useState<string | null>(null);
   useEffect(() => {
     const token = takeInviteToken();
@@ -55,7 +64,7 @@ export function Providers({
     });
     if (initialMe !== undefined) {
       queryClient.setQueryData(["me"], initialMe, { updatedAt: 0 });
-      bootstrapSession(queryClient, initialMe);
+      bootstrapSession(queryClient, initialMe, initialToday);
     }
     return queryClient;
   });
@@ -118,7 +127,9 @@ export function Providers({
             setInvitation,
           }}
         >
-          {children}
+          <TodayClock.Provider value={initialToday?.now}>
+            {children}
+          </TodayClock.Provider>
         </WorkspaceSelection.Provider>
       </I18nextProvider>
     </QueryClientProvider>

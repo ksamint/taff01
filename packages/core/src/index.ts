@@ -64,6 +64,7 @@ import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRunOperations } from "./runs";
+import { createTodayBootstrap } from "./today-bootstrap";
 
 export class CoreError extends Error {
   constructor(
@@ -939,6 +940,20 @@ export function createCore(options: {
     currentRunId,
     tokenPepper: options.tokenPepper,
   });
+  const runOperations = createRunOperations({
+    db,
+    mutation,
+    loadActor,
+    requireMember,
+    lockTask,
+  });
+  const getTodayBootstrap = createTodayBootstrap({
+    getMe,
+    listTasks,
+    listMembers,
+    listRuns: runOperations.listRuns,
+    listCalendar: calendar.operations.listCalendar,
+  });
   return {
     provisionAdministration: async (
       input: import("@taff/schemas").AdministrationProvision,
@@ -951,13 +966,8 @@ export function createCore(options: {
     ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,
-    ...createRunOperations({
-      db,
-      mutation,
-      loadActor,
-      requireMember,
-      lockTask,
-    }),
+    ...runOperations,
+    getTodayBootstrap,
     auth,
     getAuthMethods: () => ({ smsEnabled: Boolean(sms) }),
     handlePhoneAuth: async (request: Request, peerAddress: string) => {

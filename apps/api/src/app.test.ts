@@ -815,3 +815,90 @@ describe("REST adapter boundaries", () => {
     });
   });
 });
+
+describe("Today bootstrap REST boundaries", () => {
+  it.each(["/api/bootstrap", "/api/bootstrap/today"])(
+    "keeps unauthenticated %s private and nonrenewing without data reads",
+    async (path) => {
+      const headers = new Headers({ "Set-Cookie": "test=must-not-renew" });
+      const authentication = vi
+        .spyOn(core, "getSession")
+        .mockResolvedValue({ response: null, headers });
+      const me = vi.spyOn(core, "getMe");
+      const today = vi.spyOn(core, "getTodayBootstrap");
+      const response = await app.request(path);
+      expect(response.status).toBe(401);
+      expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+      expect(response.headers.getSetCookie()).toEqual([]);
+      expect(authentication.mock.calls[0]?.[1]).toBe(true);
+      expect(me).not.toHaveBeenCalled();
+      expect(today).not.toHaveBeenCalled();
+    },
+  );
+  it("forwards only validated preference hints with the session identity", async () => {
+    const authentication = vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers({ "Set-Cookie": "test=must-not-renew" }),
+    });
+    const payload = {
+      me: {
+        user: {
+          id,
+          name: "Person",
+          email: "person@example.test",
+          locale: "en" as const,
+          tz: "UTC",
+        },
+        workspaces: [],
+      },
+      today: null,
+    };
+    const read = vi.spyOn(core, "getTodayBootstrap").mockResolvedValue(payload);
+    const response = await app.request(
+      `/api/bootstrap/today?preferredUserId=other&workspaceId=${id}`,
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(payload);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(response.headers.getSetCookie()).toEqual([]);
+    expect(authentication.mock.calls[0]?.[1]).toBe(true);
+    expect(read).toHaveBeenCalledWith(id, {
+      preferredUserId: "other",
+      workspaceId: id,
+    });
+    read.mockClear();
+    const invalid = await app.request("/api/bootstrap/today?workspaceId=bad");
+    expect(invalid.status).toBe(400);
+    expect(invalid.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(read).not.toHaveBeenCalled();
+    vi.spyOn(core, "getMe").mockResolvedValue(payload.me);
+    const normal = await app.request("/api/me");
+    expect(normal.status).toBe(200);
+    expect(normal.headers.getSetCookie()).toEqual(["test=must-not-renew"]);
+    expect(authentication.mock.calls.at(-1)?.[1]).toBe(false);
+  });
+  it("does not leak a partial envelope or underlying read failure", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    vi.spyOn(core, "getTodayBootstrap").mockRejectedValue(
+      new Error("private data must not appear"),
+    );
+    const response = await app.request("/api/bootstrap/today");
+    expect(response.status).toBe(500);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(await response.json()).toEqual({ error: "internal_error" });
+  });
+  it("keeps authentication failures private before route execution", async () => {
+    vi.spyOn(core, "getSession").mockRejectedValue(
+      new Error("private auth details"),
+    );
+    const read = vi.spyOn(core, "getTodayBootstrap");
+    const response = await app.request("/api/bootstrap/today");
+    expect(response.status).toBe(500);
+    expect(response.headers.get("Cache-Control")).toBe("private, no-store");
+    expect(await response.json()).toEqual({ error: "internal_error" });
+    expect(read).not.toHaveBeenCalled();
+  });
+});
