@@ -1,0 +1,38 @@
+{
+  "appCaptureCommit": "e1c2d1a134e47256882562e7b52fc3475aca92ba",
+  "source": "Prototype markup555–612/1157–1209; real search handlers. Root inspected all4 native captures; independent strict comparison passed. Full behavioral/performance gates pending.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "app": "docs/ui/screenshots/ui-parity/search/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/search.png",
+      "sha256": "c3f2acdfc5bc84b5d9a302943b7c59224b2e576a33a6b97c366d735bee22d322",
+      "reference": "docs/ui/reference/phone-en-search.png",
+      "referenceSha256": "716a610155ababafedb3e80a8b023791847bd11fb14fb4814e8471277d147582"
+    },
+    {
+      "project": "phone-zh-HK",
+      "app": "docs/ui/screenshots/ui-parity/search/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/search.png",
+      "sha256": "8739b9e5640e1c9b87cf77a7d5d970440f9b94ef5fbef16b5fcd128b2711695c",
+      "reference": "docs/ui/reference/phone-zh-search.png",
+      "referenceSha256": "002a198503b1c5387ed8c99dd5046f0075a150a23c710e90057aee4e5f961d99"
+    },
+    {
+      "project": "desktop-en",
+      "app": "docs/ui/screenshots/ui-parity/search/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/search.png",
+      "sha256": "591636e9dcae2bb50a9bd2021b565b9fffdc2c6428c41a819e2ea4e9318c5def",
+      "reference": "docs/ui/reference/desktop-en-search.png",
+      "referenceSha256": "d6ebf583b6d51070d2622d463cc9521fadbb5c46b641a81fcb00f93378cb5b77"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "app": "docs/ui/screenshots/ui-parity/search/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/search.png",
+      "sha256": "11ae98043f7d3e3ea2be9955a7b833a2e70d7dbdd72d0fc082d5dd97b8bf2f4c",
+      "reference": "docs/ui/reference/desktop-zh-search.png",
+      "referenceSha256": "4a74ae5658d0e4182110500d7c004fe99b79cd7bc554739fea3b13df0191998b"
+    }
+  ]
+}

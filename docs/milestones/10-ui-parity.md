@@ -162,6 +162,25 @@ The prototype has no desktop Today view. These are responsive app evidence:
 
 ## Integrated source ports — candidate, acceptance pending
 
+### Search visual checkpoint
+
+The root agent inspected all four native `e1c2d1a` Search captures after
+strict independent comparison passed. The source's phone full-screen search
+and desktop palette bind the existing query, scope, filters and keyboard
+handlers. Fresh-session recent history is empty; the real search supports
+Tasks, Comments and Settings and its existing filters. Prototype-only event
+or people searches and invented recent queries are not presented. Controls
+retain the 44 px floor and visible focus. Full behavioral gates remain pending.
+The [manifest](../ui/screenshots/ui-parity/search/manifest.json) records unchanged
+app/baseline bytes and references. CI compares these approved baselines.
+
+| View | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| Phone English | ![Search reference](../ui/reference/phone-en-search.png) | ![Search app](../ui/screenshots/ui-parity/search/phone-en-app.png) |
+| Phone Hong Kong Chinese | ![Search reference Chinese](../ui/reference/phone-zh-search.png) | ![Search app Chinese](../ui/screenshots/ui-parity/search/phone-zh-HK-app.png) |
+| Desktop English | ![Search desktop reference](../ui/reference/desktop-en-search.png) | ![Search desktop app](../ui/screenshots/ui-parity/search/desktop-en-app.png) |
+| Desktop Hong Kong Chinese | ![Search desktop reference Chinese](../ui/reference/desktop-zh-search.png) | ![Search desktop app Chinese](../ui/screenshots/ui-parity/search/desktop-zh-HK-app.png) |
+
 The source ports also include Notifications (613–635), the house Switch,
 and Quick Add (794–812). Preference persistence, parsing, assignment,
 creation and their error paths retain the existing handlers. Twelve further
