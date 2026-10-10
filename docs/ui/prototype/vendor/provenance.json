@@ -1,0 +1,57 @@
+{
+  "reactVersion": "18.3.1",
+  "assets": [
+    {
+      "file": "react.production.min.js",
+      "source": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+      "archivePath": "package/umd/react.production.min.js",
+      "sha256": "d949f1c3687aedadcedac85261865f29b17cd273997e7f6b2bfc53b2f9d4c4dd",
+      "license": "MIT"
+    },
+    {
+      "file": "react-LICENSE.txt",
+      "source": "https://registry.npmjs.org/react/-/react-18.3.1.tgz",
+      "archivePath": "package/LICENSE",
+      "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "license": "MIT"
+    },
+    {
+      "file": "react-dom.production.min.js",
+      "source": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+      "archivePath": "package/umd/react-dom.production.min.js",
+      "sha256": "35f4f974f4b2bcd44da73963347f8952e341f83909e4498227d4e26b98f66f0d",
+      "license": "MIT"
+    },
+    {
+      "file": "react-dom-LICENSE.txt",
+      "source": "https://registry.npmjs.org/react-dom/-/react-dom-18.3.1.tgz",
+      "archivePath": "package/LICENSE",
+      "sha256": "52412d7bc7ce4157ea628bbaacb8829e0a9cb3c58f57f99176126bc8cf2bfc85",
+      "license": "MIT"
+    },
+    {
+      "file": "NotoSansTC.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/notosanstc/NotoSansTC%5Bwght%5D.ttf",
+      "sha256": "864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f",
+      "license": "SIL Open Font License 1.1"
+    },
+    {
+      "file": "NotoSansTC-OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/bd8f81ddb5c74d5c8897b36ad88b440266245103/ofl/notosanstc/OFL.txt",
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9",
+      "license": "SIL Open Font License 1.1"
+    },
+    {
+      "file": "Manrope-OFL.txt",
+      "source": "apps/web/public/fonts/Manrope-OFL.txt",
+      "sha256": "d6a309fcfb963d329a93baf9df66fa5f3c23a4be2b5f67edf24d6cafecde12ac",
+      "license": "SIL Open Font License 1.1"
+    },
+    {
+      "file": "../_ds/table-ai-design-system/assets/fonts/Manrope[wght].ttf",
+      "source": "Original approved prototype asset; upstream https://github.com/google/fonts/tree/main/ofl/manrope",
+      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6",
+      "license": "SIL Open Font License 1.1"
+    }
+  ]
+}

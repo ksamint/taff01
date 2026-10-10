@@ -92,6 +92,15 @@ Open [the local app](http://localhost:3000). Sign in as `alex@taff.local` using 
 three agents. Re-running the seed preserves existing accounts, passwords and tasks.
 Changing `DEMO_PASSWORD` after seeding does not reset existing passwords.
 
+The UI parity work takes priority over the remaining M9 items; its scope and
+acceptance are in [the UI goal](docs/agent-goal-ui-parity.md). After installing
+Playwright Chromium, `pnpm ui:prototype-shots` serves the offline prototype and
+captures its reference screens. `pnpm ui:app-shots` captures the running app in
+all three locales using the seeded demo account from `.env`. Run app captures
+against an isolated development database: they change the demo account's locale.
+The [parity report](docs/milestones/10-ui-parity.md) records screen comparisons
+and acceptance evidence.
+
 Web runs on port 3000 and proxies `/api`, including `/api/realtime` WebSockets,
 to the API on port 3001. PostgreSQL 18 and
 Valkey 9 bind locally to 55432 and 56379. `AUTH_URL` defines the browser origin;

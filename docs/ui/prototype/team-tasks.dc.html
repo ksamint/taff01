@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="_ds/table-ai-design-system/tokens/motion.css">
 <link rel="stylesheet" href="_ds/table-ai-design-system/tokens/base.css">
 <link rel="stylesheet" href="_ds/table-ai-design-system/styles.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;600&amp;display=swap">
+
 <script src="_ds/table-ai-design-system/_ds_bundle.js"></script>
 <style>
 body{margin:0}
@@ -32,12 +32,12 @@ a:hover{color:var(--accent-text)}
 @keyframes toastIn{from{transform:translateY(12px);opacity:0}to{transform:none;opacity:1}}
 </style>
 </helmet>
-<div lang="{{ langAttr }}" style="--bg:{{ th.bg }}; --bg-surface:{{ th.surface }}; --bg-container:{{ th.cont }}; --bg-container-low:{{ th.contLow }}; --cont-high:{{ th.contHigh }}; --text:{{ th.text }}; --text-body:{{ th.body }}; --text-muted:{{ th.muted }}; --text-subtle:{{ th.subtle }}; --border:{{ th.border }}; --hair:{{ th.hair }}; --border-strong:{{ th.strong }}; --bg-inverse:{{ th.inv }}; --text-on-inverse:{{ th.onInv }}; --color-deep-blue-muted:{{ th.invHover }}; --accent:{{ th.accent }}; --accent-hover:{{ th.accentHover }}; --accent-text:{{ th.accentText }}; --accent-wash:{{ th.wash }}; --success:{{ th.succ }}; --success-bg:{{ th.succBg }}; --warning:{{ th.warn }}; --warning-bg:{{ th.warnBg }}; --danger:{{ th.dang }}; --danger-bg:{{ th.dangBg }}; --danger-text:{{ th.dangText }}; --scrim:{{ th.scrim }}; --lift:{{ th.shadow }}; --focus-ring:{{ th.accent }}; min-height:100vh; min-width:100vw; width:max-content; box-sizing:border-box; background:{{ th.canvas }}; font-family:'Manrope','Noto Sans TC','PingFang HK','Microsoft JhengHei',system-ui,sans-serif; color:var(--text); display:flex; gap:72px; padding:64px; align-items:flex-start">
+<div data-reference-canvas lang="{{ langAttr }}" style="--bg:{{ th.bg }}; --bg-surface:{{ th.surface }}; --bg-container:{{ th.cont }}; --bg-container-low:{{ th.contLow }}; --cont-high:{{ th.contHigh }}; --text:{{ th.text }}; --text-body:{{ th.body }}; --text-muted:{{ th.muted }}; --text-subtle:{{ th.subtle }}; --border:{{ th.border }}; --hair:{{ th.hair }}; --border-strong:{{ th.strong }}; --bg-inverse:{{ th.inv }}; --text-on-inverse:{{ th.onInv }}; --color-deep-blue-muted:{{ th.invHover }}; --accent:{{ th.accent }}; --accent-hover:{{ th.accentHover }}; --accent-text:{{ th.accentText }}; --accent-wash:{{ th.wash }}; --success:{{ th.succ }}; --success-bg:{{ th.succBg }}; --warning:{{ th.warn }}; --warning-bg:{{ th.warnBg }}; --danger:{{ th.dang }}; --danger-bg:{{ th.dangBg }}; --danger-text:{{ th.dangText }}; --scrim:{{ th.scrim }}; --lift:{{ th.shadow }}; --focus-ring:{{ th.accent }}; min-height:100vh; min-width:100vw; width:max-content; box-sizing:border-box; background:{{ th.canvas }}; font-family:'Manrope','Noto Sans TC','PingFang HK','Microsoft JhengHei',system-ui,sans-serif; color:var(--text); display:flex; gap:72px; padding:64px; align-items:flex-start">
 
-<div style="display:flex; flex-direction:column; gap:16px; width:410px; flex:none">
+<div data-reference-preview="phone" style="display:flex; flex-direction:column; gap:16px; width:410px; flex:none">
 <div style="font-size:12px; font-weight:600; color:var(--text-muted)">{{ t.mobileLabel }}</div>
 <div style="padding:10px; background:{{ th.bezel }}; border-radius:56px; width:390px">
-<div style="width:390px; height:844px; position:relative; overflow:hidden; border-radius:46px; background:var(--bg); color:var(--text)">
+<div data-reference-surface="phone" style="width:390px; height:844px; position:relative; overflow:hidden; border-radius:46px; background:var(--bg); color:var(--text)">
 
 <div style="position:absolute; top:0; left:0; right:0; height:44px; z-index:70; display:flex; align-items:center; justify-content:space-between; padding:0 32px; background:var(--bg); font-size:15px; font-weight:600; font-variant-numeric:tabular-nums">
 <span>11:20</span>
@@ -45,7 +45,7 @@ a:hover{color:var(--accent-text)}
 </div>
 
 <sc-if value="{{ isToday }}" hint-placeholder-val="{{ true }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding-bottom:120px; box-sizing:border-box">
+<div data-reference-view="today" style="position:absolute; top:44px; left:0; right:0; bottom:0; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding-bottom:120px; box-sizing:border-box">
 <div style="padding:8px 20px 16px; display:flex; align-items:flex-end; justify-content:space-between">
 <div style="display:flex; flex-direction:column; gap:4px">
 <div style="font-size:12px; font-weight:600; color:var(--text-muted); letter-spacing:var(--ls-track-sm)">{{ todayLabel }}</div>
@@ -85,7 +85,7 @@ a:hover{color:var(--accent-text)}
 <span style="font-size:12px; color:{{ it.timeC }}; padding-top:14px; text-align:right; font-variant-numeric:tabular-nums">{{ it.time }}</span>
 <button onClick="{{ it.open }}" style="all:unset; box-sizing:border-box; margin:4px 0; padding:10px 12px; background:{{ it.bg }}; border:1px {{ it.bs }} {{ it.bc }}; display:flex; flex-direction:column; gap:4px; cursor:pointer; min-width:0">
 <span style="display:flex; align-items:center; gap:8px; min-width:0">
-<sc-if value="{{ it.isTask }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ it.s.fill }}; stroke:{{ it.s.stroke }}; stroke-width:1.5"></circle><path d="{{ it.s.half }}" style="fill:{{ it.s.stroke }}"></path><circle cx="7" cy="7" r="{{ it.s.dot }}" style="fill:{{ it.s.stroke }}"></circle><path d="{{ it.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg></sc-if>
+<sc-if value="{{ it.isTask }}" hint-placeholder-val="{{ false }}"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ it.s.fill }}; stroke:{{ it.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ it.s.half }}" style="fill:{{ it.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ it.s.dot }}" style="fill:{{ it.s.stroke }}"></circle><path sc-camel-d="{{ it.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg></sc-if>
 <span style="flex:1; min-width:0; font-size:14px; font-weight:500; color:{{ it.titleC }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ it.title }}</span>
 <sc-if value="{{ it.isAgent }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-muted); display:flex"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="14" hint-size="14px,14px"></x-import></span></sc-if>
 </span>
@@ -100,7 +100,7 @@ a:hover{color:var(--accent-text)}
 <div style="border-top:1px solid var(--hair)">
 <sc-for list="{{ dueToday }}" as="d" hint-placeholder-count="2">
 <button onClick="{{ d.open }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:12px; padding:12px 20px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)">
-<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ d.s.fill }}; stroke:{{ d.s.stroke }}; stroke-width:1.5"></circle><path d="{{ d.s.half }}" style="fill:{{ d.s.stroke }}"></path><circle cx="7" cy="7" r="{{ d.s.dot }}" style="fill:{{ d.s.stroke }}"></circle><path d="{{ d.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>
+<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ d.s.fill }}; stroke:{{ d.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ d.s.half }}" style="fill:{{ d.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ d.s.dot }}" style="fill:{{ d.s.stroke }}"></circle><path sc-camel-d="{{ d.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>
 <span style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px">
 <span style="font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ d.title }}</span>
 <span style="font-size:12px; color:var(--text-muted)">{{ d.id }} · {{ d.statusLabel }}</span>
@@ -113,7 +113,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isCalendar }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; display:flex; flex-direction:column">
+<div data-reference-view="calendar" style="position:absolute; top:44px; left:0; right:0; bottom:0; display:flex; flex-direction:column">
 <div style="padding:8px 20px 8px; display:flex; align-items:center; justify-content:space-between; gap:12px">
 <div style="display:flex; align-items:center; gap:4px">
 <span style="font-size:22px; font-weight:600; letter-spacing:{{ tls }}; margin-right:8px">{{ monthTitle }}</span>
@@ -221,7 +221,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isProjects }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; display:flex; flex-direction:column">
+<div data-reference-view="projects" style="position:absolute; top:44px; left:0; right:0; bottom:0; display:flex; flex-direction:column">
 <div style="padding:8px 20px 12px; display:flex; flex-direction:column; gap:4px">
 <button onClick="{{ openOrgSheet }}" style="all:unset; align-self:flex-start; display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:600; color:var(--text-muted); letter-spacing:var(--ls-track-sm); cursor:pointer" style-hover="color:var(--text)">{{ orgLabel }}<x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-down" size="12" hint-size="12px,12px"></x-import></button>
 <div style="display:flex; align-items:center; justify-content:space-between"><span style="font-size:28px; font-weight:600; letter-spacing:{{ tls }}; line-height:1.2">{{ projName }}</span><span style="display:flex; align-items:center; gap:8px"><div role="tablist" style="display:flex; background:var(--bg-container); padding:2px; border-radius:2px; gap:2px"><sc-for list="{{ pViews }}" as="pv" hint-placeholder-count="2"><button onClick="{{ pv.pick }}" role="tab" aria-selected="{{ pv.on }}" style="all:unset; height:40px; padding:0 10px; display:flex; align-items:center; font-size:13px; font-weight:{{ pv.fw }}; background:{{ pv.bg }}; color:{{ pv.c }}; border-radius:2px; cursor:pointer">{{ pv.label }}</button></sc-for></div><button onClick="{{ openSearch }}" aria-label="{{ t.search }}" style="all:unset; width:40px; height:40px; margin:-4px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; border-radius:2px" style-hover="background:var(--bg-container-low); color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="search" size="20" hint-size="20px,20px"></x-import></button></span></div>
@@ -230,7 +230,7 @@ a:hover{color:var(--accent-text)}
 <div style="display:flex; gap:4px; padding:0 20px; border-bottom:1px solid var(--hair); overflow-x:auto; scrollbar-width:none">
 <sc-for list="{{ boardCols }}" as="col" hint-placeholder-count="4">
 <button onClick="{{ col.jump }}" style="all:unset; flex:none; display:flex; align-items:center; gap:6px; height:40px; padding:0 8px; font-size:13px; font-weight:{{ col.fw }}; color:{{ col.c }}; box-shadow:inset 0 -2px 0 {{ col.ind }}; cursor:pointer">
-<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ col.s.fill }}; stroke:{{ col.s.stroke }}; stroke-width:1.5"></circle><path d="{{ col.s.half }}" style="fill:{{ col.s.stroke }}"></path><circle cx="7" cy="7" r="{{ col.s.dot }}" style="fill:{{ col.s.stroke }}"></circle><path d="{{ col.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>
+<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ col.s.fill }}; stroke:{{ col.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ col.s.half }}" style="fill:{{ col.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ col.s.dot }}" style="fill:{{ col.s.stroke }}"></circle><path sc-camel-d="{{ col.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>
 {{ col.label }}<span style="color:var(--text-subtle); font-weight:500; font-variant-numeric:tabular-nums">{{ col.count }}</span>
 </button>
 </sc-for>
@@ -258,11 +258,11 @@ a:hover{color:var(--accent-text)}
 <sc-if value="{{ isPList }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding-bottom:120px; border-top:1px solid var(--hair)">
 <sc-for list="{{ pGroups }}" as="pg" hint-placeholder-count="4">
-<div style="position:sticky; top:0; z-index:1; display:flex; align-items:center; gap:8px; height:36px; padding:0 20px; background:var(--bg-surface); border-bottom:1px solid var(--hair); font-size:12px; font-weight:600"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ pg.s.fill }}; stroke:{{ pg.s.stroke }}; stroke-width:1.5"></circle><path d="{{ pg.s.half }}" style="fill:{{ pg.s.stroke }}"></path><circle cx="7" cy="7" r="{{ pg.s.dot }}" style="fill:{{ pg.s.stroke }}"></circle><path d="{{ pg.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>{{ pg.label }}<span style="color:var(--text-subtle); font-weight:500">{{ pg.count }}</span></div>
+<div style="position:sticky; top:0; z-index:1; display:flex; align-items:center; gap:8px; height:36px; padding:0 20px; background:var(--bg-surface); border-bottom:1px solid var(--hair); font-size:12px; font-weight:600"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ pg.s.fill }}; stroke:{{ pg.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ pg.s.half }}" style="fill:{{ pg.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ pg.s.dot }}" style="fill:{{ pg.s.stroke }}"></circle><path sc-camel-d="{{ pg.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>{{ pg.label }}<span style="color:var(--text-subtle); font-weight:500">{{ pg.count }}</span></div>
 <sc-for list="{{ pg.rows }}" as="pr" hint-placeholder-count="2">
 <button onClick="{{ pr.open }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:10px; min-height:52px; padding:6px 20px 6px {{ pr.pad }}px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)">
 <sc-if value="{{ pr.isChild }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-subtle); font-size:12px">↳</span></sc-if>
-<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ pr.s.fill }}; stroke:{{ pr.s.stroke }}; stroke-width:1.5"></circle><path d="{{ pr.s.half }}" style="fill:{{ pr.s.stroke }}"></path><circle cx="7" cy="7" r="{{ pr.s.dot }}" style="fill:{{ pr.s.stroke }}"></circle><path d="{{ pr.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>
+<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ pr.s.fill }}; stroke:{{ pr.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ pr.s.half }}" style="fill:{{ pr.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ pr.s.dot }}" style="fill:{{ pr.s.stroke }}"></circle><path sc-camel-d="{{ pr.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>
 <span style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px">
 <span style="font-size:14px; font-weight:500; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ pr.title }}</span>
 <span style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-subtle); min-width:0"><span style="font-family:var(--font-mono)">{{ pr.id }}</span><span>{{ pr.due }}</span><sc-if value="{{ pr.hasSubs }}" hint-placeholder-val="{{ false }}"><span>· {{ t.subtasks }} {{ pr.subTxt }}</span></sc-if></span>
@@ -278,7 +278,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isInbox }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; display:flex; flex-direction:column">
+<div data-reference-view="inbox" style="position:absolute; top:44px; left:0; right:0; bottom:0; display:flex; flex-direction:column">
 <div style="padding:8px 20px 8px; display:flex; align-items:center; justify-content:space-between"><span style="font-size:28px; font-weight:600; letter-spacing:{{ tls }}; line-height:1.2">{{ t.inbox }}</span><span style="display:flex; align-items:center; gap:8px"><sc-if value="{{ hasUnread }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="ghost" size="sm" on-click="{{ markAll }}" hint-size="80px,32px">{{ t.markAllRead }}</x-import></sc-if><button onClick="{{ openSearch }}" aria-label="{{ t.search }}" style="all:unset; width:40px; height:40px; margin:-4px; display:flex; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer; border-radius:2px" style-hover="background:var(--bg-container-low); color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="search" size="20" hint-size="20px,20px"></x-import></button></span></div>
 <div style="display:flex; gap:4px; padding:0 20px; border-bottom:1px solid var(--hair); overflow-x:auto; scrollbar-width:none">
 <sc-for list="{{ inboxTabs }}" as="ib" hint-placeholder-count="3">
@@ -321,7 +321,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isMe }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding-bottom:110px">
+<div data-reference-view="me" style="position:absolute; top:44px; left:0; right:0; bottom:0; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding-bottom:110px">
 <div style="padding:8px 20px 8px; font-size:28px; font-weight:600; letter-spacing:{{ tls }}; line-height:1.2">{{ t.me }}</div>
 <div style="display:flex; align-items:center; gap:16px; padding:16px 20px 24px">
 <span style="width:56px; height:56px; border-radius:50%; background:var(--cont-high); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:600">{{ meIni }}</span>
@@ -407,7 +407,7 @@ a:hover{color:var(--accent-text)}
 </div>
 
 <sc-if value="{{ hasDetail }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
+<div data-reference-view="task-detail" style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
 <div style="height:52px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:0 8px; border-bottom:1px solid var(--hair)">
 <x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="ghost" size="sm" icon="arrow-left" on-click="{{ back }}" hint-size="80px,32px">{{ t.back }}</x-import>
 <span style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted)">{{ dt.id }}</span>
@@ -447,7 +447,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <div style="border-top:1px solid var(--hair)">
-<button onClick="{{ dt.statusOpen }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; min-height:44px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)"><span style="width:88px; flex:none; font-size:13px; color:var(--text-muted)">{{ t.status }}</span><span style="flex:1; display:flex; align-items:center; gap:8px; font-size:14px"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ dt.s.fill }}; stroke:{{ dt.s.stroke }}; stroke-width:1.5"></circle><path d="{{ dt.s.half }}" style="fill:{{ dt.s.stroke }}"></path><circle cx="7" cy="7" r="{{ dt.s.dot }}" style="fill:{{ dt.s.stroke }}"></circle><path d="{{ dt.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>{{ dt.statusLabel }}</span><span style="display:flex; color:var(--text-subtle); padding-right:4px"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-down" size="14" hint-size="14px,14px"></x-import></span></button>
+<button onClick="{{ dt.statusOpen }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; min-height:44px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)"><span style="width:88px; flex:none; font-size:13px; color:var(--text-muted)">{{ t.status }}</span><span style="flex:1; display:flex; align-items:center; gap:8px; font-size:14px"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ dt.s.fill }}; stroke:{{ dt.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ dt.s.half }}" style="fill:{{ dt.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ dt.s.dot }}" style="fill:{{ dt.s.stroke }}"></circle><path sc-camel-d="{{ dt.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>{{ dt.statusLabel }}</span><span style="display:flex; color:var(--text-subtle); padding-right:4px"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-down" size="14" hint-size="14px,14px"></x-import></span></button>
 <button onClick="{{ dt.ownerOpen }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; min-height:44px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)"><span style="width:88px; flex:none; font-size:13px; color:var(--text-muted)">{{ t.owner }}</span><span style="flex:1; display:flex; align-items:center; gap:8px; font-size:14px; min-width:0"><span style="width:22px; height:22px; border-radius:50%; background:var(--cont-high); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600">{{ dt.ownerAv.ini }}</span>{{ dt.ownerName }}</span><span style="display:flex; color:var(--text-subtle); padding-right:4px"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-down" size="14" hint-size="14px,14px"></x-import></span></button>
 <div style="display:flex; align-items:center; min-height:52px; border-bottom:1px solid var(--hair)"><span style="width:88px; flex:none; font-size:13px; color:var(--text-muted)">{{ t.worker }}</span>
 <sc-if value="{{ dt.hasAgent }}" hint-placeholder-val="{{ false }}"><span style="display:flex; align-items:center; gap:8px; font-size:14px; flex:1; min-width:0"><span style="width:22px; height:22px; border-radius:4px; border:1px solid var(--border); display:flex; align-items:center; justify-content:center; color:var(--text-muted)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="13" hint-size="13px,13px"></x-import></span><span style="display:flex; flex-direction:column"><span>{{ dt.agentName }}</span><span style="font-size:11px; color:var(--text-subtle)">{{ dt.agentRole }}</span></span><span style="margin-left:auto; display:flex"><sc-if value="{{ dt.canRun }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="outline" size="sm" icon="arrow-right" on-click="{{ dt.run }}" hint-size="90px,32px">{{ t.startAgent }}</x-import></sc-if><sc-if value="{{ dt.notRun }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Badge" variant="{{ dt.badgeV }}" dot="{{ true }}" hint-size="auto,22px">{{ dt.stateLabel }}</x-import></sc-if></span></span></sc-if>
@@ -503,7 +503,7 @@ a:hover{color:var(--accent-text)}
 <div style="display:flex; flex-direction:column">
 <sc-for list="{{ dt.subs }}" as="sb" hint-placeholder-count="0">
 <button onClick="{{ sb.open }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:10px; min-height:44px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)">
-<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ sb.s.fill }}; stroke:{{ sb.s.stroke }}; stroke-width:1.5"></circle><path d="{{ sb.s.half }}" style="fill:{{ sb.s.stroke }}"></path><circle cx="7" cy="7" r="{{ sb.s.dot }}" style="fill:{{ sb.s.stroke }}"></circle><path d="{{ sb.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ sb.id }}</span>
+<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ sb.s.fill }}; stroke:{{ sb.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ sb.s.half }}" style="fill:{{ sb.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ sb.s.dot }}" style="fill:{{ sb.s.stroke }}"></circle><path sc-camel-d="{{ sb.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ sb.id }}</span>
 <span style="flex:1; min-width:0; font-size:14px; color:{{ sb.tc }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ sb.title }}</span>
 <sc-if value="{{ sb.hasAgent }}" hint-placeholder-val="{{ false }}"><span style="flex:none; display:inline-flex; align-items:center; gap:4px; height:20px; padding:0 6px 0 4px; border:1px solid var(--border); font-size:11px; color:var(--text-muted)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="11" hint-size="11px,11px"></x-import>{{ sb.agentShort }}<span style="width:5px; height:5px; border-radius:50%; background:{{ sb.dotC }}"></span></span></sc-if>
 <span style="flex:none; width:20px; height:20px; border-radius:50%; background:var(--cont-high); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600">{{ sb.ini }}</span>
@@ -553,7 +553,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isSearch }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:fadeIn 300ms cubic-bezier(0.16,1,0.3,1)">
+<div data-reference-view="search" style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:fadeIn 300ms cubic-bezier(0.16,1,0.3,1)">
 <div style="flex:none; padding:8px 8px 8px 20px; display:flex; align-items:center; gap:4px">
 <div style="flex:1; position:relative">
 <span style="position:absolute; left:12px; top:12px; color:var(--text-subtle); display:flex; pointer-events:none"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="search" size="16" hint-size="16px,16px"></x-import></span>
@@ -590,7 +590,7 @@ a:hover{color:var(--accent-text)}
 <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="3">
 <button onClick="{{ r.goM }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:flex-start; gap:12px; padding:10px 20px; cursor:pointer" style-hover="background:var(--bg-container-low)">
 <span style="flex:none; width:24px; height:24px; display:flex; align-items:center; justify-content:center; color:var(--text-muted)">
-<sc-if value="{{ r.isTask }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ r.s.fill }}; stroke:{{ r.s.stroke }}; stroke-width:1.5"></circle><path d="{{ r.s.half }}" style="fill:{{ r.s.stroke }}"></path><circle cx="7" cy="7" r="{{ r.s.dot }}" style="fill:{{ r.s.stroke }}"></circle><path d="{{ r.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg></sc-if>
+<sc-if value="{{ r.isTask }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ r.s.fill }}; stroke:{{ r.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ r.s.half }}" style="fill:{{ r.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ r.s.dot }}" style="fill:{{ r.s.stroke }}"></circle><path sc-camel-d="{{ r.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg></sc-if>
 <sc-if value="{{ r.isEvent }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg></sc-if>
 <sc-if value="{{ r.isPerson }}" hint-placeholder-val="{{ false }}"><span style="width:24px; height:24px; border-radius:50%; background:var(--cont-high); color:var(--text); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600">{{ r.ini }}</span></sc-if>
 <sc-if value="{{ r.isAgent }}" hint-placeholder-val="{{ false }}"><span style="width:24px; height:24px; border-radius:4px; border:1px solid var(--border); box-sizing:border-box; display:flex; align-items:center; justify-content:center"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="13" hint-size="13px,13px"></x-import></span></sc-if>
@@ -634,7 +634,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isAgentPage }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:21; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
+<div data-reference-view="agent-profile" style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:21; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
 <div style="height:52px; flex:none; display:flex; align-items:center; padding:0 8px; border-bottom:1px solid var(--hair)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="ghost" size="sm" icon="arrow-left" on-click="{{ back }}" hint-size="80px,32px">{{ t.back }}</x-import></div>
 <div style="flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding:20px 20px 48px; display:flex; flex-direction:column; gap:24px">
 <div style="display:flex; gap:16px; align-items:center">
@@ -644,7 +644,7 @@ a:hover{color:var(--accent-text)}
 <div style="display:flex; flex-wrap:wrap; gap:6px"><sc-for list="{{ ap.skills }}" as="sk" hint-placeholder-count="3"><span style="font-size:12px; padding:4px 8px; border:1px solid var(--border); border-radius:2px; color:var(--text-muted)">{{ sk }}</span></sc-for></div>
 <sc-if value="{{ ap.hasTasks }}" hint-placeholder-val="{{ false }}">
 <div style="display:flex; flex-direction:column"><span style="font-size:11px; font-weight:600; color:var(--text-muted); letter-spacing:var(--ls-track-sm); text-transform:uppercase; padding-bottom:8px">{{ t.currentWork }}</span>
-<div style="border-top:1px solid var(--hair)"><sc-for list="{{ ap.tasks }}" as="w" hint-placeholder-count="2"><button onClick="{{ w.open }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:10px; min-height:44px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ w.s.fill }}; stroke:{{ w.s.stroke }}; stroke-width:1.5"></circle><path d="{{ w.s.half }}" style="fill:{{ w.s.stroke }}"></path><circle cx="7" cy="7" r="{{ w.s.dot }}" style="fill:{{ w.s.stroke }}"></circle><path d="{{ w.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ w.id }}</span><span style="flex:1; min-width:0; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ w.title }}</span><span style="display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-muted)"><span style="width:6px; height:6px; border-radius:50%; background:{{ w.dotC }}; animation:{{ w.anim }}"></span>{{ w.stateLabel }}</span></button></sc-for></div>
+<div style="border-top:1px solid var(--hair)"><sc-for list="{{ ap.tasks }}" as="w" hint-placeholder-count="2"><button onClick="{{ w.open }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:10px; min-height:44px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ w.s.fill }}; stroke:{{ w.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ w.s.half }}" style="fill:{{ w.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ w.s.dot }}" style="fill:{{ w.s.stroke }}"></circle><path sc-camel-d="{{ w.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ w.id }}</span><span style="flex:1; min-width:0; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ w.title }}</span><span style="display:flex; align-items:center; gap:5px; font-size:12px; color:var(--text-muted)"><span style="width:6px; height:6px; border-radius:50%; background:{{ w.dotC }}; animation:{{ w.anim }}"></span>{{ w.stateLabel }}</span></button></sc-for></div>
 </div>
 </sc-if>
 <div style="display:flex; flex-direction:column; gap:12px"><span style="font-size:11px; font-weight:600; color:var(--text-muted); letter-spacing:var(--ls-track-sm); text-transform:uppercase">{{ t.perms }}</span>
@@ -665,7 +665,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isTeam }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
+<div data-reference-view="team" style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
 <div style="height:52px; flex:none; display:flex; align-items:center; padding:0 8px; border-bottom:1px solid var(--hair)">
 <x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="ghost" size="sm" icon="arrow-left" on-click="{{ back }}" hint-size="80px,32px">{{ t.back }}</x-import>
 </div>
@@ -709,7 +709,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isMcp }}" hint-placeholder-val="{{ false }}">
-<div style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
+<div data-reference-view="mcp" style="position:absolute; top:44px; left:0; right:0; bottom:0; z-index:20; background:var(--bg); display:flex; flex-direction:column; animation:pushIn 400ms cubic-bezier(0.16,1,0.3,1)">
 <div style="height:52px; flex:none; display:flex; align-items:center; padding:0 8px; border-bottom:1px solid var(--hair)">
 <x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="ghost" size="sm" icon="arrow-left" on-click="{{ back }}" hint-size="80px,32px">{{ t.back }}</x-import>
 </div>
@@ -835,7 +835,7 @@ a:hover{color:var(--accent-text)}
 <div style="display:flex; flex-direction:column; border-top:1px solid var(--hair)">
 <sc-for list="{{ statusOpts }}" as="so" hint-placeholder-count="4">
 <button onClick="{{ so.pick }}" style="all:unset; box-sizing:border-box; display:flex; align-items:center; gap:12px; height:52px; padding:0 4px; border-bottom:1px solid var(--hair); background:{{ so.bg }}; cursor:pointer" style-hover="background:var(--bg-container-low)">
-<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ so.s.fill }}; stroke:{{ so.s.stroke }}; stroke-width:1.5"></circle><path d="{{ so.s.half }}" style="fill:{{ so.s.stroke }}"></path><circle cx="7" cy="7" r="{{ so.s.dot }}" style="fill:{{ so.s.stroke }}"></circle><path d="{{ so.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="flex:1; font-size:15px; font-weight:500">{{ so.label }}</span>
+<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ so.s.fill }}; stroke:{{ so.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ so.s.half }}" style="fill:{{ so.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ so.s.dot }}" style="fill:{{ so.s.stroke }}"></circle><path sc-camel-d="{{ so.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="flex:1; font-size:15px; font-weight:500">{{ so.label }}</span>
 <sc-if value="{{ so.cur }}" hint-placeholder-val="{{ false }}"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="check" size="18" hint-size="18px,18px"></x-import></span></sc-if>
 </button>
 </sc-for>
@@ -879,7 +879,7 @@ a:hover{color:var(--accent-text)}
 </sc-if>
 
 <sc-if value="{{ isOrgSheet }}" hint-placeholder-val="{{ false }}">
-<div style="display:flex; flex-direction:column; gap:4px"><span style="font-size:18px; font-weight:600">{{ t.switchOrg }}</span><span style="font-size:13px; line-height:1.6; color:var(--text-muted)">{{ t.switchOrgSub }}</span></div>
+<div data-reference-view="organizations" style="display:flex; flex-direction:column; gap:4px"><span style="font-size:18px; font-weight:600">{{ t.switchOrg }}</span><span style="font-size:13px; line-height:1.6; color:var(--text-muted)">{{ t.switchOrgSub }}</span></div>
 <div style="display:flex; flex-direction:column; gap:8px">
 <sc-for list="{{ orgOpts }}" as="o" hint-placeholder-count="3">
 <button onClick="{{ o.pick }}" style="all:unset; box-sizing:border-box; display:flex; align-items:center; gap:12px; padding:12px; border:1px solid var(--border); background:{{ o.bg }}; cursor:pointer" style-hover="border-color:var(--text-subtle)">
@@ -933,9 +933,9 @@ a:hover{color:var(--accent-text)}
 </div>
 
 <sc-if value="{{ showDesktop }}" hint-placeholder-val="{{ true }}">
-<div style="display:flex; flex-direction:column; gap:16px; flex:none">
+<div data-reference-preview="desktop" style="display:flex; flex-direction:column; gap:16px; flex:none">
 <div style="font-size:12px; font-weight:600; color:var(--text-muted)">{{ t.desktopLabel }}</div>
-<div style="width:1280px; height:800px; position:relative; border:1px solid var(--border); border-radius:4px; background:var(--bg); color:var(--text); display:flex; overflow:hidden; box-sizing:border-box">
+<div data-reference-surface="desktop" style="width:1280px; height:800px; position:relative; border:1px solid var(--border); border-radius:4px; background:var(--bg); color:var(--text); display:flex; overflow:hidden; box-sizing:border-box">
 
 <div style="width:208px; flex:none; background:var(--bg-surface); border-right:1px solid var(--hair); display:flex; flex-direction:column; padding:12px 8px; gap:16px; box-sizing:border-box">
 <div onClick="{{ toggleOrgMenu }}" style="display:flex; align-items:center; gap:10px; padding:4px 8px; height:32px; border-radius:2px; cursor:pointer" style-hover="background:var(--bg-container)"><span style="width:24px; height:24px; border-radius:4px; background:var(--bg-inverse); color:var(--text-on-inverse); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600">{{ wsIni }}</span><span style="flex:1; font-size:14px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ wsName }}</span><span style="display:flex; color:var(--text-subtle)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-down" size="14" hint-size="14px,14px"></x-import></span></div>
@@ -966,10 +966,10 @@ a:hover{color:var(--accent-text)}
 <x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="primary" size="sm" icon="plus" on-click="{{ deskNew }}" hint-size="100px,32px">{{ t.newTask }}</x-import>
 </div>
 <sc-if value="{{ isDeskBoard }}" hint-placeholder-val="{{ true }}">
-<div style="flex:1; min-height:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px 20px; overflow:hidden">
+<div data-reference-view="board" style="flex:1; min-height:0; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; padding:16px 20px; overflow:hidden">
 <sc-for list="{{ deskCols }}" as="col" hint-placeholder-count="4">
 <div onDragOver="{{ col.over }}" onDrop="{{ col.drop }}" style="display:flex; flex-direction:column; gap:8px; min-height:0; background:{{ col.bg }}; outline:{{ col.outline }}; padding:8px; transition:background 300ms">
-<div style="display:flex; align-items:center; gap:8px; height:28px; padding:0 4px; font-size:13px; font-weight:600"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ col.s.fill }}; stroke:{{ col.s.stroke }}; stroke-width:1.5"></circle><path d="{{ col.s.half }}" style="fill:{{ col.s.stroke }}"></path><circle cx="7" cy="7" r="{{ col.s.dot }}" style="fill:{{ col.s.stroke }}"></circle><path d="{{ col.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>{{ col.label }}<span style="color:var(--text-subtle); font-weight:500">{{ col.count }}</span></div>
+<div style="display:flex; align-items:center; gap:8px; height:28px; padding:0 4px; font-size:13px; font-weight:600"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ col.s.fill }}; stroke:{{ col.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ col.s.half }}" style="fill:{{ col.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ col.s.dot }}" style="fill:{{ col.s.stroke }}"></circle><path sc-camel-d="{{ col.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg>{{ col.label }}<span style="color:var(--text-subtle); font-weight:500">{{ col.count }}</span></div>
 <div style="display:flex; flex-direction:column; gap:8px; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; min-height:0; flex:1">
 <sc-for list="{{ col.cards }}" as="cd" hint-placeholder-count="2">
 <div draggable="true" onDragStart="{{ cd.dragStart }}" onDragEnd="{{ dragEnd }}" onClick="{{ cd.sel }}" style="display:flex; flex-direction:column; gap:8px; padding:10px 12px; background:{{ cd.selBg }}; border:1px solid {{ cd.selBorder }}; cursor:grab; opacity:{{ cd.op }}; transition:border-color 300ms, opacity 200ms; flex:none" style-hover="border-color:var(--text-subtle)">
@@ -989,11 +989,11 @@ a:hover{color:var(--accent-text)}
 </div>
 </sc-if>
 <sc-if value="{{ isDeskList }}" hint-placeholder-val="{{ false }}">
-<div style="flex:1; min-height:0; overflow-y:auto; scrollbar-width:none">
+<div data-reference-view="list" style="flex:1; min-height:0; overflow-y:auto; scrollbar-width:none">
 <div style="display:grid; grid-template-columns:minmax(0,1fr) 128px 88px 64px; gap:12px; padding:0 20px 0 12px; height:36px; align-items:center; border-bottom:1px solid var(--hair); font-size:11px; font-weight:600; color:var(--text-subtle); letter-spacing:var(--ls-track-sm); text-transform:uppercase"><span>{{ t.sTasks }}</span><span>{{ t.worker }}</span><span>{{ t.due }}</span><span>{{ t.priority }}</span></div>
 <sc-for list="{{ deskRows }}" as="rw" hint-placeholder-count="8">
 <div onClick="{{ rw.sel }}" style="display:grid; grid-template-columns:minmax(0,1fr) 128px 88px 64px; gap:12px; align-items:center; min-height:40px; padding:0 20px 0 {{ rw.pad }}px; border-bottom:1px solid var(--hair); background:{{ rw.rowBg }}; cursor:pointer" style-hover="background:var(--bg-container-low)">
-<span style="display:flex; align-items:center; gap:8px; min-width:0"><sc-if value="{{ rw.isChild }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-subtle); font-size:12px">↳</span></sc-if><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ rw.s.fill }}; stroke:{{ rw.s.stroke }}; stroke-width:1.5"></circle><path d="{{ rw.s.half }}" style="fill:{{ rw.s.stroke }}"></path><circle cx="7" cy="7" r="{{ rw.s.dot }}" style="fill:{{ rw.s.stroke }}"></circle><path d="{{ rw.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ rw.id }}</span><span style="font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ rw.title }}</span><sc-if value="{{ rw.hasSubs }}" hint-placeholder-val="{{ false }}"><span style="flex:none; font-size:11px; color:var(--text-subtle)">{{ rw.subTxt }}</span></sc-if></span>
+<span style="display:flex; align-items:center; gap:8px; min-width:0"><sc-if value="{{ rw.isChild }}" hint-placeholder-val="{{ false }}"><span style="color:var(--text-subtle); font-size:12px">↳</span></sc-if><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ rw.s.fill }}; stroke:{{ rw.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ rw.s.half }}" style="fill:{{ rw.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ rw.s.dot }}" style="fill:{{ rw.s.stroke }}"></circle><path sc-camel-d="{{ rw.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ rw.id }}</span><span style="font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ rw.title }}</span><sc-if value="{{ rw.hasSubs }}" hint-placeholder-val="{{ false }}"><span style="flex:none; font-size:11px; color:var(--text-subtle)">{{ rw.subTxt }}</span></sc-if></span>
 <span style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); min-width:0"><sc-if value="{{ rw.hasAgent }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="12" hint-size="12px,12px"></x-import><span style="white-space:nowrap">{{ rw.agentShort }}</span><span style="width:5px; height:5px; border-radius:50%; background:{{ rw.dotC }}; animation:{{ rw.anim }}"></span></sc-if><sc-if value="{{ rw.noAgentL }}" hint-placeholder-val="{{ true }}"><span style="white-space:nowrap">{{ rw.ownerName }}</span></sc-if></span>
 <span style="font-size:12px; color:var(--text-muted)">{{ rw.due }}</span><span style="font-size:12px; color:var(--text-muted)">{{ rw.pri }}</span>
 </div>
@@ -1001,7 +1001,7 @@ a:hover{color:var(--accent-text)}
 </div>
 </sc-if>
 <sc-if value="{{ isDeskInbox }}" hint-placeholder-val="{{ false }}">
-<div style="flex:1; min-height:0; overflow-y:auto; scrollbar-width:none">
+<div data-reference-view="inbox" style="flex:1; min-height:0; overflow-y:auto; scrollbar-width:none">
 <sc-for list="{{ deskInbox }}" as="m" hint-placeholder-count="3">
 <div onClick="{{ m.sel }}" style="display:flex; gap:12px; padding:14px 20px; border-bottom:1px solid var(--hair); background:{{ m.rowBg }}; box-shadow:inset 2px 0 0 {{ m.bar }}; cursor:pointer" style-hover="background:var(--bg-container-low)">
 <sc-if value="{{ m.av.agent }}" hint-placeholder-val="{{ true }}"><span style="flex:none; width:28px; height:28px; border-radius:4px; border:1px solid var(--border); box-sizing:border-box; display:flex; align-items:center; justify-content:center; color:var(--text-muted)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="14" hint-size="14px,14px"></x-import></span></sc-if>
@@ -1021,7 +1021,7 @@ a:hover{color:var(--accent-text)}
 
 <div style="width:300px; flex:none; border-left:1px solid var(--hair); display:flex; flex-direction:column; min-height:0">
 <sc-if value="{{ hasDeskTask }}" hint-placeholder-val="{{ true }}">
-<div style="flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding:20px; display:flex; flex-direction:column; gap:16px">
+<div data-reference-view="task-detail" style="flex:1; overflow-y:auto; overflow-x:hidden; scrollbar-width:none; padding:20px; display:flex; flex-direction:column; gap:16px">
 <div style="display:flex; align-items:center; justify-content:space-between"><span style="font-family:var(--font-mono); font-size:12px; color:var(--text-muted)">{{ deskTask.id }}</span><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Badge" variant="{{ deskTask.statusBadgeV }}" dot="{{ true }}" hint-size="auto,22px">{{ deskTask.statusLabel }}</x-import></div>
 <sc-if value="{{ deskTask.hasParent }}" hint-placeholder-val="{{ false }}"><button onClick="{{ deskTask.selParent }}" style="all:unset; display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); cursor:pointer; margin-bottom:-8px" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="arrow-left" size="12" hint-size="12px,12px"></x-import><span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ deskTask.parentLabel }}</span></button></sc-if>
 <div style="font-size:18px; font-weight:600; line-height:1.35; letter-spacing:{{ tls }}">{{ deskTask.title }}</div>
@@ -1088,7 +1088,7 @@ a:hover{color:var(--accent-text)}
 <div style="display:flex; flex-direction:column">
 <sc-for list="{{ deskTask.subs }}" as="sb" hint-placeholder-count="0">
 <button onClick="{{ sb.sel }}" style="all:unset; box-sizing:border-box; width:100%; display:flex; align-items:center; gap:10px; min-height:36px; border-bottom:1px solid var(--hair); cursor:pointer" style-hover="background:var(--bg-container-low)">
-<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ sb.s.fill }}; stroke:{{ sb.s.stroke }}; stroke-width:1.5"></circle><path d="{{ sb.s.half }}" style="fill:{{ sb.s.stroke }}"></path><circle cx="7" cy="7" r="{{ sb.s.dot }}" style="fill:{{ sb.s.stroke }}"></circle><path d="{{ sb.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ sb.id }}</span>
+<svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ sb.s.fill }}; stroke:{{ sb.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ sb.s.half }}" style="fill:{{ sb.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ sb.s.dot }}" style="fill:{{ sb.s.stroke }}"></circle><path sc-camel-d="{{ sb.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ sb.id }}</span>
 <span style="flex:1; min-width:0; font-size:12px; color:{{ sb.tc }}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">{{ sb.title }}</span>
 <sc-if value="{{ sb.hasAgent }}" hint-placeholder-val="{{ false }}"><span style="flex:none; display:inline-flex; align-items:center; gap:4px; height:20px; padding:0 6px 0 4px; border:1px solid var(--border); font-size:11px; color:var(--text-muted)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="11" hint-size="11px,11px"></x-import>{{ sb.agentShort }}<span style="width:5px; height:5px; border-radius:50%; background:{{ sb.dotC }}"></span></span></sc-if>
 <span style="flex:none; width:20px; height:20px; border-radius:50%; background:var(--cont-high); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600">{{ sb.ini }}</span>
@@ -1121,7 +1121,7 @@ a:hover{color:var(--accent-text)}
 
 <sc-if value="{{ orgMenu }}" hint-placeholder-val="{{ false }}">
 <div onClick="{{ closeOrgMenu }}" style="position:absolute; inset:0; z-index:40"></div>
-<div style="position:absolute; top:52px; left:8px; width:300px; z-index:41; background:var(--bg); border:1px solid var(--border); border-radius:4px; box-shadow:var(--lift); padding:6px; display:flex; flex-direction:column; gap:2px; animation:toastIn 300ms cubic-bezier(0.16,1,0.3,1)">
+<div data-reference-view="organizations" style="position:absolute; top:52px; left:8px; width:300px; z-index:41; background:var(--bg); border:1px solid var(--border); border-radius:4px; box-shadow:var(--lift); padding:6px; display:flex; flex-direction:column; gap:2px; animation:toastIn 300ms cubic-bezier(0.16,1,0.3,1)">
 <span style="padding:8px 10px 6px; font-size:11px; font-weight:600; color:var(--text-subtle); letter-spacing:var(--ls-track-sm); text-transform:uppercase">{{ t.switchOrg }}</span>
 <sc-for list="{{ orgOpts }}" as="o" hint-placeholder-count="3">
 <button onClick="{{ o.pick }}" style="all:unset; box-sizing:border-box; display:flex; align-items:center; gap:10px; padding:8px 10px; border-radius:2px; background:{{ o.bg }}; cursor:pointer" style-hover="background:var(--bg-container-low)">
@@ -1156,7 +1156,7 @@ a:hover{color:var(--accent-text)}
 
 <sc-if value="{{ pal }}" hint-placeholder-val="{{ false }}">
 <div onClick="{{ closePal }}" style="position:absolute; inset:0; background:var(--scrim); z-index:50; animation:fadeIn 200ms ease"></div>
-<div style="position:absolute; left:50%; top:88px; transform:translateX(-50%); width:640px; max-height:600px; z-index:51; background:var(--bg); border:1px solid var(--border); border-radius:4px; box-shadow:var(--lift); display:flex; flex-direction:column; overflow:hidden">
+<div data-reference-view="search" style="position:absolute; left:50%; top:88px; transform:translateX(-50%); width:640px; max-height:600px; z-index:51; background:var(--bg); border:1px solid var(--border); border-radius:4px; box-shadow:var(--lift); display:flex; flex-direction:column; overflow:hidden">
 <div style="flex:none; display:flex; align-items:center; gap:12px; height:56px; padding:0 16px; border-bottom:1px solid var(--hair)">
 <span style="display:flex; color:var(--text-subtle)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="search" size="18" hint-size="18px,18px"></x-import></span>
 <input ref="{{ palRef }}" value="{{ sq }}" onChange="{{ onSq }}" onKeyDown="{{ palKey }}" placeholder="{{ t.searchPh }}" style="flex:1; min-width:0; height:40px; border:none; background:transparent; color:var(--text); font:inherit; font-size:16px; outline:none">
@@ -1187,7 +1187,7 @@ a:hover{color:var(--accent-text)}
 <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="3">
 <div onClick="{{ r.goD }}" onMouseEnter="{{ r.hover }}" style="display:flex; align-items:flex-start; gap:12px; padding:8px 16px; cursor:pointer; background:{{ r.bg }}; box-shadow:inset 2px 0 0 {{ r.bar }}">
 <span style="flex:none; width:24px; height:24px; display:flex; align-items:center; justify-content:center; color:var(--text-muted)">
-<sc-if value="{{ r.isTask }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ r.s.fill }}; stroke:{{ r.s.stroke }}; stroke-width:1.5"></circle><path d="{{ r.s.half }}" style="fill:{{ r.s.stroke }}"></path><circle cx="7" cy="7" r="{{ r.s.dot }}" style="fill:{{ r.s.stroke }}"></circle><path d="{{ r.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg></sc-if>
+<sc-if value="{{ r.isTask }}" hint-placeholder-val="{{ true }}"><svg width="14" height="14" viewBox="0 0 14 14" style="flex:none"><circle cx="7" cy="7" r="5.75" style="fill:{{ r.s.fill }}; stroke:{{ r.s.stroke }}; stroke-width:1.5"></circle><path sc-camel-d="{{ r.s.half }}" style="fill:{{ r.s.stroke }}"></path><circle cx="7" cy="7" sc-camel-r="{{ r.s.dot }}" style="fill:{{ r.s.stroke }}"></circle><path sc-camel-d="{{ r.s.check }}" style="fill:none; stroke:var(--bg); stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round"></path></svg></sc-if>
 <sc-if value="{{ r.isEvent }}" hint-placeholder-val="{{ false }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg></sc-if>
 <sc-if value="{{ r.isPerson }}" hint-placeholder-val="{{ false }}"><span style="width:24px; height:24px; border-radius:50%; background:var(--cont-high); color:var(--text); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600">{{ r.ini }}</span></sc-if>
 <sc-if value="{{ r.isAgent }}" hint-placeholder-val="{{ false }}"><span style="width:24px; height:24px; border-radius:4px; border:1px solid var(--border); box-sizing:border-box; display:flex; align-items:center; justify-content:center"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="13" hint-size="13px,13px"></x-import></span></sc-if>
