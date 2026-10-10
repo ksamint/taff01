@@ -1,10 +1,9 @@
 import { expect, type Page } from "@playwright/test";
-import en from "../../apps/web/locales/en/common.json";
-import zhCN from "../../apps/web/locales/zh-CN/common.json";
-import zhHK from "../../apps/web/locales/zh-HK/common.json";
 import { meSchema } from "../../packages/schemas/src/index";
-export const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
-export type TestLocale = keyof typeof messages;
+import { messages, type TestLocale } from "./messages";
+import { selectLocale } from "./preferences";
+
+export { messages, type TestLocale } from "./messages";
 export async function freshAccount(page: Page, locale: TestLocale) {
   if (!process.env.DEMO_PASSWORD) throw new Error("DEMO_PASSWORD is required");
   const response = await page.request.post("/api/auth/sign-up/email", {
@@ -19,13 +18,7 @@ export async function freshAccount(page: Page, locale: TestLocale) {
   await page.goto("/");
   await expect(page.getByTestId("today-heading")).toBeVisible();
   if (locale !== "en") {
-    const saved = page.waitForResponse(
-      (result) =>
-        new URL(result.url()).pathname === "/api/profile" &&
-        result.request().method() === "PATCH",
-    );
-    await page.getByTestId("locale-select").selectOption(locale);
-    expect((await saved).status()).toBe(200);
+    await selectLocale(page, locale);
   }
   await expect(page.getByTestId("today-heading")).toHaveText(
     messages[locale].today,

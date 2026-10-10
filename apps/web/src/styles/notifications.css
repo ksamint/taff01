@@ -32,28 +32,48 @@
 .notification-alerts {
   position: fixed;
   z-index: 65;
-  inset: auto 16px 84px auto;
-  width: min(360px, calc(100vw - 32px));
+  left: 16px;
+  right: 16px;
+  bottom: calc(var(--tabbar-height) + 80px + env(safe-area-inset-bottom));
   display: grid;
   gap: 8px;
 }
 .notification-alert {
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 16px;
-  background: var(--bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 20px #0002;
-  border-radius: var(--radius-control);
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 4px 12px;
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
+  border-radius: var(--radius-dialog);
+  box-shadow: var(--shadow-lift);
+  font-size: 12px;
+}
+.notification-alert > svg {
+  flex: none;
 }
 .notification-alert > div {
+  flex: 1;
   min-width: 0;
 }
+.notification-alert strong {
+  font-weight: var(--weight-medium);
+}
 .notification-alert p {
-  margin: 6px 0;
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.notification-view {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 8px;
+  font-weight: var(--weight-label);
+}
+.notification-alert > .button {
+  color: inherit;
 }
 .digest-section {
   margin: 24px 0;
@@ -76,8 +96,10 @@
   color: var(--text-muted);
   font-size: 13px;
 }
-@media (min-width: 900px) {
+@media (min-width: 1024px) {
   .notification-alerts {
+    left: auto;
+    width: min(440px, calc(100vw - var(--sidebar-width) - 32px));
     bottom: 24px;
   }
 }

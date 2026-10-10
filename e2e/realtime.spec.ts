@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 import { memberListSchema, meSchema } from "../packages/schemas/src/index";
+import { chooseLocale, selectLocale } from "./support/preferences";
 
 const labels = {
   en: { today: "Today", running: "Working", paused: "Paused" },
@@ -37,8 +38,7 @@ async function signIn(page: Page, locale: Locale) {
   await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
-  await page.getByTestId("locale-select").selectOption(locale);
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
+  await selectLocale(page, locale);
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
@@ -146,7 +146,7 @@ test("two authenticated browsers converge through real workspace WebSockets with
         result.url().endsWith("/api/profile") &&
         result.request().method() === "PATCH",
     );
-    await page.getByTestId("locale-select").selectOption(switched);
+    await chooseLocale(page, switched);
     expect((await saved).ok()).toBe(true);
     await expect(other.getByTestId("today-heading")).toHaveText(
       labels[switched].today,

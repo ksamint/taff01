@@ -40,7 +40,7 @@ app. No production database will be seeded for this work.
 | Step | State | Evidence |
 | --- | --- | --- |
 | 0 — offline prototype and capture tooling | Accepted locally; strict checks before push pending | 38 native zh/en reference captures; independent full navigation rerun passed with zero external requests or browser errors. [Matrix and provenance](../ui/reference/README.md). |
-| 1 — shell | Pending | |
+| 1 — shell | Source port implemented; runtime and visual acceptance pending | Phone tabs/FAB from lines 376–410, desktop sidebar from 940–953; existing session/cache guards retained. |
 | 2 — Today and Northwind seed | Pending | |
 | 3 — Projects | Pending | |
 | 4 — task detail and review | Pending | |
@@ -67,3 +67,32 @@ The prototype does not define desktop Today, Calendar, Me, MCP or agent
 profile layouts. Those gaps are listed explicitly in the reference matrix.
 Phone references retain synthetic OS chrome; comparisons account for that
 chrome without adding a fake status bar to the app.
+
+## Shell candidate
+
+The signed-in global header is removed. Quick Add moves to the 52 px dark
+square FAB, language and sign-out to Me, and search to compact screen
+headers and the desktop sidebar. The sidebar follows the source's 208 px
+width, organization menu, search/⌘K control, two primary links and agent
+rows; bottom utility links retain desktop access to Today, Calendar and Me.
+The standing 44 px target floor enlarges the prototype's 32 px sidebar
+controls. Counts and agent dots use actual API data. Foreground alerts keep
+notification preferences and device delivery, with the source's dark bottom
+toast and View action. Other screen ports remain pending.
+
+The real Northwind fixture prerequisite is included: 12 Checkout tasks,
+five workspace members, three agents, real reviews/blockers/inbox and
+recurring scheduled meeting tasks. Quartz and Personal are separate demo
+organizations. Deterministic identities let repeat seeds preserve edits,
+passwords, approvals, permissions and calendar changes. Canonical untouched
+fixture fields translate in all three locales; edited content stays verbatim.
+`SEED_DATE` anchors isolated visual data to October 8; normal seeding uses
+the current day in the existing demo account's time zone. No production
+database is seeded.
+
+Current checks: six-package typecheck, licence gate and three seed unit
+tests pass. PostgreSQL integration and browser assertions are pending: the
+local PostgreSQL container accepts internal connections but the host driver
+query timed out before assertions. The initial browser run was stopped
+while waiting for API readiness, with its owned processes cleaned up.
+Acceptance will use the prepared isolated Linux environment.

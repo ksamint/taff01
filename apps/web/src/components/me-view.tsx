@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import { useMembers } from "../lib/queries";
 import { applyTheme, readTheme, type ThemePreference } from "../lib/theme";
 import { useWorkspace } from "./app-shell";
+import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 
 const THEMES: ThemePreference[] = ["light", "dark", "system"];
@@ -29,6 +30,8 @@ export function MeView() {
     setLocale,
     setTimeZone,
     localePending,
+    signOut,
+    signOutPending,
   } = useWorkspace();
   const { t, i18n } = useTranslation();
   const members = useMembers(workspace.id);
@@ -100,6 +103,7 @@ export function MeView() {
           <Label htmlFor="me-locale">{t("language")}</Label>
           <select
             id="me-locale"
+            data-testid="locale-select"
             value={i18n.resolvedLanguage ?? me.user.locale}
             disabled={localePending}
             onChange={(event) => setLocale(event.target.value as Locale)}
@@ -160,6 +164,13 @@ export function MeView() {
         </Link>
         <p className="section-hint">{t("pwa.cacheHint")}</p>
       </section>
+      <Button
+        className="button-quiet me-signout"
+        onClick={signOut}
+        disabled={signOutPending}
+      >
+        {t("signOut")}
+      </Button>
     </>
   );
 }

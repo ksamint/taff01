@@ -15,6 +15,7 @@ env:
   AUTH_SECRET: ci-only-secret-with-at-least-32-characters
   API_INTERNAL_URL: http://127.0.0.1:3001
   API_PORT: "3001"
+  SEED_DATE: "2026-10-08"
   DEMO_EMAIL: alex@taff.local
   DEMO_PASSWORD: ci-demo-password
   TOKEN_PEPPER: ci-only-pepper-16-chars

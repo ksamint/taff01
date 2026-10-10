@@ -117,7 +117,7 @@
   --text-body-sm: 14px;
   --text-label-sm: 12px;
   --lh-body: 1.6;
-  --type-product-h1-size: 24px;
+  --type-product-h1-size: 28px;
   --type-product-h2-size: 20px;
   --type-product-h3-size: 16px;
   --weight-body: 400;
@@ -137,8 +137,8 @@
   --container-content: 1152px;
   --gutter: 20px;
   --nav-height: 64px;
-  --tabbar-height: 64px;
-  --sidebar-width: 240px;
+  --tabbar-height: 56px;
+  --sidebar-width: 208px;
   --hairline: 1px;
   /* Radius: square cards, 2px controls, 4px dialogs */
   --radius-none: 0px;

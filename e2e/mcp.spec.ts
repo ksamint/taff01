@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { selectLocale } from "./support/preferences";
 
 const labels = {
   en: { today: "Today", mcp: "MCP server", create: "Create token" },
@@ -18,12 +19,10 @@ async function signIn(page: Page, locale: TestLocale) {
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
   // The profile locale wins after sign-in, so choose it once signed in.
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
-  await page.getByTestId("locale-select").selectOption(locale);
+  await selectLocale(page, locale);
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
 }
 
 test("an admin issues an agent token once and sees it in the list", async ({

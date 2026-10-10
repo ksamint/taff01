@@ -13,7 +13,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { Sparkles } from "lucide-react";
+import { Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -45,7 +45,7 @@ type TaskMutation =
   | { kind: "assign"; id: string; body: AssignTask };
 
 export function TodayView() {
-  const { me, workspace } = useWorkspace();
+  const { me, workspace, openSearch } = useWorkspace();
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const taskKey = tasksKey(workspace.id);
@@ -184,6 +184,23 @@ export function TodayView() {
         <div className="day-title">
           <h1 data-testid="today-heading">{t("today")}</h1>
           <span className="date">{date}</span>
+        </div>
+        <div className="screen-header-actions">
+          <Button
+            className="button-quiet"
+            data-testid="open-search"
+            aria-label={t("search.title")}
+            onClick={openSearch}
+          >
+            <Search size={20} aria-hidden="true" />
+          </Button>
+          <Link
+            className="screen-avatar"
+            href="/me"
+            aria-label={t("me.signedInAs", { name: me.user.name })}
+          >
+            {me.user.name.slice(0, 1)}
+          </Link>
         </div>
         <p className="greeting">{t("hello", { name: me.user.name })}</p>
         <p className="task-count">

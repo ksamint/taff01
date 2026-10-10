@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import type { Me, Task } from "@taff/schemas";
 import { freshAccount, messages } from "./support/account";
+import { selectLocale, signOutFromMe } from "./support/preferences";
 
 const labels = {
   en: {
@@ -40,12 +41,10 @@ async function signIn(page: Page) {
 }
 
 async function useLocale(page: Page, locale: TestLocale) {
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
-  await page.getByTestId("locale-select").selectOption(locale);
+  await selectLocale(page, locale);
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
 }
 
 test("sign in, create a task and assign it to an agent", async ({
@@ -131,9 +130,7 @@ test("sign in, create a task and assign it to an agent", async ({
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[otherLocale].today,
   );
-  await page
-    .getByRole("button", { name: labels[otherLocale].signout, exact: true })
-    .click();
+  await signOutFromMe(page, otherLocale);
   await expect(page.getByTestId("auth-submit")).toBeVisible();
 });
 
@@ -160,9 +157,7 @@ test("create an account with a workspace, then sign in again", async ({
     page.getByRole("heading", { name: `First task ${locale}`, exact: true }),
   ).toBeVisible();
   await expect(page.getByTestId("task-submit")).toBeEnabled();
-  await page
-    .getByRole("button", { name: labels[locale].signout, exact: true })
-    .click();
+  await signOutFromMe(page, locale);
   await page.getByTestId("auth-email").fill(email);
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-submit").click();

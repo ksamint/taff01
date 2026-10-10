@@ -10,6 +10,7 @@ import {
   meSchema,
   runDetailSchema,
 } from "../packages/schemas/src/index";
+import { selectLocale } from "./support/preferences";
 
 const labels = {
   en: {
@@ -52,11 +53,10 @@ async function signIn(page: Page, locale: TestLocale) {
   await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
-  await page.getByTestId("locale-select").selectOption(locale);
+  await selectLocale(page, locale);
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
   const meResponse = await page.request.get("/api/me");
   const me = meSchema.parse(await meResponse.json());
   const workspace = me.workspaces[0];

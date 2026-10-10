@@ -9,6 +9,7 @@ import {
   runSchema,
   taskSchema,
 } from "../packages/schemas/src/index";
+import { chooseLocale, openMe, selectLocale } from "./support/preferences";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
 type Locale = keyof typeof messages;
@@ -21,8 +22,7 @@ async function signIn(page: Page, locale: Locale) {
   await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
-  await page.getByTestId("locale-select").selectOption(locale);
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
+  await selectLocale(page, locale);
   const me = meSchema.parse(await (await page.request.get("/api/me")).json());
   const workspace = me.workspaces[0];
   const members = memberListSchema.parse(
@@ -246,10 +246,12 @@ test("rejected profile, capability, grants, tokens and language changes restore 
   await expect(token).toHaveCount(0);
   await expect(page.getByTestId("issued-token")).toHaveCount(0);
   await page.goto("/");
+  await openMe(page);
   denied = await rejectLater(page, "/api/profile", "PATCH");
   const next = locale === "en" ? "zh-HK" : "en";
-  await page.getByTestId("locale-select").selectOption(next);
+  await chooseLocale(page, next);
   await denied.seen;
+  await page.locator('a[href="/"]:visible').first().click();
   await expect(page.getByTestId("today-heading")).toHaveText(
     messages[next].today,
   );

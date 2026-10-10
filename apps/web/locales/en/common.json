@@ -572,5 +572,8 @@
     "rateLimited": "Too many requests. Wait before trying again.",
     "invalidCode": "Couldn’t sign in. Check the code or request a new one.",
     "sendFailed": "Couldn’t send a code. Try again shortly or use email sign-in."
+  },
+  "shell": {
+    "view": "View"
   }
 }

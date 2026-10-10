@@ -11,6 +11,7 @@ import {
   taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
+import { selectLocale } from "./support/preferences";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
 type Locale = keyof typeof messages;
@@ -121,8 +122,7 @@ async function setup(page: Page, locale: Locale, withAgent = false) {
   await expect(page.getByTestId("today-heading")).toBeVisible({
     timeout: 15000,
   });
-  await page.getByTestId("locale-select").selectOption(locale);
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
+  await selectLocale(page, locale);
   const me = meSchema.parse(await (await page.request.get("/api/me")).json());
   const agentIds: string[] = [];
   if (withAgent) {

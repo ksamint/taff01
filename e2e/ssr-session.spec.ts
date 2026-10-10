@@ -114,7 +114,7 @@ test("server greeting stays private and read-only until the browser confirms its
       "pending",
     );
     await expect(page.locator("main.content")).toHaveAttribute("inert", "");
-    await expect(page.getByTestId("locale-select")).toBeDisabled();
+    await expect(page.getByTestId("open-quick")).toBeDisabled();
     await page.keyboard.press("Control+k");
     await expect(page.getByRole("dialog")).toHaveCount(0);
     expect(profileWrites).toEqual([]);
@@ -172,6 +172,8 @@ for (const signedIn of [false, true]) {
     await retry.click();
     if (signedIn) await expect(page.getByTestId("task-submit")).toBeEnabled();
     else await expect(page.getByTestId("auth-submit")).toBeVisible();
-    await expect(page.getByTestId("locale-select")).toBeEnabled();
+    await expect(
+      page.getByTestId(signedIn ? "open-quick" : "locale-select"),
+    ).toBeEnabled();
   });
 }

@@ -13,7 +13,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -45,7 +45,7 @@ const STATUSES: Task["status"][] = [
 ];
 
 export function ProjectsView({ projectId = "" }: { projectId?: string }) {
-  const { workspace } = useWorkspace();
+  const { workspace, openSearch } = useWorkspace();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const client = useQueryClient();
@@ -281,6 +281,16 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           {workspace.name}
         </Link>
         <h1>{selected?.name ?? t("projects.title")}</h1>
+        <div className="screen-header-actions">
+          <Button
+            className="button-quiet"
+            data-testid="open-search"
+            aria-label={t("search.title")}
+            onClick={openSearch}
+          >
+            <Search size={20} aria-hidden="true" />
+          </Button>
+        </div>
       </section>
       <div className="planning-toolbar">
         <div className="field">

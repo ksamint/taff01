@@ -9,6 +9,7 @@ import {
   taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
+import { selectLocale } from "./support/preferences";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
 type Locale = keyof typeof messages;
@@ -22,8 +23,7 @@ async function signIn(page: Page, locale: Locale) {
   await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
-  await page.getByTestId("locale-select").selectOption(locale);
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
+  await selectLocale(page, locale);
   const me = meSchema.parse(await (await page.request.get("/api/me")).json());
   return me;
 }
@@ -292,7 +292,7 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   await expect(page.getByTestId("search-result")).toContainText(comment);
   await page.getByTestId("search-result").first().click();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(editedTitle);
-  await page.getByTestId("open-search").click();
+  await page.keyboard.press("Control+k");
   await page.getByTestId("search-type-settings").click();
   await page.getByTestId("search-input").fill(m.me.appearance);
   await expect(page.getByTestId("search-setting")).toContainText(
@@ -382,8 +382,7 @@ test("organization creation, real invitation fragment acceptance, guest role ref
     await guest.getByTestId("auth-password").fill("Taff-e2e-only-2026!");
     await guest.getByTestId("auth-submit").click();
     await expect(guest.getByTestId("today-heading")).toBeVisible();
-    await guest.getByTestId("locale-select").selectOption(locale);
-    await expect(guest.getByTestId("locale-select")).toBeEnabled();
+    await selectLocale(guest, locale);
     await guest
       .getByRole("link", { name: m.organization.accept, exact: true })
       .click();
@@ -534,8 +533,7 @@ test("concurrent edits reject stale drafts and title-only saves preserve exact D
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
-  await page.getByTestId("locale-select").selectOption(locale);
-  await expect(page.getByTestId("locale-select")).toBeEnabled();
+  await selectLocale(page, locale);
   await page.request.patch("/api/profile", {
     data: { locale, tz: "America/New_York" },
   });

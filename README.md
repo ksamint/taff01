@@ -98,6 +98,7 @@ Playwright Chromium, `pnpm ui:prototype-shots` serves the offline prototype and
 captures its reference screens. `pnpm ui:app-shots` captures the running app in
 all three locales using the seeded demo account from `.env`. Run app captures
 against an isolated development database: they change the demo account's locale.
+Use `SEED_DATE=2026-10-08 pnpm db:seed` to anchor visual fixtures to the prototype.
 The [parity report](docs/milestones/10-ui-parity.md) records screen comparisons
 and acceptance evidence.
 
