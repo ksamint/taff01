@@ -1,8 +1,10 @@
 # Agent goal: finish Taff M9 and hand over
 
 > The prototype port from `docs/agent-goal-ui-parity.md` is merged (PR 2,
-> 2026-10-10). Two of its items remain and come first here: item 0 below
-> (LCP) and the visual baselines named in that goal's closing note.
+> 2026-10-10). Item 0 below (LCP) and the visual baselines are done on
+> `main` as of `828443e` (LCP 704/780/772 ms). `docs/agent-goal-deploy.md`
+> carries the release and its first follow-up (adding an agent to a
+> workspace); come back here afterwards and start at item 1.
 
 Paste everything below this line as the goal for a coding agent working in
 `ksamint/taff01`. It is self-contained; the files it names are in the

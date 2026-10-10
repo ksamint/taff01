@@ -1,5 +1,16 @@
 # Agent goal: release the prototype UI to taff.apuch.cn
 
+> Status 2026-10-11, after the review of `codex/prototype-release` (3babb69):
+> steps 1 and 2 are done for source `828443e23c2e08a1f1936aa1dbb23380db496b52`
+> (CI green on feature and main, strict Lighthouse, LCP 704/780/772 ms,
+> bundle staged and verified on the host). The remaining blocker was the
+> live review-approval check: no real account can add an agent to a
+> workspace (agents only come from the seeds or by copying from a workspace
+> that already has one), so that check is withdrawn from this release and
+> the gap becomes the first follow-up. Resume at step 3 with the revised
+> rules below. `main` may now be ahead of the released SHA by documentation
+> commits only; see "Released SHA" under step 3.
+
 Paste everything below this line as the goal. The host, network, database,
 secrets and the deployment lock are as recorded in `docs/deploy.md`
 ("Apuch server layout" and the two checkpoints); nothing about the host
@@ -42,10 +53,18 @@ mcp:smoke`, plus `pnpm perf:lighthouse` and `LCP_LOCALE=en`, `zh-CN`,
 budget of 2 s on simulated slow 4G is known to be over (about 2.3–2.7 s,
 see `docs/agent-goal.md` item 0); it is being fixed on `main` after this
 release and does not block it, but the measured medians go into the
-checkpoint so the next release shows the change.
+checkpoint so the next release shows the change. (Done for `828443e`:
+the measured medians are 704/780/772 ms, under budget.)
 
 Step 3, deploy under the existing lock and publisher, exactly as before:
 
+- Released SHA: `828443e23c2e08a1f1936aa1dbb23380db496b52`, the source the
+  bundle, the local validation and both CI runs cover. It no longer has to
+  be the `main` head: `main` may be ahead by commits that touch only
+  `docs/`. Under the lock, confirm `git diff --stat 828443e origin/main --
+  . ':!docs'` is empty and that `828443e` is an ancestor of `origin/main`;
+  if either fails, the source has moved and the whole validation repeats
+  for the new SHA.
 - Take the dedicated Taff database backup and the exclusive private env
   backup; keep the previous image identities for rollback.
 - Relay the release as a Git bundle if the host cannot reach GitHub, verify
@@ -67,12 +86,19 @@ sign-out, sign-in; Today with the timeline, the due list and the FAB; a
 task created from quick add shows a `KEY-number` reference everywhere its
 ID appears (Today, Projects card, detail sheet, search, Inbox); Projects
 board drag on desktop and the column scroll on phone; calendar list and
-schedule editor; Inbox tabs and review approval; Me with language and
-appearance; an invitation link opened in a fresh browser lands on `/`
+schedule editor; Inbox tabs, unread count and the digest rows; Me with
+language and appearance; an invitation link opened in a fresh browser lands on `/`
 without the token in the address bar before and after sign-up; realtime
 update between two browsers; Secure/HttpOnly cookies; foreign-origin
 rejection; `GET /api/auth/methods` unchanged. Neighbouring containers keep
 their IDs, start times and health; PostgreSQL is not restarted.
+
+The review-approval check (an agent reports evidence over MCP, a person
+approves it from Inbox) is not part of this release's public acceptance:
+the verification account's workspace has no agent, and the product offers
+no way to add one. The flow is proven by the browser suite on the released
+SHA (`e2e/agent-review.spec.ts`, 123 cases in CI and locally). Do not seed
+production, and do not copy agents from the demo workspace into a real one.
 
 Step 5, record. Append a "Prototype UI upgrade checkpoint — <date>" section
 to `docs/deploy.md` in the shape of the previous checkpoints: the SHA, the
@@ -80,8 +106,22 @@ two CI run links, the validation counts, Lighthouse and LCP numbers, what
 was replaced and what was retained, the public checks that passed, and the
 rollback procedure (restore the env backup and previous image identities,
 recreate only API, worker and web; the additive migration and data stay).
-Release the lock only after verification, push the documentation commit
-to `main`, then continue with `docs/agent-goal.md` item 0.
+Release the lock only after verification and push the documentation
+commit to `main`.
+
+Step 6, first follow-up release: let a workspace admin add an agent. Add
+`POST /api/workspaces/:id/members` with `{ name, kind: "agent" }` behind
+`workspace:manage` in `packages/core` (one transaction, activity row,
+`NOTIFY`), its schema in `packages/schemas`, an MCP-free REST test, and an
+"Add agent" action on the Team screen (prototype lines 667–710) with
+strings in all three locales. Then repeat the release procedure for that
+SHA and complete the withdrawn check on the public origin: in the
+verification workspace add an agent, create a task assigned to it, start
+the run, issue an agent token from Me → MCP, report one `runs.event` and
+`runs.submit` with the official MCP client as the spec does, approve from
+Inbox, revoke the token, and record the result in the checkpoint. After
+that, continue with `docs/agent-goal.md` (LCP is already under budget;
+start at item 1).
 
 Stop and ask only if the migration backfill would touch more rows than a
 single transaction can hold on the live database, if a public check fails
