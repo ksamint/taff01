@@ -3,7 +3,7 @@ import type { Me, Task } from "@taff/schemas";
 import { freshAccount, messages } from "./support/account";
 import { selectLocale, signOutFromMe } from "./support/preferences";
 import { closeTaskField, openTaskField } from "./support/task-fields";
-import { openQuickAdd } from "./support/tasks";
+import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
 
 const labels = {
   en: {
@@ -73,6 +73,7 @@ test("sign in, create a task and assign it to an agent", async ({
   ).toHaveText(messages[locale].errors.invalid_input);
   await page.getByTestId("quick-title").fill(`  ${title}  `);
   await expect(page.getByTestId("quick-create")).toBeEnabled();
+  await openQuickField(page, "worker");
   const agentOption = page
     .getByTestId("quick-worker")
     .locator("option")
@@ -80,12 +81,15 @@ test("sign in, create a task and assign it to an agent", async ({
     .first();
   const agentId = await agentOption.getAttribute("value");
   expect(agentId).toBeTruthy();
+  await closeQuickField(page, "worker");
+  await openQuickField(page, "owner");
   await expect(
     page
       .getByTestId("quick-owner")
       .locator("option")
       .filter({ hasText: labels[locale].agent }),
   ).toHaveCount(0);
+  await closeQuickField(page, "owner");
   const created = page.waitForResponse(
     (response) =>
       new URL(response.url()).pathname === "/api/tasks" &&

@@ -100,7 +100,7 @@
   margin: 4px 0;
   padding: 10px 12px;
   border: 1px solid var(--border);
-  background: var(--bg-surface);
+  background: var(--bg);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -110,6 +110,16 @@
 .today-schedule-block:hover {
   background: var(--bg-container-low);
   color: var(--text);
+}
+.today-meeting-block {
+  background: var(--bg-container-low);
+  border-color: transparent;
+}
+.today-past .today-time {
+  color: var(--text-subtle);
+}
+.today-past .today-block-title {
+  color: var(--text-muted);
 }
 .today-agent-block {
   border-style: dashed;
@@ -139,6 +149,7 @@
   min-width: 0;
 }
 .today-block-title {
+  font-size: 14px;
   flex: 1;
 }
 .today-block-meta,

@@ -5,6 +5,7 @@ import {
 import { expect, type Page, test } from "@playwright/test";
 import {
   agentProfileSchema,
+  grantSchema,
   issuedAgentTokenSchema,
   memberListSchema,
   meSchema,
@@ -13,7 +14,7 @@ import {
 import { presentPrototypeField } from "../packages/schemas/src/prototype-data";
 import { openDisclosure } from "./support/disclosures";
 import { selectLocale } from "./support/preferences";
-import { openQuickAdd } from "./support/tasks";
+import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
 
 const labels = {
   en: {
@@ -115,8 +116,10 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
   const title = `Review flow ${locale} ${Date.now()}`;
   await openQuickAdd(page);
   await page.getByTestId("quick-title").fill(title);
+  await openQuickField(page, "worker");
   await expect(page.getByTestId("quick-worker")).toBeEnabled();
   await page.getByTestId("quick-worker").selectOption(agent.id);
+  await closeQuickField(page, "worker");
   await page.getByTestId("quick-create").click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByTestId("open-quick")).toBeEnabled();
@@ -182,6 +185,54 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
       }),
     );
     detail = await get();
+    const profileResponse = await page.request.get(`/api/agents/${agent.id}`);
+    expect(profileResponse.status()).toBe(200);
+    const profile = agentProfileSchema.parse(await profileResponse.json());
+    const attachmentPermission = profile.permissions.find(
+      ({ capability }) => capability === "files.attach",
+    );
+    expect(attachmentPermission).toBeDefined();
+    if (attachmentPermission?.decision === "ask") {
+      const requested = await page.request.post(
+        `/api/agents/${agent.id}/grants`,
+        {
+          data: {
+            capability: "files.attach",
+            taskId,
+            reason: `Attach this test task's MCP evidence ${locale}`,
+          },
+        },
+      );
+      expect(requested.status()).toBe(201);
+      const grant = grantSchema.parse(await requested.json());
+      expect(grant).toMatchObject({
+        workspaceId: workspace.id,
+        agentId: agent.id,
+        capability: "files.attach",
+        taskId,
+        runId: null,
+        status: "pending",
+      });
+      const decision = await page.request.post(
+        `/api/grants/${grant.id}/decision`,
+        {
+          data: {
+            decision: "allow",
+            expiresAt: new Date(Date.now() + 3600000).toISOString(),
+          },
+        },
+      );
+      expect(decision.status()).toBe(200);
+      const allowed = grantSchema.parse(await decision.json());
+      expect(allowed).toMatchObject({
+        id: grant.id,
+        taskId,
+        capability: "files.attach",
+        status: "allowed",
+        decidedBy: workspace.memberId,
+      });
+      expect(Date.parse(allowed.expiresAt ?? "")).toBeGreaterThan(Date.now());
+    } else expect(attachmentPermission?.decision).toBe("allow");
     const content = `<script>window.__taffInjected = true</script>\nDiscovered ${tools.tools.length} tools through the real MCP client.`;
     payload(
       await client.callTool({

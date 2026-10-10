@@ -18,6 +18,7 @@ import {
   openProjectFilters,
   openTaskField,
 } from "./support/task-fields";
+import { closeQuickField, openQuickField } from "./support/tasks";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
 type Locale = keyof typeof messages;
@@ -101,10 +102,18 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
     .fill(`${parsedTitle} ${when} #"${projectName}" +launch`);
   await page.getByTestId("quick-parse").click();
   await expect(page.getByTestId("quick-title")).toHaveValue(parsedTitle);
+  await openQuickField(page, "project");
   await expect(page.getByTestId("quick-project")).toHaveValue(project.id);
+  await closeQuickField(page, "project");
+  await openQuickField(page, "priority");
   await expect(page.getByTestId("quick-priority")).toHaveValue("2");
+  await closeQuickField(page, "priority");
+  await openQuickField(page, "due");
   await expect(page.getByTestId("quick-time")).toHaveValue("14:30");
+  await closeQuickField(page, "due");
+  await openQuickField(page, "labels");
   await expect(page.getByTestId("quick-labels")).toHaveValue("launch");
+  await closeQuickField(page, "labels");
   const title = `${parsedTitle} edited`;
   await page.getByTestId("quick-title").fill(title);
   const createdResponse = page.waitForResponse(

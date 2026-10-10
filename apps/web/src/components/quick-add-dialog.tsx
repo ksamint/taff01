@@ -1,4 +1,5 @@
 "use client";
+import "../styles/quick-add-parity.css";
 import {
   type CreateTask,
   createTaskSchema,
@@ -8,10 +9,15 @@ import {
   taskSchema,
 } from "@taff/schemas";
 import {
+  type PrototypeLocale,
+  presentPrototypeField,
+} from "@taff/schemas/prototype-data";
+import {
   useIsMutating,
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
+import { ChevronDown, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
@@ -31,7 +37,8 @@ import { SheetDialog } from "./ui/sheet-dialog";
 
 export function QuickAddDialog({ onClose }: { onClose: () => void }) {
   const { workspace, me } = useWorkspace();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
   const client = useQueryClient();
   const members = useMembers(workspace.id);
   const projects = useProjects(workspace.id);
@@ -47,6 +54,9 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
     date: "",
     time: "",
   });
+  const [picker, setPicker] = useState<
+    "owner" | "worker" | "due" | "project" | "priority" | "labels" | null
+  >(null);
   const [invalid, setInvalid] = useState<string | null>(null);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const parse = useMutation({
@@ -113,9 +123,69 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
   });
   const change = (key: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
+  const presentName = (id: string, name: string) =>
+    presentPrototypeField(id, "name", name, locale);
+  const displayMembers = (members.data ?? []).map((member) => ({
+    ...member,
+    name: presentName(member.id, member.name),
+  }));
+  const owner = displayMembers.find((member) => member.id === form.ownerId);
+  const worker = displayMembers.find((member) => member.id === form.workerId);
+  const project = projects.data?.find((item) => item.id === form.projectId);
+  const pickerLabels = {
+    owner: "owner",
+    worker: "worker",
+    due: "planning.dueDate",
+    project: "planning.project",
+    priority: "planning.priority",
+    labels: "planning.labels",
+  };
+  const dueLabel = (() => {
+    if (!form.date) return t("taskDetail.unscheduled");
+    try {
+      const instant = deadlineIso(form.date, form.time, me.user.tz);
+      return instant
+        ? new Intl.DateTimeFormat(locale, {
+            timeZone: me.user.tz,
+            month: "short",
+            day: "numeric",
+            ...(form.time ? { hour: "2-digit", minute: "2-digit" } : {}),
+          }).format(new Date(instant))
+        : t("taskDetail.unscheduled");
+    } catch {
+      // Keep the editable draft visible; submit retains authoritative validation.
+      return `${form.date} ${form.time}`.trim();
+    }
+  })();
+  const chips = [
+    { field: "owner" as const, label: owner?.name ?? t("unknownMember") },
+    { field: "worker" as const, label: worker?.name ?? t("unassigned") },
+    {
+      field: "due" as const,
+      label: dueLabel,
+    },
+    {
+      field: "priority" as const,
+      label: t(
+        `planning.${["urgent", "high", "medium", "low"][Number(form.priority) - 1]}`,
+      ),
+    },
+    {
+      field: "project" as const,
+      label: project
+        ? presentName(project.id, project.name)
+        : t("planning.noProject"),
+    },
+    { field: "labels" as const, label: form.labels || t("planning.labels") },
+  ];
   return (
-    <SheetDialog title={t("quickAdd.title")} onClose={onClose}>
+    <SheetDialog
+      title={t("quickAdd.title")}
+      onClose={onClose}
+      className="quick-parity-dialog"
+    >
       <form
+        className="quick-parity-parse-form"
         onSubmit={(event) => {
           event.preventDefault();
           if (text.trim()) parse.mutate(text);
@@ -132,41 +202,16 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
           aria-label={t("quickAdd.placeholder")}
           placeholder={t("quickAdd.placeholder")}
         />
-        <div className="action-row">
-          <Button
-            type="submit"
-            data-testid="quick-parse"
-            disabled={parse.isPending || busy || !text.trim()}
-          >
-            {t(parse.isPending ? "working" : "quickAdd.parse")}
-          </Button>
-          <Button
-            type="button"
-            className="button-quiet"
-            onClick={() => setText(t("quickAdd.example"))}
-          >
-            {t("quickAdd.try")}
-          </Button>
-        </div>
+        <Button
+          type="submit"
+          data-testid="quick-parse"
+          disabled={parse.isPending || busy || !text.trim()}
+        >
+          {t(parse.isPending ? "working" : "quickAdd.parse")}
+        </Button>
       </form>
-      {parse.data && (
-        <div className="quick-preview">
-          <p className="section-hint">{t("quickAdd.preview")}</p>
-          {parse.data.warnings.map((key) => (
-            <p className="section-hint" key={key}>
-              {t(`quickAdd.warning.${key}`)}
-            </p>
-          ))}
-          {parse.data.unresolved.length > 0 && (
-            <p className="section-hint">
-              {t("quickAdd.unresolved", {
-                text: parse.data.unresolved.join(" · "),
-              })}
-            </p>
-          )}
-        </div>
-      )}
       <form
+        className="quick-parity-create-form"
         onSubmit={(event) => {
           event.preventDefault();
           setInvalid(null);
@@ -202,116 +247,62 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
           disabled={busy || !access.data?.canCreateTasks}
           className="plain-fieldset"
         >
-          <div className="field">
-            <Label htmlFor="quick-title">{t("taskTitle")}</Label>
+          <div className="quick-preview">
+            <span className="quick-parity-title-label">
+              <Label htmlFor="quick-title">{t("taskTitle")}</Label>
+            </span>
             <Input
               id="quick-title"
               data-testid="quick-title"
+              className="quick-parity-title"
               value={form.title}
               maxLength={200}
+              placeholder={t("taskTitle")}
               onChange={(event) => change("title", event.target.value)}
             />
-          </div>
-          <div className="field-grid">
-            <div className="field">
-              <Label htmlFor="quick-owner">{t("owner")}</Label>
-              <select
-                id="quick-owner"
-                data-testid="quick-owner"
-                value={form.ownerId}
-                onChange={(event) => change("ownerId", event.target.value)}
-              >
-                {members.data
-                  ?.filter((member) => member.kind === "person")
-                  .map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name}
-                    </option>
-                  ))}
-              </select>
+            <div className="quick-parity-chips">
+              {chips.map((chip) => (
+                <Button
+                  type="button"
+                  key={chip.field}
+                  data-testid={`quick-field-${chip.field}`}
+                  aria-label={`${t(pickerLabels[chip.field])}: ${chip.label}`}
+                  aria-expanded={picker === chip.field}
+                  onClick={() => setPicker(chip.field)}
+                >
+                  {chip.field === "worker" && worker?.kind === "agent" && (
+                    <Sparkles size={12} strokeWidth={1.5} aria-hidden="true" />
+                  )}
+                  <span>{chip.label}</span>
+                  <ChevronDown size={12} strokeWidth={1.5} aria-hidden="true" />
+                </Button>
+              ))}
             </div>
-            <div className="field">
-              <Label htmlFor="quick-worker">{t("worker")}</Label>
-              <select
-                id="quick-worker"
-                data-testid="quick-worker"
-                value={form.workerId}
-                onChange={(event) => change("workerId", event.target.value)}
-              >
-                <MemberOptions members={members.data ?? []} />
-              </select>
-            </div>
-          </div>
-          <div className="field-grid">
-            <div className="field">
-              <Label htmlFor="quick-date">{t("planning.dueDate")}</Label>
-              <Input
-                id="quick-date"
-                data-testid="quick-date"
-                type="date"
-                value={form.date}
-                onChange={(event) => change("date", event.target.value)}
-              />
-            </div>
-            <div className="field">
-              <Label htmlFor="quick-time">{t("planning.dueTime")}</Label>
-              <Input
-                id="quick-time"
-                data-testid="quick-time"
-                type="time"
-                value={form.time}
-                disabled={!form.date}
-                onChange={(event) => change("time", event.target.value)}
-              />
-            </div>
-          </div>
-          <p className="field-hint">
-            {t("planning.endOfDay", { zone: me.user.tz })}
-          </p>
-          <div className="field-grid">
-            <div className="field">
-              <Label htmlFor="quick-project">{t("planning.project")}</Label>
-              <select
-                id="quick-project"
-                data-testid="quick-project"
-                value={form.projectId}
-                onChange={(event) => change("projectId", event.target.value)}
-              >
-                <option value="">{t("planning.noProject")}</option>
-                {projects.data
-                  ?.filter((item) => !item.archived)
-                  .map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-              </select>
-            </div>
-            <div className="field">
-              <Label htmlFor="quick-priority">{t("planning.priority")}</Label>
-              <select
-                id="quick-priority"
-                data-testid="quick-priority"
-                value={form.priority}
-                onChange={(event) => change("priority", event.target.value)}
-              >
-                {["urgent", "high", "medium", "low"].map((key, index) => (
-                  <option key={key} value={index + 1}>
-                    {t(`planning.${key}`)}
-                  </option>
+            {parse.data && (
+              <div className="quick-parity-notes">
+                <p>{t("quickAdd.preview")}</p>
+                {parse.data.warnings.map((key) => (
+                  <p key={key}>{t(`quickAdd.warning.${key}`)}</p>
                 ))}
-              </select>
-            </div>
+                {!!parse.data.unresolved.length && (
+                  <p>
+                    {t("quickAdd.unresolved", {
+                      text: parse.data.unresolved.join(" · "),
+                    })}
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-          <div className="field">
-            <Label htmlFor="quick-labels">{t("planning.labels")}</Label>
-            <Input
-              id="quick-labels"
-              data-testid="quick-labels"
-              value={form.labels}
-              onChange={(event) => change("labels", event.target.value)}
-            />
-          </div>
+          <section className="quick-parity-examples">
+            <span>{t("quickAdd.try")}</span>
+            <Button
+              type="button"
+              onClick={() => setText(t("quickAdd.example"))}
+            >
+              {t("quickAdd.example")}
+            </Button>
+          </section>
           <Button
             data-testid="quick-create"
             type="submit"
@@ -326,6 +317,162 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
           </p>
         )}
       </form>
+      {picker && (
+        <SheetDialog
+          title={t(pickerLabels[picker])}
+          onClose={() => setPicker(null)}
+          className="quick-parity-picker"
+        >
+          <div
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                event.target instanceof HTMLInputElement &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
+                setPicker(null);
+              }
+            }}
+          >
+            <fieldset
+              disabled={busy || !access.data?.canCreateTasks}
+              className="plain-fieldset"
+            >
+              {picker === "owner" && (
+                <div className="field">
+                  <Label htmlFor="quick-owner">{t("owner")}</Label>
+                  <select
+                    id="quick-owner"
+                    data-testid="quick-owner"
+                    value={form.ownerId}
+                    onChange={(event) => change("ownerId", event.target.value)}
+                  >
+                    {displayMembers
+                      .filter((member) => member.kind === "person")
+                      .map((member) => (
+                        <option key={member.id} value={member.id}>
+                          {member.name}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+              {picker === "worker" && (
+                <div className="field">
+                  <Label htmlFor="quick-worker">{t("worker")}</Label>
+                  <select
+                    id="quick-worker"
+                    data-testid="quick-worker"
+                    value={form.workerId}
+                    onChange={(event) => change("workerId", event.target.value)}
+                  >
+                    <MemberOptions members={displayMembers} />
+                  </select>
+                </div>
+              )}
+              {picker === "due" && (
+                <>
+                  <div className="field-grid">
+                    <div className="field">
+                      <Label htmlFor="quick-date">
+                        {t("planning.dueDate")}
+                      </Label>
+                      <Input
+                        id="quick-date"
+                        data-testid="quick-date"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="YYYY-MM-DD"
+                        value={form.date}
+                        onChange={(event) => change("date", event.target.value)}
+                      />
+                    </div>
+                    <div className="field">
+                      <Label htmlFor="quick-time">
+                        {t("planning.dueTime")}
+                      </Label>
+                      <Input
+                        id="quick-time"
+                        data-testid="quick-time"
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="HH:mm"
+                        value={form.time}
+                        disabled={!form.date}
+                        onChange={(event) => change("time", event.target.value)}
+                      />
+                    </div>
+                  </div>
+                  <p className="field-hint">
+                    {t("planning.endOfDay", { zone: me.user.tz })}
+                  </p>
+                </>
+              )}
+              {picker === "project" && (
+                <div className="field">
+                  <Label htmlFor="quick-project">{t("planning.project")}</Label>
+                  <select
+                    id="quick-project"
+                    data-testid="quick-project"
+                    value={form.projectId}
+                    onChange={(event) =>
+                      change("projectId", event.target.value)
+                    }
+                  >
+                    <option value="">{t("planning.noProject")}</option>
+                    {projects.data
+                      ?.filter((item) => !item.archived)
+                      .map((item) => (
+                        <option key={item.id} value={item.id}>
+                          {presentName(item.id, item.name)}
+                        </option>
+                      ))}
+                  </select>
+                </div>
+              )}
+              {picker === "priority" && (
+                <div className="field">
+                  <Label htmlFor="quick-priority">
+                    {t("planning.priority")}
+                  </Label>
+                  <select
+                    id="quick-priority"
+                    data-testid="quick-priority"
+                    value={form.priority}
+                    onChange={(event) => change("priority", event.target.value)}
+                  >
+                    {["urgent", "high", "medium", "low"].map((key, index) => (
+                      <option key={key} value={index + 1}>
+                        {t(`planning.${key}`)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {picker === "labels" && (
+                <div className="field">
+                  <Label htmlFor="quick-labels">{t("planning.labels")}</Label>
+                  <Input
+                    id="quick-labels"
+                    data-testid="quick-labels"
+                    value={form.labels}
+                    onChange={(event) => change("labels", event.target.value)}
+                  />
+                </div>
+              )}
+              <Button
+                type="button"
+                className="button-primary"
+                data-testid="quick-picker-close"
+                onClick={() => setPicker(null)}
+              >
+                {t("planning.close")}
+              </Button>
+            </fieldset>
+          </div>
+        </SheetDialog>
+      )}
     </SheetDialog>
   );
 }

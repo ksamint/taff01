@@ -104,6 +104,12 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
   );
   expect(loaded?.status()).toBe(200);
+  // Optional fonts keep the cold product render fast. Warm their real files,
+  // then reload so a baseline cannot accidentally approve a fallback font.
+  await page.evaluate(() =>
+    Promise.all([...document.fonts].map((font) => font.load())),
+  );
+  await page.reload();
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
   if (screen !== "shell") {
@@ -113,6 +119,8 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     if (screen === "today") {
       await expect(page.getByTestId("today-schedule")).toHaveCount(5);
       await expect(page.getByTestId("task-card")).toHaveCount(2);
+      await expect(page.locator(".today-meeting-block")).toHaveCount(3);
+      await expect(page.locator(".today-past")).toHaveCount(1);
     } else if (screen === "projects" || screen === "type") {
       await expect(page.getByTestId("board-task")).toHaveCount(12);
     } else if (screen === "task-detail" || screen === "review") {

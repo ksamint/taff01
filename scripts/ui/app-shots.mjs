@@ -101,7 +101,7 @@ try {
         const members = await membersResponse.json();
         const agent =
           members.find(
-            (member) => member.id === prototypeId("member", "nw", 1),
+            (member) => member.id === prototypeId("member", "nw", 11),
           ) ?? members.find((member) => member.kind === "agent");
         const task =
           tasks.find((item) => item.id === prototypeId("task", "nw", 145)) ??
@@ -142,6 +142,10 @@ try {
             "inert",
             "",
           );
+          await page.evaluate(() =>
+            Promise.all([...document.fonts].map((font) => font.load())),
+          );
+          await page.reload({ waitUntil: "networkidle" });
           await page.evaluate(() => document.fonts.ready);
           await page.screenshot({
             path: path.join(out, `${device}-${locale}-${view}.png`),

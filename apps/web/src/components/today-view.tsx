@@ -167,6 +167,8 @@ export function TodayView({ initialNow }: { initialNow: number }) {
     prototypeTaskReference(task.id) ?? task.id.slice(0, 8);
   function scheduleBlock(item: CalendarOccurrence) {
     const run = activeRuns.find((entry) => entry.taskId === item.task.id);
+    const meeting = item.task.labels.includes("meeting");
+    const past = Date.parse(item.endAt) <= now.getTime();
     const isAgent = members.data
       ? members.data.some(
           (member) =>
@@ -187,18 +189,21 @@ export function TodayView({ initialNow }: { initialNow: number }) {
         ? description.replace(/^(?:Participants:|參與者：|参与者：)\s*/, "")
         : memberName(item.task.workerId ?? item.task.ownerId);
     return (
-      <li className="today-timeline-row" key={item.id}>
+      <li
+        className={`today-timeline-row${past ? " today-past" : ""}`}
+        key={item.id}
+      >
         <time className="today-time" dateTime={item.startAt}>
           {time.format(new Date(item.startAt))}
         </time>
         <Link
           href={`/tasks/${item.task.id}`}
           prefetch={false}
-          className={`today-schedule-block${isAgent ? " today-agent-block" : ""}${item.task.status === "done" ? " today-schedule-done" : ""}`}
+          className={`today-schedule-block${isAgent ? " today-agent-block" : ""}${item.task.status === "done" ? " today-schedule-done" : ""}${meeting ? " today-meeting-block" : ""}`}
           data-testid="today-schedule"
         >
           <span className="today-block-heading">
-            {!isAgent && <StatusGlyph status={item.task.status} />}
+            {!isAgent && !meeting && <StatusGlyph status={item.task.status} />}
             <span className="today-block-title">{present(item.task)}</span>
             {isAgent && (
               <Sparkles size={14} strokeWidth={1.5} aria-hidden="true" />

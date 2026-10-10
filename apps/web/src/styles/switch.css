@@ -1,0 +1,50 @@
+/* The native input keeps switch semantics and a 44px target around the design-system 36x20 track. */
+.ui-switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.ui-switch::before {
+  content: "";
+  position: absolute;
+  top: 12px;
+  left: 4px;
+  width: 36px;
+  height: 20px;
+  border-radius: var(--radius-avatar);
+  background: var(--border);
+  transition: background var(--dur-fast) var(--ease-standard);
+}
+.ui-switch::after {
+  content: "";
+  position: absolute;
+  top: 14px;
+  left: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--bg);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.ui-switch:checked::before {
+  background: var(--bg-inverse);
+}
+.ui-switch:checked::after {
+  transform: translateX(16px);
+}
+.ui-switch:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+.ui-switch:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
+}

@@ -1,6 +1,7 @@
 "use client";
 import type { NotificationPreferences } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -15,6 +16,8 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import "../styles/notifications.css";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
+import { Label } from "./ui/label";
+import { Switch } from "./ui/switch";
 
 const categories = ["review", "block", "mention", "done"] as const;
 export function NotificationsView() {
@@ -43,121 +46,150 @@ export function NotificationsView() {
   const row = (
     key: "review" | "block" | "mention" | "done" | "digest" | "quiet",
   ) => (
-    <label key={key} className="notification-preference">
+    <Label key={key} className="notification-preference">
       <span>
         <strong>{t(`notifications.${key}`)}</strong>
         <span className="section-hint">{t(`notifications.${key}Hint`)}</span>
       </span>
-      <input
-        type="checkbox"
-        role="switch"
+      <Switch
         data-testid={`notification-${key}`}
         checked={preferences.data?.[key] ?? false}
+        aria-checked={preferences.data?.[key] ?? false}
         disabled={busy || !preferences.data}
         onChange={(event) => change({ [key]: event.target.checked })}
       />
-    </label>
+    </Label>
   );
   return (
-    <>
-      <Link className="text-link" href="/me">
-        {t("agentProfile.back")}
-      </Link>
-      <section className="page-heading">
-        <h1>{t("notifications.title")}</h1>
-        <p className="task-count">{t("notifications.delivery")}</p>
-      </section>
-      {preferences.isPending && <p aria-live="polite">{t("loading")}</p>}
-      {(preferences.error || update.error) && (
-        <div className="alert" role="alert">
-          <p>{t(errorKey(update.error ?? preferences.error))}</p>
-          <Button onClick={() => void preferences.refetch()} disabled={busy}>
-            {t("retry")}
-          </Button>
-        </div>
-      )}
-      <section className="me-section" aria-labelledby="notification-categories">
-        <h2 id="notification-categories">{t("notifications.foreground")}</h2>
-        {categories.map(row)}
-        <p className="section-hint">{t("notifications.inboxNote")}</p>
-      </section>
-      <section className="me-section" aria-labelledby="notification-digest">
-        <h2 id="notification-digest">{t("notifications.digest")}</h2>
-        {row("digest")}
-        {preferences.data?.digest && (
-          <fieldset className="notification-times" disabled={busy}>
-            <legend>{t("notifications.time")}</legend>
-            <div className="radio-row">
-              {(["08:00", "09:00", "18:00"] as const).map((time) => (
-                <label key={time}>
-                  <input
-                    type="radio"
-                    name="digest-time"
-                    value={time}
-                    data-testid={`notification-time-${time}`}
-                    checked={preferences.data?.digestAt === time}
-                    onChange={() => change({ digestAt: time })}
-                  />
-                  {time}
-                </label>
-              ))}
-            </div>
-            <p className="section-hint">{me.user.tz}</p>
-          </fieldset>
-        )}
-        <Link
-          className="button button-quiet"
-          href="/digests"
-          data-testid="open-digests"
-        >
-          {t("notifications.history")}
+    <div className="notifications-parity">
+      <div className="notifications-toolbar">
+        <Link className="back-link" href="/me">
+          <ArrowLeft size={16} aria-hidden="true" />
+          {t("agentProfile.back")}
         </Link>
-      </section>
-      <section className="me-section" aria-labelledby="notification-quiet">
-        <h2 id="notification-quiet">{t("notifications.quietTitle")}</h2>
-        {row("quiet")}
-      </section>
-      <section className="me-section" aria-labelledby="notification-device">
-        <h2 id="notification-device">{t("notifications.device")}</h2>
-        <p className="section-hint">{t("notifications.deviceHint")}</p>
-        {permission === "denied" || permission === "unavailable" ? (
-          <p role="status">{t(`notifications.${permission}`)}</p>
-        ) : (
-          <Button
-            data-testid="notification-device"
-            disabled={asking}
-            onClick={async () => {
-              if (device) {
-                setDeviceAlertsEnabled(me.user.id, false);
-                setDevice(false);
-                return;
-              }
-              setAsking(true);
-              try {
-                const answer = await Notification.requestPermission();
-                setPermission(answer);
-                if (answer === "granted") {
-                  setDeviceAlertsEnabled(me.user.id, true);
-                  setDevice(true);
-                }
-              } catch {
-                setPermission("unavailable");
-              } finally {
-                setAsking(false);
-              }
-            }}
-          >
-            {t(
-              device
-                ? "notifications.disableDevice"
-                : "notifications.enableDevice",
-            )}
-          </Button>
+      </div>
+      <div className="notifications-body">
+        <h1>{t("notifications.title")}</h1>
+        {preferences.isPending && <p aria-live="polite">{t("loading")}</p>}
+        {(preferences.error || update.error) && (
+          <div className="alert" role="alert">
+            <p>{t(errorKey(update.error ?? preferences.error))}</p>
+            <Button
+              type="button"
+              onClick={() => void preferences.refetch()}
+              disabled={busy}
+            >
+              {t("retry")}
+            </Button>
+          </div>
         )}
-      </section>
-      <section className="me-section">
-        <p className="section-hint">{t("pwa.cacheHint")}</p>
-      </section>
-    </>
+        <section
+          className="notification-section"
+          aria-labelledby="notification-categories"
+        >
+          <h2 id="notification-categories">{t("notifications.foreground")}</h2>
+          <div className="notification-rows">{categories.map(row)}</div>
+        </section>
+        <section
+          className="notification-section"
+          aria-labelledby="notification-digest"
+        >
+          <h2 id="notification-digest">{t("notifications.digest")}</h2>
+          <div className="notification-rows">
+            {row("digest")}
+            {preferences.data?.digest && (
+              <fieldset
+                className="notification-times"
+                disabled={busy}
+                aria-describedby="notification-time-zone"
+              >
+                <legend className="sr-only">{t("notifications.time")}</legend>
+                <span className="notification-time-label">
+                  <span aria-hidden="true">{t("notifications.time")}</span>
+                  <small id="notification-time-zone">{me.user.tz}</small>
+                </span>
+                <div className="notification-time-options">
+                  {(["08:00", "09:00", "18:00"] as const).map((time) => (
+                    <Label key={time} className="notification-time-option">
+                      <input
+                        type="radio"
+                        name="digest-time"
+                        value={time}
+                        data-testid={`notification-time-${time}`}
+                        checked={preferences.data?.digestAt === time}
+                        onChange={() => change({ digestAt: time })}
+                      />
+                      <span>{time}</span>
+                    </Label>
+                  ))}
+                </div>
+              </fieldset>
+            )}
+          </div>
+        </section>
+        <section
+          className="notification-section"
+          aria-labelledby="notification-quiet"
+        >
+          <h2 id="notification-quiet">{t("notifications.quietTitle")}</h2>
+          <div className="notification-rows">{row("quiet")}</div>
+        </section>
+        <p className="notification-note">
+          {t("notifications.inboxNote")} {t("notifications.delivery")}
+        </p>
+        <div className="notification-secondary">
+          <Link
+            className="notification-history-link"
+            href="/digests"
+            data-testid="open-digests"
+          >
+            {t("notifications.history")}
+          </Link>
+          <details
+            className="notification-device-details"
+            data-testid="notification-device-details"
+          >
+            <summary>{t("notifications.device")}</summary>
+            <p className="section-hint">{t("notifications.deviceHint")}</p>
+            {permission === "denied" || permission === "unavailable" ? (
+              <p role="status">{t(`notifications.${permission}`)}</p>
+            ) : (
+              <Button
+                type="button"
+                data-testid="notification-device"
+                disabled={asking}
+                onClick={async () => {
+                  if (device) {
+                    setDeviceAlertsEnabled(me.user.id, false);
+                    setDevice(false);
+                    return;
+                  }
+                  setAsking(true);
+                  try {
+                    const answer = await Notification.requestPermission();
+                    setPermission(answer);
+                    if (answer === "granted") {
+                      setDeviceAlertsEnabled(me.user.id, true);
+                      setDevice(true);
+                    }
+                  } catch {
+                    setPermission("unavailable");
+                  } finally {
+                    setAsking(false);
+                  }
+                }}
+              >
+                {t(
+                  device
+                    ? "notifications.disableDevice"
+                    : "notifications.enableDevice",
+                )}
+              </Button>
+            )}
+            <p className="section-hint">{t("pwa.cacheHint")}</p>
+          </details>
+        </div>
+      </div>
+    </div>
   );
 }
