@@ -675,3 +675,26 @@ remain unchanged. The existing JavaScript-disabled locale test checks the
 head hint for both Chinese locales and its absence for English/invalid
 preferences. Fresh visual and original performance validation is pending;
 the priority experiment is not an acceptance result.
+
+## Server cleanup and review preparation — 2026-10-10
+
+The user requested a current space inventory and deletion of obsolete builds
+and archives. Guarded cleanup removed 87 unused generated directories and
+reproducible Git archives, recovering 13.93 GiB of actual filesystem space.
+Main-disk free space increased from 19.87 to 33.80 GiB during the operation;
+the separate TIANSIGHT disk remains unchanged at 75.92 GiB free. All 1,092
+protected evidence files retained their hashes. Accepted QA source/archive,
+runtime and original runner checks passed, and existing services retained
+their identities, images, start times and health. Live Taff image tags remain
+`55b315b743a18113bed864191eb74c6f1d997d9b`.
+
+All 16 visual sets passed against unchanged committed baselines for `de44b79`
+(64 cases / 86 PNGs). The actual anonymous Chinese HTML includes the font hint
+in the initial head with low priority. Fresh lint, types, licences, all 452
+unit tests, builds and 193.0 KiB initial JS passed. Lighthouse passed
+98/91/90 performance in en/zh-CN/zh-HK. Default three-run LCP medians were
+1932/2152/2132 ms against 2000 ms; Chinese remains over budget. The runner
+exited 1 before the 120 behavioral cases and MCP smoke. This is a failed
+candidate, not release acceptance; no push or UI deployment is claimed.
+The [space inventory and deployment handoff](../reviews/2026-10-10-server-space-and-deployment-readiness.md)
+lists retained material, removed targets and the remaining deployment checks.
