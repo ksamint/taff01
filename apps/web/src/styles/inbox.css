@@ -278,6 +278,38 @@
     width: 28px;
     height: 28px;
   }
+  .inbox-source-content {
+    gap: 4px;
+  }
+  .inbox-source-meta {
+    font-size: 12px;
+  }
+  .inbox-source-title {
+    font-size: 14px;
+  }
+  .inbox-source-excerpt {
+    font-size: 12px;
+  }
+  /* Source desktop rows omit actions. Keep their existing controls in the
+     keyboard order and expand an active row to retain 44px targets. */
+  .inbox-source-actions {
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    margin-top: -4px;
+  }
+  .inbox-source-row:is(.is-selected, :hover, :focus-within)
+    .inbox-source-actions {
+    height: auto;
+    overflow: visible;
+    opacity: 1;
+    pointer-events: auto;
+    margin-top: 4px;
+  }
+  .inbox-source-actions .button {
+    min-width: 44px;
+  }
   .inbox-detail-pane {
     display: block;
     min-width: 0;
