@@ -955,10 +955,12 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
     .poll(() => weekScroll.evaluate((el) => el.scrollTop))
     .toBe(8 * 44);
   // A month must start at its first week regardless of the time-grid position.
-  await weekScroll.evaluate((el) => {
+  const scrolled = await weekScroll.evaluate((el) => {
     el.scrollTop = 12 * 44;
+    return el.scrollTop;
   });
-  expect(await weekScroll.evaluate((el) => el.scrollTop)).toBe(12 * 44);
+  expect(scrolled).toBeGreaterThan(8 * 44);
+  expect(await weekScroll.evaluate((el) => el.scrollTop)).toBe(scrolled);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

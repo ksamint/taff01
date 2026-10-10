@@ -24,10 +24,9 @@ const rules = {
 };
 type Preset = keyof typeof rules | "custom";
 function local(iso: string, zone: string) {
-  return Temporal.Instant.from(iso)
-    .toZonedDateTimeISO(zone)
-    .toPlainDateTime()
-    .toString({ smallestUnit: "second" });
+  const wall = Temporal.Instant.from(iso).toZonedDateTimeISO(zone).toPlainDateTime();
+  // The text field shows minutes unless the stored instant carries seconds.
+  return wall.toString({ smallestUnit: wall.second ? "second" : "minute" });
 }
 export function ScheduleEditor({
   current,
@@ -129,7 +128,11 @@ export function ScheduleEditor({
         }}
       >
         {current ? (
-          <Link className="back-link" href={`/tasks/${current.task.id}`}>
+          <Link
+            className="back-link"
+            href={`/tasks/${current.task.id}`}
+            onClick={onClose}
+          >
             {current.task.title} · {t("calendar.openTask")}
           </Link>
         ) : (

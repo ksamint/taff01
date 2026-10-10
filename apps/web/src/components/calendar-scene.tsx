@@ -281,13 +281,14 @@ export function CalendarScene() {
   return (
     <div className="calendar-scene" data-testid="calendar-scene">
       <header className="calendar-source-header">
+        <h1 className="sr-only">{t("calendar.title")}</h1>
         <div className="calendar-source-navigation">
-          <h1>
+          <p className="calendar-month-title">
             {selected.toLocaleString(locale, {
               month: "long",
               year: "numeric",
             })}
-          </h1>
+          </p>
           <Button
             className="button-quiet"
             aria-label={t("calendar.previous")}

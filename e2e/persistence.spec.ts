@@ -126,10 +126,16 @@ test("IndexedDB restores authorized lists board and calendar before real reconci
   await expect(
     page.locator(".sx__event").filter({ hasText: task.title }),
   ).toBeVisible();
+  // The calendar persists one read per visible range (day, strip, month).
   await expect
     .poll(async () =>
-      (await readCache(page))?.queries
-        .map((query) => query.key[0])
+      [
+        ...new Set(
+          (await readCache(page))?.queries.map((query) =>
+            String(query.key[0]),
+          ),
+        ),
+      ]
         .sort()
         .join(","),
     )

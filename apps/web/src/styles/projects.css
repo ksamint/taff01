@@ -145,7 +145,9 @@
 }
 .projects-view .planning-board {
   gap: 12px;
-  align-items: flex-start;
+  /* Columns share the tallest column's height: every column is a drop target
+     the full height of the board, not just the height of its own cards. */
+  align-items: stretch;
   padding: 16px 20px 120px;
   scroll-padding: 0 20px;
   scrollbar-width: none;
@@ -155,7 +157,7 @@
   flex: 0 0 300px;
   padding: 0;
   background: transparent;
-  min-height: 72px;
+  min-height: 240px;
 }
 .projects-view .planning-board .column > h2 {
   display: none;
@@ -312,6 +314,8 @@
   position: absolute;
   right: 0;
   bottom: 1px;
+  /* Above the footer chips so the drag handle and menu take the pointer. */
+  z-index: 1;
   gap: 0;
   opacity: 1;
   background: transparent;
@@ -522,26 +526,16 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  /* Controls fade in on hover or focus but always take the pointer, so a
+     drag that starts on the handle reaches it even before the hover paints. */
   .projects-view .board-card-bottom {
     opacity: 0;
-    pointer-events: none;
   }
   .projects-view .board-card:hover .board-card-bottom,
   .projects-view .board-card:focus-within .board-card-bottom,
   .projects-view .board-card:has(details[open]) .board-card-bottom {
     opacity: 1;
-    pointer-events: auto;
     background: transparent;
-  }
-  .projects-view .planning-board .board-card:hover .board-card-bottom,
-  .projects-view .planning-board .board-card:focus-within .board-card-bottom,
-  .projects-view
-    .planning-board
-    .board-card:has(details[open])
-    .board-card-bottom {
-    position: static;
-    align-self: stretch;
-    justify-content: flex-end;
   }
   .projects-view .planning-board .projects-card-menu {
     position: relative;
@@ -566,7 +560,6 @@
 @media (any-pointer: coarse) {
   .projects-view .board-card-bottom {
     opacity: 1;
-    pointer-events: auto;
   }
 }
 /* Phone keeps the title row compact; advanced controls stay in the sheet. */

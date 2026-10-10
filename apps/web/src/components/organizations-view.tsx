@@ -514,11 +514,12 @@ export function OrganizationsView() {
           <p className="section-hint">{t("organization.inviteHint")}</p>
           {invites.isPending ? (
             <p>{t("loading")}</p>
-          ) : !invites.data?.length ? (
-            <p className="quiet">{t("organization.noInvites")}</p>
           ) : (
             <ul className="history-list">
-              {invites.data.map((item) => (
+              {!invites.data?.length && (
+                <li className="quiet">{t("organization.noInvites")}</li>
+              )}
+              {invites.data?.map((item) => (
                 <li key={item.id}>
                   <strong>{item.email}</strong>
                   <p className="quiet">
