@@ -96,6 +96,9 @@
   padding: 6px;
   border-radius: 4px;
 }
+.sidebar:has(.sidebar-workspace[open]) {
+  z-index: 20;
+}
 .workspace-menu .organization-chooser {
   gap: 2px;
 }
