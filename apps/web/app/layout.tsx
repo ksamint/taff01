@@ -11,6 +11,7 @@ import { htmlLang, isLocale, preloadBootScript } from "../src/lib/i18n";
 import { readServerMe } from "../src/lib/server-me";
 import { themeBootScript } from "../src/lib/theme";
 import "./globals.css";
+import "../src/styles/notifications.css";
 
 export const metadata: Metadata = {
   title: "Taff",

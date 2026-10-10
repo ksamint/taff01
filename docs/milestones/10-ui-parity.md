@@ -622,3 +622,23 @@ per locale are still required before pushing. Capture generation is not
 a substitute for those checks. Transport compression round-tripped the
 38 MiB archive byte-identically at approximately 20 MiB; the original
 archive SHA-256 and source manifests remain the validation boundary.
+
+
+## Cold-load diagnosis — production `54dbdc6`
+
+All 16 committed visual sets passed (64 cases / 86 PNGs). Lint, six type
+checks, licence checks, 452 unit tests, builds and the 193.0 KiB initial
+JavaScript budget passed. Performance failed: Lighthouse performance was
+95/80/80 for en/zh-CN/zh-HK; default three-run LCP medians were
+2156/2308/2308 ms against the unchanged 2000 ms limit. The runner stopped
+before behavioral and MCP gates. This is a failed candidate, not acceptance.
+
+Sanitized Lighthouse requests show the task preload finishing around
+2.74 s and session confirmation around 3.07 s in Chinese. A stylesheet
+imported by lazy foreground notifications finished at 4.35 s, immediately
+before the largest task-title paint at 4.43 s. No remaining CJK font
+subset was requested. The existing notification stylesheet now imports
+once from the root layout rather than its lazy alert/preferences callers,
+so it joins the initial CSS instead of blocking a later paint. Styles,
+notification behavior and protected-read confirmation remain unchanged.
+This repair still requires fresh visual and full performance validation.

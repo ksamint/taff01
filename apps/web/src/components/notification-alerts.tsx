@@ -10,7 +10,6 @@ import {
   useNotificationPreferences,
 } from "../lib/notification-preferences";
 import { useInbox } from "../lib/queries";
-import "../styles/notifications.css";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { useDailyDigest, useDailyDigests } from "../lib/notification-queries";
-import "../styles/notifications.css";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 

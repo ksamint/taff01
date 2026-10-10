@@ -13,7 +13,6 @@ import {
   useUpdateNotificationPreferences,
 } from "../lib/notification-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
-import "../styles/notifications.css";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
