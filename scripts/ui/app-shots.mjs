@@ -6,6 +6,7 @@ import { chromium, expect } from "@playwright/test";
 import { tsImport } from "tsx/esm/api";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
 import { prepareFonts } from "./prepare-fonts.ts";
+import { prepareTime } from "./prepare-time.mjs";
 
 const { inboxSchema } = await tsImport(
   "../../packages/schemas/src/inbox-read.ts",
@@ -65,6 +66,7 @@ try {
       try {
         const page = await context.newPage();
         await page.clock.setFixedTime(new Date("2026-10-08T11:20:00Z"));
+        await page.addInitScript(prepareTime);
         const login = await page.request.post(
           `${base}/api/auth/sign-in/email`,
           {
@@ -253,6 +255,7 @@ try {
             }
             await page.waitForLoadState("networkidle");
             await page.evaluate(prepareFonts);
+            await page.mouse.move(0, 0);
             await page.screenshot({
               path: path.join(out, `${device}-${locale}-${view}.png`),
               animations: "disabled",
@@ -300,6 +303,7 @@ try {
           await expect(page.getByRole("dialog")).toBeVisible();
           await page.waitForLoadState("networkidle");
           await page.evaluate(prepareFonts);
+          await page.mouse.move(0, 0);
           await page.screenshot({
             path: path.join(out, `${device}-${locale}-search.png`),
             animations: "disabled",

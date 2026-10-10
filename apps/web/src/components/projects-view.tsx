@@ -11,6 +11,8 @@ import {
 } from "@taff/schemas";
 import {
   presentPrototypeField,
+  prototypeId,
+  prototypeOrgs,
   prototypeTaskReference,
 } from "@taff/schemas/prototype-data";
 import {
@@ -26,7 +28,6 @@ import {
   Search,
   SlidersHorizontal,
   Sparkles,
-  X,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -136,6 +137,11 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const projectName = selected
     ? presentPrototypeField(selected.id, "name", selected.name, locale)
     : t("projects.allProjects");
+  const prototypeOrg = prototypeOrgs.find(
+    (org) =>
+      workspace.id === prototypeId("workspace", org.key) &&
+      workspace.name === org.name["zh-HK"],
+  );
   useEffect(() => {
     setSelectedTaskId(null);
   }, [workspace.id, selectedProjectId]);
@@ -348,6 +354,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       <header className="projects-header">
         <Link className="projects-org" href="/orgs">
           {presentPrototypeField(workspace.id, "name", workspace.name, locale)}
+          {prototypeOrg && ` · ${prototypeOrg.team[locale]}`}
           <ChevronDown size={12} aria-hidden="true" />
         </Link>
         <div className="projects-header-row">
@@ -688,14 +695,12 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               locale,
             )}
           >
-            <Button
-              className="button-quiet projects-detail-close"
-              aria-label={t("planning.close")}
-              onClick={() => setSelectedTaskId(null)}
-            >
-              <X size={18} aria-hidden="true" />
-            </Button>
-            <TaskDetailView key={selectedTaskId} taskId={selectedTaskId} />
+            <TaskDetailView
+              key={selectedTaskId}
+              taskId={selectedTaskId}
+              embedded
+              onClose={() => setSelectedTaskId(null)}
+            />
           </aside>
         )}
       </div>
@@ -863,6 +868,11 @@ function BoardCard({
         >
           {task.dueAt ? projectDueLabel(task.dueAt, locale, me.user.tz) : ""}
         </span>
+        {view === "list" && children.length > 0 && (
+          <span className="projects-list-subtasks-meta">
+            · {t("planning.subtasks")} {completed}/{children.length}
+          </span>
+        )}
       </div>
       <h3>
         {view === "list" && (
@@ -885,6 +895,11 @@ function BoardCard({
             {title}
           </Link>
         )}
+        {view === "list" && children.length > 0 && (
+          <span className="projects-list-subtasks">
+            {completed}/{children.length}
+          </span>
+        )}
       </h3>
       {task.parentId && (
         <Link
@@ -894,14 +909,21 @@ function BoardCard({
         >
           <span aria-hidden="true">↳</span>
           <span>
-            {prototypeTaskReference(task.parentId) ?? ""}{" "}
-            {parent
-              ? presentPrototypeField(parent.id, "title", parent.title, locale)
-              : t("planning.parent")}
+            <span>{prototypeTaskReference(task.parentId) ?? ""}</span>{" "}
+            <span className="projects-parent-title">
+              {parent
+                ? presentPrototypeField(
+                    parent.id,
+                    "title",
+                    parent.title,
+                    locale,
+                  )
+                : t("planning.parent")}
+            </span>
           </span>
         </Link>
       )}
-      {children.length > 0 && (
+      {view === "board" && children.length > 0 && (
         <div className="projects-subtasks">
           <span className="projects-subtask-track" aria-hidden="true">
             <span
@@ -926,21 +948,28 @@ function BoardCard({
             .slice(0, 2)}
         </span>
         {worker?.kind === "agent" ? (
-          <span className="projects-agent-chip">
-            <Sparkles size={12} aria-hidden="true" />
-            {workerShort}
+          <>
+            <span className="projects-agent-chip">
+              <Sparkles size={12} aria-hidden="true" />
+              {workerShort}
+              {latestRun && (
+                <>
+                  <span
+                    className={`projects-agent-dot run-${latestRun.status}`}
+                    title={t(`run.status.${latestRun.status}`)}
+                  />
+                  <span className="projects-agent-state">
+                    {t(`run.status.${latestRun.status}`)}
+                  </span>
+                </>
+              )}
+            </span>
             {latestRun && (
-              <>
-                <span
-                  className={`projects-agent-dot run-${latestRun.status}`}
-                  title={t(`run.status.${latestRun.status}`)}
-                />
-                <span className="projects-agent-state">
-                  {t(`run.status.${latestRun.status}`)}
-                </span>
-              </>
+              <span className="projects-agent-state-desktop">
+                {t(`run.status.${latestRun.status}`)}
+              </span>
             )}
-          </span>
+          </>
         ) : (
           <span className="projects-human-worker">
             {worker ? workerName : view === "list" ? ownerName : ""}

@@ -12,6 +12,7 @@ import {
 } from "../packages/schemas/src/prototype-data";
 import { runListSchema } from "../packages/schemas/src/run-read";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
+import { prepareTime } from "../scripts/ui/prepare-time.mjs";
 import { messages } from "./support/messages";
 
 const screen = process.env.UI_SCREEN ?? "shell";
@@ -89,8 +90,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     },
     { userId: me.user.id, workspaceId },
   );
-  if (screen !== "shell")
+  if (screen !== "shell") {
     await page.clock.setFixedTime(new Date("2026-10-08T11:20:00Z"));
+    await page.addInitScript(prepareTime);
+  }
   const routes: Record<string, string> = {
     today: "/",
     projects: "/projects",
@@ -212,13 +215,17 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         await expect(page.getByTestId("inbox-item")).toHaveCount(
           inbox.items.length,
         );
+        if (desktop)
+          await expect(page.getByTestId("task-detail-heading")).toBeVisible();
       }
       await page.evaluate(() => document.fonts.ready);
+      await page.mouse.move(0, 0);
       await expect(page).toHaveScreenshot(`${screen}.png`, {
         animations: "disabled",
       });
       if (screen === "projects") {
         await page.getByTestId("project-view-list").click();
+        await page.mouse.move(0, 0);
         await expect(page).toHaveScreenshot("projects-list.png", {
           animations: "disabled",
         });
@@ -232,6 +239,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
             `.sx__time-grid-event[data-event-id^="occurrence-${prototypeId("task", "nw", 138)}-"]`,
           ),
         ).toBeVisible();
+        await page.mouse.move(0, 0);
         await expect(page).toHaveScreenshot("calendar-week.png", {
           animations: "disabled",
         });
@@ -243,6 +251,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
             `.sx__month-grid-event[data-event-id^="occurrence-${prototypeId("task", "nw", 138)}-"]`,
           ),
         ).toBeVisible();
+        await page.mouse.move(0, 0);
         await expect(page).toHaveScreenshot("calendar-month.png", {
           animations: "disabled",
         });
@@ -252,6 +261,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
           localStorage.setItem("taff-theme", "dark");
           document.documentElement.dataset.theme = "dark";
         });
+        await page.mouse.move(0, 0);
         await expect(page).toHaveScreenshot("type-dark.png", {
           animations: "disabled",
         });

@@ -250,6 +250,10 @@ export function TaskEditor({
   const children = (tasks.data ?? []).filter(
     (item) => item.parentId === task.id,
   );
+  const owner = members.data?.find((item) => item.id === form.ownerId);
+  const ownerName = owner
+    ? presentName(owner.id, owner.name)
+    : t("unknownMember");
   const writable = access.data?.canEditMetadata ?? access.data?.canEdit;
   return (
     <>
@@ -307,16 +311,9 @@ export function TaskEditor({
           <span>{t("owner")}</span>
           <span>
             <span className="task-person-avatar" aria-hidden="true">
-              {members.data
-                ?.find((item) => item.id === form.ownerId)
-                ?.name.slice(0, 1)}
+              {owner ? ownerName.slice(0, 1) : ""}
             </span>
-            {members.data?.find((item) => item.id === form.ownerId)
-              ? presentName(
-                  form.ownerId,
-                  members.data.find((item) => item.id === form.ownerId)!.name,
-                )
-              : t("unknownMember")}
+            <span className="task-field-value">{ownerName}</span>
           </span>
           <ChevronDown size={14} aria-hidden="true" />
         </Button>

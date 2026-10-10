@@ -203,7 +203,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
           data-testid="today-schedule"
         >
           <span className="today-block-heading">
-            {!isAgent && !meeting && <StatusGlyph status={item.task.status} />}
+            {!meeting && <StatusGlyph status={item.task.status} />}
             <span className="today-block-title">{present(item.task)}</span>
             {isAgent && (
               <Sparkles size={14} strokeWidth={1.5} aria-hidden="true" />

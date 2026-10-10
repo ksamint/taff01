@@ -185,22 +185,24 @@ export function TaskDetailView({
         onClick={() => setWorkerEditing(true)}
       >
         <span>{t("worker")}</span>
-        <span>
+        <span className="task-worker-value">
           {worker?.kind === "agent" && (
             <span className="task-agent-avatar">
               <Sparkles size={13} aria-hidden="true" />
             </span>
           )}
-          <span className="task-worker-name">{workerName}</span>
-          {latest && (
-            <span className="task-worker-state">
-              <span
-                className={`agent-status-dot agent-status-${latest.status}`}
-                aria-hidden="true"
-              />
-              {t(`run.status.${latest.status}`)}
-            </span>
-          )}
+          <span className="task-worker-copy">
+            <span className="task-worker-name">{workerName}</span>
+            {latest && (
+              <span className="task-worker-state">
+                <span
+                  className={`agent-status-dot agent-status-${latest.status}`}
+                  aria-hidden="true"
+                />
+                {t(`run.status.${latest.status}`)}
+              </span>
+            )}
+          </span>
         </span>
         <ChevronDown size={14} aria-hidden="true" />
       </Button>
@@ -265,11 +267,11 @@ export function TaskDetailView({
           >
             <ArrowLeft size={16} aria-hidden="true" />
           </Button>
-        ) : (
+        ) : !embedded ? (
           <Link className="button button-quiet" href="/">
             {t("taskDetail.back")}
           </Link>
-        )}
+        ) : null}
         <span>
           {prototypeTaskReference(task.data.id) ?? task.data.id.slice(0, 8)}
         </span>

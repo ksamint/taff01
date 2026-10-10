@@ -27,7 +27,7 @@ export default defineConfig({
   ...behavior,
   testMatch: "**/ui-parity.spec.ts",
   testIgnore: [],
-  outputDir: "test-results/ui-parity",
+  outputDir: `test-results/ui-parity/${process.env.UI_SCREEN}`,
   // References are approved separately in the milestone; this runner must not
   // invent missing baselines. Linux generation requires an explicit CLI override.
   updateSnapshots: "none",

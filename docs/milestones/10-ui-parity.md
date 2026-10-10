@@ -201,3 +201,20 @@ connection health are absent. Search supports tasks, comments and settings;
 it has no member/event search. The prototype has no desktop-specific Today,
 Calendar, Me, agent profile or MCP layout. These supported responsive screens
 need captures, baselines and side-by-side acceptance before being marked done.
+
+The `786dbfb` diagnostic capture pass exposed shared house styles overriding
+unlayered screen ports: phone Projects retained desktop controls, Search lost
+its grid, and task fields lost source styling. The original Base declarations
+are now moved byte-for-byte to a native cascade layer beneath the screen CSS.
+Projects uses the existing task toolbar to close its pane; compact card/list
+spacing and readable disabled fields preserve their handlers and 44 px targets.
+Inbox waits for its task pane and keeps action controls in the source row.
+
+Calendar capture dates now freeze native Temporal alongside Playwright Date:
+Chromium's native Temporal clock otherwise selected the real day without the
+seed's events. The helper asserts the frozen instant. Task-detail/review
+diagnostic renders wrote all four images but collided during trace teardown;
+per-screen output directories and an exclusive, bounded validation lock prevent
+shared artifacts and overlapping browser runs. These diagnostics are retained,
+not accepted baselines. Fresh comparisons and all nine required checks remain
+pending for the sealed revision.
