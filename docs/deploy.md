@@ -137,7 +137,7 @@ scope decision before changing that shared service.
 
 ### Deployed checkpoint — 2026-10-09
 
-`https://taff.apuch.cn` serves release
+The first public checkpoint at `https://taff.apuch.cn` served release
 `ef7f52c3052db173d2e56ec7828d0ed400092c8e` from
 `/srv/taff/releases/ef7f52c3052db173d2e56ec7828d0ed400092c8e` on
 `ins-ag5pnvc0`. Its separate `taff` project runs web, API, worker, Caddy and
@@ -159,6 +159,40 @@ The exact deployed commit passed local validation and both required GitHub CI
 runs: [feature 37923784208](https://github.com/ksamint/taff01/actions/runs/37923784208)
 and [main 37924781365](https://github.com/ksamint/taff01/actions/runs/37924781365).
 The later documentation checkpoint does not change the running release.
+
+### Live SMS upgrade checkpoint — 2026-10-10
+
+The public site now serves `41ae94ffbcf466a0f4f0cddd8aca4456621138e3`.
+Its unchanged all-nine validation passed 428 unit/integration tests, 96
+production browser cases and MCP smoke. Both exact-SHA CI runs passed:
+[main 37954047982](https://github.com/ksamint/taff01/actions/runs/37954047982)
+and [feature 37954048010](https://github.com/ksamint/taff01/actions/runs/37954048010).
+Today initial JavaScript is 191,578 gzip bytes; Lighthouse EN/CN/HK performance
+is 98/98/98, accessibility 96 and best practices 100. Separate default
+three-run LCP medians are 544/544/560 ms.
+
+The upgrade used the existing deployment lock and publisher, with a dedicated
+Taff database backup and an exclusive private environment backup. The additive
+0019 migration completed before only API, worker and web were replaced. Existing
+route/DNS, database/role, Caddy and Valkey were retained. Eight neighboring
+services and Caddy/Valkey preserved their image identities, start times and
+health; PostgreSQL was unchanged, with nine Taff connections using TLS.
+The deployment lock was released after verification.
+
+Public checks passed for existing email login, task writes, Secure/HttpOnly
+cookies, foreign-origin rejection, mobile Today, realtime and sign-out/sign-in.
+SMS availability is true. The mobile blank-phone SMS form check passed without
+JavaScript errors. Provider read-only checks confirmed the approved sign,
+approved one-parameter template and package-query readiness. Exactly one
+explicitly authorized application SMS request was accepted, and carrier status
+was confirmed as `SUCCESS`. Real OTP login has not yet been verified: the
+original code expired before local session verification completed. No additional
+SMS was sent; delivery success does not establish successful login.
+
+For a live-release rollback, restore the backed-up environment and verified
+previous image identities, then recreate only API, worker and web. Retain the
+route, DNS, database/role, additive migration/data, Caddy, Valkey and neighboring
+services. First-deployment route/DNS removal is not a live-upgrade rollback.
 
 ## Operations
 

@@ -1,30 +1,33 @@
 # Development quick review — 2026-10-09
 
-Taff is live at [taff.apuch.cn](https://taff.apuch.cn). The deployed release is
-`ef7f52c3`; the deployment documentation checkpoint is `22b29c9`. SMS
-implementation `d0bbe47` passed the full validation gates. The final contrast
-and report checkpoint follows those same gates before push. M9 and the
+Updated with the 2026-10-10 live SMS checkpoint. Taff is live at
+[taff.apuch.cn](https://taff.apuch.cn), serving `41ae94ff`. SMS is enabled;
+one authorized application send was accepted and carrier delivery was confirmed.
+Real OTP login has not yet been verified; the original code expired before
+local session verification completed. M9 and the
 `v0.1.0` release remain unfinished.
 
 | Area | Review |
 | --- | --- |
 | Product | Tasks, people/agents, review/Inbox, projects, calendar, organizations, MCP, realtime, cache/PWA and notifications are implemented. |
 | Architecture | Core owns database access and permissions; shared schemas validate REST/MCP boundaries. Auth uses Better Auth and transactional PostgreSQL provisioning. |
-| Deployed baseline validation | 409 unit tests, 87 production browser cases and MCP smoke passed. Deployed Today JS is 191,397 gzip bytes; Lighthouse EN/CN/HK is 99/99/98 and separate LCP medians are 536/568/564 ms. |
-| Production | Separate Taff Docker project, dedicated PostgreSQL role/database with verified TLS, trusted public HTTPS and DNS. Signup, task writes, cookie security and realtime smoke passed; neighboring services retained their start times. |
-| SMS implementation acceptance | All nine gates passed for `d0bbe47`: 428 unit/integration tests (seven PostgreSQL SMS cases), 96 browser cases (nine mocked SMS cases), MCP smoke. Today JS is 191,576 gzip bytes; Lighthouse EN/CN/HK is 99/98/98 and separate LCP medians are 552/564/560 ms. |
-| CI | [Main 37928770076](https://github.com/ksamint/taff01/actions/runs/37928770076) and [feature 37928698218](https://github.com/ksamint/taff01/actions/runs/37928698218) passed for the documentation checkpoint. |
+| Historical EF7 baseline validation | 409 unit tests, 87 production browser cases and MCP smoke passed. EF7 Today JS is 191,397 gzip bytes; Lighthouse EN/CN/HK is 99/99/98 and separate LCP medians are 536/568/564 ms. |
+| Production | Release `41ae94ff`: existing email login, task writes, Secure/HttpOnly cookies, foreign-origin rejection, mobile Today, realtime and sign-out/sign-in passed. Eight neighbors and Caddy/Valkey preserved images/start times/health; PostgreSQL was unchanged. The deployment lock was released. |
+| Historical SMS implementation acceptance | All nine gates passed for `d0bbe47`: 428 unit/integration tests (seven PostgreSQL SMS cases), 96 browser cases (nine mocked SMS cases), MCP smoke. Today JS is 191,576 gzip bytes; Lighthouse EN/CN/HK is 99/98/98 and separate LCP medians are 552/564/560 ms. |
+| Historical documentation CI | [Main 37928770076](https://github.com/ksamint/taff01/actions/runs/37928770076) and [feature 37928698218](https://github.com/ksamint/taff01/actions/runs/37928698218) passed for the documentation checkpoint. |
+| Live SMS release acceptance | `41ae94ff` passed all nine gates: 428 unit/integration tests, 96 production browser cases and MCP smoke. Today JS is 191,578 gzip bytes; Lighthouse EN/CN/HK is 98/98/98, accessibility 96, best practices 100; separate LCP medians are 544/544/560 ms. Provider readiness passed; exactly one authorized send was accepted and carrier status was `SUCCESS`. Real OTP login has not yet been verified; the original code expired. |
+| Live release CI | [Main 37954047982](https://github.com/ksamint/taff01/actions/runs/37954047982) and [feature 37954048010](https://github.com/ksamint/taff01/actions/runs/37954048010) passed for exact deployed `41ae94ff`. |
 
 ## Next development steps
 
-1. **SMS login — implementation ready for acceptance.** Tencent delivery,
-   six-digit expiring OTPs, atomic single use, bounded attempts, persistent send
-   limits and translated mobile forms are implemented. Email login, cookie/origin
-   checks and account isolation are preserved. The unchanged full gates must
-   pass before push; implementation `d0bbe47` passed all nine. Production
-   configuration/readiness needs 1Password unlock;
-   SMS is not live yet. Real delivery needs an authorized recipient; no real SMS
-   test has been sent.
+1. **Complete real OTP session verification.** SMS is live after approved
+   provider readiness, the additive migration and the validated upgrade. Exactly
+   one authorized app send was accepted and carrier delivery was confirmed.
+   The original code expired before local session verification completed, so
+   real OTP login is not yet verified. A fresh real test needs separate send
+   authorization; no additional automatic SMS was sent. Mocked send/verify,
+   expiration, replay, concurrency, account separation and email fallback are
+   covered by the accepted gates.
 2. **Complete M9 accessibility and locale acceptance.** Key parity already has
    tests. Finish the full keyboard-only workflow, typography review, both themes
    and committed screenshots across routes. The mobile Hong Kong locale

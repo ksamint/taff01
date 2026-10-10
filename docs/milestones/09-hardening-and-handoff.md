@@ -395,14 +395,51 @@ same gates before push. The broader M9 route/theme/keyboard audit remains open.
 The final contrast/report tree also passed all nine gates (428 unit/integration,
 96 browser and MCP smoke; Lighthouse 98/98/98, LCP medians 560/544/544 ms,
 191,577 gzip bytes). GitHub push protection then rejected the public Tencent
-example Secret ID in the signing test. It is replaced by an obvious placeholder
-that does not change the expected signature. Unpublished commits are rewritten
-to remove that value, while local validation proofs remain preserved; the new
-candidate must pass the same gates before push.
+example Secret ID in the signing test. It was replaced by an obvious placeholder
+that does not change the expected signature. Unpublished commits were rewritten
+to remove that value, while local validation proofs remain preserved. The
+replacement candidate passed the same gates before push, as recorded below.
 
 The [quick review report](../reviews/2026-10-09-development-review.md) records
-the deployed baseline and prioritized next work. SMS credentials/readiness and
-live activation remain pending 1Password unlock. No real SMS has been sent.
+the deployed baseline and prioritized next work. At this implementation
+checkpoint, SMS readiness and live activation awaited 1Password access and no
+real SMS had been sent. The subsequent live checkpoint follows.
+
+### Live SMS checkpoint — 2026-10-10
+
+Release `41ae94ffbcf466a0f4f0cddd8aca4456621138e3` passed the unchanged nine
+validation commands: 428 unit/integration tests, 96 production browser cases
+and MCP smoke. Initial Today JavaScript is 191,578 gzip bytes. Lighthouse
+EN/CN/HK performance is 98/98/98, accessibility 96 and best practices 100;
+Lighthouse LCP is 1428.106/1386.141/1383.874 ms. Separate default three-run LCP
+medians are 544/544/560 ms. Exact-SHA
+[main CI 37954047982](https://github.com/ksamint/taff01/actions/runs/37954047982)
+and [feature CI 37954048010](https://github.com/ksamint/taff01/actions/runs/37954048010)
+were both green before deployment. No validation settings or fixtures changed.
+
+The existing publisher upgraded the public site from EF7 while holding its
+ownership-checked deployment lock. A dedicated Taff database backup and private
+environment backup preceded the additive 0019 migration and targeted
+API/worker/web replacement. Eight neighbors and retained Caddy/Valkey preserved
+images, start times and health. Route/DNS and the dedicated database/role were
+retained; PostgreSQL was unchanged and nine Taff connections used TLS.
+The lock keeper exited successfully after verification and released the lock.
+
+Public verification passed existing email login, task writes, Secure/HttpOnly
+cookies, foreign-origin rejection, mobile Today, realtime and sign-out/sign-in.
+The SMS method is enabled; a mobile blank-phone form check produced no JavaScript
+errors. Approved sign, approved one-parameter template and package-query
+readiness were confirmed through provider read-only checks. Exactly one
+explicitly authorized application SMS request was accepted, and carrier status
+was confirmed as `SUCCESS`. Real OTP login has not yet been verified: the
+original code expired before local session verification completed. No additional
+SMS was sent; carrier delivery is not evidence that login completed.
+
+Live-upgrade rollback preserves the route/DNS, database/role, additive schema
+and data, Caddy/Valkey and neighbors, restoring only the previous environment
+and verified API/worker/web images. This documentation checkpoint must pass the
+same all-nine gates before its milestone push; it does not change the running
+application release.
 
 M9 is not complete. The local performance targets passed while preserving
 the M8 preloads, optional fonts and 20-card Today limit; both exact-commit CI runs
