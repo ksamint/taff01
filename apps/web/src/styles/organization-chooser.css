@@ -30,7 +30,7 @@
   justify-content: flex-start;
 }
 .organization-choice.button[aria-pressed="true"] {
-  background: var(--bg-container-low);
+  background: var(--accent-wash);
 }
 .organization-choice.button:hover:not(:disabled) {
   border-color: var(--text-subtle);
@@ -91,19 +91,52 @@
   font-weight: 600;
 }
 .sidebar-workspace > .workspace-menu {
-  width: 320px;
-  padding: 16px;
+  box-sizing: content-box;
+  width: 300px;
+  padding: 6px;
+  border-radius: 4px;
 }
 .workspace-menu .organization-chooser {
-  gap: 12px;
+  gap: 2px;
 }
 .workspace-menu .organization-chooser h2 {
+  padding: 8px 10px 6px;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--text-subtle);
   text-transform: uppercase;
   letter-spacing: var(--ls-track-sm);
 }
-.workspace-menu .organization-chooser-hint {
+.workspace-menu .organization-chooser-hint,
+.workspace-menu .organization-create-entry {
+  display: none;
+}
+.workspace-menu .organization-choices {
+  gap: 2px;
+}
+.workspace-menu .organization-choice.button {
+  min-height: 44px;
+  padding: 8px 10px;
+  gap: 10px;
+  border: 0;
+  border-radius: 2px;
+}
+.workspace-menu .organization-choice.button:hover:not(:disabled) {
+  background: var(--bg-container-low);
+}
+.workspace-menu .organization-choice-tile {
+  width: 24px;
+  height: 24px;
   font-size: 12px;
+}
+.workspace-menu .organization-choice-copy {
+  gap: 0;
+  line-height: 1.4;
+}
+.workspace-menu .organization-choice-copy strong {
+  font-size: 13px;
+}
+.workspace-menu .organization-choice-check {
+  width: 14px;
+  height: 14px;
 }
