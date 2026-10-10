@@ -431,15 +431,17 @@ export function AppShell({ children }: { children: ReactNode }) {
               />
             )}
           </main>
-          <Button
-            className="quick-fab"
-            data-testid="open-quick"
-            aria-label={t("quickAdd.title")}
-            disabled={!confirmed}
-            onClick={() => setOverlay("quick")}
-          >
-            <Plus size={22} aria-hidden="true" />
-          </Button>
+          {["/", "/calendar", "/projects"].includes(pathname) && (
+            <Button
+              className="quick-fab"
+              data-testid="open-quick"
+              aria-label={t("quickAdd.title")}
+              disabled={!confirmed}
+              onClick={() => setOverlay("quick")}
+            >
+              <Plus size={22} aria-hidden="true" />
+            </Button>
+          )}
         </WorkspaceContext.Provider>
       ) : (
         <main className="loading">{t("noWorkspace")}</main>

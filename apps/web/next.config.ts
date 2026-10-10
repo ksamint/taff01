@@ -7,6 +7,7 @@ const assetVersion = process.env.ASSET_VERSION || Date.now().toString(36);
 
 const config: NextConfig = {
   agentRules: false,
+  devIndicators: false,
   output: "standalone",
   outputFileTracingRoot: path.join(__dirname, "../../"),
   env: { NEXT_PUBLIC_ASSET_VERSION: assetVersion },

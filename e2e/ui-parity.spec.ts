@@ -89,6 +89,7 @@ test("shell uses the real Northwind fixture", async ({ page }, info) => {
   );
   const loaded = await page.goto(desktop ? "/projects" : "/");
   expect(loaded?.status()).toBe(200);
+  await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
   const shell = page.locator(desktop ? "aside.sidebar" : "nav.tabbar");
   await expect(shell).toBeVisible();
@@ -136,4 +137,30 @@ test("shell uses the real Northwind fixture", async ({ page }, info) => {
   await expect(shell).toHaveScreenshot(desktop ? "sidebar.png" : "tabbar.png", {
     animations: "disabled",
   });
+  if (!desktop) {
+    const fab = page.locator(".quick-fab");
+    await expect(fab).toBeVisible();
+    await expect(fab).toBeEnabled();
+    await expect(fab).toHaveScreenshot("fab.png", { animations: "disabled" });
+    for (const [route, visible] of [
+      ["/", true],
+      ["/calendar", true],
+      ["/projects", true],
+      ["/inbox", false],
+      ["/me", false],
+    ] as const) {
+      if (new URL(page.url()).pathname !== route)
+        await page.locator(`a[href="${route}"]:visible`).first().click();
+      await expect(page).toHaveURL(route);
+      await expect(page.locator("main.content")).toBeVisible();
+      await expect(page.locator("main.content")).not.toHaveAttribute(
+        "inert",
+        "",
+      );
+      if (visible) {
+        await expect(fab).toBeVisible();
+        await expect(fab).toBeEnabled();
+      } else await expect(fab).toHaveCount(0);
+    }
+  }
 });

@@ -53,7 +53,7 @@ by the application.
 | Asset | Unicode mappings | Bytes | SHA-256 |
 | --- | ---: | ---: | --- |
 | NotoSansTC-ui-common.woff2 | 171 | 47,620 | `0d3ebcb469892ff166152e19a79f2fe1e9d8baec72f33fc61f630f4754b99924` |
-| NotoSansTC-ui-remaining.woff2 | 369 | 114,440 | `8e7b4f214bb614a44f6a0ef1f25b7e773807ee06d5f74bc4e5a6345785905a87` |
+| NotoSansTC-ui-remaining.woff2 | 543 | 169,500 | `a381d949f3b7236b4c2536a654c1161173bb4c2e99856c99c09767c319c346fa` |
 
 The common set contains supported characters from every top-level string,
 navigation label, task status and run status in all three dictionaries.
@@ -129,3 +129,21 @@ for name, points in (("common", common), ("remaining", coverage - common)):
     print("unicode-range:", ranges(points))
 PY
 ```
+
+UI parity expands the remaining subset by 174 mappings from the approved full
+`docs/ui/prototype/vendor/NotoSansTC.ttf` (SHA-256
+`864727d210d54f2537bbe23b3a839436c3992af72de9322af5270897246bd44f`).
+The union covers 714 mappings, including every source-supported Han character
+in the prototype fixture definitions. All 369 prior mappings and metrics are
+preserved, verified against source outlines and widths at weights
+100/300/400/500/600/900 with FontTools 4.66.1 and Brotli 1.2.0. The common
+subset stays unchanged. The added 55,060 bytes are included in performance
+validation. The approved TC source lacks 87 Simplified Chinese fixture
+characters; these retain the existing system fallback.
+
+To regenerate, take the union of the previous remaining cmap and Han characters
+in `packages/schemas/src/prototype-data.ts`, `packages/core/src/prototype-seed.ts`
+and `packages/core/src/seed.ts`, intersect with the full source cmap, then remove
+the common cmap. Subset that source with FontTools retaining layout features,
+glyph names and the variable axis, and set WOFF2 flavor explicitly. The CSS
+Unicode range must match that resulting cmap exactly.

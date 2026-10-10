@@ -26,6 +26,12 @@ export function Sidebar() {
   const { t, i18n } = useTranslation();
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
   const pathname = usePathname();
+  const workspaceName = presentPrototypeField(
+    workspace.id,
+    "name",
+    workspace.name,
+    locale,
+  );
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
   const tasks = useTasks(workspace.id);
@@ -38,16 +44,9 @@ export function Sidebar() {
       <details className="sidebar-workspace">
         <summary>
           <span className="workspace-mark" aria-hidden="true">
-            {workspace.name.slice(0, 1)}
+            {workspaceName.slice(0, 1)}
           </span>
-          <span>
-            {presentPrototypeField(
-              workspace.id,
-              "name",
-              workspace.name,
-              locale,
-            )}
-          </span>
+          <span>{workspaceName}</span>
           <ChevronDown size={14} aria-hidden="true" />
         </summary>
         <div className="workspace-menu">

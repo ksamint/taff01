@@ -8,7 +8,8 @@ const languageNames = {
 };
 
 export async function openMe(page: Page) {
-  await expect(page.getByTestId("open-quick")).toBeEnabled();
+  await expect(page.locator("main.content")).toBeVisible();
+  await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
   if (new URL(page.url()).pathname !== "/me") {
     await page.locator('a[href="/me"]:visible').first().click();
     await expect(page).toHaveURL(/\/me(?:\?.*)?$/);
