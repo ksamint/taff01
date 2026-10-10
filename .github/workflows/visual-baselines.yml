@@ -1,0 +1,158 @@
+name: Capture visual baselines
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: Full reviewed source commit to capture
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: visual-baseline-capture
+  cancel-in-progress: false
+env:
+  POSTGRES_PASSWORD: ci-password
+  DATABASE_URL: postgres://taff:ci-password@127.0.0.1:55432/taff
+  TEST_DATABASE_URL: postgres://taff:ci-password@127.0.0.1:55432/taff_test
+  REDIS_URL: redis://127.0.0.1:56379
+  AUTH_URL: http://localhost:3000
+  AUTH_SECRET: ci-only-secret-with-at-least-32-characters
+  API_INTERNAL_URL: http://127.0.0.1:3001
+  API_PORT: "3001"
+  SEED_DATE: "2026-10-08"
+  DEMO_EMAIL: alex@taff.local
+  DEMO_PASSWORD: ci-demo-password
+  TOKEN_PEPPER: ci-only-pepper-16-chars
+  MCP_RATE_LIMIT: "60"
+  CI: "1"
+  NEXT_TELEMETRY_DISABLED: "1"
+  CAPTURE_SOURCE_SHA: ${{ inputs.source_sha }}
+  CAPTURE_WORKFLOW_SHA: ${{ github.workflow_sha }}
+jobs:
+  capture:
+    # Match CI's browser, Ubuntu font stack and rasterizer, not a Docker host.
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: taff
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: taff
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U taff -d taff" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+      valkey:
+        image: valkey/valkey:9-alpine
+        ports: ["56379:6379"]
+        options: >-
+          --health-cmd "valkey-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+    steps:
+      - name: Validate the requested commit
+        run: '[[ "$CAPTURE_SOURCE_SHA" =~ ^[0-9a-f]{40}$ ]]'
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+          persist-credentials: false
+      - name: Verify the detached source
+        run: |
+          test "$(git rev-parse HEAD)" = "$CAPTURE_SOURCE_SHA"
+          test -z "$(git status --porcelain)"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: printf 'CI=1\n' > .env
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm licence:check
+      - name: Create the test database
+        run: PGPASSWORD=ci-password psql -h 127.0.0.1 -p 55432 -U taff -d taff -c 'CREATE DATABASE taff_test'
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: pnpm test
+      - run: pnpm build
+      - run: pnpm build:server
+      - run: pnpm perf:budget
+      - name: Install CI Chromium and system dependencies
+        run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm perf:lighthouse
+      - name: Regenerate every screen without changing comparison tolerances
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only this job's disposable checkout is modified. Missing snapshots
+          # must be created by successful captures, not inherited from Git.
+          rm -rf -- e2e/__screenshots__/ui-parity.spec.ts
+          for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add; do
+            UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
+          done
+      - name: Record native capture and runtime identities
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const path = require('node:path');
+          const crypto = require('node:crypto');
+          const cp = require('node:child_process');
+          const screens = 'shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add'.split(' ');
+          const screenResults = screens.map(screen => {
+            const file = `capture-results/${screen}.json`;
+            const raw = fs.readFileSync(file);
+            const stats = JSON.parse(raw).stats;
+            if (stats.expected !== 4 || stats.unexpected || stats.skipped || stats.flaky)
+              throw new Error(`Capture did not pass all four cases: ${screen}`);
+            return {screen, stats, sha256: crypto.createHash('sha256').update(raw).digest('hex')};
+          });
+          function files(dir) {
+            return fs.readdirSync(dir, {withFileTypes: true}).flatMap(entry => {
+              const name = path.join(dir, entry.name);
+              return entry.isDirectory() ? files(name) : name.endsWith('.png') ? [name] : [];
+            });
+          }
+          const captures = files('e2e/__screenshots__/ui-parity.spec.ts').sort().map(file => {
+            const raw = fs.readFileSync(file);
+            if (raw.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a' || raw.toString('ascii', 12, 16) !== 'IHDR')
+              throw new Error(`Invalid native PNG: ${file}`);
+            return {file, bytes: raw.length, width: raw.readUInt32BE(16), height: raw.readUInt32BE(20),
+              sha256: crypto.createHash('sha256').update(raw).digest('hex')};
+          });
+          if (captures.length !== 86) throw new Error('Expected all 86 native PNGs');
+          fs.writeFileSync('visual-capture-manifest.json', JSON.stringify({
+            sourceSha: process.env.CAPTURE_SOURCE_SHA,
+            repository: process.env.GITHUB_REPOSITORY,
+            workflowSha: process.env.CAPTURE_WORKFLOW_SHA,
+            runId: process.env.GITHUB_RUN_ID, runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            sourceTree: cp.execFileSync('git', ['rev-parse', 'HEAD^{tree}'], {encoding: 'utf8'}).trim(),
+            runnerImage: process.env.ImageOS, runnerImageVersion: process.env.ImageVersion,
+            os: fs.readFileSync('/etc/os-release', 'utf8'), node: process.version,
+            playwright: require('@playwright/test/package.json').version,
+            monospace: cp.execFileSync('fc-match', ['monospace'], {encoding: 'utf8'}).trim(),
+            fontRuntime: cp.execFileSync('dpkg-query', ['-W', 'fontconfig', 'libfreetype6'], {encoding: 'utf8'}).trim(),
+            screenResults, captures,
+          }, null, 2) + '\n');
+          JS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: visual-baselines-${{ inputs.source_sha }}
+          path: |
+            e2e/__screenshots__/ui-parity.spec.ts
+            visual-capture-manifest.json
+            visual-browser.log
+            capture-results
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: failed-capture-${{ inputs.source_sha }}
+          path: |
+            test-results
+            visual-browser.log
+          retention-days: 7

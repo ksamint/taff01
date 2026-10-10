@@ -886,3 +886,31 @@ cache, read-only calendar and later reconciliation assertions remain. All
 nine focused persistence/security/PWA cases passed across EN/CN/HK on the
 production build. Exact-SHA full validation and both required CI runs remain
 pending; production is unchanged.
+
+Candidate `c1b759e` passed all nine local commands (492 unit/integration
+tests, 123 production browser cases and MCP smoke). Initial JavaScript was
+195,718 gzip bytes (191.1 KiB). Exact-SHA local Lighthouse performance was
+99/100/99 with accessibility 96 and best practices 100. Three-run slow-4G
+LCP samples were EN 692/696/700, CN 772/800/788 and HK 788/776/796 ms;
+medians 696/788/788 ms passed the strict 2,000 ms budget.
+
+Both [feature CI](https://github.com/ksamint/taff01/actions/runs/38072110538)
+and [main CI](https://github.com/ksamint/taff01/actions/runs/38072110612)
+passed all three image builds and Lighthouse (performance 99/99/99 and
+94/96/96, accessibility 96 and best practices 100), then failed the first
+shell visual comparisons. Browser/MCP stages were not reached. Native
+expected/actual/diff captures show matching content and layout with glyph
+differences, including the system-monospace shortcut. The earlier refresh
+used an isolated Docker Linux runtime rather than CI's Ubuntu host; its
+full Chromium and headless-shell versions both match 156.0.8078.4, but its
+font/raster stack has not been proven equivalent. No fonts, CSS, tolerances
+or baseline PNGs have been changed in response to this failure.
+
+The manual `Capture visual baselines` workflow uses CI's Ubuntu runner,
+services, previsual checks and browser installation. It validates a pinned
+40-character source SHA, recreates all 16 screens in a disposable checkout,
+requires all 64 capture cases and 86 native PNGs, and uploads their SHA-256,
+dimensions, source/tree/workflow/run identities and font/browser runtime
+evidence. It only produces artifacts; captures still require inspection and
+explicit integration before both exact-final-SHA CI runs can be accepted.
+Production remains unchanged.
