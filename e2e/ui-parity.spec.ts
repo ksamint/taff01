@@ -118,6 +118,13 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   await page.evaluate(prepareFonts);
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
+  if (desktop) {
+    await expect(page.locator(".sidebar")).toBeVisible();
+    await expect(page.locator(".sidebar-agents .sidebar-link")).toHaveCount(3);
+    await expect(
+      page.locator('.sidebar-primary a[href="/inbox"] .sidebar-count'),
+    ).toHaveText(String(inbox.unreadCount));
+  }
   const reviewItem = inbox.items.find(
     (item) => item.taskId === prototypeId("task", "nw", 141),
   );

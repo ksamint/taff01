@@ -159,6 +159,12 @@ try {
             "inert",
             "",
           );
+          if (device === "desktop") {
+            await expect(page.locator(".sidebar")).toBeVisible();
+            await expect(
+              page.locator(".sidebar-agents .sidebar-link"),
+            ).toHaveCount(3);
+          }
           let openedReview = false;
           let originalInbox;
           let reviewItem;
