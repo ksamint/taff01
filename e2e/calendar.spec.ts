@@ -374,17 +374,27 @@ test("calendar real day drag, bottom-edge resize and whole-series undo preserve 
   const dayWidth = await weekEvent.evaluate(
     (el) => el.closest(".sx__time-grid-day")!.getBoundingClientRect().width,
   );
+  // Sunday is the last visible column. Exercise an adjacent day inside the
+  // same week instead of dragging outside the grid on Sunday runs.
+  const weekDayDelta = new Date(`${date}T12:00:00Z`).getUTCDay() === 0 ? -1 : 1;
   const weekAck = patchAck(page, task.id);
   await page.mouse.move(weekBox.x + 20, weekBox.y + 18);
   await page.mouse.down();
   await page.waitForTimeout(250);
-  await page.mouse.move(weekBox.x + 20 + dayWidth, weekBox.y + 18, {
-    steps: 8,
-  });
+  await page.mouse.move(
+    weekBox.x + 20 + dayWidth * weekDayDelta,
+    weekBox.y + 18,
+    {
+      steps: 8,
+    },
+  );
   await page.mouse.up();
   expect((await weekAck).status()).toBe(200);
   expect((await stored(page, task.id)).schedule?.startAt).toBe(
-    calendarWallToInstant(`${date}T10:00`, me.user.tz),
+    calendarWallToInstant(
+      `${offsetDay(anchorDate, weekDayDelta)}T10:00`,
+      me.user.tz,
+    ),
   );
   await expect(page.getByTestId("calendar-undo")).toBeEnabled();
   const weekUndo = patchAck(page, task.id);
