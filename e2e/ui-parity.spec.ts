@@ -225,6 +225,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       });
       if (screen === "review") {
         await page.getByTestId("review-artifact").scrollIntoViewIfNeeded();
+        if (!desktop)
+          await expect(
+            page.locator(".task-detail-sheet .task-detail-toolbar"),
+          ).toBeInViewport();
         await page.mouse.move(0, 0);
         await expect(page).toHaveScreenshot("review-deliverable.png", {
           animations: "disabled",

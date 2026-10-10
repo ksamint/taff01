@@ -533,6 +533,19 @@
     pointer-events: auto;
     background: transparent;
   }
+  .projects-view .planning-board .board-card:hover .board-card-bottom,
+  .projects-view .planning-board .board-card:focus-within .board-card-bottom,
+  .projects-view
+    .planning-board
+    .board-card:has(details[open])
+    .board-card-bottom {
+    position: static;
+    align-self: stretch;
+    justify-content: flex-end;
+  }
+  .projects-view .planning-board .projects-card-menu {
+    position: relative;
+  }
   .projects-detail {
     display: block;
     flex: 0 0 300px;

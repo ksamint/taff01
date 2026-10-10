@@ -28,6 +28,12 @@
   padding: 0 12px;
   border-bottom: 1px solid var(--border-line);
 }
+.task-detail-sheet .task-detail-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg);
+}
 .task-detail-toolbar > span:first-of-type {
   font: 12px var(--font-mono);
   color: var(--text-muted);
