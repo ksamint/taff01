@@ -140,7 +140,9 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
       });
       expect(review.artifacts).toHaveLength(1);
       expect(review.artifacts[0]).toMatchObject({ mimeType: "text/markdown" });
-      expect(review.artifacts[0].content).toContain("Prototype sample data");
+      expect(review.artifacts[0].content).toContain(
+        "原型示例資料；未執行外部工具、測試、部署或真實訪談。",
+      );
       await expect(
         core.reviewRun(actor, review.run.id, {
           version: review.run.version,
