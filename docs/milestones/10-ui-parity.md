@@ -727,9 +727,19 @@ right and the branch not mergeable. Fixed on the branch:
 - **Critical CSS.** Route stylesheets are imported by the component that owns
   their classes, so Today ships 13 KB of CSS gzipped instead of 21 KB; the
   session request is a real `<link rel="preload">` (the `preload()` call
-  emitted nothing in the production HTML); the CJK face is no longer
-  preloaded; the head script preloads tasks, members and runs at low
+  emitted nothing in the production HTML) and is only emitted when the
+  server already saw a session, because a preloaded 401 was otherwise
+  reused by the first read after signing in; the low-priority CJK font
+  hint stays (dropping it brought no measurable gain and the i18n spec
+  asserts it); the head script preloads tasks, members and runs at low
   priority.
+- **Validation.** Lint, typecheck, unit tests and the MCP smoke pass. The
+  browser suite was run against the production build on this sandbox's
+  Chromium 141 with Playwright 1.56.1 (the pinned 1.64 browser cannot be
+  downloaded here): every case passes except the three intentionally
+  skipped optimistic-rollback cases. The SSR session spec needs the
+  production server: `next dev` answers `Cache-Control: no-store` without
+  `private`, so it fails locally against the dev server by design.
 
 Still open:
 

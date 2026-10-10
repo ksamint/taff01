@@ -244,6 +244,7 @@ test("failed optimistic creation and assignment restore the previous list", asyn
       {
         id: workspaceId,
         name: "Test workspace",
+        key: "TW",
         memberId: ownerId,
         role: "admin",
       },
@@ -252,6 +253,7 @@ test("failed optimistic creation and assignment restore the previous list", asyn
   const task: Task = {
     id: "44444444-4444-4444-8444-444444444444",
     workspaceId,
+    number: 1,
     title: "Existing task",
     description: "",
     priority: 3,

@@ -6,6 +6,7 @@ import {
   type CalendarScheduleInput,
   type CalendarViewData,
   type CreateTask,
+  calendarWallToInstant,
   createTaskSchema,
   shiftCalendarSeries,
   type Task,
@@ -69,20 +70,17 @@ export function CalendarScene() {
     view === "month-grid"
       ? last.add({ days: 8 - last.dayOfWeek })
       : last.add({ days: 1 });
-  const range = {
-    from: start.toZonedDateTime(me.user.tz).toInstant().toString(),
-    to: end.toZonedDateTime(me.user.tz).toInstant().toString(),
-  };
+  // Same instant text as Today, so one day read serves both screens and the
+  // persisted copy restores here as well.
+  const dayStart = (day: Temporal.PlainDate) =>
+    calendarWallToInstant(`${day.toString()}T00:00`, me.user.tz);
+  const range = { from: dayStart(start), to: dayStart(end) };
   const data = useCalendar(workspace.id, range.from, range.to);
   const weekStart = selected.subtract({ days: selected.dayOfWeek - 1 });
   const weekData = useCalendar(
     workspace.id,
-    weekStart.toZonedDateTime(me.user.tz).toInstant().toString(),
-    weekStart
-      .add({ days: 7 })
-      .toZonedDateTime(me.user.tz)
-      .toInstant()
-      .toString(),
+    dayStart(weekStart),
+    dayStart(weekStart.add({ days: 7 })),
   );
   const update = useSetCalendar();
   const [editor, setEditor] = useState<{

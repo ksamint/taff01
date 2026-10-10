@@ -8,6 +8,7 @@ import { AppShell } from "../src/components/app-shell";
 import { Providers } from "../src/components/providers";
 import { htmlLang, isLocale, preloadBootScript } from "../src/lib/i18n";
 import { readServerMe } from "../src/lib/server-me";
+import { inviteBootScript } from "../src/lib/invite";
 import { themeBootScript } from "../src/lib/theme";
 import "./globals.css";
 import "../src/styles/notifications.css";
@@ -86,6 +87,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{
             __html:
               themeBootScript +
+              inviteBootScript +
               preloadBootScript(
                 process.env.NEXT_PUBLIC_ASSET_VERSION ?? "dev",
                 locale,

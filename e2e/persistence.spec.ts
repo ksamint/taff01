@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 import type { ReadSnapshot } from "../apps/web/src/lib/cache-persistence";
 import {
+  type CalendarViewData,
   calendarWallToInstant,
   projectSchema,
   taskSchema,
@@ -138,6 +139,30 @@ test("IndexedDB restores authorized lists board and calendar before real reconci
         .join(","),
     )
     .toBe("calendar,projects,tasks");
+  // The gate below also blocks the snapshot writer, so the day read the
+  // calendar restores must already hold the task durably.
+  const nextDate = new Date(`${date}T00:00:00Z`);
+  nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+  const dayKey = JSON.stringify([
+    "calendar",
+    workspace.id,
+    calendarWallToInstant(`${date}T00:00`, me.user.tz),
+    calendarWallToInstant(
+      `${nextDate.toISOString().slice(0, 10)}T00:00`,
+      me.user.tz,
+    ),
+  ]);
+  await expect
+    .poll(async () =>
+      (await readCache(page))?.queries.some(
+        (query) =>
+          JSON.stringify(query.key) === dayKey &&
+          (query.data as CalendarViewData).occurrences.some(
+            (item) => item.task.id === task.id,
+          ),
+      ),
+    )
+    .toBe(true);
   const before = await readCache(page);
   expect(before?.userId).toBe(me.user.id);
   expect(
