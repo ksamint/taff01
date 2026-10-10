@@ -4,7 +4,8 @@ The application server `ins-ag5pnvc0` recovered **13.93 GiB** from unused
 validation builds and reproducible Git archives in this cleanup. Production
 services and database volumes were preserved. The UI branch is prepared for
 review; fresh strict validation failed the Chinese LCP budget on immutable
-`de44b79a6cc8d6ec99268273db85b93ed094d670`. Push and deployment remain blocked.
+`de44b79a6cc8d6ec99268273db85b93ed094d670`. Deployment remains blocked. The user subsequently requested publication of
+the latest branch as a review PR despite the known validation failures.
 
 ## Measured space
 
@@ -79,7 +80,8 @@ for en/zh-CN/zh-HK. Default three-run LCP results were:
 The original runner exited with code 1 before the 120 behavioral cases and
 MCP smoke, so those are unverified for this revision. The font-priority
 change did not resolve the LCP failure. The branch is committed locally;
-no passing release, GitHub push or live UI deployment is claimed.
+no passing release or live UI deployment is claimed. Review publication is
+separately authorized and does not establish deployment readiness.
 
 Live API, worker and web image tags remain
 `55b315b743a18113bed864191eb74c6f1d997d9b` (verified directly after cleanup).
