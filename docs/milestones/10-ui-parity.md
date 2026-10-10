@@ -46,7 +46,7 @@ app. No production database will be seeded for this work.
 | 4 — task detail and review | Visuals accepted at `e5165f9`; behavioral gates pending | Four task and eight review production captures; source 791–934/1034–1214 and sticky phone toolbar. |
 | 5 — Inbox | Visuals accepted at `e5165f9`; behavioral gates pending | Four production captures, compact inactive desktop rows and focus-visible 44 px actions; source 280–322/1010–1034. |
 | 6 — Calendar | Pending | |
-| 7 — Me | Pending | |
+| 7 — Me | Visuals accepted at `e5165f9`; behavioral gates pending | Four production captures, source 323–375; real identity, members and preferences. |
 | 8 — type, density and dark theme | Pending | |
 
 Before each push: lint, typecheck, licence gate, unit tests, web build,
@@ -441,3 +441,16 @@ source-equivalence check confirmed unchanged classes, children, test IDs and
 handlers; scoped Biome and web typecheck pass. Fresh final visual comparisons
 will validate this DOM-preserving extraction. MCP connection badges remain
 absent where the actual API supplies no connection/OAuth state.
+
+## me visual checkpoint — production `e5165f9`
+
+Source 323–375 supplies the 28 px header, 56 px avatar, hairline navigation rows and segmented preferences. Existing user/workspace/member queries and language/theme/notification/sign-out handlers remain bound. Authenticated Alex, actual Admin role and Northwind remain; no Product team is invented for this user. Team counts five people and three agents use actual members. Notification summary shows four enabled categories and daily digest 09:00. Open MCP settings is honest navigation; no unsupported Running claim appears. More settings retains existing controls, and Sign out replaces the prototype Reset demo action. All three supported locales and 44 px targets remain. Desktop is a responsive extension with real Sidebar; no desktop Me prototype exists.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/me/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / me | ![Prototype](../ui/reference/phone-en-me.png) | ![App](../ui/screenshots/ui-parity/me/phone-en-app.png) |
+| phone-zh-HK / me | ![Prototype](../ui/reference/phone-zh-me.png) | ![App](../ui/screenshots/ui-parity/me/phone-zh-HK-app.png) |
+| desktop-en / me | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/me/desktop-en-app.png) |
+| desktop-zh-HK / me | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/me/desktop-zh-HK-app.png) |
