@@ -29,6 +29,30 @@ organisation sheet and the desktop board in zh and en at 390×844 and
 1280×800, commit them under `docs/ui/reference/`, and walk the prototype
 yourself through the served page in both languages.
 
+Port from the prototype's source, not from the images. The prototype is
+working React code: `docs/ui/prototype/team-tasks.dc.html` holds 1,200
+lines of template markup with the exact inline styles (positions, sizes,
+gaps, type sizes) of every screen, the design-system components it uses
+(`Icon`, `Button`, `Switch`, `Badge` from `_ds/table-ai-design-system/
+_ds_bundle.js`), the bilingual string table `S` (line 1265) and the
+behaviour in its inline script. For each screen, take its markup block,
+convert it to TSX, lift the inline styles into CSS classes on the tokens in
+`apps/web/src/styles/tokens.css`, map the design-system components to the
+app's `apps/web/src/components/ui/` primitives (extend them when a variant is
+missing), and bind the app's real data and handlers where the prototype
+binds `st`. The captures are the acceptance check, not the source. Line
+map of the template (`<sc-if value="{{ … }}">` blocks):
+
+| Screen | Lines | Screen | Lines |
+| --- | --- | --- | --- |
+| Phone shell, header, tabs | 22–46 | Search (⌘K) | 555–612 |
+| Today | 47–114 | Notifications page | 613–635 |
+| Calendar (day, week, month) | 115–222 | Agent profile | 636–666 |
+| Projects (board, list) | 223–279 | Team | 667–710 |
+| Inbox | 280–322 | MCP | 711–790 |
+| Me | 323–375 | Task sheet, quick add, agent, status, field, grant, invite, confirm, org, new org, request changes sheets | 791–934 |
+| FAB and toast | 376–554 | Desktop: sidebar, breadcrumb, board, list, inbox, detail panel | 935–1214 |
+
 Then, in this order, each screen done means the app capture sits beside the
 reference capture in `docs/milestones/10-ui-parity.md` and a reader cannot
 tell which product is which apart from data:

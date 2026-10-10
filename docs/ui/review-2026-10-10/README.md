@@ -60,6 +60,11 @@ breadcrumb, no agent list, no inline review.
 
 ## What to do
 
+The prototype is source, not a picture: its template markup carries the
+exact inline styles of every screen, the design-system components and the
+string table. The fix is a port of that markup to TSX and CSS classes with
+the app's data bound in, checked against the captures.
+
 `docs/agent-goal-ui-parity.md` is the goal command for a UI parity milestone
 that comes before the rest of M9. It is screen-by-screen, with committed
 prototype captures as the acceptance reference and a visual regression check
