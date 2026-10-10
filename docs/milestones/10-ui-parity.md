@@ -642,3 +642,19 @@ once from the root layout rather than its lazy alert/preferences callers,
 so it joins the initial CSS instead of blocking a later paint. Styles,
 notification behavior and protected-read confirmation remain unchanged.
 This repair still requires fresh visual and full performance validation.
+
+
+## Notification CSS repair check — production `3741520`
+
+All 16 committed visual sets again passed unchanged (64 cases / 86 PNGs).
+Lint, six type checks, licences, all 452 unit tests, production builds and
+193.0 KiB initial JS passed. Lighthouse now passes every locale:
+performance 97/90/90, accessibility 96/96/96 and best practices 100/100/100.
+Default three-run LCP medians improved to 1928/2128/2128 ms for
+en/zh-CN/zh-HK. English passes; both Chinese medians still exceed the
+unchanged 2000 ms limit. This candidate failed before the 120 behavioral
+cases and MCP gate. No push or live UI deployment is claimed.
+
+A separate traced diagnostic uses the same immutable source read-only,
+pinned runtime and disposable database with providers disabled. Its
+instrumented timing is diagnostic evidence only, never an acceptance run.
