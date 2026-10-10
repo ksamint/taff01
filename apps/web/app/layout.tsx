@@ -57,12 +57,21 @@ export default async function RootLayout({
   return (
     <html lang={htmlLang(locale)} suppressHydrationWarning>
       <head>
+        {/* Optional CJK fonts must not outrank app scripts on cold visits. */}
+        {locale !== "en" && (
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/NotoSansTC-ui-common.woff2"
+            crossOrigin="anonymous"
+            fetchPriority="low"
+          />
+        )}
         {/* Browser confirmation gates protected reads and writes; it starts
-            with the HTML instead of after the JavaScript has run. The CJK
-            face is font-display: optional and is not preloaded: on a slow
-            first visit it must not take bandwidth from the scripts. */}
-        {/* Only for a session the server already saw: a preloaded 401 would
-            otherwise be reused by the first read after signing in. */}
+            with the HTML instead of after the JavaScript has run. Only for a
+            session the server already saw: a preloaded 401 would otherwise be
+            reused by the first read after signing in. */}
         {initialMe && (
           <link
             rel="preload"
