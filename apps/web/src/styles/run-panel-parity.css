@@ -177,11 +177,11 @@
   margin: 0;
 }
 .run-panel-parity .run-events time {
-  font-size: 11px;
+  font-size: 12px;
 }
 @media (min-width: 1024px) {
   .run-source-controls .button {
-    min-height: 32px;
+    min-height: 44px;
     font-size: 12px;
   }
 }

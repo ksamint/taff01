@@ -79,7 +79,7 @@
   gap: 8px;
 }
 .agent-profile-parity .agent-profile-section h2 {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   letter-spacing: var(--ls-track-sm);
@@ -112,7 +112,7 @@
 .agent-task-reference {
   flex: none;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-subtle);
 }
 .agent-task-title {
@@ -179,7 +179,7 @@
 }
 .agent-profile-parity .permission-row code {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-subtle);
   overflow-wrap: anywhere;
 }
@@ -198,7 +198,8 @@
   flex: 1;
   border: 0;
   border-radius: 2px;
-  min-height: 32px;
+  min-height: 44px;
+  min-width: 44px;
   padding: 0 10px;
   font: inherit;
   font-size: 13px;
@@ -238,6 +239,12 @@
 .agent-profile-disclosure > form,
 .agent-profile-disclosure > .assignment-fields {
   margin-top: 12px;
+}
+.agent-profile-parity .history-list .text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 44px;
 }
 .agent-profile-parity .agent-profile-grants .grant-list {
   border-top: 1px solid var(--border-line);

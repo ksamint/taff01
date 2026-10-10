@@ -1,5 +1,5 @@
 // Self-served, offline reference captures. No app, account, or API is involved.
-// Usage: pnpm ui:prototype-shots [--dark] [output-directory]
+// Usage: pnpm ui:prototype-shots [--dark | --extra] [output-directory]
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
@@ -21,13 +21,28 @@ const repo = path.resolve(
 );
 const root = await realpath(path.join(repo, "docs/ui/prototype"));
 const args = process.argv.slice(2);
-assert(args.every((arg) => !arg.startsWith("--") || arg === "--dark"));
+assert(
+  args.every(
+    (arg) => !arg.startsWith("--") || ["--dark", "--extra"].includes(arg),
+  ),
+);
 const dark = args.includes("--dark");
-const destinations = args.filter((arg) => arg !== "--dark");
+const extra = args.includes("--extra");
+assert(!(dark && extra), "Choose one capture mode");
+const destinations = args.filter((arg) => !["--dark", "--extra"].includes(arg));
 assert(destinations.length <= 1, "Provide at most one output directory");
 const approvedLight = path.join(repo, "docs/ui/reference");
 const out = path.resolve(
-  destinations[0] || (dark ? path.join(approvedLight, "dark") : approvedLight),
+  destinations[0] ||
+    (extra
+      ? path.join(approvedLight, "extra")
+      : dark
+        ? path.join(approvedLight, "dark")
+        : approvedLight),
+);
+assert(
+  !extra || (out !== approvedLight && out !== path.join(approvedLight, "dark")),
+  "Extra captures must not replace approved light or dark references",
 );
 assert(
   !dark || out !== approvedLight,
@@ -94,6 +109,11 @@ const labels = {
     checklist: "審核清單",
     allRead: "全部已讀",
     northwind: "北風科技",
+    week: "周",
+    month: "月",
+    notifications: "通知",
+    notificationTypes: "推送通知",
+    quickAdd: "快速添加",
   },
   en: {
     today: "Today",
@@ -118,6 +138,11 @@ const labels = {
     checklist: "Checklist",
     allRead: "Mark all read",
     northwind: "Northwind",
+    week: "Week",
+    month: "Month",
+    notifications: "Notifications",
+    notificationTypes: "Push notifications",
+    quickAdd: "Quick add",
   },
 };
 const phoneScreens = [
@@ -143,6 +168,14 @@ const desktopScreens = [
   "search",
   "organizations",
 ];
+const extraScreens = [
+  "calendar-week",
+  "calendar-month",
+  "projects-list",
+  "notifications",
+  "team",
+  "quick-add",
+];
 const records = [];
 const externalRequests = [];
 const resources = new Set();
@@ -163,20 +196,22 @@ try {
   browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH,
   });
-  for (const device of ["phone", "desktop"]) {
+  for (const device of extra ? ["phone"] : ["phone", "desktop"]) {
     const viewport =
       device === "phone"
         ? { width: 390, height: 844 }
         : { width: 1280, height: 800 };
     for (const lang of ["zh", "en"]) {
       const l = labels[lang];
-      const screens = dark
-        ? device === "phone"
-          ? ["projects"]
-          : ["board", "list"]
-        : device === "phone"
-          ? phoneScreens
-          : desktopScreens;
+      const screens = extra
+        ? extraScreens
+        : dark
+          ? device === "phone"
+            ? ["projects"]
+            : ["board", "list"]
+          : device === "phone"
+            ? phoneScreens
+            : desktopScreens;
       for (const screen of screens) {
         const context = await browser.newContext({
           viewport,
@@ -296,6 +331,35 @@ try {
                 .last(),
             );
           if (phoneScreens.slice(0, 5).includes(screen)) await select(screen);
+          if (["calendar-week", "calendar-month"].includes(screen)) {
+            await select("calendar");
+            await click(
+              phone.getByRole("button", {
+                name: screen === "calendar-week" ? l.week : l.month,
+                exact: true,
+              }),
+            );
+          }
+          if (screen === "projects-list") {
+            await select("projects");
+            await click(phone.getByRole("tab", { name: l.list, exact: true }));
+          }
+          if (["notifications", "team"].includes(screen)) {
+            await select("me");
+            await click(
+              phone
+                .getByRole("button", {
+                  name: new RegExp(
+                    screen === "team" ? l.team : l.notifications,
+                  ),
+                })
+                .first(),
+            );
+          }
+          if (screen === "quick-add")
+            await click(
+              phone.getByRole("button", { name: l.quickAdd, exact: true }),
+            );
           if (screen === "task-detail") {
             await select("projects");
             await click(phone.getByText(l.task, { exact: true }).first());
@@ -374,13 +438,48 @@ try {
           mcp: lang === "zh" ? "MCP 端點" : "MCP endpoint",
           search: lang === "zh" ? "最近" : "Recent",
           organizations: l.switchOrganization,
+          "calendar-week": lang === "zh" ? "拖動改期" : "Drag to reschedule",
+          "calendar-month": lang === "zh" ? "2026年10月" : "October 2026",
+          "projects-list": l.task,
+          notifications: l.notificationTypes,
+          team: l.agent,
+          "quick-add": l.quickAdd,
         }[screen];
-        const view = surface.locator(
-          `[data-reference-view="${screen === "review" ? "task-detail" : screen === "projects" && device === "desktop" ? "board" : screen}"]`,
-        );
+        const view =
+          screen === "quick-add"
+            ? phone.getByRole("dialog")
+            : screen === "notifications"
+              ? phone
+                  .getByText(l.notifications, { exact: true })
+                  .last()
+                  .locator("..")
+                  .locator("..")
+              : surface.locator(
+                  `[data-reference-view="${screen === "review" ? "task-detail" : ["calendar-week", "calendar-month"].includes(screen) ? "calendar" : screen === "projects-list" ? "projects" : screen === "projects" && device === "desktop" ? "board" : screen}"]`,
+                );
         await expect(view).toBeVisible();
         await expect(surface).toContainText(expected, { timeout: 5000 });
         await expect(view).toContainText(expected);
+        if (screen === "calendar-month")
+          assert(
+            (await view.locator("[data-day]").count()) >= 35,
+            "Month cells absent",
+          );
+        if (screen === "calendar-week")
+          await expect(
+            view.getByRole("button", { name: l.week, exact: true }),
+          ).toHaveCSS("font-weight", "600");
+        if (screen === "projects-list")
+          await expect(
+            view.getByRole("tab", { name: l.list, exact: true }),
+          ).toHaveAttribute("aria-selected", "true");
+        if (screen === "notifications")
+          assert(
+            (await view.getByRole("switch").count()) >= 6,
+            "Notification controls absent",
+          );
+        if (screen === "quick-add")
+          await expect(view.locator("textarea")).toBeVisible();
         if (screen === "review")
           await expect(surface).toContainText(l.checklist);
         if (screen === "organizations" && device === "phone")
@@ -507,6 +606,11 @@ try {
     browser: browser.version(),
     source: "docs/ui/prototype/team-tasks.dc.html",
     theme: dark ? "dark" : "light",
+    matrix: extra
+      ? "extra-phone-views"
+      : dark
+        ? "dark-projects"
+        : "primary-light-views",
     themeSelection: dark
       ? "Actual Me appearance control before navigating each fresh capture"
       : "Prototype default light appearance",

@@ -4,6 +4,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { chromium, expect } from "@playwright/test";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
+import { prepareFonts } from "./prepare-fonts.ts";
 
 const out = path.resolve(process.argv[2] ?? "docs/ui/screenshots/ui-parity");
 const base = process.env.AUTH_URL ?? "http://localhost:3000";
@@ -142,11 +143,7 @@ try {
             "inert",
             "",
           );
-          await page.evaluate(() =>
-            Promise.all([...document.fonts].map((font) => font.load())),
-          );
-          await page.reload({ waitUntil: "networkidle" });
-          await page.evaluate(() => document.fonts.ready);
+          await page.evaluate(prepareFonts);
           await page.screenshot({
             path: path.join(out, `${device}-${locale}-${view}.png`),
             animations: "disabled",
@@ -155,6 +152,7 @@ try {
         }
         if (screen === "all" || screen === "search") {
           await page.goto(`${base}/`, { waitUntil: "networkidle" });
+          await page.evaluate(prepareFonts);
           await page.keyboard.press("Control+k");
           await expect(page.getByRole("dialog")).toBeVisible();
           await page.screenshot({

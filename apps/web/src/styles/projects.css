@@ -14,6 +14,8 @@
 }
 .projects-org {
   display: inline-flex;
+  min-height: 44px;
+  min-width: 44px;
   align-self: flex-start;
   align-items: center;
   gap: 4px;
@@ -53,7 +55,8 @@
 .projects-owner-filters button {
   border: 0;
   border-radius: 2px;
-  height: 40px;
+  height: 44px;
+  min-width: 44px;
   padding: 0 10px;
   color: var(--text-muted);
   font: inherit;
@@ -100,7 +103,8 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  height: 40px;
+  height: 44px;
+  min-width: 44px;
   padding: 0 8px;
   font: inherit;
   font-size: 13px;
@@ -173,13 +177,13 @@
   flex-wrap: nowrap;
   gap: 8px;
   color: var(--text-subtle);
-  font-size: 11px;
+  font-size: 12px;
 }
 .projects-task-reference {
   font-family: var(--font-mono);
 }
 .projects-view .task-due {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-subtle);
 }
 .projects-view .board-card h3 {
@@ -189,6 +193,8 @@
 }
 .projects-parent {
   display: flex;
+  align-items: center;
+  min-height: 44px;
   gap: 4px;
   min-width: 0;
   font-size: 12px;
@@ -233,7 +239,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
 }
 .projects-agent-chip {
@@ -243,7 +249,7 @@
   height: 22px;
   padding: 0 8px 0 6px;
   border: 1px solid var(--border);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   white-space: nowrap;
   min-width: 0;
@@ -270,7 +276,7 @@
 .projects-human-worker,
 .projects-card-labels {
   color: var(--text-muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .projects-card-labels {
   display: none;
@@ -386,7 +392,7 @@
     background: transparent;
   }
   .projects-view-switch button {
-    height: 32px;
+    height: 44px;
     border-radius: 0;
   }
   .projects-view-switch button[aria-pressed="true"] {
@@ -397,7 +403,7 @@
     margin-left: auto;
   }
   .projects-owner-filters button {
-    height: 26px;
+    height: 44px;
     font-size: 12px;
   }
   .projects-new-task {
@@ -436,7 +442,7 @@
   }
   .projects-parent,
   .projects-subtasks {
-    font-size: 11px;
+    font-size: 12px;
   }
   .projects-card-footer {
     gap: 6px;
@@ -446,7 +452,7 @@
   .projects-owner-avatar {
     width: 20px;
     height: 20px;
-    font-size: 9px;
+    font-size: 12px;
   }
   .projects-agent-chip {
     height: 20px;
@@ -542,7 +548,7 @@
 }
 .projects-list-title-prefix > span:last-child {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-subtle);
 }
 .projects-view .planning-list h3 {
@@ -577,11 +583,14 @@
   .projects-list-heading {
     height: 36px;
     border-bottom: 1px solid var(--border-line);
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-subtle);
     letter-spacing: var(--ls-track-sm);
     text-transform: uppercase;
+  }
+  .projects-view .planning-list .board-card {
+    min-height: 44px;
   }
   .projects-view .planning-list .board-list-group h2 {
     display: none;
@@ -636,7 +645,7 @@
     grid-column: 1;
     margin-left: 22px;
     padding-bottom: 6px;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 .projects-column-empty {

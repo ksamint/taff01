@@ -11,6 +11,7 @@ import {
   prototypeTasks,
 } from "../packages/schemas/src/prototype-data";
 import { runListSchema } from "../packages/schemas/src/run-read";
+import { prepareFonts } from "../scripts/ui/prepare-fonts";
 import { messages } from "./support/messages";
 
 const screen = process.env.UI_SCREEN ?? "shell";
@@ -104,12 +105,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
   );
   expect(loaded?.status()).toBe(200);
-  // Optional fonts keep the cold product render fast. Warm their real files,
-  // then reload so a baseline cannot accidentally approve a fallback font.
-  await page.evaluate(() =>
-    Promise.all([...document.fonts].map((font) => font.load())),
-  );
-  await page.reload();
+  await page.evaluate(prepareFonts);
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
   if (screen !== "shell") {
