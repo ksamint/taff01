@@ -351,3 +351,20 @@ wait explicitly for the sidebar and its three real agent links. Those blank
 sidebar images are not approved baselines. Fresh captures of the final source
 and the complete behavior/performance gates remain required; diagnostic
 generation followed by self-comparison alone does not approve a screen.
+
+The completed `e1c2d1a` diagnostic pass covers all fifteen non-Calendar
+screens, with generation and strict self-comparison succeeding. Native review
+also exposed the Team fragment context and the old organization chooser;
+both required product fixes rather than baseline approval. Team now selects
+its directory context after mounting and on browser fragment/back changes.
+The shared chooser ports phone markup 880–894 and desktop 1124–1135, showing
+real workspace roles without invented teams or counts. Its phone Create action
+opens the existing organization form. Existing Me flows now cover that entry.
+Phone Agent, Team, MCP and Notifications use the source's Back navigation
+without the underlying main tabs. These changes still require fresh captures.
+
+That diagnostic candidate is superseded without starting release gates; its
+evidence is retained and owned disposable resources removed. Production and
+the previously accepted QA environment are unchanged. The next capture run
+uses a production build/start, the explicit sidebar readiness checks and the
+unchanged pixel-comparison settings, matching CI's rendering path.
