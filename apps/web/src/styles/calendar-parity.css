@@ -241,6 +241,13 @@
 .calendar-scene .calendar-engine .taff-agent-event {
   border-style: dashed !important;
 }
+.calendar-scene .calendar-engine-day .taff-agent-event {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--bg) 0 6px,
+    var(--bg-container-low) 6px 12px
+  ) !important;
+}
 .calendar-scene .calendar-engine .sx__month-grid-day {
   min-width: 0;
   padding: 4px 2px;
@@ -255,6 +262,10 @@
   border-radius: 2px;
   font-size: 12px;
   font-weight: 600;
+}
+.calendar-scene .calendar-engine .sx__month-grid-day__header-date.sx__is-today {
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
 }
 .calendar-scene .calendar-engine .sx__month-grid-day__events {
   gap: 2px;
