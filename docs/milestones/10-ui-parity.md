@@ -733,11 +733,20 @@ right and the branch not mergeable. Fixed on the branch:
   hint stays (dropping it brought no measurable gain and the i18n spec
   asserts it); the head script preloads tasks, members and runs at low
   priority.
+- **Production-only failures.** The invitation fragment came back after a
+  sign-in round trip: the app router copies the hash it finds at start-up
+  into its route state, so a child effect that stripped it and replaced the
+  same path restored the token, and the next Link to the page pushed it
+  again. An inline boot script now removes `#invite=` before React hydrates
+  and hands the token over through a one-shot global. The calendar page
+  builds its day and week keys with the same instant text as Today, so one
+  persisted read serves both screens; the persistence spec waits for that
+  read to hold the task before gating the network, and the optimistic
+  rollback spec's fixtures carry the workspace key and task number.
 - **Validation.** Lint, typecheck, unit tests and the MCP smoke pass. The
   browser suite was run against the production build on this sandbox's
   Chromium 141 with Playwright 1.56.1 (the pinned 1.64 browser cannot be
-  downloaded here): every case passes except the three intentionally
-  skipped optimistic-rollback cases. The SSR session spec needs the
+  downloaded here): 120 of 120 cases pass. The SSR session spec needs the
   production server: `next dev` answers `Cache-Control: no-store` without
   `private`, so it fails locally against the dev server by design.
 
