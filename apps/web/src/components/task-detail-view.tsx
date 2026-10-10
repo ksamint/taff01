@@ -256,7 +256,7 @@ export function TaskDetailView({
   );
   return (
     <article
-      className={`task-detail-view${embedded ? " task-detail-embedded" : ""}`}
+      className={`task-detail-view${embedded ? " task-detail-embedded" : ""}${hasReview ? " task-detail-has-review" : ""}`}
     >
       <header className="task-detail-toolbar">
         {onClose ? (
@@ -299,31 +299,38 @@ export function TaskDetailView({
               />
             ) : null
           }
+          afterDescription={
+            <>
+              {(assign.isError ||
+                start.isError ||
+                members.isError ||
+                runs.isError) && (
+                <p className="alert" role="alert">
+                  {t(
+                    errorKey(
+                      assign.error ??
+                        start.error ??
+                        members.error ??
+                        runs.error,
+                    ),
+                  )}
+                </p>
+              )}
+              {hasReview && (
+                <>
+                  <Link
+                    data-testid="open-review"
+                    className="task-review-link"
+                    href={`/tasks/${taskId}/review`}
+                  >
+                    {t("review.open")}
+                  </Link>
+                  <ReviewView taskId={taskId} embedded />
+                </>
+              )}
+            </>
+          }
         />
-        {(assign.isError ||
-          start.isError ||
-          members.isError ||
-          runs.isError) && (
-          <p className="alert" role="alert">
-            {t(
-              errorKey(
-                assign.error ?? start.error ?? members.error ?? runs.error,
-              ),
-            )}
-          </p>
-        )}
-        {hasReview && (
-          <>
-            <Link
-              data-testid="open-review"
-              className="task-review-link"
-              href={`/tasks/${taskId}/review`}
-            >
-              {t("review.open")}
-            </Link>
-            <ReviewView taskId={taskId} embedded />
-          </>
-        )}
       </div>
     </article>
   );

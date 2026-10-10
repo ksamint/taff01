@@ -207,14 +207,47 @@
   font-weight: 600;
 }
 .task-review-block {
-  margin-top: 12px;
-  border: 1px solid var(--border);
+  display: contents;
 }
 .task-review-block .review-layout {
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 12px;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+}
+/* Source review actions are outside the scrolling task content. Keep the real
+   controls last in the task's layout, including after its subtasks/comments. */
+.task-detail-has-review .task-detail-body {
+  display: flex;
+  flex-direction: column;
+}
+.task-detail-has-review .task-detail-body:has(.task-review-actions) {
+  padding-bottom: 0;
+}
+.task-review-block .task-review-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  order: 1;
+  flex: none;
+  padding: 16px 20px;
+  margin: 16px -20px 0;
+  border-top: 1px solid var(--border-line);
+  background: var(--bg);
+}
+.task-review-actions > .action-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.task-review-actions .button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px;
+  white-space: normal;
+  font-size: 13px;
 }
 .task-review-block h2 {
   font-size: 13px;
@@ -294,6 +327,12 @@
   .projects-detail .task-detail-body {
     padding: 0;
   }
+  .projects-detail .task-review-actions {
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 0;
+    padding-right: 0;
+  }
   .task-detail-embedded .task-field-row > span:first-child {
     width: 80px;
   }
@@ -352,4 +391,20 @@
 }
 .task-worker-state .agent-status-dot {
   flex: none;
+}
+
+.task-parent-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  margin-bottom: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.task-parent-link > svg {
+  flex: none;
+}
+.task-parent-link:hover {
+  color: var(--text);
 }

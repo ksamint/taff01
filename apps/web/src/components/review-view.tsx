@@ -244,6 +244,32 @@ function ReviewEditor({
       </ul>
     );
   }
+  const approveButton = (
+    <Button
+      data-testid="review-approve"
+      className="button-primary"
+      disabled={busy || !allChecked || !allApproved}
+      onClick={() => decide("approve")}
+    >
+      <Check size={16} aria-hidden="true" />
+      {t("review.approve")}
+    </Button>
+  );
+  const changesButton = (
+    <Button
+      data-testid="review-request-changes"
+      disabled={busy || !hasChangeComment}
+      onClick={() => decide("request_changes")}
+    >
+      {t("review.requestChanges")}
+    </Button>
+  );
+  const actions = (
+    <div className="action-row">
+      {embedded ? changesButton : approveButton}
+      {embedded ? approveButton : changesButton}
+    </div>
+  );
   return (
     <section className={embedded ? "task-review-block" : "review-view"}>
       {!embedded && (
@@ -468,24 +494,7 @@ function ReviewEditor({
                     onChange={(event) => setComment(event.target.value)}
                   />
                 </div>
-                <div className="action-row">
-                  <Button
-                    data-testid="review-approve"
-                    className="button-primary"
-                    disabled={busy || !allChecked || !allApproved}
-                    onClick={() => decide("approve")}
-                  >
-                    <Check size={16} aria-hidden="true" />
-                    {t("review.approve")}
-                  </Button>
-                  <Button
-                    data-testid="review-request-changes"
-                    disabled={busy || !hasChangeComment}
-                    onClick={() => decide("request_changes")}
-                  >
-                    {t("review.requestChanges")}
-                  </Button>
-                </div>
+                {!embedded && actions}
                 <p className="section-hint">{t("review.approveHint")}</p>
               </>
             )}
@@ -514,6 +523,9 @@ function ReviewEditor({
           </section>
         </aside>
       </div>
+      {embedded && eligible && (
+        <footer className="task-review-actions">{actions}</footer>
+      )}
     </section>
   );
 }

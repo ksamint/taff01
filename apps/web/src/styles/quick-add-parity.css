@@ -190,3 +190,33 @@
     border-radius: 4px 4px 0 0;
   }
 }
+/* Source desktop Quick Add 1137–1155; retain the existing explicit parser. */
+@media (min-width: 1024px) {
+  .sheet-dialog.quick-parity-dialog {
+    inset: 0 0 auto;
+    margin: 120px auto 0;
+    max-height: calc(100dvh - 152px);
+    padding: 20px;
+  }
+  .quick-parity-dialog::before {
+    display: none;
+  }
+  .quick-parity-dialog > .section-heading h2 {
+    font-size: 13px;
+  }
+  .quick-parity-parse-form .input {
+    border-color: transparent;
+    padding: 0;
+    min-height: 80px;
+    font-size: 18px;
+  }
+  .quick-parity-dialog .quick-preview {
+    border: 0;
+    padding: 0;
+    background: transparent;
+  }
+  .quick-parity-create-form > .plain-fieldset > .button-primary {
+    width: auto;
+    align-self: flex-end;
+  }
+}

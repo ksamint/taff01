@@ -17,7 +17,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import {
   type FormEvent,
@@ -52,11 +52,13 @@ export function TaskEditor({
   workerControl,
   scheduleControl,
   runControl,
+  afterDescription,
 }: {
   task: Task;
   workerControl: ReactNode;
   scheduleControl: ReactNode;
   runControl: ReactNode;
+  afterDescription?: ReactNode;
 }) {
   const { me } = useWorkspace();
   const authorId = me.workspaces.find(
@@ -250,6 +252,7 @@ export function TaskEditor({
   const children = (tasks.data ?? []).filter(
     (item) => item.parentId === task.id,
   );
+  const parent = tasks.data?.find((item) => item.id === task.parentId);
   const owner = members.data?.find((item) => item.id === form.ownerId);
   const ownerName = owner
     ? presentName(owner.id, owner.name)
@@ -258,10 +261,12 @@ export function TaskEditor({
   return (
     <>
       {task.parentId && (
-        <Link className="text-link" href={`/tasks/${task.parentId}`}>
+        <Link className="task-parent-link" href={`/tasks/${task.parentId}`}>
+          <ArrowLeft size={12} aria-hidden="true" />
           {t("planning.parent")} ·{" "}
-          {tasks.data?.find((item) => item.id === task.parentId)?.title ??
-            t("agentProfile.task")}
+          {parent
+            ? presentPrototypeField(parent.id, "title", parent.title, locale)
+            : t("agentProfile.task")}
         </Link>
       )}
       <div className="task-source-heading">
@@ -596,6 +601,7 @@ export function TaskEditor({
           {t("planning.saved")}
         </p>
       )}
+      {afterDescription}
       {picker === "status" && (
         <SheetDialog
           title={t("planning.status")}

@@ -1,4 +1,5 @@
 "use client";
+import "../styles/organizations.css";
 import {
   issuedWorkspaceInviteSchema,
   type Member,

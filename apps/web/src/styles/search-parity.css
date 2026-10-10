@@ -336,6 +336,7 @@
 @media (min-width: 1024px) {
   .sheet-dialog.search-parity-dialog {
     width: 640px;
+    bottom: auto;
     height: auto;
     max-height: min(600px, calc(100dvh - 120px));
     margin: 88px auto 0;
