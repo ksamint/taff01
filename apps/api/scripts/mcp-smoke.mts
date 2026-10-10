@@ -391,6 +391,50 @@ try {
         }),
       ),
     );
+  const profile = await core.getAgentProfile(asUser, agent.id);
+  if (
+    profile.permissions.find(({ capability }) => capability === "files.attach")
+      ?.decision === "ask"
+  ) {
+    const attachmentGrant = grantSchema.parse(
+      text(
+        await client.callTool({
+          name: "grants.request",
+          arguments: {
+            agentId: agent.id,
+            taskId,
+            runId: run.id,
+            capability: "files.attach",
+            reason: "Attach this smoke run's actual MCP discovery evidence",
+          },
+        }),
+      ),
+    );
+    check(
+      "files.attach ask policy requires its own scoped human grant",
+      attachmentGrant.status === "pending" &&
+        attachmentGrant.taskId === taskId &&
+        attachmentGrant.runId === run.id,
+    );
+    await core.decideGrant(asUser, attachmentGrant.id, {
+      decision: "allow",
+      expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+    });
+    run = (await detail()).run;
+    if (run.status === "paused")
+      run = runSchema.parse(
+        text(
+          await client.callTool({
+            name: "runs.control",
+            arguments: {
+              runId: run.id,
+              version: run.version,
+              action: "resume",
+            },
+          }),
+        ),
+      );
+  }
   const measuredStart = performance.now();
   const discovery = await client.listTools();
   await client.callTool({
