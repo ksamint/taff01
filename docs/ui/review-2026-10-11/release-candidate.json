@@ -1,0 +1,240 @@
+{
+  "validatedSourceSha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+  "sourceTree": "0bb2aa00bc3ec35f3e425e1ee6ea690ac806f0fd",
+  "checkpointKind": "pre-deployment review; not a live-upgrade checkpoint",
+  "local": {
+    "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+    "passed": true,
+    "unitTests": 492,
+    "unitFiles": 46,
+    "browserTests": 123,
+    "bundleGzipBytes": 195718
+  },
+  "performance": {
+    "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+    "passed": true,
+    "LCP_RUNS": 3,
+    "lcp": {
+      "en": {
+        "samplesMs": [
+          704,
+          696,
+          724
+        ],
+        "medianMs": 704
+      },
+      "zh-CN": {
+        "samplesMs": [
+          800,
+          780,
+          776
+        ],
+        "medianMs": 780
+      },
+      "zh-HK": {
+        "samplesMs": [
+          772,
+          764,
+          784
+        ],
+        "medianMs": 772
+      }
+    },
+    "lighthouse": [
+      {
+        "locale": "en",
+        "scores": {
+          "performance": 100,
+          "accessibility": 96,
+          "best-practices": 100
+        },
+        "lighthouse": "13.5.0"
+      },
+      {
+        "locale": "zh-CN",
+        "scores": {
+          "performance": 99,
+          "accessibility": 96,
+          "best-practices": 100
+        },
+        "lighthouse": "13.5.0"
+      },
+      {
+        "locale": "zh-HK",
+        "scores": {
+          "performance": 99,
+          "accessibility": 96,
+          "best-practices": 100
+        },
+        "lighthouse": "13.5.0"
+      }
+    ]
+  },
+  "ci": {
+    "feature": {
+      "runId": 38075126595,
+      "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+      "branch": "codex/prototype-release",
+      "url": "https://github.com/ksamint/taff01/actions/runs/38075126595",
+      "status": "completed",
+      "conclusion": "success",
+      "checks": "success",
+      "images": "success",
+      "visualScreens": 16,
+      "visualCases": 64,
+      "browserTests": 123,
+      "unitTests": 492,
+      "requiredSteps": [
+        "Run pnpm lint",
+        "Run pnpm typecheck",
+        "Run pnpm licence:check",
+        "Run pnpm test",
+        "Run pnpm build",
+        "Run pnpm build:server",
+        "Run pnpm perf:budget",
+        "Run pnpm perf:lighthouse",
+        "Approved visual baselines before fixture mutations",
+        "Browser flows in en, zh-CN and zh-HK",
+        "MCP smoke against the bundled API"
+      ]
+    },
+    "main": {
+      "runId": 38075126547,
+      "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+      "branch": "main",
+      "url": "https://github.com/ksamint/taff01/actions/runs/38075126547",
+      "status": "completed",
+      "conclusion": "success",
+      "checks": "success",
+      "images": "success",
+      "visualScreens": 16,
+      "visualCases": 64,
+      "browserTests": 123,
+      "unitTests": 492,
+      "requiredSteps": [
+        "Run pnpm lint",
+        "Run pnpm typecheck",
+        "Run pnpm licence:check",
+        "Run pnpm test",
+        "Run pnpm build",
+        "Run pnpm build:server",
+        "Run pnpm perf:budget",
+        "Run pnpm perf:lighthouse",
+        "Approved visual baselines before fixture mutations",
+        "Browser flows in en, zh-CN and zh-HK",
+        "MCP smoke against the bundled API"
+      ]
+    }
+  },
+  "ciLighthouse": {
+    "feature": {
+      "zipSha256": "649bd949ffd0ff7f8c49184ddf7b4aae9c43e18fdd2e05cbadf16ec16ce770f4",
+      "reports": [
+        {
+          "locale": "zh-CN",
+          "scores": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100
+          },
+          "sha256": "5aefa1a76854f59675df8a3bf1da9ad64599335d407176540c9455ec58b7fe84"
+        },
+        {
+          "locale": "en",
+          "scores": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100
+          },
+          "sha256": "8b945de8b79311bd3d0e3ccdb4d8439207aa859a893fb9924f1302a4287cf731"
+        },
+        {
+          "locale": "zh-HK",
+          "scores": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100
+          },
+          "sha256": "6511d9873715e6a83a16ec021ac5796dd0ffcba4d65af9d65e8546596257d9d2"
+        }
+      ],
+      "artifactId": 11677464294
+    },
+    "main": {
+      "zipSha256": "dfae79d8a4df13e1615d7d2e94f474654f50637d0e3718ad52e4beea74c7c2bf",
+      "reports": [
+        {
+          "locale": "en",
+          "scores": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100
+          },
+          "sha256": "35b9acec1ad666df96cb7b14def7c876d7439ed8ab0c972f862c1a916e16c9f0"
+        },
+        {
+          "locale": "zh-CN",
+          "scores": {
+            "performance": 95,
+            "accessibility": 96,
+            "best-practices": 100
+          },
+          "sha256": "b9b82dd927ba32344bdabf9620e35be1ea9a20bb17eb82b4561f39d0d4d4ea9f"
+        },
+        {
+          "locale": "zh-HK",
+          "scores": {
+            "performance": 94,
+            "accessibility": 96,
+            "best-practices": 100
+          },
+          "sha256": "ad1c90d1c6637551234b5f6409db8426ed37a6de8ae5e80cb98bca7782d1923f"
+        }
+      ],
+      "artifactId": 11678378740
+    }
+  },
+  "staging": {
+    "sha": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+    "tree": "0bb2aa00bc3ec35f3e425e1ee6ea690ac806f0fd",
+    "bundleSha256": "e5c2c7f0ebd1d9d087ab45131f9a145d93b4663e7915e35f60ee189163f96846",
+    "bytes": 6057141,
+    "mode": "0o600",
+    "remoteUploaded": true,
+    "gitBundleVerified": true,
+    "gitObjectShaVerified": true,
+    "temporaryVerificationRemoved": true,
+    "publisherStarted": false
+  },
+  "publicFixturePreflight": {
+    "checkedAt": "2026-10-10T18:36:53.825Z",
+    "results": [
+      {
+        "attempt": 1,
+        "ok": true,
+        "reviewEntries": 0,
+        "agents": 0,
+        "identityAndWorkspaceVerified": true,
+        "approvalPerformed": false
+      },
+      {
+        "attempt": 2,
+        "ok": true,
+        "reviewEntries": 0,
+        "agents": 0,
+        "identityAndWorkspaceVerified": true,
+        "approvalPerformed": false
+      }
+    ],
+    "releaseDeployed": false,
+    "mutationScope": "existing account sign-in/sign-out only; no task, agent, review or SMS mutations"
+  },
+  "deploymentStarted": false,
+  "remaining": [
+    "Real agent/review fixture accessible to the verification account, or explicit revision of the live review-approval requirement",
+    "Locked publisher with fresh current-main/exact-SHA CI gates, exclusive env and dedicated database backups",
+    "Default-builder API/worker/web builds, one-shot 0021/0022, task-number backfill verification, scoped container replacement",
+    "Required upgraded public-origin checks in EN/zh-HK on phone/desktop, preservation verification",
+    "Verified deployment checkpoint and lock release"
+  ]
+}
