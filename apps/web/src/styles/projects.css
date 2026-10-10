@@ -531,6 +531,15 @@
   .projects-view .board-card-bottom {
     opacity: 0;
   }
+  /* Reserve the action row before hover so the drag target never moves or
+     covers the owner, agent chip or run status. Hidden controls still take
+     the pointer and keep their 44px targets. */
+  .projects-view .planning-board .board-card-bottom {
+    position: static;
+    align-self: flex-end;
+    flex: 0 0 44px;
+    min-height: 44px;
+  }
   .projects-view .board-card:hover .board-card-bottom,
   .projects-view .board-card:focus-within .board-card-bottom,
   .projects-view .board-card:has(details[open]) .board-card-bottom {

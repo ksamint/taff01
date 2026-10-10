@@ -140,7 +140,53 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   if (screen === "task-detail") {
     await expect(page.getByTestId("task-field-worker")).toBeEnabled();
     await expect(page.getByTestId("task-schedule")).toBeEnabled();
+    await expect(page.locator(".task-parent-link")).toContainText("NW-140");
   }
+  const assertDesktopBoardActions = async () => {
+    const card = page.locator(
+      `.planning-board .board-card[data-task-id="${prototypeId("task", "nw", 141)}"]`,
+    );
+    await expect(card).toHaveClass(/is-selected/);
+    await card.locator("a.task-title-link").blur();
+    await page.mouse.move(0, 0);
+    const layout = () =>
+      card.evaluate((element) => {
+        const rect = (selector: string) => {
+          const target = element.querySelector(selector);
+          if (!target) throw new Error(`Missing board element: ${selector}`);
+          const { x, y, width, height } = target.getBoundingClientRect();
+          return { x, y, width, height };
+        };
+        return {
+          footer: rect(".projects-card-footer"),
+          status: rect(".projects-agent-state-desktop"),
+          handle: rect('[data-testid="drag-handle"]'),
+          menu: rect(".projects-card-menu > summary"),
+        };
+      });
+    const before = await layout();
+    await card.getByTestId("drag-handle").hover();
+    const after = await layout();
+    expect(after.handle, "Hover must not shift the drag target").toEqual(
+      before.handle,
+    );
+    expect(after.menu, "Hover must not shift the menu target").toEqual(
+      before.menu,
+    );
+    for (const state of [before, after]) {
+      for (const control of [state.handle, state.menu]) {
+        expect(control.width).toBeGreaterThanOrEqual(44);
+        expect(control.height).toBeGreaterThanOrEqual(44);
+        for (const label of [state.footer, state.status])
+          expect(
+            control.y,
+            "Board actions must sit below footer chips and run status",
+          ).toBeGreaterThanOrEqual(label.y + label.height);
+      }
+    }
+    await card.locator("a.task-title-link").focus();
+    await page.mouse.move(0, 0);
+  };
   let openedReview = false;
   try {
     if (screen === "review" && desktop) {
@@ -239,6 +285,8 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
           await expect(page.getByTestId("task-detail-heading")).toBeVisible();
       }
       await page.evaluate(() => document.fonts.ready);
+      if (desktop && (screen === "projects" || screen === "type"))
+        await assertDesktopBoardActions();
       await page.mouse.move(0, 0);
       await expect(page).toHaveScreenshot(`${screen}.png`, {
         animations: "disabled",
@@ -292,6 +340,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
           localStorage.setItem("taff-theme", "dark");
           document.documentElement.dataset.theme = "dark";
         });
+        if (desktop) await assertDesktopBoardActions();
         await page.mouse.move(0, 0);
         await expect(page).toHaveScreenshot("type-dark.png", {
           animations: "disabled",

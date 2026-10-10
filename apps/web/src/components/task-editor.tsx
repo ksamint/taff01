@@ -6,6 +6,7 @@ import {
   type TaskComment,
   taskCommentInputSchema,
   taskCommentSchema,
+  taskReference,
   taskSchema,
   updateTaskSchema,
 } from "@taff/schemas";
@@ -58,9 +59,8 @@ export function TaskEditor({
   afterDescription?: ReactNode;
 }) {
   const { me } = useWorkspace();
-  const authorId = me.workspaces.find(
-    ({ id }) => id === task.workspaceId,
-  )?.memberId;
+  const taskWorkspace = me.workspaces.find(({ id }) => id === task.workspaceId);
+  const authorId = taskWorkspace?.memberId;
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const members = useMembers(task.workspaceId);
@@ -260,7 +260,9 @@ export function TaskEditor({
         <Link className="task-parent-link" href={`/tasks/${task.parentId}`}>
           <ArrowLeft size={12} aria-hidden="true" />
           {t("planning.parent")} ·{" "}
-          {parent ? parent.title : t("agentProfile.task")}
+          {parent
+            ? `${taskWorkspace ? `${taskReference(taskWorkspace.key, parent.number)} ` : ""}${parent.title}`
+            : t("agentProfile.task")}
         </Link>
       )}
       <div className="task-source-heading">
