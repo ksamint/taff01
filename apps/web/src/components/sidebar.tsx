@@ -18,6 +18,7 @@ import { usePathname } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { useInbox, useMembers, useRuns, useTasks } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
+import { OrganizationChooser } from "./organization-chooser";
 import { Button } from "./ui/button";
 
 // Prototype desktop sidebar, lines 940–953; counts and status come from the API.
@@ -50,22 +51,13 @@ export function Sidebar() {
           <ChevronDown size={14} aria-hidden="true" />
         </summary>
         <div className="workspace-menu">
-          {me.workspaces.map((item) => (
-            <Button
-              key={item.id}
-              className="button-quiet"
-              aria-pressed={workspace.id === item.id}
-              onClick={(event) => {
-                setWorkspaceId(item.id);
-                event.currentTarget.closest("details")?.removeAttribute("open");
-              }}
-            >
-              {presentPrototypeField(item.id, "name", item.name, locale)}
-            </Button>
-          ))}
-          <Link className="sidebar-link" href="/orgs">
-            {t("organization.title")}
-          </Link>
+          <OrganizationChooser
+            heading
+            onSelect={(id, event) => {
+              setWorkspaceId(id);
+              event.currentTarget.closest("details")?.removeAttribute("open");
+            }}
+          />
         </div>
       </details>
       <Button

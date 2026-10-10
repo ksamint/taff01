@@ -4,7 +4,6 @@ import type { Locale } from "@taff/schemas/base";
 import { presentPrototypeField } from "@taff/schemas/prototype-data";
 import {
   Bell,
-  Check,
   ChevronDown,
   ChevronRight,
   Languages,
@@ -22,6 +21,7 @@ import { useNotificationPreferences } from "../lib/notification-preferences";
 import { useMembers } from "../lib/queries";
 import { applyTheme, readTheme, type ThemePreference } from "../lib/theme";
 import { useWorkspace } from "./app-shell";
+import { OrganizationChooser } from "./organization-chooser";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
@@ -245,33 +245,17 @@ export function MeView() {
       </Button>
       {sheet === "organization" && (
         <SheetDialog
-          title={t("organization.title")}
+          title={t("organization.switch")}
+          className="organization-sheet"
           onClose={() => setSheet(null)}
         >
-          <div className="me-org-choices">
-            {me.workspaces.map((item) => (
-              <Button
-                type="button"
-                key={item.id}
-                data-testid={`me-workspace-${item.id}`}
-                aria-pressed={workspace.id === item.id}
-                onClick={() => {
-                  setWorkspaceId(item.id);
-                  setSheet(null);
-                }}
-              >
-                <span>
-                  {presentPrototypeField(item.id, "name", item.name, locale)}
-                </span>
-                {workspace.id === item.id && (
-                  <Check size={18} aria-hidden="true" />
-                )}
-              </Button>
-            ))}
-            <Link className="me-manage-link" href="/orgs" prefetch={false}>
-              {t("organization.title")}
-            </Link>
-          </div>
+          <OrganizationChooser
+            testIdPrefix="me-workspace-"
+            onSelect={(id) => {
+              setWorkspaceId(id);
+              setSheet(null);
+            }}
+          />
         </SheetDialog>
       )}
       {sheet === "advanced" && (
