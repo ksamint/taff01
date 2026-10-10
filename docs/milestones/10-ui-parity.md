@@ -484,3 +484,16 @@ All 4 native images were inspected by root. Independent production comparisons p
 | phone-zh-HK / notifications | ![Prototype](../ui/reference/extra/phone-zh-notifications.png) | ![App](../ui/screenshots/ui-parity/notifications/phone-zh-HK-app.png) |
 | desktop-en / notifications | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/notifications/desktop-en-app.png) |
 | desktop-zh-HK / notifications | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/notifications/desktop-zh-HK-app.png) |
+
+## agent visual checkpoint — production `e5165f9`
+
+Source 636–666 supplies Back, 56 px agent icon, 22 px name, tasks and segmented permission rows. Existing member lookup supplies actual supervisor Lin Xiao; NW141 and Needs review use real task/run queries. Ten capability tags represent current permissions, rather than inventing the prototype three skills or client metadata unavailable in the DTO. Allow/Ask/Deny retains authorization, busy/error and session/snapshot guards. Phone push view covers tabs/FAB, and both desktop Sidebars render; desktop is an adaptive extension with no native prototype. The 44 px target and 12 px text floor remains; no provider, health or performance claim is fabricated.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/agent/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / agent | ![Prototype](../ui/reference/phone-en-agent-profile.png) | ![App](../ui/screenshots/ui-parity/agent/phone-en-app.png) |
+| phone-zh-HK / agent | ![Prototype](../ui/reference/phone-zh-agent-profile.png) | ![App](../ui/screenshots/ui-parity/agent/phone-zh-HK-app.png) |
+| desktop-en / agent | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/agent/desktop-en-app.png) |
+| desktop-zh-HK / agent | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/agent/desktop-zh-HK-app.png) |
