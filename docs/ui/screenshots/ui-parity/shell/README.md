@@ -13,6 +13,14 @@ helper loads equivalent faces from the actual stylesheet before capturing;
 production font policy and cold-load performance checks are unchanged. The
 manifest records the replacement hashes; FABs and reference crops are unchanged.
 
+At `f3c4f5b`, the root agent inspected the native Chinese actual and diff images
+after expanding the common font subset and preserving its prior raster controls.
+The remaining differences are 14 phone and eight desktop antialias pixels in
+text; layout, icons and data are unchanged. Those two captures are deliberately
+approved here and beside their references in the milestone. Their manifest
+hashes record the replacement. English captures, FABs, reference crops and
+strict comparison settings stay unchanged; a fresh comparison is still required.
+
 The reference inputs are the existing offline captures in
 [`docs/ui/reference`](../../../reference/README.md). Their Chinese filename
 is `zh`; the prototype's Hong Kong Chinese content maps to app project

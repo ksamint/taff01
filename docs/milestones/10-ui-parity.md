@@ -273,3 +273,15 @@ metrics, axes and layout tables stay unchanged. The exact reproducible asset
 and hashes are recorded in `apps/web/public/fonts/README.md`. Fresh strict
 pixel comparisons and the complete runner remain pending. The diagnostic
 candidate is superseded without starting gates; it is not a validation pass.
+
+At `f3c4f5b`, Calendar generated twelve native captures and passed an independent
+comparison in all four configurations. Shell's raster repair reduced the
+Chinese differences to 14 phone and eight desktop text-antialias pixels.
+The root agent inspected both actual/diff pairs and explicitly approved the
+two font-change captures shown beside their references above. Geometry,
+icons and data are unchanged. Their new hashes and source revision are in
+the Shell manifest; English captures, FABs and comparison settings are unchanged.
+A fresh comparison of these deliberately approved baselines and the complete
+runner remain required. Desktop card parent IDs now use available width;
+agent status wraps when its translated label cannot fit, and the selected
+Board/List underline uses the source's gold token.

@@ -281,6 +281,9 @@
 .calendar-scene .calendar-engine .taff-agent-event::before {
   content: none;
 }
+.calendar-scene .calendar-engine .sx__time-grid-event {
+  min-height: 44px;
+}
 .calendar-scene .calendar-engine .sx__time-grid-event-title {
   font-size: 12px;
   line-height: 16px;
