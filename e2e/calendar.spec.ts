@@ -939,6 +939,15 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
   );
   await page.getByTestId("calendar-week").click();
   await expect(page.locator(".sx__week-grid__date")).toHaveCount(7);
+  const weekScroll = page.locator(".calendar-engine-week .sx__view-container");
+  await expect
+    .poll(() => weekScroll.evaluate((el) => el.scrollTop))
+    .toBe(8 * 56);
+  // A month must start at its first week regardless of the time-grid position.
+  await weekScroll.evaluate((el) => {
+    el.scrollTop = 12 * 56;
+  });
+  expect(await weekScroll.evaluate((el) => el.scrollTop)).toBe(12 * 56);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -952,6 +961,19 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
   await expect(
     page.locator(".sx__month-grid-event").filter({ hasText: task.title }),
   ).toHaveCount(4);
+  const monthScroll = page.locator(
+    ".calendar-engine-month-grid .sx__view-container",
+  );
+  await expect.poll(() => monthScroll.evaluate((el) => el.scrollTop)).toBe(0);
+  expect(
+    await monthScroll.evaluate((el) => {
+      const firstDay = el.querySelector(".sx__month-grid-day__header");
+      return (
+        !!firstDay &&
+        firstDay.getBoundingClientRect().top >= el.getBoundingClientRect().top
+      );
+    }),
+  ).toBe(true);
   await monthEvent.evaluate((element) =>
     element.scrollIntoView({ block: "center", behavior: "instant" }),
   );

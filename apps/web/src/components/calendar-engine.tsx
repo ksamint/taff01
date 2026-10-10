@@ -141,11 +141,23 @@ export function CalendarEngine(props: CalendarEngineProps) {
       plugins.controls.setDate(Temporal.PlainDate.from(props.date));
   }, [ready, plugins.controls, props.date, props.view]);
   useEffect(() => {
-    if (!ready || props.view === "month-grid") return;
-    const frame = requestAnimationFrame(() => {
+    if (!ready) return;
+    let frame: number;
+    const positionView = () => {
       const container = root.current?.querySelector(".sx__view-container");
-      if (container) container.scrollTop = 8 * 56;
-    });
+      if (!container) return;
+      // The SDK reuses its scroll container. Wait for the new month DOM so
+      // the previous time-grid offset cannot be clamped into the month grid.
+      if (
+        props.view === "month-grid" &&
+        !container.querySelector(".sx__month-grid-wrapper")
+      ) {
+        frame = requestAnimationFrame(positionView);
+        return;
+      }
+      container.scrollTop = props.view === "month-grid" ? 0 : 8 * 56;
+    };
+    frame = requestAnimationFrame(positionView);
     return () => cancelAnimationFrame(frame);
   }, [ready, props.view]);
   useEffect(() => {

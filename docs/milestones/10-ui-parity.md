@@ -254,3 +254,22 @@ are unchanged. Generic Today labels and every localized month/weekday/date now
 use the common Noto subset. The disjoint font coverage remains exactly 714
 mappings with unchanged outlines, metrics and axes at six weights. Neither
 change is a performance pass until the unchanged cold-browser gates run.
+
+The `fb27a5a` diagnostic candidate passed independent Projects board/list
+comparisons in all four configurations. Calendar rendered all twelve day,
+week and month captures; the Chinese phone month comparison failed because
+the SDK retained a time-grid scroll offset, clipping the month headings.
+The shared engine now resets month scrolling only after its native month
+DOM mounts. The existing phone touch/month flow covers switching from a
+scrolled week, an unclipped first row and the subsequent real event move.
+Month chips also follow source lines 210–218: title-only text, square date
+labels, two-pixel gaps and compact padding. Their native interactive elements
+retain the required 44 px size.
+
+Shell comparison found small Chinese glyph raster differences after the
+common-font expansion. Only the new common font's `prep` raster-control
+table is removed to retain the earlier subset's controls; mappings, outlines,
+metrics, axes and layout tables stay unchanged. The exact reproducible asset
+and hashes are recorded in `apps/web/public/fonts/README.md`. Fresh strict
+pixel comparisons and the complete runner remain pending. The diagnostic
+candidate is superseded without starting gates; it is not a validation pass.

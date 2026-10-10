@@ -241,6 +241,43 @@
 .calendar-scene .calendar-engine .taff-agent-event {
   border-style: dashed !important;
 }
+.calendar-scene .calendar-engine .sx__month-grid-day {
+  min-width: 0;
+  padding: 4px 2px;
+}
+.calendar-scene .calendar-engine .sx__month-grid-day__header {
+  padding: 0;
+}
+.calendar-scene .calendar-engine .sx__month-grid-day__header-date {
+  width: 22px;
+  height: 22px;
+  margin-bottom: 2px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.calendar-scene .calendar-engine .sx__month-grid-day__events {
+  gap: 2px;
+}
+.calendar-scene .calendar-engine .sx__month-grid-cell,
+.calendar-scene .calendar-engine .sx__month-grid-event {
+  min-height: 44px;
+  height: 44px;
+}
+.calendar-scene .calendar-engine .sx__month-grid-event {
+  min-width: 44px;
+  border-width: 1px !important;
+  padding: 1px 3px;
+  line-height: 14px;
+}
+.calendar-scene .calendar-engine .sx__month-grid-event-time {
+  display: none;
+}
+.calendar-scene .calendar-engine .sx__month-grid-event-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .calendar-scene .calendar-engine .taff-agent-event::before {
   content: none;
 }
@@ -330,9 +367,5 @@
   }
   .calendar-scene .calendar-engine-month-grid .sx__month-grid-day {
     min-height: 118px;
-  }
-  .calendar-scene .calendar-engine-month-grid .sx__month-grid-event {
-    padding: 1px 3px;
-    line-height: 14px;
   }
 }
