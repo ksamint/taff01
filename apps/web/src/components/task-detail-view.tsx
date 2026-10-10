@@ -42,6 +42,7 @@ import { ReviewView } from "./review-view";
 import { RunPanel } from "./run-panel";
 import { TaskEditor } from "./task-editor";
 import { TaskScheduleButton } from "./task-schedule-button";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
@@ -194,13 +195,13 @@ export function TaskDetailView({
           <span className="task-worker-copy">
             <span className="task-worker-name">{workerName}</span>
             {latest && (
-              <span className="task-worker-state">
+              <Badge className="task-worker-state">
                 <span
                   className={`agent-status-dot agent-status-${latest.status}`}
                   aria-hidden="true"
                 />
                 {t(`run.status.${latest.status}`)}
-              </span>
+              </Badge>
             )}
           </span>
         </span>
@@ -275,12 +276,12 @@ export function TaskDetailView({
         <span>
           {prototypeTaskReference(task.data.id) ?? task.data.id.slice(0, 8)}
         </span>
-        <span
+        <Badge
           className={`status status-${task.data.status}`}
           data-testid="task-status"
         >
           {t(`status.${task.data.status}`)}
-        </span>
+        </Badge>
       </header>
       <div className="task-detail-body">
         <TaskEditor

@@ -41,6 +41,7 @@ import {
 } from "../lib/queries";
 import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 
 const TaskDetailView = dynamic(
@@ -406,11 +407,11 @@ export function InboxView() {
                                 {when.format(new Date(item.createdAt))}
                               </time>
                             </span>
-                            <span
+                            <Badge
                               className={`inbox-source-status inbox-source-${item.kind}`}
                             >
                               {t(`inbox.kind.${item.kind}`)}
-                            </span>
+                            </Badge>
                           </div>
                           {href ? (
                             <Link

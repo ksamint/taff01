@@ -30,6 +30,7 @@ import { useMembers } from "../lib/queries";
 import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { RunPanel } from "./run-panel";
+import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -281,12 +282,12 @@ function ReviewEditor({
           <section className="page-heading">
             <p className="eyebrow">{t("review.title")}</p>
             <h1>{data.task.title}</h1>
-            <span
+            <Badge
               className={`status status-${data.task.status}`}
               data-testid="review-task-status"
             >
               {t(`status.${data.task.status}`)}
-            </span>
+            </Badge>
           </section>
         </>
       )}
