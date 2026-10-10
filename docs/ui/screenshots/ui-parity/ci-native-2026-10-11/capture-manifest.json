@@ -1,0 +1,986 @@
+{
+  "sourceSha": "63491d0ed62de4e6bac216037272548922b3960f",
+  "repository": "ksamint/taff01",
+  "workflowSha": "63491d0ed62de4e6bac216037272548922b3960f",
+  "runId": "38073450948",
+  "runAttempt": "1",
+  "sourceTree": "02c4a1f092621ae3cb4f408f82b175f2bb6977de",
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261004.327.1",
+  "os": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "node": "v24.21.0",
+  "playwright": "1.64.0",
+  "monospace": "DejaVuSansMono.ttf: \"DejaVu Sans Mono\" \"Book\"",
+  "fontRuntime": "fontconfig\t2.15.0-1.1ubuntu2\nlibfreetype6:amd64\t2.13.2+dfsg-1ubuntu0.2",
+  "screenResults": [
+    {
+      "screen": "shell",
+      "stats": {
+        "startTime": "2026-10-10T17:55:17.447Z",
+        "duration": 12495.564,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "33eec9fc384f5accab64cb1899220a7de2582db0dd25655df3aeaf98470b8a3a"
+    },
+    {
+      "screen": "today",
+      "stats": {
+        "startTime": "2026-10-10T17:55:30.510Z",
+        "duration": 9790.416000000001,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "3892c0eac7cd7484d43bdb83640e38c2a9a9686b27b4a230fdcf8b8ef5ac9184"
+    },
+    {
+      "screen": "projects",
+      "stats": {
+        "startTime": "2026-10-10T17:55:40.859Z",
+        "duration": 13019.989,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "e5cc073b5e047a3562d57ee3baeede0d04b60d1569d3c54f76c14c3beff5abd8"
+    },
+    {
+      "screen": "task-detail",
+      "stats": {
+        "startTime": "2026-10-10T17:55:54.451Z",
+        "duration": 11667.538999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "e2ff3d9eda355b8c436b31f92e58c7ad48ced8a0244b325cf63f1e34877d4e39"
+    },
+    {
+      "screen": "review",
+      "stats": {
+        "startTime": "2026-10-10T17:56:06.679Z",
+        "duration": 13029.666,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "6bbaac920cd45b31a672570800b0614f2cdb75126a427adbf6f9784ff91343b0"
+    },
+    {
+      "screen": "inbox",
+      "stats": {
+        "startTime": "2026-10-10T17:56:20.291Z",
+        "duration": 10377.775,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "39cc080c49e62e69e2c9991f9ba944028e829c1263fdb48119629ed6f7c852da"
+    },
+    {
+      "screen": "calendar",
+      "stats": {
+        "startTime": "2026-10-10T17:56:31.225Z",
+        "duration": 13963.716,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "16d084cce446c4c3e91fa88d51e3ac915d534441c0de40c7ae67cf892af40465"
+    },
+    {
+      "screen": "me",
+      "stats": {
+        "startTime": "2026-10-10T17:56:45.757Z",
+        "duration": 9744.004,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "92c4817fc8247be71a625ed7c0fe8e23578603ba0ddb7db25787b75e0ad825f7"
+    },
+    {
+      "screen": "type",
+      "stats": {
+        "startTime": "2026-10-10T17:56:56.068Z",
+        "duration": 13369.706,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "09c236fc7fd8b0310674286613548052bb9edcaa8c4f7115141819eb9f94963a"
+    },
+    {
+      "screen": "search",
+      "stats": {
+        "startTime": "2026-10-10T17:57:09.993Z",
+        "duration": 11892.581999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "f6cda48209b03e92553288a1f1d844bc815f39fadcff213ab8d3bae9d45e7bca"
+    },
+    {
+      "screen": "notifications",
+      "stats": {
+        "startTime": "2026-10-10T17:57:22.450Z",
+        "duration": 9652.964,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "b66be084c665d5aba5b582713d6c923acf9b954c8ce9397ee29c07fff5d643d7"
+    },
+    {
+      "screen": "agent",
+      "stats": {
+        "startTime": "2026-10-10T17:57:32.653Z",
+        "duration": 9750.315999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "7437577aaf0a2acf12511c81664891ca1bdf1070988dc448e8844fb198ccf759"
+    },
+    {
+      "screen": "team",
+      "stats": {
+        "startTime": "2026-10-10T17:57:42.960Z",
+        "duration": 9986.768999999998,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "03c059765d4c20047368d2ea75bc63b58a3632347cc49d433f837db86b0d5a2c"
+    },
+    {
+      "screen": "mcp",
+      "stats": {
+        "startTime": "2026-10-10T17:57:53.499Z",
+        "duration": 9619.996,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "bcc722bc837972af2fe3865a2ee902d509bfb459ca4140ed545b2d9f09dc33e0"
+    },
+    {
+      "screen": "organizations",
+      "stats": {
+        "startTime": "2026-10-10T17:58:03.669Z",
+        "duration": 10170.456999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "815e7ecbfc3ccddd1c43aea6b5c4da1134870cde8172c6d4fd665715dd76de0f"
+    },
+    {
+      "screen": "quick-add",
+      "stats": {
+        "startTime": "2026-10-10T17:58:14.391Z",
+        "duration": 11270.002,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "ef18e2906854fcbbc71b4a674c04726e270d9a1c09aa9fcc297ce3aa749240dd"
+    }
+  ],
+  "captures": [
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/agent.png",
+      "bytes": 69957,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b4ff7a1b6efc0663d6b369b5da5eda41fb1026959189547e9847a0a2d046cb26",
+      "priorSha256": "e6f5b2055487cfe7f3e877a4720048eeeb31e0b98c5600db2f46cf2e0b0e828f",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar-month.png",
+      "bytes": 83161,
+      "width": 1280,
+      "height": 800,
+      "sha256": "e453bd5b452d7dcf05aaab727e155b3d80e08209cf609766231d631f98b2eefa",
+      "priorSha256": "b820312d7092c6e4c2c343b3fa7e991f5d5be3de47e8f5ce068767617f89c724",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar-week.png",
+      "bytes": 98238,
+      "width": 1280,
+      "height": 800,
+      "sha256": "bc46970e96e54853e0145f454aca9a69da39216a40246a581f11317068b301b4",
+      "priorSha256": "d06cd6426309d652b0cbc44f64eaf24834964eeadcc1900677dcce2584f6a5f1",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar.png",
+      "bytes": 81164,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9160dfd4676f598251013b3b30e2dbe1d254c9c8218a2ee0b91057b0d53dd5bb",
+      "priorSha256": "02e6c914852130cec19f06ff56d15b9f200551410b16e2a8002f192e1420e6c5",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/inbox.png",
+      "bytes": 130192,
+      "width": 1280,
+      "height": 800,
+      "sha256": "bf1d56e6ac5419733a7662f3ef4d12c772f3bb609a6e1274f9d3fa51eadcb959",
+      "priorSha256": "586e2fe274094b29b55ec595555c66a19b823706293b9e36f773ab50730ce826",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/mcp.png",
+      "bytes": 62961,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5184a315712fcba4578fe0d8e943f162b3e2b50fbd39488a19b270a3c556f533",
+      "priorSha256": "b3c93d44dd2b312f1b70c354157ccf7dd6987a028e53c134e7ce81138bcc6370",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/me.png",
+      "bytes": 58735,
+      "width": 1280,
+      "height": 800,
+      "sha256": "e51792d4fcfb1002abbe78818c67ce0f1e28861657c822a6b8ac94c8001a9d36",
+      "priorSha256": "07d9599f6f5d237051e04aadda473fa987b7ae6ae917121e0012776a171fa650",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/notifications.png",
+      "bytes": 63472,
+      "width": 1280,
+      "height": 800,
+      "sha256": "107bd8519e8f419e9eb3abad83e0ef7a5573f7aed87c86985956421ac9d36133",
+      "priorSha256": "be2c13650cf7a0e8c4131c604ceab0287c4b5b5aefdb39f0824c0454cb5329f6",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/organizations.png",
+      "bytes": 113612,
+      "width": 1280,
+      "height": 800,
+      "sha256": "2965f1aaa321fff0125bbbd49839b645fa890ad1af5c759428637cbd52c3abc4",
+      "priorSha256": "20d8041da2617ed680c891a24d63992bd51328b74bcf7a91791101069b81e953",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/projects-list.png",
+      "bytes": 153480,
+      "width": 1280,
+      "height": 800,
+      "sha256": "2c379bcee1279933fc49b5c31113ce7d8bc330ee9de026deb49432e36182a896",
+      "priorSha256": "1feba99fd802de18bd72ff0ee68bc8cc879c5f2fe4c594956e33fda74e41a021",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/projects.png",
+      "bytes": 155740,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ee9bfe53525e0f27c8c88b99f150fe7b213497dd73559bcd1a3fc71e7c2d0266",
+      "priorSha256": "33db6803e81c8abe5a4280d7690ced4b73ba8c15376d30e15ff55b5f0a297475",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/quick-add.png",
+      "bytes": 79084,
+      "width": 1280,
+      "height": 800,
+      "sha256": "d9eebe4d6a1d902e9b341373b9d92c9cc75fbc154bce80eddf0cda1d434bb9aa",
+      "priorSha256": "47b2a67c599370969ff6a1559cb5785ae820801943c2fb9d29f660494b15f9cc",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/review-deliverable.png",
+      "bytes": 144546,
+      "width": 1280,
+      "height": 800,
+      "sha256": "cdb9e53d458f7ed1d4f48ffa6e580750cdfba7904c920743082c5b83a8c930fb",
+      "priorSha256": "7bb5eaee30b839f8a8225256d073cba772f02c259539527dbe3bc6642d203f6b",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/review.png",
+      "bytes": 135855,
+      "width": 1280,
+      "height": 800,
+      "sha256": "11a4e5c1346855bc0ad364bdd11978ba7b94941f66da2ece741f916e45f04fc7",
+      "priorSha256": "bc8cfd051f1d2591112bd1e5059b94ac58ec22b000bbe1c946b08ead183e2528",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/search.png",
+      "bytes": 113038,
+      "width": 1280,
+      "height": 800,
+      "sha256": "dd3058e7af79efa210dbe84022cd52b58497ff2ce93702883867e5336f34829c",
+      "priorSha256": "60c5f099e4b3148c4d01501cb15665978a093a56451acb692f9f9d24c28eb1de",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/sidebar.png",
+      "bytes": 16912,
+      "width": 208,
+      "height": 800,
+      "sha256": "9a71d52f19cbb9d25b45f68758a0abc40d1caf019a9e0cb611b694d8222855e0",
+      "priorSha256": "fbbcc8048a2016bdd392a4eab2d9a2ab904bf2e77fd3a24a1e4144748c08db89",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/task-detail.png",
+      "bytes": 152857,
+      "width": 1280,
+      "height": 800,
+      "sha256": "007b82899e68bb5b6eb1557c579b9804412c414202f50a8410d8485f34a49453",
+      "priorSha256": "c6daa165b600aebe99d6fb0eaa25caf6078835bab32446de0c110581b993169e",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/team.png",
+      "bytes": 71514,
+      "width": 1280,
+      "height": 800,
+      "sha256": "775e847778a1ca234a2f948bfcf83e202685949210d2c499a87339e740e04804",
+      "priorSha256": "eb9a5b30f4b92617eacad38e4cb34d8d89a8365c3fc1e8d6dd2d99ba035be00e",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/today.png",
+      "bytes": 90938,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8008cfa6e08c432c28fa0ed6ded5a6b555da32d1e0e60a8c5323a91c4d35dd76",
+      "priorSha256": "ec61b7ec1dc63152b187a76fb16ac8f4b2c269a66a61458a4863e4b66c437789",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/type-dark.png",
+      "bytes": 157548,
+      "width": 1280,
+      "height": 800,
+      "sha256": "dd0c37e15a4720649cfd17529ac01aafa6cefdab195b5e72150bbff00b1f15fe",
+      "priorSha256": "4e652208a0a0d630b1e9a8206f604325e5883fd5b253b01d44e80362307bcfa2",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/type.png",
+      "bytes": 155740,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ee9bfe53525e0f27c8c88b99f150fe7b213497dd73559bcd1a3fc71e7c2d0266",
+      "priorSha256": "33db6803e81c8abe5a4280d7690ced4b73ba8c15376d30e15ff55b5f0a297475",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/agent.png",
+      "bytes": 79402,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5acca5976cc4b846b72f44310dee7e4e8c69343d7e19eadbedbb4bcda0f5bea6",
+      "priorSha256": "914cf13d91e4bdf23bfbd7f7f12e178782f894a81882eef218c7f010a5c84819",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar-month.png",
+      "bytes": 81304,
+      "width": 1280,
+      "height": 800,
+      "sha256": "14520d578747fe48eec54987f93e3d9812e668930f838a8b321851826d403f82",
+      "priorSha256": "9723696d1a37342de119b042af35e07ad01b7106f08c0f4ddc6cd5508a32ddab",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar-week.png",
+      "bytes": 95006,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8d70c7a7542169a0b8fa4276eabbd20507361533b3c01b0da60fe69c36ba23ba",
+      "priorSha256": "7a3add124cb22aaa3f5528a2e6b707815c07418986e0210e0cd777f0e5c6c6d1",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar.png",
+      "bytes": 78239,
+      "width": 1280,
+      "height": 800,
+      "sha256": "dc3caa14ab18f1115cf7cf8eb2b2902acf5cb1ce37e353c9e7c8e4492b6aa432",
+      "priorSha256": "e6f01b4daeda4ae10c9bf3214e8375a5c3f6983ba449459238b193cd52d68bd8",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/inbox.png",
+      "bytes": 130372,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5470b42417146c0b018f5e8ab988962a64f65048bc3f74c33a96dff29b93b54b",
+      "priorSha256": "15d9480f8bcca201ef0b27d712d53334d8e2de67039ce225ea11bf2d8e85d487",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/mcp.png",
+      "bytes": 69600,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9b4316de5ad1dede2669e333837a4cfe694188db0aa35b2140ea50bbd7909549",
+      "priorSha256": "6d95c63e5027dfac886ed14451d3483c8f6f15c4919d7e9e517889c81d081491",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/me.png",
+      "bytes": 58085,
+      "width": 1280,
+      "height": 800,
+      "sha256": "dd02b72ca49477dfeac2bd4e7d591b7c1b124ebdd2c7132823c2164eca3da5d2",
+      "priorSha256": "22c7c50d7bd790c941ae5de14f504105a5b48d86b57052097589c32c274ccc63",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/notifications.png",
+      "bytes": 67339,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f62a75c9f64e92947ca743c10dc3f49dd177843f13a27a0828f8d0f97800f799",
+      "priorSha256": "ef3cb6e9c9f0baf99e96648958d91db059e93bd1e5840f5081fbed810ecc8128",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/organizations.png",
+      "bytes": 111595,
+      "width": 1280,
+      "height": 800,
+      "sha256": "6c8890f024ce811ff22568ed3a826fdb092758efaf92bc14b47407e748569af3",
+      "priorSha256": "6c7d162a1eac37aa163670b443f2aba75251e784dd1da90531e8d6707947c217",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/projects-list.png",
+      "bytes": 151940,
+      "width": 1280,
+      "height": 800,
+      "sha256": "0b9d76481d4769f033c2d749fdb4e35aaf6fd0923b9863079212806af5002d9b",
+      "priorSha256": "84c3356aff0db6f4569893608a6f568c53cb3a57a3f81d0857fff0c0b357ac20",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/projects.png",
+      "bytes": 154491,
+      "width": 1280,
+      "height": 800,
+      "sha256": "46489aac496f9cdfe3e0527eb35d0d453be5fb0ee6b42729e1ec5401cf10499d",
+      "priorSha256": "e6a12e2d2a741a3abb09707778c52e1b080bf5c54ed1dd115775ad3c62d86aa4",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/quick-add.png",
+      "bytes": 82589,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8e381e8ee57928599ef9b7af4e6120b30c0b42bdf2267827ef9b080ce2949235",
+      "priorSha256": "2b338e314000d6b043217c182e782c273edc81cd54f930d60f9a4ab7b8c0d452",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/review-deliverable.png",
+      "bytes": 148757,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f6c406037723c58abcf67f0b9f9670aad4e9148b3cc0e12197d9b887668936f0",
+      "priorSha256": "95a68f8b8a7c2a3ae7469262afcf4d97e7f1852d99dfe2355f4b9df8fec64873",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/review.png",
+      "bytes": 137523,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8a779dda7292abc4136812aa275c345ad9985fdb57cb60a682b7707d86e12f3a",
+      "priorSha256": "9bc193dd42da7e6358f0b5e24bb2793c08e3a2f1f1c606c3a84eed86bd2405cc",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/search.png",
+      "bytes": 114377,
+      "width": 1280,
+      "height": 800,
+      "sha256": "d69b307678472a9ad6dd159424d5dc32e06b79645c5b4978ba839ed3052d9be6",
+      "priorSha256": "421dc97735a436fa41b747482969ddf73201928e03e04c88e6d7bcf378fd94a5",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/sidebar.png",
+      "bytes": 16227,
+      "width": 208,
+      "height": 800,
+      "sha256": "3630b12717bf8b125b53e3580f70f627e110ed36f86f4a18255121421337852f",
+      "priorSha256": "2c54a894fd005d238d1530ebdbcee7614237f34cccdbda1ae7235f833c308bc9",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/task-detail.png",
+      "bytes": 149773,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a54630263e89a824a1e6e9e9dadd98690368dcfe2de4936c38e5b6d76c3a7612",
+      "priorSha256": "c496b45ca011f7daefdb2be9320205d0646bb0318ad0cf228a75bb3b2add9fe3",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/team.png",
+      "bytes": 81152,
+      "width": 1280,
+      "height": 800,
+      "sha256": "be2a93b8bd307dfbae8dc851de6a5c5d910535bbb57ba842ac77d3bae7d0eb7f",
+      "priorSha256": "66dc5bcb42b958d5dc121004309f8d0c7ef79b4e2c385735d9d8680391e51bb7",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/today.png",
+      "bytes": 89549,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b2f2fba04ff146f318ecc8a2d03a9f6b82782ce1df0aa5045d57a61d2d46018f",
+      "priorSha256": "12c6b398cef535cf3e87e2ea8ad4b2b2716c5f444604e6f82d43cd41ab5c6843",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/type-dark.png",
+      "bytes": 156348,
+      "width": 1280,
+      "height": 800,
+      "sha256": "853bf70f832ac9bfee9e14692883c8c29b9f4341f7d8a5f37920aae54dcd39b9",
+      "priorSha256": "224e1753f4b60a0b00dfce1fede373089be0921b0242a8d6560f43efb7cdcc2b",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/type.png",
+      "bytes": 154518,
+      "width": 1280,
+      "height": 800,
+      "sha256": "2001e9ddf181d24d65b194ecdb6d5d01bbe175027a498053644bd33fae91be5f",
+      "priorSha256": "e6a12e2d2a741a3abb09707778c52e1b080bf5c54ed1dd115775ad3c62d86aa4",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/agent.png",
+      "bytes": 48420,
+      "width": 390,
+      "height": 844,
+      "sha256": "a099a5426442d739cad1dd5d04dd67bd131cbcac2e23e0610aaccc5e6f73b8b7",
+      "priorSha256": "1f6f5096da6ecb7444d535e7c5ae761f174a7d6e2af3907574f927339011f5fd",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar-month.png",
+      "bytes": 42713,
+      "width": 390,
+      "height": 844,
+      "sha256": "87ba46eb30fddf66074d10fc15f7f0e455ab799803329b8dec2c0179b81feebc",
+      "priorSha256": "06703a0c287569f14324bf07cde62876b87a29f03f70b1c32360e9c7b536306e",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar-week.png",
+      "bytes": 54655,
+      "width": 390,
+      "height": 844,
+      "sha256": "8835e625e525629159a0d337303f128938504198d5e79ccac51cadcb765c36d5",
+      "priorSha256": "c40a90c909ed1b6ec8ccec745436ab68ea2e9d790fa1a6b64273fe6b75cb083a",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar.png",
+      "bytes": 50010,
+      "width": 390,
+      "height": 844,
+      "sha256": "56c2a803d53142a4165d33720b74a9e77869c2d2c0c481c6a411d98b1b149a7c",
+      "priorSha256": "736c46c3a411639e0bcfe24e03193fc842c5cbe94004c009fa9e5b95c6afbcf3",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/fab.png",
+      "bytes": 402,
+      "width": 52,
+      "height": 52,
+      "sha256": "826e870520fe30029f4a914d237ff7dd9f3fd6f7f3648d8f35e4aea9c9233904",
+      "priorSha256": "bc47afba4993450fb0c5419e12f9ee8fcb498b12fccfa69fb4699cf400fe8c67",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/inbox.png",
+      "bytes": 84388,
+      "width": 390,
+      "height": 844,
+      "sha256": "2a6181df98214239c0bf8cb6f43591cc31c3750043618d64379f44d1e53a26aa",
+      "priorSha256": "2e19f6fcfae60e17a564116bc36f3a871fc3d712984aa7b545c817022a8a3089",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/mcp.png",
+      "bytes": 39544,
+      "width": 390,
+      "height": 844,
+      "sha256": "bc5539bec63aae5e5f298fcee5afd9f73dbca650b25554a86303db9935608c39",
+      "priorSha256": "f7e5f18b1891065b595e473810469919815b0a02b6286785d7ec1e8f361c231a",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/me.png",
+      "bytes": 41948,
+      "width": 390,
+      "height": 844,
+      "sha256": "700474a03c2a9784e3ec50a97d8f4199f116c804917e61a77eaa9a7a2e6d8ce9",
+      "priorSha256": "504d67649363e2ca95596afa208261102674565cd38235d87beb9fdf023a8463",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/notifications.png",
+      "bytes": 44201,
+      "width": 390,
+      "height": 844,
+      "sha256": "f46031537a139aaaef868572718ad278d9af1d7582d6a3c221e5090eaebf717d",
+      "priorSha256": "16270a11e5c95a5be4b65d03567f8ebe91d6acea0e08446d2f6a71832d1f3efa",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/organizations.png",
+      "bytes": 36354,
+      "width": 390,
+      "height": 844,
+      "sha256": "8639d597ce8c60247049d9c3968962bcf29fc0b9350259127e04549d1815e3e5",
+      "priorSha256": "2c665cefd3c091c52970f34e397b7bb88fe14347cd29991871a161a284e1e302",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/projects-list.png",
+      "bytes": 85686,
+      "width": 390,
+      "height": 844,
+      "sha256": "3f916765680504dd571c393f961856fcf51474eff9a7008ec7cd52bcbeccfe4e",
+      "priorSha256": "2aba51b6783e75f929ef5802e36a497ae67ab61426ec314b33fa306db7559af6",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/projects.png",
+      "bytes": 48835,
+      "width": 390,
+      "height": 844,
+      "sha256": "cca3590e66cd7bc2a7b838bc7ce14242a54a7836301e1d3d6ec9e33d20b5cc9a",
+      "priorSha256": "07ce16bf36a1b5093f36bfa0b43c8fecf686b018487d62b1112f2cb6c0bde0a4",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/quick-add.png",
+      "bytes": 40430,
+      "width": 390,
+      "height": 844,
+      "sha256": "33eddb334c1cf76651acb7b3515fa351b101297db38212671b2371884654223d",
+      "priorSha256": "5936ba95967a04193db37d908a76468a969080b530455d87b382d166df36b64f",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/review-deliverable.png",
+      "bytes": 64701,
+      "width": 390,
+      "height": 844,
+      "sha256": "2511e2da324324e4ae8a060ab3f2fabfa6941e969f227cda0e2b60cc2a800e29",
+      "priorSha256": "bd50178ceaab6573a9efe090daaad6d082e0f78fcdf6b482fdcb9b7df15cb38d",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/review.png",
+      "bytes": 58194,
+      "width": 390,
+      "height": 844,
+      "sha256": "c2b043c1849807ca41bf90e67b3aa7a01bf34ea5d3032df739db5c3794053d92",
+      "priorSha256": "ce97aa066223f52faa14100cefb388161aee7f4c04d9170064348fa33044b127",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/search.png",
+      "bytes": 25426,
+      "width": 390,
+      "height": 844,
+      "sha256": "2ad928d8750c2d9359a62aa7db2e83f50c417df375f2f8ba704df5ac95629c0d",
+      "priorSha256": "c3f2acdfc5bc84b5d9a302943b7c59224b2e576a33a6b97c366d735bee22d322",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/tabbar.png",
+      "bytes": 5600,
+      "width": 390,
+      "height": 56,
+      "sha256": "c608996a0efdd94bf57ae3880548b815a653dd23c8a18093c20ab2cb74a33f97",
+      "priorSha256": "3ca050a782f154f779aa178385b6d3be8f9ab3e0db93d6eab1fa551913bb6ddf",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/task-detail.png",
+      "bytes": 53002,
+      "width": 390,
+      "height": 844,
+      "sha256": "aeb66c769ec2606e8aa72947197bb9b4de2b6736a3304f7eabc922ca8af7b70a",
+      "priorSha256": "bcc7b7708fa3620f9f240aca2a5647dd15b61143f2c8b017a43e299252280da7",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/team.png",
+      "bytes": 50058,
+      "width": 390,
+      "height": 844,
+      "sha256": "aa9bc4bc7169da6c6b8298f6790b614a0750c784a289510d4f4f4c327f16acb4",
+      "priorSha256": "7262ef5529a11b7c91b18ccacbfaef6a2887e4c8f2a6b7d2bd45cf5abbf92fbc",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/today.png",
+      "bytes": 72681,
+      "width": 390,
+      "height": 844,
+      "sha256": "837a96c3efa16c964ac0d2a3817552ce3c048c3ca96ae41ea54f31b453c4eba7",
+      "priorSha256": "b77c58e9f3f27f9bbd9fbdce4c252d267ad1dc7ee7af294172c0227903a2b231",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/type-dark.png",
+      "bytes": 49762,
+      "width": 390,
+      "height": 844,
+      "sha256": "dbb2a253a7c91795ca61156d319b41e197c6a0cac234e0b933c818ef127c3cd1",
+      "priorSha256": "3a55c073cf45926189b27bd41a723b243ea69db2e1647be3adff9f63c307be88",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/type.png",
+      "bytes": 48835,
+      "width": 390,
+      "height": 844,
+      "sha256": "cca3590e66cd7bc2a7b838bc7ce14242a54a7836301e1d3d6ec9e33d20b5cc9a",
+      "priorSha256": "07ce16bf36a1b5093f36bfa0b43c8fecf686b018487d62b1112f2cb6c0bde0a4",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/agent.png",
+      "bytes": 59203,
+      "width": 390,
+      "height": 844,
+      "sha256": "7cee75be3195410c5cace4693366c8cdc9bad0f9c334c711438dad642432cd46",
+      "priorSha256": "73e4e002069affe354f6ed63f778f433922b8b9cb8291c3f75e5cd2b25bf5421",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar-month.png",
+      "bytes": 42453,
+      "width": 390,
+      "height": 844,
+      "sha256": "989297668a614ba11964d0a75c0789689cbb220acebf2d02bb8750e7a61f3da8",
+      "priorSha256": "a64d07b18eafa90d126db360135010ce572311e138f868a616169ca61a49b8b4",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar-week.png",
+      "bytes": 53779,
+      "width": 390,
+      "height": 844,
+      "sha256": "df14bcb856d929cd67d7c4b1b7f0a168573c0a1826f6c4a80bfa3a7439fa5aea",
+      "priorSha256": "99933dc6c9222cacb660419559504b90e99f220284adba4d9741d65a65540dc9",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar.png",
+      "bytes": 48199,
+      "width": 390,
+      "height": 844,
+      "sha256": "c73653c9ad4d1c94f268c9ed0d6ec8f82ab936b5977c99827b43495b8a4dce3f",
+      "priorSha256": "fd2c14cfce0c23b7ca67ea1bdfd01c59878005b656cf7be4dee80f14e9f6d737",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/fab.png",
+      "bytes": 402,
+      "width": 52,
+      "height": 52,
+      "sha256": "826e870520fe30029f4a914d237ff7dd9f3fd6f7f3648d8f35e4aea9c9233904",
+      "priorSha256": "bc47afba4993450fb0c5419e12f9ee8fcb498b12fccfa69fb4699cf400fe8c67",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/inbox.png",
+      "bytes": 89238,
+      "width": 390,
+      "height": 844,
+      "sha256": "792c054ab70e59a309fe0b6e06cf43cffee54dbcd212957ae00476394a72b74c",
+      "priorSha256": "988f89432cbca09886c0a314cd277a8e0ea2ffd90d7e6a767790410c81a5ca13",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/mcp.png",
+      "bytes": 47757,
+      "width": 390,
+      "height": 844,
+      "sha256": "6cdfeb2c7d91976c79d93e133a8dc9ea09a7990b90c54714cab0581dabf18021",
+      "priorSha256": "464fe515faf63733cead90ddf0ad02999165bd62a6b928a2de138f0d7f278f2b",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/me.png",
+      "bytes": 42468,
+      "width": 390,
+      "height": 844,
+      "sha256": "07a9d99605e0d116ac4d16df9214ac2e2637856d35adee754b122ee974d17ee5",
+      "priorSha256": "ae427c56ffc71044890745893fcf80d5ca5431b65cbe696deae2444cd7499a6c",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/notifications.png",
+      "bytes": 53303,
+      "width": 390,
+      "height": 844,
+      "sha256": "c08a54ea319456ad89988b70d133ae232ee356afe607d148e61baeace4e86d54",
+      "priorSha256": "cb42529f7937952e092ab516fdfecb06704882c91185d4d990c77cb8c07bb5a5",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/organizations.png",
+      "bytes": 40245,
+      "width": 390,
+      "height": 844,
+      "sha256": "96ea6c80f36927bdb64f88f47faf423e7470dbbdd05f7834b41cb724e528b210",
+      "priorSha256": "bd8beb53d6c85f603c5afb9b10d14f22ada25599494103dcf261e3612d288ac6",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/projects-list.png",
+      "bytes": 83891,
+      "width": 390,
+      "height": 844,
+      "sha256": "cbeb0b65a4c20ad3afd6ed9266daf4bb5f294b4006c9e2d86555febc5f827204",
+      "priorSha256": "3273f40d0ea372b0f1d7d28d18682a495b5b4427c59da3a8a4ea18850184ebdf",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/projects.png",
+      "bytes": 49485,
+      "width": 390,
+      "height": 844,
+      "sha256": "234fded00b063623819c85d09bbb16f7319c6d6eb735697227288144f7dccbaa",
+      "priorSha256": "47532851182421079c5a8ac4a778c39eee5fa87b75b6c4d06cc68eaa577c9864",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/quick-add.png",
+      "bytes": 43396,
+      "width": 390,
+      "height": 844,
+      "sha256": "744ce94d5dc0076daba21b81e8b4d664ca99ab16617a91d4e72d3cb9a15c4336",
+      "priorSha256": "f5784830e4528920eef365c07b6697ef535f4b2be37f9ce26c7d4dd3ff9c6009",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/review-deliverable.png",
+      "bytes": 65399,
+      "width": 390,
+      "height": 844,
+      "sha256": "cecc5598184c182e1e524ef5bd0101b2b6ca9e1632bd7ce73e456752fe8d287f",
+      "priorSha256": "1ae200df8b43d99afd793b7f7ee52d2489967ee201107f6a0da3e2c3f2182dd7",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/review.png",
+      "bytes": 60593,
+      "width": 390,
+      "height": 844,
+      "sha256": "5e37b4334898daedb38a1ac66dde01aee43477a1999ce4cef1ab6e884d1d1abf",
+      "priorSha256": "1f139dbb02dc99a7ed90a31f2b56bde1a3fd52dde5881e671f45ae2ffe1edfd3",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/search.png",
+      "bytes": 27854,
+      "width": 390,
+      "height": 844,
+      "sha256": "0d362950d4c4396adcb7e12858034f7e52b8d0f9159e483487448e25b579c284",
+      "priorSha256": "8739b9e5640e1c9b87cf77a7d5d970440f9b94ef5fbef16b5fcd128b2711695c",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/tabbar.png",
+      "bytes": 5451,
+      "width": 390,
+      "height": 56,
+      "sha256": "5c9f24af6cf8b518a2a8ac5d0ab7a0e60f6297f8b14cf854563a3e20624c5788",
+      "priorSha256": "04b33ab75814b3cb358d1dbdfda8066b47ee569b424dbb1bbb18d1ec39613c66",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/task-detail.png",
+      "bytes": 53861,
+      "width": 390,
+      "height": 844,
+      "sha256": "3dba80b279d95d3fee9d92fe74bee82d3f68456ab00d5b5989c573795d93e746",
+      "priorSha256": "13b70a0184c6f4e2f8348ba819477aa7c97eca7e046b3138f2e3fcb247e78288",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/team.png",
+      "bytes": 58985,
+      "width": 390,
+      "height": 844,
+      "sha256": "8131b1f9b3b48c08ebcfb5a6956b588a7cc56f6d7c4e0b748a9e70f426d5da4d",
+      "priorSha256": "7c30516a4ba3c703bc74f38e353779c30c1171e61980bea5c2d80b1922b4d279",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/today.png",
+      "bytes": 72231,
+      "width": 390,
+      "height": 844,
+      "sha256": "7f0ad11a42d320f940e2fcc627642b838e920fd3ed7e9b61e5b3c3f0edde8fbc",
+      "priorSha256": "64288c85ab4a2028f54550da8467094690245c915486f5c4e6592f006ccc7980",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/type-dark.png",
+      "bytes": 50322,
+      "width": 390,
+      "height": 844,
+      "sha256": "895e464a5fc73618dd11f3a12618710ec316ac9e64f457286edcbbc1507adff9",
+      "priorSha256": "cdf1d210b95a80e43f1e6fb4f8fbaa58be84c4cfdcf5b6b863ced4e4272066a8",
+      "changed": true
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/type.png",
+      "bytes": 49485,
+      "width": 390,
+      "height": 844,
+      "sha256": "234fded00b063623819c85d09bbb16f7319c6d6eb735697227288144f7dccbaa",
+      "priorSha256": "47532851182421079c5a8ac4a778c39eee5fa87b75b6c4d06cc68eaa577c9864",
+      "changed": true
+    }
+  ],
+  "changedCount": 86
+}
