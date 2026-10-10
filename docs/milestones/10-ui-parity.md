@@ -471,3 +471,16 @@ All 8 native images were inspected by root. Independent production comparisons p
 | desktop-en / type-dark | ![Prototype](../ui/reference/dark/desktop-en-board.png) | ![App](../ui/screenshots/ui-parity/type/desktop-en-type-dark-app.png) |
 | desktop-zh-HK / type | ![Prototype](../ui/reference/desktop-zh-board.png) | ![App](../ui/screenshots/ui-parity/type/desktop-zh-HK-type-app.png) |
 | desktop-zh-HK / type-dark | ![Prototype](../ui/reference/dark/desktop-zh-board.png) | ![App](../ui/screenshots/ui-parity/type/desktop-zh-HK-type-dark-app.png) |
+
+## notifications visual checkpoint — production `e5165f9`
+
+Source 613–635 supplies Back navigation, compact title, preference rows, digest time and quiet-hours hierarchy. House Switch and existing preference query/update handlers retain real enabled categories, digest 09:00 and disabled quiet hours. Actual UTC, busy/error states, device opt-in and delivery history remain accessible. Phone push view covers tabs and FAB; desktop retains the real Sidebar as a responsive extension. Foreground-alert wording does not promise unsupported device delivery. The 44 px target and 12 px text floor applies; no synthetic OS chrome or desktop prototype is invented.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/notifications/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / notifications | ![Prototype](../ui/reference/extra/phone-en-notifications.png) | ![App](../ui/screenshots/ui-parity/notifications/phone-en-app.png) |
+| phone-zh-HK / notifications | ![Prototype](../ui/reference/extra/phone-zh-notifications.png) | ![App](../ui/screenshots/ui-parity/notifications/phone-zh-HK-app.png) |
+| desktop-en / notifications | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/notifications/desktop-en-app.png) |
+| desktop-zh-HK / notifications | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/notifications/desktop-zh-HK-app.png) |
