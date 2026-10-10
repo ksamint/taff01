@@ -41,7 +41,7 @@ app. No production database will be seeded for this work.
 | --- | --- | --- |
 | 0 — offline prototype and capture tooling | Accepted locally; strict checks before push pending | 38 native zh/en reference captures; independent full navigation rerun passed with zero external requests or browser errors. [Matrix and provenance](../ui/reference/README.md). |
 | 1 — shell | Visuals accepted at `dfcbefb`; committed-baseline and behavioral gates pending | Six native element captures personally inspected by the root agent; reference/app comparisons below. Phone tabs/FAB from lines 376–410, desktop sidebar from 940–953; existing session/cache guards retained. |
-| 2 — Today and Northwind seed | Pending | |
+| 2 — Today and Northwind seed | Visuals accepted at `e1c2d1a`; behavioral gates pending | Four native captures inspected; independent comparison passed. Source 47–114, existing real schedule/tasks/run bindings. |
 | 3 — Projects | Pending | |
 | 4 — task detail and review | Pending | |
 | 5 — Inbox | Pending | |
@@ -137,6 +137,28 @@ the existing isolated `db:seed` step and builds. Behavioral tests can edit
 the fixture and repeat seeding intentionally preserves edits, so running
 visuals first avoids depending on a destructive reset. The visual check
 uses the committed baselines and does not update them in CI.
+
+## Today visual checkpoint
+
+The root agent inspected all four `e1c2d1a` captures after an independent
+comparison passed. The source's date/header, timed blocks, dashed agent work,
+gold now-line and compact due rows bind actual Northwind data. Actual meeting
+durations, attendees, authenticated-user initials, unread count and paused work
+remain truthful. No planned-step total or progress percentage is invented.
+The [capture manifest](../ui/screenshots/ui-parity/today/manifest.json) records
+source, reference and byte-identical app/baseline hashes. Behavioral and full
+release checks remain pending. Synthetic prototype OS chrome is absent in the app.
+
+| Locale | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| Phone English | ![Today reference English](../ui/reference/phone-en-today.png) | ![Today app English](../ui/screenshots/ui-parity/today/phone-en-app.png) |
+| Phone Hong Kong Chinese | ![Today reference Chinese](../ui/reference/phone-zh-today.png) | ![Today app Chinese](../ui/screenshots/ui-parity/today/phone-zh-HK-app.png) |
+
+The prototype has no desktop Today view. These are responsive app evidence:
+
+| Desktop English | Desktop Hong Kong Chinese |
+| --- | --- |
+| ![Today desktop English](../ui/screenshots/ui-parity/today/desktop-en-app.png) | ![Today desktop Chinese](../ui/screenshots/ui-parity/today/desktop-zh-HK-app.png) |
 
 ## Integrated source ports — candidate, acceptance pending
 

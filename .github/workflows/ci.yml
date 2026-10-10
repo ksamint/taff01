@@ -75,8 +75,11 @@ jobs:
           path: lighthouse-reports/*.report.json
           retention-days: 7
       # Behavioral flows edit the seeded fixture; reseeding preserves those edits.
-      - name: Shell visual baselines before fixture mutations
-        run: UI_SCREEN=shell pnpm exec playwright test --config playwright.visual.config.ts
+      - name: Approved visual baselines before fixture mutations
+        run: |
+          for screen in shell today; do
+            UI_SCREEN="$screen" pnpm exec playwright test --config playwright.visual.config.ts
+          done
       - name: Browser flows in en, zh-CN and zh-HK
         run: pnpm e2e
       - name: MCP smoke against the bundled API
