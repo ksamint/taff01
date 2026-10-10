@@ -41,7 +41,7 @@ app. No production database will be seeded for this work.
 | --- | --- | --- |
 | 0 — offline prototype and capture tooling | Accepted locally; strict checks before push pending | 38 native zh/en reference captures; independent full navigation rerun passed with zero external requests or browser errors. [Matrix and provenance](../ui/reference/README.md). |
 | 1 — shell | Visuals accepted at `dfcbefb`; committed-baseline and behavioral gates pending | Six native element captures personally inspected by the root agent; reference/app comparisons below. Phone tabs/FAB from lines 376–410, desktop sidebar from 940–953; existing session/cache guards retained. |
-| 2 — Today and Northwind seed | Visuals accepted at `e1c2d1a`; behavioral gates pending | Four native captures inspected; independent comparison passed. Source 47–114, existing real schedule/tasks/run bindings. |
+| 2 — Today and Northwind seed | Phone accepted at `e1c2d1a`, corrected desktop at `e5165f9`; behavioral gates pending | Four native captures inspected; independent comparison passed. Source 47–114, existing real schedule/tasks/run bindings. |
 | 3 — Projects | Pending | |
 | 4 — task detail and review | Pending | |
 | 5 — Inbox | Pending | |
@@ -141,7 +141,13 @@ uses the committed baselines and does not update them in CI.
 ## Today visual checkpoint
 
 The root agent inspected all four `e1c2d1a` captures after an independent
-comparison passed. The source's date/header, timed blocks, dashed agent work,
+comparison passed. Production verification at `e5165f9` revealed that the
+earlier desktop images had captured an empty Sidebar before it loaded. Root
+inspected and intentionally replaced those two desktop images; all reported
+differences are inside the formerly blank left 208 px. The main content has
+zero reported differences under the unchanged comparison settings. Both phone
+baselines pass unchanged. Fresh full comparisons remain required.
+The source's date/header, timed blocks, dashed agent work,
 gold now-line and compact due rows bind actual Northwind data. Actual meeting
 durations, attendees, authenticated-user initials, unread count and paused work
 remain truthful. No planned-step total or progress percentage is invented.
