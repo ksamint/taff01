@@ -40,7 +40,7 @@ app. No production database will be seeded for this work.
 | Step | State | Evidence |
 | --- | --- | --- |
 | 0 — offline prototype and capture tooling | Accepted locally; strict checks before push pending | 38 native zh/en reference captures; independent full navigation rerun passed with zero external requests or browser errors. [Matrix and provenance](../ui/reference/README.md). |
-| 1 — shell | Source port implemented; runtime and visual acceptance pending | Phone tabs/FAB from lines 376–410, desktop sidebar from 940–953; existing session/cache guards retained. |
+| 1 — shell | Visuals accepted at `dfcbefb`; committed-baseline and behavioral gates pending | Six native element captures personally inspected by the root agent; reference/app comparisons below. Phone tabs/FAB from lines 376–410, desktop sidebar from 940–953; existing session/cache guards retained. |
 | 2 — Today and Northwind seed | Pending | |
 | 3 — Projects | Pending | |
 | 4 — task detail and review | Pending | |
@@ -96,3 +96,87 @@ local PostgreSQL container accepts internal connections but the host driver
 query timed out before assertions. The initial browser run was stopped
 while waiting for API readiness, with its owned processes cleaned up.
 Acceptance will use the prepared isolated Linux environment.
+
+## Shell visual checkpoint — 2026-10-10
+
+The root agent personally inspected all six `dfcbefb` app captures and
+accepted the Shell visuals. The six accepted PNGs are copied unchanged to
+`e2e/__screenshots__/ui-parity.spec.ts/`, using the visual configuration's
+four project names. This is visual acceptance, not a claim that the nine
+validation gates have passed: the committed-baseline check and behavioral
+acceptance remain pending.
+
+The implementation inputs remain the HTML blocks: phone FAB and tabs at
+376–410, desktop sidebar at 940–953. These comparisons use only native
+pixel crops of the corresponding reference captures, without scaling or
+reconstructed pixels. The phone tab crop omits the 28 px synthetic OS home
+area; the app does not add fake OS chrome. The 52 px FAB and 208 px desktop
+sidebar are compared at their source dimensions. [Crop coordinates and
+hashes](../ui/screenshots/ui-parity/shell/README.md) preserve provenance.
+
+| Region / locale | Prototype reference crop | Accepted real app |
+| --- | --- | --- |
+| Phone tabs / English | ![Reference English phone tabs](../ui/screenshots/ui-parity/shell/phone-en-tabbar-reference.png) | ![App English phone tabs](../ui/screenshots/ui-parity/shell/phone-en-tabbar-app.png) |
+| Phone tabs / Hong Kong Chinese | ![Reference Chinese phone tabs](../ui/screenshots/ui-parity/shell/phone-zh-HK-tabbar-reference.png) | ![App Hong Kong Chinese phone tabs](../ui/screenshots/ui-parity/shell/phone-zh-HK-tabbar-app.png) |
+| Phone FAB / English | ![Reference English FAB](../ui/screenshots/ui-parity/shell/phone-en-fab-reference.png) | ![App English FAB](../ui/screenshots/ui-parity/shell/phone-en-fab-app.png) |
+| Phone FAB / Hong Kong Chinese | ![Reference Chinese FAB](../ui/screenshots/ui-parity/shell/phone-zh-HK-fab-reference.png) | ![App Hong Kong Chinese FAB](../ui/screenshots/ui-parity/shell/phone-zh-HK-fab-app.png) |
+| Desktop sidebar / English | ![Reference English sidebar](../ui/screenshots/ui-parity/shell/desktop-en-sidebar-reference.png) | ![App English sidebar](../ui/screenshots/ui-parity/shell/desktop-en-sidebar-app.png) |
+| Desktop sidebar / Hong Kong Chinese | ![Reference Chinese sidebar](../ui/screenshots/ui-parity/shell/desktop-zh-HK-sidebar-reference.png) | ![App Hong Kong Chinese sidebar](../ui/screenshots/ui-parity/shell/desktop-zh-HK-sidebar-app.png) |
+
+Documented differences preserve working behavior and the accessibility
+floor: targets are at least 44 px and text at least 12 px, enlarging the
+source's 32 px controls and 11 px labels. The real API returns four unread
+Inbox items, while the prototype shows three; badges and agent status dots
+retain actual data. Desktop utility links for Today, Calendar and Me retain
+access to those existing routes below the source sidebar's primary links
+and agents. The native Lucide icon mappings and these differences are part
+of the accepted Shell capture, not screenshot substitutions.
+
+CI now runs the explicit Shell visual check before behavioral flows, after
+the existing isolated `db:seed` step and builds. Behavioral tests can edit
+the fixture and repeat seeding intentionally preserves edits, so running
+visuals first avoids depending on a destructive reset. The visual check
+uses the committed baselines and does not update them in CI.
+
+## Integrated source ports — candidate, acceptance pending
+
+Today, Projects, task detail and review, Inbox, Calendar and Me now have TSX
+and token CSS ports from the line map. The shared shell persists across routes;
+Next intercepted task routes preserve the preceding phone screen. Desktop
+Projects and Inbox bind the existing task editor in the source's detail pane.
+Source Search, agent profile, MCP and Team blocks are also ported. Existing
+permissions, version checks, form drafts, optimistic rollback, recurrence,
+notifications, token reveal-once and cache identity guards remain in their
+original handlers. House Button, Input, Label, SheetDialog and the shared
+Lucide StatusGlyph map the prototype primitives.
+
+Review found and repaired nested-dialog Escape propagation, cross-workspace
+task member/run/comment scoping, and account-specific timezone initialization.
+Schedule controls sit outside the metadata form; an embedded approval failure
+keeps checks, item decisions and comment drafts. Existing 105 browser cases
+retain their behavioral assertions; nine regression cases cover Me preferences,
+schedule-save isolation, approval rollback and cross-workspace nested editing.
+The expanded suite has 114 cases; browser execution is pending.
+
+A local production build exposed Next 16 parallel-route validation: an explicit
+implicit-slot fallback now preserves 404 behavior while the modal slot clears
+on navigation. The build succeeds. A preliminary integrated Today measurement
+is 196,993 bytes gzipped, below 204,800; this measurement precedes the last
+auxiliary CSS imports and is not final acceptance. Full typecheck and lint pass.
+
+The immutable Shell candidate `dfcbefb` completed seven required checks and
+all three Lighthouse/LCP locale runs, but failed Playwright (95 passed,
+10 failed); MCP smoke was not reached. Failures concern the held run navigation,
+profile rollback after route changes, consumed invitation URL restoration and
+one MCP source-event response. The integrated candidate addresses the route
+lifetime and selector issues; it must pass the full runner before any push.
+The failing candidate's evidence is retained and its disposable infrastructure
+removed. Production and the previously accepted validation environment remain
+unchanged.
+
+Gaps reflect real APIs: runs report events but no planned-step total, so no
+percentage or pending steps are fabricated. Agent client/skills/health and MCP
+connection health are absent. Search supports tasks, comments and settings;
+it has no member/event search. The prototype has no desktop-specific Today,
+Calendar, Me, agent profile or MCP layout. These supported responsive screens
+need captures, baselines and side-by-side acceptance before being marked done.

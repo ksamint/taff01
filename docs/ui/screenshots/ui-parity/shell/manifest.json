@@ -1,0 +1,73 @@
+{
+  "appCaptureCommit": "dfcbefb",
+  "method": "Native source-reference crops; no scaling, recoloring or reconstructed pixels. App copies are byte-identical to accepted Playwright element screenshots.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "name": "tabbar",
+      "reference": "docs/ui/reference/phone-en-today.png",
+      "cropXYWH": [0, 760, 390, 56],
+      "referenceSourceSha256": "e4f16ad5910726fd3470934184356005aad0b8e68a558028d9e8339505c108c0",
+      "referenceCropSha256": "1af5b467d3f835823d5a0be9ddcff8461bf9a0f34ffed11c294f86517ca88ace",
+      "appSha256": "455291d188554ae916e6808f12cc77aae675d30582e673a5d52fe402be80abc1",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/tabbar.png",
+      "baselineSha256": "455291d188554ae916e6808f12cc77aae675d30582e673a5d52fe402be80abc1"
+    },
+    {
+      "project": "phone-en",
+      "name": "fab",
+      "reference": "docs/ui/reference/phone-en-today.png",
+      "cropXYWH": [318, 692, 52, 52],
+      "referenceSourceSha256": "e4f16ad5910726fd3470934184356005aad0b8e68a558028d9e8339505c108c0",
+      "referenceCropSha256": "1f6ee7b2fef016fe488b880f75fd9c45e91fa534450462525ea6d3a66c49a863",
+      "appSha256": "bc47afba4993450fb0c5419e12f9ee8fcb498b12fccfa69fb4699cf400fe8c67",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/fab.png",
+      "baselineSha256": "bc47afba4993450fb0c5419e12f9ee8fcb498b12fccfa69fb4699cf400fe8c67"
+    },
+    {
+      "project": "desktop-en",
+      "name": "sidebar",
+      "reference": "docs/ui/reference/desktop-en-projects.png",
+      "cropXYWH": [0, 0, 208, 800],
+      "referenceSourceSha256": "714bc54d59e4ccf47dca8c971789883b6e12fed02ce809f6ac6ff71fba2af7b6",
+      "referenceCropSha256": "f005c742a73596c8fc946627d6e1a227f2922b453c9340a0046add4e9507978c",
+      "appSha256": "08f1b4082e8d0f7b94b53f65c0434c5d3ec52743a4fb8bfcc570453a6032d9e9",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/sidebar.png",
+      "baselineSha256": "08f1b4082e8d0f7b94b53f65c0434c5d3ec52743a4fb8bfcc570453a6032d9e9"
+    },
+    {
+      "project": "phone-zh-HK",
+      "name": "tabbar",
+      "reference": "docs/ui/reference/phone-zh-today.png",
+      "cropXYWH": [0, 760, 390, 56],
+      "referenceSourceSha256": "3d091a090620bbfc9fb633292b63afa199082f1c812cbf58ec5b87438484d98f",
+      "referenceCropSha256": "32e3e14980c4d423e6738f3daf96fb5da94ea6286a9a93339b456dd6d14ab8a9",
+      "appSha256": "f79c7348f2b2a20402bea0d617023b78ea6dcc8ef51a846c28649479b023b39a",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/tabbar.png",
+      "baselineSha256": "f79c7348f2b2a20402bea0d617023b78ea6dcc8ef51a846c28649479b023b39a"
+    },
+    {
+      "project": "phone-zh-HK",
+      "name": "fab",
+      "reference": "docs/ui/reference/phone-zh-today.png",
+      "cropXYWH": [318, 692, 52, 52],
+      "referenceSourceSha256": "3d091a090620bbfc9fb633292b63afa199082f1c812cbf58ec5b87438484d98f",
+      "referenceCropSha256": "1f6ee7b2fef016fe488b880f75fd9c45e91fa534450462525ea6d3a66c49a863",
+      "appSha256": "bc47afba4993450fb0c5419e12f9ee8fcb498b12fccfa69fb4699cf400fe8c67",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/fab.png",
+      "baselineSha256": "bc47afba4993450fb0c5419e12f9ee8fcb498b12fccfa69fb4699cf400fe8c67"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "name": "sidebar",
+      "reference": "docs/ui/reference/desktop-zh-projects.png",
+      "cropXYWH": [0, 0, 208, 800],
+      "referenceSourceSha256": "68d1a3bfc4c3a00bcbae5c3e0fb5cbf0f949482a5cefd44fc9f238c0d0b012a0",
+      "referenceCropSha256": "ae5a28902df92738e881713f423317b9072701bc0493ff86e6d438a034ea4cca",
+      "appSha256": "28f51ff9dacf023551713df7351d52e2ff069f344e9c3a38684306270d0e4464",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/sidebar.png",
+      "baselineSha256": "28f51ff9dacf023551713df7351d52e2ff069f344e9c3a38684306270d0e4464"
+    }
+  ],
+  "cropTool": "macOS ImageIO CGImage.cropping(to: CGRect(x,y,width,height)); native pixel coordinates, no resampling."
+}
