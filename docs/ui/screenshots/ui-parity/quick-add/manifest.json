@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 791\u2013830 and 1137\u20131139 supplies the phone bottom-flush sheet and desktop dialog at top 120 px, width 600 px. Existing parser request, manual Detect action, editable title and six real field pickers remain; confirmation creates separately from parsing. House buttons and fields retain 44 px targets and 12 px minimum text. One real example, explicit Detect control and extra Labels remain documented differences. These captures open the FAB without parsing or creating, and the desktop backdrop is actual Today rather than the prototype Projects page. No AI/provider execution or success is fabricated.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "quick-add",
+      "app": "docs/ui/screenshots/ui-parity/quick-add/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/quick-add.png",
+      "sha256": "982b36fc41853f70a837433e8b2391ce579cfac1987fca83aa2f1f53139c7588",
+      "reference": "docs/ui/reference/extra/phone-en-quick-add.png",
+      "referenceSha256": "99cef42315a8fa491901e57634993a524ae51db9fa9808d2d7660f98592566d4"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "quick-add",
+      "app": "docs/ui/screenshots/ui-parity/quick-add/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/quick-add.png",
+      "sha256": "f5784830e4528920eef365c07b6697ef535f4b2be37f9ce26c7d4dd3ff9c6009",
+      "reference": "docs/ui/reference/extra/phone-zh-quick-add.png",
+      "referenceSha256": "2c4d608c568cc865999dba6eb5efb90f4b36405903af990dbc2d5dd8e159c3df"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "quick-add",
+      "app": "docs/ui/screenshots/ui-parity/quick-add/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/quick-add.png",
+      "sha256": "c7f8b08d5c8389a16ae9b6666182e293ccc61ac266829660ec41e670b1c90f13",
+      "reference": "docs/ui/reference/extra/desktop-en-quick-add.png",
+      "referenceSha256": "0a606cf5481022b5af3c15a1326aa55ed3e5fae13689678685e0caf0dfc8b36b"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "quick-add",
+      "app": "docs/ui/screenshots/ui-parity/quick-add/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/quick-add.png",
+      "sha256": "2b338e314000d6b043217c182e782c273edc81cd54f930d60f9a4ab7b8c0d452",
+      "reference": "docs/ui/reference/extra/desktop-zh-quick-add.png",
+      "referenceSha256": "33a17a20cfd3033a3ddb674d5f32c30ae2550e50b0835acbc4234f469fd86e55"
+    }
+  ]
+}

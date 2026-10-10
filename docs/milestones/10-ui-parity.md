@@ -497,3 +497,28 @@ All 4 native images were inspected by root. Independent production comparisons p
 | phone-zh-HK / agent | ![Prototype](../ui/reference/phone-zh-agent-profile.png) | ![App](../ui/screenshots/ui-parity/agent/phone-zh-HK-app.png) |
 | desktop-en / agent | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/agent/desktop-en-app.png) |
 | desktop-zh-HK / agent | No desktop prototype; responsive app evidence | ![App](../ui/screenshots/ui-parity/agent/desktop-zh-HK-app.png) |
+
+## quick-add visual checkpoint — production `e5165f9`
+
+Source 791–830 and 1137–1139 supplies the phone bottom-flush sheet and desktop dialog at top 120 px, width 600 px. Existing parser request, manual Detect action, editable title and six real field pickers remain; confirmation creates separately from parsing. House buttons and fields retain 44 px targets and 12 px minimum text. One real example, explicit Detect control and extra Labels remain documented differences. These captures open the FAB without parsing or creating, and the desktop backdrop is actual Today rather than the prototype Projects page. No AI/provider execution or success is fabricated.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/quick-add/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / quick-add | ![Prototype](../ui/reference/extra/phone-en-quick-add.png) | ![App](../ui/screenshots/ui-parity/quick-add/phone-en-app.png) |
+| phone-zh-HK / quick-add | ![Prototype](../ui/reference/extra/phone-zh-quick-add.png) | ![App](../ui/screenshots/ui-parity/quick-add/phone-zh-HK-app.png) |
+| desktop-en / quick-add | ![Prototype](../ui/reference/extra/desktop-en-quick-add.png) | ![App](../ui/screenshots/ui-parity/quick-add/desktop-en-app.png) |
+| desktop-zh-HK / quick-add | ![Prototype](../ui/reference/extra/desktop-zh-quick-add.png) | ![App](../ui/screenshots/ui-parity/quick-add/desktop-zh-HK-app.png) |
+
+## Final source repairs before sealed validation
+
+Fresh production inspection found Calendar day hatching/month date fill
+(`95c4829`), a desktop organization menu below board cards (`c030dc9`), and
+missing Team Invite/supervisor/capability details (`8b2e597`). The source
+styles and existing real handlers/queries now supply those details. Team
+workload labels in all three locales now say open tasks, matching the actual
+count. Existing Me/guest browser cases exercise permitted Invite navigation
+and absence of guest role/invite controls; both capture harnesses wait for
+the three real agent profiles. These four screens require fresh captures
+before acceptance; no earlier candidate images approve the repairs.
