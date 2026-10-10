@@ -91,6 +91,13 @@ test("Me switches real organizations and preserves theme, time-zone rollback and
     page.locator(".organizations-view > .page-heading"),
   ).toBeHidden();
   await expect(page.locator(".tabbar")).toBeHidden();
+  await page.getByTestId("team-invite").click();
+  await expect(page.locator("#invite-email")).toBeVisible();
+  await page
+    .getByRole("dialog")
+    .locator(":scope > .section-heading")
+    .getByRole("button")
+    .click();
   await page.goto("/me");
   await page.getByTestId("me-organization").click();
   await page.getByTestId("organization-create-entry").click();

@@ -202,6 +202,9 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
           page.locator(".organizations-view > .page-heading"),
         ).toBeHidden();
         await expect(page.locator(".team-directory > h1")).toBeInViewport();
+        await expect(page.locator(".team-agent-supervisor")).toHaveCount(3);
+        await expect(page.locator(".team-agent-capabilities")).toHaveCount(3);
+        await expect(page.getByTestId("team-invite")).toBeEnabled();
       }
       if (screen === "notifications")
         await expect(page.getByTestId("notification-review")).toBeEnabled();

@@ -425,6 +425,12 @@ test("organization creation, real invitation fragment acceptance, guest role ref
       guest.getByTestId(`workspace-${workspace.id}`),
     ).toHaveAttribute("aria-pressed", "true");
     await expect(guest.getByTestId("accept-invitation")).toHaveCount(0);
+    await guest.goto("/orgs#team");
+    await expect(guest.locator(".team-directory > h1")).toBeVisible();
+    await expect(guest.getByTestId("team-invite")).toHaveCount(0);
+    await expect(
+      guest.locator('.team-directory [data-testid^="role-"]'),
+    ).toHaveCount(0);
     await guest.goto(`/tasks/${task.id}`);
     await expect(guest.getByTestId("task-field-text")).toBeDisabled();
     await expect(guest.getByTestId("task-field-due")).toBeDisabled();

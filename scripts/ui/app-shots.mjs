@@ -256,6 +256,13 @@ try {
               await expect(
                 page.locator(".team-directory-list > li"),
               ).toHaveCount(members.length);
+              await expect(page.locator(".team-agent-supervisor")).toHaveCount(
+                3,
+              );
+              await expect(
+                page.locator(".team-agent-capabilities"),
+              ).toHaveCount(3);
+              await expect(page.getByTestId("team-invite")).toBeEnabled();
             } else if (view === "quick-add") {
               await expect(page.getByTestId("open-quick")).toBeEnabled();
               await page.getByTestId("open-quick").click();
