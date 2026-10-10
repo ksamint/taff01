@@ -61,7 +61,16 @@ export default async function RootLayout({
             with the HTML instead of after the JavaScript has run. The CJK
             face is font-display: optional and is not preloaded: on a slow
             first visit it must not take bandwidth from the scripts. */}
-        <link rel="preload" href="/api/me" as="fetch" crossOrigin="anonymous" />
+        {/* Only for a session the server already saw: a preloaded 401 would
+            otherwise be reused by the first read after signing in. */}
+        {initialMe && (
+          <link
+            rel="preload"
+            href="/api/me"
+            as="fetch"
+            crossOrigin="anonymous"
+          />
+        )}
       </head>
       <body suppressHydrationWarning>
         <script
