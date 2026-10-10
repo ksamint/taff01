@@ -952,10 +952,10 @@ rows remain intact. Existing prototype gaps, intentional viewport scrolling
 and documented product/prototype differences remain explicit. No blocking
 visual regression, blank frame, wrong data or newly missing control was found.
 
-These captures establish reviewed comparison baselines, not an accepted
-release. All nine local commands, strict exact-SHA Lighthouse/three-run LCP
-and successful feature/main CI at the integration commit remain required.
-Production is unchanged; the live review-approval fixture remains unresolved.
+These captures were integrated at `828443e`; its exact-SHA local validation
+and both required CI runs subsequently passed, as recorded in the candidate
+checkpoint below. Production has not been upgraded; the required live
+review-approval fixture remains unresolved.
 
 | Capture | Prototype / prior app where absent | Accepted native CI app | Review |
 | --- | --- | --- | --- |
@@ -1045,3 +1045,60 @@ Production is unchanged; the live review-approval fixture remains unresolved.
 | phone-zh-HK-today | Prototype / mapped reference<br>![comparison](../ui/reference/phone-zh-today.png) | ![native app](../ui/screenshots/ui-parity/ci-native-2026-10-11/phone-zh-HK-today-app.png) | Accepted. Populated schedule, gold 11:20 line, paused unscheduled task and two due NW-141/142 rows retain geometry. Wider references fit; no blank frame or fabricated working summary. Compared at original dimensions with the current baseline and matching prototype. Existing documented prototype differences remain; no blank frame, incorrect data, new missing control or blocking regression. |
 | phone-zh-HK-type-dark | Prototype / mapped reference<br>![comparison](../ui/reference/dark/phone-zh-projects.png) | ![native app](../ui/screenshots/ui-parity/ci-native-2026-10-11/phone-zh-HK-type-dark-app.png) | Accepted. Dark board/card/header/navigation tokens remain readable. Wider references and parent label fit; drag/menu rows remain clear and adjacent-column clipping is expected horizontal scrolling. Compared at original dimensions with the current baseline and matching prototype. Existing documented prototype differences remain; no blank frame, incorrect data, new missing control or blocking regression. |
 | phone-zh-HK-type | Prototype / mapped reference<br>![comparison](../ui/reference/phone-zh-projects.png) | ![native app](../ui/screenshots/ui-parity/ci-native-2026-10-11/phone-zh-HK-type-app.png) | Accepted. Light board typography, card borders, status counts, references and parent label remain readable. Accessible action rows remain clear; adjacent column is intentionally partially visible. Compared at original dimensions with the current baseline and matching prototype. Existing documented prototype differences remain; no blank frame, incorrect data, new missing control or blocking regression. |
+
+
+### Candidate validation and staging checkpoint — 2026-10-11
+
+The validated source is `828443e23c2e08a1f1936aa1dbb23380db496b52`
+(tree `0bb2aa00bc3ec35f3e425e1ee6ea690ac806f0fd`). All nine local commands
+passed at this immutable SHA: lint, typecheck, licence check, 492 tests in
+46 files, production web/server builds, the bundle budget, 123 browser cases
+and MCP smoke. Today initial JavaScript is 195,718 gzip bytes (191.1 KiB),
+below the 204,800-byte limit.
+
+Both required exact-SHA push runs completed successfully:
+[feature 38075126595](https://github.com/ksamint/taff01/actions/runs/38075126595)
+and [main 38075126547](https://github.com/ksamint/taff01/actions/runs/38075126547).
+Each passed both jobs, all three image builds, all 16 strict visual screens
+(64 cases), 123 browser flows and MCP smoke. The 86 integrated baseline
+PNGs and their documentation copies match the reviewed CI artifact bytes.
+
+| Lighthouse run | EN performance | CN performance | HK performance | Accessibility, all locales | Best practices, all locales |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Local, exact source SHA | 100 | 99 | 99 | 96 | 100 |
+| Feature CI | 95 | 95 | 95 | 96 | 100 |
+| Main CI | 95 | 95 | 94 | 96 | 100 |
+
+| Slow-4G LCP locale | Three samples (ms) | Median (ms) | Limit (ms) |
+| --- | --- | ---: | ---: |
+| EN | 704 / 696 / 724 | 704 | 2,000 |
+| CN | 800 / 780 / 776 | 780 | 2,000 |
+| HK | 772 / 764 / 784 | 772 | 2,000 |
+
+All three strict LCP gates passed; no release exception was used. These are
+quiet-machine production-build measurements, not measurements of the live site.
+
+The 6,057,141-byte delta Git bundle is staged on the application host at
+mode 0600. Its SHA-256 is
+`e5c2c7f0ebd1d9d087ab45131f9a145d93b4663e7915e35f60ee189163f96846`.
+Host-side checks verified the checksum, `git bundle verify`, requested commit
+and tree against the retained base bundle. The temporary verification checkout
+was removed. The production publisher has not started.
+
+At `2026-10-10T18:36:53.825Z`, two authenticated public-origin reads
+confirmed the verification account/workspace and returned zero agents and
+zero real review items. Existing email sign-in/sign-out succeeded; no approval
+was performed. This preflight concerns the existing release and does not prove
+the required upgraded public UI checks. A usable authorized review fixture, or
+an explicit revision to that requirement, is needed to finish acceptance.
+
+The live upgrade, backups, one-shot 0021/0022 migration, container replacement,
+four locale/viewport public checks and deployment checkpoint remain pending.
+Fresh current-main and exact-SHA CI receipts must be checked under the lock
+before build and startup; this documentation does not replace those gates.
+If the selected source SHA changes, regenerate its bundle and validate that SHA.
+
+[Sanitized review evidence](../ui/review-2026-10-11/release-candidate.json)
+records the source identity, checks, CI links/report hashes, staging receipt and
+remaining work. The source/runtime distinction is also recorded in
+[the deployment candidate checkpoint](../deploy.md#prototype-ui-release-candidate-for-review--2026-10-11).

@@ -203,6 +203,34 @@ previous image identities, then recreate only API, worker and web. Retain the
 route, DNS, database/role, additive migration/data, Caddy, Valkey and neighboring
 services. First-deployment route/DNS removal is not a live-upgrade rollback.
 
+### Prototype UI release candidate for review — 2026-10-11
+
+Candidate `828443e23c2e08a1f1936aa1dbb23380db496b52` passed all nine local
+checks, strict Lighthouse and three-run LCP in EN/CN/HK. Both required CI runs
+are green: [feature 38075126595](https://github.com/ksamint/taff01/actions/runs/38075126595)
+and [main 38075126547](https://github.com/ksamint/taff01/actions/runs/38075126547).
+The reviewed native visual baselines are integrated and the final Git bundle
+is staged and verified on the host. Full counts, performance samples, source
+and bundle identities are in the
+[candidate checkpoint](milestones/10-ui-parity.md#candidate-validation-and-staging-checkpoint--2026-10-11)
+and [sanitized review evidence](ui/review-2026-10-11/release-candidate.json).
+
+This is a pre-deployment checkpoint. The publisher has not started and the
+live runtime remains `55b315b743a18113bed864191eb74c6f1d997d9b`, confirmed
+during staging. The candidate's backups, migration, container replacement and
+upgraded public acceptance have not run. Two fresh authenticated reads found
+zero agents and review items in the verification workspace, so the required
+real Inbox approval is blocked pending a usable fixture or an explicit change
+to that acceptance requirement. No production fixture was seeded.
+
+Resume with fresh current-main and exact-SHA CI checks under the deployment
+lock, dedicated database/exclusive env backups, default-builder builds, one-shot
+0021/0022 and scoped API/worker/web replacement. Complete the required EN/zh-HK
+phone/desktop public checks and preservation checks before appending the actual
+Prototype UI upgrade checkpoint and releasing the lock. Rollback keeps the
+additive migrations/data and restores the exclusive env backup and verified
+previous API/worker/web image identities; recreate only those three services.
+
 ## Operations
 
 ### Username and administrative setup
