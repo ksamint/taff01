@@ -1,0 +1,78 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 791\u2013934 and 1034\u20131214 supplies the task/review hierarchy and review footer. Existing run, artifact, item decision, comment and permission handlers bind the actual seeded Markdown deliverable. Phone Back/status toolbar and Request changes/Approve footer remain visible after scrolling the deliverable; desktop keeps its source scrollable panel. Real fields, description and permission notice precede review; extra Project/Labels controls remain. The unchecked global decisions stay disabled. Stored Markdown and explicit bilingual sample provenance differ from the prototype PDF; no findings, source files or checklist state are fabricated. Supplemental deliverable captures show a different scroll position from the overview reference.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "review",
+      "app": "docs/ui/screenshots/ui-parity/review/phone-en-review-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/review.png",
+      "sha256": "5dc8e51b85ef4d19866b1e686b720e76b971cd67981df7168fb266487f655f75",
+      "reference": "docs/ui/reference/phone-en-review.png",
+      "referenceSha256": "f6b7943e6543e2867dedf6234e74082d2d54c6ed93c8602a9b41776cded90387"
+    },
+    {
+      "project": "phone-en",
+      "variant": "review-deliverable",
+      "app": "docs/ui/screenshots/ui-parity/review/phone-en-review-deliverable-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/review-deliverable.png",
+      "sha256": "2b3b5c763a0cc766b674a3830157ed411ad67439209e2870374e32858c3f495a",
+      "reference": "docs/ui/reference/phone-en-review.png",
+      "referenceSha256": "f6b7943e6543e2867dedf6234e74082d2d54c6ed93c8602a9b41776cded90387"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "review",
+      "app": "docs/ui/screenshots/ui-parity/review/phone-zh-HK-review-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/review.png",
+      "sha256": "5e2da54c6b3a56fa044e95102e1618f1f70d5769a9405d35c899c6b10032b924",
+      "reference": "docs/ui/reference/phone-zh-review.png",
+      "referenceSha256": "ead08bd330649fbf5879bfaac285107104c5c9fa03a4b46cc04e52bc8ad5b7ff"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "review-deliverable",
+      "app": "docs/ui/screenshots/ui-parity/review/phone-zh-HK-review-deliverable-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/review-deliverable.png",
+      "sha256": "634df88e9817544e2c22bb8f947b2f247d2cb1244e62f25c26abea40d79c2ff0",
+      "reference": "docs/ui/reference/phone-zh-review.png",
+      "referenceSha256": "ead08bd330649fbf5879bfaac285107104c5c9fa03a4b46cc04e52bc8ad5b7ff"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "review",
+      "app": "docs/ui/screenshots/ui-parity/review/desktop-en-review-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/review.png",
+      "sha256": "094fbbe38624fe2bd4175e439997db697ea359b5a8e8527f3e7981888ce8b2d3",
+      "reference": "docs/ui/reference/desktop-en-review.png",
+      "referenceSha256": "ac4d4899c1a6afac8428bff109aab48b99bdea9e6191ae7e3e0ec4471f77c481"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "review-deliverable",
+      "app": "docs/ui/screenshots/ui-parity/review/desktop-en-review-deliverable-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/review-deliverable.png",
+      "sha256": "189016b5991e3c8d04f8d288bdbe4319d85b93987d8c1024d6e33937620cd790",
+      "reference": "docs/ui/reference/desktop-en-review.png",
+      "referenceSha256": "ac4d4899c1a6afac8428bff109aab48b99bdea9e6191ae7e3e0ec4471f77c481"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "review",
+      "app": "docs/ui/screenshots/ui-parity/review/desktop-zh-HK-review-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/review.png",
+      "sha256": "2efabe91bd6e95ecf50a5a97c3cf265c521018dc9e2ba5866dd5521aea086720",
+      "reference": "docs/ui/reference/desktop-zh-review.png",
+      "referenceSha256": "70fa961a4b78d7a4129f582ff4de2c036aad306f9d53c8348e89f226724a3c81"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "review-deliverable",
+      "app": "docs/ui/screenshots/ui-parity/review/desktop-zh-HK-review-deliverable-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/review-deliverable.png",
+      "sha256": "47aef69ba0cddb62a8e4cc06d134ff7423dbcd3d541ab546feb494576e87e36d",
+      "reference": "docs/ui/reference/desktop-zh-review.png",
+      "referenceSha256": "70fa961a4b78d7a4129f582ff4de2c036aad306f9d53c8348e89f226724a3c81"
+    }
+  ]
+}

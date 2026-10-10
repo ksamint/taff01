@@ -43,7 +43,7 @@ app. No production database will be seeded for this work.
 | 1 — shell | Visuals accepted at `dfcbefb`; committed-baseline and behavioral gates pending | Six native element captures personally inspected by the root agent; reference/app comparisons below. Phone tabs/FAB from lines 376–410, desktop sidebar from 940–953; existing session/cache guards retained. |
 | 2 — Today and Northwind seed | Phone accepted at `e1c2d1a`, corrected desktop at `e5165f9`; behavioral gates pending | Four native captures inspected; independent comparison passed. Source 47–114, existing real schedule/tasks/run bindings. |
 | 3 — Projects | Visuals accepted at `e5165f9`; behavioral gates pending | Eight production board/list captures, source 223–279/935–1045; side-by-side evidence below. |
-| 4 — task detail and review | Pending | |
+| 4 — task detail and review | Visuals accepted at `e5165f9`; behavioral gates pending | Four task and eight review production captures; source 791–934/1034–1214 and sticky phone toolbar. |
 | 5 — Inbox | Pending | |
 | 6 — Calendar | Pending | |
 | 7 — Me | Pending | |
@@ -404,3 +404,20 @@ All 4 native images were inspected by root. Independent production comparisons p
 | phone-zh-HK / task-detail | ![Prototype](../ui/reference/phone-zh-task-detail.png) | ![App](../ui/screenshots/ui-parity/task-detail/phone-zh-HK-app.png) |
 | desktop-en / task-detail | ![Prototype](../ui/reference/desktop-en-task-detail.png) | ![App](../ui/screenshots/ui-parity/task-detail/desktop-en-app.png) |
 | desktop-zh-HK / task-detail | ![Prototype](../ui/reference/desktop-zh-task-detail.png) | ![App](../ui/screenshots/ui-parity/task-detail/desktop-zh-HK-app.png) |
+
+## review visual checkpoint — production `e5165f9`
+
+Source 791–934 and 1034–1214 supplies the task/review hierarchy and review footer. Existing run, artifact, item decision, comment and permission handlers bind the actual seeded Markdown deliverable. Phone Back/status toolbar and Request changes/Approve footer remain visible after scrolling the deliverable; desktop keeps its source scrollable panel. Real fields, description and permission notice precede review; extra Project/Labels controls remain. The unchecked global decisions stay disabled. Stored Markdown and explicit bilingual sample provenance differ from the prototype PDF; no findings, source files or checklist state are fabricated. Supplemental deliverable captures show a different scroll position from the overview reference.
+
+All 8 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/review/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / review | ![Prototype](../ui/reference/phone-en-review.png) | ![App](../ui/screenshots/ui-parity/review/phone-en-review-app.png) |
+| phone-en / review-deliverable | ![Prototype](../ui/reference/phone-en-review.png) (overview reference; app is a supplemental scroll capture) | ![App](../ui/screenshots/ui-parity/review/phone-en-review-deliverable-app.png) |
+| phone-zh-HK / review | ![Prototype](../ui/reference/phone-zh-review.png) | ![App](../ui/screenshots/ui-parity/review/phone-zh-HK-review-app.png) |
+| phone-zh-HK / review-deliverable | ![Prototype](../ui/reference/phone-zh-review.png) (overview reference; app is a supplemental scroll capture) | ![App](../ui/screenshots/ui-parity/review/phone-zh-HK-review-deliverable-app.png) |
+| desktop-en / review | ![Prototype](../ui/reference/desktop-en-review.png) | ![App](../ui/screenshots/ui-parity/review/desktop-en-review-app.png) |
+| desktop-en / review-deliverable | ![Prototype](../ui/reference/desktop-en-review.png) (overview reference; app is a supplemental scroll capture) | ![App](../ui/screenshots/ui-parity/review/desktop-en-review-deliverable-app.png) |
+| desktop-zh-HK / review | ![Prototype](../ui/reference/desktop-zh-review.png) | ![App](../ui/screenshots/ui-parity/review/desktop-zh-HK-review-app.png) |
+| desktop-zh-HK / review-deliverable | ![Prototype](../ui/reference/desktop-zh-review.png) (overview reference; app is a supplemental scroll capture) | ![App](../ui/screenshots/ui-parity/review/desktop-zh-HK-review-deliverable-app.png) |
