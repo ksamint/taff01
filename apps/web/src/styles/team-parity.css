@@ -86,6 +86,36 @@
   font-size: 12px;
   color: var(--text-body);
 }
+.team-member-copy .team-agent-capabilities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+.team-agent-capabilities > span {
+  padding: 2px 6px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.team-invite-row {
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border-line);
+}
+.team-invite-row .button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--border-strong);
+  border-radius: 2px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
 .team-workload {
   font-size: 12px;
   color: var(--text-subtle);

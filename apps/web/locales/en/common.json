@@ -27,7 +27,7 @@
   "workspace": "Workspace",
   "noWorkspace": "Your account has no workspace yet.",
   "tasksCount": "{{count}} tasks to focus on",
-  "taskCount": "{{count}} task to focus on",
+  "taskCount": "{{count}} open tasks",
   "newTask": "A new task",
   "taskTitle": "What needs doing?",
   "taskPlaceholder": "Give your task a clear title",

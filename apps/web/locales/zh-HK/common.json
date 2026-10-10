@@ -28,7 +28,7 @@
   "workspace": "工作空間",
   "noWorkspace": "你的帳戶尚未加入工作空間。",
   "tasksCount": "今天專注於 {{count}} 項任務",
-  "taskCount": "今天專注於 {{count}} 項任務",
+  "taskCount": "{{count}} 項未完成任務",
   "newTask": "新任務",
   "taskTitle": "有什麼需要完成？",
   "taskPlaceholder": "給任務起一個清晰的標題",

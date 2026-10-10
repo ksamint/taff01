@@ -27,7 +27,7 @@
   "workspace": "工作空间",
   "noWorkspace": "你的账户尚未加入工作空间。",
   "tasksCount": "今天专注于 {{count}} 项任务",
-  "taskCount": "今天专注于 {{count}} 项任务",
+  "taskCount": "{{count}} 项未完成任务",
   "newTask": "新任务",
   "taskTitle": "有什么需要完成？",
   "taskPlaceholder": "给任务起一个清晰的标题",

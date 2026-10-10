@@ -4,6 +4,7 @@ import {
   issuedWorkspaceInviteSchema,
   type Member,
   memberRoleInputSchema,
+  type Run,
   type WorkspaceCreate,
   type WorkspaceInvite,
   type WorkspaceInviteInput,
@@ -23,12 +24,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { ArrowLeft, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { invalidateM3 } from "../lib/m3-queries";
+import { invalidateM3, useAgent } from "../lib/m3-queries";
 import { useWorkspaceAccess } from "../lib/m5-queries";
 import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
 import {
@@ -50,6 +51,66 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
+
+function TeamAgentDetails({
+  member,
+  members,
+  locale,
+  status,
+}: {
+  member: Member;
+  members: Member[];
+  locale: PrototypeLocale;
+  status: Run["status"] | undefined;
+}) {
+  const profile = useAgent(member.id);
+  const { t } = useTranslation();
+  const data =
+    profile.data?.member.workspaceId === member.workspaceId
+      ? profile.data
+      : undefined;
+  if (profile.error)
+    return <span role="alert">{t(errorKey(profile.error))}</span>;
+  if (!data) return <span>{t("loading")}</span>;
+  const supervisor = members.find((item) => item.id === data.supervisorId);
+  const name = supervisor
+    ? presentPrototypeField(supervisor.id, "name", supervisor.name, locale)
+    : t(data.supervisorId ? "unknownMember" : "none");
+  return (
+    <>
+      <span
+        className="team-agent-supervisor"
+        data-testid={`team-supervisor-${member.id}`}
+      >
+        {t("agentProfile.supervisedBy", { name })}
+      </span>
+      {status && (
+        <span className="team-agent-status">
+          <span
+            className={`agent-status-dot agent-status-${status}`}
+            aria-hidden="true"
+          />
+          {t(`run.status.${status}`)}
+        </span>
+      )}
+      <span
+        className="team-agent-capabilities"
+        role="list"
+        aria-label={t("agentProfile.permissions")}
+        data-testid={`team-capabilities-${member.id}`}
+      >
+        {data.permissions
+          .filter((permission) => permission.decision !== "deny")
+          .map((permission) => (
+            <span key={permission.capability} role="listitem">
+              {t(`agentProfile.capability.${permission.capability}`)}
+            </span>
+          ))}
+      </span>
+    </>
+  );
+}
+
 export function OrganizationsView() {
   const [teamOnly, setTeamOnly] = useState(false);
   useEffect(() => {
@@ -228,6 +289,12 @@ export function OrganizationsView() {
       timeStyle: "short",
       timeZone: me.user.tz,
     }).format(new Date(value));
+  const openInvite = () => {
+    setDialog("invite");
+    setValidation(false);
+    setIssued(null);
+    issue.reset();
+  };
   const error =
     create.error ??
     accept.error ??
@@ -367,21 +434,15 @@ export function OrganizationsView() {
                       </span>
                       <span className="team-member-copy">
                         <strong>{name}</strong>
-                        <span>
-                          {t(
-                            kind === "agent"
-                              ? "agent"
-                              : `organization.${member.role}`,
-                          )}
-                        </span>
-                        {kind === "agent" && latest && (
-                          <span className="team-agent-status">
-                            <span
-                              className={`agent-status-dot agent-status-${latest.status}`}
-                              aria-hidden="true"
-                            />
-                            {t(`run.status.${latest.status}`)}
-                          </span>
+                        {kind === "agent" ? (
+                          <TeamAgentDetails
+                            member={member}
+                            members={members.data ?? []}
+                            locale={locale}
+                            status={latest?.status}
+                          />
+                        ) : (
+                          <span>{t(`organization.${member.role}`)}</span>
                         )}
                       </span>
                     </>
@@ -429,6 +490,19 @@ export function OrganizationsView() {
                   );
                 })}
             </ul>
+            {kind === "person" && teamOnly && access.data?.canInvite && (
+              <div className="team-invite-row">
+                <Button
+                  type="button"
+                  disabled={busy}
+                  onClick={openInvite}
+                  data-testid="team-invite"
+                >
+                  <Plus size={16} aria-hidden="true" />
+                  {t("organization.invite")}
+                </Button>
+              </div>
+            )}
           </section>
         ))}
         {(tasks.isError || runs.isError) && (
@@ -441,15 +515,7 @@ export function OrganizationsView() {
         <section className="me-section">
           <div className="section-title-row">
             <h2>{t("organization.invites")}</h2>
-            <Button
-              disabled={busy}
-              onClick={() => {
-                setDialog("invite");
-                setValidation(false);
-                setIssued(null);
-                issue.reset();
-              }}
-            >
+            <Button disabled={busy} onClick={openInvite}>
               {t("organization.invite")}
             </Button>
           </div>
