@@ -44,7 +44,7 @@ app. No production database will be seeded for this work.
 | 2 — Today and Northwind seed | Phone accepted at `e1c2d1a`, corrected desktop at `e5165f9`; behavioral gates pending | Four native captures inspected; independent comparison passed. Source 47–114, existing real schedule/tasks/run bindings. |
 | 3 — Projects | Visuals accepted at `e5165f9`; behavioral gates pending | Eight production board/list captures, source 223–279/935–1045; side-by-side evidence below. |
 | 4 — task detail and review | Visuals accepted at `e5165f9`; behavioral gates pending | Four task and eight review production captures; source 791–934/1034–1214 and sticky phone toolbar. |
-| 5 — Inbox | Pending | |
+| 5 — Inbox | Visuals accepted at `e5165f9`; behavioral gates pending | Four production captures, compact inactive desktop rows and focus-visible 44 px actions; source 280–322/1010–1034. |
 | 6 — Calendar | Pending | |
 | 7 — Me | Pending | |
 | 8 — type, density and dark theme | Pending | |
@@ -421,3 +421,23 @@ All 8 native images were inspected by root. Independent production comparisons p
 | desktop-en / review-deliverable | ![Prototype](../ui/reference/desktop-en-review.png) (overview reference; app is a supplemental scroll capture) | ![App](../ui/screenshots/ui-parity/review/desktop-en-review-deliverable-app.png) |
 | desktop-zh-HK / review | ![Prototype](../ui/reference/desktop-zh-review.png) | ![App](../ui/screenshots/ui-parity/review/desktop-zh-HK-review-app.png) |
 | desktop-zh-HK / review-deliverable | ![Prototype](../ui/reference/desktop-zh-review.png) (overview reference; app is a supplemental scroll capture) | ![App](../ui/screenshots/ui-parity/review/desktop-zh-HK-review-deliverable-app.png) |
+
+## inbox visual checkpoint — production `e5165f9`
+
+Source 280–322 and 1010–1034 supplies the header/tabs, avatar, actor/status/time, task, two-line excerpt, status badge and inline actions. Existing real grouped inbox queries, mark-read, snooze, review and grant routes remain bound. Desktop inactive rows are compact; selected, hover and keyboard focus expose existing 44 px actions. Phone actions remain visible. Actual four items, two reviews, one blocker, unread count, newest-first ordering and stored sample provenance are retained; selected state does not fabricate a read mutation. Approve and Grant access open the existing review/profile flows. The existing extra mark-read control and accessibility floor remain.
+
+All 4 native images were inspected by root. Independent production comparisons passed unchanged settings. Behavioral and full performance acceptance remains pending. [Capture manifest](../ui/screenshots/ui-parity/inbox/manifest.json).
+
+| Capture | Prototype reference | Accepted real app |
+| --- | --- | --- |
+| phone-en / inbox | ![Prototype](../ui/reference/phone-en-inbox.png) | ![App](../ui/screenshots/ui-parity/inbox/phone-en-app.png) |
+| phone-zh-HK / inbox | ![Prototype](../ui/reference/phone-zh-inbox.png) | ![App](../ui/screenshots/ui-parity/inbox/phone-zh-HK-app.png) |
+| desktop-en / inbox | ![Prototype](../ui/reference/desktop-en-inbox.png) | ![App](../ui/screenshots/ui-parity/inbox/desktop-en-app.png) |
+| desktop-zh-HK / inbox | ![Prototype](../ui/reference/desktop-zh-inbox.png) | ![App](../ui/screenshots/ui-parity/inbox/desktop-zh-HK-app.png) |
+
+The design-system mapping now includes `components/ui/Badge` at `c794b47`,
+forwarding the same span props for Inbox and task/review status labels. A
+source-equivalence check confirmed unchanged classes, children, test IDs and
+handlers; scoped Biome and web typecheck pass. Fresh final visual comparisons
+will validate this DOM-preserving extraction. MCP connection badges remain
+absent where the actual API supplies no connection/OAuth state.

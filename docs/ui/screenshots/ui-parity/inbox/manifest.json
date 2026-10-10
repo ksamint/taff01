@@ -1,0 +1,42 @@
+{
+  "appCaptureCommit": "e5165f97a240979a2a46b5804661d1ef5e281e91",
+  "source": "Source 280\u2013322 and 1010\u20131034 supplies the header/tabs, avatar, actor/status/time, task, two-line excerpt, status badge and inline actions. Existing real grouped inbox queries, mark-read, snooze, review and grant routes remain bound. Desktop inactive rows are compact; selected, hover and keyboard focus expose existing 44 px actions. Phone actions remain visible. Actual four items, two reviews, one blocker, unread count, newest-first ordering and stored sample provenance are retained; selected state does not fabricate a read mutation. Approve and Grant access open the existing review/profile flows. The existing extra mark-read control and accessibility floor remain.",
+  "captures": [
+    {
+      "project": "phone-en",
+      "variant": "inbox",
+      "app": "docs/ui/screenshots/ui-parity/inbox/phone-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/inbox.png",
+      "sha256": "a4112ee4a419ac15dcb06f5b0f4a62d8118c611be85cc6ec2d3abd3a597a0c73",
+      "reference": "docs/ui/reference/phone-en-inbox.png",
+      "referenceSha256": "2e6fd5375ad1e45e2a7632e088376c44f45412743c6b0ed323b5b98ae839c9c6"
+    },
+    {
+      "project": "phone-zh-HK",
+      "variant": "inbox",
+      "app": "docs/ui/screenshots/ui-parity/inbox/phone-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/inbox.png",
+      "sha256": "584774b621107e934d21ff81798daad0c7d936b632293e3e29bcfffd9e307f6e",
+      "reference": "docs/ui/reference/phone-zh-inbox.png",
+      "referenceSha256": "a6337403a699f3fe4feac8a0d7d8500b9d58e89713d7a099e793a14a2f105531"
+    },
+    {
+      "project": "desktop-en",
+      "variant": "inbox",
+      "app": "docs/ui/screenshots/ui-parity/inbox/desktop-en-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/inbox.png",
+      "sha256": "f1b470f050b74304b033cc953e2707915f8cad665dd26ddf95b4a2d7837ef012",
+      "reference": "docs/ui/reference/desktop-en-inbox.png",
+      "referenceSha256": "f7958c84861cfb8a24c5cb0db3e7b30521eb24d1b9a11c099d23ff0fa43f2cb2"
+    },
+    {
+      "project": "desktop-zh-HK",
+      "variant": "inbox",
+      "app": "docs/ui/screenshots/ui-parity/inbox/desktop-zh-HK-app.png",
+      "baseline": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/inbox.png",
+      "sha256": "3f50e2e15a929a04d3a7938b82b77db1aa38b9232827bf2e3b4abb96dfbde3f7",
+      "reference": "docs/ui/reference/desktop-zh-inbox.png",
+      "referenceSha256": "6dc1d399b1682a0bcd676373999c07b98703201d372c2992e07d5f447751354d"
+    }
+  ]
+}
