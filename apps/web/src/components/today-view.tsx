@@ -1,4 +1,5 @@
 "use client";
+import { type Locale, taskReference } from "@taff/schemas";
 
 import {
   type AssignTask,
@@ -11,11 +12,6 @@ import {
   calendarCivilTime,
   calendarWallToInstant,
 } from "@taff/schemas/calendar-read";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-  prototypeTaskReference,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -119,7 +115,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
   const [showAll, setShowAll] = useState(false);
   const shownTasks = showAll ? visibleTasks : visibleTasks.slice(0, TODAY_PAGE);
   const hiddenCount = visibleTasks.length - shownTasks.length;
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const { date, time, numbers } = useMemo(
     () => ({
       date: new Intl.DateTimeFormat(locale, {
@@ -138,13 +134,10 @@ export function TodayView({ initialNow }: { initialNow: number }) {
     }),
     [locale, me.user.tz],
   );
-  const present = (task: Task) =>
-    presentPrototypeField(task.id, "title", task.title, locale);
+  const present = (task: Task) => task.title;
   const memberName = (id: string | null) => {
     const member = members.data?.find((item) => item.id === id);
-    return member
-      ? presentPrototypeField(member.id, "name", member.name, locale)
-      : t("unknownMember");
+    return member ? member.name : t("unknownMember");
   };
   const occurrences = [...(calendar.data?.occurrences ?? [])].sort((a, b) =>
     a.startAt.localeCompare(b.startAt),
@@ -163,8 +156,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
   );
   const readError = tasks.error ?? members.error ?? access.error;
   const scheduleError = calendar.error ?? runs.error;
-  const reference = (task: Task) =>
-    prototypeTaskReference(task.id) ?? task.id.slice(0, 8);
+  const reference = (task: Task) => taskReference(workspace.key, task.number);
   function scheduleBlock(item: CalendarOccurrence) {
     const run = activeRuns.find((entry) => entry.taskId === item.task.id);
     const meeting = item.task.labels.includes("meeting");
@@ -175,12 +167,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
             member.id === item.task.workerId && member.kind === "agent",
         )
       : item.isAgent;
-    const description = presentPrototypeField(
-      item.task.id,
-      "description",
-      item.task.description,
-      locale,
-    );
+    const description = item.task.description;
     const meta = isAgent
       ? `${memberName(item.task.workerId)} · ${t(run ? `run.status.${run.status}` : `status.${item.task.status}`)}`
       : description.startsWith("Participants:") ||
@@ -397,16 +384,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
                       {worker?.kind === "agent" && (
                         <Sparkles size={12} strokeWidth={1.5} />
                       )}
-                      <span>
-                        {worker
-                          ? presentPrototypeField(
-                              worker.id,
-                              "name",
-                              worker.name,
-                              locale,
-                            )
-                          : t("unassigned")}
-                      </span>
+                      <span>{worker ? worker.name : t("unassigned")}</span>
                     </span>
                     <label className="sr-only" htmlFor={`worker-${task.id}`}>
                       {t("worker")} · {present(task)}
@@ -434,13 +412,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
                       <option value="">{t("unassigned")}</option>
                       {(members.data ?? []).map((member) => (
                         <option key={member.id} value={member.id}>
-                          {presentPrototypeField(
-                            member.id,
-                            "name",
-                            member.name,
-                            locale,
-                          )}{" "}
-                          · {t(member.kind)}
+                          {member.name} · {t(member.kind)}
                         </option>
                       ))}
                     </select>

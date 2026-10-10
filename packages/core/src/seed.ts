@@ -106,6 +106,7 @@ export async function seedDemo(options: {
         ].entries())
           await tx.insert(tasks).values({
             workspaceId: workspace.id,
+            number: index + 1,
             ownerId: owner.id,
             workerId: index === 1 ? worker.id : null,
             title,

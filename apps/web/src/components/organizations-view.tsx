@@ -2,6 +2,7 @@
 import "../styles/organizations.css";
 import {
   issuedWorkspaceInviteSchema,
+  type Locale,
   type Member,
   memberRoleInputSchema,
   type Run,
@@ -14,10 +15,6 @@ import {
   workspaceInviteSchema,
   workspaceSchema,
 } from "@taff/schemas";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -60,7 +57,7 @@ function TeamAgentDetails({
 }: {
   member: Member;
   members: Member[];
-  locale: PrototypeLocale;
+  locale: Locale;
   status: Run["status"] | undefined;
 }) {
   const profile = useAgent(member.id);
@@ -74,7 +71,7 @@ function TeamAgentDetails({
   if (!data) return <span>{t("loading")}</span>;
   const supervisor = members.find((item) => item.id === data.supervisorId);
   const name = supervisor
-    ? presentPrototypeField(supervisor.id, "name", supervisor.name, locale)
+    ? supervisor.name
     : t(data.supervisorId ? "unknownMember" : "none");
   return (
     <>
@@ -134,7 +131,7 @@ export function OrganizationsView() {
   const members = useMembers(workspace.id);
   const tasks = useTasks(workspace.id);
   const runs = useRuns(workspace.id);
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const key = ["invites", workspace.id] as const;
   const drafts = ["org-drafts", me.user.id] as const;
@@ -405,12 +402,7 @@ export function OrganizationsView() {
               {members.data
                 ?.filter((member) => member.kind === kind)
                 .map((member) => {
-                  const name = presentPrototypeField(
-                    member.id,
-                    "name",
-                    member.name,
-                    locale,
-                  );
+                  const name = member.name;
                   const latest = runs.data
                     ?.filter((run) => run.agentId === member.id)
                     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];

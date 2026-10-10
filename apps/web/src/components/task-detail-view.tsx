@@ -3,17 +3,14 @@
 import {
   type AssignTask,
   assignTaskSchema,
+  type Locale,
   type Run,
   type RunDetail,
   runSchema,
   startRunSchema,
+  taskReference,
   taskSchema,
 } from "@taff/schemas";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-  prototypeTaskReference,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -59,7 +56,7 @@ export function TaskDetailView({
   const { me, workspace } = useWorkspace();
   const { t, i18n } = useTranslation();
   const [workerEditing, setWorkerEditing] = useState(false);
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const client = useQueryClient();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const task = useTask(taskId);
@@ -173,9 +170,7 @@ export function TaskDetailView({
     ["running", "paused", "needs_review", "changes_requested"].includes(
       latest.status,
     );
-  const workerName = worker
-    ? presentPrototypeField(worker.id, "name", worker.name, locale)
-    : t("unassigned");
+  const workerName = worker ? worker.name : t("unassigned");
   const workerControl = (
     <div className="task-worker-controls">
       <Button
@@ -273,9 +268,7 @@ export function TaskDetailView({
             {t("taskDetail.back")}
           </Link>
         ) : null}
-        <span>
-          {prototypeTaskReference(task.data.id) ?? task.data.id.slice(0, 8)}
-        </span>
+        <span>{taskReference(workspace.key, task.data.number)}</span>
         <Badge
           className={`status status-${task.data.status}`}
           data-testid="task-status"

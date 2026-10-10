@@ -1,7 +1,6 @@
 "use client";
 
 import type { Locale } from "@taff/schemas/base";
-import { presentPrototypeField } from "@taff/schemas/prototype-data";
 import {
   Bell,
   ChevronDown,
@@ -63,12 +62,7 @@ export function MeView() {
     setTheme(next);
     applyTheme(next);
   };
-  const workspaceName = presentPrototypeField(
-    workspace.id,
-    "name",
-    workspace.name,
-    locale,
-  );
+  const workspaceName = workspace.name;
   const format = new Intl.NumberFormat(locale);
   const teamSummary = members.data
     ? t("me.teamSummary", {

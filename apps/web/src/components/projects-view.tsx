@@ -8,13 +8,8 @@ import {
   projectUpdateSchema,
   type Run,
   type Task,
+  taskReference,
 } from "@taff/schemas";
-import {
-  presentPrototypeField,
-  prototypeId,
-  prototypeOrgs,
-  prototypeTaskReference,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -134,14 +129,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       : projects.data?.find((item) => !item.archived);
   const selectedProjectId = selected?.id ?? projectId;
   const locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
-  const projectName = selected
-    ? presentPrototypeField(selected.id, "name", selected.name, locale)
-    : t("projects.allProjects");
-  const prototypeOrg = prototypeOrgs.find(
-    (org) =>
-      workspace.id === prototypeId("workspace", org.key) &&
-      workspace.name === org.name["zh-HK"],
-  );
+  const projectName = selected ? selected.name : t("projects.allProjects");
   useEffect(() => {
     setSelectedTaskId(null);
   }, [workspace.id, selectedProjectId]);
@@ -353,8 +341,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     <div className="projects-view">
       <header className="projects-header">
         <Link className="projects-org" href="/orgs">
-          {presentPrototypeField(workspace.id, "name", workspace.name, locale)}
-          {prototypeOrg && ` · ${prototypeOrg.team[locale]}`}
+          {workspace.name}
           <ChevronDown size={12} aria-hidden="true" />
         </Link>
         <div className="projects-header-row">
@@ -481,12 +468,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 <option value="">{t("projects.allProjects")}</option>
                 {projects.data?.map((project) => (
                   <option key={project.id} value={project.id}>
-                    {presentPrototypeField(
-                      project.id,
-                      "name",
-                      project.name,
-                      locale,
-                    )}
+                    {project.name}
                     {project.archived ? ` · ${t("projects.archived")}` : ""}
                   </option>
                 ))}
@@ -687,13 +669,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         {selectedTaskId && (
           <aside
             className="projects-detail"
-            aria-label={presentPrototypeField(
-              selectedTaskId,
-              "title",
+            aria-label={
               tasks.data?.find((task) => task.id === selectedTaskId)?.title ??
-                t("taskTitle"),
-              locale,
-            )}
+              t("taskTitle")
+            }
           >
             <TaskDetailView
               key={selectedTaskId}
@@ -712,14 +691,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             style={{ left: drag.left, top: drag.top, width: drag.width }}
           >
             <span className="section-hint">{t("projects.drag")}</span>
-            <h3>
-              {presentPrototypeField(
-                drag.id,
-                "title",
-                visible.find((task) => task.id === drag.id)?.title ?? "",
-                locale,
-              )}
-            </h3>
+            <h3>{visible.find((task) => task.id === drag.id)?.title ?? ""}</h3>
           </div>,
           document.body,
         )}
@@ -817,7 +789,7 @@ function BoardCard({
   style?: React.CSSProperties;
   dragging: boolean;
 }) {
-  const { me } = useWorkspace();
+  const { me, workspace } = useWorkspace();
   const { t, i18n } = useTranslation();
   const members = useMembers(task.workspaceId);
   const access = useTaskAccess(task.id);
@@ -829,20 +801,15 @@ function BoardCard({
     : me.user.locale;
   const owner = members.data?.find((item) => item.id === task.ownerId);
   const worker = members.data?.find((item) => item.id === task.workerId);
-  const ownerName = owner
-    ? presentPrototypeField(owner.id, "name", owner.name, locale)
-    : t("unknownMember");
-  const workerName = worker
-    ? presentPrototypeField(worker.id, "name", worker.name, locale)
-    : t("unknownMember");
-  // Only untouched known fixture names get the prototype's compact label.
+  const ownerName = owner ? owner.name : t("unknownMember");
+  const workerName = worker ? worker.name : t("unknownMember");
+  // The chip keeps its name short: "Research" for "Research Agent" or "調研智能體".
   const workerShort =
-    worker &&
-    presentPrototypeField(worker.id, "name", worker.name, "en") !== worker.name
+    worker?.kind === "agent"
       ? workerName.replace(/ Agent$|智能體$|智能体$/, "")
       : workerName;
-  const title = presentPrototypeField(task.id, "title", task.title, locale);
-  const reference = prototypeTaskReference(task.id) ?? task.id.slice(0, 8);
+  const title = task.title;
+  const reference = taskReference(workspace.key, task.number);
   const parent = tasks.data?.find((item) => item.id === task.parentId);
   const completed = children.filter((item) => item.status === "done").length;
   return (
@@ -909,16 +876,11 @@ function BoardCard({
         >
           <span aria-hidden="true">↳</span>
           <span>
-            <span>{prototypeTaskReference(task.parentId) ?? ""}</span>{" "}
+            <span>
+              {parent ? taskReference(workspace.key, parent.number) : ""}
+            </span>{" "}
             <span className="projects-parent-title">
-              {parent
-                ? presentPrototypeField(
-                    parent.id,
-                    "title",
-                    parent.title,
-                    locale,
-                  )
-                : t("planning.parent")}
+              {parent ? parent.title : t("planning.parent")}
             </span>
           </span>
         </Link>

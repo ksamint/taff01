@@ -5,16 +5,13 @@ import {
   type InboxItem,
   type InboxItemInput,
   inboxItemInputSchema,
+  type Locale,
+  taskReference,
 } from "@taff/schemas";
 import {
   calendarCivilTime,
   calendarWallToInstant,
 } from "@taff/schemas/calendar-read";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-  prototypeTaskReference,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -132,7 +129,7 @@ export function InboxView() {
       ),
     }))
     .filter((group) => group.items.length > 0);
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const { when, numbers } = useMemo(
     () => ({
       when: new Intl.DateTimeFormat(locale, {
@@ -329,25 +326,13 @@ export function InboxView() {
                     );
                     const person = agent ?? owner;
                     const name = person
-                      ? presentPrototypeField(
-                          person.id,
-                          "name",
-                          person.name,
-                          locale,
-                        )
+                      ? person.name
                       : t(
                           item.digestId
                             ? "notifications.title"
                             : "unknownMember",
                         );
-                    const title = task
-                      ? presentPrototypeField(
-                          task.id,
-                          "title",
-                          task.title,
-                          locale,
-                        )
-                      : item.title;
+                    const title = task ? task.title : item.title;
                     const run = runs.data?.find(
                       (entry) => entry.id === item.runId,
                     );
@@ -355,16 +340,9 @@ export function InboxView() {
                       item.kind === "blocker"
                         ? item.title
                         : run?.summary ||
-                          (task
-                            ? presentPrototypeField(
-                                task.id,
-                                "description",
-                                task.description,
-                                locale,
-                              )
-                            : item.title);
+                          (task ? task.description : item.title);
                     const reference = task
-                      ? (prototypeTaskReference(task.id) ?? task.id.slice(0, 8))
+                      ? taskReference(workspace.key, task.number)
                       : null;
                     const href = item.digestId
                       ? `/digests/${item.digestId}`

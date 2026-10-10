@@ -11,7 +11,6 @@ import {
   meSchema,
   runDetailSchema,
 } from "../packages/schemas/src/index";
-import { presentPrototypeField } from "../packages/schemas/src/prototype-data";
 import { openDisclosure } from "./support/disclosures";
 import { selectLocale } from "./support/preferences";
 import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
@@ -382,7 +381,7 @@ test("agent permission settings persist, Inbox grants expire, and cancel support
   const { workspace, agent } = await signIn(page, locale);
   await page.goto(`/agents/${agent.id}`);
   await expect(page.getByTestId("agent-profile-heading")).toHaveText(
-    presentPrototypeField(agent.id, "name", agent.name, locale),
+    agent.name,
   );
   await page.getByTestId("permission-web.search-ask").click();
   await expect(page.getByTestId("permission-web.search-ask")).toHaveAttribute(

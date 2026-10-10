@@ -1,14 +1,11 @@
 "use client";
 import {
+  type Locale,
   type SearchInput,
   searchInputSchema,
   searchResultSchema,
+  taskReference,
 } from "@taff/schemas";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-  prototypeTaskReference,
-} from "@taff/schemas/prototype-data";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Clock, MessageSquare, Search, Settings, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -32,7 +29,7 @@ const SETTINGS = [
 export function SearchDialog({ onClose }: { onClose: () => void }) {
   const { workspace, me, setWorkspaceId } = useWorkspace();
   const { t, i18n } = useTranslation();
-  const locale = i18n.resolvedLanguage as PrototypeLocale;
+  const locale = i18n.resolvedLanguage as Locale;
   const router = useRouter();
   const client = useQueryClient();
   const [query, setQuery] = useState("");
@@ -277,12 +274,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                       </div>
                       {group.items.map((hit, offset) => {
                         const row = group.offset + offset;
-                        const title = presentPrototypeField(
-                          hit.taskId,
-                          "title",
-                          hit.title,
-                          locale,
-                        );
+                        const title = hit.title;
                         return (
                           <button
                             key={`${hit.type}:${hit.id}`}
@@ -317,8 +309,10 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                             <span className="search-parity-result-copy">
                               <span className="search-parity-result-title">
                                 <span className="search-parity-reference">
-                                  {prototypeTaskReference(hit.taskId) ??
-                                    hit.taskId.slice(0, 8)}
+                                  {taskReference(
+                                    hit.workspaceKey,
+                                    hit.task.number,
+                                  )}
                                 </span>
                                 <SearchMatch text={title} query={deferred} />
                               </span>
@@ -338,12 +332,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                                     : ""}
                                 </span>
                                 <span className="search-parity-org">
-                                  {presentPrototypeField(
-                                    hit.workspaceId,
-                                    "name",
-                                    hit.workspaceName,
-                                    locale,
-                                  )}
+                                  {hit.workspaceName}
                                 </span>
                               </span>
                             </span>

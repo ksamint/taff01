@@ -129,6 +129,7 @@ export const taskSchema = object({
   version: number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
   id: idSchema,
   workspaceId: idSchema,
+  number: number().check(refine((v) => Number.isSafeInteger(v) && v > 0)),
   title: string(),
   ownerId: idSchema,
   workerId: nullable(idSchema),
@@ -138,6 +139,22 @@ export const taskSchema = object({
   updatedAt: iso.datetime(),
 });
 export const taskListSchema = array(taskSchema);
+/** Task reference as people say it: the workspace key and the task number. */
+export function taskReference(workspaceKey: string, taskNumber: number) {
+  // An optimistic task has no number until the server assigns one.
+  return taskNumber > 0 ? `${workspaceKey}-${taskNumber}` : "…";
+}
+/**
+ * Default workspace key from its name: the first two ASCII letters or digits,
+ * upper-cased; names without any fall back to WS. Seeds may set a nicer key.
+ */
+export function workspaceKeyFromName(name: string): string {
+  const key = name
+    .replace(/[^A-Za-z0-9]/g, "")
+    .slice(0, 2)
+    .toUpperCase();
+  return key.length === 2 ? key : "WS";
+}
 export const meSchema = object({
   user: object({
     id: string(),
@@ -150,6 +167,7 @@ export const meSchema = object({
     object({
       id: idSchema,
       name: string(),
+      key: string(),
       memberId: idSchema,
       role: memberRoleSchema,
     }),

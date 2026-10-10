@@ -7,14 +7,11 @@ import {
   createAgentTokenSchema,
   type IssuedAgentToken,
   issuedAgentTokenSchema,
+  type Locale,
   mcpCallListSchema,
   type Scope,
   scopeSchema,
 } from "@taff/schemas";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -66,7 +63,7 @@ export function McpView() {
   const { me, workspace } = useWorkspace();
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const members = useMembers(workspace.id);
   const tokensKey = ["agent-tokens", workspace.id];
   const callsKey = ["mcp-calls", workspace.id];
@@ -350,12 +347,7 @@ export function McpView() {
                 >
                   {agents.map((agent) => (
                     <option key={agent.id} value={agent.id}>
-                      {presentPrototypeField(
-                        agent.id,
-                        "name",
-                        agent.name,
-                        locale,
-                      )}
+                      {agent.name}
                     </option>
                   ))}
                 </select>

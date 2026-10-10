@@ -6,7 +6,6 @@ import {
   type RunDetail,
   runSchema,
 } from "@taff/schemas";
-import { presentPrototypeField } from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -110,14 +109,7 @@ export function RunPanel({
     run.status,
   );
   const presentationLocale = isLocale(locale) ? locale : me.user.locale;
-  const agentName = agent.data
-    ? presentPrototypeField(
-        agent.data.member.id,
-        "name",
-        agent.data.member.name,
-        presentationLocale,
-      )
-    : t("run.title");
+  const agentName = agent.data ? agent.data.member.name : t("run.title");
   // Events are reports, not a persisted plan; never infer an unreported total
   // or label a reported step complete unless its result actually says so.
   const steps = detail.events.filter((event) => event.kind === "step");

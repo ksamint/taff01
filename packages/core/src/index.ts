@@ -373,6 +373,7 @@ export function createCore(options: {
       .select({
         id: workspaces.id,
         name: workspaces.name,
+        key: workspaces.key,
         memberId: members.id,
         role: members.role,
       })
@@ -509,6 +510,7 @@ export function createCore(options: {
         .insert(tasks)
         .values({
           ...fields,
+          number: await nextTaskNumber(tx, body.workspaceId),
           projectId,
           priority: body.priority ?? parent?.priority ?? 3,
           dueAt: body.dueAt
@@ -522,6 +524,17 @@ export function createCore(options: {
         await calendar.storeOnCreate(tx, principal, task, initialCalendar);
       return toTask(task);
     });
+  }
+  /** Numbers are dense per workspace; the workspace row lock serializes creation. */
+  async function nextTaskNumber(tx: Transaction, workspaceId: string) {
+    await tx.execute(
+      sql`select 1 from ${workspaces} where ${workspaces.id} = ${workspaceId} for update`,
+    );
+    const [row] = await tx
+      .select({ next: sql<number>`coalesce(max(${tasks.number}), 0) + 1` })
+      .from(tasks)
+      .where(eq(tasks.workspaceId, workspaceId));
+    return Number(row?.next ?? 1);
   }
   async function lockTask(tx: Transaction, taskId: string) {
     parse(idSchema, taskId);

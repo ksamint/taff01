@@ -40,7 +40,7 @@ import {
   prototypePeople,
   prototypeTasks,
 } from "@taff/schemas/prototype-data";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { normalizeCalendarSchedule } from "./calendar-recurrence";
 import { type Actor, can } from "./permissions";
 
@@ -127,9 +127,15 @@ export async function seedPrototype(
       .values({
         id: workspaceId,
         name: org.name["zh-HK"],
+        key: org.key.toUpperCase(),
         seedKey: org.seedKey,
       })
-      .onConflictDoNothing({ target: workspaces.id });
+      .onConflictDoUpdate({
+        target: workspaces.id,
+        set: { key: org.key.toUpperCase() },
+        // Repeated seeds must not write (or audit) an unchanged key.
+        setWhere: sql`${workspaces.key} <> ${org.key.toUpperCase()}`,
+      });
     output[org.key] = workspaceId;
     const team = new Map<string, typeof members.$inferSelect>();
     for (const personKey of org.people) {
@@ -339,6 +345,7 @@ export async function seedPrototype(
       await tx.insert(tasks).values({
         id,
         ...fields,
+        number: definition.number,
         status: definition.status,
         dueAt: dueAt ? new Date(dueAt) : null,
       });
@@ -385,7 +392,11 @@ export async function seedPrototype(
         labels: ["meeting"],
       });
       const { dueAt: _, calendar: __, ...fields } = input;
-      await tx.insert(tasks).values({ id, ...fields });
+      await tx.insert(tasks).values({
+        id,
+        ...fields,
+        number: definition.number,
+      });
       await insertCalendar(id, definition);
     }
   }

@@ -1,7 +1,6 @@
 "use client";
 
 import type { Locale } from "@taff/schemas/base";
-import { presentPrototypeField } from "@taff/schemas/prototype-data";
 import { Check, Plus } from "lucide-react";
 import Link from "next/link";
 import type { MouseEvent } from "react";
@@ -31,12 +30,7 @@ export function OrganizationChooser({
       </p>
       <div className="organization-choices">
         {me.workspaces.map((item) => {
-          const name = presentPrototypeField(
-            item.id,
-            "name",
-            item.name,
-            locale,
-          );
+          const name = item.name;
           const selected = workspace.id === item.id;
           return (
             <Button

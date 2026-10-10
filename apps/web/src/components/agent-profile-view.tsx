@@ -10,11 +10,8 @@ import {
   type RequestGrant,
   type ReviewPolicy,
   requestGrantSchema,
+  taskReference,
 } from "@taff/schemas";
-import {
-  presentPrototypeField,
-  prototypeTaskReference,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -56,7 +53,7 @@ export function AgentProfileView({ agentId }: { agentId: string }) {
 
 function AgentEditor({ data }: { data: AgentProfile }) {
   const { t, i18n } = useTranslation();
-  const { me } = useWorkspace();
+  const { me, workspace } = useWorkspace();
   const client = useQueryClient();
   const members = useMembers(data.member.workspaceId);
   const tasks = useTasks(data.member.workspaceId);
@@ -174,13 +171,10 @@ function AgentEditor({ data }: { data: AgentProfile }) {
   });
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const presentationLocale = isLocale(locale) ? locale : me.user.locale;
-  const displayName = (id: string, value: string) =>
-    presentPrototypeField(id, "name", value, presentationLocale);
+  const displayName = (id: string, value: string) => value;
   const taskTitle = (id: string) => {
     const task = tasks.data?.find((item) => item.id === id);
-    return task
-      ? presentPrototypeField(task.id, "title", task.title, presentationLocale)
-      : t("agentProfile.task");
+    return task ? task.title : t("agentProfile.task");
   };
   const currentTasks =
     tasks.data?.filter(
@@ -266,7 +260,7 @@ function AgentEditor({ data }: { data: AgentProfile }) {
             <ul className="agent-current-tasks">
               {currentTasks.map((task) => {
                 const run = data.runs.find((item) => item.taskId === task.id);
-                const reference = prototypeTaskReference(task.id);
+                const reference = taskReference(workspace.key, task.number);
                 return (
                   <li key={task.id}>
                     <Link href={`/tasks/${task.id}`} prefetch={false}>

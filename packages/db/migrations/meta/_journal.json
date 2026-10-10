@@ -148,6 +148,13 @@
       "when": 1791599122791,
       "tag": "0020_rich_the_order",
       "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1791630102111,
+      "tag": "0021_talented_silk_fever",
+      "breakpoints": true
     }
   ]
 }

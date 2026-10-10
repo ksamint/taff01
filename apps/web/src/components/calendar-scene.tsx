@@ -9,13 +9,9 @@ import {
   shiftCalendarSeries,
   type Task,
   type TaskCalendar,
+  taskReference,
   taskSchema,
 } from "@taff/schemas";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-  prototypeTaskReference,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -111,6 +107,7 @@ export function CalendarScene() {
       const task: Task = {
         ...body,
         id: `optimistic:${crypto.randomUUID()}`,
+        number: 0,
         dueAt: body.dueAt ?? null,
         description: body.description ?? "",
         priority: body.priority ?? 3,
@@ -218,12 +215,7 @@ export function CalendarScene() {
     (item) => ({
       id: `occurrence-${item.task.id.replaceAll(":", "-")}-${Date.parse(item.startAt)}`,
       occurrenceId: item.id,
-      title: presentPrototypeField(
-        item.task.id,
-        "title",
-        item.task.title,
-        locale as PrototypeLocale,
-      ),
+      title: item.task.title,
       isAgent: item.isAgent,
       location: item.isAgent ? agentState(item.task) : undefined,
       timeLabel: new Intl.DateTimeFormat(locale, {
@@ -417,16 +409,8 @@ export function CalendarScene() {
               disabled={busy || !item.canSchedule}
               onClick={() => showEditor(item)}
             >
-              <span>
-                {prototypeTaskReference(item.task.id) ??
-                  item.task.id.slice(0, 8)}
-              </span>
-              {presentPrototypeField(
-                item.task.id,
-                "title",
-                item.task.title,
-                locale as PrototypeLocale,
-              )}
+              <span>{taskReference(workspace.key, item.task.number)}</span>
+              {item.task.title}
             </Button>
           ))}
         </section>

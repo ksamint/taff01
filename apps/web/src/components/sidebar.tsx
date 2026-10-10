@@ -1,9 +1,5 @@
 "use client";
-
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-} from "@taff/schemas/prototype-data";
+import type { Locale } from "@taff/schemas";
 
 import {
   CalendarDays,
@@ -25,14 +21,9 @@ import { Button } from "./ui/button";
 export function Sidebar() {
   const { me, workspace, setWorkspaceId, openSearch } = useWorkspace();
   const { t, i18n } = useTranslation();
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const pathname = usePathname();
-  const workspaceName = presentPrototypeField(
-    workspace.id,
-    "name",
-    workspace.name,
-    locale,
-  );
+  const workspaceName = workspace.name;
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
   const tasks = useTasks(workspace.id);
@@ -105,9 +96,7 @@ export function Sidebar() {
                 prefetch={false}
               >
                 <Sparkles size={14} aria-hidden="true" />
-                <span>
-                  {presentPrototypeField(agent.id, "name", agent.name, locale)}
-                </span>
+                <span>{agent.name}</span>
                 <span
                   className={`agent-status-dot${run ? ` agent-status-${run.status}` : ""}`}
                   aria-label={

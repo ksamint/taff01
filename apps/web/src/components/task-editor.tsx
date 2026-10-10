@@ -1,6 +1,7 @@
 "use client";
 import {
   createTaskSchema,
+  type Locale,
   type Task,
   type TaskComment,
   taskCommentInputSchema,
@@ -8,10 +9,6 @@ import {
   taskSchema,
   updateTaskSchema,
 } from "@taff/schemas";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -101,9 +98,8 @@ export function TaskEditor({
     | "status"
     | null
   >(null);
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
-  const presentName = (id: string, value: string) =>
-    presentPrototypeField(id, "name", value, locale);
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
+  const presentName = (id: string, value: string) => value;
   const [invalid, setInvalid] = useState<string | null>(null);
   const [subtaskTitle, setSubtaskTitle] = useState("");
   const [comment, setComment] = useState("");
@@ -264,9 +260,7 @@ export function TaskEditor({
         <Link className="task-parent-link" href={`/tasks/${task.parentId}`}>
           <ArrowLeft size={12} aria-hidden="true" />
           {t("planning.parent")} ·{" "}
-          {parent
-            ? presentPrototypeField(parent.id, "title", parent.title, locale)
-            : t("agentProfile.task")}
+          {parent ? parent.title : t("agentProfile.task")}
         </Link>
       )}
       <div className="task-source-heading">
@@ -286,7 +280,7 @@ export function TaskEditor({
             disabled={!access.data?.canEdit || busy}
             onClick={() => setPicker("text")}
           >
-            {presentPrototypeField(task.id, "title", task.title, locale)}
+            {task.title}
           </Button>
         </h1>
       </div>
@@ -562,14 +556,7 @@ export function TaskEditor({
         )}
       </form>
       {task.description && (
-        <p className="task-description preserve-text">
-          {presentPrototypeField(
-            task.id,
-            "description",
-            task.description,
-            locale,
-          )}
-        </p>
+        <p className="task-description preserve-text">{task.description}</p>
       )}
       {!access.data?.canEdit && (
         <p className="section-hint">{t("planning.readOnly")}</p>

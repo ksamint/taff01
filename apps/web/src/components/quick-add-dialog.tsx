@@ -3,15 +3,12 @@ import "../styles/quick-add-parity.css";
 import {
   type CreateTask,
   createTaskSchema,
+  type Locale,
   quickAddInputSchema,
   quickAddResultSchema,
   type Task,
   taskSchema,
 } from "@taff/schemas";
-import {
-  type PrototypeLocale,
-  presentPrototypeField,
-} from "@taff/schemas/prototype-data";
 import {
   useIsMutating,
   useMutation,
@@ -38,7 +35,7 @@ import { SheetDialog } from "./ui/sheet-dialog";
 export function QuickAddDialog({ onClose }: { onClose: () => void }) {
   const { workspace, me } = useWorkspace();
   const { t, i18n } = useTranslation();
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as PrototypeLocale;
+  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const client = useQueryClient();
   const members = useMembers(workspace.id);
   const projects = useProjects(workspace.id);
@@ -96,6 +93,7 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
         {
           ...body,
           id,
+          number: 0,
           description: body.description ?? "",
           priority: body.priority ?? 3,
           projectId: body.projectId ?? null,
@@ -123,8 +121,7 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
   });
   const change = (key: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
-  const presentName = (id: string, name: string) =>
-    presentPrototypeField(id, "name", name, locale);
+  const presentName = (id: string, name: string) => name;
   const displayMembers = (members.data ?? []).map((member) => ({
     ...member,
     name: presentName(member.id, member.name),
