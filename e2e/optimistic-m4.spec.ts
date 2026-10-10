@@ -4,6 +4,7 @@ import zhCN from "../apps/web/locales/zh-CN/common.json";
 import zhHK from "../apps/web/locales/zh-HK/common.json";
 import {
   agentProfileSchema,
+  grantSchema,
   memberListSchema,
   meSchema,
   reviewRunSchema,
@@ -155,6 +156,7 @@ test("rejected run start, assignment and control restore task and run caches", a
   denied = await rejectLater(page, `/api/runs/${run.id}/control`);
   await page.getByTestId("run-pause").click();
   await denied.seen;
+  await openDisclosure(page.getByTestId("run-panel"), "run-details");
   await page
     .getByTestId("run-panel")
     .locator(`a[href="/agents/${agent.id}"]`)
@@ -541,10 +543,196 @@ test("embedded review approval failure preserves decisions and drafts through ta
         [artifactComment, overallComment].includes(comment.body),
       ),
     ).toBe(false);
+
+    // A real changes request exposes Resume/Cancel in the embedded review.
+    // Their optimistic status changes must not discard its error/dialog owner.
+    await artifact.getByTestId("item-changes").click();
+    const changesSaved = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === `/api/runs/${run.id}/review` &&
+        response.request().method() === "POST" &&
+        response.request().postDataJSON()?.decision === "request_changes",
+    );
+    await review.getByTestId("review-request-changes").click();
+    expect((await changesSaved).status()).toBe(200);
+    await expect(review.getByTestId("run-status")).toHaveText(
+      messages[locale].run.status.changes_requested,
+    );
+    await expect(review.getByTestId("review-readonly")).toBeVisible();
+    await openDisclosure(review, "run-details");
+    for (const action of ["resume", "cancel"] as const) {
+      const rejectedControl = await rejectLater(
+        page,
+        `/api/runs/${run.id}/control`,
+      );
+      const dialog = review.locator("dialog.confirm-dialog");
+      try {
+        if (action === "cancel") {
+          await review.getByTestId("run-cancel").click();
+          await expect(dialog).toBeVisible();
+          await dialog
+            .getByRole("button", {
+              name: messages[locale].run.cancel,
+              exact: true,
+            })
+            .click();
+        } else await review.getByTestId("run-resume").click();
+        await rejectedControl.seen;
+        await expect(review).toBeVisible();
+        await expect(review.getByTestId("run-status")).toHaveText(
+          messages[locale].run.status[
+            action === "resume" ? "running" : "canceled"
+          ],
+        );
+        await expect(review.getByTestId("run-details")).toHaveAttribute(
+          "open",
+          "",
+        );
+        await expect(artifact.getByTestId("artifact-preview")).toHaveText(
+          "Real isolated embedded review evidence",
+        );
+        if (action === "cancel") {
+          await expect(dialog).toBeVisible();
+          await expect(
+            dialog.getByRole("button", {
+              name: messages[locale].run.cancel,
+              exact: true,
+            }),
+          ).toBeDisabled();
+        }
+        await rejectedControl.reject();
+        await expect(review.getByTestId("run-status")).toHaveText(
+          messages[locale].run.status.changes_requested,
+        );
+        await expect(page.getByTestId("task-status")).toHaveText(
+          messages[locale].status.in_progress,
+        );
+        await expect(
+          action === "cancel"
+            ? dialog.getByRole("alert")
+            : review.getByRole("alert"),
+        ).toHaveText(messages[locale].errors.forbidden);
+        await expect(review.getByTestId("review-readonly")).toBeVisible();
+        if (action === "cancel") {
+          await expect(dialog).toBeVisible();
+          await dialog
+            .getByRole("button", {
+              name: messages[locale].run.keep,
+              exact: true,
+            })
+            .click();
+        } else await expect(review.getByTestId("run-resume")).toBeEnabled();
+        const unchanged = reviewWorkspaceSchema.parse(
+          await (await page.request.get(`/api/tasks/${task.id}/review`)).json(),
+        );
+        expect(unchanged.run.status).toBe("changes_requested");
+        expect(unchanged.task.status).toBe("in_progress");
+        expect(
+          unchanged.comments.some(({ body }) => body === overallComment),
+        ).toBe(true);
+      } finally {
+        await rejectedControl.reject();
+      }
+    }
   } finally {
     if (approvalBodies.length) await denied.reject();
     page.off("request", recordApproval);
     await page.unroute(`**/api/runs/${run.id}/review`);
+  }
+});
+
+test("a grant decision records its own workspace member while another workspace is selected", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as Locale;
+  const { agent: originalAgent } = await signIn(page, locale);
+  const me = meSchema.parse(await (await page.request.get("/api/me")).json());
+  const createWorkspace = async (name: string, agentIds: string[] = []) => {
+    const response = await page.request.post("/api/workspaces", {
+      data: { name: `${name} ${locale} ${crypto.randomUUID()}`, agentIds },
+    });
+    expect(response.status()).toBe(201);
+    return workspaceSchema.parse(await response.json());
+  };
+  const ambient = await createWorkspace("Grant ambient");
+  const target = await createWorkspace("Grant target", [originalAgent.id]);
+  expect(ambient.memberId).not.toBe(target.memberId);
+  const members = memberListSchema.parse(
+    await (
+      await page.request.get(`/api/members?workspaceId=${target.id}`)
+    ).json(),
+  );
+  const agent = members.find(({ kind }) => kind === "agent");
+  if (!agent) throw new Error("Copied grant agent is required");
+  const reason = `Cross-workspace grant ${locale} ${crypto.randomUUID()}`;
+  const requested = await page.request.post(`/api/agents/${agent.id}/grants`, {
+    data: { capability: "web.search", reason },
+  });
+  expect(requested.status()).toBe(201);
+  const grant = grantSchema.parse(await requested.json());
+  await page.goto("/orgs");
+  await page.getByTestId(`workspace-${ambient.id}`).click();
+  await page.goto(`/agents/${agent.id}`);
+  await expect
+    .poll(() =>
+      page.evaluate(
+        (userId) => sessionStorage.getItem(`taff:workspace:${userId}`),
+        me.user.id,
+      ),
+    )
+    .toBe(ambient.id);
+  const card = page.getByTestId("grant-card").filter({ hasText: reason });
+  await expect(card.getByTestId("grant-allow")).toBeEnabled();
+  let release!: () => void;
+  let arrived!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const seen = new Promise<void>((resolve) => {
+    arrived = resolve;
+  });
+  const path = `/api/grants/${grant.id}/decision`;
+  const pattern = `**${path}`;
+  await page.route(pattern, async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    arrived();
+    await held;
+    await route.continue();
+  });
+  try {
+    const saved = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === path &&
+        response.request().method() === "POST",
+    );
+    await card.getByTestId("grant-allow").click();
+    await seen;
+    await expect(card.getByTestId("grant-revoke")).toBeVisible();
+    await expect(
+      card.locator(".section-hint").filter({ hasText: me.user.name }),
+    ).toHaveCount(1);
+    await expect(card).not.toContainText(messages[locale].unknownMember);
+    release();
+    const response = await saved;
+    expect(response.status()).toBe(200);
+    const decided = grantSchema.parse(await response.json());
+    expect(decided.workspaceId).toBe(target.id);
+    expect(decided.decidedBy).toBe(target.memberId);
+    expect(decided.decidedBy).not.toBe(ambient.memberId);
+    expect(decided.status).toBe("allowed");
+    const stored = agentProfileSchema.parse(
+      await (await page.request.get(`/api/agents/${agent.id}`)).json(),
+    );
+    expect(stored.grants.find(({ id }) => id === grant.id)?.decidedBy).toBe(
+      target.memberId,
+    );
+    await expect(card.getByTestId("grant-revoke")).toBeEnabled();
+    await expect(
+      card.locator(".section-hint").filter({ hasText: me.user.name }),
+    ).toHaveCount(1);
+  } finally {
+    release();
+    await page.unroute(pattern);
   }
 });
 

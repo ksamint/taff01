@@ -21,7 +21,7 @@ import {
 } from "@tanstack/react-query";
 import { ArrowLeft, ChevronDown, Play, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import {
@@ -69,6 +69,24 @@ export function TaskDetailView({
   const latest = runs.data
     ?.filter((run) => run.taskId === taskId)
     .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
+  const reviewStatus =
+    !!latest &&
+    ["needs_review", "changes_requested", "completed"].includes(latest.status);
+  const runId = latest?.id;
+  const [settledPlacement, setSettledPlacement] = useState<{
+    runId: string;
+    hasReview: boolean;
+  } | null>(null);
+  useEffect(() => {
+    if (!busy)
+      setSettledPlacement(runId ? { runId, hasReview: reviewStatus } : null);
+  }, [busy, runId, reviewStatus]);
+  // Keep the control mutation, confirmation and rollback error mounted until
+  // it settles. A new run must never inherit the previous run's placement.
+  const hasReview =
+    busy && runId && settledPlacement?.runId === runId
+      ? settledPlacement.hasReview
+      : reviewStatus;
   const detail = useRun(latest?.id);
   const assign = useMutation({
     mutationKey: m3MutationKey,
@@ -154,9 +172,6 @@ export function TaskDetailView({
     ["running", "paused", "needs_review", "changes_requested"].includes(
       latest.status,
     );
-  const hasReview =
-    !!latest &&
-    ["needs_review", "changes_requested", "completed"].includes(latest.status);
   const workerName = worker
     ? presentPrototypeField(worker.id, "name", worker.name, locale)
     : t("unassigned");

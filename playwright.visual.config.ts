@@ -31,7 +31,7 @@ export default defineConfig({
     browserName: "chromium",
     deviceScaleFactor: 1,
     colorScheme: "light",
-    timezoneId: "Asia/Shanghai",
+    timezoneId: process.env.UI_SCREEN === "shell" ? "Asia/Shanghai" : "UTC",
   },
   projects: [
     {

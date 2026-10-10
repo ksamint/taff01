@@ -1,5 +1,5 @@
 // Self-served, offline reference captures. No app, account, or API is involved.
-// Usage: pnpm ui:prototype-shots [output-directory]
+// Usage: pnpm ui:prototype-shots [--dark] [output-directory]
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
@@ -20,8 +20,18 @@ const repo = path.resolve(
   "../..",
 );
 const root = await realpath(path.join(repo, "docs/ui/prototype"));
+const args = process.argv.slice(2);
+assert(args.every((arg) => !arg.startsWith("--") || arg === "--dark"));
+const dark = args.includes("--dark");
+const destinations = args.filter((arg) => arg !== "--dark");
+assert(destinations.length <= 1, "Provide at most one output directory");
+const approvedLight = path.join(repo, "docs/ui/reference");
 const out = path.resolve(
-  process.argv[2] || path.join(repo, "docs/ui/reference"),
+  destinations[0] || (dark ? path.join(approvedLight, "dark") : approvedLight),
+);
+assert(
+  !dark || out !== approvedLight,
+  "Dark captures must not replace approved light references",
 );
 const mime = {
   ".html": "text/html",
@@ -160,7 +170,14 @@ try {
         : { width: 1280, height: 800 };
     for (const lang of ["zh", "en"]) {
       const l = labels[lang];
-      for (const screen of device === "phone" ? phoneScreens : desktopScreens) {
+      const screens = dark
+        ? device === "phone"
+          ? ["projects"]
+          : ["board", "list"]
+        : device === "phone"
+          ? phoneScreens
+          : desktopScreens;
+      for (const screen of screens) {
         const context = await browser.newContext({
           viewport,
           deviceScaleFactor: 1,
@@ -235,12 +252,40 @@ try {
           "lang",
           lang === "zh" ? "zh-Hant-HK" : "en",
         );
+        if (dark) {
+          await click(
+            phone.getByRole("button", { name: l.me, exact: true }).last(),
+          );
+          await click(
+            phone.getByRole("button", {
+              name: lang === "zh" ? "深色" : "Dark",
+              exact: true,
+            }),
+          );
+          await click(
+            phone.getByRole("button", { name: l.today, exact: true }).last(),
+          );
+        }
+        // Assert the rendered source surface, not OS color-scheme emulation.
+        const renderedTheme = await phone.evaluate(
+          (surface) => getComputedStyle(surface).backgroundColor,
+        );
+        assert.equal(
+          renderedTheme,
+          dark ? "rgb(10, 22, 38)" : "rgb(255, 255, 255)",
+        );
         // Only normalize surrounding design-canvas placement: preserve native
         // screen dimensions, OS chrome, rounded corners, content and controls.
         await page.addStyleTag({
           content: `[data-reference-canvas]{padding:0!important;gap:0!important;min-width:0!important;min-height:0!important;width:auto!important;display:block!important}[data-reference-preview="${device === "phone" ? "desktop" : "phone"}"]{display:none!important}[data-reference-preview="${device}"]{gap:0!important;width:${viewport.width}px!important}[data-reference-preview="${device}"]>div:first-child{display:none!important}[data-reference-preview="phone"]>div:nth-child(2){padding:0!important;background:transparent!important;width:390px!important}[data-reference-preview="phone"]>div:nth-child(n+3){display:none!important}`,
         });
         const surface = page.locator(`[data-reference-surface="${device}"]`);
+        assert.equal(
+          await surface.evaluate(
+            (node) => getComputedStyle(node).backgroundColor,
+          ),
+          renderedTheme,
+        );
         if (device === "phone") {
           const select = async (key) =>
             click(
@@ -415,6 +460,8 @@ try {
           device,
           language: lang,
           screen,
+          theme: dark ? "dark" : "light",
+          backgroundColor: renderedTheme,
           viewport,
           width: viewport.width,
           height: viewport.height,
@@ -459,6 +506,10 @@ try {
     capturedAt: new Date().toISOString(),
     browser: browser.version(),
     source: "docs/ui/prototype/team-tasks.dc.html",
+    theme: dark ? "dark" : "light",
+    themeSelection: dark
+      ? "Actual Me appearance control before navigating each fresh capture"
+      : "Prototype default light appearance",
     capturePolicy:
       "Native screen locator captures; surrounding dual-surface design canvas, labels and outer phone bezel excluded. Product content, synthetic OS status bar/home indicator and rounded screen corners preserved. No scaling.",
     seed: {
