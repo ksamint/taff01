@@ -522,3 +522,9 @@ count. Existing Me/guest browser cases exercise permitted Invite navigation
 and absence of guest role/invite controls; both capture harnesses wait for
 the three real agent profiles. These four screens require fresh captures
 before acceptance; no earlier candidate images approve the repairs.
+
+MCP agent and task owner/worker selectors now use the existing identity-aware
+canonical name presenter (`d595c78`), preserving edited names and option IDs.
+Local lint (265 files) and all six type checks pass. There are 62 accepted
+native captures; Calendar, Team, MCP and Organizations (24 captures) await
+fresh production inspection. Full browser and performance gates remain pending.
