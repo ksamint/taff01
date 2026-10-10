@@ -658,3 +658,20 @@ cases and MCP gate. No push or live UI deployment is claimed.
 A separate traced diagnostic uses the same immutable source read-only,
 pinned runtime and disposable database with providers disabled. Its
 instrumented timing is diagnostic evidence only, never an acceptance run.
+
+
+## CJK font request priority
+
+The traced Chinese cold load downloads the 56 KiB common CJK font while
+initial application scripts are still downloading. A browser experiment
+with the exact unchanged font bytes reports default priority VeryHigh;
+an explicit font preload with fetchpriority=low reports Low, without a
+later promotion when CSS uses the face. The experiment used no API,
+database or credentials, an isolated network and read-only mounts.
+
+Chinese root layouts now emit that low-priority hint in the initial head.
+Font files, glyphs, metrics, CSS, optional display and session confirmation
+remain unchanged. The existing JavaScript-disabled locale test checks the
+head hint for both Chinese locales and its absence for English/invalid
+preferences. Fresh visual and original performance validation is pending;
+the priority experiment is not an acceptance result.

@@ -37,6 +37,14 @@ test("saved locale renders before JavaScript and never authorizes a session", as
     await expect(initial.locator("main.loading")).toHaveText(
       messages[locale].loading,
     );
+    const fontHint = initial.locator(
+      'head link[rel="preload"][as="font"][href="/fonts/NotoSansTC-ui-common.woff2"]',
+    );
+    await expect(fontHint).toHaveCount(locale === "en" ? 0 : 1);
+    if (locale !== "en") {
+      await expect(fontHint).toHaveAttribute("fetchpriority", "low");
+      await expect(fontHint).toHaveAttribute("crossorigin", "anonymous");
+    }
     expect((await context.request.get("/api/me")).status()).toBe(401);
     await context.addCookies([{ ...preference, value: "untrusted-locale" }]);
     await initial.reload();
@@ -44,6 +52,7 @@ test("saved locale renders before JavaScript and never authorizes a session", as
     await expect(initial.locator("main.loading")).toHaveText(
       messages.en.loading,
     );
+    await expect(fontHint).toHaveCount(0);
   } finally {
     await context.close();
   }

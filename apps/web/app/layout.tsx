@@ -60,6 +60,19 @@ export default async function RootLayout({
   preload("/api/me", { as: "fetch", crossOrigin: "anonymous" });
   return (
     <html lang={htmlLang(locale)} suppressHydrationWarning>
+      <head>
+        {/* Optional CJK fonts must not outrank app scripts on cold visits. */}
+        {locale !== "en" && (
+          <link
+            rel="preload"
+            as="font"
+            type="font/woff2"
+            href="/fonts/NotoSansTC-ui-common.woff2"
+            crossOrigin="anonymous"
+            fetchPriority="low"
+          />
+        )}
+      </head>
       <body suppressHydrationWarning>
         <script
           dangerouslySetInnerHTML={{
