@@ -1,5 +1,13 @@
 # Agent goal: bring the UI to the approved prototype
 
+> Status 2026-10-10: merged to `main` through PR 2, reviewed and fixed
+> (`docs/ui/review-2026-10-10/pr-2-review.md`, `docs/milestones/10-ui-parity.md`).
+> Two items remain and are now part of `docs/agent-goal.md`: LCP in every
+> locale (its item 0) and the visual baselines: regenerate
+> `e2e/__screenshots__/` on the Linux Chromium that CI installs (the
+> review sandbox could not download it), place each capture next to its
+> reference in the milestone report, and get the visual job green.
+
 Paste everything below this line as the goal. Do this before the remaining
 M9 items in `docs/agent-goal.md`.
 

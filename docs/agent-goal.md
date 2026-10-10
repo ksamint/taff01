@@ -1,7 +1,8 @@
 # Agent goal: finish Taff M9 and hand over
 
-> Run `docs/agent-goal-ui-parity.md` first: the UI review of 2026-10-10
-> found the app far from the approved prototype on every screen.
+> The prototype port from `docs/agent-goal-ui-parity.md` is merged (PR 2,
+> 2026-10-10). Two of its items remain and come first here: item 0 below
+> (LCP) and the visual baselines named in that goal's closing note.
 
 Paste everything below this line as the goal for a coding agent working in
 `ksamint/taff01`. It is self-contained; the files it names are in the
@@ -84,6 +85,33 @@ and a "Show more" button.
 
 M9 scope, in this order, each with acceptance:
 
+0. LCP ≤ 2 s in every locale, before anything else. After the prototype
+   port the signed-in Today route measures about 2.3–2.5 s in en and
+   2.5–2.7 s in zh-HK on the production build over simulated slow 4G
+   (`pnpm perf:lcp`, ±150 ms run to run; `LCP_TRACE=1` writes the Chrome
+   trace, `LCP_DEBUG=1` prints the LCP element). The budget is 2,000 ms.
+   `docs/milestones/10-ui-parity.md` ("Still open") records the trace
+   reading; the causes, in the order they cost time:
+   - The layout's client chunk (`app/layout-*.js`) is not among the initial
+     scripts in the HTML, so hydration waits one extra round trip for it,
+     then another for the cache-persistence chunk that it imports. Both
+     must be in the initial script list or inlined into a chunk that is.
+   - After the scripts arrive (~1.7 s on slow 4G) the shell spends about
+     650 ms on the main thread before the first list paints: hydration,
+     the session confirmation request, then a second render from the
+     query cache. Render the first Today paint from the data the server
+     already has (`initialMe`, the preloaded tasks and calendar reads) in
+     one pass, and let session confirmation gate writes, not the paint.
+   - The Chinese font still loads through CSS on an English visit; keep it
+     to `lang="zh-*"` only. `font-display: optional` stays.
+   - Only then cut JavaScript further: split `@taff/schemas` so Today
+     ships only the schemas it parses, lazy-load i18next resources and
+     non-Today code, and read the chunk list from `pnpm perf:budget`.
+   Measure after each change, in all three locales, and keep the number in
+   the milestone report. Acceptance: `LCP_LOCALE=en`, `zh-CN` and `zh-HK`
+   `pnpm perf:lcp` medians ≤ 2,000 ms over three runs each on the
+   production build, `pnpm perf:budget` still green, every Playwright flow
+   still passing.
 1. Lighthouse in CI. Add `lighthouse` as a devDependency (its `axe-core`
    dependency is the approved MPL-2.0 exception; the gate already allows it)
    and a `pnpm perf:lighthouse` script that audits the signed-in Today route
@@ -91,14 +119,9 @@ M9 scope, in this order, each with acceptance:
    failing below 90 on performance, accessibility and best practices. Run it
    in `ci.yml` after `perf:budget`. Acceptance: the script and CI pass; the
    report JSON is uploaded as a CI artifact.
-2. Chinese-locale LCP ≤ 2 s. Milestone 08 measured en 1.94 s and zh-HK
-   2.34 s and names the causes. Expected order of gain: cut route JavaScript
-   (split `@taff/schemas` so Today ships only the schemas it parses; lazy-load
-   i18next resources and non-Today code; check `pnpm perf:budget` chunk list);
-   render the stored locale on the server from a cookie so the client applies
-   no locale pass; keep `/api/me`, locale and workspace preloads working.
-   Acceptance: `LCP_LOCALE=zh-HK pnpm perf:lcp` and `zh-CN` medians ≤ 2,000 ms
-   on three runs, en still ≤ 2,000 ms, bundle budget still met.
+2. LCP guard. With item 0 green, make `pnpm perf:lcp` fail CI in all three
+   locales when a median exceeds 2,000 ms, so the number cannot drift back.
+   Acceptance: the gate runs in `ci.yml` after `perf:budget` and is green.
 3. Accessibility pass against the floor in `docs/ui/README.md`: every
    interactive element reachable and operable by keyboard, visible focus,
    names on icon-only buttons, dialogs trap focus and restore it, live
