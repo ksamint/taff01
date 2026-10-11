@@ -16,27 +16,15 @@
     "LCP_RUNS": 3,
     "lcp": {
       "en": {
-        "samplesMs": [
-          704,
-          696,
-          724
-        ],
+        "samplesMs": [704, 696, 724],
         "medianMs": 704
       },
       "zh-CN": {
-        "samplesMs": [
-          800,
-          780,
-          776
-        ],
+        "samplesMs": [800, 780, 776],
         "medianMs": 780
       },
       "zh-HK": {
-        "samplesMs": [
-          772,
-          764,
-          784
-        ],
+        "samplesMs": [772, 764, 784],
         "medianMs": 772
       }
     },
