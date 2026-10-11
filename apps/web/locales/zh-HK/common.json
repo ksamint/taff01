@@ -64,7 +64,8 @@
     "network": "無法連線，請檢查網絡後重試。",
     "auth": "無法登入，請檢查電郵或用戶名稱和密碼後重試。",
     "signup": "無法建立帳戶，請檢查資料或嘗試登入。",
-    "profile": "無法儲存語言偏好，請重試。"
+    "profile": "無法儲存語言偏好，請重試。",
+    "email_verification_required": "請先驗證電郵地址，再接受此邀請。"
   },
   "nav": {
     "label": "主導航",
@@ -529,7 +530,12 @@
     },
     "current": "目前組織",
     "roleFor": "{{name}}的角色",
-    "people": "人員"
+    "people": "人員",
+    "emailDelivery": {
+      "sent": "邀請電郵已傳送，亦可複製下方連結。",
+      "logged": "尚未設定電郵傳送。邀請已私下記錄，請複製下方連結分享。",
+      "failed": "邀請電郵未能傳送，下方連結仍然有效，可複製分享。"
+    }
   },
   "pwa": {
     "description": "人與代理協作的任務和日曆。",
@@ -605,5 +611,29 @@
   "todayDue": "今天到期",
   "todayScheduleEmpty": "今天沒有日程。",
   "todayNow": "現在",
-  "moreAgentWork": "還有 {{count}} 項，見項目"
+  "moreAgentWork": "還有 {{count}} 項，見項目",
+  "emailVerification": {
+    "title": "電郵驗證",
+    "hint": "接受邀請前，請先驗證 {{email}}。",
+    "confirmHint": "確認使用此連結驗證 {{email}}。",
+    "verified": "電郵地址已驗證",
+    "unverified": "電郵地址尚未驗證",
+    "request": "傳送驗證連結",
+    "confirm": "驗證此電郵地址",
+    "signInHint": "請登入需要驗證電郵地址的帳戶。",
+    "delivery": {
+      "sent": "驗證電郵已傳送，請開啟電郵中的連結繼續。",
+      "logged": "尚未設定電郵傳送。驗證連結已由伺服器私下記錄，請聯絡管理員。",
+      "failed": "驗證電郵未能傳送，請重試或聯絡管理員。"
+    }
+  },
+  "emailInvitationSubject": "你獲邀加入 Taff 工作空間",
+  "emailInvitationBody": "你獲邀加入 Taff 工作空間。請以此電郵地址登入、驗證地址擁有權，並在七天內接受邀請：\n{{link}}",
+  "emailVerificationSubject": "驗證你的 Taff 電郵地址",
+  "emailVerificationBody": "請在一小時內透過此連結確認你擁有這個 Taff 電郵地址：\n{{link}}\n如非你提出的要求，請忽略此訊息。",
+  "inputFormat": {
+    "date": "YYYY-MM-DD",
+    "time": "HH:mm",
+    "dateTime": "YYYY-MM-DDTHH:mm"
+  }
 }

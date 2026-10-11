@@ -15,3 +15,5 @@ lighthouse-reports/
 *.log
 .env.production
 !.env.production.example
+
+.taff-mail/

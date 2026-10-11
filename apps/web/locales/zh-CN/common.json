@@ -63,7 +63,8 @@
     "network": "无法连接，请检查网络后重试。",
     "auth": "无法登录，请检查邮箱或用户名和密码后重试。",
     "signup": "无法创建账户，请检查信息或尝试登录。",
-    "profile": "无法保存语言偏好，请重试。"
+    "profile": "无法保存语言偏好，请重试。",
+    "email_verification_required": "请先验证邮箱地址，再接受此邀请。"
   },
   "zh-HK": "繁體中文（香港）",
   "nav": {
@@ -529,7 +530,12 @@
     },
     "current": "当前组织",
     "roleFor": "{{name}}的角色",
-    "people": "人员"
+    "people": "人员",
+    "emailDelivery": {
+      "sent": "邀请邮件已发送，也可复制下方链接。",
+      "logged": "尚未配置邮件发送。邀请已私下记录，请复制下方链接分享。",
+      "failed": "邀请邮件未能发送，下方链接仍然有效，可复制分享。"
+    }
   },
   "pwa": {
     "description": "人与智能体协作的任务和日历。",
@@ -605,5 +611,29 @@
   "todayDue": "今天到期",
   "todayScheduleEmpty": "今天没有日程。",
   "todayNow": "现在",
-  "moreAgentWork": "还有 {{count}} 项，见项目"
+  "moreAgentWork": "还有 {{count}} 项，见项目",
+  "emailVerification": {
+    "title": "邮箱验证",
+    "hint": "接受邀请前，请先验证 {{email}}。",
+    "confirmHint": "确认使用此链接验证 {{email}}。",
+    "verified": "邮箱地址已验证",
+    "unverified": "邮箱地址尚未验证",
+    "request": "发送验证链接",
+    "confirm": "验证此邮箱地址",
+    "signInHint": "请登录需要验证邮箱地址的账号。",
+    "delivery": {
+      "sent": "验证邮件已发送，请打开邮件中的链接继续。",
+      "logged": "尚未配置邮件发送。验证链接已由服务器私下记录，请联系管理员。",
+      "failed": "验证邮件未能发送，请重试或联系管理员。"
+    }
+  },
+  "emailInvitationSubject": "你受邀加入 Taff 工作空间",
+  "emailInvitationBody": "你受邀加入 Taff 工作空间。请使用此邮箱地址登录、验证地址所有权，并在七天内接受邀请：\n{{link}}",
+  "emailVerificationSubject": "验证你的 Taff 邮箱地址",
+  "emailVerificationBody": "请在一小时内通过此链接确认你拥有这个 Taff 邮箱地址：\n{{link}}\n如果不是你提出的请求，请忽略此消息。",
+  "inputFormat": {
+    "date": "YYYY-MM-DD",
+    "time": "HH:mm",
+    "dateTime": "YYYY-MM-DDTHH:mm"
+  }
 }

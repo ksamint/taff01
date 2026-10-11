@@ -51,6 +51,13 @@ services:
       TENCENT_SMS_SIGN_NAME: ${TENCENT_SMS_SIGN_NAME:-}
       TENCENT_SMS_TEMPLATE_ID: ${TENCENT_SMS_TEMPLATE_ID:-}
       TENCENT_SMS_REGION: ${TENCENT_SMS_REGION:-ap-guangzhou}
+      EMAIL_HOST: ${EMAIL_HOST:-}
+      EMAIL_PORT: ${EMAIL_PORT:-465}
+      EMAIL_SECURE: ${EMAIL_SECURE:-true}
+      EMAIL_USER: ${EMAIL_USER:-}
+      EMAIL_PASSWORD: ${EMAIL_PASSWORD:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      EMAIL_LOG_PATH: ${EMAIL_LOG_PATH:-/app/.taff-mail/messages.jsonl}
       API_PORT: "3001"
       API_HOST: 0.0.0.0
     depends_on:

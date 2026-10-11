@@ -12,6 +12,15 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
   expect(exampleUrl.searchParams.get("sslmode")).toBe("verify-full");
   const database =
     "postgres://taff:compose-test@postgres01.internal.apuch.art:5432/taff?sslmode=verify-full";
+  const email = {
+    EMAIL_HOST: "smtp.example.test",
+    EMAIL_PORT: "587",
+    EMAIL_SECURE: "false",
+    EMAIL_USER: "fixture",
+    EMAIL_PASSWORD: "compose-test-only",
+    EMAIL_FROM: "taff@example.test",
+    EMAIL_LOG_PATH: "/app/.taff-mail/messages.jsonl",
+  };
   const config = JSON.parse(
     execFileSync(
       "docker",
@@ -31,6 +40,7 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
         encoding: "utf8",
         env: {
           ...process.env,
+          ...email,
           DATABASE_URL: database,
           AUTH_URL: "https://taff.apuch.cn",
           AUTH_SECRET: "compose-test-secret-with-at-least-32-characters",
@@ -64,6 +74,10 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
   expect(config.services.api.environment.AUTH_URL).toBe(
     "https://taff.apuch.cn",
   );
+  expect(config.services.api.environment).toMatchObject(email);
+  for (const service of ["migrate", "worker", "web"])
+    for (const key of Object.keys(email))
+      expect(config.services[service].environment[key]).toBeUndefined();
   for (const service of ["api", "worker", "web", "valkey", "caddy"])
     expect(config.services[service].ports ?? []).toEqual([]);
   expect(config.services.worker.build.args.TARGET).toBe("worker");

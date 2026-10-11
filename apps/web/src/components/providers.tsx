@@ -13,7 +13,7 @@ import {
 } from "react";
 import { I18nextProvider, initReactI18next } from "react-i18next";
 import { detectLocale, htmlLang, readPreference } from "../lib/i18n";
-import { takeInviteToken } from "../lib/invite";
+import { takeEmailVerificationToken, takeInviteToken } from "../lib/invite";
 import { installLocaleLoader } from "../lib/locale-loader";
 import { bootstrapSession } from "../lib/session-cache";
 
@@ -26,6 +26,8 @@ const WorkspaceSelection = createContext<{
   setId: (id: string) => void;
   invitation: string | null;
   setInvitation: (token: string | null) => void;
+  emailVerificationToken: string | null;
+  setEmailVerificationToken: (token: string | null) => void;
 } | null>(null);
 const TodayClock = createContext<number | undefined>(undefined);
 export function useInitialTodayTime() {
@@ -54,9 +56,14 @@ export function Providers({
     initialToday?.workspaceId ?? "",
   );
   const [invitation, setInvitation] = useState<string | null>(null);
+  const [emailVerificationToken, setEmailVerificationToken] = useState<
+    string | null
+  >(null);
   useEffect(() => {
     const token = takeInviteToken();
     if (token) setInvitation(token);
+    const verification = takeEmailVerificationToken();
+    if (verification) setEmailVerificationToken(verification);
   }, []);
   const [client] = useState(() => {
     const queryClient = new QueryClient({
@@ -125,6 +132,8 @@ export function Providers({
             setId: setWorkspaceId,
             invitation,
             setInvitation,
+            emailVerificationToken,
+            setEmailVerificationToken,
           }}
         >
           <TodayClock.Provider value={initialToday?.now}>

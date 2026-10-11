@@ -21,6 +21,7 @@ ARG TARGET=api
 COPY --from=build /repo/dist/runtime/${TARGET}/node_modules ./node_modules
 COPY --from=build /repo/dist/server ./dist
 COPY --from=build /repo/dist/server/migrations ./migrations
+RUN mkdir -m 0700 /app/.taff-mail && chown node:node /app/.taff-mail
 USER node
 ENV TAFF_TARGET=${TARGET}
 CMD ["sh", "-c", "node dist/${TAFF_TARGET}.mjs"]

@@ -936,3 +936,107 @@ describe("Today bootstrap REST boundaries", () => {
     expect(read).not.toHaveBeenCalled();
   });
 });
+
+describe("authenticated email ownership REST boundaries", () => {
+  function signedIn() {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+  }
+  const request = (
+    path: string,
+    body: unknown,
+    origin = "http://localhost:3000",
+  ) =>
+    app.request(`/api/me/email-verification/${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", origin },
+      body: JSON.stringify(body),
+    });
+  it("requires a session and rejects recipient, redirect and foreign origins before sending", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const send = vi.spyOn(core, "requestEmailVerification");
+    const unauthenticated = await request("request", {});
+    expect(unauthenticated.status).toBe(401);
+    expect(unauthenticated.headers.get("cache-control")).toBe(
+      "private, no-store",
+    );
+    signedIn();
+    expect(
+      (await request("request", { email: "other@example.test" })).status,
+    ).toBe(400);
+    expect(
+      (await request("request", { callbackURL: "https://other.example.test" }))
+        .status,
+    ).toBe(400);
+    const forbidden = await request(
+      "request",
+      {},
+      "https://other.example.test",
+    );
+    expect(forbidden.status).toBe(403);
+    expect(forbidden.headers.get("cache-control")).toBe("private, no-store");
+    const oversized = await request("request", { token: "a".repeat(17_000) });
+    expect(oversized.status).toBe(413);
+    expect(oversized.headers.get("cache-control")).toBe("private, no-store");
+    expect(send).not.toHaveBeenCalled();
+  });
+  it("returns authoritative self status and honest delivery, limits resends", async () => {
+    signedIn();
+    const status = vi
+      .spyOn(core, "getEmailVerificationStatus")
+      .mockResolvedValue({ emailVerified: false });
+    const send = vi
+      .spyOn(core, "requestEmailVerification")
+      .mockResolvedValue({ emailVerified: false, delivery: "failed" });
+    const read = await app.request("/api/me/email-verification");
+    expect(read.status).toBe(200);
+    expect(read.headers.get("cache-control")).toBe("private, no-store");
+    expect(status).toHaveBeenCalledWith({ kind: "user", userId: id });
+    expect(await (await request("request", {})).json()).toEqual({
+      emailVerified: false,
+      delivery: "failed",
+    });
+    expect((await request("request", {})).status).toBe(200);
+    const limited = await request("request", {});
+    expect(limited.status).toBe(429);
+    expect(limited.headers.get("retry-after")).toBe("60");
+    expect(send).toHaveBeenCalledTimes(2);
+    expect(send).toHaveBeenCalledWith({ kind: "user", userId: id }, {});
+  });
+  it("validates JSON token and translates independent ownership failures without auth secrets", async () => {
+    signedIn();
+    const verify = vi
+      .spyOn(core, "verifyEmailOwnership")
+      .mockResolvedValue({ emailVerified: true });
+    expect(
+      (await request("verify", { token: "proof", userId: id })).status,
+    ).toBe(400);
+    expect((await request("verify", { token: "" })).status).toBe(400);
+    const result = await request("verify", { token: " proof " });
+    expect(await result.json()).toEqual({ emailVerified: true });
+    expect(verify).toHaveBeenCalledExactlyOnceWith(
+      { kind: "user", userId: id },
+      { token: "proof" },
+    );
+    vi.spyOn(core, "acceptWorkspaceInvite").mockRejectedValue(
+      new CoreError("email_verification_required", 403),
+    );
+    const invite = await app.request("/api/workspace-invites/accept", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        origin: "http://localhost:3000",
+      },
+      body: JSON.stringify({ token: "a".repeat(43) }),
+    });
+    expect(invite.status).toBe(403);
+    expect(await invite.json()).toEqual({
+      error: "email_verification_required",
+    });
+  });
+});

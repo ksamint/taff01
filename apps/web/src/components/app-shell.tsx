@@ -67,6 +67,11 @@ const QuickAddDialog = dynamic(
   () => import("./quick-add-dialog").then((module) => module.QuickAddDialog),
   { ssr: false },
 );
+const EmailVerification = dynamic(
+  () =>
+    import("./email-verification").then((module) => module.EmailVerification),
+  { ssr: false },
+);
 const NotificationAlerts = dynamic(
   () =>
     import("./notification-alerts").then((module) => module.NotificationAlerts),
@@ -193,6 +198,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     setId: setWorkspaceId,
     invitation,
     setInvitation,
+    emailVerificationToken,
+    setEmailVerificationToken,
   } = useWorkspaceSelection();
   const [sessionError, setSessionError] = useState<string | null>(null);
   const me = useMeQuery();
@@ -304,6 +311,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       setWorkspaceId("");
       // A pending invitation belongs to the account that opened it.
       setInvitation(null);
+      setEmailVerificationToken(null);
       setSessionError(null);
       router.replace("/");
     },
@@ -404,6 +412,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             </p>
           )}
           <Auth />
+          {emailVerificationToken && (
+            <p className="invite-banner">{t("emailVerification.signInHint")}</p>
+          )}
         </main>
       ) : workspace ? (
         <WorkspaceContext.Provider
@@ -438,6 +449,9 @@ export function AppShell({ children }: { children: ReactNode }) {
               </p>
             )}
             {children}
+            {confirmed && emailVerificationToken && (
+              <EmailVerification key={me.data.user.id} token />
+            )}
             {confirmed && (
               <NotificationAlerts key={`${identityKey}:${workspace.id}`} />
             )}

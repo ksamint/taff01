@@ -1,8 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { inviteBootScript, takeInviteToken } from "./invite";
+import {
+  inviteBootScript,
+  takeEmailVerificationToken,
+  takeInviteToken,
+} from "./invite";
 
 type FakeWindow = {
   __taffInvite?: string;
+  __taffVerifyEmail?: string;
   location: { hash: string; pathname: string; search: string };
   history: {
     replaceState: (data: unknown, title: string, url: string) => void;
@@ -42,6 +47,22 @@ afterEach(() => {
 });
 
 describe("invite fragment", () => {
+  it.each([true, false])(
+    "preserves both private tokens and consumes them once (boot=%s)",
+    (early) => {
+      const win = fakeWindow(
+        "/?x=1#invite=invite-value&verifyEmail=verify-value",
+      );
+      if (early) boot(win);
+      vi.stubGlobal("window", win);
+      expect(takeInviteToken()).toBe("invite-value");
+      expect(win.location.hash).toBe("");
+      expect(takeEmailVerificationToken()).toBe("verify-value");
+      expect(takeInviteToken()).toBeNull();
+      expect(takeEmailVerificationToken()).toBeNull();
+      expect(win.location.pathname + win.location.search).toBe("/?x=1");
+    },
+  );
   it("boot script keeps the token in memory and strips the fragment", () => {
     const win = fakeWindow("/?x=1#invite=abc%2Fdef");
     boot(win);

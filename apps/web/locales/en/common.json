@@ -63,7 +63,8 @@
     "network": "Couldn’t connect. Check your connection and try again.",
     "auth": "Couldn’t sign in. Check your email or username and password, then try again.",
     "signup": "Couldn’t create an account. Check your details or try signing in.",
-    "profile": "Couldn’t save your language preference. Please try again."
+    "profile": "Couldn’t save your language preference. Please try again.",
+    "email_verification_required": "Verify your email address before accepting this invitation."
   },
   "zh-HK": "繁體中文（香港）",
   "nav": {
@@ -529,7 +530,12 @@
     },
     "current": "Current organization",
     "roleFor": "Role for {{name}}",
-    "people": "People"
+    "people": "People",
+    "emailDelivery": {
+      "sent": "Invitation email sent. The link below is also available to copy.",
+      "logged": "Email delivery is not configured. The invitation was recorded privately; copy the link below to share it.",
+      "failed": "The invitation email could not be sent. The link below is still valid and can be shared."
+    }
   },
   "pwa": {
     "description": "Tasks and calendars for people and agents.",
@@ -605,5 +611,29 @@
   "todayDue": "Due today",
   "todayScheduleEmpty": "No appointments today.",
   "todayNow": "Now",
-  "moreAgentWork": "{{count}} more in Projects"
+  "moreAgentWork": "{{count}} more in Projects",
+  "emailVerification": {
+    "title": "Email verification",
+    "hint": "Verify {{email}} before accepting an invitation.",
+    "confirmHint": "Confirm that you want to verify {{email}} with this link.",
+    "verified": "Email address verified",
+    "unverified": "Email address not verified",
+    "request": "Send verification link",
+    "confirm": "Verify this email address",
+    "signInHint": "Sign in to the account whose email address you want to verify.",
+    "delivery": {
+      "sent": "Verification email sent. Open its link to continue.",
+      "logged": "Email delivery is not configured. The verification link was recorded privately by the server; contact the administrator.",
+      "failed": "The verification email could not be sent. Try again or contact the administrator."
+    }
+  },
+  "emailInvitationSubject": "You have been invited to a Taff workspace",
+  "emailInvitationBody": "You have been invited to join a Taff workspace. Sign in with this email address, verify its ownership, and accept the invitation within seven days:\n{{link}}",
+  "emailVerificationSubject": "Verify your Taff email address",
+  "emailVerificationBody": "Confirm ownership of your Taff email address using this link within one hour:\n{{link}}\nIf you did not request this, ignore this message.",
+  "inputFormat": {
+    "date": "YYYY-MM-DD",
+    "time": "HH:mm",
+    "dateTime": "YYYY-MM-DDTHH:mm"
+  }
 }

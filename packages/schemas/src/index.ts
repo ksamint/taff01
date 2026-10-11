@@ -56,6 +56,7 @@ export * from "./base";
 
 export * from "./calendar-read";
 export * from "./changes";
+export * from "./email-verification";
 export * from "./inbox-read";
 export * from "./notification-preferences";
 export * from "./project-read";
@@ -482,6 +483,7 @@ export const workspaceInviteSchema = object({
   createdAt: iso.datetime(),
 });
 export const issuedWorkspaceInviteSchema = extend(workspaceInviteSchema, {
+  emailDelivery: zodEnum(["sent", "logged", "failed"]),
   token: string(),
 });
 export const memberRoleInputSchema = strictObject({ role: memberRoleSchema });

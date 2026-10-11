@@ -184,6 +184,7 @@ export const errorSchema = object({
     "rate_limited",
     "sms_unavailable",
     "sms_invalid_code",
+    "email_verification_required",
   ]),
 });
 export const SchemaError = $ZodError;

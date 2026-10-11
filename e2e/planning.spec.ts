@@ -11,6 +11,7 @@ import {
   taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
+import { verificationLink } from "./support/email-verification";
 import { selectLocale } from "./support/preferences";
 import {
   closeFieldSheet,
@@ -393,6 +394,9 @@ test("organization creation, real invitation fragment acceptance, guest role ref
     .getByRole("button", { name: m.organization.invite, exact: true })
     .click();
   await expect(page.locator("#issued-invite")).toBeVisible();
+  await expect(page.getByTestId("invite-email-delivery")).toHaveText(
+    m.organization.emailDelivery.logged,
+  );
   const link = await page.locator("#issued-invite").inputValue();
   const url = new URL(link);
   expect(url.pathname).toBe("/");
@@ -420,6 +424,56 @@ test("organization creation, real invitation fragment acceptance, guest role ref
     await guest
       .getByRole("link", { name: m.organization.accept, exact: true })
       .click();
+    const deniedAccept = guest.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname === "/api/workspace-invites/accept" &&
+        response.request().method() === "POST",
+    );
+    await guest.getByTestId("accept-invitation").click();
+    expect((await deniedAccept).status()).toBe(403);
+    await expect(guest.getByRole("alert")).toHaveText(
+      m.errors.email_verification_required,
+    );
+    await guest.getByTestId("request-email-verification").click();
+    await expect(guest.getByTestId("email-delivery-status")).toHaveText(
+      m.emailVerification.delivery.logged,
+    );
+    const recipient = meSchema.parse(
+      await (await guest.request.get("/api/me")).json(),
+    );
+    const verification = await otherContext.newPage();
+    try {
+      await verification.goto(await verificationLink(recipient.user.id));
+      await expect
+        .poll(() => {
+          const current = new URL(verification.url());
+          return (
+            current.origin === url.origin &&
+            current.pathname === "/" &&
+            current.hash === ""
+          );
+        })
+        .toBe(true);
+      await expect(
+        verification.getByTestId("verify-email-confirm"),
+      ).toBeEnabled();
+      const verified = verification.waitForResponse(
+        (response) =>
+          new URL(response.url()).pathname ===
+            "/api/me/email-verification/verify" &&
+          response.request().method() === "POST",
+      );
+      await verification.getByTestId("verify-email-confirm").click();
+      expect((await verified).status()).toBe(200);
+      await expect(
+        verification.getByTestId("verify-email-confirm"),
+      ).toHaveCount(0);
+      expect(
+        await (await guest.request.get("/api/me/email-verification")).json(),
+      ).toEqual({ emailVerified: true });
+    } finally {
+      await verification.close();
+    }
     await guest.getByTestId("accept-invitation").click();
     await expect(
       guest.getByTestId(`workspace-${workspace.id}`),

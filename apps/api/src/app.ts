@@ -17,6 +17,8 @@ import {
   createAgentTokenSchema,
   createTaskSchema,
   decideGrantSchema,
+  emailVerificationConsumeSchema,
+  emailVerificationRequestSchema,
   idSchema,
   inboxFilterSchema,
   inboxItemInputSchema,
@@ -84,6 +86,7 @@ export function createApp(
   logger: Logger,
   rateLimiter: RateLimiter,
   realtime?: Realtime,
+  emailRateLimiter?: RateLimiter,
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<{
@@ -165,6 +168,10 @@ export function createApp(
     });
     await record(principal, state.failed ?? (await callStatus(response)));
     return response;
+  });
+  app.use("/api/me/email-verification*", async (c, next) => {
+    c.header("Cache-Control", "private, no-store");
+    await next();
   });
   app.use("/api/*", cors({ origin, credentials: true }));
   app.use("/api/*", (c, next) =>
@@ -282,6 +289,35 @@ export function createApp(
       c.get("sessionExpiresAt"),
     );
   });
+  app.get("/api/me/email-verification", async (c) =>
+    c.json(
+      await core.getEmailVerificationStatus(userPrincipal(c.get("userId"))),
+    ),
+  );
+  app.post("/api/me/email-verification/request", async (c) => {
+    const body = emailVerificationRequestSchema.parse(await c.req.json());
+    const key = `email:${createHash("sha256").update(c.get("userId")).digest("hex")}`;
+    try {
+      const hit = await (emailRateLimiter ?? rateLimiter).hit(key);
+      if (!hit.allowed) {
+        c.header("Retry-After", "60");
+        return c.json({ error: "rate_limited" }, 429);
+      }
+    } catch {
+      return c.json({ error: "internal_error" }, 503);
+    }
+    return c.json(
+      await core.requestEmailVerification(userPrincipal(c.get("userId")), body),
+    );
+  });
+  app.post("/api/me/email-verification/verify", async (c) =>
+    c.json(
+      await core.verifyEmailOwnership(
+        userPrincipal(c.get("userId")),
+        emailVerificationConsumeSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
   app.get("/api/me", async (c) => c.json(await core.getMe(c.get("userId"))));
   app.get("/api/bootstrap", async (c) => {
     c.header("Cache-Control", "private, no-store");

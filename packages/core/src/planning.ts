@@ -48,6 +48,8 @@ import {
   workspaceKeyFromName,
 } from "@taff/schemas";
 import { and, desc, eq, inArray, isNull, type SQL, sql } from "drizzle-orm";
+import { deliverEmail, type EmailStatus, type EmailTransport } from "./email";
+import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { localDate, parseQuickAddText } from "./quick-add";
@@ -106,6 +108,9 @@ function dtoInvite(row: typeof workspaceInvites.$inferSelect): WorkspaceInvite {
 type Dependencies = {
   db: Database;
   tokenPepper: string;
+  authUrl: string;
+  email?: EmailTransport;
+  onEmailStatus?: (status: EmailStatus) => void;
   mutation<T>(p: Principal, run: (tx: Transaction) => Promise<T>): Promise<T>;
   requireMember(
     q: Database | Transaction,
@@ -129,6 +134,9 @@ type Dependencies = {
 export function createPlanningOperations({
   db,
   tokenPepper,
+  authUrl,
+  email: emailTransport,
+  onEmailStatus,
   mutation,
   requireMember,
   lockTask,
@@ -492,7 +500,7 @@ export function createPlanningOperations({
     input: WorkspaceInviteInput,
   ): Promise<IssuedWorkspaceInvite> {
     const body = parse(workspaceInviteInputSchema, input);
-    return mutation(p, async (tx) => {
+    const { issued, locale } = await mutation(p, async (tx) => {
       await lockWorkspace(tx, w);
       const actor = await requireMember(tx, p, w, "workspace:manage");
       const email = body.email.trim().toLowerCase();
@@ -528,8 +536,33 @@ export function createPlanningOperations({
           expiresAt: new Date(Date.now() + 7 * 86400000),
         })
         .returning();
-      return { ...dtoInvite(row), token };
+      const [recipient] = await tx
+        .select({ locale: user.locale })
+        .from(user)
+        .where(sql`lower(${user.email})=${email}`);
+      const [inviter] = await tx
+        .select({ locale: user.locale })
+        .from(user)
+        .where(eq(user.id, actor.userId!));
+      return {
+        issued: { ...dtoInvite(row), token },
+        locale: recipient?.locale ?? inviter?.locale ?? "en",
+      };
     });
+    const emailDelivery = await deliverEmail(
+      emailTransport,
+      "invitation",
+      {
+        to: issued.email,
+        ...emailMessage(
+          "invitation",
+          locale,
+          `${new URL(authUrl).origin}/#invite=${encodeURIComponent(issued.token)}`,
+        ),
+      },
+      onEmailStatus,
+    );
+    return { ...issued, emailDelivery };
   }
   async function findInvite(tx: Transaction, id: string) {
     parse(idSchema, id);
@@ -579,7 +612,8 @@ export function createPlanningOperations({
       const [person] = await tx
         .select()
         .from(user)
-        .where(eq(user.id, p.userId));
+        .where(eq(user.id, p.userId))
+        .for("share");
       if (!person) throw new CoreError("unauthorized", 401);
       const [identity] = await tx
         .select()
@@ -592,6 +626,8 @@ export function createPlanningOperations({
         throw new CoreError("forbidden", 403);
       if (row.status !== "pending" || row.expiresAt.getTime() <= Date.now())
         conflict();
+      if (!person.emailVerified)
+        throw new CoreError("email_verification_required", 403);
       const [existing] = await tx
         .select()
         .from(members)

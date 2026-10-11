@@ -49,8 +49,16 @@ import {
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins/username";
+import type { EmailStatus, EmailTransport } from "./email";
+import { createEmailVerificationOperations } from "./email-verification";
 import { createSmsAuth } from "./sms-auth";
 import type { SmsProvider } from "./tencent-sms";
+
+export type { EmailMessage, EmailStatus, EmailTransport } from "./email";
+export {
+  createEmailTransportFromEnv,
+  createLoggingEmailTransport,
+} from "./email";
 
 export type { SmsProvider } from "./tencent-sms";
 export {
@@ -75,7 +83,8 @@ export class CoreError extends Error {
       | "forbidden"
       | "not_found"
       | "invalid_input"
-      | "conflict",
+      | "conflict"
+      | "email_verification_required",
     public status: number,
   ) {
     super(code);
@@ -141,6 +150,8 @@ export function createCore(options: {
   authSecret: string;
   tokenPepper: string;
   sms?: SmsProvider;
+  email?: EmailTransport;
+  onEmailStatus?: (status: EmailStatus) => void;
 }) {
   if (options.tokenPepper.length < 16)
     throw new Error("TOKEN_PEPPER must be at least 16 characters");
@@ -212,6 +223,7 @@ export function createCore(options: {
     closed = (async () => {
       await listening?.catch(() => {});
       await connection.close();
+      await options.email?.close?.();
     })();
     return closed;
   }
@@ -972,6 +984,9 @@ export function createCore(options: {
     validateAssignees,
     currentRunId,
     tokenPepper: options.tokenPepper,
+    authUrl: options.authUrl,
+    email: options.email,
+    onEmailStatus: options.onEmailStatus,
   });
   const runOperations = createRunOperations({
     db,
@@ -996,6 +1011,14 @@ export function createCore(options: {
         options.authSecret,
         (await auth.$context).password,
       ).provisionAdministration(input),
+    ...createEmailVerificationOperations({
+      db,
+      mutation,
+      authSecret: options.authSecret,
+      authUrl: options.authUrl,
+      email: options.email,
+      onEmailStatus: options.onEmailStatus,
+    }),
     ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,

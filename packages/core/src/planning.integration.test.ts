@@ -42,6 +42,7 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
   let agentId: string;
   let otherW: string;
   const events: ChangeEvent[] = [];
+  const mail = new Map<string, string>();
   const actor = (
     tx: Parameters<
       Parameters<ReturnType<typeof connectDatabase>["db"]["transaction"]>[0]
@@ -58,6 +59,12 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
       authUrl: "http://localhost:3000",
       authSecret: "m5-test-secret-longer-than-thirty-two-characters",
       tokenPepper: "m5-test-pepper-at-least-sixteen",
+      email: {
+        send: async (message) => {
+          mail.set(message.to, message.text);
+          return "logged";
+        },
+      },
     });
     await core.subscribeChanges((event) => {
       events.push(event);
@@ -87,6 +94,15 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
     outsiderId = o.user.id;
     outsiderEmail = o.user.email;
     outsider = userPrincipal(outsiderId);
+    for (const person of [b.user, o.user]) {
+      await core.requestEmailVerification(userPrincipal(person.id), {});
+      const token = new URL(mail.get(person.email)!.split("\n")[1]).hash.slice(
+        "#verifyEmail=".length,
+      );
+      await core.verifyEmailOwnership(userPrincipal(person.id), {
+        token: decodeURIComponent(token),
+      });
+    }
     otherW = (await core.getMe(outsiderId)).workspaces[0].id;
     await connection.db.transaction(async (tx) => {
       await actor(tx);

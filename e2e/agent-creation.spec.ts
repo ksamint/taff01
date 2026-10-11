@@ -6,6 +6,7 @@ import {
   taskSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
+import { verifyTestEmail } from "./support/email-verification";
 import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
 
 test("Team creates a real custom agent through UI and assigns it as a task worker", async ({
@@ -229,6 +230,7 @@ test("real member and guest memberships cannot add workspace agents", async ({
       );
       expect(issued.status()).toBe(201);
       const invite = issuedWorkspaceInviteSchema.parse(await issued.json());
+      await verifyTestEmail(recipient, me.user.id);
       const accepted = await recipient.request.post(
         "/api/workspace-invites/accept",
         { data: { token: invite.token } },

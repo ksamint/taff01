@@ -1,5 +1,9 @@
 import { serve } from "@hono/node-server";
-import { createCore, createTencentSmsProviderFromEnv } from "@taff/core";
+import {
+  createCore,
+  createEmailTransportFromEnv,
+  createTencentSmsProviderFromEnv,
+} from "@taff/core";
 import pino from "pino";
 import { z } from "zod";
 import { createApp } from "./app";
@@ -33,10 +37,20 @@ const core = createCore({
   authSecret: env.AUTH_SECRET,
   tokenPepper: env.TOKEN_PEPPER,
   sms: createTencentSmsProviderFromEnv(process.env),
+  email: createEmailTransportFromEnv(process.env),
+  onEmailStatus: (status) => logger.info(status, "Email delivery status"),
 });
 const rateLimiter = createRateLimiter(env.REDIS_URL, env.MCP_RATE_LIMIT);
+const emailRateLimiter = createRateLimiter(env.REDIS_URL, 3);
 const realtime = await createRealtime(core);
-const app = createApp(core, env.AUTH_URL, logger, rateLimiter, realtime);
+const app = createApp(
+  core,
+  env.AUTH_URL,
+  logger,
+  rateLimiter,
+  realtime,
+  emailRateLimiter,
+);
 const server = serve(
   {
     fetch: app.fetch,
@@ -51,9 +65,11 @@ const server = serve(
 const shutdown = async () => {
   await realtime.close();
   server.close(() => {
-    void Promise.all([core.close(), rateLimiter.close()]).then(() =>
-      process.exit(0),
-    );
+    void Promise.all([
+      core.close(),
+      rateLimiter.close(),
+      emailRateLimiter.close(),
+    ]).then(() => process.exit(0));
   });
 };
 process.once("SIGINT", shutdown);

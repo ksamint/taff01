@@ -31,6 +31,7 @@ describe.skipIf(!url)(
     let guestCookie: string;
     let outsiderCookie: string;
     const changes: ChangeEvent[] = [];
+    const mail = new Map<string, string>();
     const authUrl = "http://localhost:3000";
     const password = `test-${randomUUID()}`;
 
@@ -63,6 +64,12 @@ describe.skipIf(!url)(
         authSecret:
           "workspace-agent-test-secret-at-least-thirty-two-characters",
         tokenPepper: "workspace-agent-test-pepper-sixteen",
+        email: {
+          send: async (message) => {
+            mail.set(message.to, message.text);
+            return "logged";
+          },
+        },
       });
       await core.subscribeChanges((event) => {
         changes.push(event);
@@ -85,6 +92,13 @@ describe.skipIf(!url)(
       ownerId = workspace.memberId;
       for (const role of ["member", "guest"] as const) {
         const person = await signup(role);
+        await core.requestEmailVerification(userPrincipal(person.id), {});
+        const token = new URL(
+          mail.get(person.email)!.split("\n")[1],
+        ).hash.slice("#verifyEmail=".length);
+        await core.verifyEmailOwnership(userPrincipal(person.id), {
+          token: decodeURIComponent(token),
+        });
         const invite = await core.createWorkspaceInvite(
           userPrincipal(adminId),
           workspaceId,

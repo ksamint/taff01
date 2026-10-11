@@ -47,6 +47,7 @@ import {
 } from "../lib/query-snapshot";
 import { sessionVersion } from "../lib/session-cache";
 import { useWorkspace } from "./app-shell";
+import { EmailVerification } from "./email-verification";
 import { useWorkspaceSelection } from "./providers";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -158,6 +159,7 @@ export function OrganizationsView() {
   const [issued, setIssued] = useState<{
     link: string;
     expiresAt: string;
+    emailDelivery: "sent" | "logged" | "failed";
   } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [validation, setValidation] = useState(false);
@@ -274,6 +276,7 @@ export function OrganizationsView() {
         setIssued({
           link: `${window.location.origin}/#invite=${encodeURIComponent(token)}`,
           expiresAt: metadata.expiresAt,
+          emailDelivery: metadata.emailDelivery,
         });
       return metadata;
     },
@@ -364,6 +367,7 @@ export function OrganizationsView() {
         <section className="invite-banner">
           <h2>{t("organization.accept")}</h2>
           <p>{t("organization.acceptHint")}</p>
+          <EmailVerification />
           <Button
             data-testid="accept-invitation"
             disabled={busy}
@@ -794,6 +798,12 @@ export function OrganizationsView() {
           {issued && (
             <section className="invite-preview" aria-live="polite">
               <h3>{t("organization.inviteCreated")}</h3>
+              <p
+                role={issued.emailDelivery === "failed" ? "alert" : "status"}
+                data-testid="invite-email-delivery"
+              >
+                {t(`organization.emailDelivery.${issued.emailDelivery}`)}
+              </p>
               <p className="quiet">
                 {t("organization.expires", {
                   date: formatDate(issued.expiresAt),

@@ -6,6 +6,7 @@ import {
   meSchema,
   workspaceSchema,
 } from "../../packages/schemas/src/index";
+import { verifyTestEmail } from "./email-verification";
 
 /** Genuine profile copy and invitation acceptance; no invented agent identity. */
 export async function agentWorkspace(
@@ -58,6 +59,7 @@ export async function agentWorkspace(
         })
       ).json(),
     );
+    await verifyTestEmail(page, recipient.user.id);
     expect(
       (
         await page.request.post("/api/workspace-invites/accept", {

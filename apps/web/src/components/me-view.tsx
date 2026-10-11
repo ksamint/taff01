@@ -21,6 +21,7 @@ import { useNotificationPreferences } from "../lib/notification-preferences";
 import { useMembers } from "../lib/queries";
 import { applyTheme, readTheme, type ThemePreference } from "../lib/theme";
 import { useWorkspace } from "./app-shell";
+import { EmailVerification } from "./email-verification";
 import { OrganizationChooser } from "./organization-chooser";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -266,6 +267,7 @@ export function MeView() {
             <dt>{t("email")}</dt>
             <dd>{me.user.email}</dd>
           </dl>
+          <EmailVerification />
           <div className="field">
             <Label htmlFor="me-tz">{t("me.timeZone")}</Label>
             <select
