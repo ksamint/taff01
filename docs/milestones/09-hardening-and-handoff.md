@@ -558,3 +558,54 @@ QA container start times; interrupted QA evidence cannot be reused as acceptance
 Taff did not restart shared services or replace production containers. Resume
 server QA only after maintenance, rechecking ownership and runtime identities.
 The M9 branch remains local and `v0.1.0` has not been created.
+
+## Full M9 candidate validation — 2026-10-11
+
+Source `e06151639ac37cda8289d49fb09b41aed86d5887` passed the complete required
+command set on fresh, isolated Linux PostgreSQL and Valkey infrastructure:
+lint, types, licence check, 520 tests across 50 files, web/server production
+builds, bundle budget, 135 browser cases and MCP smoke. There were no skipped
+tests. The gate container exited zero at `2026-10-11T07:46:09Z` with its actual
+completion marker. Its log and terminal/source/runtime proofs remain private;
+only the owned disposable containers and network were removed.
+
+Today initial JS was 196,208 gzip bytes against the unchanged 204,800-byte
+budget. Three-run LCP medians were en 552 ms, zh-CN 620 ms and zh-HK 620 ms.
+Lighthouse performance/accessibility/best practices were respectively 99/96/100,
+98/96/100 and 98/96/100. External SMTP and SMS remained disabled in QA.
+
+The validated source is pushed for asynchronous review in
+[draft PR 3](https://github.com/ksamint/taff01/pull/3).
+[Native Ubuntu capture](https://github.com/ksamint/taff01/actions/runs/38122554127)
+passed 64 visual cases without skips or failures and produced 86 verified PNGs.
+The comparison with the previous baselines found 24 identical images and 62
+changed images, inspected side by side. Changes include the fifth recipient
+digest, unread badges and small rendering differences. Baselines have not yet
+been replaced; [branch CI](https://github.com/ksamint/taff01/actions/runs/38122532493)
+stopped at the unchanged visual comparison gate. Image builds passed.
+
+A separate fresh seeded instance completed a diagnostic matrix of 288 measured
+contexts and 300 captures across routes, locales, phone/desktop and light/dark,
+including signed-out views. Twelve SMS presentation captures used intercepted
+availability only; no SMS was sent and OTP/provider behavior was not verified.
+No missing accessible names or focus rings were detected. This is diagnostic
+evidence, not full accessibility acceptance: the tab-walk identity check and
+effective checkbox-label measurements have been improved for the next audit.
+
+The measured low-contrast text used the outline token: 4.48:1 on white and
+4.27:1 on surface. Local follow-ups reuse the existing ink-variant token,
+preserve secondary text contrast on elevated dark surfaces, give buttons,
+organization cards, phone text links and the signed-out home link 44px targets,
+and scope the capture script to the current organization picker dialog. These
+follow-ups are committed locally but await fresh validation before pushing.
+The original 18px checkbox glyphs have associated 44px labels; the next browser
+audit will measure their effective targets rather than counting glyph size.
+
+The diagnostic containers and network were removed with source, ownership and
+neighbor guards; their files and evidence remain private. Starting validation
+of the follow-ups is currently delayed by the configured SSH relay rejecting
+connections before the remote command starts. No alternate route, shared-service
+restart or production replacement was attempted. The public health check still
+returns `{"status":"ok"}`. Current-source validation, refreshed native baselines,
+committed locale captures, the final accessibility audit, clean-checkout
+walkthrough and green feature/main CI remain open; `v0.1.0` is not tagged.
