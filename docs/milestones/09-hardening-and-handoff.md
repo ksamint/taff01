@@ -452,3 +452,74 @@ No release tag has been created.
 The existing product decisions remain open: choose the MCP OAuth 2.1
 authorization server and review the BullMQ PostgreSQL backend in an ADR.
 Scheduled stack upgrades remain governed by `docs/upgrade-plan.md`.
+
+
+## M9 continuation after agent release — 2026-10-11
+
+The prototype and first agent-creation follow-up are live. Accepted application
+source is `23387723f8c438d990db00d561cba2899f48ab80`; its documentation checkpoint
+`d1edf49` is on main. [The release checkpoint](../deploy.md#agent-creation-upgrade-checkpoint--2026-10-11)
+records both exact-source CI runs, 500 unit/integration tests, 132 browser cases,
+Lighthouse 100/96/100 and LCP medians 692/780/776 ms. All four public EN/HK
+phone/desktop cases passed. A real Team-created agent submitted evidence through
+the official SDK, Inbox displayed DE-15, the human approved and UI token
+revocation made the next MCP call return 401. The native deployment lock is
+independently verified free; neighbouring services and PostgreSQL are unchanged.
+
+Work continues on `codex/m9-handoff`; this is a progress checkpoint, not final
+acceptance. Item 1 already has a strict all-locale Lighthouse gate and report
+artifacts. Item 2 adds the existing strict three-sample LCP measurement to CI
+for EN/CN/HK after the production build/bundle check, with an owned bundled API
+and cleanup. Invalid sample counts/locales are rejected before startup and an
+absent LCP observation cannot pass as zero. Three negative configuration checks
+passed; measurements and exact-source CI remain pending for the integrated tree.
+
+Item 5 now seeds one recipient-specific digest per prototype member using the
+worker's existing real task/review/run snapshot helper inside the same locked,
+audited seed transaction. Reseeding retains saved snapshots and Inbox identity.
+Focused prototype/notification PostgreSQL tests passed 21/21 in a separate local
+`taff_m9_test` database. The change intentionally adds a fifth Northwind Inbox
+row/unread item, so fresh native capture review is required for Inbox and badge
+screens before accepting updated baselines.
+
+Item 3 keyboard-only create/assign/open/approve tests and the full route/theme
+accessibility audit are in progress. Item 4 keeps existing three-locale key
+parity checks; the app capture helper now covers every standalone route,
+including project/task/review, organization directory and digest list/detail,
+in all three locales and both viewport sizes (126 captures). The new capture
+matrix has not yet been run on the integrated tree.
+
+Item 6 adds the goal-approved SMTP transport, private development delivery sink,
+independent signed email-ownership proof and genuine invitation acceptance.
+Existing email, username and SMS login are preserved; SMTP failure keeps the
+committed invitation and copyable link. Backend focused transport/API and real
+PostgreSQL proof tests passed during implementation; final integration,
+three-locale invitation flows and the reviewed diff remain pending. No live SMTP
+configuration, real mail delivery, SMS or production seed action occurred.
+
+Item 7 remains open: integrated full validation, new native baseline acceptance,
+clean-checkout README/deployment walkthrough, M1–M9 release notes, exact-source
+CI and only then `v0.1.0`. OAuth authorization server, BullMQ PostgreSQL backend
+and scheduled stack upgrades remain explicit open decisions. The current live
+release stays unchanged while this development branch is prepared.
+
+### Local validation interruption
+
+The integrated source passes lint, all six package typechecks and the licence
+gate (306 packages). Independent source review found no ownership/token blocker;
+the email cache guard now precedes early middleware returns. Its regression test
+failed before the fix and the full API suite passes 56/56 afterward, including
+private no-store headers on 401/403/413. The rendered production Compose test
+also confirms all seven SMTP values reach only the API (1/1 passed).
+
+Local PostgreSQL setup and browser signup stalled before feature assertions.
+A minimal current-core probe, with no email transport, measured signup 46,408 ms
+and signin 113 ms. A separate probe measured auth initialization 51 ms, hashing
+758 ms, the first adapter read 8,215 ms, signup 11,914 ms and signin 101 ms.
+A bare `SELECT 1` took 25,505 ms through the host port and 30,751 ms through
+container execution. Restarting only Taff's local PostgreSQL/Valkey containers,
+with their data retained, did not fix a subsequent connection timeout.
+These failures are retained as infrastructure evidence, not counted as passes.
+The precise Docker stall cause is unresolved; validation moves to an isolated
+QA project on the existing approved server route. Production and shared Docker
+services are not restarted; test timeouts and acceptance limits are unchanged.

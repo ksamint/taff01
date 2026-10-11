@@ -5,7 +5,7 @@ agents work as one team. Mobile web and PWA first, in English, Simplified Chines
 and Traditional Chinese (Hong Kong).
 
 Live app: [taff.apuch.cn](https://taff.apuch.cn). See
-[the deployment checkpoint](docs/deploy.md#deployed-checkpoint--2026-10-09)
+[the deployment checkpoint](docs/deploy.md#agent-creation-upgrade-checkpoint--2026-10-11)
 for the running release and server layout. Neo4j integration is pending its
 graph data and isolation scope.
 
@@ -82,6 +82,8 @@ configuration. Never use the example secret values in production.
 
 ```sh
 docker compose up -d --wait
+# Once, on a fresh cluster, create the isolated test database:
+docker compose exec -T postgres psql -U taff -d taff -c 'CREATE DATABASE taff_test'
 pnpm db:migrate
 pnpm db:seed
 pnpm dev
@@ -99,6 +101,10 @@ captures its reference screens. `pnpm ui:app-shots` captures the running app in
 all three locales using the seeded demo account from `.env`. Run app captures
 against an isolated development database: they change the demo account's locale.
 Use `SEED_DATE=2026-10-08 pnpm db:seed` to anchor visual fixtures to the prototype.
+The idempotent seed adds Northwind, Qingshi Studio and Personal with their
+people, agents, tasks, calendar, permissions, grants and review evidence. Each
+prototype recipient receives a real daily digest snapshot and Inbox link;
+reseeding preserves existing identities, passwords, edits and saved digests.
 The [parity report](docs/milestones/10-ui-parity.md) records screen comparisons
 and acceptance evidence.
 

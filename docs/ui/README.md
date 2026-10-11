@@ -72,7 +72,7 @@ and `agentSpeed` controls. `agent-teammates.dc.html` is an empty placeholder.
 | MCP scopes `tasks:read`, `tasks:write`, `calendar:write`, `inbox:review` | `agent_tokens.scopes` |
 | Call log rows (method and tool) | `mcp_calls` |
 | Integrations (GitHub, Figma, Slack, Google Calendar) | Phase 4 backlog; shown as "not connected" |
-| Seed: Northwind (5 people, 3 agents), Qingshi Studio, Personal | `pnpm db:seed` recreates Northwind as the demo workspace |
+| Seed: Northwind (5 people, 3 agents), Qingshi Studio, Personal | `pnpm db:seed` adds all three prototype organizations idempotently, preserving edits and credentials; recipient-specific daily digests use real task/review/run snapshots |
 
 ## Locales
 

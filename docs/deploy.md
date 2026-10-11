@@ -61,7 +61,7 @@ docker compose --env-file .env.production -f compose.prod.yaml up -d
 ```
 
 Migrations are additive and run before the new API starts. Take a backup
-first: `docker compose -f compose.prod.yaml exec -T postgres pg_dump -U taff taff > backup.sql`.
+first: `umask 077; docker compose --env-file .env.production -f compose.prod.yaml exec -T postgres pg_dump -U taff taff > backup.sql`. Keep the dump private.
 
 The task-reference upgrade applies both 0021 and 0022 before replacing the API.
 0022 assigns missing task numbers for previous API images, preserving task
@@ -325,6 +325,34 @@ personal workspace. New phone identities remain unverified until their holders
 complete SMS login; this CLI does not send SMS. No public HTTP/MCP adapter
 exposes this setup operation.
 
+### Invitation email and independent ownership verification
+
+Set `EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASSWORD` and `EMAIL_FROM` together
+for SMTP. `EMAIL_FROM` is a mailbox address; `EMAIL_PORT` defaults to 465 and
+`EMAIL_SECURE` to true. For STARTTLS set the provider's port and
+`EMAIL_SECURE=false`; TLS is still required and certificates verified.
+Partial SMTP credentials fail startup. Only API receives these variables.
+Nodemailer 10.1.0 is MIT-0 and its development types are MIT (ADR 0013).
+
+Invitation creation commits before attempting delivery. Its response reports
+`emailDelivery` as sent, logged or failed and preserves the copyable invite
+link even when SMTP fails. SMTP acceptance does not prove inbox delivery.
+Recipients must independently verify ownership of the invited address before
+joining. Me and the pending invitation expose the verification request; the
+one-hour verification link is consumed from a fragment and sent as JSON.
+Existing email/password, username and SMS login remain available.
+
+With SMTP unset, the development fallback writes messages to
+`EMAIL_LOG_PATH` (default `.taff-mail/messages.jsonl`) in a private directory
+and mode-0600 regular file. That file contains secret verification links:
+keep it outside version control and restrict access. Ordinary application
+logs record delivery status only. The production API image has a private
+node-owned `/app/.taff-mail` directory; its default sink is container-local
+and disappears when the container is replaced. Use SMTP for real recipient
+delivery. No public endpoint exposes fallback messages or bypasses email proof.
+Both env examples and production Compose list the settings; configuring SMTP
+for a future live release is separate from this source preparation.
+
 ### Optional Tencent SMS login
 
 Configure `TENCENT_SECRET_ID`, `TENCENT_SECRET_KEY`, `TENCENT_SMS_SDK_APP_ID`,
@@ -371,14 +399,12 @@ Keep the additive schema and data.
   `0.0.0.0` so Caddy can reach it; outside a container it stays on loopback.
 - `MIGRATIONS_DIR` (migrator runtime): the server image sets
   `/app/migrations`; the repository layout needs no value.
-- `pnpm perf:lcp` is not part of CI because shared runners make LCP timing
-  unreliable; run it on a quiet machine before a release.
+- `pnpm perf:lcp` runs in CI against the bundled API and production web build
+  in EN, CN and HK, three samples each; a median above 2,000 ms fails. Also
+  measure on a quiet machine before a release.
 
 ## Not configured yet
 
-- Outgoing email: invitations are copyable links; sign-up does not verify
-  email addresses, so invitations rely on the invitee signing in with the
-  invited address.
 - OAuth 2.1 for `/mcp`: personal access tokens are the only credential.
 - Push notifications: digests are in-app pages.
 
