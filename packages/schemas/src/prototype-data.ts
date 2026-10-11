@@ -24,6 +24,7 @@ const kinds = [
   "inbox",
   "comment",
   "reviewItem",
+  "digest",
 ] as const;
 /** Fixed fixture namespace; UUIDs are identities, never authentication tokens. */
 export function prototypeId(

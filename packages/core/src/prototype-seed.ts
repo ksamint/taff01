@@ -1,6 +1,7 @@
 import {
   agentPermissions,
   agentProfiles,
+  dailyDigests,
   grants,
   inboxItems,
   members,
@@ -26,6 +27,7 @@ import {
   calendarScheduleInputSchema,
   calendarWallToInstant,
   createTaskSchema,
+  digestSnapshotSchema,
   reviewChecksSchema,
   taskCommentInputSchema,
 } from "@taff/schemas";
@@ -42,6 +44,7 @@ import {
 } from "@taff/schemas/prototype-data";
 import { eq, sql } from "drizzle-orm";
 import { normalizeCalendarSchedule } from "./calendar-recurrence";
+import { createDigestSnapshot } from "./notifications";
 import { type Actor, can } from "./permissions";
 
 type Person = typeof user.$inferSelect;
@@ -398,6 +401,54 @@ export async function seedPrototype(
         number: definition.number,
       });
       await insertCalendar(id, definition);
+    }
+    for (const [personKey, member] of team) {
+      if (member.kind !== "person" || !member.userId) continue;
+      const person = people.find((row) => row.id === member.userId);
+      const definition = prototypePeople.find((row) => row.key === personKey);
+      if (!person || !definition)
+        throw new Error("Prototype digest recipient missing");
+      const id = prototypeId("digest", org.key, definition.number);
+      const [existing] = await tx
+        .select()
+        .from(dailyDigests)
+        .where(eq(dailyDigests.id, id));
+      if (existing) {
+        if (
+          existing.userId !== person.id ||
+          existing.workspaceId !== workspaceId ||
+          existing.memberId !== member.id
+        )
+          throw new Error("Prototype digest identity conflict");
+        continue;
+      }
+      const [digest] = await tx
+        .insert(dailyDigests)
+        .values({
+          id,
+          userId: person.id,
+          workspaceId,
+          memberId: member.id,
+          localDate: today,
+          timeZone: person.tz,
+          locale: person.locale,
+          snapshot: digestSnapshotSchema.parse(
+            await createDigestSnapshot(tx, member, today, person.tz),
+          ),
+          createdAt: at(8, 540),
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (digest)
+        await tx.insert(inboxItems).values({
+          id: prototypeId("inbox", org.key, 90000 + definition.number),
+          workspaceId,
+          memberId: member.id,
+          kind: "digest",
+          title: today,
+          digestId: digest.id,
+          createdAt: at(8, 540),
+        });
     }
   }
   return output;

@@ -101,6 +101,116 @@ function localSql(column: SQL, zone: string): SQL {
     ? sql`${column} AT TIME ZONE ${canonical}::interval`
     : sql`${column} AT TIME ZONE ${canonical}`;
 }
+export async function createDigestSnapshot(
+  tx: Transaction,
+  member: typeof members.$inferSelect,
+  day: string,
+  zone: string,
+): Promise<DigestSnapshot> {
+  const reviewsPredicate = and(
+    eq(inboxItems.workspaceId, member.workspaceId),
+    eq(inboxItems.memberId, member.id),
+    eq(inboxItems.kind, "review"),
+    isNull(inboxItems.resolvedAt),
+  );
+  const reviewsQuery = () =>
+    tx
+      .select({
+        taskId: tasks.id,
+        title: tasks.title,
+        runId: inboxItems.runId,
+      })
+      .from(inboxItems)
+      .innerJoin(tasks, eq(tasks.id, inboxItems.taskId))
+      .where(reviewsPredicate);
+  const reviews = await reviewsQuery()
+    .orderBy(desc(inboxItems.createdAt), inboxItems.id)
+    .limit(20);
+  const [reviewCount] = await tx
+    .select({ n: count() })
+    .from(inboxItems)
+    .innerJoin(tasks, eq(tasks.id, inboxItems.taskId))
+    .where(reviewsPredicate);
+  const duePredicate = and(
+    eq(tasks.workspaceId, member.workspaceId),
+    sql`${tasks.status}<>'done'`,
+    sql`(${localSql(sql`${tasks.dueAt}`, zone)})::date=${day}::date`,
+  );
+  const dueRows = await tx
+    .select({ taskId: tasks.id, title: tasks.title, dueAt: tasks.dueAt })
+    .from(tasks)
+    .where(duePredicate)
+    .orderBy(tasks.dueAt, tasks.id)
+    .limit(20);
+  const [dueCount] = await tx
+    .select({ n: count() })
+    .from(tasks)
+    .where(duePredicate);
+  const agentPredicate = and(
+    eq(runs.workspaceId, member.workspaceId),
+    or(
+      sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
+      sql`(${localSql(sql`${runs.finishedAt}`, zone)})::date=${day}::date`,
+    ),
+  );
+  const agentRows = await tx
+    .select({ run: runs, title: tasks.title })
+    .from(runs)
+    .innerJoin(tasks, eq(tasks.id, runs.taskId))
+    .where(agentPredicate)
+    .orderBy(desc(runs.updatedAt), runs.id)
+    .limit(20);
+  const [agentCount] = await tx
+    .select({ n: count() })
+    .from(runs)
+    .where(agentPredicate);
+  const events = agentRows.length
+    ? await tx
+        .select({
+          runId: runEvents.runId,
+          n: count(),
+          latest: sql<Date | null>`max(${runEvents.createdAt})`,
+        })
+        .from(runEvents)
+        .where(
+          inArray(
+            runEvents.runId,
+            agentRows.map((r) => r.run.id),
+          ),
+        )
+        .groupBy(runEvents.runId)
+    : [];
+  const byRun = new Map(events.map((e) => [e.runId, e]));
+  return {
+    reviews: { count: reviewCount.n, items: reviews },
+    dueToday: {
+      count: dueCount.n,
+      items: dueRows.map((r) => ({ ...r, dueAt: r.dueAt!.toISOString() })),
+    },
+    agents: {
+      count: agentCount.n,
+      items: agentRows.map(({ run, title }) => {
+        const event = byRun.get(run.id);
+        return {
+          taskId: run.taskId,
+          title,
+          runId: run.id,
+          agentId: run.agentId,
+          status:
+            run.status as DigestSnapshot["agents"]["items"][number]["status"],
+          lastEventAt: event?.latest
+            ? new Date(event.latest).toISOString()
+            : null,
+          eventCount: event?.n ?? 0,
+          durationMs: run.durationMs,
+          costMicros: run.costMicros,
+        };
+      }),
+    },
+    truncated: reviewCount.n > 20 || dueCount.n > 20 || agentCount.n > 20,
+  };
+}
+
 export function createNotificationOperations({
   db,
   mutation,
@@ -276,115 +386,6 @@ export function createNotificationOperations({
           : null,
     };
   }
-  async function snapshot(
-    tx: Transaction,
-    member: typeof members.$inferSelect,
-    day: string,
-    zone: string,
-  ): Promise<DigestSnapshot> {
-    const reviewsPredicate = and(
-      eq(inboxItems.workspaceId, member.workspaceId),
-      eq(inboxItems.memberId, member.id),
-      eq(inboxItems.kind, "review"),
-      isNull(inboxItems.resolvedAt),
-    );
-    const reviewsQuery = () =>
-      tx
-        .select({
-          taskId: tasks.id,
-          title: tasks.title,
-          runId: inboxItems.runId,
-        })
-        .from(inboxItems)
-        .innerJoin(tasks, eq(tasks.id, inboxItems.taskId))
-        .where(reviewsPredicate);
-    const reviews = await reviewsQuery()
-      .orderBy(desc(inboxItems.createdAt), inboxItems.id)
-      .limit(20);
-    const [reviewCount] = await tx
-      .select({ n: count() })
-      .from(inboxItems)
-      .innerJoin(tasks, eq(tasks.id, inboxItems.taskId))
-      .where(reviewsPredicate);
-    const duePredicate = and(
-      eq(tasks.workspaceId, member.workspaceId),
-      sql`${tasks.status}<>'done'`,
-      sql`(${localSql(sql`${tasks.dueAt}`, zone)})::date=${day}::date`,
-    );
-    const dueRows = await tx
-      .select({ taskId: tasks.id, title: tasks.title, dueAt: tasks.dueAt })
-      .from(tasks)
-      .where(duePredicate)
-      .orderBy(tasks.dueAt, tasks.id)
-      .limit(20);
-    const [dueCount] = await tx
-      .select({ n: count() })
-      .from(tasks)
-      .where(duePredicate);
-    const agentPredicate = and(
-      eq(runs.workspaceId, member.workspaceId),
-      or(
-        sql`${runs.status} IN ('running','paused','needs_review','changes_requested')`,
-        sql`(${localSql(sql`${runs.finishedAt}`, zone)})::date=${day}::date`,
-      ),
-    );
-    const agentRows = await tx
-      .select({ run: runs, title: tasks.title })
-      .from(runs)
-      .innerJoin(tasks, eq(tasks.id, runs.taskId))
-      .where(agentPredicate)
-      .orderBy(desc(runs.updatedAt), runs.id)
-      .limit(20);
-    const [agentCount] = await tx
-      .select({ n: count() })
-      .from(runs)
-      .where(agentPredicate);
-    const events = agentRows.length
-      ? await tx
-          .select({
-            runId: runEvents.runId,
-            n: count(),
-            latest: sql<Date | null>`max(${runEvents.createdAt})`,
-          })
-          .from(runEvents)
-          .where(
-            inArray(
-              runEvents.runId,
-              agentRows.map((r) => r.run.id),
-            ),
-          )
-          .groupBy(runEvents.runId)
-      : [];
-    const byRun = new Map(events.map((e) => [e.runId, e]));
-    return {
-      reviews: { count: reviewCount.n, items: reviews },
-      dueToday: {
-        count: dueCount.n,
-        items: dueRows.map((r) => ({ ...r, dueAt: r.dueAt!.toISOString() })),
-      },
-      agents: {
-        count: agentCount.n,
-        items: agentRows.map(({ run, title }) => {
-          const event = byRun.get(run.id);
-          return {
-            taskId: run.taskId,
-            title,
-            runId: run.id,
-            agentId: run.agentId,
-            status:
-              run.status as DigestSnapshot["agents"]["items"][number]["status"],
-            lastEventAt: event?.latest
-              ? new Date(event.latest).toISOString()
-              : null,
-            eventCount: event?.n ?? 0,
-            durationMs: run.durationMs,
-            costMicros: run.costMicros,
-          };
-        }),
-      },
-      truncated: reviewCount.n > 20 || dueCount.n > 20 || agentCount.n > 20,
-    };
-  }
   async function generateDailyDigest(
     userId: string,
     scheduledAt: string,
@@ -458,7 +459,7 @@ export function createNotificationOperations({
               localDate: day,
               timeZone: canonicalCalendarTimeZone(person.tz),
               locale: person.locale,
-              snapshot: await snapshot(tx, member, day, person.tz),
+              snapshot: await createDigestSnapshot(tx, member, day, person.tz),
             })
             .onConflictDoNothing()
             .returning();

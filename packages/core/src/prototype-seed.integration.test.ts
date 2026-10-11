@@ -3,6 +3,7 @@ import {
   account,
   activity,
   connectDatabase,
+  dailyDigests,
   members,
   taskCalendar,
   tasks,
@@ -194,6 +195,36 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
     expect(inbox.items.filter((row) => row.kind === "blocker")).toHaveLength(1);
     expect(inbox.items.filter((row) => row.kind === "mention")).toHaveLength(1);
   });
+  it("seeds recipient-isolated real digest snapshots and Inbox links", async () => {
+    const actor = userPrincipal(alexId);
+    for (const org of prototypeOrgs) {
+      const workspaceId = prototypeId("workspace", org.key);
+      const list = await core.listDailyDigests(actor, workspaceId);
+      const digest = list.items.find(
+        (row) => row.id === prototypeId("digest", org.key, 1),
+      );
+      expect(digest).toBeDefined();
+      expect(digest).toMatchObject({ localDate: "2026-10-08", workspaceId });
+      const inbox = await core.listInbox(actor, workspaceId, {});
+      expect(
+        inbox.items.filter(
+          (row) => row.kind === "digest" && row.digestId === digest!.id,
+        ),
+      ).toHaveLength(1);
+      await expect(
+        core.getDailyDigest(userPrincipal(unrelatedId), digest!.id),
+      ).rejects.toMatchObject({ code: "not_found" });
+      if (org.key === "nw") {
+        expect(
+          digest!.snapshot.reviews.items.map((row) => row.taskId).sort(),
+        ).toEqual(
+          [141, 142].map((number) => prototypeId("task", "nw", number)).sort(),
+        );
+        expect(digest!.snapshot.agents.count).toBeGreaterThan(0);
+        expect(digest!.snapshot.dueToday.count).toBeGreaterThan(0);
+      }
+    }
+  });
   it("expands genuine recurring meeting tasks without changing project or deadline counts", async () => {
     const [anchor] = await connection.db
       .select()
@@ -230,6 +261,10 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
     const workspaceIds = prototypeOrgs.map((org) =>
       prototypeId("workspace", org.key),
     );
+    const digestRows = await connection.db
+      .select()
+      .from(dailyDigests)
+      .where(inArray(dailyDigests.workspaceId, workspaceIds));
     const before = await connection.db
       .select()
       .from(activity)
@@ -265,6 +300,12 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
       }),
     ]);
     expect(results[0]).toEqual(results[1]);
+    expect(
+      await connection.db
+        .select()
+        .from(dailyDigests)
+        .where(inArray(dailyDigests.workspaceId, workspaceIds)),
+    ).toEqual(digestRows);
     expect(
       await connection.db
         .select()
