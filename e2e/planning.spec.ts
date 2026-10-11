@@ -431,9 +431,9 @@ test("organization creation, real invitation fragment acceptance, guest role ref
     );
     await guest.getByTestId("accept-invitation").click();
     expect((await deniedAccept).status()).toBe(403);
-    await expect(guest.getByRole("alert")).toHaveText(
-      m.errors.email_verification_required,
-    );
+    await expect(
+      guest.locator(".organizations-view").getByRole("alert"),
+    ).toHaveText(m.errors.email_verification_required);
     await guest.getByTestId("request-email-verification").click();
     await expect(guest.getByTestId("email-delivery-status")).toHaveText(
       m.emailVerification.delivery.logged,
