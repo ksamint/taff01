@@ -253,7 +253,9 @@ try {
             if (view === "organizations") {
               await page.getByTestId("me-organization").click();
               await expect(page.getByRole("dialog")).toBeVisible();
-              await expect(page.locator(".me-org-choices")).toBeVisible();
+              await expect(
+                page.getByRole("dialog").locator(".organization-choices"),
+              ).toBeVisible();
             } else if (view === "notifications") {
               await page.getByTestId("open-notifications").click();
               await expect(page).toHaveURL(`${base}/me/notifications`);
