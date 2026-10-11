@@ -69,7 +69,11 @@ services:
       timeout: 3s
       retries: 10
   worker:
-    image: ${TAFF_IMAGE_API:-taff-api}:${TAFF_TAG:-latest}
+    image: ${TAFF_IMAGE_WORKER:-taff-worker}:${TAFF_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.server
+      args: { TARGET: worker }
     restart: unless-stopped
     command: ["node", "dist/worker.mjs"]
     environment:

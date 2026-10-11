@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-# One image for the API, the worker and the migrator; TARGET picks the entry.
+# TARGET selects the API or worker dependency tree; the API image also migrates.
 FROM node:24-alpine AS build
 RUN npm install -g pnpm@12.10.1
 WORKDIR /repo

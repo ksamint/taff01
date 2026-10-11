@@ -2,6 +2,35 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 
+it("builds the base Compose worker with its own production dependencies", () => {
+  const config = JSON.parse(
+    execFileSync(
+      "docker",
+      [
+        "compose",
+        "--env-file",
+        ".env.production.example",
+        "-f",
+        "compose.prod.yaml",
+        "config",
+        "--format",
+        "json",
+      ],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          TAFF_IMAGE_WORKER: "taff-worker-test",
+          TAFF_TAG: "test",
+        },
+      },
+    ),
+  );
+  expect(config.services.worker.image).toBe("taff-worker-test:test");
+  expect(config.services.worker.build.args.TARGET).toBe("worker");
+  expect(config.services.worker.command).toEqual(["node", "dist/worker.mjs"]);
+});
+
 it("keeps Taff isolated while using the private PostgreSQL server and shared TLS proxy", () => {
   const exampleDatabase = readFileSync(".env.production.example", "utf8").match(
     /^DATABASE_URL=(.+)$/m,
