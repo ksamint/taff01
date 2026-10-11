@@ -609,3 +609,101 @@ restart or production replacement was attempted. The public health check still
 returns `{"status":"ok"}`. Current-source validation, refreshed native baselines,
 committed locale captures, the final accessibility audit, clean-checkout
 walkthrough and green feature/main CI remain open; `v0.1.0` is not tagged.
+
+
+## Accessibility and visual acceptance refresh — 2026-10-11
+
+The follow-up application source `d2bebf21017b171c0ac1a8656a85e89cfee2d1b9`
+passed all nine required commands on isolated Linux infrastructure: lint,
+typechecks, licences, **520 tests in 50 files**, web/server builds, the bundle
+budget, **135 browser cases** and MCP smoke. No tests were skipped. The gate
+exited zero with its actual marker at `2026-10-11T08:30:42Z`. Its source,
+container identity, runtime and neighboring-service guards passed; owned
+containers and network were removed, with private evidence retained.
+
+Today initial JavaScript is **196,205 gzip bytes**. Three-run LCP medians are
+**544 ms (en), 620 ms (zh-CN), 620 ms (zh-HK)**. Each locale scored **99/100/100**
+for Lighthouse performance/accessibility/best practices. Acceptance limits and
+existing behavior tests remain unchanged.
+
+[Native Ubuntu capture](https://github.com/ksamint/taff01/actions/runs/38125273667)
+passed all **64 visual cases**, producing **86 PNGs** with verified hashes and
+dimensions. All prototype/application comparisons and previous/current
+comparisons were inspected. The adopted baselines and the complete side-by-side
+matrix are in [milestone 10](10-ui-parity.md). Changes strengthen light/dark
+secondary text contrast and the 44px target floor, and retain the seeded fifth
+digest/unread counts. Existing documented prototype differences remain.
+[The preceding branch CI](https://github.com/ksamint/taff01/actions/runs/38125256106)
+failed its old visual comparison; integrated CI with the refreshed baselines
+must pass before tagging.
+
+A separate final accessibility audit measured **288 contexts** across all three
+locales, phone/desktop, light/dark, signed-out views, routes and dialogs.
+It observed **6,450 keyboard focus stops**, **7,620 interactive elements** and
+**17,094 text elements**. It found zero low-contrast text failures, undersized
+effective phone targets, text below 12px, missing names, missing focus rings or
+incomplete tab cycles. Checkbox measurements use their associated labels;
+focus traversal identifies actual DOM nodes and finishes a complete cycle.
+Calendar hatch text was reviewed in all twelve locale/device/theme captures
+and checked against both opaque stripes, with a minimum contrast of **8.44:1**.
+The sanitized proof is in
+[`m9-accessibility-audit.json`](../ui/review-2026-10-11/m9-accessibility-audit.json).
+Twelve additional SMS presentation captures intercepted availability only;
+provider delivery and OTP were not tested and no SMS or SMTP message was sent.
+
+The README development walkthrough passed from a fresh detached checkout:
+frozen install, new PostgreSQL/Valkey databases, migration, seed, `pnpm dev`,
+the two-browser realtime flow and all **27 MCP smoke assertions**. Its owned
+processes exited, ports were released and containers stopped; the development
+volume is retained. The local Docker build attempt was stopped after shared
+host health changes; final inspection restored the exact original container
+identities, start times and health states without restarting shared services.
+The production Compose walkthrough therefore moved to an isolated server
+project. Its first preflight omitted privileged access; its second checkout
+inherited the private harness's restrictive umask and prevented the image's
+`node` user from reading the migration journal. Both failed receipts are
+retained. These are harness failures, not accepted runtime checks. The corrected readable checkout then migrated successfully and brought the API,
+web and Caddy up, but the base Compose worker failed with
+`ERR_MODULE_NOT_FOUND: bullmq`: it incorrectly used the API dependency image.
+The base worker now builds and uses `TARGET=worker` and `TAFF_IMAGE_WORKER`, as
+already configured by the deployed Apuch override. Both base and Apuch Compose
+regression tests pass. A fresh walkthrough of the repaired source remains
+pending; failed receipts and volumes are retained, with owned containers stopped,
+ports free and all 26 neighboring container identities/start times unchanged.
+
+All **126 locale route captures** are committed under
+[`m9-locales-2026-10-11`](../ui/screenshots/m9-locales-2026-10-11/README.md):
+21 route/view states × three locales × phone/desktop, with verified PNG
+viewports and hashes. Additional management/digest pages have no prototype
+markup; their existing simple layouts and organization-label spacing are
+explicitly recorded as visual follow-up work. Captures are evidence; prototype
+source remains the implementation reference.
+
+The clean production Compose walkthrough of
+`fdd392dfe671a35949ef93a6195fa9d8f49878bf` passed with the source configuration:
+all three images built, the image's `node` user read the migration journal,
+migration exited zero, PostgreSQL/Valkey/API became healthy, the worker logged
+ready with zero restarts, and web through Caddy returned HTTP 200. Browser signup,
+independent login, task creation, Team agent creation and Me token issuance
+passed. Realtime reached the independent browser **653 ms after the task POST
+response**, within the unchanged 1,000 ms limit. The official MCP SDK listed
+**20 tools**, read the new task, and received **401 after token revocation**.
+There were no browser page errors. All seven owned containers stopped, both
+forwarding ports were released, three test volumes were retained and all
+**33 existing containers** matched their original IDs, images, start times,
+running state and health. No shared service was restarted and no public
+application, DNS, real database or SMTP/SMS provider was changed.
+
+The report, capture proofs and refreshed baselines are part of the final source
+candidate. All nine commands must pass on that exact candidate before its push;
+feature/main CI must also be green before the annotated `v0.1.0` tag is created.
+The PR body and tag annotation record the final source SHA and CI links without
+changing the validated source tree. This checkpoint prepares deployment; it
+does not replace the accepted live `23387723` application.
+
+Open product decisions remain the MCP OAuth 2.1 authorization server, BullMQ
+PostgreSQL backend (ADR required), the scheduled stack upgrades in
+[`upgrade-plan.md`](../upgrade-plan.md), and Neo4j graph/isolation scope. The
+existing organization-management and digest layout follow-ups are visible in
+the locale capture index. Bearer MCP tokens and cache-first reconciliation
+remain the current contracts; offline write synchronization is not included.

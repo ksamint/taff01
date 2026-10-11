@@ -1,10 +1,10 @@
 # Changelog
 
-## Unreleased — v0.1.0 candidate
+## v0.1.0
 
-The release tag is pending the complete M9 validation and handoff. The accepted
-live application remains `23387723f8c438d990db00d561cba2899f48ab80`; subsequent
-source preparation does not update production automatically.
+The release tag is created only after complete M9 validation and green CI. The
+accepted live application remains `23387723f8c438d990db00d561cba2899f48ab80`;
+subsequent source preparation does not update production automatically.
 
 - M1: TABLE AI design tokens, light/dark mobile-first shell, Today, Projects,
   Calendar, Inbox and Me; English, Simplified Chinese and Hong Kong Traditional
@@ -25,11 +25,13 @@ source preparation does not update production automatically.
 - M8: authorization/concurrency audit fixes, hardened MCP boundary and rate limits,
   socket lifecycle, database vocabulary constraints, production server bundles,
   Docker Compose/Caddy images, licence gate and performance measurement.
-- M9 preparation: signed-in Today bootstrap and performance improvements, strict
+- M9: signed-in Today bootstrap and performance improvements, strict
   all-locale Lighthouse reports and LCP CI guard, keyboard and locale QA,
   idempotent prototype content including digest snapshots, SMTP invitations and
-  independent email ownership verification. Final integration acceptance is
-  recorded in `docs/milestones/09-hardening-and-handoff.md`.
+  independent email ownership verification, accessible light/dark tokens and
+  targets, refreshed visual baselines, and a dedicated base-Compose worker image.
+  Final integration acceptance is recorded in
+  `docs/milestones/09-hardening-and-handoff.md`.
 
 Additional accepted changes include the prototype source port and reviewed
 visual baselines, workspace `KEY-number` task references with additive
