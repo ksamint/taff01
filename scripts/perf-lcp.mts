@@ -16,6 +16,10 @@ const password = process.env.DEMO_PASSWORD;
 if (!password) throw new Error("DEMO_PASSWORD is required");
 const executablePath = process.env.CHROMIUM_PATH;
 const locale = process.env.LCP_LOCALE ?? "en";
+if (!Number.isInteger(runs) || runs < 1)
+  throw new Error("LCP_RUNS must be a positive integer");
+if (!["en", "zh-CN", "zh-HK"].includes(locale))
+  throw new Error("LCP_LOCALE must be en, zh-CN or zh-HK");
 
 const server = spawn(
   "node",
@@ -284,6 +288,8 @@ async function measure(): Promise<number> {
       );
     }
     await context.close();
+    if (!Number.isFinite(lcp) || lcp <= 0)
+      throw new Error("Largest Contentful Paint was not observed");
     return Math.round(lcp);
   } finally {
     await browser.close();

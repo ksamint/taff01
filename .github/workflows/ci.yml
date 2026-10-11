@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main, claude/m9-hardening, codex/ui-parity, codex/prototype-release, codex/agent-creation]
+    branches: [main, claude/m9-hardening, codex/ui-parity, codex/prototype-release, codex/agent-creation, codex/m9-handoff]
   pull_request:
 concurrency:
   group: ci-${{ github.ref }}
@@ -67,6 +67,20 @@ jobs:
       - run: pnpm perf:budget
       - name: Install Playwright Chromium
         run: pnpm exec playwright install --with-deps chromium
+      - name: Signed-in Today LCP guard in all three locales
+        run: |
+          node dist/runtime/api/api.mjs > api-lcp.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid"; wait "$api_pid" || true' EXIT
+          for i in $(seq 1 30); do
+            kill -0 "$api_pid"
+            if curl -sf http://127.0.0.1:3001/api/health; then break; fi
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:3001/api/health
+          for locale in en zh-CN zh-HK; do
+            LCP_LOCALE="$locale" LCP_RUNS=3 pnpm perf:lcp
+          done
       - run: pnpm perf:lighthouse
       - uses: actions/upload-artifact@v4
         if: always()
@@ -101,6 +115,7 @@ jobs:
           path: |
             test-results
             api.log
+            api-lcp.log
           retention-days: 7
   images:
     runs-on: ubuntu-latest
