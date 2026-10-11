@@ -523,3 +523,38 @@ These failures are retained as infrastructure evidence, not counted as passes.
 The precise Docker stall cause is unresolved; validation moves to an isolated
 QA project on the existing approved server route. Production and shared Docker
 services are not restarted; test timeouts and acceptance limits are unchanged.
+
+### Later validation and shared-host maintenance
+
+Source `14c8299508260839caed798b7e029f4cec53ac71` passed **520 tests in
+50 files**, with no skips, against an isolated local test database. Migration
+and prototype seeding also passed on a new, separate local application database.
+Lint, all six typechecks, licences, production web/server builds and the unchanged
+200 KiB JavaScript budget passed. No production seed or real SMS/email send ran.
+
+The seed integration fixture now records pre-existing digest dates: other suites
+use the same fixed prototype IDs, and re-seeding correctly preserves their
+snapshots. A focused prototype/fake-SMS retry passed all 13 database tests with
+unchanged timeouts. Seed behavior remains unchanged.
+
+The full browser attempt was interrupted after 41 passes, six failures and one
+interrupted case; 87 cases did not run. The invitation assertion matched Next.js's
+route announcer as well as the application alert; it is now scoped to the
+organization view. The remaining failures included pending signup requests and
+setup timeouts while both local database containers again accumulated Docker
+health-check timeouts. Artifacts are retained privately. The owned browser/API/web
+processes exited and ports 3000/3001 are free. This attempt is **not accepted**;
+the scoped assertion still needs its browser retry, followed by all required
+checks, current-source MCP smoke and three-locale performance/visual acceptance.
+
+A fresh detached checkout of `e16a2bd` passed the frozen offline install, lint,
+typechecks, web/server builds and budget. Both production Compose configurations
+validated using their example environment. The complete database/browser
+deployment walkthrough remains open.
+
+The app host's shared Docker service was stopped and restored externally during
+the user-approved MathMap Docker/containerd storage migration. Its restarts affect
+QA container start times; interrupted QA evidence cannot be reused as acceptance.
+Taff did not restart shared services or replace production containers. Resume
+server QA only after maintenance, rechecking ownership and runtime identities.
+The M9 branch remains local and `v0.1.0` has not been created.
