@@ -115,6 +115,19 @@ test("Team creates a real custom agent through UI and assigns it as a task worke
     expect(stored.find((item) => item.id === member.id)?.name).toBe(name);
     expect(writes).toBe(1);
     expect(temporaryProfileReads).toBe(0);
+    await page.goto(`/agents/${member.id}`);
+    await expect(page.getByTestId("agent-profile-heading")).toHaveText(name);
+    await page.getByTestId("agent-settings-details").locator("summary").click();
+    await expect(
+      page.getByTestId("agent-supervisor").locator("option"),
+    ).toHaveCount(2);
+    await expect(page.getByTestId("agent-supervisor")).toHaveValue("");
+    await expect(page.locator(".agent-profile-heading p")).toHaveText(
+      messages[locale].agentProfile.supervisedBy.replace(
+        "{{name}}",
+        messages[locale].agentProfile.noSupervisor,
+      ),
+    );
     await page.goto("/");
     await openQuickAdd(page);
     const title = `Agent-created worker ${crypto.randomUUID()}`;

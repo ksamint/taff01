@@ -190,6 +190,7 @@ function AgentEditor({ data }: { data: AgentProfile }) {
       minute: "2-digit",
     }).format(new Date(iso));
   const name = (id: string | null) => {
+    if (id === null) return t("agentProfile.noSupervisor");
     const member = members.data?.find(
       (item) => item.id === id || item.userId === id,
     );
