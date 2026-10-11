@@ -672,7 +672,21 @@ test("a grant decision records its own workspace member while another workspace 
   const grant = grantSchema.parse(await requested.json());
   await page.goto("/orgs");
   await page.getByTestId(`workspace-${ambient.id}`).click();
+  let releaseMembers!: () => void;
+  let membersArrived!: () => void;
+  const heldMembers = new Promise<void>((resolve) => {
+    releaseMembers = resolve;
+  });
+  const membersSeen = new Promise<void>((resolve) => {
+    membersArrived = resolve;
+  });
+  await page.route(`**/api/members?workspaceId=${target.id}`, async (route) => {
+    membersArrived();
+    await heldMembers;
+    await route.continue();
+  });
   await page.goto(`/agents/${agent.id}`);
+  await membersSeen;
   await expect
     .poll(() =>
       page.evaluate(
@@ -712,6 +726,7 @@ test("a grant decision records its own workspace member while another workspace 
       card.locator(".section-hint").filter({ hasText: me.user.name }),
     ).toHaveCount(1);
     await expect(card).not.toContainText(messages[locale].unknownMember);
+    releaseMembers();
     release();
     const response = await saved;
     expect(response.status()).toBe(200);
@@ -731,8 +746,9 @@ test("a grant decision records its own workspace member while another workspace 
       card.locator(".section-hint").filter({ hasText: me.user.name }),
     ).toHaveCount(1);
   } finally {
+    releaseMembers();
     release();
-    await page.unroute(pattern);
+    await page.unrouteAll({ behavior: "wait" });
   }
 });
 

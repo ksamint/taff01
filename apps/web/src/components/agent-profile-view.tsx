@@ -193,9 +193,12 @@ function AgentEditor({ data }: { data: AgentProfile }) {
     const member = members.data?.find(
       (item) => item.id === id || item.userId === id,
     );
-    return member
-      ? displayName(member.id, member.name)
-      : t(id ? "unknownMember" : "agentProfile.noSupervisor");
+    if (member) return displayName(member.id, member.name);
+    const ownMemberId = me.workspaces.find(
+      (item) => item.id === data.member.workspaceId,
+    )?.memberId;
+    if (id && (id === ownMemberId || id === me.user.id)) return me.user.name;
+    return t(id ? "unknownMember" : "agentProfile.noSupervisor");
   };
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
