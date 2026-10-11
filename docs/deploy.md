@@ -381,3 +381,97 @@ Keep the additive schema and data.
   invited address.
 - OAuth 2.1 for `/mcp`: personal access tokens are the only credential.
 - Push notifications: digests are in-app pages.
+
+## Agent creation upgrade checkpoint — 2026-10-11
+
+Released source `23387723f8c438d990db00d561cba2899f48ab80` (tree
+`081ade25b8525a090afd4aee2ff1a181d7118ffb`) adds workspace-admin agent
+creation through Team and the strict, human-only REST adapter. Agent membership
+is fixed to member, with no linked user; creation emits one activity and change
+notification. Agent-profile identity and null-supervisor rendering are corrected.
+
+Exact-source [feature CI](https://github.com/ksamint/taff01/actions/runs/38101185018)
+and [main CI](https://github.com/ksamint/taff01/actions/runs/38101185022)
+passed checks and images. All local validation commands passed: 500 tests in
+47 files, 132 browser cases and official MCP smoke. Initial mobile Today JS is
+195,767 bytes gzipped. Lighthouse performance/accessibility/best practices are
+100/96/100 in all three locales. Slow-4G LCP samples and medians, in ms:
+
+| Locale | Samples | Median | Budget |
+| --- | --- | ---: | ---: |
+| EN | 692 / 696 / 680 | 692 | 2,000 |
+| CN | 776 / 784 / 780 | 780 | 2,000 |
+| HK | 888 / 772 / 776 | 776 | 2,000 |
+
+The [native capture run](https://github.com/ksamint/taff01/actions/runs/38101198542)
+passed all 64 cases and produced 86 PNGs for this exact source and workflow.
+77 match approved baselines byte for byte, including all four Team captures;
+nine have only inspected 3–30-pixel antialias/corner differences. Existing
+baselines and thresholds stay. The earlier Docker-font capture was discarded
+before publication; its evidence remains marked superseded, not validated.
+
+Under the existing native deployment lock, the dedicated Taff database dump
+was verified with `pg_restore --list`: 137,727 bytes, SHA-256
+`b2a74f883fda5633e8a5793975097ef5c33cb53649d9b10057c98a9ba78fe21a`,
+at `/srv/postgresql/backups/taff-before-23387723f8c438d990db00d561cba2899f48ab80/taff.dump`.
+The exclusive env backup is `/srv/taff/secrets/.env.before-23387723f8c438d990db00d561cba2899f48ab80`.
+The 25,804-byte Git bundle was relayed and verified, SHA-256
+`e0475288ac7290ba4059587d2656dfdad1f07b4ea76bfaee18f12b870927dd1c`.
+The existing SSH relay disconnected before migration; fresh inspection proved
+no migration or replacement had started. The same native lock was reacquired
+for the same candidate, backups and attempt, with a detached keeper to survive
+SSH disconnects. No route, host layout or database role changed.
+
+The detached clean source was built using the explicit default builder. The
+one-shot migrator exited 0. Both existing additive migration journals match;
+missing task numbers, missing workspace keys and duplicate task numbers are
+zero. Only API, worker and web were replaced. Their immutable image IDs are
+recorded in [sanitized release evidence](ui/review-2026-10-11/agent-public-upgrade.json).
+Caddy, Valkey, route, DNS and neighbouring container identities, start times
+and health stayed intact. PostgreSQL was not restarted; Taff connections use
+TLS and its dedicated role. `TAFF_TAG` is the released SHA; all other private
+env values and mode 0600 are preserved. Health and SMS-method discovery passed.
+
+All four public-origin cases passed: EN/HK on phone and desktop, email
+sign-out/sign-in, real task references DE-10–DE-13 in Today/Projects/detail/search,
+desktop board drag and phone native scrolling, calendar scheduling/list/editor,
+Inbox counts/tabs/digests, Me preferences, realtime between two browsers,
+fresh-browser invitation fragment clearing, Secure/HttpOnly cookies and
+foreign-origin rejection. There were zero browser page errors. These human
+quick-add tasks had no Inbox review item; the separate agent check below
+supplies the required actual Inbox task-reference acceptance.
+
+The withdrawn flow now passes publicly: Team created a real agent, quick add
+assigned task DE-15, the human started its run and issued a token from Me → MCP.
+The official SDK discovered 20 tools, reported exactly one `runs.event`, attached
+one actual discovery-result artifact and called `runs.submit` once with review
+requested. Inbox displayed DE-15; the human checked the evidence and approved.
+The run became completed and the task Done. Me revoked the token; a subsequent
+authenticated MCP initialize received HTTP 401. SDK/browser cleanup and original
+locale, time zone, appearance and workspace restoration passed. No SMS was
+sent, production seed run or agent copied from another workspace.
+
+The first agent attempt also persisted approval of DE-14, then its private
+helper asserted a standalone-page status label in the embedded drawer. A
+read-only diagnosis confirmed completed/Done and all three checks true. The
+helper assertion was corrected; the one permitted rollback-free retry passed
+the entire flow, including UI revocation. The first token was revoked by the
+failure cleanup. Both agents/tasks/artifacts remain as verification evidence.
+
+Rollback retains source and image identities of `828443e23c2e08a1f1936aa1dbb23380db496b52`:
+API/migrator `sha256:fdea97ab658541f0bda317421925a873f68853263550146f8b8eb413dc520819`,
+worker `sha256:b331e9d5b38ef793d8c5d11a3c8857f25e9dcad30ac27eef428e0d3347c650ee`,
+web `sha256:99e116322e7d3b63ff9c8a306140cbd37ea3e76a11b0e797bf8a651bd0c70b60`.
+Under the existing lock, restore the exclusive env backup and recreate only
+API, worker and web from those retained images. Keep additive migrations and
+data; the dump is recovery evidence, not an automatic destructive restore.
+No rollback was needed. Lock-release verification is recorded below after the
+acceptance receipt is written. Continue M9 at the existing Lighthouse evidence
+and the missing all-locale LCP CI guard.
+
+After the complete public acceptance, the verified receipt was written and
+`deployment.done` set to the accepted SHA. The detached keeper logged
+`LOCK_RELEASED` and removed its owner file. An independent nonblocking native
+flock probe then acquired the same lock and confirmed the accepted runtime
+images were still running and API healthy. The lock is free. This checkpoint
+is a documentation-only commit ahead of the accepted source.

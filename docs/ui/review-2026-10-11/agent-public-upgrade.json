@@ -1,0 +1,345 @@
+{
+  "sha": "23387723f8c438d990db00d561cba2899f48ab80",
+  "tree": "081ade25b8525a090afd4aee2ff1a181d7118ffb",
+  "previousRelease": "828443e23c2e08a1f1936aa1dbb23380db496b52",
+  "ci": {
+    "feature": "https://github.com/ksamint/taff01/actions/runs/38101185018",
+    "main": "https://github.com/ksamint/taff01/actions/runs/38101185022"
+  },
+  "localValidation": {
+    "tests": 500,
+    "testFiles": 47,
+    "browserCases": 132,
+    "mobileTodayGzipBytes": 195767,
+    "lcpSamplesMs": {
+      "en": [692, 696, 680],
+      "zh-CN": [776, 784, 780],
+      "zh-HK": [888, 772, 776]
+    },
+    "lcpMediansMs": {
+      "en": 692,
+      "zh-CN": 780,
+      "zh-HK": 776
+    },
+    "lighthouse": {
+      "performance": 100,
+      "accessibility": 96,
+      "bestPractices": 100
+    }
+  },
+  "publicCases": [
+    {
+      "locale": "en",
+      "mode": "phone",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Phone native touch column scrolling",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "9e244894-7ceb-497a-9843-3bc8605b7375",
+      "taskId": "d4062dfb-bae4-4d89-a2a6-fdf5ec4ea99e",
+      "reference": "DE-10",
+      "unreadCount": 2,
+      "inboxItems": 2,
+      "digestCount": 2,
+      "invitation": {
+        "fragmentClearedBeforeAndAfterSignup": true,
+        "recipientCreated": true,
+        "guestMembership": true
+      },
+      "pageErrors": 0
+    },
+    {
+      "locale": "en",
+      "mode": "desktop",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Desktop real pointer board drag",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "57b6fb87-490e-4bfe-8a0e-7b04f95bccad",
+      "taskId": "c8e5f8d0-f346-4964-832c-e78c6b482acd",
+      "reference": "DE-11",
+      "unreadCount": 2,
+      "inboxItems": 2,
+      "digestCount": 2,
+      "pageErrors": 0
+    },
+    {
+      "locale": "zh-HK",
+      "mode": "phone",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Phone native touch column scrolling",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "6cbc9f24-20f5-45c5-adec-6b8a178e3857",
+      "taskId": "e96adf0b-d1d9-4323-9c20-4db4a6c4bc88",
+      "reference": "DE-12",
+      "unreadCount": 2,
+      "inboxItems": 2,
+      "digestCount": 2,
+      "invitation": {
+        "fragmentClearedBeforeAndAfterSignup": true,
+        "recipientCreated": true,
+        "guestMembership": true
+      },
+      "pageErrors": 0
+    },
+    {
+      "locale": "zh-HK",
+      "mode": "desktop",
+      "checks": [
+        "Me language and appearance",
+        "HTTPS, auth methods, Secure HttpOnly cookie, foreign-origin rejection",
+        "Desktop real pointer board drag",
+        "QuickAdd real KEY-number in Today, Projects, detail and search",
+        "Real calendar schedule, list and editor",
+        "Inbox real tabs and available counts",
+        "Two-browser actual realtime UI update",
+        "Email sign-out/sign-in and saved preference restoration"
+      ],
+      "inboxTaskReference": "not_present",
+      "digestRows": "verified-present",
+      "projectId": "f8f844c8-fc13-4b51-96e7-c5c476ca611e",
+      "taskId": "e874d613-05b0-42da-9616-c7b81fac9f66",
+      "reference": "DE-13",
+      "unreadCount": 2,
+      "inboxItems": 2,
+      "digestCount": 2,
+      "pageErrors": 0
+    }
+  ],
+  "agentReview": {
+    "sha": "23387723f8c438d990db00d561cba2899f48ab80",
+    "startedAt": "2026-10-11T05:35:46.509Z",
+    "status": "passed",
+    "requiresParentDeploymentShaAndLockVerification": true,
+    "recordsRetained": true,
+    "officialSdk": true,
+    "steps": [
+      {
+        "step": "ui-agent-create",
+        "status": "passed",
+        "at": "2026-10-11T05:35:50.449Z"
+      },
+      {
+        "step": "ui-task-create-and-run-start",
+        "status": "passed",
+        "at": "2026-10-11T05:35:52.313Z"
+      },
+      {
+        "step": "ui-token-issued-and-dismissed",
+        "status": "passed",
+        "at": "2026-10-11T05:35:53.139Z"
+      },
+      {
+        "step": "official-sdk-event-artifact-submit",
+        "status": "passed",
+        "at": "2026-10-11T05:35:54.416Z"
+      },
+      {
+        "step": "inbox-task-reference",
+        "status": "passed",
+        "at": "2026-10-11T05:35:54.813Z"
+      },
+      {
+        "step": "ui-inbox-approval",
+        "status": "passed",
+        "at": "2026-10-11T05:35:55.714Z"
+      },
+      {
+        "step": "ui-token-revoke-and-authenticated-mcp-401",
+        "status": "passed",
+        "at": "2026-10-11T05:35:57.123Z"
+      }
+    ],
+    "cleanup": {
+      "sdkClosed": true,
+      "themeRestored": true,
+      "localeAndTimeZoneRestored": true,
+      "workspaceRestored": true,
+      "contextClosed": true,
+      "browserClosed": true
+    },
+    "workspaceId": "611ec3bb-5242-476a-8a5e-8bea57d17387",
+    "taskReference": "DE-15",
+    "tokenScopes": ["tasks:read", "tasks:write", "files:write", "inbox:review"],
+    "mcp": {
+      "discoveredToolCount": 20,
+      "eventCalls": 1,
+      "attachmentCalls": 1,
+      "submitCalls": 1,
+      "submitStatus": "needs_review"
+    },
+    "revokedMcpStatus": 401,
+    "memberId": "d00c31f8-1a54-45c9-a526-e0e314b2c5e2",
+    "taskId": "5ab02488-6f60-4de3-8fbd-e29ce9a6682e",
+    "runId": "6b7e20ae-9c85-4f63-aac3-6dde4f6ac0d8",
+    "tokenId": "c89ed172-29d7-466e-89f1-9376f72c4dfa",
+    "pageErrors": 0,
+    "finishedAt": "2026-10-11T05:35:57.900Z"
+  },
+  "nativeCapture": {
+    "sourceSha": "23387723f8c438d990db00d561cba2899f48ab80",
+    "captureRun": 38101198542,
+    "artifactId": 11688246331,
+    "cases": 64,
+    "captures": 86,
+    "byteIdentical": 77,
+    "teamByteIdentical": 4,
+    "remainingDifferences": [
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/search.png",
+        "pixels": 4,
+        "maxChannelDifference": 1,
+        "bounds": [1258, 2, 1259, 48]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/sidebar.png",
+        "pixels": 11,
+        "maxChannelDifference": 20,
+        "bounds": [189, 151, 189, 202]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/agent.png",
+        "pixels": 10,
+        "maxChannelDifference": 9,
+        "bounds": [189, 151, 189, 202]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/mcp.png",
+        "pixels": 30,
+        "maxChannelDifference": 12,
+        "bounds": [189, 151, 1259, 779]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/search.png",
+        "pixels": 11,
+        "maxChannelDifference": 11,
+        "bounds": [189, 151, 189, 202]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/sidebar.png",
+        "pixels": 11,
+        "maxChannelDifference": 20,
+        "bounds": [189, 151, 189, 202]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/task-detail.png",
+        "pixels": 11,
+        "maxChannelDifference": 20,
+        "bounds": [189, 151, 189, 202]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/type.png",
+        "pixels": 11,
+        "maxChannelDifference": 20,
+        "bounds": [189, 151, 189, 202]
+      },
+      {
+        "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/type-dark.png",
+        "pixels": 3,
+        "maxChannelDifference": 6,
+        "bounds": [19, 20, 360, 829]
+      }
+    ],
+    "assessment": "Inspected native old-left/new-right pixel regions and full MCP and phone dark type screens. Only antialias/corner differences, 3–30 pixels per differing PNG; no content or layout changes. Existing approved baselines retained. Native runner and font/raster stack matched."
+  },
+  "runtime": {
+    "sha": "23387723f8c438d990db00d561cba2899f48ab80",
+    "runtime": {
+      "api": {
+        "id": "dfa0022fb4fc779adb132c324777866191a65ab5cf98299692d7eff9ed1ba669",
+        "image": "sha256:c828844901e46b97b58d0bb537922f807079cbc5aa65129b8a78d538ea467e25",
+        "running": true,
+        "health": "healthy"
+      },
+      "worker": {
+        "id": "82eb031dd24e1cdc3e48adc4bfb0effeacc0c8eabc2f4adb34fc264821fee3fa",
+        "image": "sha256:1531e2630e941710d7604a5106884cae2c6424f47bba434b97945f70f2375c7e",
+        "running": true,
+        "health": null
+      },
+      "web": {
+        "id": "26138c0d30bbc15758505b9d5014b05b6d5b53d3340e9ba1a889fd8678d8804d",
+        "image": "sha256:c8daf2f869c5594a7ae3eceda850474bf507261dfe4345b94ec0274b1fed9625",
+        "running": true,
+        "health": null
+      }
+    },
+    "workerReady": true,
+    "neighborsUnchanged": true,
+    "caddyValkeyRouteUnchanged": true,
+    "privateEnvPreserved": true,
+    "postgresUnchanged": true
+  },
+  "backfill": {
+    "sha": "23387723f8c438d990db00d561cba2899f48ab80",
+    "missingTaskNumbers": 0,
+    "missingWorkspaceKeys": 0,
+    "duplicateTaskNumbers": 0,
+    "migrations": 2,
+    "legacyTrigger": 1
+  },
+  "postgresTls": {
+    "taffConnections": 12,
+    "insecureConnections": 0,
+    "dedicatedRole": true,
+    "sha": "23387723f8c438d990db00d561cba2899f48ab80"
+  },
+  "backup": {
+    "databaseBackupPath": "/srv/postgresql/backups/taff-before-23387723f8c438d990db00d561cba2899f48ab80/taff.dump",
+    "databaseBackupSha256": "b2a74f883fda5633e8a5793975097ef5c33cb53649d9b10057c98a9ba78fe21a",
+    "backupBytes": 137727,
+    "dedicatedDatabaseBackupVerified": true
+  },
+  "bundle": {
+    "bytes": 25804,
+    "sha256": "e0475288ac7290ba4059587d2656dfdad1f07b4ea76bfaee18f12b870927dd1c"
+  },
+  "dnsA": "146.56.215.142",
+  "smsEnabled": true,
+  "smsSent": false,
+  "productionSeeded": false,
+  "agentCopied": false,
+  "rollbackPerformed": false,
+  "firstAgentAttempt": {
+    "taskReference": "DE-14",
+    "approvalPersisted": true,
+    "tokenRevokedByFallback": true,
+    "failure": "private helper asserted the standalone review status label inside the embedded drawer; corrected to task-status"
+  },
+  "lockRecovery": {
+    "cause": "existing SSH relay disconnected before migration",
+    "reacquiredExistingNativeLock": true,
+    "detachedKeeper": true,
+    "sameCandidateBackupBundleAndAttempt": true
+  },
+  "privateEvidenceHashes": {
+    "public-agent-review-taff-agent-review-20261011-01/result.json": "55cb49105e9d5189e40201eb26caf5ad8c4af6ca28c947ef0ea1d98069718a17",
+    "public-agent-review-taff-agent-review-20261011-02/result.json": "1c59d966462d2e8a5c808066b6d48392d277e77762af7ee8dea0ba5cfea8130c",
+    "public-prototype-acceptance-taff-agent-public-20261011-01/results.json": "e002c000cc98ff72cdc43b27d5cbf7a0f1a6d023b5203bf7368e15f350e3144d"
+  }
+}

@@ -1102,3 +1102,39 @@ If the selected source SHA changes, regenerate its bundle and validate that SHA.
 records the source identity, checks, CI links/report hashes, staging receipt and
 remaining work. The source/runtime distinction is also recorded in
 [the deployment candidate checkpoint](../deploy.md#prototype-ui-release-candidate-for-review--2026-10-11).
+
+## Agent creation follow-up acceptance — 2026-10-11
+
+Source `23387723f8c438d990db00d561cba2899f48ab80` is deployed and its
+[feature](https://github.com/ksamint/taff01/actions/runs/38101185018) and
+[main](https://github.com/ksamint/taff01/actions/runs/38101185022) CI runs passed.
+The [native capture run](https://github.com/ksamint/taff01/actions/runs/38101198542)
+covers the same source/workflow: 64 cases, 86 captures, zero failures or skips.
+All four Team images match approved baselines byte for byte; 77/86 images
+match exactly, with nine inspected differences confined to 3–30 edge pixels.
+No baseline or comparison threshold was changed. Add agent is the authorized
+functional addition to the ported Team markup and existing dialog/components.
+
+| Screen | Prototype | Exact-source native application |
+| --- | --- | --- |
+| Desktop EN Team | Prototype gap; prior accepted app ![prior](../ui/screenshots/ui-parity/team/desktop-en-app.png) | ![application](../ui/screenshots/ui-parity/agent-creation-2026-10-11/desktop-en-team.png) |
+| Desktop HK Team | Prototype gap; prior accepted app ![prior](../ui/screenshots/ui-parity/team/desktop-zh-HK-app.png) | ![application](../ui/screenshots/ui-parity/agent-creation-2026-10-11/desktop-zh-HK-team.png) |
+| Phone EN Team | ![prototype](../ui/reference/extra/phone-en-team.png) | ![application](../ui/screenshots/ui-parity/agent-creation-2026-10-11/phone-en-team.png) |
+| Phone HK Team | ![prototype](../ui/reference/extra/phone-zh-team.png) | ![application](../ui/screenshots/ui-parity/agent-creation-2026-10-11/phone-zh-HK-team.png) |
+
+The separate public acceptance uses live data rather than prototype fixtures.
+All four EN/HK phone/desktop cases passed. The real agent flow created DE-15,
+submitted actual official-SDK evidence, showed its reference in Inbox, approved
+it to completed/Done and revoked its token; authenticated MCP then returned 401.
+Private-helper status-label diagnosis and its single successful retry are
+recorded in [the release checkpoint](../deploy.md#agent-creation-upgrade-checkpoint--2026-10-11).
+
+| Public Inbox task reference | Public approved evidence |
+| --- | --- |
+| ![DE-15 Inbox](../ui/screenshots/ui-parity/agent-creation-2026-10-11/public-inbox-task-reference.png) | ![approved checklist](../ui/screenshots/ui-parity/agent-creation-2026-10-11/public-review-approved.png) |
+
+[Sanitized source, validation, native capture and public evidence](../ui/review-2026-10-11/agent-public-upgrade.json)
+contains no credentials or raw token. Test records remain in the verification
+workspace. Behaviour/data, existing visual thresholds and all existing tests
+are preserved. M9 work remains: LCP CI guard, keyboard/i18n QA, digest seed,
+verified invitation email and final release handoff.
