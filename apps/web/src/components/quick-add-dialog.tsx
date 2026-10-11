@@ -380,7 +380,7 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
                         data-testid="quick-date"
                         type="text"
                         inputMode="numeric"
-                        placeholder="YYYY-MM-DD"
+                        placeholder={t("inputFormat.date")}
                         value={form.date}
                         onChange={(event) => change("date", event.target.value)}
                       />
@@ -394,7 +394,7 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
                         data-testid="quick-time"
                         type="text"
                         inputMode="numeric"
-                        placeholder="HH:mm"
+                        placeholder={t("inputFormat.time")}
                         value={form.time}
                         disabled={!form.date}
                         onChange={(event) => change("time", event.target.value)}

@@ -127,8 +127,22 @@ try {
           task && agent && reviewTask,
           "Seed must include the canonical task, agent and awaiting-review task",
         );
+        const digestResponse = await page.request.get(
+          `${base}/api/digests?workspaceId=${workspace.id}`,
+        );
+        assert.equal(digestResponse.status(), 200);
+        const digest = (await digestResponse.json()).items.find(
+          (row) => row.id === prototypeId("digest", "nw", 1),
+        );
+        assert(digest, "Seed must include the recipient's daily digest");
         const routes = [
           ["today", "/"],
+          ["organization-directory", "/orgs"],
+          ["project-detail", `/projects/${prototypeId("project", "nw")}`],
+          ["task-page", `/tasks/${task.id}`],
+          ["review-page", `/tasks/${reviewTask.id}/review`],
+          ["digests", "/digests"],
+          ["digest-detail", `/digests/${digest.id}`],
           ["calendar", "/calendar"],
           ["projects", "/projects"],
           ["inbox", "/inbox"],
@@ -353,9 +367,9 @@ try {
   assert.equal(
     captures.length,
     screen === "all"
-      ? 90
+      ? 126
       : screen === "shell"
-        ? 84
+        ? 120
         : screen === "review"
           ? 12
           : 6,

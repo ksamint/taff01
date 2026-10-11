@@ -469,7 +469,7 @@ export function TaskEditor({
                     id="edit-date"
                     data-testid="edit-date"
                     type="text"
-                    placeholder="YYYY-MM-DD"
+                    placeholder={t("inputFormat.date")}
                     value={form.date}
                     onChange={(event) => change("date", event.target.value)}
                   />
@@ -480,7 +480,7 @@ export function TaskEditor({
                     id="edit-time"
                     data-testid="edit-time"
                     type="text"
-                    placeholder="HH:mm"
+                    placeholder={t("inputFormat.time")}
                     value={form.time}
                     disabled={!form.date}
                     onChange={(event) => change("time", event.target.value)}

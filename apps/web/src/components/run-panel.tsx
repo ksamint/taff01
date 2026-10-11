@@ -141,6 +141,8 @@ export function RunPanel({
           <span
             className={`run-source-status run-${run.status}`}
             data-testid="run-status"
+            role="status"
+            aria-atomic="true"
           >
             {t(`run.status.${run.status}`)}
           </span>

@@ -509,7 +509,11 @@ function ReviewEditor({
               </p>
             )}
             {!eligible && (
-              <p className="section-hint" data-testid="review-readonly">
+              <p
+                className="section-hint"
+                data-testid="review-readonly"
+                role="status"
+              >
                 {t(
                   data.run.status === "completed"
                     ? "review.approved"

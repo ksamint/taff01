@@ -161,7 +161,7 @@ export function ScheduleEditor({
               id="schedule-start"
               data-testid="schedule-start"
               type="text"
-              placeholder="YYYY-MM-DDTHH:mm"
+              placeholder={t("inputFormat.dateTime")}
               step={1}
               required
               value={start}
@@ -174,7 +174,7 @@ export function ScheduleEditor({
               id="schedule-end"
               data-testid="schedule-end"
               type="text"
-              placeholder="YYYY-MM-DDTHH:mm"
+              placeholder={t("inputFormat.dateTime")}
               step={1}
               required
               value={end}
