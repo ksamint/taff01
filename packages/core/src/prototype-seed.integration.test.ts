@@ -50,6 +50,7 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
   let unrelatedId: string;
   let unrelatedEmail: string;
   const changes: ChangeEvent[] = [];
+  const existingDigestDates = new Map<string, string>();
   beforeAll(async () => {
     await migrateDatabase(url!);
     connection = connectDatabase(url!);
@@ -64,6 +65,12 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
       body: { name: "Unrelated seed test", email: unrelatedEmail, password },
     });
     unrelatedId = unrelated.user.id;
+    // Other suites share these fixed IDs; re-seeding must preserve their snapshots.
+    for (const row of await connection.db
+      .select({ id: dailyDigests.id, localDate: dailyDigests.localDate })
+      .from(dailyDigests)) {
+      existingDigestDates.set(row.id, row.localDate);
+    }
     await seedDemo({ ...options, password, seedDate: "2026-10-08" });
     alexId = (
       await connection.db
@@ -204,7 +211,10 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
         (row) => row.id === prototypeId("digest", org.key, 1),
       );
       expect(digest).toBeDefined();
-      expect(digest).toMatchObject({ localDate: "2026-10-08", workspaceId });
+      expect(digest).toMatchObject({
+        localDate: existingDigestDates.get(digest!.id) ?? "2026-10-08",
+        workspaceId,
+      });
       const inbox = await core.listInbox(actor, workspaceId, {});
       expect(
         inbox.items.filter(
