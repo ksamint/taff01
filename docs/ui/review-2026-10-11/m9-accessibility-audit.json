@@ -1,0 +1,34 @@
+{
+  "sourceSha": "d2bebf21017b171c0ac1a8656a85e89cfee2d1b9",
+  "measuredContexts": 288,
+  "auditRows": 300,
+  "localeCount": 3,
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "viewports": {
+    "phone": [
+      390,
+      844
+    ],
+    "desktop": [
+      1280,
+      800
+    ]
+  },
+  "contrastFailures": 0,
+  "smallEffectivePhoneTargets": 0,
+  "below12pxText": 0,
+  "missingNames": 0,
+  "missingFocusRings": 0,
+  "incompleteTabCycles": 0,
+  "focusStops": 6450,
+  "interactiveObservations": 7620,
+  "textObservations": 17094,
+  "manualCalendarGradientObservations": 36,
+  "minimumStripeContrast": 8.44,
+  "manualCalendarScreenshotsReviewed": 12,
+  "smsPresentationOnly": true,
+  "actualSmsOrOtpTested": false
+}
