@@ -193,6 +193,7 @@
     "timeZoneHint": "所有裝置上的日期和時間都按此時區顯示；首次登入時已從瀏覽器偵測。",
     "teamSummary": "{{people}} 人 · {{agents}} 個智能體",
     "settings": "設定",
+    "mcpSettings": "設定 › MCP",
     "advanced": "更多設定",
     "notificationSummary": "{{count}} 項已開啟",
     "notificationsOff": "已關閉",

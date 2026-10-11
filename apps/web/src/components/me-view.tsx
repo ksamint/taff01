@@ -144,7 +144,7 @@ export function MeView() {
           data-testid="open-mcp"
         >
           <Plug size={20} aria-hidden="true" />
-          <span className="me-row-label">{t("me.settings")} › MCP</span>
+          <span className="me-row-label">{t("me.mcpSettings")}</span>
           <span className="me-row-value">{t("mcp.open")}</span>
           <ChevronRight size={16} aria-hidden="true" />
         </Link>

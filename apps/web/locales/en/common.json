@@ -193,6 +193,7 @@
     "timeZoneHint": "Dates and times follow this zone on every device. It was detected from your first browser.",
     "teamSummary": "{{people}} people · {{agents}} agents",
     "settings": "Settings",
+    "mcpSettings": "Settings › MCP",
     "advanced": "More settings",
     "notificationSummary": "{{count}} on",
     "notificationsOff": "Off",

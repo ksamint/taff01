@@ -193,6 +193,7 @@
     "timeZoneHint": "所有设备上的日期和时间都按此时区显示；首次登录时已从浏览器检测。",
     "teamSummary": "{{people}} 人 · {{agents}} 个智能体",
     "settings": "设置",
+    "mcpSettings": "设置 › MCP",
     "advanced": "更多设置",
     "notificationSummary": "{{count}} 项已开启",
     "notificationsOff": "已关闭",
