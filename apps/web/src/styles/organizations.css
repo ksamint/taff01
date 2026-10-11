@@ -1,5 +1,9 @@
 /* Native #team shows the source directory; /orgs keeps management controls. */
+button.org-card {
+  min-width: 44px;
+  min-height: 44px;
+}
 .organizations-view.team-only
-> :is(.organization-toolbar, .page-heading, .org-grid, .button, .me-section) {
+  > :is(.organization-toolbar, .page-heading, .org-grid, .button, .me-section) {
   display: none;
 }

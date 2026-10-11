@@ -404,6 +404,7 @@ footer.tagline {
   justify-content: center;
   gap: var(--space-sm);
   min-height: 44px;
+  min-width: 44px;
   padding: 10px var(--space-md);
   border: var(--hairline) solid var(--border-strong);
   border-radius: var(--radius-control);
@@ -971,6 +972,14 @@ textarea {
   text-decoration: underline;
   text-underline-offset: 3px;
   overflow-wrap: anywhere;
+}
+@media (max-width: 1023px) {
+  a.text-link {
+    display: inline-block;
+    min-width: 44px;
+    min-height: 44px;
+    align-content: center;
+  }
 }
 .back-link {
   display: inline-flex;
