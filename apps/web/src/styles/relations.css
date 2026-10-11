@@ -1,0 +1,171 @@
+.relations-view {
+  padding: 8px 20px 32px;
+  max-width: 1000px;
+  margin-inline: auto;
+}
+.relations-view h1 {
+  margin: 12px 0;
+  font-size: var(--type-product-h1-size);
+}
+.relations-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--text);
+}
+.relations-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-block: 20px 12px;
+}
+.relations-status > span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.relations-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.relations-controls input,
+.relations-controls select {
+  width: 100%;
+  min-height: 44px;
+}
+.relations-focus {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-wrap: anywhere;
+}
+.relations-focus > span {
+  font-size: 13px;
+  font-weight: var(--weight-body);
+  color: var(--text-muted);
+}
+.relations-view a {
+  color: var(--text);
+}
+.relations-focus a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.relations-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block: 16px;
+}
+.relations-kind {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.relations-agent {
+  --node-fill: var(--accent-wash);
+  --node-stroke: var(--accent-text);
+}
+.relations-person {
+  --node-fill: var(--bg-container-low);
+  --node-stroke: var(--text-muted);
+}
+.relations-task {
+  --node-fill: var(--bg);
+  --node-stroke: var(--text);
+}
+.relations-project {
+  --node-fill: var(--bg-container);
+  --node-stroke: var(--text);
+}
+.relations-kind {
+  background: var(--node-fill);
+  border-color: var(--node-stroke);
+}
+.relations-viewport {
+  max-width: 100%;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg-container-low);
+}
+.relations-svg {
+  display: block;
+  margin-inline: auto;
+  font-family: var(--font-sans);
+  font-size: 14px;
+}
+.relations-svg marker path {
+  fill: var(--text-muted);
+}
+.relations-edge {
+  fill: none;
+  stroke: var(--text-muted);
+  stroke-width: 1.5;
+}
+.relations-edge-label {
+  fill: var(--text);
+  font-size: 12px;
+  paint-order: stroke;
+  stroke: var(--bg-container-low);
+  stroke-width: 5px;
+  stroke-linejoin: round;
+}
+.relations-node rect {
+  fill: var(--node-fill);
+  stroke: var(--node-stroke);
+}
+.relations-node text {
+  fill: var(--text);
+}
+.relations-node-kind {
+  font-size: 11px;
+}
+.relations-list {
+  padding: 0;
+  list-style: none;
+}
+.relations-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.relations-list li > div {
+  min-width: 0;
+}
+.relations-list a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+}
+.relations-edge-copy {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.relations-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.relations-pagination > span {
+  text-align: center;
+  font-size: 13px;
+}
+.relations-view .button {
+  min-height: 44px;
+}
+@media (max-width: 600px) {
+  .relations-controls {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}

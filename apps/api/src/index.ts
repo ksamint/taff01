@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import {
   createCore,
   createEmailTransportFromEnv,
+  createGraphStoreFromEnv,
   createTencentSmsProviderFromEnv,
 } from "@taff/core";
 import pino from "pino";
@@ -36,6 +37,7 @@ const core = createCore({
   authUrl: env.AUTH_URL,
   authSecret: env.AUTH_SECRET,
   tokenPepper: env.TOKEN_PEPPER,
+  graph: createGraphStoreFromEnv(process.env),
   sms: createTencentSmsProviderFromEnv(process.env),
   email: createEmailTransportFromEnv(process.env),
   onEmailStatus: (status) => logger.info(status, "Email delivery status"),

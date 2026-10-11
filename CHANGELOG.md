@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased — relationship graph
+
+- Optional Neo4j relationship projection and accessible Relationships view; PostgreSQL remains authoritative.
+- Workspace authorization, stale-data checks and explicit graph limits; recovery on notifications/reconnect and periodic reconciliation.
+- Verified private Neo4j TLS in the Apuch layout and real Neo4j integration checks in CI.
+
 ## v0.1.0
 
 The release tag is created only after complete M9 validation and green CI. The

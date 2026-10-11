@@ -268,6 +268,9 @@ export function MeView() {
             <dd>{me.user.email}</dd>
           </dl>
           <EmailVerification />
+          <Link href="/relations" className="me-manage-link" prefetch={false}>
+            {t("relations.title")}
+          </Link>
           <div className="field">
             <Label htmlFor="me-tz">{t("me.timeZone")}</Label>
             <select

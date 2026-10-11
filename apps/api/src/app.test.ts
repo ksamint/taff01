@@ -1040,3 +1040,47 @@ describe("authenticated email ownership REST boundaries", () => {
     });
   });
 });
+
+describe("graph REST boundary", () => {
+  it("uses the session principal and validates workspace IDs before core", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const result = {
+      workspaceId: id,
+      status: "unavailable" as const,
+      syncedAt: null,
+      nodeLimit: 500 as const,
+      nodes: [],
+      edges: [],
+    };
+    const read = vi.spyOn(core, "getWorkspaceGraph").mockResolvedValue(result);
+    expect(
+      await (await app.request(`/api/graph?workspaceId=${id}`)).json(),
+    ).toEqual(result);
+    expect(read).toHaveBeenCalledExactlyOnceWith(
+      { kind: "user", userId: id },
+      id,
+    );
+    expect((await app.request("/api/graph?workspaceId=invalid")).status).toBe(
+      400,
+    );
+    expect(read).toHaveBeenCalledTimes(1);
+    read.mockRejectedValueOnce(new CoreError("forbidden", 403));
+    expect((await app.request(`/api/graph?workspaceId=${id}`)).status).toBe(
+      403,
+    );
+  });
+  it("requires a signed-in session", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const read = vi.spyOn(core, "getWorkspaceGraph");
+    expect((await app.request(`/api/graph?workspaceId=${id}`)).status).toBe(
+      401,
+    );
+    expect(read).not.toHaveBeenCalled();
+  });
+});

@@ -636,5 +636,47 @@
     "date": "YYYY-MM-DD",
     "time": "HH:mm",
     "dateTime": "YYYY-MM-DDTHH:mm"
+  },
+  "relations": {
+    "title": "關係圖",
+    "description": "查看專案、任務、人員與智能體之間的協作關係。",
+    "state": {
+      "ready": "關係圖已更新。",
+      "stale": "正在更新關係圖，即將自動重試…",
+      "unavailable": "關係圖暫時無法使用。",
+      "disabled": "此部署尚未啟用關係圖。",
+      "too_large": "此工作區規模過大，無法顯示關係圖。"
+    },
+    "synced": "最近同步：{{time}}",
+    "limit": "關係圖最多支援 {{count}} 個節點。",
+    "refresh": "重新整理",
+    "refreshing": "正在重新整理…",
+    "empty": "暫無專案、任務或成員。",
+    "summary": "{{nodes}} 個節點 · {{edges}} 條關係",
+    "search": "按名稱尋找節點",
+    "select": "選擇聚焦節點",
+    "noMatches": "沒有相符的節點",
+    "hint": "每次查看一個節點。箭嘴從任務指向其專案、父任務、負責人或執行者。小螢幕可橫向捲動關係圖；下方清單提供完整名稱。",
+    "legend": "節點類型",
+    "diagram": "關係圖，可橫向捲動查看",
+    "list": "此節點的關係",
+    "focusNode": "聚焦 {{name}}",
+    "focus": "聚焦",
+    "previous": "上一頁",
+    "next": "下一頁",
+    "page": "{{page}} / {{total}}",
+    "isolated": "此節點暫無關聯。",
+    "kind": {
+      "project": "專案",
+      "task": "任務",
+      "person": "人員",
+      "agent": "智能體"
+    },
+    "edge": {
+      "project": "所屬專案",
+      "parent": "父任務",
+      "owner": "負責人",
+      "worker": "執行者"
+    }
   }
 }

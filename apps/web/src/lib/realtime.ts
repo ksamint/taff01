@@ -25,6 +25,7 @@ const FAMILIES = [
   "notificationPreferences",
   "dailyDigests",
   "dailyDigest",
+  "graph",
 ];
 
 export function connectWorkspace(

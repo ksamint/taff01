@@ -485,6 +485,12 @@ export function createApp(
       201,
     ),
   );
+  app.get("/api/graph", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.getWorkspaceGraph(userPrincipal(c.get("userId")), workspaceId),
+    );
+  });
   app.get("/api/projects", async (c) => {
     const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
     return c.json(

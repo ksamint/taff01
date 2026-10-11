@@ -636,5 +636,47 @@
     "date": "YYYY-MM-DD",
     "time": "HH:mm",
     "dateTime": "YYYY-MM-DDTHH:mm"
+  },
+  "relations": {
+    "title": "Relationships",
+    "description": "Explore how projects, tasks, people and agents work together.",
+    "state": {
+      "ready": "Relationships are up to date.",
+      "stale": "Relationships are updating. Checking again shortly…",
+      "unavailable": "Relationships are temporarily unavailable.",
+      "disabled": "Relationships are not enabled for this installation.",
+      "too_large": "This workspace is too large to display as a graph."
+    },
+    "synced": "Last synchronized: {{time}}",
+    "limit": "The graph supports up to {{count}} nodes.",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing…",
+    "empty": "No projects, tasks or members yet.",
+    "summary": "{{nodes}} nodes · {{edges}} relationships",
+    "search": "Find a node by name",
+    "select": "Focus on a node",
+    "noMatches": "No matching nodes",
+    "hint": "Explore one node at a time. Arrows point from a task to its project, parent, owner or worker. Scroll the diagram horizontally on a small screen; the list below includes full names.",
+    "legend": "Node types",
+    "diagram": "Relationship diagram, scroll horizontally to explore",
+    "list": "Relationships for this node",
+    "focusNode": "Focus on {{name}}",
+    "focus": "Focus",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "{{page}} of {{total}}",
+    "isolated": "This node has no relationships yet.",
+    "kind": {
+      "project": "Project",
+      "task": "Task",
+      "person": "Person",
+      "agent": "Agent"
+    },
+    "edge": {
+      "project": "belongs to project",
+      "parent": "has parent task",
+      "owner": "owned by",
+      "worker": "worked on by"
+    }
   }
 }

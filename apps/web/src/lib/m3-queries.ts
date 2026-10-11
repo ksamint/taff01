@@ -85,6 +85,7 @@ export function invalidateM3(client: QueryClient) {
         "notificationPreferences",
         "dailyDigests",
         "dailyDigest",
+        "graph",
       ].includes(String(queryKey[0])),
   });
 }

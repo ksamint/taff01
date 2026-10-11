@@ -1,8 +1,9 @@
-import { createCore } from "@taff/core";
+import { createCore, createGraphStoreFromEnv } from "@taff/core";
 import { Queue, Worker } from "bullmq";
 import pino from "pino";
 import { z } from "zod";
 import { createDigestProcessor } from "./digests";
+import { createGraphRefresh } from "./graph";
 
 const redisUrl = new URL(z.url().parse(process.env.REDIS_URL));
 if (!["redis:", "rediss:"].includes(redisUrl.protocol))
@@ -16,11 +17,13 @@ const env = z
     TOKEN_PEPPER: z.string().min(16),
   })
   .parse(process.env);
+const graph = createGraphStoreFromEnv(process.env);
 const core = createCore({
   databaseUrl: env.DATABASE_URL,
   authUrl: env.AUTH_URL,
   authSecret: env.AUTH_SECRET,
   tokenPepper: env.TOKEN_PEPPER,
+  graph,
 });
 const connection = {
   host: redisUrl.hostname,
@@ -39,9 +42,23 @@ const queue = new Queue("taff", { connection });
 queue.on("error", (error) =>
   logger.error({ errorName: error.name }, "Queue connection error"),
 );
-const worker = new Worker("taff", createDigestProcessor(core, queue), {
-  connection,
-});
+const graphRefresh = graph
+  ? await createGraphRefresh(core, () =>
+      logger.warn("Graph projection unavailable; recovery sweep will retry"),
+    )
+  : undefined;
+const digestProcessor = createDigestProcessor(core, queue);
+const worker = new Worker(
+  "taff",
+  async (job) => {
+    if (job.name === "graph-scan") {
+      z.strictObject({}).parse(job.data);
+      return graphRefresh?.rebuildAll();
+    }
+    return digestProcessor(job);
+  },
+  { connection },
+);
 worker.on("error", (error) =>
   logger.error({ errorName: error.name }, "Worker connection error"),
 );
@@ -61,10 +78,23 @@ await queue.upsertJobScheduler(
     },
   },
 );
+if (graphRefresh) {
+  await queue.upsertJobScheduler(
+    "graph-scan",
+    { every: 60_000 },
+    {
+      name: "graph-scan",
+      data: {},
+      opts: { removeOnComplete: 10, removeOnFail: true },
+    },
+  );
+  void graphRefresh.rebuildAll();
+}
 logger.info("Worker ready");
 const shutdown = () => {
   void worker
     .close()
+    .then(() => graphRefresh?.close())
     .then(() => Promise.all([queue.close(), core.close()]))
     .then(() => process.exit(0));
 };

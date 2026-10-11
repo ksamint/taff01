@@ -205,3 +205,13 @@ MPL-2.0 components, accepted as documented exceptions in
 [ADR 0003](docs/adr/0003-transitive-license-decision.md); GPL, AGPL and SSPL
 code is not permitted. The queue and rate-limit store is Valkey (BSD-3) rather
 than Redis 7.4+ (RSAL/SSPL) for the same reason.
+
+### Relationships
+
+PostgreSQL remains the main database. Optionally set all three `NEO4J_URI`,
+`NEO4J_USERNAME`, `NEO4J_PASSWORD` values, plus `NEO4J_DATABASE` (default `neo4j`),
+in `.env` or the private production env. The API and worker project workspace
+projects, tasks, people and agents into Neo4j; business writes still use PostgreSQL.
+Open Me → Advanced → Relationships to inspect the graph. Missing credentials disable
+it; outages/stale projections are shown explicitly, and workspaces over 500 nodes
+are reported as too large. See [deployment](docs/deploy.md) and [ADR 0014](docs/adr/0014-neo4j-relationship-projection.md).

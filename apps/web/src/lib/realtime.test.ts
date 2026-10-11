@@ -49,7 +49,14 @@ beforeEach(() => {
   vi.stubGlobal("window", browser);
   vi.stubGlobal("WebSocket", Socket);
   client = new QueryClient();
-  for (const key of ["tasks", "me", "agent-tokens", "inbox", "unrelated"])
+  for (const key of [
+    "tasks",
+    "me",
+    "agent-tokens",
+    "inbox",
+    "graph",
+    "unrelated",
+  ])
     client.setQueryData([key, workspaceId], []);
 });
 afterEach(() => {
@@ -83,7 +90,11 @@ describe("workspace realtime lifecycle", () => {
     socket.message({ ...event, token: "extra fields are rejected" });
     socket.message("invalid json event");
     expect(invalidate).toHaveBeenCalledTimes(1);
+    client.setQueryData(["graph", workspaceId], []);
     socket.message(event);
+    expect(client.getQueryState(["graph", workspaceId])?.isInvalidated).toBe(
+      true,
+    );
     socket.message({
       ...event,
       action: "users.update",

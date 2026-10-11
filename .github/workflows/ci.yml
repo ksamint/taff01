@@ -1,7 +1,7 @@
 name: CI
 on:
   push:
-    branches: [main, claude/m9-hardening, codex/ui-parity, codex/prototype-release, codex/agent-creation, codex/m9-handoff]
+    branches: [main, claude/m9-hardening, codex/ui-parity, codex/prototype-release, codex/agent-creation, codex/m9-handoff, codex/m9-neo4j-release]
   pull_request:
 concurrency:
   group: ci-${{ github.ref }}
@@ -22,6 +22,9 @@ env:
   MCP_RATE_LIMIT: "60"
   CI: "1"
   NEXT_TELEMETRY_DISABLED: "1"
+  TEST_NEO4J_URI: bolt://127.0.0.1:57687
+  TEST_NEO4J_USERNAME: neo4j
+  TEST_NEO4J_PASSWORD: ci-neo4j-password
 jobs:
   checks:
     runs-on: ubuntu-latest
@@ -37,6 +40,17 @@ jobs:
         options: >-
           --health-cmd "pg_isready -U taff -d taff" --health-interval 5s
           --health-timeout 3s --health-retries 20
+      neo4j:
+        image: neo4j:2026.06.0-community@sha256:42fd5b9ead4dd4211f6f91bd831c358e4e2117367d04633fbf88682ca4792b30
+        env:
+          NEO4J_AUTH: neo4j/ci-neo4j-password
+          NEO4J_server_memory_heap_initial__size: 256m
+          NEO4J_server_memory_heap_max__size: 256m
+          NEO4J_server_memory_pagecache_size: 128m
+        ports: ["57687:7687"]
+        options: >-
+          --health-cmd "cypher-shell -u neo4j -p ci-neo4j-password 'RETURN 1'"
+          --health-interval 5s --health-timeout 10s --health-retries 30
       valkey:
         image: valkey/valkey:9-alpine
         ports: ["56379:6379"]

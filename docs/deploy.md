@@ -140,9 +140,24 @@ role and volumes. For upgrades, retain the previous image tags and restore
 those tags if health checks fail; additive migrations remain in place.
 
 `ins-aj5kmjag` hosts Neo4j Community at private `10.206.103.5:7687`.
-The current app has no Neo4j driver or graph data model, so no graph connection
-is claimed or configured. Graph functionality and its isolation need an explicit
-scope decision before changing that shared service.
+The optional relationship projection uses `NEO4J_URI`, `NEO4J_USERNAME`,
+`NEO4J_PASSWORD` and `NEO4J_DATABASE` (default `neo4j`) in API/worker only.
+Set the first three together, or leave all empty to disable. Production uses
+`bolt+s://neo4j01.internal.apuch.art:7687`; the Apuch override maps that
+certificate name to the private IP. Its certificate shares the PostgreSQL CA,
+so the existing verified read-only CA mount remains. Never disable TLS verification
+or expose the Bolt port publicly. Keep the graph password only in the private
+mode-0600 production env. Migrator and web receive no graph credentials.
+
+PostgreSQL remains authoritative. The worker projects existing workspace
+relationships at startup, on changes/reconnect and every 60 seconds. The
+authenticated `/api/graph?workspaceId=<uuid>` reports `ready`, `stale`,
+`unavailable`, `disabled` or `too_large`; only a current, authorized graph
+returns nodes and edges. Open Me → Advanced → Relationships for `/relations`.
+See [ADR 0014](adr/0014-neo4j-relationship-projection.md) for the 500-node bound
+and Community namespace isolation. Production verification must prove a real
+PostgreSQL task edit reaches the Neo4j graph; a mocked screenshot alone is not
+connection evidence. This source configuration awaits the new release checkpoint.
 
 ### Deployed checkpoint — 2026-10-09
 

@@ -1,0 +1,19 @@
+# Relationships and M9 deployment — 2026-10-11
+
+The user requested Neo4j relationships and data visualization on ins-aj5kmjag, retained PostgreSQL on ins-nx2vm7pc as the main database, and authorized deployment of the latest M9 to taff.apuch.cn.
+
+## Implemented source
+
+PostgreSQL remains the only business-write database. Neo4j receives atomic, workspace-keyed projections of existing projects, tasks, people and agents, with project/parent/owner/worker edges. Worker startup, coalesced change notifications, reconnect and periodic reconciliation repair the graph. The authenticated read adapter applies existing workspace permissions and withholds stale/corrupt data by checking PostgreSQL and graph fingerprints. Over 500 nodes is an explicit too_large state.
+
+Me → Advanced → Relationships opens an accessible focused SVG diagram, node search, paging and full-label relationship links. All three locales are included. No new client dependency or existing prototype baseline change is intended. The official server driver is neo4j-driver 6.2.0 (Apache-2.0), documented in ADR 0014.
+
+The existing Neo4j service was inspected without restart. Verified TLS uses neo4j01.internal.apuch.art at10.206.103.5:7687 and the same CA as PostgreSQL. A separate Taff login was provisioned and successfully authenticated over verified TLS; its secret remains private. This Community service uses application namespace isolation, not Enterprise label-level RBAC. PostgreSQL’s existing database, role and verified connection remain unchanged.
+
+## Validation before integration
+
+Core/API/worker and web typechecks pass. Focused backend/worker/API tests pass61cases; i18n/realtime tests pass11cases. Initial graph browser checks pass6cases across all locales, with inspected English/HK phone renders. An enhanced keyboard/403 retry was stopped when the local API stopped responding; these enhanced cases and corrected PostgreSQL integration tests await isolated QA. Real Neo4j tests are mandatory in CI through a separate pinned Neo4j service, not the production graph.
+
+## Acceptance remaining
+
+Fresh isolated PostgreSQL/Valkey/Neo4j integration, actual graph projection and three-locale screenshots, final all-nine validation with strict all-locale performance checks, exact-source feature/main CI, locked backups/build/migration/scoped API-worker-web replacement, public login/task edit/relationship view and revocation checks. Keep all neighboring services, Caddy, Valkey, PostgreSQL and Neo4j identities/start times intact. No production seed, SMS send or database replacement is authorized by the validation harness. Final source and runtime evidence will be recorded in the PR/deployment checkpoint after the checks complete.

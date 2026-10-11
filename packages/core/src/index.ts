@@ -51,6 +51,9 @@ import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins/username";
 import type { EmailStatus, EmailTransport } from "./email";
 import { createEmailVerificationOperations } from "./email-verification";
+import { createGraphOperations } from "./graph";
+import type { GraphStore } from "./graph-store";
+
 import { createSmsAuth } from "./sms-auth";
 import type { SmsProvider } from "./tencent-sms";
 
@@ -59,6 +62,8 @@ export {
   createEmailTransportFromEnv,
   createLoggingEmailTransport,
 } from "./email";
+export type { GraphProjection, GraphSnapshot, GraphStore } from "./graph-store";
+export { createGraphStoreFromEnv } from "./graph-store";
 
 export type { SmsProvider } from "./tencent-sms";
 export {
@@ -150,6 +155,7 @@ export function createCore(options: {
   authSecret: string;
   tokenPepper: string;
   sms?: SmsProvider;
+  graph?: GraphStore;
   email?: EmailTransport;
   onEmailStatus?: (status: EmailStatus) => void;
 }) {
@@ -224,6 +230,7 @@ export function createCore(options: {
       await listening?.catch(() => {});
       await connection.close();
       await options.email?.close?.();
+      await options.graph?.close();
     })();
     return closed;
   }
@@ -1019,6 +1026,7 @@ export function createCore(options: {
       email: options.email,
       onEmailStatus: options.onEmailStatus,
     }),
+    ...createGraphOperations({ db, store: options.graph, requireMember }),
     ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,

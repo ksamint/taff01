@@ -50,6 +50,12 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
     EMAIL_FROM: "taff@example.test",
     EMAIL_LOG_PATH: "/app/.taff-mail/messages.jsonl",
   };
+  const graph = {
+    NEO4J_URI: "bolt+s://neo4j01.internal.apuch.art:7687",
+    NEO4J_USERNAME: "taff",
+    NEO4J_PASSWORD: "compose-test-only",
+    NEO4J_DATABASE: "neo4j",
+  };
   const config = JSON.parse(
     execFileSync(
       "docker",
@@ -70,6 +76,7 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
         env: {
           ...process.env,
           ...email,
+          ...graph,
           DATABASE_URL: database,
           AUTH_URL: "https://taff.apuch.cn",
           AUTH_SECRET: "compose-test-secret-with-at-least-32-characters",
@@ -87,6 +94,9 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
     expect(config.services[service].environment.DATABASE_URL).toBe(database);
     expect(config.services[service].extra_hosts).toEqual([
       "postgres01.internal.apuch.art=10.206.103.13",
+      ...(service === "migrate"
+        ? []
+        : ["neo4j01.internal.apuch.art=10.206.103.5"]),
     ]);
     expect(config.services[service].environment.NODE_EXTRA_CA_CERTS).toBe(
       "/run/secrets/postgresql-ca.crt",
@@ -104,6 +114,11 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
     "https://taff.apuch.cn",
   );
   expect(config.services.api.environment).toMatchObject(email);
+  for (const service of ["api", "worker"])
+    expect(config.services[service].environment).toMatchObject(graph);
+  for (const service of ["migrate", "web"])
+    for (const key of Object.keys(graph))
+      expect(config.services[service].environment[key]).toBeUndefined();
   for (const service of ["migrate", "worker", "web"])
     for (const key of Object.keys(email))
       expect(config.services[service].environment[key]).toBeUndefined();
