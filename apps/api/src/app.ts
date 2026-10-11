@@ -46,6 +46,7 @@ import {
   updateTaskStatusSchema,
   usernameSignInSchema,
   verifyPhoneOtpSchema,
+  workspaceAgentInputSchema,
   workspaceCreateSchema,
   workspaceInviteAcceptSchema,
   workspaceInviteInputSchema,
@@ -523,6 +524,16 @@ export function createApp(
         userPrincipal(c.get("userId")),
         workspaceInviteAcceptSchema.parse(await c.req.json()),
       ),
+    ),
+  );
+  app.post("/api/workspaces/:id/members", async (c) =>
+    c.json(
+      await core.createWorkspaceAgent(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        workspaceAgentInputSchema.parse(await c.req.json()),
+      ),
+      201,
     ),
   );
   app.patch("/api/workspaces/:id/members/:memberId", async (c) =>

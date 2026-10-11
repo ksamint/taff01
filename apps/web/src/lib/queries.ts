@@ -52,6 +52,12 @@ export function useMembers(workspaceId: string) {
   const client = useQueryClient();
   return useQuery({
     enabled: currentSession(client)?.confirmed !== false,
+    refetchOnMount: () =>
+      client.isMutating({ mutationKey: m3MutationKey }) === 0,
+    refetchOnWindowFocus: () =>
+      client.isMutating({ mutationKey: m3MutationKey }) === 0,
+    refetchOnReconnect: () =>
+      client.isMutating({ mutationKey: m3MutationKey }) === 0,
     queryKey: membersKey(workspaceId),
     queryFn: async () =>
       memberListSchema.parse(

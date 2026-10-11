@@ -497,6 +497,8 @@
     "create": "创建组织",
     "name": "组织名称",
     "createHint": "你将成为管理员，并可邀请成员。",
+    "addAgent": "添加智能体",
+    "agentName": "智能体名称",
     "agentsToCopy": "要加入的智能体",
     "agentsHint": "智能体在此组织获得新的身份和默认权限。",
     "team": "团队",

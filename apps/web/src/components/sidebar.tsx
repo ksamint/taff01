@@ -83,7 +83,10 @@ export function Sidebar() {
       <section className="sidebar-agents" aria-label={t("agentProfile.team")}>
         <h2>{t("agentProfile.team")}</h2>
         {members.data
-          ?.filter((member) => member.kind === "agent")
+          ?.filter(
+            (member) =>
+              member.kind === "agent" && !member.id.startsWith("optimistic:"),
+          )
           .map((agent) => {
             const run = runs.data
               ?.filter((item) => item.agentId === agent.id)

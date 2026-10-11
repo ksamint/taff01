@@ -133,6 +133,34 @@ describe("notification and digest REST boundaries", () => {
   });
 });
 describe("REST adapter boundaries", () => {
+  it("creates an agent with only the validated workspace and session identity", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const member = {
+      id,
+      workspaceId: id,
+      userId: null,
+      name: "Research agent",
+      kind: "agent" as const,
+      role: "member" as const,
+    };
+    const write = vi
+      .spyOn(core, "createWorkspaceAgent")
+      .mockResolvedValue(member);
+    const response = await app.request(`/api/workspaces/${id}/members`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: "  Research agent  ", kind: "agent" }),
+    });
+    expect(response.status).toBe(201);
+    expect(await response.json()).toEqual(member);
+    expect(write).toHaveBeenCalledWith({ kind: "user", userId: id }, id, {
+      name: "Research agent",
+      kind: "agent",
+    });
+  });
   it("requires a session before core task reads", async () => {
     vi.spyOn(core, "getSession").mockResolvedValue({
       response: null,
@@ -602,6 +630,12 @@ describe("REST adapter boundaries", () => {
       "/api/workspaces/:id/invites",
       "createWorkspaceInvite",
       { email: "invalid", role: "admin" },
+    ],
+    [
+      "POST",
+      "/api/workspaces/:id/members",
+      "createWorkspaceAgent",
+      { name: "Injected admin", kind: "agent", role: "admin" },
     ],
     [
       "POST",

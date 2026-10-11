@@ -455,6 +455,10 @@ export const workspaceCreateSchema = strictObject({
     ),
   ),
 });
+export const workspaceAgentInputSchema = strictObject({
+  name: boundedText(100),
+  kind: zodEnum(["agent"]),
+});
 export const workspaceSchema = object({
   id: idSchema,
   name: string(),
@@ -544,6 +548,7 @@ export type TaskComment = Infer<typeof taskCommentSchema>;
 export type ProjectInput = Infer<typeof projectInputSchema>;
 export type ProjectUpdate = Infer<typeof projectUpdateSchema>;
 export type WorkspaceCreate = Infer<typeof workspaceCreateSchema>;
+export type WorkspaceAgentInput = Infer<typeof workspaceAgentInputSchema>;
 export type Workspace = Infer<typeof workspaceSchema>;
 export type WorkspaceInviteInput = Infer<typeof workspaceInviteInputSchema>;
 export type WorkspaceInvite = Infer<typeof workspaceInviteSchema>;

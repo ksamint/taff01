@@ -594,6 +594,13 @@ describe("M5 permission decisions", () => {
       false,
     ],
     [
+      "guest cannot add workspace agents",
+      { ...person, role: "guest" },
+      "workspace:manage",
+      task,
+      false,
+    ],
+    [
       "agent admin cannot manage organization",
       { ...agent, role: "admin" },
       "workspace:manage",

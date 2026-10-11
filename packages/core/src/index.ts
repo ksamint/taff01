@@ -44,6 +44,8 @@ import {
   updateTaskStatusSchema,
   updateTaskWorkSchema,
   verifyPhoneOtpSchema,
+  type WorkspaceAgentInput,
+  workspaceAgentInputSchema,
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins/username";
@@ -410,6 +412,37 @@ export function createCore(options: {
       .from(members)
       .where(eq(members.workspaceId, workspaceId))
       .orderBy(members.createdAt);
+  }
+  async function createWorkspaceAgent(
+    principal: Principal,
+    workspaceId: string,
+    input: WorkspaceAgentInput,
+  ): Promise<Member> {
+    parse(idSchema, workspaceId);
+    const body = parse(workspaceAgentInputSchema, input);
+    return mutation(principal, async (tx) => {
+      await requireMember(tx, principal, workspaceId, "workspace:manage");
+      const [member] = await tx
+        .insert(members)
+        .values({
+          workspaceId,
+          name: body.name,
+          kind: "agent",
+          role: "member",
+          userId: null,
+        })
+        .onConflictDoNothing()
+        .returning();
+      if (!member) throw new CoreError("conflict", 409);
+      return {
+        id: member.id,
+        workspaceId: member.workspaceId,
+        userId: member.userId,
+        name: member.name,
+        kind: member.kind,
+        role: member.role,
+      };
+    });
   }
   async function listTasks(
     principal: Principal,
@@ -988,6 +1021,7 @@ export function createCore(options: {
     getSession,
     getMe,
     listMembers,
+    createWorkspaceAgent,
     listTasks,
     createTask,
     assignTask,

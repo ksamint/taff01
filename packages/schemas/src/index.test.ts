@@ -1,8 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { createTaskSchema, profileSchema, signInSchema } from "./index";
+import {
+  createTaskSchema,
+  profileSchema,
+  signInSchema,
+  workspaceAgentInputSchema,
+} from "./index";
 
 const id = "00000000-0000-4000-8000-000000000001";
 describe("API trust boundaries", () => {
+  it("accepts only a trimmed, bounded new agent name and agent kind", () => {
+    expect(
+      workspaceAgentInputSchema.parse({
+        name: "  Research agent  ",
+        kind: "agent",
+      }),
+    ).toEqual({ name: "Research agent", kind: "agent" });
+    for (const input of [
+      { name: "", kind: "agent" },
+      { name: " \n ", kind: "agent" },
+      { name: "a".repeat(101), kind: "agent" },
+      { name: "Person", kind: "person" },
+      { name: "Agent" },
+      { name: "Agent", kind: "agent", role: "admin" },
+      { name: "Agent", kind: "agent", userId: id },
+      { name: "Agent", kind: "agent", workspaceId: id },
+      { name: "Agent", kind: "agent", id },
+      { name: "Agent", kind: "agent", permissions: [] },
+    ])
+      expect(workspaceAgentInputSchema.safeParse(input).success).toBe(false);
+  });
   it("trims task titles, defaults worker and preserves omitted due date", () => {
     expect(
       createTaskSchema.parse({

@@ -6,10 +6,13 @@ import {
   type Locale,
   type Member,
   memberRoleInputSchema,
+  memberSchema,
   type Run,
+  type WorkspaceAgentInput,
   type WorkspaceCreate,
   type WorkspaceInvite,
   type WorkspaceInviteInput,
+  workspaceAgentInputSchema,
   workspaceCreateSchema,
   workspaceInviteAcceptSchema,
   workspaceInviteInputSchema,
@@ -124,7 +127,7 @@ export function OrganizationsView() {
       window.removeEventListener("popstate", sync);
     };
   }, []);
-  const { me, workspace, setWorkspaceId } = useWorkspace();
+  const { me, workspace, setWorkspaceId, confirmed } = useWorkspace();
   const { invitation, setInvitation } = useWorkspaceSelection();
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
@@ -144,8 +147,11 @@ export function OrganizationsView() {
         (value) => workspaceInviteSchema.parse(value),
       ),
   });
-  const [dialog, setDialog] = useState<"create" | "invite" | null>(null);
+  const [dialog, setDialog] = useState<"create" | "invite" | "agent" | null>(
+    null,
+  );
   const [name, setName] = useState("");
+  const [agentName, setAgentName] = useState("");
   const [agents, setAgents] = useState<string[]>([]);
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<WorkspaceInviteInput["role"]>("member");
@@ -181,6 +187,40 @@ export function OrganizationsView() {
       setDialog(null);
       setName("");
       setWorkspaceId(value.id);
+    },
+    onSettled: invalidate,
+  });
+  const addAgent = useMutation({
+    mutationKey: m3MutationKey,
+    mutationFn: (body: WorkspaceAgentInput) =>
+      request(`/api/workspaces/${workspace.id}/members`, {
+        method: "POST",
+        body: JSON.stringify(workspaceAgentInputSchema.parse(body)),
+      }).then(memberSchema.parse),
+    onMutate: async (body) => {
+      const snapshot = await snapshotM3(client);
+      const id = `optimistic:${crypto.randomUUID()}`;
+      client.setQueryData<Member[]>(membersKey(workspace.id), (current) => [
+        ...(current ?? []),
+        {
+          id,
+          workspaceId: workspace.id,
+          userId: null,
+          name: body.name,
+          kind: "agent",
+          role: "member",
+        },
+      ]);
+      return { id, snapshot };
+    },
+    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
+    onSuccess: (member, _, context) => {
+      if (!isCurrentSnapshot(client, context.snapshot)) return;
+      client.setQueryData<Member[]>(membersKey(workspace.id), (current) =>
+        current?.map((item) => (item.id === context.id ? member : item)),
+      );
+      setDialog(null);
+      setAgentName("");
     },
     onSettled: invalidate,
   });
@@ -299,6 +339,7 @@ export function OrganizationsView() {
     changeRole.error ??
     issue.error ??
     revoke.error ??
+    addAgent.error ??
     access.error ??
     members.error ??
     invites.error;
@@ -404,6 +445,7 @@ export function OrganizationsView() {
                 ?.filter((member) => member.kind === kind)
                 .map((member) => {
                   const name = member.name;
+                  const pending = member.id.startsWith("optimistic:");
                   const latest = runs.data
                     ?.filter((run) => run.agentId === member.id)
                     .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
@@ -427,7 +469,9 @@ export function OrganizationsView() {
                       </span>
                       <span className="team-member-copy">
                         <strong>{name}</strong>
-                        {kind === "agent" ? (
+                        {pending ? (
+                          <span>{t("adding")}</span>
+                        ) : kind === "agent" ? (
                           <TeamAgentDetails
                             member={member}
                             members={members.data ?? []}
@@ -442,13 +486,17 @@ export function OrganizationsView() {
                   );
                   return (
                     <li key={member.id} className="member-role-row">
-                      {kind === "agent" ? (
+                      {kind === "agent" && !pending ? (
                         <Link
                           className="team-agent-link"
                           href={`/agents/${member.id}`}
                         >
                           {content}
                         </Link>
+                      ) : kind === "agent" ? (
+                        <span className="team-agent-link" aria-busy="true">
+                          {content}
+                        </span>
                       ) : (
                         content
                       )}
@@ -493,6 +541,24 @@ export function OrganizationsView() {
                 >
                   <Plus size={16} aria-hidden="true" />
                   {t("organization.invite")}
+                </Button>
+              </div>
+            )}
+            {kind === "agent" && teamOnly && access.data?.canManageRoles && (
+              <div className="team-invite-row">
+                <Button
+                  type="button"
+                  disabled={busy || !confirmed || !members.data}
+                  data-testid="team-add-agent"
+                  onClick={() => {
+                    setDialog("agent");
+                    setAgentName("");
+                    setValidation(false);
+                    addAgent.reset();
+                  }}
+                >
+                  <Plus size={16} aria-hidden="true" />
+                  {t("organization.addAgent")}
                 </Button>
               </div>
             )}
@@ -605,6 +671,60 @@ export function OrganizationsView() {
             )}
             <Button disabled={busy}>
               {t(create.isPending ? "working" : "organization.create")}
+            </Button>
+          </form>
+        </SheetDialog>
+      )}
+      {dialog === "agent" && (
+        <SheetDialog
+          title={t("organization.addAgent")}
+          onClose={() => setDialog(null)}
+        >
+          <form
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              const parsed = workspaceAgentInputSchema.safeParse({
+                name: agentName,
+                kind: "agent",
+              });
+              setValidation(!parsed.success);
+              if (
+                parsed.success &&
+                confirmed &&
+                access.data?.canManageRoles &&
+                !busy
+              )
+                addAgent.mutate(parsed.data);
+            }}
+          >
+            <div className="field">
+              <Label htmlFor="agent-name">{t("organization.agentName")}</Label>
+              <Input
+                id="agent-name"
+                data-testid="agent-name"
+                required
+                maxLength={100}
+                value={agentName}
+                onChange={(event) => setAgentName(event.target.value)}
+                disabled={busy || !confirmed || !access.data?.canManageRoles}
+              />
+            </div>
+            {validation && (
+              <p role="alert" className="alert">
+                {t("errors.invalid_input")}
+              </p>
+            )}
+            {addAgent.error && (
+              <p role="alert" className="alert">
+                {t(errorKey(addAgent.error))}
+              </p>
+            )}
+            <Button
+              data-testid="agent-create"
+              disabled={busy || !confirmed || !access.data?.canManageRoles}
+            >
+              {t(addAgent.isPending ? "working" : "organization.addAgent")}
             </Button>
           </form>
         </SheetDialog>

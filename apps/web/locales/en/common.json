@@ -497,6 +497,8 @@
     "create": "Create organization",
     "name": "Organization name",
     "createHint": "You become an admin and can invite members.",
+    "addAgent": "Add agent",
+    "agentName": "Agent name",
     "agentsToCopy": "Agents to add",
     "agentsHint": "Agents get new identities and default permissions in this organization.",
     "team": "Team",
