@@ -3,19 +3,10 @@
   "measuredContexts": 288,
   "auditRows": 300,
   "localeCount": 3,
-  "themes": [
-    "light",
-    "dark"
-  ],
+  "themes": ["light", "dark"],
   "viewports": {
-    "phone": [
-      390,
-      844
-    ],
-    "desktop": [
-      1280,
-      800
-    ]
+    "phone": [390, 844],
+    "desktop": [1280, 800]
   },
   "contrastFailures": 0,
   "smallEffectivePhoneTargets": 0,
