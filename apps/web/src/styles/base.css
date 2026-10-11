@@ -99,6 +99,7 @@ select:disabled {
 .wordmark {
   display: inline-flex;
   align-items: center;
+  min-height: 44px;
   gap: var(--space-sm);
   color: var(--text);
   font-size: 15px;
