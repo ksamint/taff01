@@ -79,6 +79,7 @@ describe("private outgoing email boundary", () => {
     expect(await readFile(linked, "utf8")).toBe("original");
     await rm(path);
     await writeFile(path, "original", { mode: 0o644 });
+    await chmod(path, 0o644);
     expect(
       await deliverEmail(
         createLoggingEmailTransport(path),
