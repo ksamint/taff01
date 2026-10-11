@@ -165,7 +165,7 @@
   --text: #f3f0f1;
   --text-body: #e4e2e3;
   --text-muted: #bbc7dd;
-  --text-subtle: #8b96aa;
+  --text-subtle: var(--text-muted);
   --text-on-inverse: #0a1626;
   --accent: #a88b52;
   --accent-hover: #b89a60;
