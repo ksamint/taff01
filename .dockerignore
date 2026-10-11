@@ -8,6 +8,8 @@ dist
 test-results
 playwright-report
 lighthouse-reports
+.taff-mail
+**/.taff-mail
 .env
 .env.*
 !.env.example
