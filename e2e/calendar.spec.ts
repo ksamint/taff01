@@ -112,12 +112,7 @@ test("calendar member fetch failure explains disabled editor and Retry restores 
     calendarWallToInstant(`${date}T11:00`, me.user.tz),
   );
 });
-async function setup(
-  page: Page,
-  locale: Locale,
-  withAgent = false,
-  now = new Date(),
-) {
+async function setup(page: Page, locale: Locale, withAgent = false) {
   if (!process.env.DEMO_PASSWORD) throw new Error("DEMO_PASSWORD is required");
   await page.goto("/");
   await page
@@ -169,7 +164,7 @@ async function setup(
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(now);
+  }).format(new Date());
   return { me, workspace, date };
 }
 async function stored(page: Page, id: string) {
@@ -834,10 +829,7 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
 }, info) => {
   test.setTimeout(90000);
   const locale = info.project.name as Locale;
-  // Keep all four weekly occurrences inside the rendered month.
-  const now = new Date("2026-10-05T12:00:00Z");
-  await page.clock.setFixedTime(now);
-  const { me, workspace, date } = await setup(page, locale, false, now);
+  const { me, workspace, date } = await setup(page, locale);
   const deadline = calendarWallToInstant(
     `${offsetDay(date, 3)}T23:59:59.456`,
     me.user.tz,
@@ -989,9 +981,30 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
     .locator(".sx__month-grid-event")
     .filter({ hasText: task.title })
     .first();
+  await expect(monthEvent).toBeVisible();
+  const recurrence = await page.request.get(
+    `/api/calendar?${new URLSearchParams({
+      workspaceId: workspace.id,
+      from: calendarWallToInstant(`${date}T00:00`, me.user.tz),
+      to: calendarWallToInstant(`${offsetDay(date, 28)}T00:00`, me.user.tz),
+    })}`,
+  );
+  expect(recurrence.status()).toBe(200);
+  const occurrences = calendarViewDataSchema.parse(await recurrence.json());
+  expect(
+    occurrences.occurrences.filter((item) => item.task.id === task.id),
+  ).toHaveLength(4);
+  // A recurrence beyond the rendered month belongs in the next view.
+  const renderedDates = await page
+    .locator(".sx__month-grid-day")
+    .evaluateAll((days) => days.map((day) => day.getAttribute("data-date")));
+  const visibleCount = [0, 7, 14, 21].filter((offset) =>
+    renderedDates.includes(offsetDay(date, offset)),
+  ).length;
+  expect(visibleCount).toBeGreaterThan(0);
   await expect(
     page.locator(".sx__month-grid-event").filter({ hasText: task.title }),
-  ).toHaveCount(4);
+  ).toHaveCount(visibleCount);
   const monthScroll = page.locator(
     ".calendar-engine-month-grid .sx__view-container",
   );

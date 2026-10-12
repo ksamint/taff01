@@ -28,7 +28,7 @@ Source `58e960c` passed all 532 CI unit/integration tests. Its English Lighthous
 
 The first server gate failed with `EAI_AGAIN` because the harness attached its graph network after startup. A fresh retry harness verifies the owned Neo4j service and its network before starting the gate; the failed attempt is retained as evidence.
 
-The `f559ea2` retry passed532 unit/integration tests and all six relationship browser checks. CI Lighthouse scored98/98/98; isolated Lighthouse99/99/99 and mobile LCP552/624/620ms. Both runs exposed the existing Calendar test assumption that four weekly occurrences always fit the current month: on October12 the fourth is November2. That test now fixes its browser/fixture date to October5 while retaining all four-event, drag, cancellation, resize and navigation assertions. Application behavior is unchanged; the corrected exact source requires a fresh gate.
+The `f559ea2` retry passed532 unit/integration tests and all six relationship browser checks. CI Lighthouse scored98/98/98; isolated Lighthouse99/99/99 and mobile LCP552/624/620ms. Both runs exposed the existing Calendar test assumption that four weekly occurrences always fit the current month: on October12 the fourth is November2. A first fixed-clock retry (`456c13b`) broke Calendar setup and was rejected. The test now verifies all four recurrences over their full API range and exactly those inside the rendered month, retaining the drag, cancellation, resize and navigation assertions. Application behavior is unchanged; the corrected exact source requires a fresh gate.
 
 ## Acceptance remaining
 
