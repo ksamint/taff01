@@ -112,7 +112,12 @@ test("calendar member fetch failure explains disabled editor and Retry restores 
     calendarWallToInstant(`${date}T11:00`, me.user.tz),
   );
 });
-async function setup(page: Page, locale: Locale, withAgent = false) {
+async function setup(
+  page: Page,
+  locale: Locale,
+  withAgent = false,
+  now = new Date(),
+) {
   if (!process.env.DEMO_PASSWORD) throw new Error("DEMO_PASSWORD is required");
   await page.goto("/");
   await page
@@ -164,7 +169,7 @@ async function setup(page: Page, locale: Locale, withAgent = false) {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(new Date());
+  }).format(now);
   return { me, workspace, date };
 }
 async function stored(page: Page, id: string) {
@@ -829,7 +834,10 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
 }, info) => {
   test.setTimeout(90000);
   const locale = info.project.name as Locale;
-  const { me, workspace, date } = await setup(page, locale);
+  // Keep all four weekly occurrences inside the rendered month.
+  const now = new Date("2026-10-05T12:00:00Z");
+  await page.clock.setFixedTime(now);
+  const { me, workspace, date } = await setup(page, locale, false, now);
   const deadline = calendarWallToInstant(
     `${offsetDay(date, 3)}T23:59:59.456`,
     me.user.tz,

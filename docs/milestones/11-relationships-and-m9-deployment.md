@@ -28,6 +28,8 @@ Source `58e960c` passed all 532 CI unit/integration tests. Its English Lighthous
 
 The first server gate failed with `EAI_AGAIN` because the harness attached its graph network after startup. A fresh retry harness verifies the owned Neo4j service and its network before starting the gate; the failed attempt is retained as evidence.
 
+The `f559ea2` retry passed532 unit/integration tests and all six relationship browser checks. CI Lighthouse scored98/98/98; isolated Lighthouse99/99/99 and mobile LCP552/624/620ms. Both runs exposed the existing Calendar test assumption that four weekly occurrences always fit the current month: on October12 the fourth is November2. That test now fixes its browser/fixture date to October5 while retaining all four-event, drag, cancellation, resize and navigation assertions. Application behavior is unchanged; the corrected exact source requires a fresh gate.
+
 ## Acceptance remaining
 
 Fresh isolated PostgreSQL/Valkey/Neo4j integration, actual graph projection and three-locale screenshots, final all-nine validation with strict all-locale performance checks, exact-source feature/main CI, locked backups/build/migration/scoped API-worker-web replacement, public login/task edit/relationship view and revocation checks. Keep all neighboring services, Caddy, Valkey, PostgreSQL and Neo4j identities/start times intact. No production seed, SMS send or database replacement is authorized by the validation harness. Final source and runtime evidence will be recorded in the PR/deployment checkpoint after the checks complete.
