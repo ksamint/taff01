@@ -1,4 +1,4 @@
-# Relationships and M9 deployment — 2026-10-11
+# Relationships and M9 deployment — 2026-10-12
 
 The user requested Neo4j relationships and data visualization on ins-aj5kmjag, retained PostgreSQL on ins-nx2vm7pc as the main database, and authorized deployment of the latest M9 to taff.apuch.cn.
 
@@ -13,6 +13,14 @@ The existing Neo4j service was inspected without restart. Verified TLS uses neo4
 ## Validation before integration
 
 Core/API/worker and web typechecks pass. Focused backend/worker/API tests pass61cases; i18n/realtime tests pass11cases. Initial graph browser checks pass6cases across all locales, with inspected English/HK phone renders. An enhanced keyboard/403 retry was stopped when the local API stopped responding; these enhanced cases and corrected PostgreSQL integration tests await isolated QA. Real Neo4j tests are mandatory in CI through a separate pinned Neo4j service, not the production graph.
+
+## Isolated integration evidence
+
+Source `e093bcdabc9040f141839713a99436b688066cc3` passed 531 unit/integration tests, including real Neo4j replacement, deletion and workspace isolation, on fresh isolated PostgreSQL/Valkey/Neo4j. The only failure was a Compose assertion expecting host mappings in a particular array order; it now checks the same exact mappings after sorting, preserving the private routing assertions.
+
+The real API/worker/browser flow created a synthetic project, agent, parent task and child task. Five nodes and seven edges covered all four relationship kinds. A PostgreSQL title edit appeared through the actual Neo4j read in **295 ms**. No graph response was intercepted; a foreign account received403 and there were zero browser page errors. All six phone/desktop locale captures were inspected and retained privately. The first capture helper supplied an incomplete profile body and was corrected to preserve the required time zone. A first Neo4j harness without a network exited during startup; its preserved second attempt on the isolated QA network booted successfully. Neither production database was restarted or seeded.
+
+Visual inspection found an 11px SVG node-kind label; the source now uses the documented 12px floor, with a computed-font browser assertion. Final-source captures and all-nine validation remain required after this correction. Existing prototype baselines stay intact.
 
 ## Acceptance remaining
 

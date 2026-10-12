@@ -92,12 +92,14 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
   expect(config.services.migrate.depends_on ?? {}).toEqual({});
   for (const service of ["migrate", "api", "worker"]) {
     expect(config.services[service].environment.DATABASE_URL).toBe(database);
-    expect(config.services[service].extra_hosts).toEqual([
-      "postgres01.internal.apuch.art=10.206.103.13",
-      ...(service === "migrate"
-        ? []
-        : ["neo4j01.internal.apuch.art=10.206.103.5"]),
-    ]);
+    expect([...config.services[service].extra_hosts].sort()).toEqual(
+      [
+        "postgres01.internal.apuch.art=10.206.103.13",
+        ...(service === "migrate"
+          ? []
+          : ["neo4j01.internal.apuch.art=10.206.103.5"]),
+      ].sort(),
+    );
     expect(config.services[service].environment.NODE_EXTRA_CA_CERTS).toBe(
       "/run/secrets/postgresql-ca.crt",
     );

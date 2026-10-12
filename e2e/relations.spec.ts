@@ -112,6 +112,17 @@ test("relationships expose the graph, full text, focus, and live recovery in eac
       () => document.documentElement.scrollWidth <= window.innerWidth,
     ),
   ).toBe(true);
+  expect(
+    await page
+      .locator(".relations-node-kind")
+      .evaluateAll((nodes) =>
+        Math.min(
+          ...nodes.map((node) =>
+            Number.parseFloat(getComputedStyle(node).fontSize),
+          ),
+        ),
+      ),
+  ).toBeGreaterThanOrEqual(12);
   await page.screenshot({
     path: info.outputPath(`relations-${locale}.png`),
     fullPage: true,
