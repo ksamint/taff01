@@ -22,6 +22,12 @@ The real API/worker/browser flow created a synthetic project, agent, parent task
 
 Visual inspection found an 11px SVG node-kind label; the source now uses the documented 12px floor, with a computed-font browser assertion. Final-source captures and all-nine validation remain required after this correction. Existing prototype baselines stay intact.
 
+## Final-source retry
+
+Source `58e960c` passed all 532 CI unit/integration tests. Its English Lighthouse score was 89 against the unchanged minimum of 90 (CN95/HK96); English LCP was 1458ms and total blocking time436ms. Graph schemas now use their explicit subpath instead of loading through the general schema barrel. The isolated CI Neo4j service stops after its mandatory integration tests, before frontend performance probes, matching the dedicated production topology. These changes require fresh acceptance.
+
+The first server gate failed with `EAI_AGAIN` because the harness attached its graph network after startup. A fresh retry harness verifies the owned Neo4j service and its network before starting the gate; the failed attempt is retained as evidence.
+
 ## Acceptance remaining
 
 Fresh isolated PostgreSQL/Valkey/Neo4j integration, actual graph projection and three-locale screenshots, final all-nine validation with strict all-locale performance checks, exact-source feature/main CI, locked backups/build/migration/scoped API-worker-web replacement, public login/task edit/relationship view and revocation checks. Keep all neighboring services, Caddy, Valkey, PostgreSQL and Neo4j identities/start times intact. No production seed, SMS send or database replacement is authorized by the validation harness. Final source and runtime evidence will be recorded in the PR/deployment checkpoint after the checks complete.

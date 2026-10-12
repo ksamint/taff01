@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { connectDatabase, members, tasks } from "@taff/db";
-import { type Task, workspaceGraphSchema } from "@taff/schemas";
+import type { Task } from "@taff/schemas";
+import { workspaceGraphSchema } from "@taff/schemas/graph";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";

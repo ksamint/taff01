@@ -4,7 +4,7 @@ import {
   type GraphEdge,
   type GraphNode,
   workspaceGraphSchema,
-} from "@taff/schemas";
+} from "@taff/schemas/graph";
 import neo4j, { type ManagedTransaction } from "neo4j-driver";
 import { z } from "zod";
 

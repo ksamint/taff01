@@ -6,12 +6,12 @@ import {
   tasks,
   workspaces,
 } from "@taff/db";
+import { idSchema } from "@taff/schemas";
 import {
   GRAPH_NODE_LIMIT,
   type GraphEdge,
-  idSchema,
   type WorkspaceGraph,
-} from "@taff/schemas";
+} from "@taff/schemas/graph";
 import { eq, gt, sql } from "drizzle-orm";
 import {
   type GraphSnapshot,

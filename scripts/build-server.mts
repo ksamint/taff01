@@ -12,6 +12,7 @@ const out = "dist/server";
 await rm(out, { recursive: true, force: true });
 await mkdir(out, { recursive: true });
 const alias = {
+  "@taff/schemas/graph": "./packages/schemas/src/graph-read.ts",
   "@taff/core": "./packages/core/src/index.ts",
   "@taff/db/schema": "./packages/db/src/schema.ts",
   "@taff/db": "./packages/db/src/index.ts",

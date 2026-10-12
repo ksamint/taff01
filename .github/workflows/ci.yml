@@ -76,6 +76,9 @@ jobs:
       - run: pnpm db:migrate
       - run: pnpm db:seed
       - run: pnpm test
+      - name: Stop isolated graph service after its integration tests
+        # Production Neo4j runs on a dedicated host; keep frontend probes quiet.
+        run: docker stop "${{ job.services.neo4j.id }}"
       - run: pnpm build
       - run: pnpm build:server
       - run: pnpm perf:budget
