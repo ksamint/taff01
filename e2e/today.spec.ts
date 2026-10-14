@@ -275,6 +275,11 @@ test("failed optimistic creation and assignment restore the previous list", asyn
         canManageProjects: true,
         canInvite: true,
         canManageRoles: true,
+        canEditPlan: true,
+        canReadFinance: true,
+        canReadCrm: true,
+        canManageCrm: true,
+        canArchiveCrm: true,
       },
     }),
   );
