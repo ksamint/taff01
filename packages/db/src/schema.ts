@@ -1301,3 +1301,138 @@ export const suggestions = pgTable(
     check("suggestions_version", sql`${t.version} > 0`),
   ],
 );
+/**
+ * Mind map (M18, D8: one per workspace). Nodes and sources are archived,
+ * never deleted; edges and node-source links may be removed (audited).
+ */
+export const mindNodes = pgTable(
+  "mind_nodes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    title: text("title").notNull(),
+    /** Ring from the centre outwards. */
+    layer: integer("layer").notNull(),
+    /** Degrees clockwise from the top, [0, 360). */
+    angle: numeric("angle", { precision: 5, scale: 2 }).notNull(),
+    strength: integer("strength").default(3).notNull(),
+    momentum: integer("momentum").default(0).notNull(),
+    /** A person's note: evidence and reasoning, never model output. */
+    note: text("note").default("").notNull(),
+    /** The validation task created from this node. */
+    taskId: uuid("task_id"),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("mind_nodes_workspace_id_unique").on(t.workspaceId, t.id),
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "mind_nodes_task_fk",
+    }),
+    index("mind_nodes_workspace_idx").on(t.workspaceId, t.layer),
+    check("mind_nodes_title", sql`length(btrim(${t.title})) BETWEEN 1 AND 200`),
+    check("mind_nodes_layer", sql`${t.layer} BETWEEN 0 AND 9`),
+    check("mind_nodes_angle", sql`${t.angle} >= 0 AND ${t.angle} < 360`),
+    check("mind_nodes_strength", sql`${t.strength} BETWEEN 1 AND 5`),
+    check("mind_nodes_momentum", sql`${t.momentum} BETWEEN -2 AND 2`),
+    check("mind_nodes_note", sql`length(${t.note}) <= 4000`),
+    check("mind_nodes_version", sql`${t.version} > 0`),
+  ],
+);
+export const mindEdges = pgTable(
+  "mind_edges",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    fromNodeId: uuid("from_node_id").notNull(),
+    toNodeId: uuid("to_node_id").notNull(),
+    kind: text("kind").default("relates").notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("mind_edges_workspace_id_unique").on(t.workspaceId, t.id),
+    unique("mind_edges_pair_unique").on(
+      t.workspaceId,
+      t.fromNodeId,
+      t.toNodeId,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.fromNodeId],
+      foreignColumns: [mindNodes.workspaceId, mindNodes.id],
+      name: "mind_edges_from_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.toNodeId],
+      foreignColumns: [mindNodes.workspaceId, mindNodes.id],
+      name: "mind_edges_to_fk",
+    }).onDelete("cascade"),
+    index("mind_edges_to_idx").on(t.workspaceId, t.toNodeId),
+    check("mind_edges_self", sql`${t.fromNodeId} <> ${t.toNodeId}`),
+    check(
+      "mind_edges_kind",
+      sql`${t.kind} IN ('relates','supports','contradicts')`,
+    ),
+  ],
+);
+export const mindSources = pgTable(
+  "mind_sources",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    title: text("title").notNull(),
+    url: text("url"),
+    note: text("note").default("").notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("mind_sources_workspace_id_unique").on(t.workspaceId, t.id),
+    check(
+      "mind_sources_title",
+      sql`length(btrim(${t.title})) BETWEEN 1 AND 300`,
+    ),
+    check(
+      "mind_sources_url",
+      sql`${t.url} IS NULL OR (${t.url} ~ '^https?://' AND length(${t.url}) <= 2000)`,
+    ),
+    check("mind_sources_note", sql`length(${t.note}) <= 4000`),
+    check("mind_sources_version", sql`${t.version} > 0`),
+  ],
+);
+export const mindNodeSources = pgTable(
+  "mind_node_sources",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    nodeId: uuid("node_id").notNull(),
+    sourceId: uuid("source_id").notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("mind_node_sources_workspace_id_unique").on(t.workspaceId, t.id),
+    unique("mind_node_sources_link_unique").on(
+      t.workspaceId,
+      t.nodeId,
+      t.sourceId,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.nodeId],
+      foreignColumns: [mindNodes.workspaceId, mindNodes.id],
+      name: "mind_node_sources_node_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.sourceId],
+      foreignColumns: [mindSources.workspaceId, mindSources.id],
+      name: "mind_node_sources_source_fk",
+    }).onDelete("cascade"),
+    index("mind_node_sources_source_idx").on(t.workspaceId, t.sourceId),
+  ],
+);

@@ -169,6 +169,22 @@ describe("workspace realtime lifecycle", () => {
         expect(client.getQueryState(key)?.isInvalidated).toBe(true);
     }
   });
+  it("invalidates the mind map on a node, edge or source change", () => {
+    const key = ["mind-map", workspaceId, "exclude"];
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    for (const action of [
+      "mind_nodes.update",
+      "mind_edges.delete",
+      "mind_sources.insert",
+      "mind_node_sources.delete",
+    ]) {
+      client.setQueryData(key, {});
+      socket.message({ ...event, action });
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    }
+  });
   it("defers change refetches until a pending optimistic mutation settles", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
     cleanup = connectWorkspace(client, workspaceId, userId);

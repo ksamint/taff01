@@ -365,3 +365,143 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
     expect(set).toHaveBeenCalledWith(person, id, { enabled: true });
   });
 });
+
+describe("mind map REST", () => {
+  const send = (path: string, method: string, body?: unknown) =>
+    app.request(path, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+    });
+  it("requires a session", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const read = vi.spyOn(core, "getMindMap");
+    expect((await app.request(`/api/workspaces/${id}/mind`)).status).toBe(401);
+    expect(read).not.toHaveBeenCalled();
+  });
+  it("reads the map and validates node input before core", async () => {
+    signedIn();
+    const read = vi.spyOn(core, "getMindMap").mockResolvedValue({} as never);
+    await app.request(`/api/workspaces/${id}/mind?archived=include`);
+    expect(read).toHaveBeenCalledWith(person, id, { archived: "include" });
+    expect(
+      (await app.request(`/api/workspaces/${id}/mind?archived=all`)).status,
+    ).toBe(400);
+    const create = vi
+      .spyOn(core, "createMindNode")
+      .mockResolvedValue({} as never);
+    for (const body of [
+      { title: "x", layer: 0, angle: 400 },
+      { title: "x", layer: -1, angle: 0 },
+      { title: "x", layer: 0, angle: 0, strength: 6 },
+      { title: "x", layer: 0, angle: 0, note: "a".repeat(4001) },
+      { title: "x", layer: 0, angle: 0, ai: true },
+    ])
+      expect(
+        (await send(`/api/workspaces/${id}/mind/nodes`, "POST", body)).status,
+      ).toBe(400);
+    expect(create).not.toHaveBeenCalled();
+    const good = { title: "Belonging", layer: 0, angle: 315, momentum: 1 };
+    expect(
+      (await send(`/api/workspaces/${id}/mind/nodes`, "POST", good)).status,
+    ).toBe(201);
+    expect(create).toHaveBeenCalledWith(person, id, good);
+    const update = vi
+      .spyOn(core, "updateMindNode")
+      .mockRejectedValue(new CoreError("forbidden", 403));
+    expect(
+      (await send(`/api/mind/nodes/${id}`, "PATCH", { version: 1 })).status,
+    ).toBe(400);
+    expect(
+      (
+        await send(`/api/mind/nodes/${id}`, "PATCH", {
+          version: 1,
+          archived: true,
+        })
+      ).status,
+    ).toBe(403);
+    expect(update).toHaveBeenCalledWith(person, id, {
+      version: 1,
+      archived: true,
+    });
+  });
+  it("routes edges, sources, links and the validation task", async () => {
+    signedIn();
+    const edge = vi
+      .spyOn(core, "createMindEdge")
+      .mockResolvedValue({} as never);
+    expect(
+      (
+        await send(`/api/workspaces/${id}/mind/edges`, "POST", {
+          fromNodeId: id,
+          toNodeId: id,
+        })
+      ).status,
+    ).toBe(400);
+    await send(`/api/workspaces/${id}/mind/edges`, "POST", {
+      fromNodeId: id,
+      toNodeId: other,
+      kind: "supports",
+    });
+    expect(edge).toHaveBeenCalledWith(person, id, {
+      fromNodeId: id,
+      toNodeId: other,
+      kind: "supports",
+    });
+    const remove = vi
+      .spyOn(core, "removeMindEdge")
+      .mockResolvedValue({} as never);
+    await send(`/api/mind/edges/${other}`, "DELETE");
+    expect(remove).toHaveBeenCalledWith(person, other);
+    const source = vi
+      .spyOn(core, "createMindSource")
+      .mockResolvedValue({} as never);
+    expect(
+      (
+        await send(`/api/workspaces/${id}/mind/sources`, "POST", {
+          title: "x",
+          url: "javascript:alert(1)",
+        })
+      ).status,
+    ).toBe(400);
+    expect(source).not.toHaveBeenCalled();
+    const link = vi
+      .spyOn(core, "linkMindSource")
+      .mockResolvedValue({} as never);
+    const unlink = vi
+      .spyOn(core, "unlinkMindSource")
+      .mockResolvedValue({} as never);
+    expect(
+      (await send(`/api/mind/nodes/${id}/sources/${other}`, "PUT")).status,
+    ).toBe(201);
+    await send(`/api/mind/nodes/${id}/sources/${other}`, "DELETE");
+    expect(link).toHaveBeenCalledWith(person, id, other);
+    expect(unlink).toHaveBeenCalledWith(person, id, other);
+    const task = vi
+      .spyOn(core, "createValidationTask")
+      .mockResolvedValue({} as never);
+    expect(
+      (
+        await send(`/api/mind/nodes/${id}/task`, "POST", {
+          version: 1,
+          dueDate: "2026-02-30",
+        })
+      ).status,
+    ).toBe(400);
+    expect(
+      (
+        await send(`/api/mind/nodes/${id}/task`, "POST", {
+          version: 1,
+          dueDate: "2026-10-20",
+        })
+      ).status,
+    ).toBe(201);
+    expect(task).toHaveBeenCalledWith(person, id, {
+      version: 1,
+      dueDate: "2026-10-20",
+    });
+  });
+});

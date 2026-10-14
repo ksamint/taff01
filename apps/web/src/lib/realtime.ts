@@ -44,6 +44,8 @@ const FAMILIES = [
   "brief",
   "suggestions",
   "workspace-ai",
+  // Mind map (M18), keyed by workspace: ["mind-map", workspaceId, archived].
+  "mind-map",
 ];
 
 export function connectWorkspace(

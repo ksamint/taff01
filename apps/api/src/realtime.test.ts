@@ -333,7 +333,14 @@ describe("authenticated realtime boundaries", () => {
     const warmDana = message(dana);
     await deliver(change());
     await Promise.all([warmAlice, warmDana]);
-    for (const action of ["suggestions.insert", "suggestions.update"]) {
+    for (const action of [
+      "suggestions.insert",
+      "suggestions.update",
+      "mind_nodes.insert",
+      "mind_edges.delete",
+      "mind_sources.update",
+      "mind_node_sources.insert",
+    ]) {
       const toAlice = message(alice);
       const toDana = message(dana);
       await deliver(change({ action }));

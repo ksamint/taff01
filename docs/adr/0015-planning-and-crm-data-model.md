@@ -127,3 +127,57 @@ constraint is forbidden in production migrations. Phone and email need the separ
   cannot probe hidden details.
 - **Realtime.** `project_payments` events reach admins only (D7); CRM table
   events skip guests.
+
+## Implementation notes (M16 relations graph)
+
+- **Read model.** `relationGraph()` (`packages/core/src/relation-graph.ts`)
+  is pure; `GET /api/workspaces/:id/graph?projectId=&layers=` and the MCP
+  tool `relations.get` call it through `workspace:read`. The workspace is the
+  root node; the other kinds are project, task, person, agent, company and
+  contact.
+- **Edges and layers (D8).** `contains` (workspace → project → top-level task
+  → subtask; a task without a project hangs off the workspace) and
+  `client_of` (CRM company → project, D9) are the org layer; `owns`,
+  `works_on` and `supervises` the people layer; `depends_on` (successor →
+  predecessor, task-to-task only — milestones stay on the timeline) the
+  dependencies layer; `stakeholder_of` (contact → project or task) and
+  `contact_of` (contact → employer) the CRM layer. There is no value-chain
+  layer and no `value_nodes` table.
+- **Scope.** Without `projectId` the graph covers active projects and tasks
+  without a project; archived projects appear only when asked for by id. A
+  dependency into the scope brings its other end along as a neighbour.
+  People appear only through an edge.
+- **CRM.** Company and contact nodes need `contact:read` (guests and agents
+  without `crm.read` get `crmVisible: false` and none). Phone and email are
+  never selected, whoever reads. Archived companies and contacts are left
+  out.
+- **Order.** Nodes sort by kind, then name (tasks by number), then id; edges
+  by layer, kind, then keys — the same data always gives the same JSON, so a
+  deterministic client layout can seed from it.
+
+## Implementation notes (M18 mind map)
+
+- **Scope (D8).** One map per workspace. Migration `0025_m18_mind_map` is
+  additive: `mind_nodes` (layer 0–9, angle `numeric(5,2)` in [0, 360),
+  strength 1–5, momentum −2..2, note, nullable `task_id` composite foreign
+  key), `mind_edges` (cascading composite foreign keys, one row per pair,
+  `relates|supports|contradicts`), `mind_sources` (title, optional http(s)
+  URL, note) and `mind_node_sources`. Each has `id uuid`, `workspace_id`,
+  `unique(workspace_id, id)` and the `_audit` trigger.
+- **Removal.** Nodes and sources are archived (`PATCH {archived}`), never
+  deleted; archive and restore need `mind:archive` (admins). Edges and
+  node-source links are removed like the other link rows: the delete is
+  audited and the API returns the removed row for undo. An edge into an
+  archived node is hidden and returns with the node.
+- **Permissions.** Read is `workspace:read` (guests included); writes are
+  `mind:write`, non-guest people only. Agents get no mind path and there is
+  no `mind.get` MCP tool yet.
+- **Validation task.** `POST /api/mind/nodes/:id/task {version, dueDate,
+  title?, projectId?}` creates a real task through the normal create path,
+  owned by the signed-in person, due at 23:59 on `dueDate` in their saved
+  zone, with the node's note as description, and links it — one
+  transaction; a node links one task (409 after).
+- **Notes, not AI.** The prototype's "AI insight" text is seeded as each
+  node's `note`, with its research sources, for Northwind only and once
+  (`prototype-mind.ts`); nothing is labelled as model output (plan §2.4
+  item 12, ADR 0016).

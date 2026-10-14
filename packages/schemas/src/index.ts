@@ -61,6 +61,7 @@ export * from "./crm";
 export * from "./email-verification";
 export * from "./graph";
 export * from "./inbox-read";
+export * from "./mind";
 export * from "./notification-preferences";
 export * from "./plan";
 export * from "./project-read";

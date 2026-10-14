@@ -19,7 +19,8 @@
     "./crm": "./src/crm.ts",
     "./plan": "./src/plan.ts",
     "./graph": "./src/graph.ts",
-    "./assistant": "./src/assistant.ts"
+    "./assistant": "./src/assistant.ts",
+    "./mind": "./src/mind.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

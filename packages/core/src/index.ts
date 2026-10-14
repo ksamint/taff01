@@ -78,6 +78,7 @@ import type { AiProvider } from "./ai-provider";
 import { createAssistantOperations } from "./assistant";
 import { createCalendarOperations } from "./calendar";
 import { createCrmOperations } from "./crm";
+import { createMindOperations } from "./mind";
 import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
@@ -1027,6 +1028,13 @@ export function createCore(options: {
     insertTask,
     applyTaskPlan: timeline.applyTaskPlan,
   });
+  const mind = createMindOperations({
+    db,
+    mutation,
+    requireMember,
+    zoneOf: timeline.zoneOf,
+    insertTask,
+  });
   const assistant = createAssistantOperations({
     db,
     mutation,
@@ -1074,6 +1082,7 @@ export function createCore(options: {
     ...relations.operations,
     ...suggestionOperations.operations,
     ...assistant.operations,
+    ...mind.operations,
     ...runOperations,
     getTodayBootstrap,
     auth,
