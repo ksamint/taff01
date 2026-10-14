@@ -2,33 +2,29 @@
 import "../styles/agent-profile-parity.css";
 
 import {
-  type AgentPermissionInput,
   type AgentProfile,
-  type AgentProfileInput,
-  agentPermissionInputSchema,
   agentProfileInputSchema,
   capabilitySchema,
-  type RequestGrant,
   type ReviewPolicy,
   requestGrantSchema,
   taskReference,
 } from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import { ArrowLeft, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { historyActor, historyMessage } from "../lib/agent-history";
-import { errorKey, request } from "../lib/api";
+import { errorKey } from "../lib/api";
 import { isLocale } from "../lib/i18n";
-import { agentKey, invalidateM3, useAgent } from "../lib/m3-queries";
-import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
+import { useAgent } from "../lib/m3-queries";
+import {
+  useRequestGrant,
+  useSaveAgentProfile,
+  useSetAgentPermission,
+} from "../lib/mutations/agents";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useTasks } from "../lib/queries";
-import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { GrantActions } from "./grant-actions";
 import { Button } from "./ui/button";
@@ -55,7 +51,6 @@ export function AgentProfileView({ agentId }: { agentId: string }) {
 function AgentEditor({ data }: { data: AgentProfile }) {
   const { t, i18n } = useTranslation();
   const { me, workspace } = useWorkspace();
-  const client = useQueryClient();
   const members = useMembers(data.member.workspaceId);
   const tasks = useTasks(data.member.workspaceId);
   const [supervisorId, setSupervisorId] = useState(data.supervisorId ?? "");
@@ -89,86 +84,10 @@ function AgentEditor({ data }: { data: AgentProfile }) {
     data.maxDurationMs,
     data.maxCostMicros,
   ]);
-  const save = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: AgentProfileInput) =>
-      request(`/api/agents/${data.member.id}`, {
-        method: "PATCH",
-        body: JSON.stringify(agentProfileInputSchema.parse(body)),
-      }),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      client.setQueryData<AgentProfile>(agentKey(data.member.id), (current) =>
-        current ? { ...current, ...body } : current,
-      );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: () => invalidateM3(client),
-  });
-  const permission = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: AgentPermissionInput) =>
-      request(`/api/agents/${data.member.id}/permissions`, {
-        method: "PUT",
-        body: JSON.stringify(agentPermissionInputSchema.parse(body)),
-      }),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      client.setQueryData<AgentProfile>(agentKey(data.member.id), (current) =>
-        current
-          ? {
-              ...current,
-              permissions: current.permissions.map((item) =>
-                item.capability === body.capability ? body : item,
-              ),
-            }
-          : current,
-      );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: () => invalidateM3(client),
-  });
-  const grant = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: RequestGrant) =>
-      request(`/api/agents/${data.member.id}/grants`, {
-        method: "POST",
-        body: JSON.stringify(requestGrantSchema.parse(body)),
-      }),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      const now = new Date().toISOString();
-      client.setQueryData<AgentProfile>(agentKey(data.member.id), (current) =>
-        current
-          ? {
-              ...current,
-              grants: [
-                {
-                  id: `optimistic:${crypto.randomUUID()}`,
-                  workspaceId: data.member.workspaceId,
-                  agentId: data.member.id,
-                  capability: body.capability,
-                  taskId: body.taskId ?? null,
-                  runId: body.runId ?? null,
-                  reason: body.reason,
-                  status: "pending",
-                  expiresAt: null,
-                  decidedBy: null,
-                  createdAt: now,
-                  updatedAt: now,
-                },
-                ...current.grants,
-              ],
-            }
-          : current,
-      );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSuccess: () => setReason(""),
-    onSettled: () => invalidateM3(client),
+  const save = useSaveAgentProfile(data.member.id);
+  const permission = useSetAgentPermission(data.member.id);
+  const grant = useRequestGrant(data.member, {
+    onRequested: () => setReason(""),
   });
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const presentationLocale = isLocale(locale) ? locale : me.user.locale;

@@ -1,12 +1,7 @@
 "use client";
 
 import type { Locale, Me } from "@taff/schemas";
-import { profileSchema } from "@taff/schemas/base";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 import {
   CalendarDays,
   Inbox,
@@ -28,20 +23,15 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
+import { errorKey } from "../lib/api";
 import {
   browserTimeZone,
   LAST_WORKSPACE_KEY,
   readPreference,
   savePreference,
 } from "../lib/i18n";
-import { m3MutationKey } from "../lib/optimistic-m3";
-import { meKey, useInbox, useMeQuery } from "../lib/queries";
-import {
-  isCurrentSnapshot,
-  restoreQueries,
-  snapshotQueries,
-} from "../lib/query-snapshot";
+import { useSignOut, useUpdateProfile } from "../lib/mutations/session";
+import { useInbox, useMeQuery } from "../lib/queries";
 import { connectWorkspace } from "../lib/realtime";
 import {
   currentSession,
@@ -265,49 +255,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       savePreference(me.data.user.locale);
     }
   }, [me.data?.user.locale, i18n, confirmed]);
-  const profile = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: ({ locale, tz }: { locale: Locale; tz: string }) =>
-      request("/api/profile", {
-        method: "PATCH",
-        body: JSON.stringify(profileSchema.parse({ locale, tz })),
-      }),
-    onMutate: async ({ locale, tz }) => {
-      const snapshot = await snapshotQueries(client, [meKey]);
-      const previous = i18n.language;
-      client.setQueryData<Me | null>(meKey, (current) =>
-        current
-          ? { ...current, user: { ...current.user, locale, tz } }
-          : current,
-      );
-      setSessionError(null);
-      void i18n.changeLanguage(locale);
-      return { previous, snapshot };
-    },
-    onSuccess: (_, { locale, tz }, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      savePreference(locale);
-      client.setQueryData<Me | null>(meKey, (current) =>
-        current
-          ? { ...current, user: { ...current.user, locale, tz } }
-          : current,
-      );
-    },
-    onError: (_, __, context) => {
-      if (!isCurrentSnapshot(client, context?.snapshot)) return;
-      restoreQueries(client, context?.snapshot);
-      void i18n.changeLanguage(context?.previous ?? "en");
-      setSessionError("errors.profile");
-    },
-    onSettled: () => client.invalidateQueries({ queryKey: meKey }),
+  const profile = useUpdateProfile({
+    i18n,
+    onStart: () => setSessionError(null),
+    onFailure: setSessionError,
   });
-  const signOut = useMutation({
-    mutationFn: () =>
-      request("/api/auth/sign-out", { method: "POST", body: "{}" }),
-    onSuccess: () => {
-      synchronizeSession(client, null);
-      client.clear();
-      client.setQueryData(meKey, null);
+  const signOut = useSignOut({
+    onSignedOut: () => {
       setWorkspaceId("");
       // A pending invitation belongs to the account that opened it.
       setInvitation(null);
@@ -315,7 +269,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       setSessionError(null);
       router.replace("/");
     },
-    onError: (error) => setSessionError(errorKey(error)),
+    onFailure: setSessionError,
   });
   const setLocale = (locale: Locale) => {
     if (me.data) profile.mutate({ locale, tz: me.data.user.tz });

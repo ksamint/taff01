@@ -1,28 +1,20 @@
 "use client";
 import { type Locale, taskReference } from "@taff/schemas";
 
-import {
-  type AssignTask,
-  assignTaskSchema,
-  type Task,
-  taskSchema,
-} from "@taff/schemas/base";
+import type { Task } from "@taff/schemas/base";
 import {
   type CalendarOccurrence,
   calendarCivilTime,
   calendarWallToInstant,
 } from "@taff/schemas/calendar-read";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 import { Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
-import { m3MutationKey, patchTask, snapshotM3 } from "../lib/optimistic-m3";
+import { errorKey } from "../lib/api";
+import { useAssignTodayTask } from "../lib/mutations/today";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import {
   useCalendar,
   useMembers,
@@ -30,7 +22,6 @@ import {
   useTasks,
   useWorkspaceAccess,
 } from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { currentSession } from "../lib/session-cache";
 import { todayTasks } from "../lib/today";
 import { useWorkspace } from "./app-shell";
@@ -82,41 +73,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
     };
   }, [localDate, me.user.tz]);
   const calendar = useCalendar(workspace.id, range.from, range.to);
-  const mutation = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async (input: { id: string; body: AssignTask }) =>
-      taskSchema.parse(
-        await request(`/api/tasks/${input.id}/assignment`, {
-          method: "PATCH",
-          body: JSON.stringify(assignTaskSchema.parse(input.body)),
-        }),
-      ),
-    onMutate: async (input) => {
-      const snapshot = await snapshotM3(client);
-      patchTask(client, input.id, { workerId: input.body.workerId });
-      return { snapshot };
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (task, _, context) => {
-      if (isCurrentSnapshot(client, context.snapshot))
-        patchTask(client, task.id, task);
-    },
-    onSettled: () => {
-      if (client.isMutating({ mutationKey: m3MutationKey }) > 1) return;
-      return client.invalidateQueries({
-        predicate: ({ queryKey }) =>
-          [
-            "tasks",
-            "task",
-            "calendar",
-            "task-calendar",
-            "task-access",
-            "review",
-            "search",
-          ].includes(String(queryKey[0])),
-      });
-    },
-  });
+  const mutation = useAssignTodayTask();
   const visibleTasks = todayTasks(
     (tasks.data ?? []).filter(
       (task) => task.dueAt || !task.labels.includes("meeting"),

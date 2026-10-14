@@ -1,43 +1,21 @@
 "use client";
 import "../styles/inbox.css";
 
-import {
-  type Inbox,
-  type InboxItem,
-  type InboxItemInput,
-  inboxItemInputSchema,
-  type Locale,
-  taskReference,
-} from "@taff/schemas";
+import { type InboxItem, type Locale, taskReference } from "@taff/schemas";
 import {
   calendarCivilTime,
   calendarWallToInstant,
 } from "@taff/schemas/calendar-read";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import { Bell, Check, Eye, EyeOff, Search, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { type MouseEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
-import { invalidateM3 } from "../lib/m3-queries";
-import {
-  inboxFromItems,
-  m3MutationKey,
-  snapshotM3,
-} from "../lib/optimistic-m3";
-import {
-  inboxKey,
-  useInbox,
-  useMembers,
-  useRuns,
-  useTasks,
-} from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
+import { errorKey } from "../lib/api";
+import { useUpdateInboxItem } from "../lib/mutations/inbox";
+import { m3MutationKey } from "../lib/optimistic-m3";
+import { useInbox, useMembers, useRuns, useTasks } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -48,12 +26,6 @@ const TaskDetailView = dynamic(
 );
 type Tab = "all" | "reviews" | "blockers";
 type Selection = { workspaceId: string; taskId: string };
-type Update = {
-  id: string;
-  body: InboxItemInput;
-  snooze?: InboxItem;
-  undo?: boolean;
-};
 
 // Prototype phone 280–322 and desktop 1001–1020, sharing actual task/review panes.
 export function InboxView() {
@@ -63,7 +35,6 @@ export function InboxView() {
   const tasks = useTasks(workspace.id);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
-  const client = useQueryClient();
   const pending = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const [markingAll, setMarkingAll] = useState(false);
   const busy = pending || markingAll;
@@ -79,46 +50,9 @@ export function InboxView() {
     media.addEventListener("change", sync);
     return () => media.removeEventListener("change", sync);
   }, []);
-  const update = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: ({ id, body }: Update) =>
-      request(`/api/inbox/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(inboxItemInputSchema.parse(body)),
-      }),
-    onMutate: async ({ id, body, undo }) => {
-      const snapshot = await snapshotM3(client);
-      client.setQueryData<Inbox>(inboxKey(workspace.id), (current) => {
-        if (!current) return current;
-        const items =
-          undo && activeSnoozed && !current.items.some((item) => item.id === id)
-            ? [activeSnoozed, ...current.items]
-            : current.items;
-        return inboxFromItems(
-          items.map((item) =>
-            item.id !== id
-              ? item
-              : {
-                  ...item,
-                  ...(body.read === undefined
-                    ? {}
-                    : { readAt: body.read ? new Date().toISOString() : null }),
-                  ...(body.snoozedUntil === undefined
-                    ? {}
-                    : { snoozedUntil: body.snoozedUntil }),
-                },
-          ),
-        );
-      });
-      return snapshot;
-    },
-    onSuccess: (_, input, snapshot) => {
-      if (!isCurrentSnapshot(client, snapshot)) return;
-      if (input.snooze) setSnoozed(input.snooze);
-      else if (input.undo) setSnoozed(null);
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: () => invalidateM3(client),
+  const update = useUpdateInboxItem(workspace.id, {
+    snoozed: activeSnoozed,
+    onSnoozedChange: setSnoozed,
   });
   const groups = (inbox.data?.groups ?? [])
     .map((group) => ({

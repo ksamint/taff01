@@ -2,35 +2,28 @@
 import "../styles/mcp-parity.css";
 
 import {
-  type AgentToken,
   agentTokenListSchema,
-  type CreateAgentToken,
   createAgentTokenSchema,
   type IssuedAgentToken,
-  issuedAgentTokenSchema,
   type Locale,
   mcpCallListSchema,
   type Scope,
   scopeSchema,
 } from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, ChevronDown, Copy, Cpu } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError, errorKey, request } from "../lib/api";
+import {
+  agentTokensKey,
+  mcpCallsKey,
+  useCreateAgentToken,
+  useRevokeAgentToken,
+} from "../lib/mutations/mcp";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
-import {
-  isCurrentSnapshot,
-  restoreQueries,
-  snapshotQueries,
-} from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -63,11 +56,10 @@ const SCOPES = scopeSchema.options as Scope[];
 export function McpView() {
   const { me, workspace } = useWorkspace();
   const { t, i18n } = useTranslation();
-  const client = useQueryClient();
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const members = useMembers(workspace.id);
-  const tokensKey = ["agent-tokens", workspace.id];
-  const callsKey = ["mcp-calls", workspace.id];
+  const tokensKey = agentTokensKey(workspace.id);
+  const callsKey = mcpCallsKey(workspace.id);
   const tokens = useQuery({
     queryKey: tokensKey,
     queryFn: async () =>
@@ -94,65 +86,15 @@ export function McpView() {
   const [scopes, setScopes] = useState<Scope[]>(["tasks:read"]);
   const [validationError, setValidationError] = useState(false);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
-  const create = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async (body: CreateAgentToken) =>
-      issuedAgentTokenSchema.parse(
-        await request("/api/agent-tokens", {
-          method: "POST",
-          body: JSON.stringify(body),
-        }),
-      ),
-    onMutate: async (body) => {
-      const snapshot = await snapshotQueries(client, [tokensKey]);
-      const id = `optimistic:${crypto.randomUUID()}`;
-      client.setQueryData<AgentToken[]>(tokensKey, (current = []) => [
-        {
-          ...body,
-          id,
-          createdBy: workspace.memberId,
-          prefix: "",
-          createdAt: new Date().toISOString(),
-          revokedAt: null,
-          lastUsedAt: null,
-        },
-        ...current,
-      ]);
-      return { snapshot, id };
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (token, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      const { token: _secret, ...metadata } = token;
-      client.setQueryData<AgentToken[]>(tokensKey, (current) =>
-        current?.map((item) => (item.id === context.id ? metadata : item)),
-      );
+  const create = useCreateAgentToken(workspace, {
+    onIssued: (token) => {
       setIssued(token);
       setCopied(null);
       setName("");
     },
-    onSettled: () => client.invalidateQueries({ queryKey: tokensKey }),
   });
-  const revoke = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async (id: string) =>
-      request<AgentToken>(`/api/agent-tokens/${id}`, { method: "DELETE" }),
-    onMutate: async (id) => {
-      const snapshot = await snapshotQueries(client, [tokensKey]);
-      client.setQueryData<AgentToken[]>(tokensKey, (current = []) =>
-        current.map((token) =>
-          token.id === id
-            ? { ...token, revokedAt: new Date().toISOString() }
-            : token,
-        ),
-      );
-      setConfirming(null);
-      return snapshot;
-    },
-    onError: (_, __, context) => {
-      restoreQueries(client, context);
-    },
-    onSettled: () => client.invalidateQueries({ queryKey: tokensKey }),
+  const revoke = useRevokeAgentToken(workspace.id, {
+    onStart: () => setConfirming(null),
   });
   const agents =
     members.data?.filter((member) => member.kind === "agent") ?? [];

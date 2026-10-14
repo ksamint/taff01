@@ -1,21 +1,13 @@
 "use client";
 import "../styles/projects.css";
 import {
-  type Project,
-  type ProjectInput,
-  type ProjectUpdate,
   projectInputSchema,
-  projectSchema,
   projectUpdateSchema,
   type Run,
   type Task,
   taskReference,
 } from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import {
   ChevronDown,
   GripVertical,
@@ -31,19 +23,17 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
+import { errorKey } from "../lib/api";
 import { isLocale } from "../lib/i18n";
-import { invalidateM3 } from "../lib/m3-queries";
 import {
-  projectsKey,
   useEditTask,
   useProjects,
   useTaskAccess,
   useWorkspaceAccess,
 } from "../lib/m5-queries";
-import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
+import { useManageProject } from "../lib/mutations/projects";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -98,7 +88,6 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const client = useQueryClient();
   const tasks = useTasks(workspace.id);
   const members = useMembers(workspace.id);
   const projects = useProjects(workspace.id);
@@ -138,57 +127,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   }, [workspace.id, selectedProjectId]);
   const workspaceAccess = useWorkspaceAccess(workspace.id);
   const admin = workspaceAccess.data?.canManageProjects;
-  const manage = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: ProjectInput | ProjectUpdate) =>
-      request(
-        projectDialog === "new"
-          ? `/api/projects?workspaceId=${workspace.id}`
-          : `/api/projects/${projectBaseline?.id}`,
-        {
-          method: projectDialog === "new" ? "POST" : "PATCH",
-          body: JSON.stringify(body),
-        },
-      ).then(projectSchema.parse),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      const id =
-        projectDialog === "edit"
-          ? projectBaseline!.id
-          : `optimistic:${crypto.randomUUID()}`;
-      const now = new Date().toISOString();
-      client.setQueryData<Project[]>(
-        projectsKey(workspace.id),
-        (current = []) =>
-          projectDialog === "new"
-            ? [
-                ...current,
-                {
-                  id,
-                  workspaceId: workspace.id,
-                  name: body.name!,
-                  archived: false,
-                  version: 1,
-                  createdAt: now,
-                  updatedAt: now,
-                },
-              ]
-            : current.map((item) =>
-                item.id === id ? { ...item, ...body } : item,
-              ),
-      );
-      return { snapshot, id };
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (project, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<Project[]>(projectsKey(workspace.id), (current) =>
-        current?.map((item) => (item.id === context.id ? project : item)),
-      );
+  const manage = useManageProject(workspace.id, {
+    mode: projectDialog,
+    baseline: projectBaseline,
+    onSaved: (project) => {
       setProjectDialog(null);
       router.push(`/projects/${project.id}`);
     },
-    onSettled: () => invalidateM3(client),
   });
   const visible = (tasks.data ?? [])
     .filter(
