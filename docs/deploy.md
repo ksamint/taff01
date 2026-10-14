@@ -787,3 +787,134 @@ not run. Publish a fresh unblocked candidate to repeat the complete local
 validation. No production lock, backup, migration, image build or container
 replacement was started; the live SHA is still
 `23387723f8c438d990db00d561cba2899f48ab80`.
+
+### Frontend v2 release candidate M15 — 2026-10-14
+
+**Source:** `main` at `8019c6943e453e087a6cfa6c48651c99b9840a9d`. This
+candidate supersedes R1b and answers its `Blocked:` note: it contains all of
+R1/R1b plus M15, so one deploy covers both.
+
+The R1b blocker was a local helper still holding port 4601 when `pnpm e2e`
+started. The application was not at fault. Before `pnpm e2e`, make sure
+nothing listens on the configured API and web ports. The Playwright web
+servers refuse a busy port on purpose (`reuseExistingServer` is false).
+
+Scope since R1:
+
+- PR #11 (`m15-crm`), merged as `7872024`.
+- `main` commits after `7872024`, which touch only `docs/`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source:**
+  [38528200033](https://github.com/ksamint/taff01/actions/runs/38528200033).
+  The run for `7872024` was cancelled by the next push to `main`.
+- **PR #11 CI on its head `58ea2cb141cfdcd57791e19fe6b81603ee88143c`:**
+  [38525583386](https://github.com/ksamint/taff01/actions/runs/38525583386),
+  success. That head is an ancestor of the source, and the source-to-head
+  diff is only `docs/agent-goal-deploy-frontend-v2.md` and `docs/deploy.md`.
+- **Visual baselines and gated Lighthouse on CI's Chromium:**
+  [38524514460](https://github.com/ksamint/taff01/actions/runs/38524514460).
+
+**What changes for people.**
+
+- **CRM screens:** companies and contacts, each with list, detail, create,
+  edit and archive (archive asks for confirmation; every change has undo).
+  On desktop, list and detail share a split view.
+- **Stakeholders:** 相關方 at `?view=stakeholders`, with the client company
+  per project.
+- **Navigation:** 公司 · 聯繫人 sit under 項目 in the desktop sidebar and the
+  Projects switch. They are shown only to people who can read CRM.
+- **Phase B backend, ahead of its screens (M16–M18):**
+  - brief and Ask taff, rules-based;
+  - suggestions;
+  - the relations graph;
+  - mind-map APIs.
+- **New MCP tools:** `brief.get`, `relations.get` and `suggestions.create`
+  (30 tools in all).
+
+Reports: `docs/milestones/15-crm-screens.md` and
+`docs/milestones/16-18-phase-b-backend.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green (PR CI) |
+| unit and integration tests | 814 / 814 locally; green in PR CI |
+| e2e | green in PR CI |
+| visual suite | 16 screens × 4 projects, locally and on CI |
+| Today initial JS | 193,457 B gzipped / 204,800 B (CI) |
+| Today LCP, median of 3 (slow 4G, 4× CPU), local production build | en 640 ms, zh-CN 656 ms, zh-HK 664 ms |
+| Lighthouse (gated, CI Chromium) | en 96/100/100, zh-CN 95/100/100, zh-HK 96/100/100 (performance / accessibility / best practices) |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+The cloud container's local Lighthouse scores were 82–91 after a host
+restart. The same container measured the unchanged M14 build at 87–93,
+against 92–94 before the restart. The CI run above is the gated
+measurement.
+
+**Migrations.** Two new migrations, both additive, with no backfill (0 rows
+rewritten):
+
+- **`0024_m17_suggestions_ai.sql`:**
+  - a `suggestions` table, workspace-scoped, with composite foreign keys and
+    an `_audit` trigger;
+  - `workspaces.ai_enabled boolean NOT NULL DEFAULT false`. The default is a
+    constant, so PostgreSQL stores it as metadata and does not rewrite the
+    table. Every workspace starts opted out.
+- **`0025_m18_mind_map.sql`:** `mind_nodes`, `mind_edges`, `mind_sources`
+  and `mind_node_sources`, workspace-scoped, with composite foreign keys and
+  `_audit` triggers.
+
+Neither migration has a `DROP`, `TRUNCATE`, `DELETE`, rename or data
+rewrite.
+
+**Environment.** `.env.example` documents four optional variables, none
+needed in production:
+
+- **`ASK_RATE_LIMIT`:** Ask requests per person per minute. Default 20.
+- **`AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`:** the optional model path for
+  Ask taff (ADR 0016). `compose.prod.yaml` does not pass them to the API, so
+  in production the path stays off and no workspace data goes to any model.
+  Ask answers by rules. Turning the path on would need a Compose change, all
+  three values, and a workspace admin's opt-in. Do not set them for this
+  deploy.
+
+No secret values are recorded here.
+
+**Compose, Docker and Caddy.** No changes since R1.
+
+**Release checklist (plan §6.0)** against a local production-mode stack built
+from PR head `58ea2cb`, which has the same application code as the source:
+
+- **Stack:** `pnpm release:stack --build --migrate --seed` on a fresh
+  database, API on 4201 and web on 4200.
+- **Command:** `RELEASE_MAIL_LOG=… pnpm release:checklist`. The mail-log
+  directory must be mode 0700.
+- **Result: passed, 32 / 32**, 0 failed, 0 skipped. Owner and role changes
+  and the rate-limit probe ran.
+- **One sub-step skipped**, in every project: SMS sign-in, because
+  `smsEnabled=false` locally.
+- **MCP:** each project's `@modelcontextprotocol/client` round trip passed
+  42/42 checks, covering all 30 tools in `MCP_TOOLS`.
+
+| Item | phone-en | phone-zh-HK | desktop-en | desktop-zh-HK |
+| --- | --- | --- | --- | --- |
+| 1. Sign-in and preferences | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) |
+| 2. Tasks | pass | pass | pass | pass |
+| 3. Agents and review | pass | pass | pass | pass |
+| 4. Projects | pass | pass | pass | pass |
+| 5. Calendar | pass | pass | pass | pass |
+| 6. Search and organizations | pass | pass | pass | pass |
+| 7. Settings | pass | pass | pass | pass |
+| 8. MCP | pass | pass | pass | pass |
+
+**Notes for the deploy.**
+
+- The live SHA is still `2338772`, so this deploy applies migrations 0023,
+  0024 and 0025 together, in order, with the API image.
+- After the deploy, run the checklist against the live origin. Because of the
+  new CRM screens, check that a member without CRM access sees no 公司 ·
+  聯繫人 entries.
+
