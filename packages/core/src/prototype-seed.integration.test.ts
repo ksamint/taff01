@@ -227,10 +227,23 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
       name: "林曉",
       role: "admin",
     });
-    expect((await core.getMe(alexId)).workspaces.map((row) => row.id)).toEqual(
+    const joined = (await core.getMe(alexId)).workspaces;
+    expect(joined.map((row) => row.id)).toEqual(
       expect.arrayContaining(
         prototypeOrgs.map((org) => prototypeId("workspace", org.key)),
       ),
+    );
+    // The seed creates these in one transaction, so they share createdAt and
+    // the default workspace (the first) must come from the name tie-break.
+    const seeded = joined
+      .filter((row) =>
+        prototypeOrgs.some(
+          (org) => prototypeId("workspace", org.key) === row.id,
+        ),
+      )
+      .map((row) => row.name);
+    expect(seeded).toEqual(
+      [...seeded].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
     );
     await expect(
       core.listTasks(userPrincipal(unrelatedId), w),
