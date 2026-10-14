@@ -98,6 +98,22 @@ describe("workspace realtime lifecycle", () => {
     });
     expect(invalidate).toHaveBeenCalledTimes(4);
   });
+  it("invalidates the planning families keyed by project on a planning change", () => {
+    const project = "44444444-4444-4444-8444-444444444444";
+    for (const key of ["timeline", "milestones", "payments"])
+      client.setQueryData([key, project], {});
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    for (const key of ["timeline", "milestones", "payments"])
+      client.setQueryData([key, project], {});
+    socket.message({ ...event, action: "task_plans.update" });
+    for (const key of ["timeline", "milestones", "payments"])
+      expect(client.getQueryState([key, project])?.isInvalidated).toBe(true);
+    expect(
+      client.getQueryState(["unrelated", workspaceId])?.isInvalidated,
+    ).toBe(false);
+  });
   it("defers change refetches until a pending optimistic mutation settles", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
     cleanup = connectWorkspace(client, workspaceId, userId);

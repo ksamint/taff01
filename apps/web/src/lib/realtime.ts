@@ -25,6 +25,10 @@ const FAMILIES = [
   "notificationPreferences",
   "dailyDigests",
   "dailyDigest",
+  // Planning (ADR 0015), keyed by project: ["timeline", projectId] and so on.
+  "timeline",
+  "milestones",
+  "payments",
 ];
 
 export function connectWorkspace(

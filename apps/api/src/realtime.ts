@@ -41,7 +41,10 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
     const membershipChange = /^(members|workspaces)\.(update|delete)$/.test(
       event.action,
     );
-    const adminOnly = /^(agent_tokens|mcp_calls)\./.test(event.action);
+    // Payments are finance (D7): admins only, like token and call logs.
+    const adminOnly = /^(agent_tokens|mcp_calls|project_payments)\./.test(
+      event.action,
+    );
     for (const client of clients) {
       if (
         event.recipientOnly

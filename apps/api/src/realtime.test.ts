@@ -199,6 +199,24 @@ describe("authenticated realtime boundaries", () => {
     expect(await third).toEqual(change());
     expect(bobMessages).toEqual([]);
   });
+  it("routes planning changes to the workspace and keeps payments from non-admins", async () => {
+    const alice = await connect("alice");
+    const seen: ChangeEvent[] = [];
+    alice.on("message", (data) => seen.push(JSON.parse(data.toString())));
+    for (const action of [
+      "project_payments.insert",
+      "task_plans.update",
+      "milestones.insert",
+      "task_dependencies.delete",
+    ])
+      await deliver(change({ action }));
+    await vi.waitFor(() => expect(seen).toHaveLength(3));
+    expect(seen.map((event) => event.action)).toEqual([
+      "task_plans.update",
+      "milestones.insert",
+      "task_dependencies.delete",
+    ]);
+  });
   it("closes sockets on membership removal, session deletion and listener reconnect", async () => {
     const alice = await connect("alice");
     const bob = await connect("bob", otherWorkspace);
