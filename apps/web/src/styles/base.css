@@ -346,6 +346,13 @@ footer.tagline {
 .sidebar-link:hover {
   background: var(--bg-container-low);
 }
+/* 公司 · 聯繫人 under 項目 (M15). */
+.sidebar-sublink {
+  padding-left: 28px;
+}
+.sidebar-folded .sidebar-sublink {
+  padding-left: 10px;
+}
 .sidebar-link[aria-current="page"] {
   background: var(--bg-container);
   font-weight: var(--weight-label);

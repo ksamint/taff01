@@ -129,7 +129,9 @@ function NavItems({
         ? pathname === "/"
         : href === "/me"
           ? ME_PATHS.some((path) => pathname.startsWith(path))
-          : pathname.startsWith(href);
+          : href === "/projects"
+            ? /^\/(projects|companies|contacts)/.test(pathname)
+            : pathname.startsWith(href);
     return (
       <Link
         key={href}

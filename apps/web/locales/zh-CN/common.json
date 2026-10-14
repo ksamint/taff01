@@ -777,10 +777,26 @@
       "noMatches": "没有可添加的联系人。",
       "needsProject": "任务加入项目后才能添加联系人。",
       "noneOnTask": "此任务暂无联系人。",
-      "someone": "另一位联系人"
+      "someone": "另一位联系人",
+      "new": "添加联系人",
+      "edit": "编辑联系人",
+      "nameLabel": "姓名",
+      "titleLabel": "职位",
+      "phoneLabel": "电话",
+      "emailLabel": "邮箱",
+      "company": "公司",
+      "noCompany": "不设公司",
+      "empty": "暂无联系人",
+      "pick": "选择一位联系人，查看关联和角色。",
+      "delete": "删除联系人",
+      "deleteConfirm": "删除 {{name}}？联系人会被归档，关联会保留，并可撤销。"
     },
     "stakeholders": {
-      "fromProject": "项目相关方"
+      "fromProject": "项目相关方",
+      "title": "相关方",
+      "empty": "此项目暂无相关方。",
+      "note": "任务联系人会自动成为项目相关方；移出项目会一并移除其在任务上的联系。",
+      "pickProject": "选择一个项目，查看其相关方。"
     },
     "external": "外部",
     "rolesTitle": "角色",
@@ -789,7 +805,9 @@
     "editRolesFor": "编辑 {{name}} 的角色",
     "doneEditingFor": "完成编辑 {{name}} 的角色",
     "roles": {
-      "task": "任务角色"
+      "task": "任务角色",
+      "company": "公司角色",
+      "project": "项目角色"
     },
     "toast": {
       "added": "已添加 {{name}}",
@@ -797,7 +815,58 @@
       "roleReplaced": "{{name}} 现为{{role}}，已取代 {{previous}}",
       "addedStakeholder": "并已加入“{{project}}”项目相关方",
       "removed": "已移除 {{name}}",
-      "separator": "；"
+      "separator": "；",
+      "removedWithLinks_one": "已移除 {{name}}，及其 {{count}} 项任务上的联系",
+      "removedWithLinks_other": "已移除 {{name}}，及其 {{count}} 项任务上的联系",
+      "companyChanged": "已将 {{name}} 改为 {{company}}",
+      "companyCleared": "{{name}} 已不设公司",
+      "rolesCleared": "原公司角色已清除",
+      "clientSet": "客户公司已设为 {{company}}",
+      "clientCleared": "已清除客户公司",
+      "companyCreated": "已添加 {{name}}",
+      "contactCreated": "已添加 {{name}}",
+      "saved": "已保存 {{name}}",
+      "deleted": "已删除 {{name}}",
+      "restored": "已恢复 {{name}}"
+    },
+    "companies": {
+      "title": "公司",
+      "new": "添加公司",
+      "edit": "编辑公司",
+      "name": "公司名称",
+      "industry": "行业",
+      "empty": "暂无公司",
+      "search": "搜索公司",
+      "pick": "选择一家公司，查看成员和角色。",
+      "people_one": "{{count}} 位成员",
+      "people_other": "{{count}} 位成员",
+      "clientOf": "客户项目",
+      "delete": "删除公司",
+      "deleteConfirm": "删除 {{name}}？公司会被归档，联系人和关联会保留，并可撤销。",
+      "rolesNote": "公司角色适用于整家公司；更换联系人所属公司时会清除其原公司角色。"
+    },
+    "client": "客户公司",
+    "noClient": "未设客户",
+    "people": "成员",
+    "noPeople": "暂无成员",
+    "noLinks": "尚未关联项目或任务",
+    "clearCompanyRoles": "清除公司角色",
+    "removeFromProject": "移出项目",
+    "showArchived": "显示已归档",
+    "archived": "已归档",
+    "restore": "恢复",
+    "noMatches": "没有符合搜索的结果。",
+    "noAccess": "你在此无法查看公司和联系人。",
+    "searchPlaceholder": "搜索姓名、公司、电话或邮箱",
+    "form": {
+      "required": "请输入名称。",
+      "phone": "请输入电话号码（数字、空格或 + - ( )）。",
+      "email": "请输入有效的邮箱地址。",
+      "tooLong": "内容太长。",
+      "save": "保存",
+      "create": "添加",
+      "cancel": "取消",
+      "delete": "删除"
     }
   }
 }

@@ -20,13 +20,8 @@ export const PROJECT_VIEWS = [
 export type ProjectView = (typeof PROJECT_VIEWS)[number];
 /** Views behind 更多 (prototype `moreMenu`): 相關方 · 關係圖 · 心智圖. */
 export const MORE_VIEWS = ["stakeholders", "relations", "mind"] as const;
-/** Views that ship later (M15 stakeholders, M16 timeline/relations, M18 mind). */
-export const PLANNED_VIEWS: ProjectView[] = [
-  "timeline",
-  "stakeholders",
-  "relations",
-  "mind",
-];
+/** Views that ship later (M16 timeline/relations, M18 mind). */
+export const PLANNED_VIEWS: ProjectView[] = ["timeline", "relations", "mind"];
 
 /** `?view=` with the board as the default for anything unknown. */
 export function parseProjectView(value: string | null | undefined) {
