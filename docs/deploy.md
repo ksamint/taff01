@@ -601,3 +601,134 @@ section here for each validated `main` SHA. The local agent deploys it with
 `docs/agent-goal-deploy-frontend-v2.md`. Then it appends the matching
 `### Frontend v2 <name> upgrade checkpoint — <date>`, or a `Blocked:` note
 under the candidate.
+
+### Frontend v2 release candidate R1 — 2026-10-14
+
+**Source.** `main` at `5e616dd27bb167508155f4c5dd9bde9284538a7c`, the merge of
+PR #10 (M14). It includes PR #7 (M12), PR #9 (M13) and PR #10 (M14) on top of
+the last recorded deployment, `23387723f8c438d990db00d561cba2899f48ab80`
+(agent creation upgrade checkpoint, 2026-10-11).
+
+**CI.**
+
+- Pull requests:
+  - [PR #9 CI](https://github.com/ksamint/taff01/actions/runs/38512986433)
+  - [PR #10 CI](https://github.com/ksamint/taff01/actions/runs/38519911336)
+- `main` CI:
+  - [after #9](https://github.com/ksamint/taff01/actions/runs/38514991407)
+  - [after #10](https://github.com/ksamint/taff01/actions/runs/38521546475)
+- Visual baselines on CI's Chromium:
+  - [M13 capture](https://github.com/ksamint/taff01/actions/runs/38512400959)
+  - [M14 capture](https://github.com/ksamint/taff01/actions/runs/38519032163)
+
+**What changes for people.**
+
+- **Navigation (v2 shell):**
+  - phone: a four-tab bar (今天 · 日曆 · 項目 · 我的);
+  - desktop: a foldable sidebar;
+  - signed out: a landing page.
+- **Screens:** Today, Me, Inbox and MCP use the v2 layouts.
+- **Projects:** the v2 board and list.
+- **Task detail:** contacts, and a right panel on desktop.
+- **Calendar:** the v2 calendar.
+- **Search:** ⌘K also finds companies and contacts.
+- **Undo:** toasts with undo on both layouts.
+- **Backend only for now:** planning and CRM (M12). Its screens arrive with
+  later candidates.
+
+Reports:
+
+- `docs/milestones/12-planning-crm-backend.md`
+- `docs/milestones/13-shell-today-me.md`
+- `docs/milestones/14-projects-task-calendar-search.md`
+
+**Validation numbers** (M14 head, then `main`).
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 683 / 683 |
+| e2e | 141 / 141 |
+| visual suite | 16 screens × 4 projects |
+| Today initial JS | 193,325 B gzipped / 204,800 B budget |
+| Today LCP (median of 3, slow 4G, 4× CPU) | en 792 ms, zh-CN 1020 ms, zh-HK 980 ms (limit 2000 ms) |
+| Lighthouse (performance / accessibility / best practices) | en 92/100/100, zh-CN 93/100/100, zh-HK 94/100/100 |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+**Migrations.** One new migration, `0023_m12_planning_crm.sql`. It is
+**additive**, with no backfill (0 rows rewritten):
+
+- **New tables:** 10, all workspace-scoped, with composite foreign keys and
+  `_audit` triggers: companies, contacts, company_contacts,
+  project_contacts, task_contacts, contact_roles, task_plans, milestones,
+  task_dependencies and project_payments.
+- **New project columns:** three nullable ones (`contract_amount`,
+  `currency`, `client_company_id`).
+- **New unique constraint:** `tasks (workspace_id, id, project_id)`, which
+  builds an index on `tasks`.
+- **Checks:** a role-rule CHECK on contact_roles.
+- **Nothing destructive:** no `DROP`, `TRUNCATE`, `DELETE`, rename or data
+  rewrite.
+
+**Environment.** No new variables for frontend v2. Since `2338772`, these
+settings are new or changed:
+
+- **`EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_FROM`:** optional
+  and all-or-none. Unset, mail goes to the private log at `EMAIL_LOG_PATH`.
+  `EMAIL_PORT` (465) and `EMAIL_SECURE` (true) only apply with SMTP.
+  Partial settings stop the API at start.
+- **`EMAIL_LOG_PATH`:** defaults to `/app/.taff-mail/messages.jsonl` in the
+  image. Its directory must be mode 0700 and owned by the API user, or
+  delivery fails closed.
+- **`AUTH_URL`:** an existing variable, now also passed to the web
+  container. The MCP page shows `AUTH_URL/mcp` as the client endpoint, so it
+  must be the public origin.
+
+No secret values are recorded here.
+
+**Compose, Docker and Caddy.**
+
+- **`compose.prod.yaml`:**
+  - the API receives the `EMAIL_*` settings above;
+  - the worker uses its own image, `${TAFF_IMAGE_WORKER:-taff-worker}`,
+    built from `deploy/Dockerfile.server` with `TARGET=worker`;
+  - web receives `AUTH_URL`.
+- **`deploy/Dockerfile.server`:** creates `/app/.taff-mail` as 0700, owned
+  by `node`.
+- **Caddy:** no changes.
+
+**Release checklist (plan §6.0)** against a local production-mode stack built
+from `5e616dd`:
+
+- **Stack:** `pnpm release:stack --build --migrate --seed` on a fresh
+  database, API on 4201 and web on 4200. That is
+  `dist/runtime/api/api.mjs` and the Next standalone server with
+  `NODE_ENV=production`.
+- **Command:** `RELEASE_MAIL_LOG=… pnpm release:checklist`.
+- **Result: passed, 32 / 32** (8 items × phone-en, phone-zh-HK, desktop-en,
+  desktop-zh-HK), 0 failed, 0 skipped.
+- **Covered:** owner and role changes (a second person verifies from the
+  mail log) and the rate-limit probe.
+- **One sub-step skipped**, in every project: SMS sign-in, because
+  `/api/auth/methods` reports `smsEnabled=false` locally. Live SMS stays
+  covered by the 2026-10-10 checkpoint.
+- **MCP:** each project's real `@modelcontextprotocol/client` round trip
+  passed 38/38 checks, covering all 27 tools in `MCP_TOOLS`.
+
+| Item | phone-en | phone-zh-HK | desktop-en | desktop-zh-HK |
+| --- | --- | --- | --- | --- |
+| 1. Sign-in and preferences | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) |
+| 2. Tasks | pass | pass | pass | pass |
+| 3. Agents and review | pass | pass | pass | pass |
+| 4. Projects | pass | pass | pass | pass |
+| 5. Calendar | pass | pass | pass | pass |
+| 6. Search and organizations | pass | pass | pass | pass |
+| 7. Settings | pass | pass | pass | pass |
+| 8. MCP | pass | pass | pass | pass |
+
+**Notes for the deploy.**
+
+- Build and push both server images (`api` and `worker`) and the web image,
+  then migrate with the API image as before.
+- After the deploy, run the checklist against the live origin with the
+  verification account (see "Release candidate checks").
