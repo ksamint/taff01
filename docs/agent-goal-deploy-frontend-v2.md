@@ -52,8 +52,10 @@ belongs to the cloud build agent.
 
 Read first:
 
-1. `AGENTS.md`. Run its op-cli preflight and follow its sign-in procedure if
-   access is unavailable.
+1. `AGENTS.md`. Run its op-cli preflight. If the script path it names no
+   longer exists, run the Mac's canonical op-automation preflight instead,
+   and correct the path in `AGENTS.md` in a docs-only commit to `main`.
+   Follow the sign-in procedure if access is unavailable.
 2. `docs/deploy.md` end to end, especially "Apuch server layout", "Operations"
    and the checkpoints from 2026-10-10 onward.
 3. `docs/agent-goal-deploy.md`, the previous release procedure; it is the
@@ -64,6 +66,27 @@ Read first:
 
 Never commit or print secrets, private env values, tokens, passwords, OTPs or
 cookies.
+
+**Verification account.** This is a one-time setup, repeated only if the
+account is lost. The earlier private credential files are gone (readiness
+check, 2026-10-14). If no verification credential item exists in the ops
+vault:
+
+1. Create one through the public site, using the normal username sign-up:
+   - username `taff-verify`, or `taff-verify-<yyyymmdd>` if taken;
+   - a generated strong password;
+   - an address you control, if email is required.
+2. Store the credentials immediately as a new item in the 1Password ops
+   vault used for Taff, named `Taff production verification account`. Never
+   write them to the repo, logs or reports.
+3. Signed in as that account, create the workspace `Taff verification`.
+4. Add one agent through Team, named `Verification agent`.
+5. Record only the account's username and the workspace name in
+   `docs/deploy.md`, under "Operations".
+
+This creates only that account's own data; it seeds nothing, changes no
+other account and copies no demo agents. Use this account and workspace for
+every public check and the live MCP round trip.
 
 **Step 0 — pick the candidate.**
 
@@ -142,8 +165,8 @@ detached keeper so an SSH drop does not release it.
 
 - en and zh-HK on a phone viewport (390×844) and on desktop (1280×800);
 - a zh-CN spot check of Today, Projects and Me;
-- the verification account and workspace from the earlier checkpoints, never
-  the demo seed;
+- the dedicated verification account and workspace (see "Verification
+  account" below), never the demo seed or a real user's workspace;
 - zero browser page errors.
 
 1. **Platform:**
