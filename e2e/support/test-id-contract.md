@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (315 distinct, 1223 uses)
+## Test ids (316 distinct, 1227 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -55,7 +55,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `me-brief` | 4 | me-view.tsx | brief.spec.ts |
+| `me-brief` | 5 | me-view.tsx | brief.spec.ts, ui-v2.spec.ts |
 
 ### brief-view.tsx
 
@@ -200,7 +200,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `inbox-approve` | 1 |  | release/checklist.spec.ts |
 | `inbox-grant-access` | 2 |  | agent-review.spec.ts, release/checklist.spec.ts |
-| `inbox-item` | 10 |  | agent-review.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `inbox-item` | 11 |  | agent-review.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `inbox-open-digest` | 1 |  | notifications.spec.ts |
 | `inbox-open-review` | 2 |  | agent-review.spec.ts, release/checklist.spec.ts |
 | `inbox-snooze` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
@@ -241,6 +241,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `advanced-theme-system` | 2 |  | me.spec.ts |
 | `brief-dot` | 1 |  | brief.spec.ts |
+| `me-inbox` | 1 |  | ui-v2.spec.ts |
 | `me-team` | 3 |  | me.spec.ts, scripts/ui/app-shots.mjs |
 | `me-tz` | 9 |  | me.spec.ts |
 | `open-notifications` | 4 |  | me.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs |
@@ -497,7 +498,7 @@ several do). “Also rendered by” lists the other files.
 | `subtask-title` | 3 |  | planning.spec.ts, release/checklist.spec.ts |
 | `task-comment` | 7 |  | planning.spec.ts, release/checklist.spec.ts |
 | `task-comment-submit` | 5 |  | planning.spec.ts, release/checklist.spec.ts |
-| `task-detail-heading` | 34 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
+| `task-detail-heading` | 35 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
 | `task-field-due` | 2 |  | planning.spec.ts |
 | `task-field-text` | 5 |  | planning.spec.ts |
 
