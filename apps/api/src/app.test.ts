@@ -184,6 +184,58 @@ describe("REST adapter boundaries", () => {
     expect(response.status).toBe(403);
     expect(write).not.toHaveBeenCalled();
   });
+  it("restores an agent token only for a signed-in person, never a bearer agent", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const authenticate = vi.spyOn(core, "authenticateAgentToken");
+    const restore = vi.spyOn(core, "restoreAgentToken");
+    const agent = await app.request(`/api/agent-tokens/${id}/restore`, {
+      method: "POST",
+      headers: { Authorization: "Bearer taff_agent-token" },
+    });
+    expect(agent.status).toBe(401);
+    expect(authenticate).not.toHaveBeenCalled();
+    expect(restore).not.toHaveBeenCalled();
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    expect(
+      (
+        await app.request("/api/agent-tokens/not-an-id/restore", {
+          method: "POST",
+        })
+      ).status,
+    ).toBe(400);
+    expect(restore).not.toHaveBeenCalled();
+    const token = {
+      id,
+      workspaceId: id,
+      memberId: id,
+      createdBy: id,
+      name: "Claude Desktop",
+      prefix: "taff_abcdefg",
+      scopes: ["tasks:read" as const],
+      createdAt: now.toISOString(),
+      revokedAt: null,
+      lastUsedAt: null,
+    };
+    restore.mockResolvedValueOnce(token);
+    const restored = await app.request(`/api/agent-tokens/${id}/restore`, {
+      method: "POST",
+    });
+    expect(restored.status).toBe(200);
+    expect(await restored.json()).toEqual(token);
+    expect(restore).toHaveBeenCalledWith({ kind: "user", userId: id }, id);
+    restore.mockRejectedValueOnce(new CoreError("conflict", 409));
+    const expired = await app.request(`/api/agent-tokens/${id}/restore`, {
+      method: "POST",
+    });
+    expect(expired.status).toBe(409);
+    expect(await expired.json()).toEqual({ error: "conflict" });
+  });
   it("validates before calling core and does not expose input", async () => {
     vi.spyOn(core, "getSession").mockResolvedValue({
       response: session,

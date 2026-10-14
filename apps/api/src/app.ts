@@ -775,6 +775,12 @@ export function createApp(
       await core.revokeAgentToken(userPrincipal(c.get("userId")), id),
     );
   });
+  app.post("/api/agent-tokens/:id/restore", async (c) => {
+    const id = idSchema.parse(c.req.param("id"));
+    return c.json(
+      await core.restoreAgentToken(userPrincipal(c.get("userId")), id),
+    );
+  });
   app.get("/api/mcp-calls", async (c) => {
     const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
     return c.json(
