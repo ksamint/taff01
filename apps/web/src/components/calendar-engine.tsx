@@ -16,11 +16,13 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { createCalendarDragPlugin } from "../lib/calendar-plugins";
-import "./calendar.css";
+import "../styles/calendar.css";
 
 export type CalendarMode = "day" | "week" | "month-grid";
 export interface CalendarEngineProps {
   agentLane?: boolean;
+  /** Desktop week rows keep the day view's 56 px hour (prototype 1413). */
+  desktop?: boolean;
   locale: string;
   timeZone: string;
   date: string;
@@ -32,6 +34,8 @@ export interface CalendarEngineProps {
   onMove: (event: CalendarEvent) => void;
   canMove: (id: string) => boolean;
 }
+const hourHeight = (view: CalendarMode, desktop?: boolean) =>
+  view === "week" && !desktop ? 44 : 56;
 export function CalendarEngine(props: CalendarEngineProps) {
   const { t } = useTranslation();
   const latest = useRef(props);
@@ -82,7 +86,7 @@ export function CalendarEngine(props: CalendarEngineProps) {
       firstDayOfWeek: 1,
       dayBoundaries: { start: "00:00", end: "24:00" },
       weekOptions: {
-        gridHeight: props.view === "week" ? 1056 : 1344,
+        gridHeight: 24 * hourHeight(props.view, props.desktop),
         gridStep: 60,
         eventWidth: 96,
         timeAxisFormatOptions: {
@@ -136,7 +140,7 @@ export function CalendarEngine(props: CalendarEngineProps) {
   useEffect(() => {
     if (!ready) return;
     if (props.view !== "month-grid") {
-      const gridHeight = props.view === "week" ? 1056 : 1344;
+      const gridHeight = 24 * hourHeight(props.view, props.desktop);
       const options = plugins.controls.getWeekOptions();
       if (options.gridHeight !== gridHeight || options.gridStep !== 60)
         plugins.controls.setWeekOptions({ gridHeight, gridStep: 60 });
@@ -145,7 +149,7 @@ export function CalendarEngine(props: CalendarEngineProps) {
       plugins.controls.setView(props.view);
     if (plugins.controls.getDate().toString() !== props.date)
       plugins.controls.setDate(Temporal.PlainDate.from(props.date));
-  }, [ready, plugins.controls, props.date, props.view]);
+  }, [ready, plugins.controls, props.date, props.view, props.desktop]);
   useEffect(() => {
     if (!ready) return;
     let frame: number;
@@ -162,11 +166,13 @@ export function CalendarEngine(props: CalendarEngineProps) {
         return;
       }
       container.scrollTop =
-        props.view === "month-grid" ? 0 : 8 * (props.view === "week" ? 44 : 56);
+        props.view === "month-grid"
+          ? 0
+          : 8 * hourHeight(props.view, props.desktop);
     };
     frame = requestAnimationFrame(positionView);
     return () => cancelAnimationFrame(frame);
-  }, [ready, props.view]);
+  }, [ready, props.view, props.desktop]);
   useEffect(() => {
     if (!ready || props.view === "month-grid") return;
     let line: HTMLDivElement | undefined;

@@ -82,7 +82,7 @@
   "calendar": {
     "title": "日历",
     "hint": "日程与任务截止时间分别设置。",
-    "unscheduled": "未安排",
+    "unscheduled": "未安排时间",
     "day": "日",
     "week": "周",
     "month": "月",
@@ -112,7 +112,7 @@
     "saved": "已更新",
     "titleLabel": "标题",
     "truncated": "日程过多，请缩小日期或工作区范围。",
-    "agentLane": "智能体",
+    "agentLane": "智能体背景执行",
     "agentHint": "打开任务查看智能体运行状态。",
     "emptyTray": "没有待安排任务。",
     "invalid": "请检查日期、时长、时区和重复规则。",
@@ -120,8 +120,13 @@
     "selectView": "视图",
     "noEvents": "没有日程任务",
     "tools": "日历控制",
-    "dragHint": "拖动以移动；使用列表以键盘安排",
-    "goToDate": "前往日期"
+    "dragHint": "拖动改期，点空白处新建",
+    "goToDate": "前往日期",
+    "keyboardHint": "不用拖动时，可用列表或打开日程以键盘修改时间。",
+    "toast": {
+      "moved": "已改期至 {{date}} {{time}}",
+      "durationSet": "时长改为 {{start}}–{{end}}"
+    }
   },
   "projects": {
     "title": "项目",
