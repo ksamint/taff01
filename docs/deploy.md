@@ -1521,3 +1521,120 @@ current rules, the local production-mode checklist was not rerun.
 **Migrations.** None. The last migration is still `0026`.
 
 **Environment, Compose, Docker and Caddy.** No changes.
+
+### Frontend v2 M19a upgrade checkpoint — 2026-10-14
+
+Live pinned source `9577c8cde908f0da38987dcb196fcd6704c998b3`, tree
+`bf341ea42f786d8115ab7f045dfab2e1b9f69ae1`. M19a removes unused v1 CSS and expands the
+Traditional Chinese Noto Sans TC font subsets for v2 strings. Review [PR
+#21](https://github.com/ksamint/taff01/pull/21) and [PR
+#22](https://github.com/ksamint/taff01/pull/22). Newer code on main was left for later
+candidates; M19a remained the newest published candidate at the final eligibility check.
+
+**Validation.** Exact-source main-push CI
+[38572631759](https://github.com/ksamint/taff01/actions/runs/38572631759) and merged PR
+#22 head CI [38569973363](https://github.com/ksamint/taff01/actions/runs/38569973363)
+completed/success. PR #21
+[38565883593](https://github.com/ksamint/taff01/actions/runs/38565883593) also passed.
+Source and PR-head ancestry were verified before build, migration, start and acceptance.
+The candidate records 877/877 tests and Today initial JS 194,431 B gzipped against a
+204,800 B budget. Exact-source main CI logs report signed-in Today LCP medians en 624
+ms, zh-CN 648 ms, zh-HK 648 ms (three runs per locale, slow 4G, 4× CPU; 2,000 ms limit),
+and Lighthouse 13.5.0 performance/accessibility/best-practices 96/100/100 in every
+locale. These are CI measurements. The full local suite, Lighthouse and LCP were not
+rerun.
+
+On a clean detached checkout, all three local images built and `pnpm mcp:smoke` passed
+on the first attempt against production-mode API/worker containers with a dedicated
+local development database and Redis namespace. The existing Mac Colima builder was
+used; production retained `--builder default`. Local smoke containers were removed.
+
+**Lock, backups and source relay.** Fresh detached keeper PID `107294` held the existing
+native `/srv/taff/deploy.lock`. Verified dedicated database dump:
+`/srv/taff/secrets/db.before-9577c8cde908f0da38987dcb196fcd6704c998b3.dump`, 559,842 B,
+SHA-256 `831891fa685413683eb8341ac0a45db4535b1df4ca1fc756fdc282463d65d373`. `pg_restore
+--list` verified 88 tables, tasks, workspaces and migration journal. Exclusive env
+backup `/srv/taff/secrets/.env.before-9577c8cde908f0da38987dcb196fcd6704c998b3`, mode
+0600. Incremental Git bundle 5,406,313 B, SHA-256
+`a52841f7a827232b6a9967cb86a99b7fa8a2f95cb4dbaea004fcfd74871204f7`; hash, `git bundle
+verify`, detached SHA, clean tree and GitHub origin verified. Only tracked public source
+modes were normalized to 0644/0755; private Git/env/secret files stayed protected.
+
+**Migrations and runtime.** No new migration, env variable, Compose, Dockerfile or Caddy
+change since accepted M18b. Canonical one-shot migrator exited 0; existing additive
+0023–0026 hashes were confirmed. Last migration remains
+`0026_m18_mind_edge_version.sql`, hash
+`3dd0bf9837fbe740fac652712f32a71b84bddd619a6f9198a5c5ebe0b9e0b520`. Only API, worker and
+web were recreated, with SHA tags and `ASSET_VERSION` cache stamping:
+
+- api: `sha256:8de56737961121eb0ad04c3d8d7ffa9a6e09bd3cfc19964eed77d67320f398de`
+- worker: `sha256:aa240a32862ee3a76511a3e3ca865e933b941809fcc9ac74cf15006906b09449`
+- web: `sha256:51a42c0bb3e4a040fef2acecff746d0ce47978019711f392108e668633e7ab61`
+
+Caddy, Valkey and all 46 neighboring containers retained IDs, images, start times and
+health. Route hash unchanged. Private env changed only TAFF_TAG and retained mode 0600;
+email/SMS unchanged, AI_* unset and all workspace AI flags disabled. PostgreSQL retained
+its host, dedicated role, TLS connection and postmaster start `2026-08-29
+01:19:14.878015+00`. No database restart, DNS, route or role change.
+
+**Rollback identities.** Immediately preceding accepted M18b
+`ab243e8379c952f37c459a60596e4754ba33967e` images remain available:
+
+- api: `sha256:e3ec7ac800fe6e540d173ead9fa16c7ba9d587cc29abe945d5f03e42602bbbe7`
+- worker: `sha256:bcdd2a0d96d33c3533a138851ec05fcbb56f00a9eec8d76c89f14a3f0a245163`
+- web: `sha256:63825ed6a64ca62304f3a9423112b0e37788a9b7bcec3043968dfb56434c6bbb`
+
+**Fresh public acceptance.** All 21 critical/platform cases passed on this M19a runtime:
+en and zh-HK at 390×844 phone and 1280×800 desktop, plus the zh-CN Today/Projects/Me
+spot check. Sign-in, sign-out/re-sign-in, Today, task creation/edit/person and agent
+assignment, run start/pause/resume/cancel, review approve/request changes, grant access,
+navigation, locale/theme, HTTPS/health, Secure/HttpOnly cookies, foreign-origin
+rejection and unchanged auth methods passed. Each of the four live MCP cases used the
+official client, initialized/listed and exercised all 30 read/write tools on current-run
+verification entities, confirmed call logs and live browser updates, submitted and
+approved review, regenerated/revoked tokens and confirmed fresh initialization returns
+401. No production rate-limit flood or SMS OTP request was made.
+
+The fresh remaining public batch completed 108 unique cases: 102 passed, 6 expected
+phone/desktop brief counterparts skipped, 0 remaining noncritical failures, across 109
+attempts. It exercised board drag/status, list filters, calendar day/week/month
+schedule/drag/resize/undo, command search, organizations/create/invite in a fresh
+browser, notifications and agent permissions, CRM
+roles/stakeholders/cascade/archive/undo, timeline dependencies/cycle rejection/relations
+graph/undo, brief and rules-only Ask with human-approved proposals, mind-map keyboard
+nodes/links/evidence/undo and person-owned validation tasks, restricted-member finance
+visibility, and realtime between separate Chromium processes. en/zh-HK phone and desktop
+and zh-CN phone/desktop milestone checks ran. This is fresh M19a evidence, with no
+application-equivalence substitution. 134 entity journals report 0 browser errors and 0
+cleanup failures.
+
+**Verification follow-ups.** The copied recipient helper initially generated an M18b
+prefix while the scoped proof bridge required M19a. Both phone task cases stopped twice
+before task creation; all four journals contain zero created tasks, browser errors and
+cleanup failures. The prefixes were corrected, and each affected phone task flow passed
+its first valid attempt. These four invalid harness attempts are retained in the
+evidence; they are not classified as twice-failing application task flows. No
+application or production permission/data guard was weakened.
+
+- phone-zh-HK mind-map keyboard node/link editing and archive/undo: first attempt
+  failed, then the one permitted retry passed. The sanitized location is
+  `mind.spec.ts:66` (test declaration); the first-attempt cause remains unestablished.
+  Follow up on verification stability.
+
+Verification tokens/new grants were revoked, active runs canceled, agent settings and
+profile/notification preferences restored, schedules cleared, and current-run
+projects/CRM/mind nodes and sources archived; current-run mind edges were removed
+through the supported link API. Tasks, accepted invitations, verification
+recipients/members and workspaces retain auditable history because no supported
+archive/delete API exists. Failed helper signups also retain their isolated
+verification-account history. Public checks used the dedicated verification workspace
+and its own test entities.
+
+**Receipt and unlock.** Acceptance receipt
+`/srv/taff/frontend-v2-m19a-accepted-9577c8cde908f0da38987dcb196fcd6704c998b3.json`;
+`deployment.done` is `9577c8cde908f0da38987dcb196fcd6704c998b3`. Keeper release followed
+the reconciled receipt. An independent native flock probe acquired/released the lock and
+reverified exact images, healthy API, public health 200, Caddy/Valkey/all 46 neighbors,
+route hash and PostgreSQL start time. No twice-failing critical flow required rollback.
+The release remains live; the agent resumes 30-minute discovery until v0.2.0 is deployed
+and recorded.
