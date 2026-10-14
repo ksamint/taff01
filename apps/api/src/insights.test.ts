@@ -263,15 +263,16 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
     signedIn();
     const brief = vi.spyOn(core, "getBrief").mockResolvedValue({} as never);
     expect((await app.request("/api/brief")).status).toBe(200);
-    expect(brief).toHaveBeenLastCalledWith(person, {});
+    expect(brief).toHaveBeenLastCalledWith(person, {}, { labels: true });
     expect(
       (await app.request(`/api/brief?scope=workspace&workspaceId=${other}`))
         .status,
     ).toBe(200);
-    expect(brief).toHaveBeenLastCalledWith(person, {
-      scope: "workspace",
-      workspaceId: other,
-    });
+    expect(brief).toHaveBeenLastCalledWith(
+      person,
+      { scope: "workspace", workspaceId: other },
+      { labels: true },
+    );
     for (const query of ["scope=workspace", "scope=team", "workspaceId=x"])
       expect((await app.request(`/api/brief?${query}`)).status).toBe(400);
     expect(brief).toHaveBeenCalledTimes(2);
@@ -293,7 +294,7 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
     const first = await send("/api/ask", "POST", body);
     expect(first.status).toBe(200);
     expect(first.headers.get("cache-control")).toBe("private, no-store");
-    expect(ask).toHaveBeenCalledWith(person, body);
+    expect(ask).toHaveBeenCalledWith(person, body, { labels: true });
     expect((await send("/api/ask", "POST", body)).status).toBe(200);
     const limited = await send("/api/ask", "POST", body);
     expect(limited.status).toBe(429);
