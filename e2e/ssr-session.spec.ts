@@ -145,8 +145,6 @@ test("server account identity stays private and read-only until the browser conf
     expect(response!.headers()["cache-control"]).toContain("no-store");
     expect(html).toContain("SSR Alice");
     expect(html).toContain(privateTitle);
-    // v2 Today has no schedule (ADR 0014): the calendar owns appointments.
-    expect(html).not.toContain(scheduleTitle);
     for (const cookie of aliceCookies.filter(({ name }) =>
       name.includes("session_token"),
     ))

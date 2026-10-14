@@ -1,6 +1,7 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import {
+  activity,
   agentPermissions,
   agentProfiles,
   agentTokens,
@@ -118,6 +119,8 @@ export type Principal =
       workspaceId: string;
       scopes: Scope[];
     };
+/** How long a person can undo an agent-token revocation. */
+export const RESTORE_WINDOW_MS = 10 * 60 * 1000;
 export function userPrincipal(userId: string): Principal {
   return { kind: "user", userId };
 }
@@ -895,6 +898,75 @@ export function createCore(options: {
       return toAgentToken(updated, null);
     });
   }
+  /**
+   * Undoes a person's revocation within RESTORE_WINDOW_MS, keeping the same
+   * hash so clients configured with the token work again. Person-only: the
+   * last change to the token must have been made by a person in this
+   * workspace, and its agent member must still exist.
+   */
+  async function restoreAgentToken(
+    principal: Principal,
+    tokenId: string,
+  ): Promise<AgentToken> {
+    parse(idSchema, tokenId);
+    if (principal.kind !== "user") throw new CoreError("forbidden", 403);
+    return mutation(principal, async (tx) => {
+      const [row] = await tx
+        .select()
+        .from(agentTokens)
+        .where(eq(agentTokens.id, tokenId))
+        .limit(1)
+        .for("update");
+      if (!row) throw new CoreError("not_found", 404);
+      await requireMember(tx, principal, row.workspaceId, "token:manage");
+      if (!row.revokedAt) return toAgentToken(row, null);
+      if (Date.now() - row.revokedAt.getTime() > RESTORE_WINDOW_MS)
+        throw new CoreError("conflict", 409);
+      const [change] = await tx
+        .select({ actorId: activity.actorId })
+        .from(activity)
+        .where(
+          and(
+            eq(activity.resourceId, row.id),
+            eq(activity.action, "agent_tokens.update"),
+          ),
+        )
+        .orderBy(desc(activity.createdAt))
+        .limit(1);
+      const [revoker] = change
+        ? await tx
+            .select({ id: members.id })
+            .from(members)
+            .where(
+              and(
+                eq(members.workspaceId, row.workspaceId),
+                eq(members.userId, change.actorId),
+                eq(members.kind, "person"),
+              ),
+            )
+            .limit(1)
+        : [];
+      if (!revoker) throw new CoreError("conflict", 409);
+      const [agent] = await tx
+        .select({ id: members.id })
+        .from(members)
+        .where(
+          and(
+            eq(members.workspaceId, row.workspaceId),
+            eq(members.id, row.memberId),
+            eq(members.kind, "agent"),
+          ),
+        )
+        .limit(1);
+      if (!agent) throw new CoreError("conflict", 409);
+      const [updated] = await tx
+        .update(agentTokens)
+        .set({ revokedAt: null, updatedAt: new Date() })
+        .where(eq(agentTokens.id, tokenId))
+        .returning();
+      return toAgentToken(updated, null);
+    });
+  }
   /** Resolves a raw bearer token to an agent principal, or null. */
   async function authenticateAgentToken(
     token: string,
@@ -1011,6 +1083,8 @@ export function createCore(options: {
     listMembers,
     listRuns: runOperations.listRuns,
     listCalendar: calendar.operations.listCalendar,
+    listInbox: (principal, workspaceId) =>
+      runOperations.listInbox(principal, workspaceId),
   });
   return {
     provisionAdministration: async (
@@ -1067,6 +1141,7 @@ export function createCore(options: {
     createAgentToken,
     listAgentTokens,
     revokeAgentToken,
+    restoreAgentToken,
     authenticateAgentToken,
     recordMcpCall,
     listMcpCalls,

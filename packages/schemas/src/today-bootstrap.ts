@@ -12,6 +12,7 @@ import {
 } from "zod/mini";
 import { memberSchema, meSchema, taskSchema } from "./base";
 import { calendarViewDataSchema } from "./calendar-read";
+import { inboxSchema } from "./inbox-read";
 import { idSchema, nonnegativeInteger } from "./primitives";
 import { runSchema } from "./run-read";
 
@@ -32,6 +33,8 @@ export const todayBootstrapSchema = object({
       members: array(memberSchema),
       runs: array(runSchema),
       calendar: calendarViewDataSchema,
+      // Today › 待你處理 renders from the server in the same pass (M13).
+      inbox: inboxSchema,
     }),
   ),
 }).check(

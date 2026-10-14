@@ -39,7 +39,6 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `inbox-badge` | 2 |  | optimistic-m4.spec.ts |
-| `locale-select` | 9 | me-view.tsx | me.spec.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts |
 | `open-quick` | 15 |  | accessibility.spec.ts, agent-review.spec.ts, persistence.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts |
 
 ### auth.tsx
@@ -99,6 +98,12 @@ several do). “Also rendered by” lists the other files.
 | `inbox-tab-blockers` | 1 |  | agent-review.spec.ts |
 | `open-search` | 3 | projects-view.tsx, today-view.tsx | planning.spec.ts |
 
+### landing.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `locale-select` | 9 | me-view.tsx | me.spec.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts |
+
 ### mcp-view.tsx
 
 | Test id | Uses | Also rendered by | Used in |
@@ -109,17 +114,22 @@ several do). “Also rendered by” lists the other files.
 | `token-name` | 2 |  | mcp.spec.ts, optimistic-m4.spec.ts |
 | `token-submit` | 3 |  | mcp.spec.ts, optimistic-m4.spec.ts |
 
+### me-desktop.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `me-advanced` | 2 | me-view.tsx | me.spec.ts |
+| `me-organization` | 5 | me-view.tsx | me.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
+| `open-mcp` | 2 | me-view.tsx | mcp.spec.ts |
+
 ### me-view.tsx
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `advanced-theme-system` | 2 |  | me.spec.ts |
-| `me-advanced` | 2 |  | me.spec.ts |
-| `me-organization` | 5 |  | me.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
 | `me-team` | 3 |  | me.spec.ts, scripts/ui/app-shots.mjs |
 | `me-tz` | 9 |  | me.spec.ts |
 | `me-workspace-*` | 1 |  | me.spec.ts |
-| `open-mcp` | 2 |  | mcp.spec.ts |
 | `open-notifications` | 3 |  | me.spec.ts, scripts/ui/app-shots.mjs |
 | `theme-dark` | 2 |  | me.spec.ts |
 | `theme-light` | 1 |  | me.spec.ts |
@@ -145,6 +155,12 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `organization-create-entry` | 1 |  | me.spec.ts |
 
+### organization-dialogs.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `invite-email-delivery` | 1 |  | planning.spec.ts |
+
 ### organizations-view.tsx
 
 | Test id | Uses | Also rendered by | Used in |
@@ -152,7 +168,6 @@ several do). “Also rendered by” lists the other files.
 | `accept-invitation` | 3 |  | planning.spec.ts |
 | `agent-create` | 5 |  | agent-creation.spec.ts |
 | `agent-name` | 4 |  | agent-creation.spec.ts |
-| `invite-email-delivery` | 1 |  | planning.spec.ts |
 | `role-*` | 5 |  | planning.spec.ts |
 | `team-add-agent` | 5 |  | agent-creation.spec.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
@@ -301,7 +316,7 @@ several do). “Also rendered by” lists the other files.
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 12 |  | accessibility.spec.ts, agent-creation.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-parity.spec.ts |
 | `today-heading` | 42 |  | agent-review.spec.ts, calendar.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, today.spec.ts, username-auth.spec.ts |
-| `today-schedule` | 1 |  | ui-parity.spec.ts |
+| `today-needs-item` | 1 |  | ui-parity.spec.ts |
 
 ## Role and name locators
 
@@ -439,9 +454,6 @@ read (`data-event-id`, `data-date`).
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mjs |
 | `.team-directory-list li` | 1 | ui-parity.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
-| `.today-block-title` | 2 | ssr-session.spec.ts |
-| `.today-meeting-block` | 1 | ui-parity.spec.ts |
-| `.today-past` | 1 | ui-parity.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
 | `#auth-name` | 6 | optimistic-m4.spec.ts, planning.spec.ts, today.spec.ts, username-auth.spec.ts |

@@ -32,7 +32,14 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { StatusGlyph } from "./ui/status-glyph";
 
-export function AgentProfileView({ agentId }: { agentId: string }) {
+/** `embedded` renders the profile inside desktop Me › Agents, without the back bar. */
+export function AgentProfileView({
+  agentId,
+  embedded = false,
+}: {
+  agentId: string;
+  embedded?: boolean;
+}) {
   const { t } = useTranslation();
   const profile = useAgent(agentId);
   if (profile.isPending) return <p className="loading">{t("loading")}</p>;
@@ -45,10 +52,16 @@ export function AgentProfileView({ agentId }: { agentId: string }) {
         <Button onClick={() => void profile.refetch()}>{t("retry")}</Button>
       </div>
     );
-  return <AgentEditor key={agentId} data={profile.data} />;
+  return <AgentEditor key={agentId} data={profile.data} embedded={embedded} />;
 }
 
-function AgentEditor({ data }: { data: AgentProfile }) {
+function AgentEditor({
+  data,
+  embedded,
+}: {
+  data: AgentProfile;
+  embedded: boolean;
+}) {
   const { t, i18n } = useTranslation();
   const { me, workspace } = useWorkspace();
   const members = useMembers(data.member.workspaceId);
@@ -143,13 +156,15 @@ function AgentEditor({ data }: { data: AgentProfile }) {
     if (parsed.success) grant.mutate(parsed.data);
   }
   return (
-    <div className="agent-profile-parity">
-      <div className="agent-profile-toolbar">
-        <Link className="back-link" href="/me">
-          <ArrowLeft size={16} aria-hidden="true" />
-          {t("agentProfile.back")}
-        </Link>
-      </div>
+    <div className={`agent-profile-parity${embedded ? " is-embedded" : ""}`}>
+      {!embedded && (
+        <div className="agent-profile-toolbar">
+          <Link className="back-link" href="/me">
+            <ArrowLeft size={16} aria-hidden="true" />
+            {t("agentProfile.back")}
+          </Link>
+        </div>
+      )}
       <div className="agent-profile-body">
         <header className="agent-profile-heading">
           <span className="agent-profile-avatar" aria-hidden="true">

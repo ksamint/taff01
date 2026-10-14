@@ -118,12 +118,17 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   await page.evaluate(prepareFonts);
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
+  // One count everywhere (ADR 0014): unresolved reviews and blockers.
+  const needsYou = inbox.items.filter(
+    (item) =>
+      !item.resolvedAt && (item.kind === "review" || item.kind === "blocker"),
+  ).length;
   if (desktop) {
     await expect(page.locator(".sidebar")).toBeVisible();
-    await expect(page.locator(".sidebar-agents .sidebar-link")).toHaveCount(3);
-    await expect(
-      page.locator('.sidebar-primary a[href="/inbox"] .sidebar-count'),
-    ).toHaveText(String(inbox.unreadCount));
+    await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(3);
+    await expect(page.locator(".sidebar-me .nav-badge")).toHaveText(
+      String(needsYou),
+    );
   }
   const reviewItem = inbox.items.find(
     (item) => item.taskId === prototypeId("task", "nw", 141),
@@ -372,44 +377,20 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   }
   const shell = page.locator(desktop ? "aside.sidebar" : "nav.tabbar");
   await expect(shell).toBeVisible();
-  await expect(shell.locator('a[href="/inbox"]')).toContainText(
-    messages[locale].nav.inbox,
-  );
   if (desktop) {
-    await expect(shell.locator(".sidebar-agents a")).toHaveCount(3);
-    await expect(shell.locator('a[href="/inbox"] .sidebar-count')).toHaveText(
-      String(inbox.unreadCount),
+    await expect(shell.locator(".sidebar-primary .sidebar-link")).toHaveCount(
+      3,
     );
-    await expect(
-      shell.locator('a[href="/projects"] .sidebar-count'),
-    ).toHaveText(
-      String(
-        new Set(
-          tasks.flatMap((task) => (task.projectId ? [task.projectId] : [])),
-        ).size,
-      ),
+    await expect(shell.locator('a[href="/me"] .nav-badge')).toHaveText(
+      String(needsYou),
     );
-    for (const agent of prototypeAgents) {
-      const latest = runs
-        .filter(
-          (run) => run.agentId === prototypeId("member", "nw", agent.number),
-        )
-        .sort((left, right) =>
-          right.updatedAt.localeCompare(left.updatedAt),
-        )[0];
-      expect(latest, "Seed agent must have its real run").toBeDefined();
-      await expect(
-        shell.locator(
-          `a[href="/agents/${prototypeId("member", "nw", agent.number)}"] .agent-status-dot`,
-        ),
-      ).toHaveClass(
-        new RegExp(`(?:^|\\s)agent-status-${latest.status}(?:\\s|$)`),
-      );
-    }
   } else {
-    await expect(shell.getByRole("link")).toHaveCount(5);
-    await expect(shell.locator('a[href="/inbox"] .nav-badge')).toHaveText(
-      String(inbox.unreadCount),
+    await expect(shell.getByRole("link")).toHaveCount(4);
+    await expect(shell.locator('a[href="/me"]')).toContainText(
+      messages[locale].nav.me,
+    );
+    await expect(shell.locator('a[href="/me"] .nav-badge')).toHaveText(
+      String(needsYou),
     );
   }
   await page.evaluate(() => document.fonts.ready);

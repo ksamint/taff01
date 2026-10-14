@@ -203,14 +203,16 @@
     "notificationsOff": "已關閉",
     "digestSummary": "每日摘要 {{time}}",
     "languageHK": "繁體中文",
-    "languageCN": "简体"
+    "languageCN": "简体",
+    "noAgents": "暫無智能體",
+    "noActiveTasks": "暫無進行中任務"
   },
   "mcp": {
     "title": "MCP 伺服器",
-    "subtitle": "透過 Model Context Protocol 把智能體接入此工作空間。",
+    "subtitle": "外部智能體和客戶端通過 MCP 讀取、建立和更新任務與日程。",
     "open": "開啟 MCP 設定",
-    "endpoint": "端點",
-    "endpointUrl": "Streamable HTTP 網址",
+    "endpoint": "MCP 端點",
+    "endpointUrl": "伺服器地址",
     "endpointHint": "使用個人存取權杖授權：Authorization: Bearer <token>。OAuth 2.1 將於發佈里程碑提供。",
     "adminOnly": "只有工作空間管理員可以管理智能體權杖。",
     "newToken": "新權杖",
@@ -218,10 +220,10 @@
     "copyToken": "複製權杖",
     "copied": "已複製",
     "dismiss": "關閉",
-    "clientConfig": "客戶端設定",
+    "clientConfig": "客戶端配置",
     "tokenName": "權杖名稱",
     "tokenNamePlaceholder": "例如：Claude Desktop",
-    "scopes": "權限範圍",
+    "scopes": "授權範圍",
     "scope": {
       "tasks:read": "讀取任務",
       "tasks:write": "建立與更新任務",
@@ -230,20 +232,15 @@
       "files:write": "附加交付物"
     },
     "createToken": "建立權杖",
-    "tokens": "權杖",
     "noTokens": "還沒有權杖。",
-    "active": "有效",
     "revoked": "已撤銷",
     "lastUsed": "最近使用：{{date}}",
     "neverUsed": "從未使用",
-    "revoke": "撤銷",
     "confirmRevoke": "確認撤銷",
     "cancel": "取消",
-    "callLog": "呼叫記錄",
+    "callLog": "最近調用",
     "noCalls": "還沒有呼叫。",
-    "when": "時間",
     "method": "方法",
-    "tool": "工具",
     "status": "狀態",
     "duration": "耗時",
     "callStatus": {
@@ -252,7 +249,7 @@
       "denied": "已拒絕",
       "rate_limited": "已限流"
     },
-    "tools": "可用工具",
+    "tools": "開放的工具",
     "toolNames": {
       "listTasks": "讀取任務",
       "createTask": "建立任務",
@@ -284,7 +281,47 @@
     },
     "back": "返回",
     "copyEndpoint": "複製端點",
-    "copyConfig": "複製設定"
+    "copyConfig": "複製設定",
+    "running": "執行中",
+    "transport": "Streamable HTTP · 協議 2025-11-25",
+    "auth": {
+      "title": "授權"
+    },
+    "personalToken": "個人存取權杖",
+    "personalTokenHint": "作為 Authorization: Bearer 發送。每個權杖代表一個智能體，只擁有你選擇的授權範圍。",
+    "activeTokens_one": "{{count}} 個有效權杖",
+    "activeTokens_other": "{{count}} 個有效權杖",
+    "connectedClients": "已連接客戶端",
+    "scopeSummary": "{{granted}}/{{total}} 項授權",
+    "created": "建立於 {{date}}",
+    "granted": "已授權",
+    "notGranted": "未授權",
+    "token": "權杖",
+    "regenerate": "重新生成",
+    "regenerateTitle": "重新生成「{{name}}」？",
+    "regenerateHint": "舊權杖會立即失效，已連接的客戶端需要重新配置。",
+    "revokeAccess": "撤銷訪問",
+    "revokeTitle": "撤銷「{{name}}」？",
+    "revokeHint": "使用此權杖的客戶端會立即失效，可在隨後的提示中撤銷此操作。",
+    "undo": "撤銷",
+    "toast": {
+      "regenerated": "已生成新權杖，舊權杖立即失效",
+      "revoked": "已撤銷 {{name}}",
+      "restored": "已恢復 {{name}}"
+    },
+    "connectTools": "連接工具",
+    "notConnected": "未連接",
+    "integrationsHint": "整合功能尚未提供，目前沒有任何連接。",
+    "integrations": {
+      "github": "GitHub",
+      "githubHint": "代碼與 PR",
+      "figma": "Figma",
+      "figmaHint": "設計檔案",
+      "slack": "Slack",
+      "slackHint": "頻道通知",
+      "gcal": "Google 日曆",
+      "gcalHint": "雙向同步日程"
+    }
   },
   "taskDetail": {
     "back": "返回今天",
@@ -314,7 +351,8 @@
       "changes_requested": "已要求修改",
       "completed": "已完成",
       "canceled": "已取消",
-      "failed": "失敗"
+      "failed": "失敗",
+      "idle": "空閒"
     },
     "eventKind": {
       "step": "步驟",
@@ -546,12 +584,14 @@
     },
     "current": "目前組織",
     "roleFor": "{{name}}的角色",
-    "people": "人員",
+    "people": "成員",
     "emailDelivery": {
       "sent": "邀請電郵已傳送，亦可複製下方連結。",
       "logged": "尚未設定電郵傳送。邀請已私下記錄，請複製下方連結分享。",
       "failed": "邀請電郵未能傳送，下方連結仍然有效，可複製分享。"
-    }
+    },
+    "label": "組織",
+    "switchShort": "切換"
   },
   "pwa": {
     "description": "人與代理協作的任務和日曆。",
@@ -663,7 +703,8 @@
     "featureReview": "智能體交付等你確認",
     "featureReviewText": "智能體的交付，經成員確認後才算完成。",
     "featureMcp": "接入你的智能體",
-    "featureMcpText": "智能體經 MCP 接入，權杖有範圍，隨時可撤銷。"
+    "featureMcpText": "智能體經 MCP 接入，權杖有範圍，隨時可撤銷。",
+    "signedIn": "已登入"
   },
   "todayNeeds": {
     "title": "待你處理",
@@ -672,5 +713,12 @@
     "blockedBy": "{{name}} 已受阻",
     "badgeReview": "待確認",
     "badgeBlocker": "已阻塞"
+  },
+  "actions": {
+    "back": "返回"
+  },
+  "toast": {
+    "orgSwitched": "已切換到 {{name}}",
+    "orgCreated": "已建立組織 {{name}}"
   }
 }

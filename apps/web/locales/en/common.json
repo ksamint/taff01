@@ -203,14 +203,16 @@
     "notificationsOff": "Off",
     "digestSummary": "Daily digest {{time}}",
     "languageHK": "繁體中文",
-    "languageCN": "简体"
+    "languageCN": "简体",
+    "noAgents": "No agents yet",
+    "noActiveTasks": "No active tasks"
   },
   "mcp": {
     "title": "MCP server",
-    "subtitle": "Connect agents to this workspace with the Model Context Protocol.",
+    "subtitle": "External agents and clients use MCP to read, create and update tasks and events.",
     "open": "Open MCP settings",
     "endpoint": "Endpoint",
-    "endpointUrl": "Streamable HTTP URL",
+    "endpointUrl": "Server URL",
     "endpointHint": "Authorize with a personal access token: Authorization: Bearer <token>. OAuth 2.1 arrives with the release milestone.",
     "adminOnly": "Only workspace admins manage agent tokens.",
     "newToken": "New token",
@@ -230,20 +232,15 @@
       "files:write": "Attach deliverables"
     },
     "createToken": "Create token",
-    "tokens": "Tokens",
     "noTokens": "No tokens yet.",
-    "active": "Active",
     "revoked": "Revoked",
     "lastUsed": "Last used {{date}}",
     "neverUsed": "Never used",
-    "revoke": "Revoke",
     "confirmRevoke": "Confirm revoke",
     "cancel": "Cancel",
     "callLog": "Call log",
     "noCalls": "No calls yet.",
-    "when": "When",
     "method": "Method",
-    "tool": "Tool",
     "status": "Status",
     "duration": "Duration",
     "callStatus": {
@@ -284,7 +281,47 @@
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",
-    "copyConfig": "Copy configuration"
+    "copyConfig": "Copy configuration",
+    "running": "Running",
+    "transport": "Streamable HTTP · protocol 2025-11-25",
+    "auth": {
+      "title": "Authorization"
+    },
+    "personalToken": "Personal access token",
+    "personalTokenHint": "Sent as Authorization: Bearer. Each token acts as one agent with only the scopes you choose.",
+    "activeTokens_one": "{{count}} active token",
+    "activeTokens_other": "{{count}} active tokens",
+    "connectedClients": "Connected clients",
+    "scopeSummary": "{{granted}}/{{total}} scopes",
+    "created": "Created {{date}}",
+    "granted": "Granted",
+    "notGranted": "Not granted",
+    "token": "Token",
+    "regenerate": "Regenerate",
+    "regenerateTitle": "Regenerate {{name}}?",
+    "regenerateHint": "The old token stops working immediately; connected clients must be reconfigured.",
+    "revokeAccess": "Revoke access",
+    "revokeTitle": "Revoke {{name}}?",
+    "revokeHint": "Clients using this token stop working immediately. You can undo this from the notice that follows.",
+    "undo": "Undo",
+    "toast": {
+      "regenerated": "New token generated; the old one stops working now",
+      "revoked": "Revoked {{name}}",
+      "restored": "Restored {{name}}"
+    },
+    "connectTools": "Connect tools",
+    "notConnected": "Not connected",
+    "integrationsHint": "Integrations are not available yet; nothing is connected.",
+    "integrations": {
+      "github": "GitHub",
+      "githubHint": "Code and pull requests",
+      "figma": "Figma",
+      "figmaHint": "Design files",
+      "slack": "Slack",
+      "slackHint": "Channel notifications",
+      "gcal": "Google Calendar",
+      "gcalHint": "Two-way event sync"
+    }
   },
   "taskDetail": {
     "back": "Back to Today",
@@ -314,7 +351,8 @@
       "changes_requested": "Changes requested",
       "completed": "Completed",
       "canceled": "Canceled",
-      "failed": "Failed"
+      "failed": "Failed",
+      "idle": "Idle"
     },
     "eventKind": {
       "step": "Step",
@@ -551,7 +589,9 @@
       "sent": "Invitation email sent. The link below is also available to copy.",
       "logged": "Email delivery is not configured. The invitation was recorded privately; copy the link below to share it.",
       "failed": "The invitation email could not be sent. The link below is still valid and can be shared."
-    }
+    },
+    "label": "Organization",
+    "switchShort": "Switch"
   },
   "pwa": {
     "description": "Tasks and calendars for people and agents.",
@@ -663,7 +703,8 @@
     "featureReview": "Agent work waits for you",
     "featureReviewText": "Nothing an agent delivers is final until a person confirms it.",
     "featureMcp": "Bring your own agents",
-    "featureMcpText": "Agents connect over MCP with scoped tokens you can revoke."
+    "featureMcpText": "Agents connect over MCP with scoped tokens you can revoke.",
+    "signedIn": "Signed in"
   },
   "todayNeeds": {
     "title": "Needs you",
@@ -672,5 +713,12 @@
     "blockedBy": "{{name}} is blocked",
     "badgeReview": "To confirm",
     "badgeBlocker": "Blocked"
+  },
+  "actions": {
+    "back": "Back"
+  },
+  "toast": {
+    "orgSwitched": "Switched to {{name}}",
+    "orgCreated": "Created {{name}}"
   }
 }
