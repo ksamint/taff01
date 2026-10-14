@@ -19,7 +19,12 @@ import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
 
 const categories = ["review", "block", "mention", "done"] as const;
-export function NotificationsView() {
+/** `embedded` renders the panel inside desktop Me › Settings, without the back bar. */
+export function NotificationsView({
+  embedded = false,
+}: {
+  embedded?: boolean;
+}) {
   const { me } = useWorkspace();
   const { t } = useTranslation();
   const preferences = useNotificationPreferences();
@@ -60,15 +65,17 @@ export function NotificationsView() {
     </Label>
   );
   return (
-    <div className="notifications-parity">
-      <div className="notifications-toolbar">
-        <Link className="back-link" href="/me">
-          <ArrowLeft size={16} aria-hidden="true" />
-          {t("agentProfile.back")}
-        </Link>
-      </div>
+    <div className={`notifications-parity${embedded ? " is-embedded" : ""}`}>
+      {!embedded && (
+        <div className="notifications-toolbar">
+          <Link className="back-link" href="/me">
+            <ArrowLeft size={16} aria-hidden="true" />
+            {t("agentProfile.back")}
+          </Link>
+        </div>
+      )}
       <div className="notifications-body">
-        <h1>{t("notifications.title")}</h1>
+        {!embedded && <h1>{t("notifications.title")}</h1>}
         {preferences.isPending && <p aria-live="polite">{t("loading")}</p>}
         {(preferences.error || update.error) && (
           <div className="alert" role="alert">
