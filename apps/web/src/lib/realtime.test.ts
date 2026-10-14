@@ -98,6 +98,30 @@ describe("workspace realtime lifecycle", () => {
     });
     expect(invalidate).toHaveBeenCalledTimes(4);
   });
+  it("invalidates the CRM families on a company, contact or link change", () => {
+    const keys = [
+      ["companies", workspaceId],
+      ["company", "company-1"],
+      ["contacts", workspaceId, { query: "lee" }],
+      ["contact", "contact-1"],
+      ["contact-links", "project", "project-1"],
+      ["crm-search", workspaceId, "north"],
+      ["crm-audit", workspaceId],
+    ];
+    for (const key of keys) client.setQueryData(key, []);
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    for (const key of keys) client.setQueryData(key, []);
+    for (const key of keys)
+      expect(client.getQueryState(key)?.isInvalidated).toBe(false);
+    socket.message({ ...event, action: "contact_roles.insert" });
+    for (const key of keys)
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(
+      client.getQueryState(["unrelated", workspaceId])?.isInvalidated,
+    ).toBe(false);
+  });
   it("defers change refetches until a pending optimistic mutation settles", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
     cleanup = connectWorkspace(client, workspaceId, userId);

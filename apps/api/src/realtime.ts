@@ -13,6 +13,8 @@ type Client = {
   userId: string;
   sessionId: string;
   admin: boolean;
+  /** Non-guest members read CRM (contact:read); guests get no CRM events. */
+  crmReader: boolean;
   ready: boolean;
   alive: boolean;
   pending?: ChangeEvent;
@@ -42,6 +44,10 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
       event.action,
     );
     const adminOnly = /^(agent_tokens|mcp_calls)\./.test(event.action);
+    const crmEvent =
+      /^(companies|contacts|company_contacts|project_contacts|task_contacts|contact_roles)\./.test(
+        event.action,
+      );
     for (const client of clients) {
       if (
         event.recipientOnly
@@ -67,6 +73,7 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
         continue;
       }
       if (authEvent || (adminOnly && !client.admin)) continue;
+      if (crmEvent && !client.crmReader) continue;
       if (client.socket.readyState !== 1) continue;
       if (client.ready) send(client, event);
       else client.pending = event;
@@ -121,10 +128,10 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
           userPrincipal(userId),
           workspaceId,
         );
+        const role = members.find((member) => member.userId === userId)?.role;
         return {
-          admin:
-            members.find((member) => member.userId === userId)?.role ===
-            "admin",
+          admin: role === "admin",
+          crmReader: role !== undefined && role !== "guest",
           expiresAt: response.session.expiresAt.getTime(),
         };
       };
@@ -133,9 +140,10 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
           () => {
             // A refreshed session keeps its socket; a lapsed one closes.
             void authorize().then(
-              ({ admin, expiresAt: next }) => {
+              ({ admin, crmReader, expiresAt: next }) => {
                 if (!client) return;
                 client.admin = admin;
+                client.crmReader = crmReader;
                 client.expiry = scheduleExpiry(socket, next);
               },
               () => socket.close(1012),
@@ -155,6 +163,7 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
             workspaceId,
             sessionId,
             admin: false,
+            crmReader: false,
             ready: false,
             alive: true,
             expiry: scheduleExpiry(socket, expiresAt),
@@ -165,9 +174,10 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
           });
           // Register first, then reauthorize to cover revocation during the handshake.
           void authorize().then(
-            ({ admin }) => {
+            ({ admin, crmReader }) => {
               if (client && socket.readyState === 1) {
                 client.admin = admin;
+                client.crmReader = crmReader;
                 client.ready = true;
                 // One change invalidates every cache family, including changes while authorizing.
                 if (client.pending) send(client, client.pending);
