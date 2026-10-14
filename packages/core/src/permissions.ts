@@ -127,10 +127,10 @@ export function can(
   if (action === "contact:manage") return actor.kind === "person";
   if (action === "contact:read" || action === "contact:details") {
     if (actor.kind === "person") return true;
-    // Agents read CRM through the crm:read scope; phone and email need a
-    // separate capability so they are never shared by default.
+    // Agents read CRM with tasks:read plus the crm.read capability a person
+    // grants (default ask); phone and email need a separate capability.
     return (
-      !!actor.scopes?.includes("crm:read") &&
+      !!actor.scopes?.includes("tasks:read") &&
       can(actor, "capability:use", { ...resource, capability: "crm.read" }) &&
       (action === "contact:read" ||
         can(actor, "capability:use", {
@@ -317,6 +317,6 @@ function capabilityScope(capability: Capability): Scope {
       : capability === "files.attach"
         ? "files:write"
         : capability.startsWith("crm.")
-          ? "crm:read"
+          ? "tasks:read"
           : "tasks:write";
 }

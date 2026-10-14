@@ -756,7 +756,7 @@ describe("M12 planning and CRM permission decisions", () => {
   const admin: Actor = { ...person, id: "admin", role: "admin" };
   const other: Actor = { ...person, id: "other" };
   const guest: Actor = { ...person, id: "guest", role: "guest" };
-  const crmAgent: Actor = { ...agent, scopes: ["crm:read"] };
+  const crmAgent: Actor = { ...agent, scopes: ["tasks:read"] };
   const allow = (capability: "crm.read" | "crm.contact_details") => ({
     capability,
     decision: "allow" as const,
@@ -823,28 +823,28 @@ describe("M12 planning and CRM permission decisions", () => {
     ["admin audits CRM", admin, "crm:audit", workspace, true],
     ["member cannot audit CRM", person, "crm:audit", workspace, false],
     [
-      "agent without crm:read cannot read contacts",
-      { ...agent, permissions: [allow("crm.read")] },
+      "agent without tasks:read cannot read contacts",
+      { ...agent, scopes: ["tasks:write"], permissions: [allow("crm.read")] },
       "contact:read",
       workspace,
       false,
     ],
     [
-      "crm:read defaults to ask, so no grant means no read",
+      "crm.read defaults to ask, so no grant means no read",
       crmAgent,
       "contact:read",
       workspace,
       false,
     ],
     [
-      "crm:read with an allowed grant reads contacts",
+      "crm.read with an allowed grant reads contacts",
       { ...crmAgent, grants: [grant] },
       "contact:read",
       workspace,
       true,
     ],
     [
-      "crm:read with allow permission reads contacts",
+      "crm.read with allow permission reads contacts",
       { ...crmAgent, permissions: [allow("crm.read")] },
       "contact:read",
       workspace,

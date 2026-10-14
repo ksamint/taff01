@@ -178,10 +178,6 @@ ALTER TABLE "contacts" ADD CONSTRAINT "contacts_company_fk" FOREIGN KEY ("worksp
 -- Generated from CONTACT_ROLE_RULES in packages/schemas/src/crm.ts; a test keeps them equal.
 ALTER TABLE "contact_roles" ADD CONSTRAINT "contact_roles_scope_role" CHECK ((scope, role) IN (('company','decider'),('project','decider'),('task','decider'),('company','chair'),('company','ops'),('project','ops'),('task','ops'),('project','broker'),('project','tech'),('task','tech'),('company','finance'),('project','finance'),('project','signoff'),('task','signoff')));
 --> statement-breakpoint
-ALTER TABLE agent_tokens DROP CONSTRAINT agent_tokens_scopes_known;
---> statement-breakpoint
-ALTER TABLE agent_tokens ADD CONSTRAINT agent_tokens_scopes_known CHECK (scopes <@ ARRAY['tasks:read','tasks:write','calendar:write','inbox:review','files:write','crm:read']::text[]);
---> statement-breakpoint
 CREATE TRIGGER companies_audit AFTER INSERT OR UPDATE OR DELETE ON companies FOR EACH ROW EXECUTE FUNCTION taff_audit_change();
 --> statement-breakpoint
 CREATE TRIGGER contacts_audit AFTER INSERT OR UPDATE OR DELETE ON contacts FOR EACH ROW EXECUTE FUNCTION taff_audit_change();

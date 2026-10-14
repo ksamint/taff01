@@ -223,8 +223,7 @@
       "tasks:write": "建立與更新任務",
       "calendar:write": "修改日程",
       "inbox:review": "提交審核",
-      "files:write": "附加交付物",
-      "crm:read": "讀取公司與聯繫人"
+      "files:write": "附加交付物"
     },
     "createToken": "建立權杖",
     "tokens": "權杖",

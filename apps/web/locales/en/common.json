@@ -223,8 +223,7 @@
       "tasks:write": "Create and update tasks",
       "calendar:write": "Change events",
       "inbox:review": "Submit for review",
-      "files:write": "Attach deliverables",
-      "crm:read": "Read companies and contacts"
+      "files:write": "Attach deliverables"
     },
     "createToken": "Create token",
     "tokens": "Tokens",

@@ -99,7 +99,6 @@ export const scopeSchema = zodEnum([
   "calendar:write",
   "inbox:review",
   "files:write",
-  "crm:read",
 ]);
 export const createAgentTokenSchema = strictObject({
   workspaceId: idSchema,

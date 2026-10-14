@@ -223,8 +223,7 @@
       "tasks:write": "创建与更新任务",
       "calendar:write": "修改日程",
       "inbox:review": "提交审核",
-      "files:write": "附加交付物",
-      "crm:read": "读取公司与联系人"
+      "files:write": "附加交付物"
     },
     "createToken": "创建令牌",
     "tokens": "令牌",

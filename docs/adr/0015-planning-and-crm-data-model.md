@@ -15,8 +15,9 @@ exceptions and no versions. The repository's rules are uuid ids with
 ## Decision
 
 Migration `0023_m12_planning_crm` is additive. It adds ten tables, three
-nullable columns on `projects`, one unique constraint on `tasks`, and widens
-the token-scope check to accept `crm:read`.
+nullable columns on `projects` and one unique constraint on `tasks`. It never
+drops or rewrites anything, constraints included, so the production deploy
+rules (`docs/agent-goal-deploy-frontend-v2.md`, step 2) accept it.
 
 **Planning**
 
@@ -74,8 +75,11 @@ same API. No production entity is ever hard-deleted.
 **Permissions and agents.** Plans reuse `task:schedule`; milestones reuse
 `project:manage`; `dependency:edit` is the successor's owner or an admin, or
 an agent that is its worker with `tasks:write`. CRM reads are for non-guest
-people. Agents read CRM only with the new `crm:read` token scope and the
-`crm.read` capability (default `ask`); phone and email need the separate
+people. Agents read CRM with the existing `tasks:read` token scope and the
+`crm.read` capability, which defaults to `ask`, so a person must allow or
+grant it. Plan §4.2 proposed a new `crm:read` token scope, but accepting it
+would mean replacing the `agent_tokens_scopes_known` CHECK, and dropping a
+constraint is forbidden in production migrations. Phone and email need the separate
 `crm.contact_details` capability (default `deny`). `crm.write` exists
 (default `deny`) but no agent write path ships: MCP CRM tools are read-only.
 `crm:archive` and `crm:audit` are admin-only.
