@@ -868,5 +868,158 @@
       "cancel": "Cancel",
       "delete": "Delete"
     }
+  },
+  "timeline": {
+    "pickProject": "Choose a project to see its timeline.",
+    "empty": "No tasks or milestones to plan yet.",
+    "zoom": "Zoom",
+    "day": "Day",
+    "week": "Week",
+    "criticalPath": "Critical path",
+    "linkMode": "Link mode",
+    "linkHint": "Select the predecessor, then the successor. You can also drag from the dot at the end of a bar. Click an arrow to remove it.",
+    "linkSelected": "“{{task}}” selected. Now select the successor.",
+    "cancel": "Cancel",
+    "close": "Close",
+    "keyboardHint": "Use the up and down arrow keys to move between rows. Edit dates and predecessors in the panel below the chart.",
+    "colTask": "Task",
+    "rowsLabel": "Tasks and milestones in {{project}}",
+    "rowLabel": "{{title}}, {{start}} to {{end}}, {{duration}}, {{who}}, {{progress}}% done",
+    "milestoneLabel": "Milestone {{title}}, {{date}}",
+    "days_one": "{{count}} day",
+    "days_other": "{{count}} days",
+    "behind_one": "{{count}} day behind",
+    "behind_other": "{{count}} days behind",
+    "slip_one": "{{count}} day late",
+    "slip_other": "{{count}} days late",
+    "blocked": "Blocked",
+    "conflict": "Dependency conflict",
+    "agentWork": "Agent work",
+    "human": "Human",
+    "milestone": "Milestone",
+    "legend": "Legend",
+    "dragLink": "Drag to add a dependency",
+    "removeDependency": "Remove dependency: {{from}} → {{to}}",
+    "forecast": "Forecast",
+    "delivery": "Delivered",
+    "risk": {
+      "level": {
+        "low": "On track",
+        "medium": "Watch",
+        "high": "High risk"
+      },
+      "reason": {
+        "dependency_conflict": "Dependency conflict",
+        "slip": "Forecast slips past the plan",
+        "blocked": "A task is blocked",
+        "behind": "Work is behind"
+      }
+    },
+    "finance": {
+      "amount": "Project amount",
+      "collected": "Fees collected"
+    },
+    "date": "Date",
+    "start": "Start",
+    "duration": "Duration (days)",
+    "apply": "Apply",
+    "parentNote": "Moving a parent task moves all its subtasks. Its duration follows the subtasks.",
+    "predecessors": "After",
+    "noPredecessors": "No predecessors.",
+    "removePredecessor": "Remove {{task}} as a predecessor",
+    "addPredecessor": "Add a predecessor",
+    "choosePredecessor": "Choose a task or milestone",
+    "add": "Add",
+    "openTask": "Open task",
+    "showInRelations": "Show in relations",
+    "rescheduled": "Rescheduled",
+    "resized": "Duration changed",
+    "depAdded": "Dependency added",
+    "depRemoved": "Dependency removed",
+    "depExists": "Dependency already exists",
+    "cycle": "That would create a loop, so it was not added"
+  },
+  "relations": {
+    "layoutLabel": "Layout",
+    "layout": {
+      "layered": "Structured",
+      "force": "Free"
+    },
+    "layersTitle": "Relations",
+    "filterAll": "All",
+    "layer": {
+      "dependencies": "Task dependencies",
+      "people": "People ↔ tasks",
+      "org": "Projects ↔ companies",
+      "crm": "Contacts"
+    },
+    "scope": "Scope",
+    "scopeProject": "This project: {{project}}",
+    "scopeWorkspace": "Whole workspace",
+    "asList": "As list",
+    "empty": "Nothing to show yet.",
+    "inspector": "Details",
+    "nodes": "Nodes",
+    "selectHint": "Select a node on the canvas or in this list to see its relations.",
+    "noLayers": "No relation layers selected",
+    "noRelations": "No relations in the selected layers.",
+    "canvasLabel": "Relations graph with {{count}} nodes. Use the details panel or “As list” to browse by keyboard.",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fit": "Fit to view",
+    "legend": "Legend",
+    "close": "Close",
+    "role": "Role",
+    "detail": "Details",
+    "memberRole": {
+      "admin": "Admin",
+      "member": "Member",
+      "guest": "Guest"
+    },
+    "openTask": "Open task",
+    "openInTimeline": "Open in timeline",
+    "nodeType": {
+      "workspace": "Workspace",
+      "project": "Project",
+      "task": "Task",
+      "person": "Human",
+      "agent": "Agent",
+      "company": "Company",
+      "contact": "Contact"
+    },
+    "edge": {
+      "contains": {
+        "out": "Contains",
+        "in": "Part of"
+      },
+      "owns": {
+        "out": "Owns",
+        "in": "Owner"
+      },
+      "works_on": {
+        "out": "Works on",
+        "in": "Worker"
+      },
+      "depends_on": {
+        "out": "Depends on",
+        "in": "Needed by"
+      },
+      "client_of": {
+        "out": "Client of",
+        "in": "Client"
+      },
+      "stakeholder_of": {
+        "out": "Stakeholder of",
+        "in": "Stakeholder"
+      },
+      "contact_of": {
+        "out": "Works at",
+        "in": "Contact"
+      },
+      "supervises": {
+        "out": "Supervises",
+        "in": "Supervised by"
+      }
+    }
   }
 }
