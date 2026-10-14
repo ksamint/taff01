@@ -100,3 +100,23 @@ changed.
 - `relations.get` and `brief.get` MCP tools (M16, M17).
 
 ## Validation
+
+| Check | Result |
+| --- | --- |
+| `pnpm lint`, `typecheck`, `licence:check` | green |
+| `pnpm test` | 56 files, 619 tests green on a fresh test database; the seed suite also passes three times on one database |
+| `pnpm build`, `build:server` | green |
+| `pnpm perf:budget` | Today 196,845 B / 204,800 B |
+| `pnpm e2e` | 128 passed. The 7 failures were the Today mock missing the new access flags (fixed) and the date-dependent calendar test, whose fix came from M11 by merge. The re-run of both specs passed 27/27 |
+| `pnpm mcp:smoke` | 37 checks green, including the seven new tools, the cycle rejection and CRM redaction |
+| Core unit tests | plan model 11, timeline 10, CRM 10, agent-token permission and role tables, the `CONTACT_ROLE_RULES` ↔ SQL test |
+
+The read-model numbers are fixed in `packages/core/src/plan-model.test.ts`.
+They are the acceptance numbers for the M17 brief. Northwind on 2026-10-08:
+
+- NW-140 spans 6–10 October at 59 % progress;
+- the project is 69 % delivered and 40 % collected;
+- the risk is medium, with reason `blocked` (NW-144);
+- the critical path is NW-133 → NW-139 → NW-147 → the v2.4 milestone.
+
+No UI changed, so LCP, Lighthouse and the visual suite stay as on `main`.
