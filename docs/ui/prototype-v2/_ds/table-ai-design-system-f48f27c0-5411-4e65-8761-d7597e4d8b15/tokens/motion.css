@@ -1,0 +1,22 @@
+/* TABLE AI — motion tokens. One easing (expo-out) everywhere; reveal = fade + rise + de-blur. */
+:root{
+--ease-out-expo:cubic-bezier(0.16,1,0.3,1); /* @kind other */
+--ease-standard:var(--ease-out-expo); /* @kind other */
+--dur-fast:300ms; /* @kind other */
+--dur-base:400ms; /* @kind other */
+--dur-slow:500ms; /* @kind other */
+--dur-reveal:800ms; /* @kind other */
+--dur-line:1200ms; /* @kind other */
+--reveal-offset:50px; /* @kind spacing */
+--reveal-blur:6px; /* @kind other */
+--hover-lift:-4px; /* @kind spacing */
+--hover-scale:1.02; /* @kind other */
+--press-scale:0.98; /* @kind other */
+--shadow-lift:0 20px 60px -15px rgba(10,22,38,0.08); /* @kind shadow */
+--shadow-none:none; /* @kind shadow */
+}
+@keyframes ta-reveal-up{from{opacity:0;transform:translateY(var(--reveal-offset));filter:blur(var(--reveal-blur))}to{opacity:1;transform:translateY(0);filter:blur(0)}}
+@keyframes ta-line-expand{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes ta-pulse-ring{0%{transform:scale(1);opacity:.6}100%{transform:scale(2.5);opacity:0}}
+@keyframes ta-spin{to{transform:rotate(360deg)}}
+@keyframes ta-skeleton{0%,100%{opacity:1}50%{opacity:.55}}

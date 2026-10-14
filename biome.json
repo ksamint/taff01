@@ -7,6 +7,7 @@
       "!!**/.next",
       "!!**/migrations",
       "!!docs/ui/prototype",
+      "!!docs/ui/prototype-v2",
       "!!pnpm-lock.yaml",
       "!!**/next-env.d.ts"
     ]

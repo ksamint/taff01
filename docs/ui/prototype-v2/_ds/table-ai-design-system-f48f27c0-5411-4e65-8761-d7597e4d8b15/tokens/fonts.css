@@ -1,0 +1,4 @@
+/* Noto Sans TC — 繁體中文 (Hong Kong) for bilingual 中/EN copy; system CJK fonts as fallback (SC no longer downloaded). Offline copy: the complete OFL font is shared with ../../../../prototype/vendor (serve docs/ui as the root). */
+@font-face{font-family:"Noto Sans TC";src:url("../../../../prototype/vendor/NotoSansTC.ttf") format("truetype");font-weight:100 900;font-style:normal;font-display:swap}
+/* Manrope — display, body and UI (variable font, 200–800). Source: google/fonts ofl/manrope, OFL 1.1 */
+@font-face{font-family:"Manrope";src:url("../assets/fonts/Manrope[wght].ttf") format("truetype");font-weight:200 800;font-style:normal;font-display:swap}
