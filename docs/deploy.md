@@ -1472,3 +1472,52 @@ blocked; the one retry-passing noncritical follow-up is recorded above.
 The local agent continues newest-candidate discovery every 30 minutes until
 v0.2.0 is deployed and recorded, using the effective user rules in the
 updated runbook.
+
+### Frontend v2 release candidate M19a — 2026-10-14
+
+**Source.** `main` at `9577c8cde908f0da38987dcb196fcd6704c998b3`. It supersedes
+M18b, whose source `ab243e8` is live. Since M18b, it adds two parts of M19:
+
+- **PR #21: v1 leftovers.**
+  - Removes 317 lines of unused v1 CSS from `base.css`, `task-detail.css` and
+    `today.css`.
+  - Renames the visual suite to `e2e/ui-v2.spec.ts`; its 86 baselines move
+    byte for byte.
+- **PR #22: fonts and i18n.**
+  - Regenerates the Noto Sans TC subsets from the v2 strings: 714 → 975
+    characters, 219,496 → 295,616 bytes across the two files.
+  - Updates the `unicode-range` values in `tokens.css` to match.
+  - Adds a zh-HK Traditional-character lint test.
+  - Recaptures 69 visual baselines on CI.
+- **`848060a`:** the deploy agent's M18b record, docs only.
+
+**What changes for people.** Seed names, titles and v2 interface characters
+that used to fall back to the system font now render in Noto Sans TC. The
+fonts keep `font-display: optional`. The service worker and locale caches
+refresh through `ASSET_VERSION`, as usual.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `9577c8c`:**
+  [38572631759](https://github.com/ksamint/taff01/actions/runs/38572631759),
+  success. It runs the LCP guard, gated Lighthouse, the visual suite, e2e and
+  the MCP smoke test.
+- **PR CI on the merged heads,** each an ancestor of the source, all success:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #22 | `132bc1ccfb0d7ac0f93e70d1b5709adc43dabc98` | [38569973363](https://github.com/ksamint/taff01/actions/runs/38569973363) |
+  | #21 | `bdaae8aa1a0bb1726e4b3b8ba819cba9e2956f69` | [38565883593](https://github.com/ksamint/taff01/actions/runs/38565883593) |
+
+- **Visual baselines:**
+  [38568927657](https://github.com/ksamint/taff01/actions/runs/38568927657)
+  on `32ac206`, the PR #22 head before the baseline commit.
+
+**Validation numbers.** Unit and integration tests: 877 / 877 (PR #22). Today
+initial JS: 194,431 B gzipped of 204,800 B. The LCP guard and Lighthouse
+(at least 90 in every category) are gated in the `main` run above. Under the
+current rules, the local production-mode checklist was not rerun.
+
+**Migrations.** None. The last migration is still `0026`.
+
+**Environment, Compose, Docker and Caddy.** No changes.

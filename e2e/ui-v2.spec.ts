@@ -292,6 +292,18 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         await expect(lanes.nth(0)).toBeVisible();
         await expect(lanes.nth(1)).toBeVisible();
         await expect(page.locator(".sx__time-grid-event")).toHaveCount(5);
+      } else if (screen === "me") {
+        // Desktop Me opens on its inbox tab with the first item's detail;
+        // phone Me lists its rows. Wait for that content, not just the shell.
+        if (desktop) {
+          await expect(page.getByTestId("inbox-item")).toHaveCount(
+            inbox.items.length,
+          );
+          await expect(page.getByTestId("task-detail-heading")).toBeVisible();
+        } else {
+          await expect(page.getByTestId("me-inbox")).toBeVisible();
+          await expect(page.getByTestId("me-brief")).toBeVisible();
+        }
       } else if (screen === "inbox") {
         await expect(page.getByTestId("inbox-item")).toHaveCount(
           inbox.items.length,

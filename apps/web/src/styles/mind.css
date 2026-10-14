@@ -482,6 +482,7 @@
   overflow-wrap: anywhere;
 }
 a.mind-citation-title {
+  min-height: 44px;
   text-decoration: underline;
   text-underline-offset: 2px;
 }

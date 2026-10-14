@@ -82,6 +82,8 @@
   --text-muted: var(--color-ink-variant);
   --text-subtle: var(--color-ink-variant);
   --text-on-inverse: var(--color-white);
+  /* Text on the gold accent: white is 3.24:1, deep blue 5.5:1. */
+  --text-on-accent: var(--color-deep-blue);
   --accent: var(--color-gold);
   --accent-hover: var(--color-gold-hover);
   --accent-text: var(--color-gold-deep);
@@ -167,6 +169,7 @@
   --text-muted: #bbc7dd;
   --text-subtle: var(--text-muted);
   --text-on-inverse: #0a1626;
+  --text-on-accent: #0a1626;
   --accent: #a88b52;
   --accent-hover: #b89a60;
   --accent-text: #e3c284;

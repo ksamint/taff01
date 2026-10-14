@@ -35,6 +35,7 @@ assert(
     "review",
     "search",
     "type",
+    "v2",
   ].includes(screen),
   "Unknown UI_SCREEN",
 );
@@ -135,6 +136,19 @@ try {
           (row) => row.id === prototypeId("digest", "nw", 1),
         );
         assert(digest, "Seed must include the recipient's daily digest");
+        const first = async (kind) => {
+          const response = await page.request.get(
+            `${base}/api/${kind}?workspaceId=${workspace.id}`,
+          );
+          assert.equal(response.status(), 200, `${kind} read failed`);
+          const body = await response.json();
+          const row = (Array.isArray(body) ? body : body.items)[0];
+          assert(row, `Seed must include ${kind}`);
+          return row.id;
+        };
+        const company = await first("companies");
+        const contact = await first("contacts");
+        const project = prototypeId("project", "nw");
         const routes = [
           ["today", "/"],
           ["organization-directory", "/orgs"],
@@ -148,19 +162,33 @@ try {
           ["inbox", "/inbox"],
           ["me", "/me"],
           ["mcp", "/me/mcp"],
-          ["organizations", "/me"],
-          ["notifications", "/me"],
-          ["team", "/me"],
+          // Desktop Me opens on 收件箱; its organization switch is under 設定,
+          // and notifications and team are reached directly (plan §7).
+          ["organizations", device === "desktop" ? "/me?tab=settings" : "/me"],
+          ["notifications", device === "desktop" ? "/me/notifications" : "/me"],
+          ["team", device === "desktop" ? "/orgs#team" : "/me"],
           ["quick-add", "/"],
           ["task-detail", "/projects"],
           ["agent", `/agents/${agent.id}`],
           ["review", device === "desktop" ? "/inbox" : "/projects"],
+          // Frontend v2 routes (plan §7).
+          ...["list", "timeline", "stakeholders", "relations", "mind"].map(
+            (name) => [`project-${name}`, `/projects/${project}?view=${name}`],
+          ),
+          ["companies", "/companies"],
+          ["company-detail", `/companies/${company}`],
+          ["contacts", "/contacts"],
+          ["contact-detail", `/contacts/${contact}`],
+          ["brief", device === "desktop" ? "/me?tab=brief" : "/brief"],
         ];
+        const v2Views = new Set(routes.slice(-10).map(([view]) => view));
         for (const [view, route] of routes) {
+          if (screen === "v2" && !v2Views.has(view)) continue;
           if (
             screen !== "all" &&
             screen !== "shell" &&
             screen !== "type" &&
+            screen !== "v2" &&
             view !== screen
           )
             continue;
@@ -175,9 +203,10 @@ try {
           );
           if (device === "desktop") {
             await expect(page.locator(".sidebar")).toBeVisible();
+            // 今天 · 日曆 · 項目 with 公司 · 聯繫人 nested (ADR 0014 §2).
             await expect(
               page.locator(".sidebar-primary .sidebar-link"),
-            ).toHaveCount(3);
+            ).toHaveCount(5);
           }
           let openedReview = false;
           let originalInbox;
@@ -257,13 +286,14 @@ try {
                 page.getByRole("dialog").locator(".organization-choices"),
               ).toBeVisible();
             } else if (view === "notifications") {
-              await page.getByTestId("open-notifications").click();
+              if (device === "phone")
+                await page.getByTestId("open-notifications").click();
               await expect(page).toHaveURL(`${base}/me/notifications`);
               await expect(
                 page.getByTestId("notification-review"),
               ).toBeEnabled();
             } else if (view === "team") {
-              await page.getByTestId("me-team").click();
+              if (device === "phone") await page.getByTestId("me-team").click();
               await expect(page).toHaveURL(`${base}/orgs#team`);
               await expect(page.locator("#team")).toBeVisible();
               await expect(
@@ -280,8 +310,13 @@ try {
               ).toHaveCount(3);
               await expect(page.getByTestId("team-invite")).toBeEnabled();
             } else if (view === "quick-add") {
-              await expect(page.getByTestId("open-quick")).toBeEnabled();
-              await page.getByTestId("open-quick").click();
+              // Desktop Today opens quick add from 新建任務 (ADR 0014).
+              const trigger =
+                device === "desktop"
+                  ? page.getByTestId("desktop-new-task")
+                  : page.getByTestId("open-quick");
+              await expect(trigger).toBeEnabled();
+              await trigger.click();
               await expect(page.getByRole("dialog")).toBeVisible();
               await expect(page.getByTestId("quick-title")).toBeEnabled();
             }
@@ -369,12 +404,14 @@ try {
   assert.equal(
     captures.length,
     screen === "all"
-      ? 126
+      ? 186
       : screen === "shell"
-        ? 120
-        : screen === "review"
-          ? 12
-          : 6,
+        ? 180
+        : screen === "v2"
+          ? 60
+          : screen === "review"
+            ? 12
+            : 6,
     "Incomplete capture matrix",
   );
   await writeFile(
