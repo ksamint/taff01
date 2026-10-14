@@ -768,3 +768,22 @@ SHA, which a merged PR never has. The rule now accepts:
   an ancestor of the source.
 
 Everything after the source on `main` touches only `docs/`.
+
+**Blocked: local `pnpm e2e` readiness failure — 2026-10-14.** R1b passed
+the revised Step 0: main CI is green for source
+`5e616dd27bb167508155f4c5dd9bde9284538a7c`, PR CI is green for its ancestor
+`ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`, and the source-to-main code
+diff is empty. In a clean detached checkout on Node 24.19.0, local lint,
+typecheck, licence, 683 tests in 67 files, build, build:server and perf:budget
+passed; Today initial JavaScript is 193,190 bytes gzipped (204,800 limit).
+The deploy agent interrupted a local readiness setup to set the web port,
+but its detached API helper remained running. `pnpm e2e` then exited 1:
+`http://127.0.0.1:4601/api/health is already used`. No browser cases ran.
+This is a local deploy-helper failure, not evidence of an application defect;
+the checkout-owned API/web helpers have been stopped and the ignored local
+environment now explicitly sets `PORT=4600`. Step 1 requires stopping on a
+failed command, so MCP smoke, Lighthouse, LCP and production deployment were
+not run. Publish a fresh unblocked candidate to repeat the complete local
+validation. No production lock, backup, migration, image build or container
+replacement was started; the live SHA is still
+`23387723f8c438d990db00d561cba2899f48ab80`.
