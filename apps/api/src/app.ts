@@ -61,6 +61,7 @@ import type { Logger } from "pino";
 import { createMcpHttpHandler, describeCall } from "./mcp";
 import type { RateLimiter } from "./rate-limit";
 import type { Realtime } from "./realtime";
+import { registerTimelineRoutes } from "./routes/timeline";
 
 type Core = ReturnType<typeof createCore>;
 
@@ -511,6 +512,7 @@ export function createApp(
       ),
     ),
   );
+  registerTimelineRoutes(app, core);
   app.post("/api/workspaces", async (c) =>
     c.json(
       await core.createWorkspace(
