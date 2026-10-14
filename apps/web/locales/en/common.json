@@ -269,7 +269,10 @@
       "submitRun": "Submit for review",
       "requestGrant": "Request permission",
       "calendarList": "List actual scheduled occurrences",
-      "calendarSet": "Set a whole-series calendar schedule"
+      "calendarSet": "Set a whole-series calendar schedule",
+      "listCompanies": "List companies",
+      "listContacts": "List contacts (no phone or email without permission)",
+      "readContact": "Read a contact and its links"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",

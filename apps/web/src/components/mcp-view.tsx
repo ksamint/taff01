@@ -57,6 +57,9 @@ const TOOLS = [
   ["files.attach", "attachFile"],
   ["runs.submit", "submitRun"],
   ["grants.request", "requestGrant"],
+  ["companies.list", "listCompanies"],
+  ["contacts.list", "listContacts"],
+  ["contacts.get", "readContact"],
 ] as const;
 const SCOPES = scopeSchema.options as Scope[];
 

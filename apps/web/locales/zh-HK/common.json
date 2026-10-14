@@ -269,7 +269,10 @@
       "submitRun": "提交審核",
       "requestGrant": "請求權限",
       "calendarList": "列出實際日程項目",
-      "calendarSet": "設定整個系列的日程"
+      "calendarSet": "設定整個系列的日程",
+      "listCompanies": "列出公司",
+      "listContacts": "列出聯繫人（未獲授權不含電話與電郵）",
+      "readContact": "讀取聯繫人及其關聯"
     },
     "back": "返回",
     "copyEndpoint": "複製端點",
