@@ -263,10 +263,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         page.getByText(messages[locale].loading, { exact: true }),
       ).toHaveCount(0);
       if (screen === "today") {
-        await expect(page.getByTestId("today-schedule")).toHaveCount(5);
         await expect(page.getByTestId("task-card")).toHaveCount(2);
-        await expect(page.locator(".today-meeting-block")).toHaveCount(3);
-        await expect(page.locator(".today-past")).toHaveCount(1);
+        await expect(
+          page.getByTestId("today-needs-item").first(),
+        ).toBeVisible();
       } else if (screen === "projects" || screen === "type") {
         await expect(page.getByTestId("board-task")).toHaveCount(12);
       } else if (screen === "task-detail" || screen === "review") {

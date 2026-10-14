@@ -145,7 +145,8 @@ test("server account identity stays private and read-only until the browser conf
     expect(response!.headers()["cache-control"]).toContain("no-store");
     expect(html).toContain("SSR Alice");
     expect(html).toContain(privateTitle);
-    expect(html).toContain(scheduleTitle);
+    // v2 Today has no schedule (ADR 0014): the calendar owns appointments.
+    expect(html).not.toContain(scheduleTitle);
     for (const cookie of aliceCookies.filter(({ name }) =>
       name.includes("session_token"),
     ))
@@ -154,17 +155,11 @@ test("server account identity stays private and read-only until the browser conf
       "aria-label",
       messages[locale].me.signedInAs.replace("{{name}}", alice.user.name),
     );
-    // App scripts are still held: both the due list and calendar must already
-    // be visible from authenticated HTML, rather than hydration or IDB.
+    // App scripts are still held: the due list must already be visible from
+    // authenticated HTML, rather than hydration or IDB.
     await expect(page.getByTestId("task-card")).toHaveCount(1);
     await expect(page.locator(".today-task-title")).toHaveText(privateTitle);
     await expect(page.locator(".today-task-title")).toBeVisible();
-    await expect(page.locator(".today-block-title")).toContainText([
-      scheduleTitle,
-    ]);
-    await expect(
-      page.locator(".today-block-title").filter({ hasText: scheduleTitle }),
-    ).toBeVisible();
     releaseScripts();
     await expect(page.locator("html")).toHaveAttribute(
       "data-client-session-read",
