@@ -292,6 +292,13 @@ commit and the agent-creation follow-up.
 
 ## Operations
 
+### Production verification account
+
+- Username: `taff_verify`.
+- Workspace: `Taff verification`.
+- Credentials: 1Password vault `Codex Automation`, item
+  `Taff production verification account`.
+
 ### Username and administrative setup
 
 Sign-in accepts email or a 2–30 character ASCII username (letters, digits,
