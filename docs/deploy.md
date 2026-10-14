@@ -501,3 +501,12 @@ After the complete public acceptance, the verified receipt was written and
 flock probe then acquired the same lock and confirmed the accepted runtime
 images were still running and API healthy. The lock is free. This checkpoint
 is a documentation-only commit ahead of the accepted source.
+
+## Frontend v2 releases
+
+Frontend v2 (`docs/frontend-v2-plan.md`) is released in stages. The cloud
+build agent appends a `### Frontend v2 release candidate <name> — <date>`
+section here for each validated `main` SHA. The local agent deploys it with
+`docs/agent-goal-deploy-frontend-v2.md`. Then it appends the matching
+`### Frontend v2 <name> upgrade checkpoint — <date>`, or a `Blocked:` note
+under the candidate.

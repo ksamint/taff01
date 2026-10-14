@@ -564,7 +564,7 @@ user redirects asynchronously.
 3. M13, shell, Today, Me, Inbox and sign-in.
 4. M14, projects, task detail, calendar and search.
 5. The MCP items in M13 and M14.
-6. **R1**: deploy to `https://taff.apuch.cn`.
+6. **R1**: publish the release candidate; the local agent deploys it to `https://taff.apuch.cn`.
 
 **Phase B:** M15–M18, each redeployed live when green.
 
@@ -602,18 +602,21 @@ zh-HK, on phone and desktop, before R1 is reported:
 
    Record the result without printing the token.
 
-Deploy every release with `docs/agent-goal-deploy.md` and the procedure in
-`docs/deploy.md`:
+**Who deploys.** The cloud build agent cannot reach the host, so it never
+deploys. For each release it:
 
-- take the lock and back up first;
-- deploy a detached SHA;
-- run the migrator;
-- replace only the API, worker and web;
-- run the public checks;
-- write a checkpoint in `docs/deploy.md`.
+- merges to `main` with green CI;
+- passes the checklist against a local production-mode stack;
+- appends a `Frontend v2 release candidate` section to `docs/deploy.md`.
 
-Migrations stay additive. Never drop or rewrite production data. Roll back
-to the previous SHA if a public check fails, then fix forward.
+The local agent deploys each candidate with
+[`agent-goal-deploy-frontend-v2.md`](agent-goal-deploy-frontend-v2.md),
+using the same lock, backups, detached SHA, migrator and API/worker/web-only
+replacement as earlier releases. It runs the same checklist plus a live MCP
+round trip on the public site, writes the upgrade checkpoint, and rolls back
+on failure.
+
+Migrations stay additive. Never drop or rewrite production data.
 
 ### 6.1 Milestone list
 
@@ -754,9 +757,10 @@ Acceptance:
 
 ### R1 — Live review release
 
-The Phase A exit described in §6.0: the checklist passes on the live site and
-the deploy checkpoint and milestone report link the evidence. Then continue
-with M15 without waiting for review.
+The Phase A exit described in §6.0. The build agent publishes the R1
+candidate and continues with M15 without waiting. The local agent deploys
+it, and the checklist passes on the live site. The upgrade checkpoint in
+`docs/deploy.md` and the milestone report link the evidence.
 
 ### M15 — CRM screens
 
