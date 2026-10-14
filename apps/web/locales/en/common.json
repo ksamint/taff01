@@ -82,7 +82,7 @@
   "calendar": {
     "title": "Calendar",
     "hint": "Schedules and deadlines are separate.",
-    "unscheduled": "Unscheduled",
+    "unscheduled": "No time set",
     "day": "Day",
     "week": "Week",
     "month": "Month",
@@ -112,7 +112,7 @@
     "saved": "Updated",
     "titleLabel": "Title",
     "truncated": "Too many events. Narrow dates or workspace.",
-    "agentLane": "Agents",
+    "agentLane": "Agents · background",
     "agentHint": "Open tasks for agent run status.",
     "emptyTray": "No unscheduled tasks.",
     "invalid": "Check dates, duration, zone and repeat.",
@@ -120,8 +120,13 @@
     "selectView": "View",
     "noEvents": "No scheduled tasks",
     "tools": "Calendar controls",
-    "dragHint": "Drag to move; use list for keyboard scheduling",
-    "goToDate": "Go to date"
+    "dragHint": "Drag to reschedule; tap an empty slot to add",
+    "goToDate": "Go to date",
+    "keyboardHint": "Without a pointer, use the list or open an item to change its time.",
+    "toast": {
+      "moved": "Moved to {{date}} {{time}}",
+      "durationSet": "Duration set to {{start}}–{{end}}"
+    }
   },
   "projects": {
     "title": "Projects",

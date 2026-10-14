@@ -1,0 +1,738 @@
+/* Calendar, prototype v2: phone 141–247, desktop header 1221–1238 and grid
+   1405–1442. Schedule-X keeps its native DOM (gestures, `.sx__*` classes);
+   these rules restyle it with tokens only. Imported by the calendar scene,
+   engine and schedule editor, so it loads only with the calendar chunks. */
+
+/* Schedule-X theme mapped onto the design tokens. */
+.calendar-engine {
+  min-width: 0;
+  width: 100%;
+  overflow-x: auto;
+  --sx-border: 1px solid var(--border-line);
+  --sx-color-primary: var(--accent);
+  --sx-color-on-primary: var(--text-on-inverse);
+  --sx-color-primary-container: var(--accent-wash);
+  --sx-color-on-primary-container: var(--accent-text);
+  --sx-color-background: var(--bg);
+  --sx-color-on-background: var(--text);
+  --sx-color-surface: var(--bg);
+  --sx-color-surface-dim: var(--bg-container);
+  --sx-color-surface-bright: var(--bg);
+  --sx-color-surface-container: var(--bg-container);
+  --sx-color-surface-container-low: var(--bg-container-low);
+  --sx-color-surface-container-high: var(--bg-container-high);
+  --sx-internal-color-text: var(--text);
+  --sx-internal-color-light-gray: var(--bg-container-low);
+  --sx-internal-color-gray-ripple-background: var(--bg-container);
+  --sx-color-neutral: var(--text-muted);
+  --sx-color-on-surface: var(--text);
+  --sx-color-outline: var(--border);
+  --sx-color-outline-variant: var(--border);
+  --sx-rounding-extra-small: 0px;
+  --sx-calendar-week-grid-padding-left: 56px;
+}
+.calendar-engine .sx__calendar-header,
+.calendar-engine .sx__week-grid__date-axis {
+  display: none;
+}
+.calendar-engine .sx-react-calendar-wrapper {
+  width: 100%;
+  min-width: 0;
+  height: calc(100dvh - 300px);
+  min-height: 360px;
+}
+.calendar-engine .sx__calendar {
+  border: none;
+}
+.calendar-engine .sx__view-container {
+  scroll-behavior: auto;
+  scrollbar-width: none;
+}
+.calendar-engine .sx__week-grid__time-axis {
+  font-size: 12px;
+  color: var(--text-subtle);
+  width: calc(100% - var(--sx-calendar-week-grid-padding-left));
+  font-variant-numeric: tabular-nums;
+}
+.calendar-engine .sx__event:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+/* Event blocks: white with a hairline border, dashed for agents. */
+.calendar-engine .sx__time-grid-event,
+.calendar-engine .sx__date-grid-event,
+.calendar-engine .sx__month-grid-event {
+  border: 1px solid var(--border) !important;
+  border-radius: 0;
+  background: var(--bg) !important;
+  color: var(--text) !important;
+  padding: 3px 8px;
+  font-size: 12px;
+}
+.calendar-engine .taff-event-in_progress {
+  border-color: var(--border-strong) !important;
+}
+.calendar-engine .taff-event-needs_review {
+  border-color: var(--accent) !important;
+}
+.calendar-engine .taff-event-done {
+  border-color: var(--success) !important;
+  background: var(--bg-container-low) !important;
+}
+.calendar-engine .taff-agent-event {
+  border-style: dashed !important;
+}
+.calendar-engine-day .taff-agent-event {
+  background: repeating-linear-gradient(
+    135deg,
+    var(--bg) 0 6px,
+    var(--bg-container-low) 6px 12px
+  ) !important;
+}
+.calendar-engine .sx__time-grid-event {
+  min-height: 44px;
+}
+.calendar-engine .sx__time-grid-event-inner {
+  position: static;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.calendar-event-title,
+.calendar-event-time {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.calendar-event-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
+.calendar-event-time {
+  font-size: 12px;
+  line-height: 14px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+/* Exact Sparkles artwork from installed lucide-react 1.52.0 (ISC).
+   A CSS mask keeps the SDK's stable, escaped native event elements. */
+.calendar-engine .taff-agent-event .calendar-event-title::before,
+.calendar-engine .taff-agent-event .sx__month-grid-event-title::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  vertical-align: -1px;
+  background: var(--text-muted);
+  mask:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22black%22%20stroke-width%3D%221.5%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M11.017%202.814a1%201%200%200%201%201.966%200l1.051%205.558a2%202%200%200%200%201.594%201.594l5.558%201.051a1%201%200%200%201%200%201.966l-5.558%201.051a2%202%200%200%200-1.594%201.594l-1.051%205.558a1%201%200%200%201-1.966%200l-1.051-5.558a2%202%200%200%200-1.594-1.594l-5.558-1.051a1%201%200%200%201%200-1.966l5.558-1.051a2%202%200%200%200%201.594-1.594z%22%2F%3E%3Cpath%20d%3D%22M20%202v4M22%204h-4%22%2F%3E%3Ccircle%20cx%3D%224%22%20cy%3D%2220%22%20r%3D%222%22%2F%3E%3C%2Fsvg%3E")
+    center / contain no-repeat;
+}
+.calendar-engine .sx__time-grid-event-resize-handle {
+  min-height: 12px;
+  inset-inline: 0;
+  width: auto;
+}
+.calendar-engine .sx__time-grid-event-resize-handle::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  opacity: 0.5;
+  left: calc(50% - 10px);
+  bottom: 2px;
+  pointer-events: none;
+}
+.calendar-source-now-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--accent);
+  pointer-events: none;
+  z-index: 4;
+}
+.calendar-source-now-line::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Month grid. */
+.calendar-engine .sx__month-grid-day {
+  min-width: 0;
+  padding: 4px 2px;
+}
+.calendar-engine .sx__month-grid-day__header {
+  padding: 0;
+}
+.calendar-engine .sx__month-grid-day__header-day-name {
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+.calendar-engine .sx__month-grid-day__header-date {
+  width: 22px;
+  height: 22px;
+  margin-bottom: 2px;
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.calendar-engine .sx__month-grid-day__header-date.sx__is-today {
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
+}
+.calendar-engine .sx__month-grid-day__events {
+  gap: 2px;
+}
+.calendar-engine .sx__month-grid-cell,
+.calendar-engine .sx__month-grid-event {
+  min-height: 44px;
+  height: 44px;
+}
+.calendar-engine .sx__month-grid-event {
+  min-width: 44px;
+  padding: 1px 3px;
+  line-height: 14px;
+  touch-action: none;
+}
+.calendar-engine .sx__month-grid-event-time {
+  display: none;
+}
+.calendar-engine .sx__month-grid-event-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.calendar-touch-preview {
+  position: fixed;
+  z-index: 1000;
+  pointer-events: none;
+  max-width: 160px;
+  padding: 6px 10px;
+  border: 1px solid var(--accent);
+  background: var(--bg);
+  color: var(--text);
+  box-shadow: var(--shadow-lift);
+  font-size: 12px;
+}
+
+/* Day view: people on the left, agents' background lane on the right. */
+.calendar-day-lanes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  min-width: 0;
+}
+.calendar-day-lanes .sx__date-grid {
+  height: var(--calendar-date-row-height, auto);
+  overflow-y: auto;
+}
+.calendar-agent-engine {
+  border-left: 1px dashed var(--border);
+  --sx-calendar-week-grid-padding-left: 0px;
+}
+.calendar-agent-engine .sx__week-grid__time-axis {
+  display: none;
+}
+.calendar-agent-engine .sx__week-grid,
+.calendar-agent-engine .sx__date-grid {
+  padding-left: 0;
+}
+.calendar-agent-label {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 8px 12px 0;
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+
+/* Header, segmented control, tools and day strip (phone 143–165). */
+.calendar-source-header {
+  padding: 8px 16px 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.calendar-source-navigation {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+.calendar-month-title {
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.2;
+  margin-right: 8px;
+  white-space: nowrap;
+}
+.calendar-source-navigation .button {
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  flex: none;
+  color: var(--text-muted);
+}
+.calendar-source-mode {
+  display: flex;
+  background: var(--bg-container);
+  padding: 2px;
+  border-radius: 2px;
+  gap: 2px;
+  margin-left: auto;
+}
+.calendar-source-mode .button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 10px;
+  font-size: 13px;
+  border: 0;
+  border-radius: 2px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+.calendar-source-mode .button[aria-pressed="true"] {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+}
+.calendar-source-tools {
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+.calendar-source-tools > summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 20px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+}
+.calendar-source-tools > summary::-webkit-details-marker {
+  display: none;
+}
+.calendar-source-tools > summary > svg {
+  flex: none;
+}
+.calendar-source-tools > summary > svg:last-child {
+  margin-left: auto;
+}
+.calendar-source-tool-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0 20px 8px;
+}
+.calendar-source-tool-actions > p {
+  flex-basis: 100%;
+}
+.calendar-source-tool-actions .button {
+  min-height: 44px;
+  font-size: 12px;
+}
+.calendar-source-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  padding: 0 12px 8px;
+  border-bottom: 1px solid var(--border-line);
+}
+.calendar-source-week-strip {
+  padding-left: 44px;
+  padding-right: 8px;
+}
+.calendar-source-strip button {
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  padding: 2px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 60px;
+  min-width: 0;
+  color: var(--text);
+}
+.calendar-source-strip button > span:first-child {
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+.calendar-source-strip strong {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.calendar-source-week-strip strong {
+  width: 26px;
+  height: 26px;
+  font-size: 13px;
+}
+.calendar-source-strip button[aria-pressed="true"] strong {
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
+}
+.calendar-source-day-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+.calendar-source-day-dot.has-events {
+  background: var(--text-subtle);
+}
+
+/* Unscheduled tray: 未安排時間 · n, then dashed chips. */
+.calendar-source-tray {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border-line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.calendar-source-tray h2 {
+  flex: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.calendar-source-tray-items {
+  display: flex;
+  gap: 8px;
+}
+.calendar-source-tray .button {
+  flex: none;
+  min-height: 44px;
+  display: inline-flex;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0 10px;
+  border: 1px dashed var(--border);
+  border-radius: 2px;
+  font-size: 12px;
+  font-weight: 500;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.calendar-source-tray .button:hover:not(:disabled) {
+  border-color: var(--text-subtle);
+  background: transparent;
+}
+.calendar-source-tray .button > span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+
+/* Notices, undo and the list alternative to dragging. */
+.calendar-undo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 8px 20px;
+  padding: 4px 12px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  font-size: 12px;
+}
+.calendar-scene .alert,
+.calendar-scene .loading {
+  margin: 8px 20px;
+  font-size: 12px;
+}
+.calendar-list-item {
+  list-style: none;
+  padding: 4px 20px;
+  border-bottom: 1px solid var(--border-line);
+}
+
+/* Phone week: 44 px hours, compact title-only blocks (prototype 197–217). */
+.calendar-phone .calendar-engine-week {
+  --sx-calendar-week-grid-padding-left: 44px;
+}
+@media (max-width: 700px) {
+  .calendar-phone .calendar-engine-week .sx__time-grid-event {
+    padding: 2px 3px;
+  }
+  .calendar-phone .calendar-engine-week .calendar-event-title {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 14px;
+  }
+  .calendar-phone .calendar-engine-week .calendar-event-title::before {
+    display: none;
+  }
+  .calendar-phone .calendar-engine-week .calendar-event-time {
+    display: none;
+  }
+  .calendar-phone .calendar-engine-month-grid .sx__month-grid-day {
+    min-height: 118px;
+  }
+  .calendar-phone .calendar-engine-month-grid .sx__month-grid-event {
+    padding: 1px 2px;
+  }
+  .calendar-phone .calendar-engine-month-grid .sx__month-grid-event-title {
+    text-overflow: clip;
+  }
+}
+
+/* Desktop (prototype 1221–1238, 1405–1442): header bar, column heads, the
+   Schedule-X grid filling the view and the tray on the side. */
+.signed-in > .content:has(.calendar-desktop) {
+  padding-bottom: 0;
+}
+.calendar-desktop {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  min-width: 0;
+}
+.calendar-desk-header {
+  flex: none;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--border-line);
+}
+.calendar-desk-header .calendar-month-title {
+  font-size: 15px;
+}
+.calendar-desk-header .calendar-today {
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-color: var(--border-strong);
+  border-radius: 2px;
+}
+.calendar-desk-spacer {
+  flex: 1;
+}
+.calendar-desk-header .calendar-source-mode {
+  margin-left: 0;
+}
+.calendar-desk-header .calendar-source-mode .button {
+  font-size: 12px;
+  padding: 0 10px;
+}
+.calendar-new-task {
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  font-size: 13px;
+  border-radius: 2px;
+}
+.calendar-desk-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+}
+.calendar-desk-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.calendar-desk-days {
+  flex: none;
+  display: grid;
+  grid-template-columns: 56px repeat(7, minmax(0, 1fr));
+  border-bottom: 1px solid var(--border-line);
+}
+.calendar-desk-days-1 {
+  grid-template-columns: 56px minmax(0, 1fr);
+}
+.calendar-desk-days button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--border-line);
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+}
+.calendar-desk-days button:hover {
+  background: var(--bg-container-low);
+}
+.calendar-desk-days button > span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.calendar-desk-days strong {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.calendar-desk-days button[aria-pressed="true"] strong {
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
+}
+.calendar-desktop .calendar-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.calendar-desktop .calendar-stage > .calendar-engine,
+.calendar-desktop .calendar-day-lanes {
+  flex: 1;
+  min-height: 0;
+}
+.calendar-desktop .calendar-engine .sx-react-calendar-wrapper {
+  height: 100%;
+  min-height: 0;
+}
+.calendar-desktop .calendar-engine .sx__time-grid-day {
+  cursor: copy;
+}
+.calendar-desktop .calendar-engine-month-grid .sx__month-grid-day {
+  padding: 6px;
+}
+.calendar-desktop .calendar-engine-month-grid .sx__month-grid-event {
+  padding: 1px 6px;
+  line-height: 16px;
+}
+.calendar-desktop .calendar-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.calendar-desk-side {
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  border-left: 1px solid var(--border-line);
+  background: var(--bg-surface);
+}
+.calendar-desktop .calendar-desk-side .alert,
+.calendar-desktop .calendar-desk-side .loading,
+.calendar-desktop .calendar-undo {
+  margin: 0;
+}
+.calendar-desktop .calendar-source-tray {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+}
+.calendar-desktop .calendar-source-tray-items {
+  flex-direction: column;
+}
+.calendar-desktop .calendar-source-tray .button {
+  max-width: none;
+  width: 100%;
+  background: var(--bg);
+}
+.calendar-desk-empty {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.calendar-desk-tools {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-subtle);
+}
+.calendar-desk-tools > p {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+.calendar-desk-tools > p > svg {
+  flex: none;
+  margin-top: 3px;
+}
+.calendar-desk-tools .button {
+  min-height: 44px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--bg);
+}
+.calendar-desk-tools .button[aria-pressed="true"] {
+  border-color: var(--border-strong);
+}
+
+/* Schedule editor (also opened from task detail). */
+.planning-form {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.planning-form .back-link {
+  display: block;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.schedule-fields {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: block;
+  min-width: 0;
+}
+.schedule-fields .input {
+  min-width: 0;
+  width: 100%;
+}
+.schedule-fields > div + div {
+  margin-top: 12px;
+}
+.schedule-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}

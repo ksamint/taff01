@@ -82,7 +82,7 @@
   "calendar": {
     "title": "日曆",
     "hint": "日程與任務截止時間分開設定。",
-    "unscheduled": "未安排",
+    "unscheduled": "未安排時間",
     "day": "日",
     "week": "週",
     "month": "月",
@@ -108,11 +108,11 @@
     "series": "修改與完成狀態套用至所有日期。",
     "save": "儲存",
     "clear": "取消安排",
-    "undo": "復原",
+    "undo": "撤銷",
     "saved": "已更新",
     "titleLabel": "標題",
     "truncated": "日程過多，請縮小日期或工作區範圍。",
-    "agentLane": "智能體",
+    "agentLane": "智能體背景執行",
     "agentHint": "開啟任務查看代理執行狀態。",
     "emptyTray": "沒有待安排任務。",
     "invalid": "請檢查日期、時長、時區及重複規則。",
@@ -120,8 +120,13 @@
     "selectView": "檢視",
     "noEvents": "沒有日程任務",
     "tools": "日曆控制",
-    "dragHint": "拖動以移動；使用列表以鍵盤安排",
-    "goToDate": "前往日期"
+    "dragHint": "拖動改期，點空白處新建",
+    "goToDate": "前往日期",
+    "keyboardHint": "不用拖動時，可用列表或開啟日程以鍵盤修改時間。",
+    "toast": {
+      "moved": "已改期至 {{date}} {{time}}",
+      "durationSet": "時長改為 {{start}}–{{end}}"
+    }
   },
   "projects": {
     "title": "項目",
