@@ -146,13 +146,16 @@ failed by 33,948 px.
 
 ### Release
 
-- `CHANGELOG.md` has a v0.2.0 section covering M11–M19. The README gains a
-  v2 status summary and the v2 capture commands in the quick start. All
-  workspace packages and the MCP server version are now `0.2.0`.
-- Release candidates are recorded in `docs/deploy.md`:
-  - **M18b:** live.
-  - **M19a:** `9577c8c`, which includes PR #21 and PR #22.
-  - **Next:** the merge of this pull request is the v0.2.0 candidate.
+- `CHANGELOG.md` covers v0.2.0 and M11–M19. The README includes the v2
+  summary and capture commands. Workspace packages and the MCP server
+  version are `0.2.0`.
+- **v0.2.0 is deployed and accepted** at [taff.apuch.cn](https://taff.apuch.cn),
+  source `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`. The annotated
+  [v0.2.0 tag](https://github.com/ksamint/taff01/tree/v0.2.0) points to that
+  exact source. The final checkpoint, backups, public acceptance, MCP
+  server-version checks and free-lock evidence are in `docs/deploy.md`.
+- M19a `9577c8c` was the preceding accepted upgrade. The deployment watcher
+  stops after this final release, as the goal requires.
 
 ## Missing
 

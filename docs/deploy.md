@@ -1705,3 +1705,138 @@ git fetch origin
 git tag -a v0.2.0 191243d25ea4f72116aadf2a9f7fec844a0ffa6e -m "Taff v0.2.0 — frontend v2 (M11–M19)"
 git push origin v0.2.0
 ```
+
+### Frontend v2 v0.2.0 upgrade checkpoint — 2026-10-15
+
+Live pinned source `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, tree
+`cb98c3f495c05894cef5199ef7c0aead32d7a0e8`. This completes the frontend v2 deployment
+goal. The [M19 report](milestones/19-cleanup-a11y-i18n-release.md), [PR
+#23](https://github.com/ksamint/taff01/pull/23) and [PR
+#24](https://github.com/ksamint/taff01/pull/24) cover the accessibility fixes, larger
+touch targets, brief focus ring, release documentation, package versions and MCP server
+identity `taff/0.2.0`. Newer main commits were left for later candidates; this remained
+the newest published candidate at acceptance.
+
+**CI and local readiness.** Exact-source main-push CI
+[38585652337](https://github.com/ksamint/taff01/actions/runs/38585652337), merged PR #24
+head CI [38580016843](https://github.com/ksamint/taff01/actions/runs/38580016843), and
+PR #23 CI [38576480541](https://github.com/ksamint/taff01/actions/runs/38576480541)
+completed/success. Source and PR-head ancestry and newest-candidate eligibility were
+refreshed before build, migration, container start and acceptance. CI is the validation:
+877/877 unit/integration tests; Today initial JS 194,421 B gzipped against 204,800 B;
+signed-in Today LCP medians en 584 ms, zh-CN 676 ms, zh-HK 660 ms (three runs/locale,
+slow 4G, 4× CPU, 2,000 ms limit); Lighthouse 13.5.0
+performance/accessibility/best-practices 100/100/100 in every locale. These are
+exact-source CI measurements. The M19 report records its 348-context accessibility audit
+with zero failures and 186 locale captures.
+
+All three pinned images built on a clean detached local checkout and `pnpm mcp:smoke`
+passed on the first attempt against production-mode API/worker containers with a
+dedicated local development database and Redis namespace. The Mac used its existing
+Colima builder; production retained `--builder default`. Local smoke containers were
+independently confirmed removed. The full local suite, Lighthouse and LCP were not
+rerun.
+
+**Lock, backups and bundle.** Fresh detached keeper PID `392956` held the existing
+native `/srv/taff/deploy.lock`. Verified dedicated dump
+`/srv/taff/secrets/db.before-191243d25ea4f72116aadf2a9f7fec844a0ffa6e.dump`, 791,092 B,
+SHA-256 `bf3fb0a6feff80b0ae98b9ddae834ad40bd753234af9046220cb5bb5b50ead05`; `pg_restore
+--list` confirmed 88 tables, tasks, workspaces and migration journal. Exclusive env
+backup `/srv/taff/secrets/.env.before-191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, mode
+0600. Incremental bundle 16,767,395 B, SHA-256
+`aa3eca66a010c6e3755f34325496e010eb796245318de91aa278aa8f8ae83ed7`; bundle hash, `git
+bundle verify`, detached SHA, clean tree and GitHub origin verified. Only tracked public
+source modes were normalized to 0644/0755; private Git/env/secret files remained
+protected.
+
+**Migrations and runtime.** No new migration, env variable, Compose, Dockerfile or Caddy
+change since accepted M19a. Canonical one-shot migrator exited 0 and existing additive
+0023–0026 hashes were present. Last migration remains `0026_m18_mind_edge_version.sql`,
+hash `3dd0bf9837fbe740fac652712f32a71b84bddd619a6f9198a5c5ebe0b9e0b520`. Only API,
+worker and web were recreated, with SHA tags and `ASSET_VERSION` cache stamping:
+
+- api: `sha256:fe32cd4997f9c9ee13ffe50580dd6ec2a5ed6d50f1958b5937c7a77523d24303`
+- worker: `sha256:0e4938d7e6854c3388beba670c506d0002dea94eec36b2816431530e9fee8bdb`
+- web: `sha256:797f5939f799128df6df0bac9faa7a9e2e529cd1a580814c89ddf2a626010100`
+
+Caddy, Valkey and all 46 neighboring containers retained IDs, images, start times and
+health; route hash unchanged. Private env changed only TAFF_TAG and remained mode 0600.
+Email/SMS unchanged, AI_* unset and all workspace AI flags disabled. PostgreSQL retained
+its host, dedicated role, TLS and postmaster start `2026-08-29 01:19:14.878015+00`. No
+database restart, DNS, route or role change.
+
+**Rollback identities.** Previously accepted M19a
+`9577c8cde908f0da38987dcb196fcd6704c998b3` images remain available:
+
+- api: `sha256:8de56737961121eb0ad04c3d8d7ffa9a6e09bd3cfc19964eed77d67320f398de`
+- worker: `sha256:aa240a32862ee3a76511a3e3ca865e933b941809fcc9ac74cf15006906b09449`
+- web: `sha256:51a42c0bb3e4a040fef2acecff746d0ce47978019711f392108e668633e7ab61`
+
+**Fresh public acceptance.** All 21 critical/platform cases passed on the final runtime:
+en and zh-HK at 390×844 phone and 1280×800 desktop, plus zh-CN Today/Projects/Me spot
+checks. Sign-in, sign-out/re-sign-in, Today, task creation/edit/person and agent
+assignment, run start/pause/resume/cancel, review approve/request changes, grant access,
+navigation, locale/theme, HTTPS/health, Secure/HttpOnly cookies, foreign-origin
+rejection and unchanged auth methods passed. Each of four live MCP cases used the
+official client, exercised all 30 read/write tools on current-run verification entities,
+confirmed call logs and live browser changes, submitted and approved review,
+regenerated/revoked tokens, and verified fresh initialize returns 401. Separate
+official-client connections in all four locale/viewport cases confirmed server identity
+`taff/0.2.0`. No public rate-limit flood or SMS OTP request was made.
+
+The fresh remaining batch completed 108 unique cases: 102 passed, 6 expected
+phone/desktop brief counterparts skipped, 0 remaining noncritical failures, across 111
+attempts. It exercised board drag/status, list filters, calendar day/week/month
+schedule/drag/resize/undo, command search, organizations/create/invite in a fresh
+browser, notifications/agent permissions, CRM roles/stakeholders/cascade/archive/undo,
+timeline dependencies/cycle rejection/relations graph/undo, brief and rules-only Ask
+with human-approved proposals, mind-map keyboard node/link/evidence/undo and
+person-owned validation tasks, restricted-member finance visibility, and realtime
+between separate Chromium processes. en/zh-HK phone and desktop and zh-CN phone/desktop
+milestones ran. 132 entity journals report 0 browser errors and 0 cleanup failures. This
+is fresh final-release evidence.
+
+**Follow-ups.**
+
+SMS is configured and its sign-in form opened in all four locale/viewport cases. The
+repository checklist explicitly skips requesting a real OTP; that delivery/sign-in cycle
+remains unverified and is a manual follow-up. Email and username sign-in passed. Public
+rate-limit enforcement was also intentionally not flooded, as the deployment runbook
+directs; local/CI MCP smoke covers it.
+
+- phone-en: create nodes and links by keyboard, edit and archive with undo — first
+  attempt failed; the single retry passed. Sanitized failed-attempt evidence:
+  [{"status": "failed", "retry": 0, "failureLocations": [{"file": "mind.spec.ts",
+  "line": 66, "column": 1}]}].
+- desktop-en: sources become evidence, with undo — first attempt failed; the single
+  retry passed. Sanitized failed-attempt evidence: [{"status": "failed", "retry": 0,
+  "failureLocations": [{"file": "mind.spec.ts", "line": 220, "column": 1}]}].
+- desktop-zh-HK: create nodes and links by keyboard, edit and archive with undo — first
+  attempt failed; the single retry passed. Sanitized failed-attempt evidence:
+  [{"status": "failed", "retry": 0, "failureLocations": [{"file": "mind.spec.ts",
+  "line": 66, "column": 1}]}].
+
+The M19 source report retains known visual limitations: manual review of 216 text nodes
+on gradient/image backgrounds, light-theme-only locale captures, and system-font
+fallback for 173 Simplified Chinese characters. These were reported by the build agent
+and remain follow-ups; they were not represented as new local audit measurements.
+
+Verification tokens/new grants were revoked, active runs canceled, agent settings and
+profile/notification preferences restored, schedules cleared, and current-run
+projects/CRM/mind nodes and sources archived. Current-run mind edges were removed
+through the supported link API. Tasks, accepted invitations, verification
+recipients/members and workspaces retain their auditable history because no supported
+archive/delete API exists. Public checks used the dedicated verification workspace and
+its own entities.
+
+**Acceptance, unlock and final tag.** Receipt
+`/srv/taff/frontend-v2-v020-accepted-191243d25ea4f72116aadf2a9f7fec844a0ffa6e.json`;
+`deployment.done` is `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`. Keeper release followed
+the reconciled receipt. An independent native flock probe acquired/released the lock and
+verified exact images, healthy API, public health 200, Caddy/Valkey/all 46 neighbors,
+route hash and PostgreSQL start time. No twice-failing critical flow required rollback.
+The remote annotated [v0.2.0 tag](https://github.com/ksamint/taff01/tree/v0.2.0), object
+`189a4a20658de40851ec2bd5075d196566dab82f`, was verified through GitHub Git APIs and
+`git ls-remote` to peel to exact source `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`. The
+final release remains live. The watcher already returned when it found this candidate
+and is not restarted; the deployment goal is complete.

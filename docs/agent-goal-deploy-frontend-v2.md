@@ -1,7 +1,7 @@
 # Agent goal: deploy frontend v2 to taff.apuch.cn (local agent)
 
-> Status 2026-10-14: ready. The live site runs
-> `9577c8cde908f0da38987dcb196fcd6704c998b3` (M19a upgrade checkpoint in
+> Status 2026-10-15: complete. The live site runs
+> `191243d25ea4f72116aadf2a9f7fec844a0ffa6e` (v0.2.0 upgrade checkpoint in
 > `docs/deploy.md`).
 >
 > Work is split between two agents:
