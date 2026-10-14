@@ -70,6 +70,7 @@ export {
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { createAdministrationOperations } from "./administration";
 import { createCalendarOperations } from "./calendar";
+import { createCrmOperations } from "./crm";
 import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
@@ -988,6 +989,7 @@ export function createCore(options: {
     email: options.email,
     onEmailStatus: options.onEmailStatus,
   });
+  const crm = createCrmOperations({ db, mutation, requireMember });
   const runOperations = createRunOperations({
     db,
     mutation,
@@ -1022,6 +1024,7 @@ export function createCore(options: {
     ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,
+    ...crm.operations,
     ...runOperations,
     getTodayBootstrap,
     auth,

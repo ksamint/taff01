@@ -20,6 +20,7 @@ import {
   enum as zodEnum,
 } from "zod/mini";
 import { boundedText, idSchema, versionSchema } from "./primitives";
+import { projectSchema } from "./project-read";
 
 /** Where a contact can hold a role. */
 export const contactScopeSchema = zodEnum(["company", "project", "task"]);
@@ -213,9 +214,27 @@ const entityRef = union([
 ]);
 export const contactEntityRefSchema = entityRef;
 
-export const mcpCompaniesListArgs = strictObject({
+export const companyFilterSchema = strictObject({
   includeArchived: optional(boolean()),
 });
+/** A company with its employees, company-role links and client projects. */
+export const companyDetailSchema = object({
+  company: companySchema,
+  contacts: contactListSchema,
+  links: contactLinkListSchema,
+  projects: array(projectSchema),
+});
+/** DELETE archives (D4); the version guards against a stale undo. */
+export const crmArchiveInputSchema = strictObject({ version: versionSchema });
+export const crmSearchInputSchema = strictObject({
+  query: string().check(trim(), maxLength(200)),
+});
+export const crmSearchResultSchema = object({
+  companies: companyListSchema,
+  contacts: contactListSchema,
+});
+
+export const mcpCompaniesListArgs = companyFilterSchema;
 export const mcpContactsListArgs = contactFilterSchema;
 export const mcpContactsGetArgs = strictObject({ contactId: idSchema });
 
@@ -236,4 +255,8 @@ export type SetContactCompanyResult = Infer<
 >;
 export type ContactDetail = Infer<typeof contactDetailSchema>;
 export type CrmAuditIssue = Infer<typeof crmAuditIssueSchema>;
+export type CompanyFilter = Infer<typeof companyFilterSchema>;
+export type CompanyDetail = Infer<typeof companyDetailSchema>;
+export type CrmArchiveInput = Infer<typeof crmArchiveInputSchema>;
+export type CrmSearchResult = Infer<typeof crmSearchResultSchema>;
 export type ContactEntityRef = Infer<typeof contactEntityRefSchema>;
