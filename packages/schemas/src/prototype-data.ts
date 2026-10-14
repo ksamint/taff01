@@ -25,6 +25,13 @@ const kinds = [
   "comment",
   "reviewItem",
   "digest",
+  "company",
+  "contact",
+  "milestone",
+  "dependency",
+  "contactLink",
+  "contactRole",
+  "payment",
 ] as const;
 /** Fixed fixture namespace; UUIDs are identities, never authentication tokens. */
 export function prototypeId(
@@ -808,3 +815,281 @@ export function prototypeTaskReference(id: string): string | null {
   );
   return row ? `${row.org.toUpperCase()}-${row.number}` : null;
 }
+
+/** Timeline durations (days); the plan ends on the task's due day. */
+export const prototypePlans: readonly {
+  org: PrototypeOrg;
+  number: number;
+  days: number;
+}[] = [
+  ...(
+    [
+      [141, 3],
+      [142, 2],
+      [138, 3],
+      [144, 4],
+      [139, 3],
+      [145, 1],
+      [146, 1],
+      [147, 2],
+      [135, 4],
+      [133, 5],
+      [136, 3],
+    ] as const
+  ).map(([number, days]) => ({ org: "nw" as const, number, days })),
+  ...(
+    [
+      [22, 2],
+      [23, 6],
+      [21, 3],
+      [24, 1],
+      [20, 4],
+    ] as const
+  ).map(([number, days]) => ({ org: "qs" as const, number, days })),
+  ...(
+    [
+      [7, 1],
+      [8, 5],
+      [6, 1],
+    ] as const
+  ).map(([number, days]) => ({ org: "me" as const, number, days })),
+];
+export const prototypeMilestones = [
+  {
+    org: "nw",
+    key: 1,
+    name: prototypeText("v2.4 發佈", "v2.4 release", "v2.4 发布"),
+    day: 15,
+  },
+  {
+    org: "qs",
+    key: 1,
+    name: prototypeText("新官網上線", "New site live", "新官网上线"),
+    day: 17,
+  },
+] as const;
+type PlanEnd = { task: number } | { milestone: number };
+/** Finish-to-start links from the prototype's DEPS. */
+export const prototypeDependencies: readonly {
+  org: PrototypeOrg;
+  key: number;
+  from: PlanEnd;
+  to: PlanEnd;
+}[] = [
+  { org: "nw", key: 1, from: { task: 133 }, to: { task: 139 } },
+  { org: "nw", key: 2, from: { task: 139 }, to: { task: 147 } },
+  { org: "nw", key: 3, from: { task: 136 }, to: { task: 146 } },
+  { org: "nw", key: 4, from: { task: 144 }, to: { task: 146 } },
+  { org: "nw", key: 5, from: { task: 147 }, to: { milestone: 1 } },
+  { org: "nw", key: 6, from: { task: 146 }, to: { milestone: 1 } },
+  { org: "nw", key: 7, from: { task: 140 }, to: { milestone: 1 } },
+  { org: "qs", key: 1, from: { task: 20 }, to: { task: 21 } },
+  { org: "qs", key: 2, from: { task: 20 }, to: { task: 22 } },
+  { org: "qs", key: 3, from: { task: 19 }, to: { milestone: 1 } },
+  { org: "qs", key: 4, from: { task: 22 }, to: { task: 24 } },
+];
+/** Contract value and collected fees in HKD, as numeric(14,2) strings. */
+export const prototypeFinance = [
+  { org: "nw", contract: "1280000.00", collected: "512000.00", client: 1 },
+  { org: "qs", contract: "360000.00", collected: "180000.00", client: 4 },
+] as const;
+export const prototypeCompanies = [
+  {
+    org: "nw",
+    key: 1,
+    name: prototypeText(
+      "北風零售集團",
+      "Northwind Retail Group",
+      "北风零售集团",
+    ),
+    industry: prototypeText("零售", "Retail"),
+  },
+  {
+    org: "nw",
+    key: 2,
+    name: prototypeText("匯通支付", "HuiTong Pay", "汇通支付"),
+    industry: prototypeText("支付", "Payments"),
+  },
+  {
+    org: "nw",
+    key: 3,
+    name: prototypeText("青藍顧問", "Qinglan Advisory", "青蓝顾问"),
+    industry: prototypeText("顧問", "Advisory", "顾问"),
+  },
+  {
+    org: "qs",
+    key: 4,
+    name: prototypeText("石川地產", "Shikawa Properties", "石川地产"),
+    industry: prototypeText("地產", "Property", "地产"),
+  },
+] as const;
+export const prototypeContacts = [
+  {
+    org: "nw",
+    key: 1,
+    company: 1,
+    name: prototypeText("黃志明", "Wong Chi-ming", "黄志明"),
+    title: prototypeText("董事長", "Chairman", "董事长"),
+    phone: "+852 9123 4501",
+    email: "cm.wong@nwretail.hk",
+  },
+  {
+    org: "nw",
+    key: 2,
+    company: 1,
+    name: prototypeText("李佩欣", "Lee Pui-yan"),
+    title: prototypeText("營運總監", "Operations director", "营运总监"),
+    phone: "+852 9123 4502",
+    email: "py.lee@nwretail.hk",
+  },
+  {
+    org: "nw",
+    key: 3,
+    company: 1,
+    name: prototypeText("陳嘉豪", "Chan Ka-ho", "陈嘉豪"),
+    title: prototypeText(
+      "數碼產品經理",
+      "Digital product manager",
+      "数码产品经理",
+    ),
+    phone: "+852 9123 4503",
+    email: "kh.chan@nwretail.hk",
+  },
+  {
+    org: "nw",
+    key: 4,
+    company: 2,
+    name: prototypeText("張穎", "Cheung Wing", "张颖"),
+    title: prototypeText(
+      "商戶整合經理",
+      "Merchant integration manager",
+      "商户整合经理",
+    ),
+    phone: "+852 9876 1100",
+    email: "wing.cheung@htpay.hk",
+  },
+  {
+    org: "nw",
+    key: 5,
+    company: 3,
+    name: prototypeText("吳家樂", "Ng Ka-lok", "吴家乐"),
+    title: prototypeText("合夥人", "Partner", "合伙人"),
+    phone: "+852 6234 7788",
+    email: "kalok@qinglan.hk",
+  },
+  {
+    org: "qs",
+    key: 6,
+    company: 4,
+    name: prototypeText("梁詠詩", "Leung Wing-sze", "梁咏诗"),
+    title: prototypeText("市場總監", "Marketing director", "市场总监"),
+    phone: "+852 6655 2201",
+    email: "ws.leung@shikawa.hk",
+  },
+] as const;
+type ContactRoleKey =
+  | "decider"
+  | "chair"
+  | "ops"
+  | "broker"
+  | "tech"
+  | "finance"
+  | "signoff";
+/** CRM_SEED links: the entity is the org's company, project or task number. */
+export const prototypeContactLinks: readonly {
+  org: PrototypeOrg;
+  key: number;
+  contact: number;
+  scope: "company" | "project" | "task";
+  entity: number;
+  roles: readonly ContactRoleKey[];
+}[] = [
+  {
+    org: "nw",
+    key: 1,
+    contact: 1,
+    scope: "company",
+    entity: 1,
+    roles: ["chair", "decider"],
+  },
+  {
+    org: "nw",
+    key: 2,
+    contact: 2,
+    scope: "company",
+    entity: 1,
+    roles: ["ops"],
+  },
+  {
+    org: "nw",
+    key: 3,
+    contact: 1,
+    scope: "project",
+    entity: 0,
+    roles: ["decider"],
+  },
+  {
+    org: "nw",
+    key: 4,
+    contact: 2,
+    scope: "project",
+    entity: 0,
+    roles: ["ops", "signoff"],
+  },
+  {
+    org: "nw",
+    key: 5,
+    contact: 3,
+    scope: "project",
+    entity: 0,
+    roles: ["tech"],
+  },
+  {
+    org: "nw",
+    key: 6,
+    contact: 4,
+    scope: "project",
+    entity: 0,
+    roles: ["tech"],
+  },
+  {
+    org: "nw",
+    key: 7,
+    contact: 5,
+    scope: "project",
+    entity: 0,
+    roles: ["broker"],
+  },
+  {
+    org: "nw",
+    key: 8,
+    contact: 2,
+    scope: "task",
+    entity: 140,
+    roles: ["signoff"],
+  },
+  {
+    org: "nw",
+    key: 9,
+    contact: 4,
+    scope: "task",
+    entity: 138,
+    roles: ["tech"],
+  },
+  {
+    org: "qs",
+    key: 10,
+    contact: 6,
+    scope: "company",
+    entity: 4,
+    roles: ["decider"],
+  },
+  {
+    org: "qs",
+    key: 11,
+    contact: 6,
+    scope: "project",
+    entity: 0,
+    roles: ["decider", "signoff"],
+  },
+];

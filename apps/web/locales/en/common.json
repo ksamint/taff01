@@ -269,7 +269,14 @@
       "submitRun": "Submit for review",
       "requestGrant": "Request permission",
       "calendarList": "List actual scheduled occurrences",
-      "calendarSet": "Set a whole-series calendar schedule"
+      "calendarSet": "Set a whole-series calendar schedule",
+      "readTimeline": "Read project timeline",
+      "planTask": "Plan start date and duration",
+      "addDependency": "Add dependency",
+      "removeDependency": "Remove dependency",
+      "listCompanies": "List companies",
+      "listContacts": "List contacts (no phone or email without permission)",
+      "readContact": "Read a contact and its links"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",
@@ -390,7 +397,10 @@
       "deploy.prod": "Deploy to production",
       "staging.read": "Read staging",
       "staging.write": "Change staging",
-      "alerts": "Manage alerts"
+      "alerts": "Manage alerts",
+      "crm.read": "Read companies and contacts",
+      "crm.write": "Change companies and contacts",
+      "crm.contact_details": "See contact phone and email"
     },
     "historyGrantChanged": "{{capability}}: {{previousStatus}} → {{status}}",
     "historyGrant": "{{capability}}: {{status}}",

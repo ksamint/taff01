@@ -269,7 +269,14 @@
       "submitRun": "提交审核",
       "requestGrant": "请求权限",
       "calendarList": "列出真实日程实例",
-      "calendarSet": "设置整个系列的日程"
+      "calendarSet": "设置整个系列的日程",
+      "readTimeline": "读取项目时间线",
+      "planTask": "规划开始日期与工期",
+      "addDependency": "添加依赖",
+      "removeDependency": "移除依赖",
+      "listCompanies": "列出公司",
+      "listContacts": "列出联系人（未获授权不含电话与邮箱）",
+      "readContact": "读取联系人及其关联"
     },
     "back": "返回",
     "copyEndpoint": "复制端点",
@@ -390,7 +397,10 @@
       "deploy.prod": "发布到生产环境",
       "staging.read": "读取预发环境",
       "staging.write": "修改预发环境",
-      "alerts": "管理告警"
+      "alerts": "管理告警",
+      "crm.read": "读取公司与联系人",
+      "crm.write": "修改公司与联系人",
+      "crm.contact_details": "查看联系人电话与邮箱"
     },
     "historyGrantChanged": "{{capability}}：{{previousStatus}} → {{status}}",
     "historyGrant": "{{capability}}：{{status}}",

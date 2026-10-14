@@ -6,8 +6,13 @@ on:
         description: Full reviewed source commit to capture
         required: true
         type: string
+      publish:
+        description: Also push the captures to branch visual-baselines/<source_sha> (for environments that cannot download artifacts)
+        required: false
+        type: boolean
+        default: false
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: visual-baseline-capture
   cancel-in-progress: false
@@ -156,3 +161,16 @@ jobs:
             test-results
             visual-browser.log
           retention-days: 7
+      - name: Publish the captures to a review branch
+        if: ${{ inputs.publish }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          branch="visual-baselines/$CAPTURE_SOURCE_SHA"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch --create "$branch"
+          git add --force e2e/__screenshots__/ui-parity.spec.ts visual-capture-manifest.json
+          git commit --quiet -m "test(visual): captures for $CAPTURE_SOURCE_SHA from run $GITHUB_RUN_ID"
+          git push --quiet "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "HEAD:refs/heads/$branch"
