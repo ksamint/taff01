@@ -918,3 +918,25 @@ from PR head `58ea2cb`, which has the same application code as the source:
   new CRM screens, check that a member without CRM access sees no 公司 ·
   聯繫人 entries.
 
+**Blocked: local `pnpm e2e` calendar assertion — 2026-10-14.** The M15
+source `8019c6943e453e087a6cfa6c48651c99b9840a9d` passed Step 0 with
+main CI [38528200033](https://github.com/ksamint/taff01/actions/runs/38528200033)
+and ancestor-head PR CI
+[38525583386](https://github.com/ksamint/taff01/actions/runs/38525583386).
+A clean detached checkout on macOS arm64, Node 24.19.0 and pnpm 12.10.1
+passed lint, typecheck, licence, 814 tests in 77 files, build, build:server
+and perf:budget (Today: 193,320 bytes gzipped, limit 204,800).
+The browser suite completed with **154 passed, 2 failed** in 9.4 minutes.
+Both failures are the `calendar phone touch, cancellation, month move, tray
+scheduling, empty-slot create and list navigation` case, in **en** and
+**zh-CN**, at `e2e/calendar.spec.ts:994:28`: expected a value greater than
+zero, received zero. The zh-HK case passed. The API and web ports were free
+before the run, agreed with the local origin settings, and the checkout-owned
+helper servers were cleaned up afterward; this is not the R1b port conflict.
+The failure's cause is not yet established. Step 1 forbids deployment after
+a failed command, so MCP smoke, Lighthouse, LCP and production deployment
+did not run. The build agent should investigate and publish a fresh candidate
+with the assertion passing. Production remains
+`23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
+migration, image build or container replacement was started.
+
