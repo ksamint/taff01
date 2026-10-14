@@ -378,6 +378,50 @@ describe.skipIf(!url)(
         );
         const blocked = await core.ask(bob, { question: "what's blocked" });
         expect(blocked.items.map((item) => item.id)).toContain(grant.id);
+        expect(blocked.labels).toBeUndefined();
+      });
+      it("labels the mentioned ids for the web only, never for MCP", async () => {
+        const task = await create("Label me");
+        const grant = await core.requestGrant(agent, agentId, {
+          capability: "staging.write",
+          taskId: task.id,
+          reason: "Deploy to staging",
+        });
+        expect((await core.getBrief(alice, { workspaceId: w })).labels).toBe(
+          undefined,
+        );
+        const brief = briefSchema.parse(
+          await core.getBrief(alice, { workspaceId: w }, { labels: true }),
+        );
+        expect(brief.labels?.workspaces.map((item) => item.id)).toEqual([w]);
+        expect(brief.labels?.tasks).toContainEqual(
+          expect.objectContaining({ id: task.id, title: "Label me" }),
+        );
+        expect(brief.labels?.agents).toContainEqual(
+          expect.objectContaining({ id: agentId }),
+        );
+        expect(brief.labels?.projects.map((item) => item.id)).toContain(
+          projectId,
+        );
+        const answer = askAnswerSchema.parse(
+          await core.ask(
+            alice,
+            { question: "what's blocked", workspaceId: w },
+            { labels: true },
+          ),
+        );
+        expect(answer.items.map((item) => item.id)).toContain(grant.id);
+        expect(answer.labels?.tasks.map((item) => item.id)).toContain(task.id);
+        // An outsider's brief never names this workspace's records.
+        const theirs = await core.getBrief(
+          outsider,
+          { scope: "all" },
+          { labels: true },
+        );
+        expect(theirs.labels?.workspaces.map((item) => item.id)).not.toContain(
+          w,
+        );
+        expect(theirs.labels?.tasks).toEqual([]);
       });
       it("spans only the caller's memberships", async () => {
         const all = await core.getBrief(alice, { scope: "all" });

@@ -31,6 +31,7 @@ export function registerAssistantRoutes(
       await core.getBrief(
         userPrincipal(c.get("userId")),
         briefQuerySchema.parse(c.req.query()),
+        { labels: true },
       ),
     ),
   );
@@ -48,7 +49,9 @@ export function registerAssistantRoutes(
       return c.json({ error: "internal_error" }, 503);
     }
     c.header("Cache-Control", "private, no-store");
-    return c.json(await core.ask(userPrincipal(c.get("userId")), body));
+    return c.json(
+      await core.ask(userPrincipal(c.get("userId")), body, { labels: true }),
+    );
   });
   app.get("/api/workspaces/:id/suggestions", async (c) =>
     c.json(

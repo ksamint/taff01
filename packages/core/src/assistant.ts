@@ -14,9 +14,11 @@ import {
   type AiSettings,
   type AskAnswer,
   type AskInput,
+  type AskItem,
   aiSettingsInputSchema,
   askInputSchema,
   type Brief,
+  type BriefLabels,
   type BriefQuery,
   type BriefScope,
   briefQuerySchema,
@@ -264,16 +266,134 @@ export function createAssistantOperations({
     return source;
   }
 
+  /**
+   * Names for the ids a brief or answer mentions, from the reader's own
+   * workspaces only (the web shows titles instead of ids). Never given to
+   * the model, and not part of the MCP brief.
+   */
+  async function loadLabels(
+    source: BriefSource,
+    mentioned: {
+      taskIds: Iterable<string | null | undefined>;
+      agentIds: Iterable<string | undefined>;
+    },
+  ): Promise<BriefLabels> {
+    const w = source.workspaceIds;
+    const taskIds = [...new Set(mentioned.taskIds)].filter(
+      (id): id is string => !!id,
+    );
+    const agentIds = [...new Set(mentioned.agentIds)].filter(
+      (id): id is string => !!id,
+    );
+    const [workspaceRows, taskRows, agentRows] = await Promise.all([
+      w.length
+        ? db
+            .select({
+              id: workspaces.id,
+              name: workspaces.name,
+              key: workspaces.key,
+            })
+            .from(workspaces)
+            .where(inArray(workspaces.id, w))
+        : [],
+      w.length && taskIds.length
+        ? db
+            .select({
+              id: tasks.id,
+              workspaceId: tasks.workspaceId,
+              number: tasks.number,
+              title: tasks.title,
+              projectId: tasks.projectId,
+            })
+            .from(tasks)
+            .where(
+              and(inArray(tasks.workspaceId, w), inArray(tasks.id, taskIds)),
+            )
+        : [],
+      w.length && agentIds.length
+        ? db
+            .select({
+              id: members.id,
+              workspaceId: members.workspaceId,
+              name: members.name,
+            })
+            .from(members)
+            .where(
+              and(
+                inArray(members.workspaceId, w),
+                inArray(members.id, agentIds),
+              ),
+            )
+        : [],
+    ]);
+    const byId = (a: { id: string }, b: { id: string }) =>
+      a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
+    return {
+      workspaces: workspaceRows.sort(
+        (a, b) => w.indexOf(a.id) - w.indexOf(b.id),
+      ),
+      projects: source.projects.map((project) => ({
+        id: project.projectId,
+        workspaceId: project.workspaceId,
+        name: project.name,
+      })),
+      tasks: taskRows.sort(byId),
+      milestones: source.projects.flatMap((project) =>
+        project.plan.milestones.map((milestone) => ({
+          id: milestone.id,
+          projectId: project.projectId,
+          name: milestone.name,
+        })),
+      ),
+      agents: agentRows.sort(byId),
+    };
+  }
+
   async function getBrief(
     p: Principal,
     query: BriefQuery = {},
+    options: { labels?: boolean } = {},
   ): Promise<Brief> {
     const body = parse(briefQuerySchema, query);
     const scope = body.scope ?? (body.workspaceId ? "workspace" : "all");
-    return buildBrief(await loadSource(p, scope, body.workspaceId));
+    const source = await loadSource(p, scope, body.workspaceId);
+    const brief = buildBrief(source);
+    if (!options.labels) return brief;
+    return {
+      ...brief,
+      labels: await loadLabels(source, {
+        taskIds: [
+          ...brief.projects.flatMap((project) => [
+            project.risk.blockedTaskId,
+            project.risk.driverTaskId,
+          ]),
+          ...brief.actions.map((action) => action.taskId),
+        ],
+        agentIds: brief.actions.map((action) => action.agentId),
+      }),
+    };
   }
 
-  async function ask(p: Principal, input: AskInput): Promise<AskAnswer> {
+  async function ask(
+    p: Principal,
+    input: AskInput,
+    options: { labels?: boolean } = {},
+  ): Promise<AskAnswer> {
+    const { source, answer } = await answerQuestion(p, input);
+    if (!options.labels) return answer;
+    return {
+      ...answer,
+      labels: await loadLabels(source, {
+        taskIds: answer.items.map((item: AskItem) => item.taskId),
+        agentIds: answer.items.map((item: AskItem) => item.agentId),
+      }),
+    };
+  }
+
+  async function answerQuestion(
+    p: Principal,
+    input: AskInput,
+  ): Promise<{ source: BriefSource; answer: AskAnswer }> {
     const body = parse(askInputSchema, input);
     const source = await loadSource(
       p,
@@ -300,10 +420,11 @@ export function createAssistantOperations({
             items: answer.items.map(({ workspaceId: _w, ...item }) => item),
           }),
         });
-        if (text) return { ...answer, text, source: "model" };
+        if (text)
+          return { source, answer: { ...answer, text, source: "model" } };
       }
     }
-    return { ...answer, text: null, source: "rules" };
+    return { source, answer: { ...answer, text: null, source: "rules" } };
   }
 
   async function getAiSettings(

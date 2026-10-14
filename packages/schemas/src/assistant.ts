@@ -170,6 +170,32 @@ export const briefCountsSchema = object({
   dueToday: nonnegativeInteger,
   agentsWorking: nonnegativeInteger,
 });
+/**
+ * Display labels for the ids a brief or answer mentions (the web only):
+ * names and titles the reader can already read in those workspaces. Never
+ * sent to a model and not part of the MCP `brief.get` result.
+ */
+export const briefLabelsSchema = object({
+  workspaces: array(object({ id: idSchema, name: string(), key: string() })),
+  projects: array(
+    object({ id: idSchema, workspaceId: idSchema, name: string() }),
+  ),
+  tasks: array(
+    object({
+      id: idSchema,
+      workspaceId: idSchema,
+      number: nonnegativeInteger,
+      title: string(),
+      projectId: nullable(idSchema),
+    }),
+  ),
+  milestones: array(
+    object({ id: idSchema, projectId: idSchema, name: string() }),
+  ),
+  agents: array(
+    object({ id: idSchema, workspaceId: idSchema, name: string() }),
+  ),
+});
 export const briefSchema = object({
   today: civilDateSchema,
   timeZone: string(),
@@ -178,6 +204,7 @@ export const briefSchema = object({
   projects: array(briefProjectSchema),
   counts: briefCountsSchema,
   actions: array(briefActionSchema),
+  labels: optional(briefLabelsSchema),
 });
 export const mcpBriefGetArgs = strictObject({});
 
@@ -217,6 +244,7 @@ export const askAnswerSchema = object({
   /** Model prose, only when the model path is configured and opted in. */
   text: nullable(string()),
   source: zodEnum(["rules", "model"]),
+  labels: optional(briefLabelsSchema),
 });
 
 // Model path settings (D6, ADR 0016) ----------------------------------------
@@ -244,6 +272,7 @@ export type BriefProject = Infer<typeof briefProjectSchema>;
 export type BriefAction = Infer<typeof briefActionSchema>;
 export type BriefCounts = Infer<typeof briefCountsSchema>;
 export type Brief = Infer<typeof briefSchema>;
+export type BriefLabels = Infer<typeof briefLabelsSchema>;
 export type AskIntent = Infer<typeof askIntentSchema>;
 export type AskInput = Infer<typeof askInputSchema>;
 export type AskItem = Infer<typeof askItemSchema>;
