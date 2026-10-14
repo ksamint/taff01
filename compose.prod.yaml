@@ -94,6 +94,8 @@ services:
     restart: unless-stopped
     environment:
       API_INTERNAL_URL: http://api:3001
+      # The MCP page shows this origin plus /mcp as the client endpoint.
+      AUTH_URL: ${AUTH_URL}
     depends_on:
       api: { condition: service_healthy }
   caddy:

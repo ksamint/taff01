@@ -1,4 +1,4 @@
-// MCP agent-token mutations (issue and revoke).
+// MCP agent-token mutations: issue, regenerate, revoke and undo a revoke.
 import {
   type AgentToken,
   type CreateAgentToken,
@@ -6,7 +6,7 @@ import {
   issuedAgentTokenSchema,
 } from "@taff/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { request } from "../api";
+import { ApiError, request } from "../api";
 import { m3MutationKey } from "../optimistic-m3";
 import {
   isCurrentSnapshot,
@@ -94,10 +94,126 @@ export function useCreateAgentToken(
   });
 }
 
-/** Revokes an agent token; `onStart` closes the confirmation. */
+export function withRestoredToken(current: AgentToken[] = [], id: string) {
+  return current.map((token) =>
+    token.id === id ? { ...token, revokedAt: null } : token,
+  );
+}
+
+/** The new row first, the replaced token marked revoked. */
+export function withRegeneratedToken(
+  current: AgentToken[] = [],
+  replaced: AgentToken,
+  next: AgentToken,
+  now: string,
+) {
+  return [next, ...withRevokedToken(current, replaced.id, now)];
+}
+
+/** The new token was issued but the old one could not be revoked. */
+export class PartialRegenerateError extends ApiError {
+  constructor(
+    readonly issued: IssuedAgentToken,
+    cause: unknown,
+  ) {
+    super(
+      cause instanceof ApiError ? cause.code : "internal_error",
+      cause instanceof ApiError ? cause.status : undefined,
+    );
+  }
+}
+
+/** Issues the replacement first, then revokes the old token. */
+export async function regenerateAgentToken(
+  old: AgentToken,
+): Promise<IssuedAgentToken> {
+  const body: CreateAgentToken = {
+    workspaceId: old.workspaceId,
+    memberId: old.memberId,
+    name: old.name,
+    scopes: old.scopes,
+  };
+  const issued = issuedAgentTokenSchema.parse(
+    await request("/api/agent-tokens", {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  );
+  try {
+    await request<AgentToken>(`/api/agent-tokens/${old.id}`, {
+      method: "DELETE",
+    });
+  } catch (error) {
+    throw new PartialRegenerateError(issued, error);
+  }
+  return issued;
+}
+
+/**
+ * Regenerates a token: issues a new one with the same name, agent and scopes,
+ * then revokes the old one, in that order, so a failure never leaves the
+ * agent without a working token. `onIssued` receives the one-time secret.
+ */
+export function useRegenerateAgentToken(
+  workspace: { id: string; memberId: string },
+  { onIssued }: { onIssued?: (token: IssuedAgentToken) => void } = {},
+) {
+  const client = useQueryClient();
+  const tokensKey = agentTokensKey(workspace.id);
+  return useMutation({
+    mutationKey: m3MutationKey,
+    mutationFn: regenerateAgentToken,
+    onMutate: async (old) => {
+      const snapshot = await snapshotQueries(client, [tokensKey]);
+      const id = `optimistic:${crypto.randomUUID()}`;
+      const now = new Date().toISOString();
+      client.setQueryData<AgentToken[]>(tokensKey, (current) =>
+        withRegeneratedToken(
+          current,
+          old,
+          optimisticAgentToken(
+            {
+              workspaceId: old.workspaceId,
+              memberId: old.memberId,
+              name: old.name,
+              scopes: old.scopes,
+            },
+            id,
+            workspace.memberId,
+            now,
+          ),
+          now,
+        ),
+      );
+      return { snapshot, id };
+    },
+    onError: (error, _, context) => {
+      restoreQueries(client, context?.snapshot);
+      // The new secret exists server-side; show it once rather than lose it.
+      if (error instanceof PartialRegenerateError) onIssued?.(error.issued);
+    },
+    onSuccess: (token, _, context) => {
+      if (!isCurrentSnapshot(client, context.snapshot)) return;
+      const { token: _secret, ...metadata } = token;
+      client.setQueryData<AgentToken[]>(tokensKey, (current) =>
+        current?.map((item) => (item.id === context.id ? metadata : item)),
+      );
+      onIssued?.(token);
+    },
+    onSettled: () => client.invalidateQueries({ queryKey: tokensKey }),
+  });
+}
+
+/**
+ * Revokes an agent token; `onStart` closes the confirmation and `onRevoked`
+ * offers undo once the server has revoked it.
+ */
 export function useRevokeAgentToken(
   workspaceId: string,
-  { onStart }: { onStart?: () => void } = {},
+  {
+    onStart,
+    onRevoked,
+  }: { onStart?: () => void; onRevoked?: (token: AgentToken) => void } = {},
 ) {
   const client = useQueryClient();
   const tokensKey = agentTokensKey(workspaceId);
@@ -111,6 +227,31 @@ export function useRevokeAgentToken(
         withRevokedToken(current, id, new Date().toISOString()),
       );
       onStart?.();
+      return snapshot;
+    },
+    onError: (_, __, context) => {
+      restoreQueries(client, context);
+    },
+    onSuccess: (token) => onRevoked?.(token),
+    onSettled: () => client.invalidateQueries({ queryKey: tokensKey }),
+  });
+}
+
+/** Undoes a person's recent revocation (the toast's 撤銷 action). */
+export function useRestoreAgentToken(workspaceId: string) {
+  const client = useQueryClient();
+  const tokensKey = agentTokensKey(workspaceId);
+  return useMutation({
+    mutationKey: m3MutationKey,
+    mutationFn: async (id: string) =>
+      request<AgentToken>(`/api/agent-tokens/${id}/restore`, {
+        method: "POST",
+      }),
+    onMutate: async (id) => {
+      const snapshot = await snapshotQueries(client, [tokensKey]);
+      client.setQueryData<AgentToken[]>(tokensKey, (current = []) =>
+        withRestoredToken(current, id),
+      );
       return snapshot;
     },
     onError: (_, __, context) => {

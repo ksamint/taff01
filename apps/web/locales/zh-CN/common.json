@@ -209,10 +209,10 @@
   },
   "mcp": {
     "title": "MCP 服务器",
-    "subtitle": "通过 Model Context Protocol 把智能体接入此工作空间。",
+    "subtitle": "外部智能体和客户端通过 MCP 读取、创建和更新任务与日程。",
     "open": "打开 MCP 设置",
-    "endpoint": "端点",
-    "endpointUrl": "Streamable HTTP 地址",
+    "endpoint": "MCP 端点",
+    "endpointUrl": "服务器地址",
     "endpointHint": "使用个人访问令牌授权：Authorization: Bearer <token>。OAuth 2.1 将在发布里程碑提供。",
     "adminOnly": "只有工作空间管理员可以管理智能体令牌。",
     "newToken": "新令牌",
@@ -223,7 +223,7 @@
     "clientConfig": "客户端配置",
     "tokenName": "令牌名称",
     "tokenNamePlaceholder": "例如：Claude Desktop",
-    "scopes": "权限范围",
+    "scopes": "授权范围",
     "scope": {
       "tasks:read": "读取任务",
       "tasks:write": "创建与更新任务",
@@ -232,20 +232,15 @@
       "files:write": "附加交付物"
     },
     "createToken": "创建令牌",
-    "tokens": "令牌",
     "noTokens": "还没有令牌。",
-    "active": "有效",
     "revoked": "已撤销",
     "lastUsed": "最近使用：{{date}}",
     "neverUsed": "从未使用",
-    "revoke": "撤销",
     "confirmRevoke": "确认撤销",
     "cancel": "取消",
-    "callLog": "调用日志",
+    "callLog": "最近调用",
     "noCalls": "还没有调用。",
-    "when": "时间",
     "method": "方法",
-    "tool": "工具",
     "status": "状态",
     "duration": "耗时",
     "callStatus": {
@@ -254,7 +249,7 @@
       "denied": "已拒绝",
       "rate_limited": "已限流"
     },
-    "tools": "可用工具",
+    "tools": "开放的工具",
     "toolNames": {
       "listTasks": "读取任务",
       "createTask": "创建任务",
@@ -280,7 +275,46 @@
     "back": "返回",
     "copyEndpoint": "复制端点",
     "copyConfig": "复制配置",
-    "running": "执行中"
+    "running": "执行中",
+    "transport": "Streamable HTTP · 协议 2025-11-25",
+    "auth": {
+      "title": "授权"
+    },
+    "personalToken": "个人访问令牌",
+    "personalTokenHint": "作为 Authorization: Bearer 发送。每个令牌代表一个智能体，只拥有你选择的授权范围。",
+    "activeTokens_one": "{{count}} 个有效令牌",
+    "activeTokens_other": "{{count}} 个有效令牌",
+    "connectedClients": "已连接客户端",
+    "scopeSummary": "{{granted}}/{{total}} 项授权",
+    "created": "创建于 {{date}}",
+    "granted": "已授权",
+    "notGranted": "未授权",
+    "token": "令牌",
+    "regenerate": "重新生成",
+    "regenerateTitle": "重新生成“{{name}}”？",
+    "regenerateHint": "旧令牌会立即失效，已连接的客户端需要重新配置。",
+    "revokeAccess": "撤销访问",
+    "revokeTitle": "撤销“{{name}}”？",
+    "revokeHint": "使用此令牌的客户端会立即失效，可在随后的提示中撤销此操作。",
+    "undo": "撤销",
+    "toast": {
+      "regenerated": "已生成新令牌，旧令牌立即失效",
+      "revoked": "已撤销 {{name}}",
+      "restored": "已恢复 {{name}}"
+    },
+    "connectTools": "连接工具",
+    "notConnected": "未连接",
+    "integrationsHint": "集成功能尚未提供，目前没有任何连接。",
+    "integrations": {
+      "github": "GitHub",
+      "githubHint": "代码与 PR",
+      "figma": "Figma",
+      "figmaHint": "设计文件",
+      "slack": "Slack",
+      "slackHint": "频道通知",
+      "gcal": "Google 日历",
+      "gcalHint": "双向同步日程"
+    }
   },
   "taskDetail": {
     "back": "返回今天",

@@ -1,0 +1,462 @@
+/* Prototype v2 MCP page (ADR 0014): phone pushed screen, lines 910–988;
+   desktop Me › 設定 › MCP and 已連接客戶端, lines 1498–1537. Tokens only.
+   The prototype's OAuth server rows, tool switches and fake integration
+   connections are not ported: the page shows only what the server does. */
+.mcp-view {
+  min-width: 0;
+  padding-bottom: 48px;
+}
+.mcp-view :is(h1, h2, h3, p, dl, dd) {
+  margin: 0;
+}
+.mcp-backbar {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 8px;
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.mcp-view .mcp-back {
+  gap: 8px;
+  padding: 0 12px;
+  font-size: 13px;
+  text-decoration: none;
+}
+.mcp-page {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Intro */
+.mcp-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px var(--gutter) 0;
+}
+.mcp-eyebrow {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+}
+.mcp-intro h1 {
+  font-size: var(--type-product-h1-size);
+  font-weight: var(--weight-heading);
+  line-height: 1.2;
+}
+.mcp-lede,
+.mcp-body {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: var(--lh-body);
+}
+.mcp-body {
+  color: var(--text-body);
+}
+.mcp-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  color: var(--success);
+  font-size: 13px;
+}
+.mcp-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+}
+
+/* Labels and small print */
+.mcp-label {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: var(--ls-track-sm);
+  text-transform: uppercase;
+}
+.mcp-note,
+.mcp-section-hint {
+  color: var(--text-subtle);
+  font-size: 12px;
+  line-height: var(--lh-body);
+}
+.mcp-mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* Server settings: endpoint, authorization, client config */
+.mcp-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px var(--gutter) 0;
+}
+.mcp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.mcp-field-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.mcp-copy-row {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding-left: 12px;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-control);
+}
+.mcp-copy-row > code {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mcp-view .mcp-icon-button {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  color: var(--text-muted);
+}
+.mcp-config-wrap {
+  position: relative;
+  min-width: 0;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg-surface);
+}
+.mcp-config {
+  margin: 0;
+  padding: 12px 48px 12px 12px;
+  color: var(--text-body);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: var(--lh-body);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.mcp-config-wrap > .mcp-icon-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+/* Sections with hairline lists */
+.mcp-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-top: 28px;
+}
+.mcp-list-label {
+  padding: 0 var(--gutter) 8px;
+}
+.mcp-section-hint {
+  padding: 0 var(--gutter) 8px;
+}
+.mcp-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hairline) solid var(--border-line);
+}
+.mcp-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 10px var(--gutter);
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.mcp-row-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.mcp-row-title {
+  font-size: 14px;
+  font-weight: var(--weight-label);
+  overflow-wrap: anywhere;
+}
+code.mcp-row-title {
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+}
+.mcp-row-sub {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.mcp-tile {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  box-sizing: border-box;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-dialog);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: var(--weight-label);
+}
+.mcp-state {
+  flex: none;
+  color: var(--text-subtle);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.mcp-state[data-state="revoked"] {
+  color: var(--danger);
+}
+.mcp-notice {
+  margin: 0 var(--gutter);
+  padding: 12px 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.mcp-notice.alert {
+  margin: 12px var(--gutter);
+  padding: 12px;
+  color: var(--danger-text);
+}
+
+/* Personal access token: one-time secret and the issue form */
+.mcp-pat {
+  gap: 6px;
+  padding: 28px var(--gutter) 0;
+}
+.mcp-issued {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 12px;
+  border: var(--hairline) solid var(--accent);
+  border-radius: var(--radius-control);
+  background: var(--accent-wash);
+}
+.mcp-show-once {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: var(--weight-label);
+}
+.mcp-issued .mcp-copy-row {
+  background: var(--bg);
+}
+.mcp-issued .mcp-token-value {
+  padding: 10px 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.mcp-view .mcp-text-button {
+  align-self: flex-start;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+.mcp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+.mcp-form-title {
+  font-size: 14px;
+  font-weight: var(--weight-label);
+}
+.mcp-form .field {
+  margin: 0;
+}
+.mcp-form .input,
+.mcp-form select {
+  font-size: 14px;
+}
+.mcp-scopes {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.mcp-scopes legend {
+  padding: 0 0 6px;
+}
+.mcp-scope {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  border-bottom: var(--hairline) solid var(--border-line);
+  cursor: pointer;
+}
+.mcp-scope .mcp-row-title {
+  font-size: 13px;
+  font-weight: var(--weight-body);
+}
+.mcp-view .mcp-submit {
+  align-self: flex-start;
+  font-size: 13px;
+}
+
+/* Connected clients: one disclosure per token */
+.mcp-client {
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.mcp-client-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 10px var(--gutter);
+  cursor: pointer;
+  list-style: none;
+}
+.mcp-client-summary::-webkit-details-marker {
+  display: none;
+}
+.mcp-client-summary:hover {
+  background: var(--bg-container-low);
+}
+.mcp-client-summary:focus-visible {
+  outline-offset: -2px;
+}
+.mcp-chevron {
+  flex: none;
+  color: var(--text-subtle);
+  transition: transform var(--dur-fast) var(--ease-standard);
+}
+.mcp-client-details[open] .mcp-chevron {
+  transform: rotate(180deg);
+}
+.mcp-client-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 0 var(--gutter) 12px 64px;
+}
+.mcp-granted {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mcp-granted .mcp-scope {
+  min-height: 44px;
+  border: 0;
+  cursor: default;
+}
+.mcp-grant {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--success);
+}
+.mcp-scope[data-granted="false"] {
+  color: var(--text-subtle);
+}
+.mcp-scope[data-granted="false"] .mcp-grant {
+  color: var(--text-subtle);
+}
+.mcp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+/* Call log */
+.mcp-call-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 6px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.mcp-call-meta > div {
+  display: flex;
+  align-items: baseline;
+}
+.mcp-call-meta > div + div::before {
+  content: "·";
+  margin-right: 6px;
+  color: var(--text-subtle);
+}
+.mcp-call-meta dd[data-status="error"],
+.mcp-call-meta dd[data-status="denied"],
+.mcp-call-meta dd[data-status="rate_limited"] {
+  color: var(--danger);
+}
+.mcp-call time {
+  flex: none;
+  white-space: nowrap;
+}
+
+/* Confirm dialog (regenerate, revoke): native modal traps focus. */
+.sheet-dialog.mcp-confirm {
+  width: min(400px, calc(100% - 32px));
+}
+.mcp-confirm .mcp-body {
+  font-size: 14px;
+}
+.mcp-confirm-actions {
+  justify-content: flex-end;
+  padding-top: 20px;
+}
+
+/* Desktop: Me › 設定 layout, label column and a 720px measure. */
+@media (min-width: 1024px) {
+  .mcp-view {
+    --gutter: 0px;
+  }
+  .mcp-backbar {
+    padding: 0 16px;
+  }
+  .mcp-page {
+    max-width: 720px;
+    padding: 24px 24px 0;
+  }
+  .mcp-settings {
+    gap: 0;
+    border-top: var(--hairline) solid var(--border-line);
+    margin-top: 24px;
+    padding-top: 0;
+  }
+  .mcp-field {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: var(--hairline) solid var(--border-line);
+  }
+  .mcp-field > .mcp-label {
+    padding-top: 14px;
+    letter-spacing: normal;
+    text-transform: none;
+    font-size: 13px;
+    font-weight: var(--weight-body);
+  }
+  .mcp-client-body {
+    padding-left: 44px;
+  }
+  .mcp-client-summary {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
