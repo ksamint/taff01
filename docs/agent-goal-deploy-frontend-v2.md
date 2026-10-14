@@ -117,14 +117,18 @@ every public check and the live MCP round trip.
    Rerun this command when the build agent publishes one.
 3. Otherwise check all of the following:
    - the candidate SHA is an ancestor of `origin/main`;
-   - `git diff --stat <SHA> origin/main -- . ':!docs'` is empty;
    - the linked `main` push CI run is green for that exact SHA;
    - the linked PR CI run is green on the PR's head commit, and that commit is
      an ancestor of the SHA. A merge commit always has a different SHA from
      its PR head, so this run is never on the exact SHA.
 
-   If the code moved past the candidate, wait for the next candidate section;
-   never deploy an unlisted SHA.
+   Application code merged to `main` after the candidate does **not** block
+   it. The build agent keeps merging while a deploy runs, so the candidate is
+   deployed as its pinned SHA, and later code ships with a later candidate.
+   Never deploy an unlisted SHA, and never build from the `main` head.
+   - If several candidates are pending, deploy only the newest.
+   - Once a candidate has started deploying, finish it even if a newer
+     candidate appears, then pick up the newer one.
 
 **Step 1 — validate locally** on a quiet machine, on a clean detached
 checkout of the SHA.
@@ -176,8 +180,12 @@ detached keeper so an SSH drop does not release it.
    - run `git bundle verify`;
    - check out the pinned SHA `--detach` with a clean tree;
    - set `origin` back to GitHub.
-5. Check the remote default branch and the exact-SHA CI from the connected
-   workspace, before building and again before container start.
+5. From the connected workspace, before building and again before container
+   start, check that:
+   - the pinned SHA is still an ancestor of the remote default branch;
+   - its CI runs are still green.
+
+   Newer commits on `main` are expected and do not stop the release.
 6. Set `TAFF_TAG` and the `ASSET_VERSION` build argument to the SHA, so the
    service worker and locale caches refresh on every client.
 7. Build with `--builder default`.
