@@ -72,27 +72,36 @@ account is lost. The earlier private credential files are gone (readiness
 check, 2026-10-14). If no verification credential item exists in the ops
 vault:
 
-1. Create one through the public site, using the normal username sign-up:
-   - username `taff-verify`, or `taff-verify-<yyyymmdd>` if taken;
-   - a generated strong password;
-   - an address you control, if email is required.
-2. Store the credentials immediately, before signing up, so they are never
-   unrecoverable:
-   - **Preferred:** a 1Password item named `Taff production verification
-     account`, in any vault the automation can write to.
-   - **Fallback** (the service account cannot create items in Codex
-     Automation, readiness check 2026-10-14): on the Taff host, write
-     `/srv/taff/secrets/verification-account.json`. Give it the same owner as
-     the private env file and mode 0600. Write it with `umask 077` and
-     without echoing the password; it holds `username`, `password` and
-     `workspace`. Never print or copy it elsewhere. Move it to 1Password once
-     a writable vault exists, then delete the file.
+1. Create the credentials in 1Password first, through the `op` CLI
+   authorized by the 1Password desktop app (the user enables desktop app
+   integration and approves the prompt). The service account cannot create
+   items, so run `op` without `OP_SERVICE_ACCOUNT_TOKEN` in its
+   environment, and confirm `op whoami` shows the user account.
+   - Let 1Password generate the password, so it is never typed, echoed or
+     logged: `op item create --category login --vault "Codex Automation"
+     --title "Taff production verification account" --generate-password='20,letters,digits'
+     username=taff-verify
+     website=https://taff.apuch.cn`.
+   - If that vault refuses the write, use the user's `Private` vault with the
+     same command.
+   - Read the password only by piping `op read
+     "op://<vault>/Taff production verification account/password"` straight
+     into the sign-up and sign-in steps, never into a file, terminal output
+     or report.
+   - After the workspace exists, add a `workspace` field to the item with
+     `op item edit`.
 
+   No credential file is kept on the Mac or the host.
    Never write the credentials to the repo, logs or reports.
+2. Sign up through the public site with the normal username sign-up, using
+   that item's username and password:
+   - if `taff-verify` is taken, use `taff-verify-<yyyymmdd>` and update the
+     item's `username` field first;
+   - an address you control, if email is required.
 3. Signed in as that account, create the workspace `Taff verification`.
 4. Add one agent through Team, named `Verification agent`.
 5. Record only the account's username, the workspace name and where the
-   credentials live (the item name or the host path) in `docs/deploy.md`,
+   credentials live (vault and item name) in `docs/deploy.md`,
    under "Operations".
 
 This creates only that account's own data; it seeds nothing, changes no
