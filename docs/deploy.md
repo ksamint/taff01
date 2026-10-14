@@ -1638,3 +1638,60 @@ reverified exact images, healthy API, public health 200, Caddy/Valkey/all 46 nei
 route hash and PostgreSQL start time. No twice-failing critical flow required rollback.
 The release remains live; the agent resumes 30-minute discovery until v0.2.0 is deployed
 and recorded.
+
+### Frontend v2 release candidate v0.2.0 — 2026-10-14
+
+**Source.** `main` at `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, tagged **`v0.2.0`**. It supersedes M19a,
+whose source `9577c8c` is live and accepted. This candidate completes M19 and
+is the frontend v2 release. Since M19a, it adds:
+
+- **PR #23, accessibility.**
+  - The accessibility audit (`scripts/ui/a11y-audit.mjs`) now covers every v2
+    route: 348 contexts, 0 failures.
+  - CSS fixes:
+    - deep-blue `--text-on-accent` text on the gold badges (5.5:1);
+    - 44 px targets for timeline rows, mind-map source links, project view
+      tabs, contact links and the brief's send button;
+    - the standard focus ring on the brief's ask input.
+  - The Me visual test now waits for its content before capturing.
+  - The PR adds 186 locale captures.
+- **PR #24, the release itself.**
+  - The v0.2.0 `CHANGELOG.md` and README.
+  - Workspace packages and the MCP server version move to `0.2.0`.
+  - The complete M19 report.
+- **`191243d`:** the deploy agent's M19a record, docs only.
+
+**What changes for people.** Badge counts on the phone tab bar, the desktop
+sidebar and Me now use deep-blue text on gold instead of white. The
+timeline, mind map, contact detail and brief controls are easier to hit,
+and the brief's ask field shows a focus ring. MCP clients now see server
+version `0.2.0`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `191243d`:**
+  [38585652337](https://github.com/ksamint/taff01/actions/runs/38585652337),
+  success. It covers the LCP guard, gated Lighthouse, the visual suite, e2e
+  and MCP smoke.
+- **PR CI on the merged heads,** each an ancestor of the source, all success:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #24 | `aaa5c5e3321c230596a695b13112db03defd5ff6` | [38580016843](https://github.com/ksamint/taff01/actions/runs/38580016843) |
+  | #23 | `00630dcf22c50d073dd97edf6590a697df0ac3b1` | [38576480541](https://github.com/ksamint/taff01/actions/runs/38576480541) |
+
+- **Visual baselines:**
+  - [38572695160](https://github.com/ksamint/taff01/actions/runs/38572695160)
+    on `cfd5e76`;
+  - [38575377243](https://github.com/ksamint/taff01/actions/runs/38575377243)
+    on `7ba0c1b`, for the Me baseline.
+
+**Validation numbers.** The gates are the `main` run above. The M19 report
+(`docs/milestones/19-cleanup-a11y-i18n-release.md`) records the audit,
+keyboard flow, locale captures and the per-PR checks. Under the current
+rules, the local production-mode checklist was not rerun.
+
+**Migrations.** None since M18. The last migration is still `0026`; every
+migration since v0.1.0 (`0023`–`0026`) is additive.
+
+**Environment, Compose, Docker and Caddy.** No changes.
