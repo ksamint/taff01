@@ -894,7 +894,7 @@ export function createRunOperations({
       .select()
       .from(grants)
       .where(eq(grants.agentId, agentId))
-      .orderBy(desc(grants.createdAt))
+      .orderBy(desc(grants.createdAt), desc(grants.id))
       .limit(200);
     const history = await db
       .select()
@@ -911,7 +911,7 @@ export function createRunOperations({
           ),
         ),
       )
-      .orderBy(desc(activity.createdAt))
+      .orderBy(desc(activity.createdAt), desc(activity.id))
       .limit(200);
     return {
       member,
