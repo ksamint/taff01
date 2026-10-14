@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (174 distinct, 805 uses)
+## Test ids (175 distinct, 805 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -39,7 +39,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `inbox-badge` | 2 |  | optimistic-m4.spec.ts |
-| `open-quick` | 15 |  | accessibility.spec.ts, agent-review.spec.ts, persistence.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts |
+| `open-quick` | 14 |  | accessibility.spec.ts, agent-review.spec.ts, persistence.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts |
 
 ### auth.tsx
 
@@ -63,6 +63,7 @@ several do). “Also rendered by” lists the other files.
 | `calendar-tools` | 1 |  | support/calendar.ts |
 | `calendar-undo` | 10 |  | calendar.spec.ts |
 | `calendar-week` | 3 |  | calendar.spec.ts, ui-parity.spec.ts |
+| `desktop-new-task` | 1 | projects-view.tsx, today-view.tsx | support/tasks.ts |
 | `schedule-task-*` | 2 |  | calendar.spec.ts |
 
 ### digest-view.tsx
@@ -461,9 +462,8 @@ read (`data-event-id`, `data-date`).
 | `.section-hint` | 2 | optimistic-m4.spec.ts |
 | `.sidebar` | 4 | agent-creation.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
 | `.sidebar a[href^="/agents/optimistic:"]` | 1 | agent-creation.spec.ts |
-| `.sidebar-agents .sidebar-link` | 2 | scripts/ui/app-shots.mjs, ui-parity.spec.ts |
-| `.sidebar-agents a` | 1 | ui-parity.spec.ts |
-| `.sidebar-primary a[href="/inbox"] .sidebar-count` | 1 | ui-parity.spec.ts |
+| `.sidebar-me .nav-badge` | 1 | ui-parity.spec.ts |
+| `.sidebar-primary .sidebar-link` | 3 | scripts/ui/app-shots.mjs, ui-parity.spec.ts |
 | `.sidebar-workspace > summary` | 1 | ui-parity.spec.ts |
 | `.tabbar` | 2 | me.spec.ts, ui-parity.spec.ts |
 | `.task-detail-sheet .task-detail-toolbar` | 1 | ui-parity.spec.ts |
@@ -495,13 +495,10 @@ read (`data-event-id`, `data-date`).
 | `a.task-title-link[href="/tasks/*"]` | 2 | scripts/ui/app-shots.mjs, ui-parity.spec.ts |
 | `a[href="*"]:visible` | 2 | support/preferences.ts, ui-parity.spec.ts |
 | `a[href="/agents/*"]` | 1 | optimistic-m4.spec.ts |
-| `a[href="/agents/*"] .agent-status-dot` | 1 | ui-parity.spec.ts |
 | `a[href="/digests/*"]` | 1 | notifications.spec.ts |
-| `a[href="/inbox"]` | 1 | ui-parity.spec.ts |
-| `a[href="/inbox"] .nav-badge` | 1 | ui-parity.spec.ts |
-| `a[href="/inbox"] .sidebar-count` | 1 | ui-parity.spec.ts |
+| `a[href="/me"]` | 1 | ui-parity.spec.ts |
+| `a[href="/me"] .nav-badge` | 2 | ui-parity.spec.ts |
 | `a[href="/me"]:visible` | 1 | support/preferences.ts |
-| `a[href="/projects"] .sidebar-count` | 1 | ui-parity.spec.ts |
 | `a[href="/tasks/*"]` | 1 | accessibility.spec.ts |
 | `aside.sidebar` | 4 | today.spec.ts, ui-parity.spec.ts |
 | `dialog.confirm-dialog` | 5 | agent-review.spec.ts, optimistic-m4.spec.ts |
@@ -557,8 +554,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `me.teamSummary` | 1 | me.spec.ts |
 | `me.title` | 1 | me.spec.ts |
 | `nav.calendar` | 1 | calendar.spec.ts |
-| `nav.inbox` | 1 | ui-parity.spec.ts |
 | `nav.label` | 1 | calendar.spec.ts |
+| `nav.me` | 1 | ui-parity.spec.ts |
 | `notifications.title` | 1 | notifications.spec.ts |
 | `organization.accept` | 5 | planning.spec.ts |
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
