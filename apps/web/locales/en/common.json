@@ -64,7 +64,8 @@
     "auth": "Couldn’t sign in. Check your email or username and password, then try again.",
     "signup": "Couldn’t create an account. Check your details or try signing in.",
     "profile": "Couldn’t save your language preference. Please try again.",
-    "email_verification_required": "Verify your email address before accepting this invitation."
+    "email_verification_required": "Verify your email address before accepting this invitation.",
+    "rate_limited": "Too many questions at once. Try again in a minute."
   },
   "zh-HK": "繁體中文（香港）",
   "nav": {
@@ -1020,6 +1021,150 @@
         "out": "Supervises",
         "in": "Supervised by"
       }
+    }
+  },
+  "brief": {
+    "nav": "Brief",
+    "title": "Daily brief",
+    "close": "Close brief",
+    "loading": "Reading across all projects…",
+    "greeting": {
+      "morning": "Good morning, {{name}}",
+      "afternoon": "Good afternoon, {{name}}",
+      "evening": "Good evening, {{name}}"
+    },
+    "summary": {
+      "onTrack": "{{count}} of {{total}} projects are on track.",
+      "worst": "{{project}} needs the most attention: {{reason}}",
+      "agents_one": "{{count}} agent is working.",
+      "agents_other": "{{count}} agents are working.",
+      "noAgents": "No agents are working right now.",
+      "reviews_one": "{{count}} deliverable is waiting for your confirmation.",
+      "reviews_other": "{{count}} deliverables are waiting for your confirmation.",
+      "noProjects": "No projects yet. Their risk and forecast appear here once you create one in Projects."
+    },
+    "reason": {
+      "blockedTask": "{{task}} is blocked, waiting for a permission decision.",
+      "behindTask": "{{task}} is behind plan.",
+      "slipMilestone_one": "{{milestone}} is forecast {{count}} day late.",
+      "slipMilestone_other": "{{milestone}} is forecast {{count}} days late.",
+      "slip_one": "Forecast to finish {{count}} day late.",
+      "slip_other": "Forecast to finish {{count}} days late.",
+      "conflict": "A task starts before its predecessor finishes.",
+      "onTrackFor": "On track for {{date}}.",
+      "noPlan": "No dated work yet."
+    },
+    "stat": {
+      "dueToday": "Due today",
+      "agents": "Agents working",
+      "toConfirm": "Awaiting your confirmation"
+    },
+    "stats": "Today in numbers",
+    "risk": {
+      "title": "Risk & slip forecast",
+      "forecast": "Forecast {{date}}",
+      "forecastLate_one": "Forecast {{date}} · {{count}} day late",
+      "forecastLate_other": "Forecast {{date}} · {{count}} days late",
+      "openTimeline": "Open the {{project}} timeline"
+    },
+    "finance": {
+      "total_one": "Total · {{count}} billable project",
+      "total_other": "Total · {{count}} billable projects",
+      "delivery": "Delivered"
+    },
+    "actions": {
+      "title": "Suggested actions",
+      "none": "Nothing is waiting for you.",
+      "waiting_one": "{{count}} suggested action",
+      "waiting_other": "{{count}} suggested actions"
+    },
+    "kind": {
+      "review": "Review",
+      "grant": "Permission",
+      "suggestion": "Proposal"
+    },
+    "action": {
+      "review": "{{agent}} asks you to confirm {{task}}",
+      "grant": "{{agent}} asks for permission: {{capability}}",
+      "grantTask": "{{agent}} asks for permission on {{task}}: {{capability}}",
+      "split_one": "{{agent}} proposes splitting {{task}} into {{count}} subtask",
+      "split_other": "{{agent}} proposes splitting {{task}} into {{count}} subtasks",
+      "reschedule_one": "{{agent}} proposes moving {{task}} to start {{date}} for {{count}} day",
+      "reschedule_other": "{{agent}} proposes moving {{task}} to start {{date}} for {{count}} days",
+      "proposal": "{{agent}} has a proposal for {{task}}",
+      "openReview": "Open review",
+      "openGrant": "Review request",
+      "openProposal": "Review proposal"
+    },
+    "someTask": "a task",
+    "source": "Built from your plans, reviews and permission requests by fixed rules. No AI model is used.",
+    "proposal": {
+      "title": "Agent proposal",
+      "intro": "{{agent}} proposed this. Nothing changes until you apply it.",
+      "subtasks": "Subtasks to create under {{task}}",
+      "newPlan": "New plan for {{task}}",
+      "start": "Start",
+      "duration": "Duration",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "due": "Due {{date}}",
+      "reason": "Agent's reason",
+      "apply": "Apply",
+      "dismiss": "Dismiss",
+      "loading": "Loading the proposal…",
+      "gone": "This proposal was already decided."
+    },
+    "toast": {
+      "applied": "Applied",
+      "dismissed": "Dismissed"
+    }
+  },
+  "ask": {
+    "label": "Ask across all projects",
+    "placeholder": "Ask across all projects…",
+    "send": "Send",
+    "try": "Try",
+    "suggestion": {
+      "atRisk": "What's at risk?",
+      "needsMe": "What needs me?",
+      "blocked": "What's blocked?",
+      "dueThisWeek": "What's due this week?",
+      "agents": "What are agents working on?"
+    },
+    "thinking": "Reading across all projects…",
+    "question": "You asked: {{question}}",
+    "rules": "Answered from your workspace data by fixed rules.",
+    "model": "Written by the AI model an admin enabled for this organization.",
+    "answer": {
+      "at_risk_one": "{{count}} project needs attention.",
+      "at_risk_other": "{{count}} projects need attention.",
+      "blocked_one": "{{count}} request is waiting for a permission decision.",
+      "blocked_other": "{{count}} requests are waiting for a permission decision.",
+      "needs_me_one": "{{count}} item is waiting for you.",
+      "needs_me_other": "{{count}} items are waiting for you.",
+      "due_this_week_one": "{{count}} of your tasks is due in the next 7 days.",
+      "due_this_week_other": "{{count}} of your tasks are due in the next 7 days.",
+      "agent_status_one": "{{count}} agent run is active.",
+      "agent_status_other": "{{count}} agent runs are active.",
+      "none": {
+        "at_risk": "Every project is on track.",
+        "blocked": "Nothing is blocked.",
+        "needs_me": "Nothing is waiting for you.",
+        "due_this_week": "None of your tasks are due in the next 7 days.",
+        "agent_status": "No agent is working right now."
+      },
+      "unknown": "I can answer about risk, blocked work, what needs you, what's due this week and what agents are doing. Try one of the questions below."
+    },
+    "item": {
+      "project": "{{project}} · {{level}}",
+      "forecast": "Forecast {{date}}",
+      "forecastLate_one": "Forecast {{date}}, {{count}} day late",
+      "forecastLate_other": "Forecast {{date}}, {{count}} days late",
+      "task": "{{task}}",
+      "due": "Due {{date}}",
+      "blockedTask": "{{task}}: {{agent}} waits for a permission",
+      "blockedAgent": "{{agent}} waits for a permission",
+      "agent": "{{agent}} · {{status}} · {{task}}"
     }
   }
 }

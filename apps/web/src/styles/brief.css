@@ -1,0 +1,543 @@
+/* M17 brief and Ask taff (Team Tasks Module Plan.dc.html 240–285).
+   The prototype's 10–11 px labels and 28–32 px targets are raised to the
+   accessibility floor: 12 px text and 44 px targets. */
+
+.brief {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  color: var(--text);
+}
+.brief-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 12px;
+  padding: 16px 20px 20px;
+  border-bottom: var(--hairline) solid var(--border);
+}
+.brief-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: var(--ls-track-sm, 0.04em);
+  text-transform: uppercase;
+}
+:lang(zh) .brief-eyebrow {
+  letter-spacing: 0;
+}
+.brief-eyebrow svg {
+  flex: none;
+  color: var(--accent-text);
+}
+.brief-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: -8px -12px -8px 0;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+.brief-icon-button:hover {
+  color: var(--text);
+  background: var(--bg-container-low);
+}
+.brief-ask {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 4px 0 12px;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg-surface);
+}
+.brief-ask:focus-within {
+  border-color: var(--border-strong);
+}
+.brief-ask input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 14px;
+}
+.brief-ask input:focus-visible {
+  outline: none;
+}
+.brief-ask input::placeholder {
+  color: var(--text-muted);
+}
+.brief-ask-send {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
+  cursor: pointer;
+}
+.brief-ask-send:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.brief-answer-region:empty {
+  display: none;
+}
+.brief-answer {
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: var(--hairline) solid var(--border);
+  background: var(--bg-surface);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.brief-answer > p {
+  margin: 0;
+}
+.brief-answer-question {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.brief-answer-text,
+.brief-answer-heading {
+  margin-top: 4px;
+  font-weight: var(--weight-medium);
+}
+.brief-answer-items {
+  display: flex;
+  flex-direction: column;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.brief-answer-items li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  min-height: 44px;
+  border-top: var(--hairline) solid var(--border-line);
+}
+.brief-answer-items a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.brief-answer-detail,
+.brief-answer-source {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.brief-answer-source {
+  margin-top: 8px !important;
+}
+.brief-note {
+  margin: 0;
+  padding: 24px 20px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.brief-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: var(--hairline) solid var(--border);
+}
+.brief-greeting {
+  margin: 0;
+  font-size: 22px;
+  font-weight: var(--weight-label);
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+:lang(zh) .brief-greeting {
+  letter-spacing: 0;
+}
+.brief-text {
+  margin: 0;
+  color: var(--text-body);
+  font-size: 14px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+.brief-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  border: var(--hairline) solid var(--border);
+  background: var(--border);
+}
+.brief-stat {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--bg);
+}
+.brief-stat dt {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.3;
+}
+.brief-stat dd {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.brief-try {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.brief-try-label {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.brief-try ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.brief-chip {
+  min-height: 44px;
+  padding: 0 10px;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.brief-chip:hover {
+  border-color: var(--border-strong);
+}
+.brief-label {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: var(--ls-track-sm, 0.04em);
+  text-transform: uppercase;
+}
+:lang(zh) .brief-label {
+  letter-spacing: 0;
+}
+.brief-label:focus {
+  outline: none;
+}
+.brief-label:focus-visible {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.brief-portfolio {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: var(--hairline) solid var(--border);
+  background: var(--bg-surface);
+}
+.brief-portfolio-label {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.brief-finance {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+.brief-finance > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.brief-finance dt {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  white-space: nowrap;
+}
+.brief-finance dd {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: var(--weight-label);
+  font-variant-numeric: tabular-nums;
+}
+.brief-portfolio .brief-finance dd {
+  font-size: 16px;
+  font-weight: 400;
+}
+.brief-finance-sub {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.brief-bar {
+  display: block;
+  height: 3px;
+  background: var(--bg-container-high);
+}
+.brief-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--text);
+}
+.brief-risk-list,
+.brief-action-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.brief-risk {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: var(--hairline) solid var(--border-line);
+  color: inherit;
+  text-decoration: none;
+}
+.brief-risk:hover {
+  background: var(--bg-container-low);
+}
+.brief-risk-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brief-risk-names {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.brief-risk-org {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.brief-risk-name {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: var(--weight-label);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.brief-level {
+  flex: none;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+:lang(zh) .brief-level {
+  letter-spacing: 0;
+}
+.brief-level.is-low {
+  background: var(--success-bg);
+  color: var(--success);
+}
+.brief-level.is-medium {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.brief-level.is-high {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+.brief-risk-reason {
+  color: var(--text-body);
+  font-size: 13px;
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+.brief-risk-meta {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.brief-action {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 14px 0;
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.brief-action-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.brief-action-meta svg {
+  color: var(--accent-text);
+}
+.brief-action-ref {
+  margin-left: auto;
+  font-family: var(--font-mono);
+}
+.brief-action-title {
+  font-size: 14px;
+  font-weight: var(--weight-medium);
+  line-height: 1.4;
+  text-wrap: pretty;
+}
+.brief-outline {
+  min-height: 44px;
+  border-color: var(--border);
+  font-size: 13px;
+  text-decoration: none;
+}
+.brief-empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.brief-source {
+  margin: 0;
+  padding: 16px 20px 32px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.brief-proposal-title {
+  margin: 0 0 4px;
+  font-weight: var(--weight-label);
+}
+.brief-note-inline {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.brief-proposal-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.brief-proposal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+}
+.brief-proposal-list .brief-finance-sub {
+  margin-left: 8px;
+}
+.brief-proposal-plan {
+  display: flex;
+  gap: 24px;
+  margin: 0;
+}
+.brief-proposal-plan dt {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.brief-proposal-plan dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: var(--weight-label);
+}
+.brief-proposal-reason {
+  margin: 0;
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+  color: var(--text-body);
+  font-size: 14px;
+}
+
+/* Phone: a full-screen overlay pushed in over 我的 (prototype line 80). */
+.brief-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0 0 env(safe-area-inset-bottom);
+  border: 0;
+  background: var(--bg);
+  color: var(--text);
+  overflow-y: auto;
+  animation: brief-push-in 300ms
+    var(--ease-standard, cubic-bezier(0.16, 1, 0.3, 1));
+}
+.brief-overlay::backdrop {
+  background: var(--scrim);
+}
+@keyframes brief-push-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brief-overlay {
+    animation: none;
+  }
+}
+
+/* Desktop Me › AI 簡報: the centred column of the capture. */
+.me-desk-panel .brief {
+  padding-top: 8px;
+}
+.me-desk-panel .brief-head,
+.me-desk-panel .brief-section,
+.me-desk-panel .brief-answer,
+.me-desk-panel .brief-source {
+  padding-left: 24px;
+  padding-right: 24px;
+}
+@media (min-width: 1024px) {
+  .brief-greeting {
+    font-size: 24px;
+  }
+}
