@@ -65,7 +65,8 @@
     "auth": "無法登入，請檢查電郵或用戶名稱和密碼後重試。",
     "signup": "無法建立帳戶，請檢查資料或嘗試登入。",
     "profile": "無法儲存語言偏好，請重試。",
-    "email_verification_required": "請先驗證電郵地址，再接受此邀請。"
+    "email_verification_required": "請先驗證電郵地址，再接受此邀請。",
+    "rate_limited": "提問太頻繁，請一分鐘後再試。"
   },
   "nav": {
     "label": "主導航",
@@ -1020,6 +1021,150 @@
         "out": "督導",
         "in": "督導人"
       }
+    }
+  },
+  "brief": {
+    "nav": "AI 簡報",
+    "title": "AI 每日簡報",
+    "close": "收起簡報",
+    "loading": "正在分析所有項目…",
+    "greeting": {
+      "morning": "早晨，{{name}}",
+      "afternoon": "午安，{{name}}",
+      "evening": "晚上好，{{name}}"
+    },
+    "summary": {
+      "onTrack": "{{total}} 個項目中有 {{count}} 個按計劃進行。",
+      "worst": "「{{project}}」最需要關注：{{reason}}",
+      "agents_one": "{{count}} 個智能體正在工作。",
+      "agents_other": "{{count}} 個智能體正在工作。",
+      "noAgents": "目前沒有智能體在工作。",
+      "reviews_one": "{{count}} 項交付等待你確認。",
+      "reviews_other": "{{count}} 項交付等待你確認。",
+      "noProjects": "還沒有項目。在「項目」建立項目後，這裏會顯示風險與預測。"
+    },
+    "reason": {
+      "blockedTask": "「{{task}}」被阻礙，正在等待權限決定。",
+      "behindTask": "「{{task}}」進度落後計劃。",
+      "slipMilestone_one": "「{{milestone}}」預計延後 {{count}} 天。",
+      "slipMilestone_other": "「{{milestone}}」預計延後 {{count}} 天。",
+      "slip_one": "預計延後 {{count}} 天完成。",
+      "slip_other": "預計延後 {{count}} 天完成。",
+      "conflict": "有任務在前置任務完成前開始。",
+      "onTrackFor": "按計劃於 {{date}} 完成。",
+      "noPlan": "還沒有排期的工作。"
+    },
+    "stat": {
+      "dueToday": "今天到期",
+      "agents": "工作中智能體",
+      "toConfirm": "待你確認"
+    },
+    "stats": "今日數字",
+    "risk": {
+      "title": "風險與延誤預測",
+      "forecast": "預計 {{date}}",
+      "forecastLate_one": "預計 {{date}} · 延後 {{count}} 天",
+      "forecastLate_other": "預計 {{date}} · 延後 {{count}} 天",
+      "openTimeline": "打開「{{project}}」時間線"
+    },
+    "finance": {
+      "total_one": "合計 · {{count}} 個收費項目",
+      "total_other": "合計 · {{count}} 個收費項目",
+      "delivery": "交付進度"
+    },
+    "actions": {
+      "title": "待批准的建議",
+      "none": "沒有等待你處理的事項。",
+      "waiting_one": "{{count}} 項建議待處理",
+      "waiting_other": "{{count}} 項建議待處理"
+    },
+    "kind": {
+      "review": "審核",
+      "grant": "權限",
+      "suggestion": "建議"
+    },
+    "action": {
+      "review": "{{agent}}請你確認「{{task}}」",
+      "grant": "{{agent}}請求權限：{{capability}}",
+      "grantTask": "{{agent}}就「{{task}}」請求權限：{{capability}}",
+      "split_one": "{{agent}}建議把「{{task}}」拆分為 {{count}} 個子任務",
+      "split_other": "{{agent}}建議把「{{task}}」拆分為 {{count}} 個子任務",
+      "reschedule_one": "{{agent}}建議把「{{task}}」改為 {{date}} 開始，為期 {{count}} 天",
+      "reschedule_other": "{{agent}}建議把「{{task}}」改為 {{date}} 開始，為期 {{count}} 天",
+      "proposal": "{{agent}}對「{{task}}」有一項建議",
+      "openReview": "打開審核",
+      "openGrant": "查看請求",
+      "openProposal": "查看建議"
+    },
+    "someTask": "一項任務",
+    "source": "根據你的計劃、審核與權限請求按固定規則整理，沒有使用 AI 模型。",
+    "proposal": {
+      "title": "智能體建議",
+      "intro": "這是{{agent}}的建議。你套用之前不會有任何改動。",
+      "subtasks": "將在「{{task}}」下建立的子任務",
+      "newPlan": "「{{task}}」的新計劃",
+      "start": "開始",
+      "duration": "工期",
+      "days_one": "{{count}} 天",
+      "days_other": "{{count}} 天",
+      "due": "{{date}} 到期",
+      "reason": "智能體的理由",
+      "apply": "套用",
+      "dismiss": "略過",
+      "loading": "正在載入建議…",
+      "gone": "這項建議已經處理。"
+    },
+    "toast": {
+      "applied": "已套用",
+      "dismissed": "已略過"
+    }
+  },
+  "ask": {
+    "label": "詢問所有項目",
+    "placeholder": "詢問所有項目…",
+    "send": "發送",
+    "try": "試問",
+    "suggestion": {
+      "atRisk": "哪些項目有風險？",
+      "needsMe": "有甚麼需要我確認？",
+      "blocked": "有甚麼被阻礙？",
+      "dueThisWeek": "本週有甚麼到期？",
+      "agents": "智能體正在做甚麼？"
+    },
+    "thinking": "正在分析所有項目…",
+    "question": "你問：{{question}}",
+    "rules": "根據工作區資料按固定規則回答。",
+    "model": "由管理員為此組織啟用的 AI 模型撰寫。",
+    "answer": {
+      "at_risk_one": "{{count}} 個項目需要留意。",
+      "at_risk_other": "{{count}} 個項目需要留意。",
+      "blocked_one": "{{count}} 項請求正在等待權限決定。",
+      "blocked_other": "{{count}} 項請求正在等待權限決定。",
+      "needs_me_one": "{{count}} 項正在等你處理。",
+      "needs_me_other": "{{count}} 項正在等你處理。",
+      "due_this_week_one": "未來 7 天有 {{count}} 項你的任務到期。",
+      "due_this_week_other": "未來 7 天有 {{count}} 項你的任務到期。",
+      "agent_status_one": "{{count}} 個智能體任務正在執行。",
+      "agent_status_other": "{{count}} 個智能體任務正在執行。",
+      "none": {
+        "at_risk": "所有項目都按計劃進行。",
+        "blocked": "沒有被阻礙的工作。",
+        "needs_me": "沒有等你處理的事項。",
+        "due_this_week": "未來 7 天沒有你的任務到期。",
+        "agent_status": "目前沒有智能體在工作。"
+      },
+      "unknown": "我可以回答風險、被阻礙的工作、等你處理的事項、本週到期的任務，以及智能體的工作。試試下面的問題。"
+    },
+    "item": {
+      "project": "{{project}} · {{level}}",
+      "forecast": "預計 {{date}}",
+      "forecastLate_one": "預計 {{date}}，延後 {{count}} 天",
+      "forecastLate_other": "預計 {{date}}，延後 {{count}} 天",
+      "task": "{{task}}",
+      "due": "{{date}} 到期",
+      "blockedTask": "「{{task}}」：{{agent}}正在等待權限",
+      "blockedAgent": "{{agent}}正在等待權限",
+      "agent": "{{agent}} · {{status}} · {{task}}"
     }
   }
 }

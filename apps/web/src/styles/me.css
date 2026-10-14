@@ -519,3 +519,11 @@
 .me-settings .notifications-parity .notifications-body {
   padding-bottom: 0;
 }
+/* M17: the dot on AI 簡報 when suggested actions wait (prototype line 431). */
+.me-brief-dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}

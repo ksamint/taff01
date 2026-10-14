@@ -20,6 +20,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
+import { useBrief } from "../lib/brief-queries";
 import { needsYouCount } from "../lib/needs-you";
 import { useNotificationPreferences } from "../lib/notification-preferences";
 import { useInbox, useMembers, useRuns, useTasks } from "../lib/queries";
@@ -55,6 +56,21 @@ function timeZones(current: string): string[] {
 
 export const initial = (name: string) =>
   Array.from(name.trim()).slice(0, 1).join("").toUpperCase();
+
+/** The prototype's dot on AI 簡報: suggested actions wait for the reader. */
+export function BriefDot() {
+  const { t } = useTranslation();
+  const brief = useBrief();
+  const count = brief.data?.actions.length ?? 0;
+  return count > 0 ? (
+    <span
+      className="me-brief-dot"
+      role="img"
+      aria-label={t("brief.actions.waiting", { count })}
+      data-testid="brief-dot"
+    />
+  ) : null;
+}
 
 /** Phone (< 1024 px) renders the prototype's Me list; desktop renders tabs. */
 export function MeView() {
@@ -388,7 +404,25 @@ function MePhone() {
           )}
           <ChevronRight size={16} aria-hidden="true" />
         </Link>
-        {/* The AI 簡報 (brief) row ships with the brief in M17. */}
+        <Link
+          className="me-row-control"
+          href="/brief"
+          prefetch={false}
+          data-testid="me-brief"
+          onClick={() => {
+            // The overlay goes back here on close instead of adding history.
+            try {
+              window.sessionStorage.setItem("taff:brief-back", "1");
+            } catch {
+              /* Without storage, closing replaces the entry instead. */
+            }
+          }}
+        >
+          <Sparkles size={20} strokeWidth={1.5} aria-hidden="true" />
+          <span className="me-row-label">{t("brief.nav")}</span>
+          <BriefDot />
+          <ChevronRight size={16} aria-hidden="true" />
+        </Link>
       </div>
       <h2 className="me-section-label">{t("agentProfile.team")}</h2>
       <div className="me-rows">

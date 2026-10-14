@@ -101,7 +101,7 @@ const NAV = [
   { href: "/me", key: "me", Icon: User },
 ] as const;
 /** Screens pushed from 我的 keep the Me tab current. */
-const ME_PATHS = ["/me", "/inbox", "/agents", "/orgs", "/digests"];
+const ME_PATHS = ["/me", "/inbox", "/brief", "/agents", "/orgs", "/digests"];
 
 function Wordmark({ label }: { label: string }) {
   return (

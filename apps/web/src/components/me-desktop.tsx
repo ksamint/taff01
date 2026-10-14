@@ -24,6 +24,7 @@ import {
   AdvancedSheet,
   AgentDot,
   AppearanceControl,
+  BriefDot,
   initial,
   LanguageControl,
   MeProfile,
@@ -56,8 +57,12 @@ const NotificationsView = dynamic(
   { ssr: false, loading: () => null },
 );
 
-// The AI 簡報 (brief) tab ships with the brief in M17.
-const TABS = ["inbox", "agents", "settings"] as const;
+const BriefView = dynamic(
+  () => import("./brief-view").then((module) => module.BriefView),
+  { ssr: false, loading: () => null },
+);
+
+const TABS = ["inbox", "brief", "agents", "settings"] as const;
 type Tab = (typeof TABS)[number];
 const isTab = (value: string | null): value is Tab =>
   TABS.includes(value as Tab);
@@ -79,6 +84,7 @@ export function MeDesktop() {
   const count = needsYouCount(inbox.data);
   const refs = useRef<Record<Tab, HTMLButtonElement | null>>({
     inbox: null,
+    brief: null,
     agents: null,
     settings: null,
   });
@@ -132,9 +138,11 @@ export function MeDesktop() {
               {t(
                 key === "inbox"
                   ? "nav.inbox"
-                  : key === "agents"
-                    ? "agentProfile.team"
-                    : "me.settings",
+                  : key === "brief"
+                    ? "brief.nav"
+                    : key === "agents"
+                      ? "agentProfile.team"
+                      : "me.settings",
               )}
               {key === "inbox" && count > 0 && (
                 <span
@@ -144,6 +152,7 @@ export function MeDesktop() {
                   {numbers.format(count)}
                 </span>
               )}
+              {key === "brief" && <BriefDot />}
             </button>
           ))}
         </div>
@@ -156,6 +165,8 @@ export function MeDesktop() {
       >
         {tab === "inbox" ? (
           <InboxView embedded />
+        ) : tab === "brief" ? (
+          <BriefView onClose={() => select("inbox", true)} />
         ) : tab === "agents" ? (
           <AgentsTab />
         ) : (
