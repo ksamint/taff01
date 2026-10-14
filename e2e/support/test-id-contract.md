@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (160 distinct, 769 uses)
+## Test ids (174 distinct, 805 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -264,20 +264,44 @@ several do). “Also rendered by” lists the other files.
 | `search-type-comment` | 1 |  | planning.spec.ts |
 | `search-type-settings` | 1 |  | planning.spec.ts |
 
+### shell/toaster.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `toast` | 1 |  | task-contacts.spec.ts |
+| `toast-action` | 4 |  | task-contacts.spec.ts |
+
 ### sms-auth.tsx
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `sms-resend` | 4 |  | sms-auth.spec.ts |
 
+### task-contacts.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `task-contact` | 10 |  | task-contacts.spec.ts |
+| `task-contact-add` | 2 |  | task-contacts.spec.ts |
+| `task-contact-confirm` | 1 |  | task-contacts.spec.ts |
+| `task-contact-edit` | 3 |  | task-contacts.spec.ts |
+| `task-contact-new-role-signoff` | 2 |  | task-contacts.spec.ts |
+| `task-contact-option` | 2 |  | task-contacts.spec.ts |
+| `task-contact-remove` | 1 |  | task-contacts.spec.ts |
+| `task-contact-role-signoff` | 1 |  | task-contacts.spec.ts |
+| `task-contact-roles` | 4 |  | task-contacts.spec.ts |
+| `task-contact-search` | 1 |  | task-contacts.spec.ts |
+| `task-contacts` | 1 |  | task-contacts.spec.ts |
+| `task-contacts-no-project` | 1 |  | task-contacts.spec.ts |
+
 ### task-detail-view.tsx
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `detail-worker` | 9 |  | optimistic-m4.spec.ts, planning.spec.ts, support/task-fields.ts, today.spec.ts |
+| `detail-worker` | 9 | task-editor.tsx | optimistic-m4.spec.ts, planning.spec.ts, support/task-fields.ts, today.spec.ts |
 | `run-start` | 7 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts |
 | `task-field-*` | 2 | task-editor.tsx | support/task-fields.ts |
-| `task-field-worker` | 4 |  | planning.spec.ts, ui-parity.spec.ts |
+| `task-field-worker` | 4 | task-editor.tsx | planning.spec.ts, ui-parity.spec.ts |
 | `task-status` | 6 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 
 ### task-editor.tsx
@@ -299,7 +323,7 @@ several do). “Also rendered by” lists the other files.
 | `subtask-title` | 2 |  | planning.spec.ts |
 | `task-comment` | 6 |  | planning.spec.ts |
 | `task-comment-submit` | 4 |  | planning.spec.ts |
-| `task-detail-heading` | 23 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, today.spec.ts, ui-parity.spec.ts |
+| `task-detail-heading` | 25 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, task-contacts.spec.ts, today.spec.ts, ui-parity.spec.ts |
 | `task-field-due` | 2 |  | planning.spec.ts |
 | `task-field-text` | 5 |  | planning.spec.ts |
 
@@ -350,6 +374,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `dialog` | 37 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-parity.spec.ts |
+| `dialog — name: m.crm.contacts.add` | 1 | task-contacts.spec.ts |
 | `heading` | 3 | mcp.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
@@ -498,10 +523,18 @@ Keys read from `apps/web/locales/*/common.json` through
 
 | Key | Uses | Used in |
 | --- | ---: | --- |
+| `actions.undo` | 1 | task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
+| `crm.contacts.add` | 1 | task-contacts.spec.ts |
+| `crm.contacts.needsProject` | 1 | task-contacts.spec.ts |
+| `crm.noRole` | 1 | task-contacts.spec.ts |
+| `crm.role.signoff` | 1 | task-contacts.spec.ts |
+| `crm.toast.addedStakeholder` | 2 | task-contacts.spec.ts |
+| `crm.toast.removed` | 1 | task-contacts.spec.ts |
+| `crm.toast.roleReplaced` | 2 | task-contacts.spec.ts |
 | `emailOrUsername` | 1 | username-auth.spec.ts |
 | `emailVerification.delivery.logged` | 5 | planning.spec.ts |
 | `en` | 1 | me.spec.ts |

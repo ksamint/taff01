@@ -8,9 +8,9 @@ import {
   reviewRunSchema,
 } from "@taff/schemas";
 import { useIsMutating, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Check, FileText } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, FileText } from "lucide-react";
 import Link from "next/link";
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { invalidateM3, useReview } from "../lib/m3-queries";
@@ -85,6 +85,9 @@ function ReviewEditor({
   >({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [validationError, setValidationError] = useState(false);
+  const [needsComment, setNeedsComment] = useState(false);
+  const commentRef = useRef<HTMLTextAreaElement>(null);
+  const hintId = useId();
   const review = useReviewRun(data);
   const addComment = useAddReviewComment(data, authorId, {
     onAdded: (body) =>
@@ -186,11 +189,21 @@ function ReviewEditor({
       {t("review.approve")}
     </Button>
   );
+  // 要求修改 opens the comment input (plan §2.4 item 5): without a comment
+  // it focuses the review comment and asks for one; it never sends canned text.
   const changesButton = (
     <Button
       data-testid="review-request-changes"
-      disabled={busy || !hasChangeComment}
-      onClick={() => decide("request_changes")}
+      disabled={busy}
+      onClick={() => {
+        if (hasChangeComment) {
+          decide("request_changes");
+          return;
+        }
+        setNeedsComment(true);
+        commentRef.current?.scrollIntoView({ block: "center" });
+        commentRef.current?.focus();
+      }}
     >
       {t("review.requestChanges")}
     </Button>
@@ -220,6 +233,19 @@ function ReviewEditor({
             </Badge>
           </section>
         </>
+      )}
+      {embedded && (
+        <header className="task-review-header">
+          <h2>{t("review.open")}</h2>
+          <Link
+            data-testid="open-review"
+            className="task-review-link"
+            href={`/tasks/${data.task.id}/review`}
+          >
+            {t("review.title")}
+            <ArrowRight size={14} aria-hidden="true" />
+          </Link>
+        </header>
       )}
       <div className="review-layout">
         <div className="deliverables">
@@ -416,14 +442,26 @@ function ReviewEditor({
                     {t("review.overallComment")}
                   </Label>
                   <textarea
+                    ref={commentRef}
                     id="review-comment"
                     data-testid="review-comment"
                     className="input"
                     value={comment}
                     maxLength={5000}
                     rows={4}
+                    aria-describedby={needsComment ? hintId : undefined}
                     onChange={(event) => setComment(event.target.value)}
                   />
+                  {needsComment && !hasChangeComment && (
+                    <p
+                      id={hintId}
+                      className="field-hint review-changes-hint"
+                      data-testid="review-changes-hint"
+                      role="status"
+                    >
+                      {t("review.changesHint")}
+                    </p>
+                  )}
                 </div>
                 {!embedded && actions}
                 <p className="section-hint">{t("review.approveHint")}</p>
