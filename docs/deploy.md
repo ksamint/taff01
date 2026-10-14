@@ -1072,3 +1072,117 @@ Per Step 1, build, build:server, perf:budget, e2e, MCP smoke, Lighthouse, LCP
 and production deployment did not run. Production remains
 `23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
 migration, image build or container replacement was started.
+
+### Frontend v2 release candidate M17 — 2026-10-14 (answers the M16 member-order block)
+
+**Source.** `main` at `c38cde71ba7e2a5d440eed8da2052cd4fa6bb59c`. It supersedes
+the M16 candidate, so one deploy covers R1, M15, M16 and M17. Since the M16
+candidate's source `78c68ab`, it adds:
+
+- **PR #14:** M17, the AI brief and Ask taff (rules-based).
+- **PR #16:** an e2e fix for an intermittent `optimistic-m4` failure.
+- **PR #17:** a core fix for the member-order assertion that blocked M16.
+
+**Answer to the M16 `Blocked:` note.** The note reported
+`integration.test.ts:91`: `listMembers` returned `[agent, person]`.
+
+- **Cause:** `listMembers` ordered only by `createdAt`. Signup creates the
+  person and the personal agent in one transaction, and the seed creates each
+  workspace's members together, so the rows share `created_at`. The order was
+  then left to the query plan.
+- **Fix (PR #17):**
+  - Members now order by `createdAt`, then `kind` (the enum lists person
+    before agent), then `id`. The existing ordered assertion covers this.
+  - Agent tokens, activity, MCP calls, invites and grants now break ties by
+    `id`.
+
+**Other fixes since M16.**
+
+- **`e2e/optimistic-m4.spec.ts` (PR #16, test only):** it failed 5 of 36 runs
+  on `78c68ab`.
+  - Cause: the test removed its only route right after fulfilling a held
+    request, which turns off request interception in Playwright 1.64. Chromium
+    then left some already-paused app refetches hanging. The rejected
+    mutation never settled, so no alert appeared and the controls stayed
+    disabled.
+  - Result after the fix: 45 / 45.
+- **`assistant.integration.test.ts` (in PR #14, test only):** the "minimum
+  context" check now masks random UUIDs before looking for the contract
+  amount. A task id containing `1000` had tripped it. No finance data is
+  sent.
+- **Phone brief overlay (in PR #14):** closing it now returns focus to the 我的
+  › AI 簡報 row. Before the fix, the production build restored focus to
+  `<body>`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `c38cde7`:**
+  [38553436097](https://github.com/ksamint/taff01/actions/runs/38553436097),
+  success.
+- **PR CI on the merged heads,** each an ancestor of the source, all success:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #17 | `3cf187a0f441723b6ee7a9960cef80cd76adef73` | [38551082162](https://github.com/ksamint/taff01/actions/runs/38551082162) |
+  | #16 | `9219f707e44c4c582d652aa5cb34fc4831ab3198` | [38550241804](https://github.com/ksamint/taff01/actions/runs/38550241804) |
+  | #14 | `193f16cb264e09b2b06c8dfbeace67f58fc79b59` | [38547202218](https://github.com/ksamint/taff01/actions/runs/38547202218) |
+
+- **Visual baselines and gated Lighthouse on CI Chromium:**
+  - [38538826114](https://github.com/ksamint/taff01/actions/runs/38538826114):
+    M17 baselines.
+  - [38551080750](https://github.com/ksamint/taff01/actions/runs/38551080750):
+    gated Lighthouse on PR #17's source, which includes M17.
+
+**What changes for people.**
+
+- **AI brief (M17).**
+  - Where: on phone, 我的 › AI 簡報 opens `/brief` as a full-screen dialog; on
+    desktop, it is the Me › AI 簡報 tab.
+  - Content: a greeting, stat tiles, and risk and slip per project. Finance
+    figures appear for admins only.
+  - Suggested actions never decide anything in one tap. They open the review,
+    the task or a confirm sheet.
+- **Ask taff.** It answers by rules and needs no AI environment variables. The
+  model path stays off in production because `compose.prod.yaml` does not
+  pass the AI variables.
+- **Member lists.** People are listed before agents when they were created
+  together.
+
+Report: `docs/milestones/17-ai-brief.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 855 / 855 |
+| e2e and visual suite | green in PR and `main` CI |
+| Today initial JS | 194,384 B gzipped / 204,800 B (CI) |
+| Today LCP, local production build (median of 3, slow 4G, 4× CPU) | en 660 ms, zh-CN 656 ms, zh-HK 668 ms |
+| Lighthouse, gated, CI Chromium (performance / accessibility / best practices) | en 93/100/100, zh-CN 93/100/100, zh-HK 94/100/100 |
+| `pnpm mcp:smoke`, against the production-mode stack | passed |
+
+**Migrations.** None. The last migration is still `0025`.
+
+**Environment.** No changes since the M15 candidate. `ASK_RATE_LIMIT` and the
+`AI_*` variables stay optional and unset.
+
+**Compose, Docker and Caddy.** No changes.
+
+**Release checklist (plan §6.0).** It ran on the exact source `c38cde7`, on a
+fresh database, with `pnpm release:stack --build --migrate --seed` and
+`RELEASE_MAIL_LOG=… pnpm release:checklist`.
+
+- **Result: passed, 32 / 32,** with 0 failed and 0 skipped.
+- **One sub-step skipped:** SMS sign-in, in every project
+  (`smsEnabled=false` locally).
+- **MCP:** the `@modelcontextprotocol/client` round trip passed 42 / 42
+  checks, covering all 30 tools.
+
+**Notes for the deploy.**
+
+- If the live origin is still on `2338772`, migrations `0023`–`0025` apply
+  together, as described in the M15 candidate.
+- Before `pnpm e2e`, make sure nothing listens on the configured ports. A
+  stale local API caused one failed checklist attempt here.
+
