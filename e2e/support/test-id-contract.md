@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (263 distinct, 1122 uses)
+## Test ids (315 distinct, 1220 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -45,9 +45,9 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `auth-email` | 31 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-password` | 27 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-submit` | 33 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-email` | 32 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-password` | 28 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-submit` | 34 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 7 |  | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-username` | 5 |  | release/checklist.spec.ts, username-auth.spec.ts |
 
@@ -129,13 +129,16 @@ several do). “Also rendered by” lists the other files.
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
 | `token-confirm` | 3 | mcp-view.tsx | release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 17 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
+| `workspace-*` | 18 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
 
 ### crm/contact-role-row.tsx
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `contact-link-roles` | 1 | crm/contacts-view.tsx | crm.spec.ts |
+| `mind-evidence-remove` | 1 | mind-view.tsx | mind.spec.ts |
+| `mind-link-remove` | 1 | mind-view.tsx | mind.spec.ts |
+| `mind-source-edit` | 1 | mind-view.tsx | mind.spec.ts |
 | `stakeholder-edit` | 1 | crm/stakeholders-view.tsx | crm.spec.ts |
 | `stakeholder-remove` | 1 | crm/stakeholders-view.tsx | crm.spec.ts |
 | `stakeholder-roles` | 1 | crm/stakeholders-view.tsx | crm.spec.ts |
@@ -243,6 +246,60 @@ several do). “Also rendered by” lists the other files.
 | `open-notifications` | 4 |  | me.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs |
 | `theme-dark` | 4 |  | me.spec.ts, release/checklist.spec.ts |
 | `theme-light` | 2 |  | me.spec.ts, release/checklist.spec.ts |
+
+### mind-view.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `mind-add-evidence` | 1 |  | mind.spec.ts |
+| `mind-add-evidence-submit` | 1 |  | mind.spec.ts |
+| `mind-add-link-direction` | 1 |  | mind.spec.ts |
+| `mind-add-link-kind` | 1 |  | mind.spec.ts |
+| `mind-add-link-submit` | 1 |  | mind.spec.ts |
+| `mind-add-link-target` | 1 |  | mind.spec.ts |
+| `mind-archive-node` | 1 |  | mind.spec.ts |
+| `mind-as-list` | 4 |  | mind.spec.ts |
+| `mind-back` | 2 |  | mind.spec.ts |
+| `mind-coverage` | 2 |  | mind.spec.ts |
+| `mind-detail-title` | 6 |  | mind.spec.ts |
+| `mind-edit-node` | 1 |  | mind.spec.ts |
+| `mind-empty` | 1 |  | mind.spec.ts |
+| `mind-evidence-item` | 2 |  | mind.spec.ts |
+| `mind-from-node` | 1 |  | mind.spec.ts |
+| `mind-link-kind` | 1 |  | mind.spec.ts |
+| `mind-list-node` | 3 |  | mind.spec.ts |
+| `mind-make-task` | 2 |  | mind.spec.ts |
+| `mind-new-evidence` | 1 |  | mind.spec.ts |
+| `mind-new-node` | 2 |  | mind.spec.ts |
+| `mind-new-source` | 1 |  | mind.spec.ts |
+| `mind-no-evidence` | 2 |  | mind.spec.ts |
+| `mind-node` | 2 |  | mind.spec.ts |
+| `mind-node-form` | 1 |  | mind.spec.ts |
+| `mind-node-layer` | 1 |  | mind.spec.ts |
+| `mind-node-momentum` | 1 |  | mind.spec.ts |
+| `mind-node-note` | 1 |  | mind.spec.ts |
+| `mind-node-save` | 3 |  | mind.spec.ts |
+| `mind-node-strength` | 1 |  | mind.spec.ts |
+| `mind-node-title` | 4 |  | mind.spec.ts |
+| `mind-note` | 1 |  | mind.spec.ts |
+| `mind-open-task` | 1 | relations-view.tsx | mind.spec.ts |
+| `mind-overview` | 2 |  | mind.spec.ts |
+| `mind-source` | 2 |  | mind.spec.ts |
+| `mind-source-form` | 1 |  | mind.spec.ts |
+| `mind-source-link` | 2 |  | mind.spec.ts |
+| `mind-source-note` | 1 |  | mind.spec.ts |
+| `mind-source-save` | 4 |  | mind.spec.ts |
+| `mind-source-title` | 3 |  | mind.spec.ts |
+| `mind-source-url` | 2 |  | mind.spec.ts |
+| `mind-strength` | 1 |  | mind.spec.ts |
+| `mind-task-due` | 1 |  | mind.spec.ts |
+| `mind-task-form` | 1 |  | mind.spec.ts |
+| `mind-task-project` | 1 |  | mind.spec.ts |
+| `mind-task-save` | 1 |  | mind.spec.ts |
+| `mind-task-title` | 1 |  | mind.spec.ts |
+| `mind-tasked` | 1 |  | mind.spec.ts |
+| `mind-to-node` | 1 |  | mind.spec.ts |
+| `mind-view` | 1 |  | mind.spec.ts |
 
 ### notification-alerts.tsx
 
@@ -392,8 +449,8 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `toast` | 9 |  | crm.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
-| `toast-action` | 15 |  | crm.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
+| `toast` | 12 |  | crm.spec.ts, mind.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
+| `toast-action` | 21 |  | crm.spec.ts, mind.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
 
 ### sms-auth.tsx
 
@@ -440,7 +497,7 @@ several do). “Also rendered by” lists the other files.
 | `subtask-title` | 3 |  | planning.spec.ts, release/checklist.spec.ts |
 | `task-comment` | 7 |  | planning.spec.ts, release/checklist.spec.ts |
 | `task-comment-submit` | 5 |  | planning.spec.ts, release/checklist.spec.ts |
-| `task-detail-heading` | 32 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-parity.spec.ts |
+| `task-detail-heading` | 33 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-parity.spec.ts |
 | `task-field-due` | 2 |  | planning.spec.ts |
 | `task-field-text` | 5 |  | planning.spec.ts |
 
@@ -478,7 +535,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 14 |  | accessibility.spec.ts, agent-creation.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-parity.spec.ts |
-| `today-heading` | 53 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 54 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-parity.spec.ts |
 
 ## Role and name locators
@@ -491,7 +548,7 @@ several do). “Also rendered by” lists the other files.
 
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
-| `alert` | 29 | agent-creation.spec.ts, calendar.spec.ts, me.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `alert` | 31 | agent-creation.spec.ts, calendar.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `button` | 8 | calendar.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 1 | release/checklist.spec.ts |
@@ -643,6 +700,7 @@ read (`data-event-id`, `data-date`).
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
 | `[data-source]` | 1 | brief.spec.ts |
 | `[data-testid="desktop-new-task"]` | 1 | ui-parity.spec.ts |
+| `[data-testid="mind-node"][data-id="*"]` | 1 | mind.spec.ts |
 | `[data-testid="relations-node"][data-key="task:*"]` | 1 | timeline.spec.ts |
 | `[data-testid="timeline-bar"][data-id="*"]` | 1 | timeline.spec.ts |
 | `[data-testid="timeline-dependency"][data-from="*"]` | 1 | timeline.spec.ts |
@@ -743,6 +801,23 @@ Keys read from `apps/web/locales/*/common.json` through
 | `me.signedInAs` | 2 | ssr-session.spec.ts |
 | `me.teamSummary` | 1 | me.spec.ts |
 | `me.title` | 1 | me.spec.ts |
+| `mind.coverage` | 6 | mind.spec.ts |
+| `mind.edgeKind.contradicts` | 3 | mind.spec.ts |
+| `mind.form.required` | 3 | mind.spec.ts |
+| `mind.form.urlError` | 3 | mind.spec.ts |
+| `mind.noEvidence` | 3 | mind.spec.ts |
+| `mind.toast.edgeAdded` | 3 | mind.spec.ts |
+| `mind.toast.edgeChanged` | 3 | mind.spec.ts |
+| `mind.toast.edgeRemoved` | 3 | mind.spec.ts |
+| `mind.toast.evidenceAdded` | 3 | mind.spec.ts |
+| `mind.toast.evidenceRemoved` | 3 | mind.spec.ts |
+| `mind.toast.nodeArchived` | 3 | mind.spec.ts |
+| `mind.toast.nodeCreated` | 3 | mind.spec.ts |
+| `mind.toast.nodeSaved` | 3 | mind.spec.ts |
+| `mind.toast.sourceCreated` | 3 | mind.spec.ts |
+| `mind.toast.sourceSaved` | 3 | mind.spec.ts |
+| `mind.toast.taskMade` | 3 | mind.spec.ts |
+| `mind.validateTitle` | 6 | mind.spec.ts |
 | `nav.calendar` | 1 | calendar.spec.ts |
 | `nav.label` | 1 | calendar.spec.ts |
 | `nav.me` | 1 | ui-parity.spec.ts |

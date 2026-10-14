@@ -68,6 +68,7 @@ export const mindEdgeSchema = object({
   fromNodeId: idSchema,
   toNodeId: idSchema,
   kind: mindEdgeKindSchema,
+  version: versionSchema,
   createdAt: iso.datetime(),
 });
 export const mindSourceSchema = object({
@@ -126,6 +127,11 @@ export const mindEdgeInputSchema = strictObject({
   toNodeId: idSchema,
   kind: optional(mindEdgeKindSchema),
 }).check(refine((v) => v.fromNodeId !== v.toNodeId));
+/** PATCH /api/mind/edges/:id: change what a link means. */
+export const mindEdgeUpdateSchema = strictObject({
+  version: versionSchema,
+  kind: mindEdgeKindSchema,
+});
 export const mindSourceInputSchema = strictObject({
   title: boundedText(300),
   url: optional(nullable(mindUrlSchema)),
@@ -162,6 +168,7 @@ export type MindMapQuery = Infer<typeof mindMapQuerySchema>;
 export type MindNodeInput = Infer<typeof mindNodeInputSchema>;
 export type MindNodeUpdate = Infer<typeof mindNodeUpdateSchema>;
 export type MindEdgeInput = Infer<typeof mindEdgeInputSchema>;
+export type MindEdgeUpdate = Infer<typeof mindEdgeUpdateSchema>;
 export type MindSourceInput = Infer<typeof mindSourceInputSchema>;
 export type MindSourceUpdate = Infer<typeof mindSourceUpdateSchema>;
 export type MindValidationTaskInput = Infer<

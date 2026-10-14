@@ -452,6 +452,30 @@ describe("mind map REST", () => {
       toNodeId: other,
       kind: "supports",
     });
+    const editEdge = vi
+      .spyOn(core, "updateMindEdge")
+      .mockResolvedValue({} as never);
+    expect(
+      (await send(`/api/mind/edges/${other}`, "PATCH", { kind: "supports" }))
+        .status,
+    ).toBe(400);
+    expect(
+      (
+        await send(`/api/mind/edges/${other}`, "PATCH", {
+          version: 1,
+          kind: "linked",
+        })
+      ).status,
+    ).toBe(400);
+    await send(`/api/mind/edges/${other}`, "PATCH", {
+      version: 2,
+      kind: "contradicts",
+    });
+    expect(editEdge).toHaveBeenCalledOnce();
+    expect(editEdge).toHaveBeenCalledWith(person, other, {
+      version: 2,
+      kind: "contradicts",
+    });
     const remove = vi
       .spyOn(core, "removeMindEdge")
       .mockResolvedValue({} as never);

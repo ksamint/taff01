@@ -1352,6 +1352,8 @@ export const mindEdges = pgTable(
     fromNodeId: uuid("from_node_id").notNull(),
     toNodeId: uuid("to_node_id").notNull(),
     kind: text("kind").default("relates").notNull(),
+    /** M18 screens: the kind is editable, so the row carries a version. */
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
@@ -1377,6 +1379,7 @@ export const mindEdges = pgTable(
       "mind_edges_kind",
       sql`${t.kind} IN ('relates','supports','contradicts')`,
     ),
+    check("mind_edges_version", sql`${t.version} > 0`),
   ],
 );
 export const mindSources = pgTable(
