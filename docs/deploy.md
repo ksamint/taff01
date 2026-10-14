@@ -502,6 +502,90 @@ flock probe then acquired the same lock and confirmed the accepted runtime
 images were still running and API healthy. The lock is free. This checkpoint
 is a documentation-only commit ahead of the accepted source.
 
+## Release candidate checks
+
+Every frontend v2 candidate passes the plan §6.0 checklist
+(`e2e/release/checklist.spec.ts`, `playwright.release.config.ts`) twice:
+against a local production-mode stack before the candidate section is
+written, and against the live origin after the deploy. It never starts
+servers; it drives whatever `RELEASE_BASE_URL` points at.
+
+**Local production-mode stack, without Docker image builds.**
+`scripts/release-stack.mjs` (`pnpm release:stack`) runs the bundled API from
+`pnpm build:server` (`dist/runtime/api/api.mjs`, as `deploy/Dockerfile.server`
+does) and the Next standalone server (`apps/web/.next/standalone/apps/web/server.js`,
+as `deploy/Dockerfile.web` does, with `.next/static` and `public` copied
+beside it), both with `NODE_ENV=production`. `next start` is not used: it
+warns under `output: "standalone"`.
+
+```sh
+# Ports default to 3000/3001 and the database to DATABASE_URL from .env.
+pnpm release:stack --build --migrate --seed   # --worker also starts the worker
+```
+
+- `--build` runs `pnpm build` and `pnpm build:server`. Next bakes the `/api`
+  and `/mcp` rewrite target (`API_INTERNAL_URL`) into the build, so the script
+  refuses a build made for another API URL; rebuild after changing it.
+- On other ports or another database, export the values first; exported
+  variables win over `.env`:
+
+  ```sh
+  export DATABASE_URL=postgres://…/taff_r1 API_PORT=4201 WEB_PORT=4200 \
+    API_INTERNAL_URL=http://127.0.0.1:4201 AUTH_URL=http://localhost:4200 \
+    EMAIL_LOG_PATH=/tmp/taff-r1/mail/messages.jsonl
+  pnpm release:stack --build --migrate --seed
+  ```
+
+- `AUTH_URL` must be the browser origin: the MCP page shows `AUTH_URL/mcp` as
+  the endpoint and the checklist asserts it equals `RELEASE_BASE_URL/mcp`.
+- Ctrl-C stops every process the script started.
+
+**Run the checklist.**
+
+```sh
+# Against the local stack, with full coverage of owner and role changes:
+RELEASE_BASE_URL=http://localhost:4200 \
+RELEASE_MAIL_LOG=/tmp/taff-r1/mail/messages.jsonl pnpm release:checklist
+
+# Against the live origin, from the local agent:
+RELEASE_BASE_URL=https://taff.apuch.cn \
+RELEASE_DEMO_EMAIL=<verification account> RELEASE_DEMO_PASSWORD=<from the private env> \
+pnpm release:checklist
+```
+
+- Projects: `phone-en`, `phone-zh-HK` (Pixel 7) and `desktop-en`,
+  `desktop-zh-HK` (1280×800); `--project` selects one, `-g "item 8"` one item.
+- One test per §6.0 item. Each signs up its own fresh account
+  (`release-<id>@example.test`, random password) and works only in that
+  account's workspace; agents are added through Team › Add agent. Nothing
+  depends on the clock or on seeded counts.
+- Owner and member-role changes need a second person with a verified email:
+  `RELEASE_MAIL_LOG` (the local stack's `EMAIL_LOG_PATH`) lets a second fresh
+  account verify itself; otherwise the `RELEASE_DEMO_*` account accepts the
+  invitation (it must have a verified email). Without either, those two
+  sub-steps are skipped and the reason is recorded.
+- SMS is exercised only when `/api/auth/methods` reports it enabled, and then
+  only up to the open form: no code is ever sent. Otherwise the step is
+  recorded as skipped with the reason.
+- Item 8 runs the shared MCP round trip (`apps/api/scripts/mcp-round-trip.ts`,
+  the same code as `pnpm mcp:smoke`) with the official client against
+  `RELEASE_BASE_URL/mcp`, using a token issued on the MCP page: every tool,
+  the rate limit (`RELEASE_MCP_RATE_LIMIT`, default `MCP_RATE_LIMIT` or 60;
+  `RELEASE_SKIP_RATE_LIMIT=1` skips the probe with a recorded reason), the
+  call log in the UI, the created task arriving on an open board in real
+  time, and revocation from the UI. The probe sends at most limit + 2
+  requests on the run's own throwaway token; where the deploy goal says not
+  to probe production, set `RELEASE_SKIP_RATE_LIMIT=1`.
+- Tokens, passwords and cookies are never printed: the token is asserted by
+  its `taff_` prefix only, traces and screenshots are off (`RELEASE_DEBUG=1`
+  turns them on for local debugging only), and the report is redacted.
+- The report lands in `release-reports/checklist-<timestamp>.{json,md}`
+  (gitignored): each item × project with pass, fail or skip-with-reason,
+  durations, skipped sub-steps and the MCP checks. Paste the Markdown table
+  into the candidate section.
+- Optional: `RELEASE_WORKERS` (default 1), `RELEASE_RETRIES` (default 0),
+  `RELEASE_REPORT_DIR`.
+
 ## Frontend v2 releases
 
 Frontend v2 (`docs/frontend-v2-plan.md`) is released in stages. The cloud
