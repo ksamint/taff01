@@ -66,6 +66,11 @@
 .brief-ask:focus-within {
   border-color: var(--border-strong);
 }
+/* The input draws no outline of its own, so the field shows the ring. */
+.brief-ask:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring);
+  outline-offset: 2px;
+}
 .brief-ask input {
   flex: 1;
   min-width: 0;
@@ -87,8 +92,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border: 0;
   border-radius: var(--radius-control);
   background: var(--bg-inverse);
