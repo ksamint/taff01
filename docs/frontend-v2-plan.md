@@ -1,6 +1,10 @@
 # Frontend v2 — review and implementation plan
 
-Status: plan, 2026-10-14. Nothing in `apps/` has changed yet. The agent prompt
+Status: plan, 2026-10-14. Nothing in `apps/` has changed yet.
+
+**User directive, 2026-10-14:** do not stop for decisions. The agent builds
+every default in §5 and develops through to a live, working frontend on
+`https://taff.apuch.cn` for review. Basic functions and MCP come first (§6.0). The agent prompt
 that executes this plan is [`agent-goal-frontend-v2.md`](agent-goal-frontend-v2.md).
 
 ## 1. Goal
@@ -466,7 +470,7 @@ listed. Each new table is added to the change-event whitelist
   prototype misses this case.
 - Repair-on-load is **not** ported. A read-only admin `auditCrm()` returns `[]`
   after every test scenario.
-- Archive, don't delete, unless D4 says otherwise.
+- Archive, don't delete (D4).
 
 **REST**
 
@@ -525,23 +529,24 @@ listed. Each new table is added to the change-event whitelist
     `AI_MODEL` (plain `fetch`, key redacted in pino), and only when the
     workspace's `ai_enabled` is on (default off).
   - The provider choice needs an ADR. Sending workspace data to a third party
-    is a product-contract decision (D6).
+    stays off until the user configures it (D6).
   - Ask is rate-limited per user in Valkey.
   - No `ask` MCP tool. Expose `brief.get` instead.
 
 ## 5. Open decisions
 
-Defaults are what the agent builds unless the user redirects. Items marked
-**stop** need the user's answer before that part ships.
+The user delegated every decision below (2026-10-14). The agent builds the
+default, records it in ADR 0014 or a later ADR, and never stops to ask. The
+user redirects asynchronously.
 
 | # | Decision | Default |
 | --- | --- | --- |
-| D1 | Tag `v0.1.0` from the current UI before v2 starts? | Yes. Finish M9 item 7 (green CI on `main`, tag). v2 becomes `v0.2.0`. |
+| D1 | Tag `v0.1.0` from the current UI before v2 starts? | Only if `main` CI is already green: tag it and continue. Otherwise do not block on it; v2 becomes `v0.2.0`. |
 | D2 | One feature branch or a branch per milestone? | Branch per milestone from `main`, each merged green. The 4-tab shell switch (M13) lands in one PR so `main` never shows a mixed navigation. |
 | D3 | Home page and 跳過首頁 | Home is the signed-out landing with sign-in. Signed-in users go to Today. No skip-home setting. |
-| D4 | Delete or archive contacts and companies (deleting data is a contract decision) | **stop.** Build archive with undo. Hard delete waits for the user. |
+| D4 | Delete or archive contacts and companies | Archive with undo; the UI's 刪除 action archives. No hard delete, so no data is lost. |
 | D5 | Review vocabulary (prototype half-migrated) | Status and request: 待確認 / "To confirm" and 請求確認 / "requests confirmation". Review-workspace nouns stay 審核 / "Review". zh-CN follows zh-HK. Recorded in ADR 0014. |
-| D6 | LLM provider for Ask taff and AI insight, and sending data to it | **stop** for the provider. Ship the rules-based brief and Ask. The model path is env-gated, off by default, per-workspace opt-in, with an ADR. |
+| D6 | LLM provider for Ask taff and AI insight, and sending data to it | Ship the rules-based brief and Ask. Build the model path as a generic OpenAI-compatible `fetch` adapter, env-gated (`AI_*` unset in production) and per-workspace opt-in (default off), with an ADR. No workspace data leaves the system until the user sets the env and opts in. |
 | D7 | Who sees finance (contract amount, collected) | Admins only. Members see delivery %. |
 | D8 | Mind map and value chain: scope and whether they ship in v2 | Mind map per workspace, shipped last (M18). Value-chain layer deferred. Relations shows people, dependencies, org and CRM layers. |
 | D9 | Relations "company" node: workspace or CRM client company? | CRM client company. The workspace is the root. |
@@ -549,6 +554,68 @@ Defaults are what the agent builds unless the user redirects. Items marked
 | D11 | Retire v1 references (`docs/ui/prototype`, `docs/ui/reference`, 86 baselines)? | Keep v1 files as history. Replace the baselines screen by screen. Delete only the v1 CSS and components. |
 
 ## 6. Milestones
+
+### 6.0 Delivery order: basic functions and MCP first, then live
+
+**Phase A, to the first live review release (R1):**
+
+1. M11, kept lean: ADR, README and references.
+2. M12, backend.
+3. M13, shell, Today, Me, Inbox and sign-in.
+4. M14, projects, task detail, calendar and search.
+5. The MCP items in M13 and M14.
+6. **R1**: deploy to `https://taff.apuch.cn`.
+
+**Phase B:** M15–M18, each redeployed live when green.
+
+**Phase C:** M19, which ends with the `v0.2.0` release.
+
+The basic-function checklist below must pass on the live site, in en and
+zh-HK, on phone and desktop, before R1 is reported:
+
+1. **Sign-in and preferences.** Sign up and sign in (email and username;
+   SMS where configured), sign out. Switch language (three) and theme.
+2. **Tasks.** Create a task from the FAB or quick add and from the desktop
+   新建任務 button. Edit title, owner, due date, priority, project, labels and
+   subtasks. Comment.
+3. **Agents and review.** Assign to a person and to an agent. Start, pause,
+   resume and cancel a run. Approve and request changes from the inbox and
+   the review workspace. Grant access to a blocked agent.
+4. **Projects.** Change status on the board by drag and by the status control.
+   Use the list view with filters.
+5. **Calendar.** Use day, week and month. Schedule an unscheduled task. Drag,
+   resize and undo.
+6. **Search and organizations.** Search (⌘K) and open a result. Switch
+   organization, create an organization, invite a member, change a member's
+   role.
+7. **Settings.** Notification preferences. Agent profile permissions and
+   review policy.
+8. **MCP.** The MCP page shows the endpoint `/mcp`, the copyable client
+   config, the scopes and the call log. Issue a token (shown once),
+   regenerate with confirm, revoke with confirm and undo.
+
+   A real MCP client (`@modelcontextprotocol/client`, the same code as `pnpm
+   mcp:smoke`) runs against the **live** endpoint with a freshly issued
+   token. It calls every tool and sees the rate limit; its calls appear in the
+   call log and the created task appears in the UI in real time. Revoke the
+   token afterwards.
+
+   Record the result without printing the token.
+
+Deploy every release with `docs/agent-goal-deploy.md` and the procedure in
+`docs/deploy.md`:
+
+- take the lock and back up first;
+- deploy a detached SHA;
+- run the migrator;
+- replace only the API, worker and web;
+- run the public checks;
+- write a checkpoint in `docs/deploy.md`.
+
+Migrations stay additive. Never drop or rewrite production data. Roll back
+to the previous SHA if a public check fails, then fix forward.
+
+### 6.1 Milestone list
 
 Numbering continues from the last report (`10-*`). The ADR numbering continues
 from 0013. Each milestone ends with:
@@ -635,9 +702,19 @@ all pass. The UI is unchanged.
    invites, quiet hours and digest time.
 6. **Inbox** as a pushed screen on phone and as the Me tab on desktop. Same
    rows and actions as now.
-7. **Signed-out landing** replaces `<Auth/>`. Keep the email, username and SMS
+7. **MCP page** on v2 markup (phone lines 910–988; desktop Me › 設定 ›
+   MCP and 已連接客戶端), with full parity on both layouts:
+   - endpoint and OAuth metadata panel;
+   - personal access token shown once, regenerate and revoke with confirm and
+     undo;
+   - copyable client config;
+   - client scopes, tool toggles and integrations;
+   - call log with method and tool.
+
+   Keep the `mcp.spec.ts` flows and test ids.
+8. **Signed-out landing** replaces `<Auth/>`. Keep the email, username and SMS
    flows and the `auth-*` test ids.
-8. **Routes.**
+9. **Routes.**
    - `/inbox` stays as a direct route: a pushed screen on phone, `/me?tab=inbox`
      on desktop.
    - `#task=ID` and `/tasks/:id` both open the task.
@@ -674,6 +751,12 @@ Acceptance:
 4. **Search (⌘K).**
    - Adds companies and contacts.
    - Desktop results open desktop views.
+
+### R1 — Live review release
+
+The Phase A exit described in §6.0: the checklist passes on the live site and
+the deploy checkpoint and milestone report link the evidence. Then continue
+with M15 without waiting for review.
 
 ### M15 — CRM screens
 
@@ -737,7 +820,7 @@ Acceptance:
   - risk and slip forecast per project, with finance if allowed;
   - suggested actions routed through review and grants.
 - Ask taff with the rules fallback.
-- The model path only if D6 is answered.
+- The model path built but disabled (D6).
 
 Acceptance:
 
@@ -811,5 +894,5 @@ CI (`ci.yml`) stays green on every merged PR.
 | Visual CI red during the swap | Replace baselines per screen in the same PR as the screen, generated by `visual-baselines.yml` on CI's Chromium. |
 | E2E churn | Prep commit keeps test ids. Change selectors only. Keep `messages[locale]` keys or rename them in the same commit as the tests. |
 | Schema drift from `db/schema.sql` | Treat it as concept input only (§2.5). Every new table follows the audit, tenancy and version pattern. |
-| Data leaving the system (Ask taff) | Off by default, env-gated, per-workspace opt-in, needs an ADR and the user's decision (D6). |
+| Data leaving the system (Ask taff) | Off by default, env-gated, per-workspace opt-in, with an ADR; production ships with it unset (D6). |
 | Fake agent output from the prototype | Never port: suggestions are proposals a person applies, and the review policy still holds. |

@@ -1,6 +1,6 @@
 # Agent goal: finish Taff M9 and hand over
 
-> **Next (2026-10-14):** after item 7 (tag `v0.1.0`), the frontend is replaced
+> **Next (2026-10-14):** the frontend is being replaced
 > by prototype v2: `docs/agent-goal-frontend-v2.md` drives that work and
 > `docs/frontend-v2-plan.md` is the plan.
 

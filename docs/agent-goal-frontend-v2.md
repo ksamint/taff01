@@ -1,8 +1,9 @@
 # Agent goal: replace the frontend with prototype v2
 
-> Status 2026-10-14: planned, not started. Prerequisite: decision D1 in
-> `docs/frontend-v2-plan.md` (finish M9 item 7 and tag `v0.1.0` from the
-> current UI), unless the user redirects.
+> Status 2026-10-14: planned, not started. The user delegated every
+> decision: the agent never stops to ask, and develops until the new
+> frontend is live and working on `https://taff.apuch.cn` for review, with
+> basic functions and MCP first.
 
 Paste everything below this line as the goal for a coding agent working in
 `ksamint/taff01`. It is self-contained; the files it names are in the
@@ -13,7 +14,10 @@ repository.
 Replace Taff's web frontend with the approved prototype v2 in
 `docs/ui/prototype-v2/`, and add the backend it needs: CRM, planning
 timeline, relations graph, AI brief and mind map. Ship every screen on phone
-and desktop in en, zh-CN and zh-HK with real data. Work on a branch from
+and desktop in en, zh-CN and zh-HK with real data, and keep it live on
+`https://taff.apuch.cn`. Basic functions and MCP come first: get them
+working and deployed live (release R1, plan §6.0) before the CRM screens,
+timeline, graph, brief and mind map, then redeploy after each of those. Work on a branch from
 `main` per milestone, push often, and never wait for approval between steps:
 the user reviews asynchronously.
 
@@ -98,34 +102,44 @@ These override anything else:
 
 ## Order of work
 
-Follow plan §6:
+Follow plan §6.0 and §6.1:
 
-| Milestone | Scope |
+| Step | Scope |
 | --- | --- |
-| M11 | Intake: ADR 0014, `docs/ui/README.md` for v2, `ui:prototype-shots --v2` references, the strings table |
+| **Phase A** | |
+| M11 (lean) | ADR 0014, `docs/ui/README.md` for v2, `ui:prototype-shots --v2` references, the strings table |
 | M12 | Planning and CRM backend, with seed |
-| M13 | Shell, 4-tab navigation, Today, Me, Inbox and signed-out landing. Its first commit extracts the ~35 inline mutations into `src/lib` hooks with no UI change. |
+| M13 | Shell, 4-tab navigation, Today, Me, Inbox, the MCP page, signed-out landing. Its first commit extracts the ~35 inline mutations into `src/lib` hooks with no UI change. |
 | M14 | Projects, task detail with contacts, desktop calendar, search |
+| **R1** | Deploy live and pass the basic-function and live-MCP checklist of plan §6.0 |
+| **Phase B** | |
 | M15 | CRM screens |
 | M16 | Timeline and relations graph |
 | M17 | AI brief and suggestions, rules-based |
 | M18 | Mind map |
-| M19 | Remove v1 code and baselines, regenerate font subsets, accessibility and i18n QA, release `v0.2.0` |
+| **Phase C** | |
+| M19 | Remove v1 code and baselines, regenerate font subsets, accessibility and i18n QA, release and deploy `v0.2.0` |
 
-Each milestone's acceptance is in the plan.
+Each Phase B milestone is redeployed live when green.
 
 ## Decisions
 
-Build the defaults in plan §5 without asking. **Stop and ask** only for:
+The user delegated every decision. Build the defaults in plan §5, record
+them in ADRs (the next number is 0014), and never stop to ask; the user
+redirects asynchronously.
 
-- D4: hard-deleting companies or contacts (archive meanwhile);
-- D6: choosing an LLM provider or sending workspace data to one (the
-  rules-based brief and Ask ship meanwhile);
-- licences, deleting data, publishing outside the repository, or a stack
-  change.
+Hard limits, followed without asking:
 
-Record every other design choice in `docs/adr/NNNN-title.md`; the next number
-is 0014.
+- Archive, never hard-delete; production data is never dropped or rewritten,
+  and migrations stay additive.
+- Never send workspace data to a third-party model (the AI path ships
+  disabled).
+- Never commit or print secrets or tokens.
+- Only allowed licences.
+- No stack swap without an ADR.
+
+When a deploy check fails, roll back to the previous SHA, fix forward and
+redeploy.
 
 ## Validation
 
@@ -143,6 +157,21 @@ Before each milestone report, also run:
 - the visual suite.
 
 `.github/workflows/ci.yml` must stay green on every merge.
+
+## Deployment
+
+Deploy with `docs/agent-goal-deploy.md` and `docs/deploy.md`:
+
+- lock and back up first;
+- deploy a detached SHA;
+- run the migrator;
+- replace only the API, worker and web;
+- run the public checks in zh-HK and en on phone and desktop;
+- write a checkpoint in `docs/deploy.md`.
+
+The live MCP check uses a freshly issued token, calls every tool through
+`@modelcontextprotocol/client` against `https://taff.apuch.cn/mcp`, and
+revokes the token afterwards.
 
 ## Milestone protocol
 
