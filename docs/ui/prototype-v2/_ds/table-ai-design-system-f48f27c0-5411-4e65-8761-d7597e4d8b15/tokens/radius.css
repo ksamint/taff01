@@ -1,0 +1,16 @@
+/* TABLE AI — radius tokens. Micro radii only: 2–4px or square ("investor-grade restraint"). */
+:root{
+--radius-none:0px;
+--radius-sm:2px;
+--radius:4px;
+/* Deprecated — kept only for DTCG parity with tableai.tokens.json. Do not use; they break the 2–4px rule. */
+--radius-md:6px;
+--radius-lg:8px;
+--radius-xl:12px;
+--radius-full:9999px;
+/* Role aliases */
+--radius-control:var(--radius-sm);   /* buttons, inputs, tags */
+--radius-card:var(--radius-none);    /* cards & tiles are square, hairline-bordered */
+--radius-dialog:var(--radius);
+--radius-avatar:var(--radius-full);
+}

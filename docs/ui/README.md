@@ -1,80 +1,120 @@
-# UI and UX specification
+# UI and UX specification (prototype v2)
 
-The approved UI lives in `prototype/`: a working single-file React prototype
-(`team-tasks.dc.html`, viewed through `support.js`) built on the TABLE AI design
-system (`_ds/table-ai-design-system/`). `prototype/audit-and-upgrade-plan.md` is
-the designer's audit of it and the product decisions taken on 2026-10-08. This
-file maps the prototype to Taff's routes, data and milestones. When the prototype
-and this file disagree, the prototype wins for visuals and this file wins for
-data and behaviour.
+The approved UI is **prototype v2** in [`prototype-v2/`](prototype-v2/README.md)
+(ADR 0014). It is a working React prototype viewed through `support.js` and
+built on the TABLE AI design system (`prototype-v2/_ds/`). The review,
+line maps, do-not-port list and milestones are in
+[`../frontend-v2-plan.md`](../frontend-v2-plan.md). When the prototype and
+this file disagree, the prototype wins for visuals and this file wins for
+data and behaviour. The v1 mapping is kept as history in
+[`README-v1.md`](README-v1.md).
 
-To view the prototype, serve `docs/ui/prototype/` with any static file server and
-open `team-tasks.dc.html`. The page exposes `theme` (light/dark), `lang` (zh/en)
-and `agentSpeed` controls. `agent-teammates.dc.html` is an empty placeholder.
+To view the prototype, serve `docs/ui` statically and open
+`/prototype-v2/Team%20Tasks.dc.html` (`?reset` clears its demo state). Click
+開始 (phone) and 進入工作區 (desktop). Language and theme live in 我的 ›
+偏好設定. Reference captures of every screen, both languages and both themes
+are in [`reference-v2/`](reference-v2/README.md)
+(`pnpm ui:prototype-shots --v2`). The prototype's strings, mapped to app
+keys with the Traditional-character fixes, are in
+[`prototype-v2/strings.csv`](prototype-v2/strings.csv).
 
 ## Design system
 
-- Tokens: `_ds/table-ai-design-system/tokens/*.css` (colors, typography,
-  spacing, radius, motion, base). They are imported into
-  `apps/web/src/styles/tokens.css` and mapped to Tailwind 4 `@theme` names.
-  White ground, Universe Deep Blue `#0A1626` text and structure, Sundial Dark Gold
-  `#A88B52` for at most 8% of a view (one CTA, active and focus states), hairline
-  borders `#C5C6CD`, square cards, 2px controls, 4px dialogs.
-- Fonts: Manrope (variable, bundled, OFL) for everything; Noto Sans TC for
-  Traditional Chinese (loaded from Google Fonts in the prototype; the app
-  self-hosts a subset in Phase 3). Chinese never gets letter spacing: set
-  `lang="zh-Hant-HK"` or `lang="zh-Hans-CN"` on the root.
-- Icons: Lucide, 1.5px stroke, `currentColor`, sizes 12/14/16/20. Agent =
-  `sparkles`, person = `user`.
-- Product UI uses semibold headings (`--type-product-*`), status colours
-  success `#2F5D4E`, warning `#8A5A12`, error `#BA1A1A` with pale containers.
-- Motion: one easing `cubic-bezier(0.16,1,0.3,1)`, 300/400/500 ms, no springs;
-  `prefers-reduced-motion` disables everything.
-- Dark theme: derived from the deep-blue range in the prototype; carried over as
-  is until the brand team reviews it.
-- Accessibility floor: 44px touch targets, 12px minimum text (Chinese), visible
-  `:focus-visible` ring, screen-reader labels on icon-only buttons, focus trapped
-  and returned by sheets and dialogs, a keyboard alternative to every drag.
+Unchanged from v1 apart from `fonts.css`, so
+`apps/web/src/styles/tokens.css` stays the only token source.
 
-## Screens and routes
+- White ground, Universe Deep Blue `#0A1626` for text and structure, Sundial
+  Dark Gold `#A88B52` for at most 8 % of a view (one CTA, active and focus
+  states), hairline borders `#C5C6CD`, square cards, 2 px controls, 4 px
+  dialogs. The dark theme is the prototype's deep-blue range.
+- Fonts: Manrope for Latin; Noto Sans TC (self-hosted subsets) for Chinese.
+  Chinese never gets letter spacing; the root `lang` follows the locale.
+- Icons: Lucide, 1.5 px stroke, `currentColor`. Agent = `sparkles`, person =
+  `user`.
+- Status colours: success `#2F5D4E`, warning `#8A5A12`, error `#BA1A1A`, with
+  pale containers.
+- Motion: one easing `cubic-bezier(0.16,1,0.3,1)`, 300/400/500 ms;
+  `prefers-reduced-motion` disables it.
 
-| Screen (prototype) | Route | Data | Milestone |
+**Accessibility floor** (wins over the prototype): 44 px touch targets, 12 px
+minimum text, visible `:focus-visible`, names on icon-only buttons, real
+buttons and links (no clickable `<div>`), labelled inputs and selects,
+dialogs and sheets trap focus and restore it, live regions for optimistic
+results and errors, and a keyboard alternative to every drag (board, calendar,
+timeline bars and dependency links).
+
+## Navigation
+
+| | Phone (< 1024 px) | Desktop (≥ 1024 px) |
+| --- | --- | --- |
+| Primary | Tab bar 今天 · 日曆 · 項目 · 我的; FAB for quick add; badge on 我的 | Foldable sidebar: org switcher, ⌘K field, 今天 · 日曆 · 項目 › 公司 · 聯繫人, user footer with badge; fold state remembered per user |
+| Secondary | Pushed screens: Inbox, Search, Notifications, Agent, Team, MCP, Company, Contact | Per-view header and filter bar; right detail panel with an empty state; Me tabs 收件箱 · AI 簡報 · 智能體 · 設定 |
+| Feedback | Toast with 撤銷 (undo) | Same toast, same undo |
+| Signed out | Home landing with sign-in (email, username, SMS) | Same |
+
+The badge count is unresolved reviews plus blockers, everywhere (Today ›
+待你處理, 我的, Me › 收件箱). Mentions stay in Inbox › 全部.
+
+## Screens, routes and data
+
+| Screen (prototype lines, §2.1) | Route | Data | Milestone |
 | --- | --- | --- | --- |
-| Today: agents-at-work card, schedule, due today, avatar opens Me | `/` | tasks due today or unscheduled, runs in progress, events | M1 shell, M3 agents card |
-| Calendar: day, week, month; day strip; tap day/cell; tap block; drag with undo; tap empty slot to create; drag edge to resize; unscheduled tray; agent background lane | `/calendar` | events (task with start/end), rrule occurrences, tz | M6 |
-| Projects: column tabs with counts, board, phone list view with filters and sorting; desktop drag between columns | `/projects`, `/projects/[id]` | tasks by project and status | M5 |
-| Task detail: editable title, owner, due date and time, priority, project, labels, subtasks; status picker; assign agent; start agent; pause, resume, cancel; comments; sheets cancel on outside tap | `/tasks/[id]` | task, subtasks, comments, run | M3 (run, assign), M5 (fields) |
-| Review workspace: deliverable preview, diff, sources, test results; three-item checklist; approve or request changes with comment; per-item comments | `/tasks/[id]/review` | run output, review checklist | M3 |
-| Inbox: All / Reviews / Blockers tabs; approve; grant access; mentions; unread; snooze; grouped by task; badge count; empty state; desktop inbox | `/inbox` | notifications, reviews, grants | M3, M4 |
-| Me: organization, team, MCP, language, appearance, notifications | `/me` | user, workspace, preferences | M1 (language, appearance), M2 (MCP), M5 (organization, team), M7 (notifications) |
-| Agent profile: tools it may use, supervisor, limits, history; permissions Allow / Ask / Deny; review policy; scoped grants with expiry and history | `/agents/[id]` | member (kind agent), permissions, grants, runs | M3 |
-| MCP page: single Streamable HTTP endpoint `/mcp`; OAuth 2.1 metadata; personal access token shown once, regenerate and revoke with confirm, undo and log; copyable client config; clients with scopes; tool toggles; integrations; call log with method and tool | `/me/mcp` | agent_tokens, mcp_calls | M2 done (tokens with scopes, show-once, confirm-revoke, config, call log), M8 (OAuth 2.1, tool toggles, integrations) |
-| Search (⌘K): idle state, recent, quick filters, type chips; this org vs all orgs; matches in comments; settings results; keyboard navigation | overlay | tasks, comments, settings pages | M5 |
-| Organizations: switch from sheet and desktop menu; create; invite; roles; data changes per org | `/orgs` | workspaces, members, invites | M5 |
-| Desktop: sidebar (Today, Calendar, Inbox, Team, Settings), board with filters, selected card, assign, approve, request changes, ⌘K, New task dialog, organization menu | ≥1024px layouts of the above | | M1 shell, then each milestone |
-| Quick add: natural-language line parsed into fields the user can edit before creating | sheet on Today and Projects | | M5 |
+| Signed-out home and sign-in (phone 48–77, desktop 1152–1183) | `/` signed out | auth methods | M13 |
+| Today: agents at work, 待你處理 (top three), due today (phone 83–139, desktop 1359–1404) | `/` | server bootstrap: me, tasks, runs, inbox count | M13 |
+| Calendar day / week / month, unscheduled tray, drag with undo; desktop adds 今天 and click-to-create (phone 141–247, desktop 1405–1442) | `/calendar` | `task_calendar`, rrule occurrences | M14 |
+| Projects: 項目 · 公司 · 聯繫人 switch; 看板 · 列表 · 時間線 · 更多; status tabs with counts; desktop 4-column board, table list, filter chips (phone 249–369, desktop 1538–1579) | `/projects/[id]?view=board\|list\|timeline\|stakeholders\|relations\|mind` | tasks by project and status; plan model | M14, M16, M18 |
+| Task detail: v2 field rows, 聯繫人, review deliverables, subtasks, activity; desktop status control, description, comment input (phone 526–691, desktop 1585–1707) | `/tasks/[id]` (sheet; `@modal` intercept) and `#task=ID`; desktop right panel | task, subtasks, comments, run, task contacts | M14 |
+| Review workspace | `/tasks/[id]/review` | run output, checks, comments | M14 |
+| Inbox (phone 371–412, desktop Me tab 1444) | `/inbox` (pushed); desktop `/me?tab=inbox` | inbox items, grants | M13 |
+| Me: profile, 收件箱 and AI 簡報 rows, agents, 組織 · 團隊 · MCP, preferences (language ×3, appearance, notifications), sign out (phone 414–496, desktop 1443–1537) | `/me`, `/me?tab=agents\|settings` | user, workspaces, members, preferences | M13 |
+| MCP: endpoint, OAuth metadata, token shown once, regenerate and revoke with confirm and undo, client config, scopes, tool toggles, integrations, call log (phone 910–988, desktop Me › 設定) | `/me/mcp` | `agent_tokens`, `mcp_calls` | M13 |
+| Search ⌘K with tasks, comments, companies, contacts (phone 693–749, desktop 1744–1796) | overlay | search | M14 |
+| Notifications, agent profile, team, organizations | `/me/notifications`, `/agents/[id]`, `/orgs` | as v1 | M13 |
+| Companies list, detail, create, edit, archive (phone 308, 805–835, desktop 1270–1317) | `/companies`, `/companies/[id]`; desktop split | `companies`, links, roles | M15 |
+| Contacts list, detail, create, edit, company change, archive (phone 320, 837–864, desktop 1318–1358) | `/contacts`, `/contacts/[id]`; desktop split | `contacts`, links, roles | M15 |
+| 相關方 stakeholders (phone 333, desktop 1239–1269) | `/projects/[id]?view=stakeholders` | `project_contacts`, client company | M15 |
+| Timeline (Module Plan 105–187, logic 448–550) | `?view=timeline` | `task_plans`, `milestones`, `task_dependencies`, plan model | M16 |
+| Relations graph (Module Relations) | `?view=relations` | `relationGraph` read model | M16 |
+| AI brief and Ask taff (Module Plan 240–285, 626–646) | `/brief` (phone overlay); desktop `/me?tab=brief` | `GET /api/brief`, `POST /api/ask` | M17 |
+| Mind map (Module Plan 198–237, 552–599) | `?view=mind` | `mind_nodes`, `mind_edges`, sources | M18 |
+| Digests | `/digests`, `/digests/[id]` | as v1, restyled on v2 tokens | M19 |
 
 ## Prototype data mapped to Taff
 
-| Prototype | Taff |
+| Prototype (`Team Tasks.dc.html`, `taff-store.js`) | Taff |
 | --- | --- |
-| Organization (`ORGS`) | `workspaces` |
-| People (`PEOPLE`), agents (`AGENTS` with supervisor and client) | `members.kind = person | agent`; `agents.supervisor_id` is a person |
-| Status `todo`, `doing`, `review`, `done` | `todo`, `in_progress`, `needs_review`, `done` |
-| Priority 1–4 (Urgent, High, Medium, Low) | `tasks.priority` 1–4 |
-| Project | `projects` per workspace; `tasks.project_id` |
-| Agent run steps, run log | `runs`, `run_events` (tool calls, files, duration, cost) |
-| Permissions `allow` / `ask` / `deny` per capability (`tasks.read`, `web.search`, `files.attach`, `repo.read`, `repo.pr`, `repo.merge`, `deploy.prod`, `staging.read`, `staging.write`, `alerts`) | `agent_permissions` with `decision`; `can()` consults them |
-| Scoped grants with expiry and history | `grants` (+ activity rows) |
-| Review policy (default always review) | `agents.review_policy` |
-| Review checklist: matches description; sources or tests verifiable; no actions beyond granted permissions | `review_checks` on a run |
-| MCP tools `tasks.list`, `tasks.create`, `tasks.update`, `calendar.schedule`, `inbox.request_review`, `files.attach` | MCP tools over core, arguments from `packages/schemas` |
-| MCP scopes `tasks:read`, `tasks:write`, `calendar:write`, `inbox:review` | `agent_tokens.scopes` |
-| Call log rows (method and tool) | `mcp_calls` |
-| Integrations (GitHub, Figma, Slack, Google Calendar) | Phase 4 backlog; shown as "not connected" |
-| Seed: Northwind (5 people, 3 agents), Qingshi Studio, Personal | `pnpm db:seed` adds all three prototype organizations idempotently, preserving edits and credentials; recipient-specific daily digests use real task/review/run snapshots |
+| `ORGS` organization (with one `proj`) | `workspaces`; many `projects` per workspace, client company per project |
+| `PEOPLE`, `AGENTS` (supervisor, client) | `members.kind = person \| agent`; `agent_profiles.supervisor_id` |
+| `PERMS`, grants | `agent_permissions`, `grants` |
+| `REVIEW_CHECKS` | `review_checks` |
+| Status `todo`, `doing`, `review` (待確認), `done` | `todo`, `in_progress`, `needs_review`, `done` |
+| Task `due` + `dur` (days) | `tasks.due_at`; `task_plans(start_date, duration_days)` keeps `due_at` at the plan end |
+| `PLAN`, `DEPS`, `MILESTONES` | `task_plans`, `task_dependencies` (typed task or milestone ends), `milestones` |
+| `FINANCE` (contract, collected, HK$) | `projects.contract_amount`, `currency`, `client_company_id`; `project_payments`; `Intl.NumberFormat` in the project currency; admins only |
+| `CRM_SEED` companies, contacts | `companies`, `contacts` (archive, never delete) |
+| `contact_links` + `contact_link_roles` (polymorphic) | typed `company_contacts`, `project_contacts`, `task_contacts` with role rows checked against `CONTACT_ROLE_RULES` |
+| `crmRepair` on load | not ported; read-only admin `auditCrm()` returns `[]` |
+| Mind data | `mind_nodes`, `mind_edges`, `mind_sources`, `mind_node_sources` (workspace-scoped) |
+| `SUGG` suggestions | pending reviews and grants (existing), plus `suggestions` a person applies |
+| `canned` Ask answers | rules fallback behind `POST /api/ask` |
+| `TODAY`, `NOW`, `'lx'`, HK$/萬 | member time zone, signed-in member, `Intl` |
 
 ## Locales
 
 `en`, `zh-CN` and `zh-HK` (ADR 0005). The prototype's `zh` strings are
-Traditional (Hong Kong) and seed `zh-HK`; `zh-CN` is the Simplified counterpart.
+Traditional (Hong Kong) and seed `zh-HK`; `zh-CN` is derived and reviewed.
+Every string goes through i18next with the three locales in the same commit.
+Dates, numbers and currency go through `Intl` in the member's locale and time
+zone.
+
+## Port method
+
+The milestone-10 method still applies (`../milestones/10-ui-parity.md`): take
+the markup block from the line map, convert it to TSX, lift inline styles into
+token-based classes in one stylesheet per area under
+`apps/web/src/styles/`, map `Icon`, `Button`, `Switch` and `Badge` to
+`apps/web/src/components/ui`, and bind real data where the prototype binds
+`st`. Every mutation is an extracted, optimistic hook in `apps/web/src/lib`
+that sends `version` and rolls back. Visual baselines are replaced per screen
+through `.github/workflows/visual-baselines.yml` and committed beside the
+reference capture in the milestone report.

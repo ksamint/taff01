@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/colors.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/typography.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/radius.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/motion.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/base.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/styles.css">
+<script src="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/_ds_bundle.js"></script>
+<script src="taff-store.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#0A1626"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="#0A1626"></rect><circle cx="34" cy="50" r="8" fill="#fff"></circle><circle cx="66" cy="34" r="6" fill="#A88B52"></circle><circle cx="66" cy="66" r="6" fill="#fff"></circle><path d="M40 47 L60 36 M40 53 L60 64" stroke="#fff" stroke-width="2"></path></svg></template>
+<style>
+@font-face{font-family:"Manrope";src:url("_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/assets/fonts/Manrope%5Bwght%5D.ttf") format("truetype");font-weight:200 800;font-style:normal;font-display:swap}
+html,body{margin:0;height:100%}
+a{color:var(--text);text-decoration:none}
+a:hover{color:var(--accent-text)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</helmet>
+<div lang="{{ langAttr }}" style="font-family:var(--font-sans); color:var(--text); background:var(--bg); height:{{ L.rootH }}; display:flex; flex-direction:column; overflow:hidden; -webkit-font-smoothing:antialiased">
+
+<sc-if value="{{ L.header }}" hint-placeholder-val="{{ true }}">
+<header style="flex:none; height:{{ L.headH }}; display:flex; align-items:center; gap:20px; padding:0 {{ L.pad }}; border-bottom:1px solid var(--border); box-sizing:border-box">
+<a href="Team Tasks.dc.html" style="display:flex; align-items:flex-end; gap:3px"><span style="font-size:24px; font-weight:700; letter-spacing:-0.05em; line-height:1; color:var(--color-deep-blue)">taff</span><span style="width:5px; height:5px; background:var(--accent); margin-bottom:3px"></span></a>
+<span style="font-size:14px; font-weight:600">{{ t.title }}</span>
+<span style="flex:1"></span>
+<sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}"><nav style="display:flex; gap:20px; font-size:13px"><a href="Team Tasks.dc.html" style="color:var(--text-body)">{{ t.tasks }}</a></nav></sc-if>
+<button onClick="{{ toggleLang }}" style="all:unset; height:28px; padding:0 9px; display:flex; align-items:center; border:1px solid var(--border); border-radius:2px; font-size:11px; font-weight:600; letter-spacing:.15em; cursor:pointer">{{ langBtn }}</button>
+</header>
+</sc-if>
+
+<div style="flex:none; display:flex; flex-wrap:{{ L.tbWrap }}; overflow-x:auto; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--border); scrollbar-width:none">
+<div style="flex:none; display:flex; background:var(--bg-container); padding:2px; border-radius:2px; gap:2px"><sc-for list="{{ layouts }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="all:unset; height:28px; padding:0 10px; display:flex; align-items:center; font-size:12px; font-weight:{{ o.fw }}; background:{{ o.bg }}; color:{{ o.c }}; border-radius:2px; cursor:pointer; white-space:nowrap">{{ o.label }}</button></sc-for></div>
+<sc-for list="{{ chips }}" as="ch" hint-placeholder-count="5"><button onClick="{{ ch.toggle }}" aria-pressed="{{ ch.on }}" style="all:unset; flex:none; height:30px; padding:0 10px; display:flex; align-items:center; font-size:12px; font-weight:500; white-space:nowrap; border:1px solid {{ ch.bd }}; background:{{ ch.bg }}; color:{{ ch.c }}; border-radius:2px; cursor:pointer">{{ ch.label }}</button></sc-for>
+<sc-if value="{{ showScope }}" hint-placeholder-val="{{ true }}"><select value="{{ scope }}" onChange="{{ onScope }}" style="flex:none; height:32px; padding:0 8px; border:1px solid var(--border); border-radius:2px; background:var(--bg); font:inherit; font-size:12px; color:var(--text)"><option value="all">{{ t.scopeAll }}</option><sc-for list="{{ projOpts }}" as="po" hint-placeholder-count="3"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select></sc-if>
+</div>
+
+<div ref="{{ gRef }}" style="position:relative; flex:1; min-height:0; overflow:hidden; touch-action:none; user-select:none; background-color:var(--bg); background-image:linear-gradient(rgba(10,22,38,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(10,22,38,.035) 1px, transparent 1px); background-size:40px 40px">
+{{ svg }}
+<sc-if value="{{ empty }}" hint-placeholder-val="{{ false }}"><div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:13px; color:var(--text-muted); pointer-events:none">{{ t.noEdges }}</div></sc-if>
+<sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}">
+<div style="position:absolute; left:12px; bottom:12px; display:flex; flex-wrap:wrap; gap:4px 12px; max-width:60%; padding:8px 10px; background:var(--bg); border:1px solid var(--border); font-size:11px; color:var(--text-muted)"><sc-for list="{{ legend }}" as="lg" hint-placeholder-count="8"><span style="display:flex; align-items:center; gap:5px">{{ lg.icon }}{{ lg.label }}</span></sc-for></div>
+</sc-if>
+<div style="position:absolute; right:12px; bottom:12px; display:flex; flex-direction:column; background:var(--bg); border:1px solid var(--border)">
+<button onClick="{{ zoomIn }}" aria-label="{{ t.zoomIn }}" style="all:unset; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted)" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="plus" size="16" hint-size="16px,16px"></x-import></button>
+<button onClick="{{ zoomOut }}" aria-label="{{ t.zoomOut }}" style="all:unset; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted); border-top:1px solid var(--border)" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="minus" size="16" hint-size="16px,16px"></x-import></button>
+<button onClick="{{ fit }}" aria-label="{{ t.fit }}" title="{{ t.fit }}" style="all:unset; width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted); border-top:1px solid var(--border)" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="eye" size="16" hint-size="16px,16px"></x-import></button>
+</div>
+<sc-if value="{{ ins.has }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute; top:{{ L.insTop }}; right:{{ L.insRight }}; left:{{ L.insLeft }}; bottom:{{ L.insBottom }}; width:{{ L.insW }}; max-height:{{ L.insMaxH }}; overflow:auto; background:var(--bg); border:1px solid var(--border); border-radius:{{ L.insR }}; box-shadow:0 20px 60px -15px rgba(10,22,38,.14); padding:16px; box-sizing:border-box; display:flex; flex-direction:column; gap:12px; animation:fadeIn .3s cubic-bezier(.16,1,.3,1)">
+<div style="display:flex; align-items:center; justify-content:space-between; gap:8px"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ ins.type }}</span><button onClick="{{ clearSel }}" aria-label="{{ t.close }}" style="all:unset; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="x" size="16" hint-size="16px,16px"></x-import></button></div>
+<div style="display:flex; flex-direction:column; gap:2px; margin-top:-6px"><sc-if value="{{ ins.hasId }}" hint-placeholder-val="{{ false }}"><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted)">{{ ins.id }}</span></sc-if><span style="font-size:17px; font-weight:600; line-height:1.3">{{ ins.title }}</span></div>
+<sc-if value="{{ ins.hasBlocker }}" hint-placeholder-val="{{ false }}"><div style="padding:8px 10px; background:var(--danger-bg); color:var(--danger-text); font-size:12px; line-height:1.5; border-radius:2px">{{ ins.blocker }}</div></sc-if>
+<div style="display:flex; flex-direction:column; gap:6px"><sc-for list="{{ ins.props }}" as="ip" hint-placeholder-count="3"><div style="display:flex; justify-content:space-between; gap:12px; font-size:12px"><span style="color:var(--text-muted)">{{ ip.k }}</span><span style="text-align:right">{{ ip.v }}</span></div></sc-for></div>
+<sc-if value="{{ ins.hasPr }}" hint-placeholder-val="{{ false }}"><div style="height:3px; background:var(--color-surface-container-high)"><div style="height:100%; width:{{ ins.pr }}%; background:var(--color-deep-blue)"></div></div></sc-if>
+<div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted); border-top:1px solid var(--border); padding-top:12px">{{ ins.relTitle }}</div>
+<div style="display:flex; flex-direction:column; margin-top:-6px"><sc-for list="{{ ins.rels }}" as="rl" hint-placeholder-count="4"><button onClick="{{ rl.go }}" style="all:unset; display:flex; align-items:center; gap:8px; min-height:36px; font-size:12px; cursor:pointer; border-bottom:1px solid var(--color-surface-container-high)" style-hover="color:var(--accent-text)"><span style="flex:none; width:64px; font-size:10px; font-weight:600; color:var(--text-muted); letter-spacing:var(--ls-track-sm)">{{ rl.rel }}</span><span style="flex:none; color:var(--text-subtle)">{{ rl.dir }}</span><span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ rl.name }}</span><span style="flex:none; font-size:10px; color:var(--text-muted)">{{ rl.type }}</span></button></sc-for></div>
+<div style="display:flex; flex-direction:column; gap:8px">
+<sc-if value="{{ ins.canTask }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ ins.taskCb }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="primary" size="sm" icon="external-link" on-click="{{ ins.openTask }}" hint-size="100%,32px">{{ t.openTask }}</x-import></sc-if>
+<sc-if value="{{ ins.taskLink }}" hint-placeholder-val="{{ false }}"><a href="{{ ins.taskHref }}" style="display:flex; align-items:center; justify-content:center; gap:8px; height:32px; background:var(--color-deep-blue); color:#fff; font-size:13px; font-weight:500; border-radius:2px" style-hover="background:var(--color-deep-blue-muted); color:#fff"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="external-link" size="14" hint-size="14px,14px"></x-import>{{ t.openTask }}</a></sc-if>
+</sc-if>
+<sc-if value="{{ ins.canTl }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ ins.tlCb }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="secondary" size="sm" icon="menu" on-click="{{ ins.openTl }}" hint-size="100%,32px">{{ t.openTl }}</x-import></sc-if>
+<sc-if value="{{ ins.tlLink }}" hint-placeholder-val="{{ false }}"><a href="{{ ins.tlHref }}" style="display:flex; align-items:center; justify-content:center; gap:8px; height:32px; border:1px solid var(--color-deep-blue); font-size:13px; font-weight:500; border-radius:2px; box-sizing:border-box" style-hover="box-shadow:inset 0 -1px 0 var(--accent); color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="menu" size="14" hint-size="14px,14px"></x-import>{{ t.openTl }}</a></sc-if>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;lang&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;zh&quot;,&quot;en&quot;],&quot;default&quot;:&quot;zh&quot;,&quot;tsType&quot;:&quot;'zh' | 'en'&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;mobile&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;'auto' | 'desktop' | 'mobile'&quot;},&quot;edgeLabels&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;bare&quot;:{&quot;editor&quot;:null,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;embedded&quot;:{&quot;editor&quot;:null,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;scope&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;focus&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;onOpenTask&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id: string) =&gt; void&quot;},&quot;onOpenTimeline&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(projectId: string, taskId?: string) =&gt; void&quot;}}">
+const UI_KEY = 'taff-relations-ui-v1';
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const dOf = n => new Date(2026, 8, 28 + n);
+const fmtD = (n, zh) => { const d = dOf(Math.round(n)); return zh ? `${d.getMonth()+1}月${d.getDate()}日` : `${d.getDate()} ${MON[d.getMonth()]}`; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const hash = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return ((h >>> 0) % 10000) / 10000; };
+const circ = (r, cx = 0, cy = 0) => `M${cx - r},${cy} a${r},${r} 0 1,0 ${2*r},0 a${r},${r} 0 1,0 ${-2*r},0`;
+const SPARK = 'M0,-5 L1.3,-1.3 L5,0 L1.3,1.3 L0,5 L-1.3,1.3 L-5,0 L-1.3,-1.3 Z';
+const NSTYLE = {
+  company: { r: 22, d: circ(22) + circ(15), fill: '#fff', stroke: 'var(--color-deep-blue)', sw: 1.4, deco: circ(2.6, 0, -22), decoFill: 'var(--accent)' },
+  project: { r: 18, d: circ(18), fill: 'var(--color-deep-blue)', stroke: 'none', sw: 0 },
+  task: { r: 9, d: circ(9), fill: '#fff', stroke: 'var(--color-deep-blue)', sw: 1.5 },
+  human: { r: 10, d: circ(10), fill: 'var(--color-ink-variant)', stroke: 'none', sw: 0 },
+  agent: { r: 10, d: circ(10), fill: '#fff', stroke: 'var(--accent)', sw: 1.5, deco: SPARK, decoFill: 'var(--accent)' },
+  service: { r: 12, d: 'M0,-12 L12,0 L0,12 L-12,0 Z', fill: 'var(--color-deep-blue-muted)', stroke: 'none', sw: 0 },
+  data: { r: 10, d: 'M-9,-6 a9,3 0 0,0 18,0 a9,3 0 0,0 -18,0 V6 a9,3 0 0,0 18,0 V-6', fill: 'var(--color-deep-blue-fixed)', stroke: 'var(--color-deep-blue-tint)', sw: 1 },
+  value: { r: 11, d: circ(11), fill: 'var(--color-gold-fixed)', stroke: 'var(--accent-text)', sw: 1.2 },
+};
+const ESTYLE = { DEPENDS_ON: ['var(--color-deep-blue)', 1.3, ''], ASSIGNED: ['var(--color-outline)', 1, ''], RUNS: ['var(--accent)', 1, '3 2'], PART_OF: ['var(--color-outline-variant)', 1, ''], SUBTASK_OF: ['var(--color-outline-variant)', 1, '2 2'], OWNS: ['var(--color-deep-blue-tint)', 1, ''], FEEDS: ['var(--accent-text)', 1.1, '5 3'], YIELDS: ['var(--accent-text)', 1.1, '5 3'], DELIVERS: ['var(--accent-text)', 1.1, '5 3'] };
+const LEN = { DEPENDS_ON: 70, ASSIGNED: 55, RUNS: 55, PART_OF: 70, SUBTASK_OF: 40, OWNS: 95, FEEDS: 75, YIELDS: 75, DELIVERS: 85 };
+const LAYER_KEYS = ['deps', 'people', 'org', 'chain'];
+const COL = { service: 0, data: 1, value: 2, company: 3, project: 4, task: 5, human: 6, agent: 6 };
+const COLW = 170;
+const T = {
+  zh: { title: '關係圖', home: '首頁', timeline: '時間線', tasks: '任務', layered: '結構', force: '自由', all: '全部', scopeAll: '全部項目', fit: '適應畫面', zoomIn: '放大', zoomOut: '縮小', close: '關閉', relations: '關係', noEdges: '未選擇任何關係層', openTask: '在任務中打開', openTl: '在時間線打開', project: '項目', company: '公司', owner: '負責人', agent: '智能體', dates: '日期', status: '狀態', forecast: '預計完成', role: '角色', tasksN: '任務數', expected: '預期價值', amount: '項目金額', collected: '已收費用', delivery: '交付進度', st: { todo: '待處理', doing: '進行中', review: '待確認', done: '已完成' }, lv: { high: '高風險', med: '需留意', low: '按計劃' },
+    type: { company: '公司', project: '項目', task: '任務', human: '人員', agent: '智能體', service: '服務', data: '數據', value: '價值' },
+    layers: { deps: '任務依賴', people: '人員 ↔ 任務', org: '項目 ↔ 公司', chain: '服務 → 數據 → 價值 → 項目' },
+    rel: { DEPENDS_ON: '依賴', ASSIGNED: '負責', RUNS: '執行', PART_OF: '屬於', SUBTASK_OF: '子任務', OWNS: '擁有', FEEDS: '供給', YIELDS: '產生', DELIVERS: '交付' } },
+  en: { title: 'Relations', home: 'Home', timeline: 'Timeline', tasks: 'Tasks', layered: 'Structured', force: 'Free', all: 'All', scopeAll: 'All projects', fit: 'Fit to view', zoomIn: 'Zoom in', zoomOut: 'Zoom out', close: 'Close', relations: 'Relations', noEdges: 'No relation layers selected', openTask: 'Open task', openTl: 'Open in timeline', project: 'Project', company: 'Company', owner: 'Owner', agent: 'Agent', dates: 'Dates', status: 'Status', forecast: 'Forecast', role: 'Role', tasksN: 'Tasks', expected: 'Expected value', amount: 'Project amount', collected: 'Fees collected', delivery: 'Delivered', st: { todo: 'To do', doing: 'In progress', review: 'To confirm', done: 'Done' }, lv: { high: 'High risk', med: 'Watch', low: 'On track' },
+    type: { company: 'Company', project: 'Project', task: 'Task', human: 'Human', agent: 'Agent', service: 'Service', data: 'Data', value: 'Value' },
+    layers: { deps: 'Task dependencies', people: 'People ↔ tasks', org: 'Projects ↔ companies', chain: 'Service → data → value → project' },
+    rel: { DEPENDS_ON: 'DEPENDS_ON', ASSIGNED: 'ASSIGNED', RUNS: 'RUNS', PART_OF: 'PART_OF', SUBTASK_OF: 'SUBTASK_OF', OWNS: 'OWNS', FEEDS: 'FEEDS', YIELDS: 'YIELDS', DELIVERS: 'DELIVERS' } },
+};
+
+class Component extends DCLogic {
+  state = this.load();
+  P = {}; view = { x: 0, y: 0, z: 1 }; alpha = 0; ptrs = new Map();
+  load() {
+    const base = { lang: 'zh', layers: { deps: 1, people: 1, org: 1, chain: 1 }, gLayout: 'layered', scope: this.props.scope || 'all', sel: this.props.focus || null, winW: typeof window !== 'undefined' ? window.innerWidth : 1280, ready: !!window.TaffStore };
+    if (this.props.embedded) return base;
+    try { const s = JSON.parse(localStorage.getItem(UI_KEY) || 'null'); if (s && typeof s === 'object') ['lang', 'layers', 'gLayout', 'scope'].forEach(k => { if (s[k] !== undefined) base[k] = s[k]; }); } catch (e) {}
+    try { const m = /node=([\w-]+)/.exec(location.hash || ''); if (m) base.sel = m[1]; } catch (e) {}
+    return base;
+  }
+  componentDidMount() {
+    this.onMove = e => this.pMove(e); this.onUp = e => this.pUp(e); this.onResize = () => this.setState({ winW: window.innerWidth });
+    this.onKey = e => { if (e.key === 'Escape') this.setState({ sel: null }); };
+    window.addEventListener('pointermove', this.onMove); window.addEventListener('pointerup', this.onUp); window.addEventListener('pointercancel', this.onUp);
+    window.addEventListener('resize', this.onResize); window.addEventListener('keydown', this.onKey);
+    const hook = () => { if (!window.TaffStore) { this.wait = setTimeout(hook, 40); return; } this.unsub = window.TaffStore.subscribe(() => this.forceUpdate()); if (!this.state.ready) this.setState({ ready: true }); };
+    hook();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('pointermove', this.onMove); window.removeEventListener('pointerup', this.onUp); window.removeEventListener('pointercancel', this.onUp);
+    window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey);
+    if (this.unsub) this.unsub(); clearTimeout(this.wait); if (this.raf) cancelAnimationFrame(this.raf); if (this.gEl) this.gEl.removeEventListener('wheel', this.onWheel);
+  }
+  componentDidUpdate(pp, ps) {
+    if (pp.scope !== this.props.scope && this.props.scope) this.setState({ scope: this.props.scope, sel: null });
+    if (pp.focus !== this.props.focus && this.props.focus) this.setState({ sel: this.props.focus });
+    if (!this.props.embedded && ps && ['lang', 'layers', 'gLayout', 'scope'].some(k => ps[k] !== this.state[k])) { try { const s = this.state; localStorage.setItem(UI_KEY, JSON.stringify({ lang: s.lang, layers: s.layers, gLayout: s.gLayout, scope: s.scope })); } catch (e) {} }
+    if (this.needFit && this.gEl) { this.needFit = false; requestAnimationFrame(() => this.fitGraph()); setTimeout(() => this.fitGraph(), 120); }
+  }
+  lang() { return this.props.lang || this.state.lang; }
+
+  gRef = el => { if (el === this.gEl) return; if (this.gEl) this.gEl.removeEventListener('wheel', this.onWheel); this.gEl = el; if (el) { el.addEventListener('wheel', this.onWheel, { passive: false }); requestAnimationFrame(() => this.fitGraph()); setTimeout(() => this.fitGraph(), 150); } };
+  onWheel = e => { e.preventDefault(); const r = this.gEl.getBoundingClientRect(); this.zoomTo(e.clientX - r.left, e.clientY - r.top, this.view.z * Math.exp(-e.deltaY * 0.0015)); };
+  zoomTo(mx, my, nz) { const v = this.view; nz = clamp(nz, 0.25, 3); const k = nz / v.z; v.x = mx - (mx - v.x) * k; v.y = my - (my - v.y) * k; v.z = nz; this.forceUpdate(); }
+  zoomBtn(f) { if (!this.gEl) return; const r = this.gEl.getBoundingClientRect(); this.zoomTo(r.width / 2, r.height / 2, this.view.z * f); }
+  toGraph(cx, cy) { const r = this.gEl.getBoundingClientRect(), v = this.view; return { x: (cx - r.left - v.x) / v.z, y: (cy - r.top - v.y) / v.z }; }
+  layered() { return this.state.gLayout !== 'force'; }
+  fitGraph() {
+    if (!this.gEl || !this.gVis) return; const r = this.gEl.getBoundingClientRect(); if (!r.width || !r.height) return;
+    const ids = this.gVis.ids; if (!ids.length) return; const lay = this.layered(), PP = lay ? (this.LP || {}) : this.P; if (!ids.every(id => PP[id])) return;
+    let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; ids.forEach(id => { const p = PP[id]; x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); });
+    if (lay) { y0 -= 40; x0 -= 30; x1 += 120; }
+    const pad = r.width < 500 ? 24 : 56, bw = Math.max(x1 - x0, 1), bh = Math.max(y1 - y0, 1);
+    const z = clamp(Math.min((r.width - pad * 2) / bw, (r.height - pad * 2) / bh), lay ? 0.42 : 0.6, 1.5);
+    this.view = { z, x: r.width / 2 - (x0 + x1) / 2 * z, y: r.height / 2 - (y0 + y1) / 2 * z }; this.forceUpdate();
+  }
+  kick(a) { this.alpha = Math.max(this.alpha, a); if (!this.raf) this.raf = requestAnimationFrame(this.loop); }
+  loop = () => { this.raf = null; this.simTick(this.alpha); this.alpha *= 0.95; this.forceUpdate(); if (this.alpha > 0.02 || this.nDrag) this.raf = requestAnimationFrame(this.loop); };
+  simTick(alpha) {
+    if (!this.gVis) return; const { ids, edges } = this.gVis, P = this.P, N = ids.length;
+    for (let i = 0; i < N; i++) { const a = P[ids[i]]; for (let j = i + 1; j < N; j++) { const b = P[ids[j]]; let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy; if (d2 < 1) { dx = 0.5; dy = 0.3; d2 = 0.34; } if (d2 > 160000) continue; const d = Math.sqrt(d2), f = 260 * alpha / d; const fx = dx / d * f, fy = dy / d * f; a.vx -= fx; a.vy -= fy; b.vx += fx; b.vy += fy; } }
+    edges.forEach(e => { const a = P[e.a], b = P[e.b]; const dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx * dx + dy * dy) || 1; const k = (d - e.len) / d * 0.22 * alpha; a.vx += dx * k; a.vy += dy * k; b.vx -= dx * k; b.vy -= dy * k; });
+    ids.forEach(id => { const p = P[id]; p.vx -= p.x * 0.035 * alpha; p.vy -= p.y * 0.035 * alpha; if (p.fixed) { p.vx = p.vy = 0; return; } p.vx *= 0.6; p.vy *= 0.6; p.x += clamp(p.vx, -25, 25); p.y += clamp(p.vy, -25, 25); });
+  }
+  ensurePos(ids, nodes, edges) {
+    const P = this.P, adj = {}; let fresh = 0; const S = window.TaffStore;
+    edges.forEach(e => { (adj[e.a] = adj[e.a] || []).push(e.b); (adj[e.b] = adj[e.b] || []).push(e.a); });
+    const order = ['project', 'company', 'task', 'human', 'agent', 'value', 'data', 'service'];
+    ids.slice().sort((a, b) => order.indexOf(nodes[a].type) - order.indexOf(nodes[b].type)).forEach(id => {
+      if (P[id]) return; fresh++; const n = nodes[id], h = hash(id);
+      if (n.type === 'project') { const i = S.PROJECTS.findIndex(p => p.id === id), a = i / S.PROJECTS.length * Math.PI * 2 - Math.PI / 2; P[id] = { x: Math.cos(a) * 220, y: Math.sin(a) * 170, vx: 0, vy: 0 }; return; }
+      const nb = (adj[id] || []).find(x => P[x]), b = nb ? P[nb] : { x: 0, y: 0 }, a = h * Math.PI * 2, r = 40 + h * 40;
+      P[id] = { x: b.x + Math.cos(a) * r, y: b.y + Math.sin(a) * r, vx: 0, vy: 0 };
+    });
+    return fresh;
+  }
+  nodeDown = id => e => { e.stopPropagation(); if (e.button > 0) return; this.nDrag = { id, x0: e.clientX, y0: e.clientY, moved: false }; if (this.P[id]) this.P[id].fixed = true; };
+  gBgDown = e => {
+    this.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (this.ptrs.size === 1) this.pan = { x0: e.clientX, y0: e.clientY, vx: this.view.x, vy: this.view.y, moved: false };
+    else if (this.ptrs.size === 2) { const [a, b] = [...this.ptrs.values()]; this.pinch = { d0: Math.hypot(a.x - b.x, a.y - b.y) || 1, z0: this.view.z }; this.pan = null; this.pinchUsed = true; }
+  };
+  pMove(e) {
+    if (this.nDrag) { const d = this.nDrag; if (Math.abs(e.clientX - d.x0) + Math.abs(e.clientY - d.y0) > 3) d.moved = true; if (d.moved && !this.layered() && this.P[d.id]) { const p = this.toGraph(e.clientX, e.clientY), n = this.P[d.id]; n.x = p.x; n.y = p.y; n.vx = n.vy = 0; this.kick(0.25); } return; }
+    if (this.ptrs.has(e.pointerId)) {
+      this.ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (this.ptrs.size === 2 && this.pinch) { const [a, b] = [...this.ptrs.values()]; const r = this.gEl.getBoundingClientRect(); this.zoomTo((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, this.pinch.z0 * Math.hypot(a.x - b.x, a.y - b.y) / this.pinch.d0); }
+      else if (this.pan) { const dx = e.clientX - this.pan.x0, dy = e.clientY - this.pan.y0; if (Math.abs(dx) + Math.abs(dy) > 3) this.pan.moved = true; this.view.x = this.pan.vx + dx; this.view.y = this.pan.vy + dy; this.forceUpdate(); }
+    }
+  }
+  pUp(e) {
+    if (this.nDrag) { const d = this.nDrag; this.nDrag = null; if (this.P[d.id]) this.P[d.id].fixed = false; if (!d.moved) this.setState({ sel: d.id }); return; }
+    if (this.ptrs.has(e.pointerId)) { this.ptrs.delete(e.pointerId); if (this.pan && !this.pan.moved && this.ptrs.size === 0 && !this.pinchUsed) this.setState({ sel: null }); if (this.ptrs.size < 2) this.pinch = null; if (this.ptrs.size === 0) { this.pan = null; this.pinchUsed = false; } }
+  }
+
+  renderVals() {
+    const lang = this.lang(), zh = lang === 'zh', t = T[lang], S = window.TaffStore, h = React.createElement;
+    const device = this.props.device || 'auto', isM = device === 'mobile' || (device === 'auto' && this.state.winW < 720);
+    const L = { header: !this.props.bare, desk: !isM, rootH: this.props.embedded || this.props.bare ? '100%' : '100vh', headH: isM ? '56px' : '64px', pad: isM ? '16px' : '24px', tbWrap: isM ? 'nowrap' : 'wrap',
+      insTop: isM ? 'auto' : '12px', insRight: isM ? '0' : '12px', insLeft: isM ? '0' : 'auto', insBottom: isM ? '0' : 'auto', insW: isM ? 'auto' : '296px', insMaxH: isM ? '64%' : 'calc(100% - 24px)', insR: isM ? '12px 12px 0 0' : '4px' };
+    const base = { t, L, langAttr: zh ? 'zh-Hant-HK' : 'en', langBtn: zh ? 'EN' : '中', toggleLang: () => this.setState({ lang: zh ? 'en' : 'zh' }), gRef: this.gRef, layouts: [], chips: [], legend: [], projOpts: [], ins: { has: false }, svg: null, empty: false, scope: this.state.scope, showScope: !this.props.scope, onScope: e => this.setState({ scope: e.target.value, sel: null }), clearSel: () => this.setState({ sel: null }), zoomIn: () => this.zoomBtn(1.25), zoomOut: () => this.zoomBtn(0.8), fit: () => this.fitGraph() };
+    if (!S) return base;
+    const db = S.get(), md = S.model(db), Ls = this.state.layers, scope = this.state.scope;
+    const nodes = {}, edges = [];
+    const add = (id, type, label, extra) => { if (!nodes[id]) nodes[id] = { id, type, label, ...extra }; };
+    const E = (a, b, rel, layer) => { if (nodes[a] && nodes[b]) edges.push({ a, b, rel, layer, len: LEN[rel], k: a + '|' + rel + '|' + b }); };
+    S.PROJECTS.forEach(p => { add(p.org, 'company', S.ORGS[p.org][lang]); add(p.id, 'project', p[lang], { code: p.code }); E(p.org, p.id, 'OWNS', 'org'); });
+    const person = id => { const pp = S.PEOPLE[id]; if (pp) add(id, pp.agent ? 'agent' : 'human', pp[lang], { person: pp }); };
+    Object.values(md.raw).forEach(({ t: x }) => { add(x.id, 'task', x.title[lang], { tk: x, mm: md.m[x.id] }); });
+    Object.values(md.raw).forEach(({ t: x }) => {
+      if (x.parent && nodes[x.parent]) E(x.id, x.parent, 'SUBTASK_OF', 'org'); else E(x.id, x.proj, 'PART_OF', 'org');
+      if (x.owner) { person(x.owner); E(x.owner, x.id, 'ASSIGNED', 'people'); }
+      if (x.agent) { person(x.agent); E(x.agent, x.id, 'RUNS', 'people'); }
+    });
+    (db.deps || []).forEach(([a, b]) => { if (nodes[a] && nodes[b]) E(a, b, 'DEPENDS_ON', 'deps'); });
+    Object.keys(S.SERVICES).forEach(id => add(id, 'service', S.SERVICES[id][lang]));
+    Object.keys(S.DATA).forEach(id => add(id, 'data', S.DATA[id][lang]));
+    Object.keys(S.VALUES).forEach(id => add(id, 'value', S.VALUES[id][lang], { v: S.VALUES[id] }));
+    S.CHAIN.forEach(([a, b, rel]) => E(a, b, rel, 'chain'));
+    let vis = edges.filter(e => Ls[e.layer]);
+    if (scope !== 'all') {
+      const pj = S.PROJECTS.find(p => p.id === scope); const Sx = new Set([scope, pj ? pj.org : null]);
+      Object.values(md.raw).forEach(({ t: x }) => { if (x.proj === scope) Sx.add(x.id); });
+      for (let i = 0; i < 3; i++) S.CHAIN.forEach(([a, b]) => { if (Sx.has(b)) Sx.add(a); });
+      const S2 = new Set(Sx); vis.forEach(e => { if (['ASSIGNED', 'RUNS', 'DEPENDS_ON'].includes(e.rel)) { if (Sx.has(e.a) && nodes[e.a].type === 'task') S2.add(e.b); if (Sx.has(e.b) && nodes[e.b].type === 'task') S2.add(e.a); } });
+      vis = vis.filter(e => S2.has(e.a) && S2.has(e.b));
+    }
+    const ids = [...new Set(vis.flatMap(e => [e.a, e.b]))];
+    const layered = this.layered();
+    const key = (layered ? 'L#' : 'F#') + ids.join(',') + '#' + vis.map(e => e.k).join(',');
+    if (key !== this.gKey) {
+      const first = !this.gKey; this.gKey = key;
+      if (!layered) { const fresh = this.ensurePos(ids, nodes, vis); this.gVis = { ids, edges: vis }; const big = fresh > 6; let a = big ? 1 : 0.4; for (let i = 0; i < (big ? 320 : 140); i++) { this.simTick(a); a *= 0.985; } this.needFit = first || big || this.lastLayout !== 'force'; if (!big) this.kick(0.15); }
+      else this.needFit = first || this.lastLayout !== 'layered' || this.lastIds !== ids.length;
+      this.lastLayout = layered ? 'layered' : 'force'; this.lastIds = ids.length;
+    }
+    this.gVis = { ids, edges: vis };
+    const colHeads = [];
+    if (layered) {
+      const LP = {}, adj = {}; vis.forEach(e => { (adj[e.a] = adj[e.a] || []).push(e.b); (adj[e.b] = adj[e.b] || []).push(e.a); });
+      const byType = ty => ids.filter(id => ty.includes(nodes[id].type));
+      const mean = id => { const ys = (adj[id] || []).filter(x => LP[x]).map(x => LP[x].y); return ys.length ? ys.reduce((a, b) => a + b, 0) / ys.length : 0; };
+      const place = (list, gap, desired) => { if (!list.length) return; const arr = list.map((id, i) => ({ id, y: desired(id), i })).sort((a, b) => a.y - b.y || a.i - b.i); const want = arr.reduce((s, o) => s + o.y, 0) / arr.length; for (let i = 1; i < arr.length; i++) arr[i].y = Math.max(arr[i].y, arr[i - 1].y + gap); const got = arr.reduce((s, o) => s + o.y, 0) / arr.length; arr.forEach(o => { LP[o.id] = { x: COL[nodes[o.id].type] * COLW, y: o.y - got + want }; }); };
+      const tasks = byType(['task']);
+      if (tasks.length) {
+        const ord = []; S.PROJECTS.forEach(p => { const pts = tasks.filter(id => nodes[id].tk.proj === p.id); pts.filter(id => !nodes[id].tk.parent || !pts.includes(nodes[id].tk.parent)).forEach(id => { ord.push(id); pts.filter(k => nodes[k].tk.parent === id).forEach(k => ord.push(k)); }); });
+        let y = 0, lp = null; ord.forEach(id => { const pp = nodes[id].tk.proj; if (lp && pp !== lp) y += 18; lp = pp; LP[id] = { x: COL.task * COLW + (nodes[id].tk.parent && ord.includes(nodes[id].tk.parent) ? 16 : 0), y }; y += 28; });
+        const off = (y - 28) / 2; ord.forEach(id => { LP[id].y -= off; });
+      }
+      place(byType(['project']), 52, id => tasks.length ? mean(id) : S.PROJECTS.findIndex(p => p.id === id) * 90);
+      place(byType(['company']), 52, mean); place(byType(['human', 'agent']), 28, mean); place(byType(['value']), 44, mean); place(byType(['data']), 44, mean); place(byType(['service']), 44, mean);
+      this.LP = LP;
+      let y0 = 1e9, y1 = -1e9; ids.forEach(id => { y0 = Math.min(y0, LP[id].y); y1 = Math.max(y1, LP[id].y); });
+      [['service', t.type.service], ['data', t.type.data], ['value', t.type.value], ['company', t.type.company], ['project', t.type.project], ['task', t.type.task], ['human', t.type.human + ' / ' + t.type.agent]].forEach(([ty, lab]) => { if (ids.some(id => COL[nodes[id].type] === COL[ty])) colHeads.push({ x: COL[ty] * COLW, y0: y0 - 34, y1: y1 + 20, lab }); });
+    }
+    const sel = ids.includes(this.state.sel) ? this.state.sel : null;
+    const nb = new Set(sel ? [sel] : []); if (sel) vis.forEach(e => { if (e.a === sel) nb.add(e.b); if (e.b === sel) nb.add(e.a); });
+    const P = layered ? this.LP : this.P, v = this.view;
+    const showAll = this.props.edgeLabels || v.z > 1.35;
+    const edgeEls = vis.map(e => {
+      const a = P[e.a], b = P[e.b]; let dx = b.x - a.x, dy = b.y - a.y; const d = Math.sqrt(dx * dx + dy * dy) || 1; let ux = dx / d, uy = dy / d;
+      const ra = NSTYLE[nodes[e.a].type].r + 2, rb = NSTYLE[nodes[e.b].type].r + 3;
+      let x1 = a.x + ux * ra, y1 = a.y + uy * ra, x2 = b.x - ux * rb, y2 = b.y - uy * rb, line = `M${x1},${y1} L${x2},${y2}`;
+      if (layered) {
+        if (Math.abs(dx) < 20) { const bu = clamp(Math.abs(dy) * 0.4, 20, 64); x1 = a.x + ra; y1 = a.y; x2 = b.x + rb; y2 = b.y; line = `M${x1},${y1} C${x1 + bu},${y1} ${x2 + bu},${y2} ${x2},${y2}`; ux = -1; uy = 0; }
+        else { const sg = Math.sign(dx); x1 = a.x + sg * ra; y1 = a.y; x2 = b.x - sg * rb; y2 = b.y; const mx = (x1 + x2) / 2; line = `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`; ux = sg; uy = 0; }
+        dx = 1; dy = 0;
+      }
+      const ah = `M${x2 - ux * 6 - uy * 3.5},${y2 - uy * 6 + ux * 3.5} L${x2},${y2} L${x2 - ux * 6 + uy * 3.5},${y2 - uy * 6 - ux * 3.5}`;
+      const conf = e.rel === 'DEPENDS_ON' && md.conflicts.has(e.a + '>' + e.b);
+      const [st, sw, dash] = ESTYLE[e.rel]; const on = !sel || e.a === sel || e.b === sel;
+      const stroke = conf ? 'var(--danger)' : (sel && on ? 'var(--color-deep-blue)' : st);
+      let ang = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI; if (ang > 90 || ang < -90) ang += 180;
+      const mx = (x1 + x2) / 2, my = (y1 + y2) / 2, lbl = (showAll || (sel && on)) && Math.hypot(x2 - x1, y2 - y1) > 50;
+      return h('g', { key: e.k, style: { opacity: on ? 1 : 0.12 } },
+        h('path', { d: line, style: { fill: 'none', stroke, strokeWidth: sel && on ? sw + 0.4 : sw, strokeDasharray: dash } }),
+        h('path', { d: ah, style: { fill: 'none', stroke, strokeWidth: sw } }),
+        lbl ? h('text', { x: mx, y: my - 3, transform: layered ? undefined : `rotate(${ang},${mx},${my})`, style: { fontSize: 7.5, fontWeight: 600, letterSpacing: zh ? 0 : '0.06em', fill: 'var(--text-muted)', textAnchor: 'middle', paintOrder: 'stroke', stroke: '#fff', strokeWidth: 3, strokeLinejoin: 'round', pointerEvents: 'none' } }, t.rel[e.rel]) : null);
+    });
+    const nodeEls = ids.map(id => {
+      const n = nodes[id], p = P[id], Sx = NSTYLE[n.type], on = !sel || nb.has(id);
+      let fill = Sx.fill, stroke = Sx.stroke, sw = Sx.sw;
+      if (n.type === 'task') { const mm = n.mm; if (n.tk.status === 'done') fill = 'var(--color-deep-blue-fixed-dim)'; if (n.tk.agentState === 'blocked' || (mm && md.behind(mm) > 0.5)) { stroke = 'var(--danger)'; sw = 2; } else if (n.tk.status === 'review') { stroke = 'var(--accent)'; sw = 2; } }
+      let inner = null; if (n.type === 'project') inner = n.code; if (n.type === 'human') inner = zh ? n.person.ini : n.person.iniEn;
+      const label = n.label.length > 20 ? n.label.slice(0, 19) + '…' : n.label;
+      const big = n.type === 'project' || n.type === 'company';
+      const ts = { fontSize: big ? 11 : 10, fontWeight: big ? 600 : 400, fill: 'var(--text-body)', paintOrder: 'stroke', stroke: '#fff', strokeWidth: 3, strokeLinejoin: 'round', pointerEvents: 'none' };
+      return h('g', { key: id, transform: `translate(${p.x},${p.y})`, onPointerDown: this.nodeDown(id), style: { cursor: 'pointer', opacity: on ? 1 : 0.18 } },
+        h('path', { d: circ(Sx.r + 8), style: { fill: 'transparent' } }),
+        id === sel ? h('path', { d: circ(Sx.r + 5), style: { fill: 'var(--accent-wash)', stroke: 'var(--accent)', strokeWidth: 1.5 } }) : null,
+        h('path', { d: Sx.d, style: { fill, stroke, strokeWidth: sw } }),
+        Sx.deco ? h('path', { d: Sx.deco, style: { fill: Sx.decoFill } }) : null,
+        inner ? h('text', { y: n.type === 'project' ? 3.5 : 3, style: { fontSize: n.type === 'project' ? 10 : (zh ? 9 : 7.5), fontWeight: 700, fill: '#fff', textAnchor: 'middle', pointerEvents: 'none' } }, inner) : null,
+        layered ? h('text', { x: Sx.r + 5, y: 3.5, style: { ...ts, textAnchor: 'start' } }, label) : h('text', { y: Sx.r + 13, style: { ...ts, textAnchor: 'middle' } }, label));
+    });
+    const svg = h('svg', { style: { position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block', touchAction: 'none' }, onPointerDown: this.gBgDown },
+      h('g', { transform: `translate(${v.x},${v.y}) scale(${v.z})` },
+        colHeads.map(c => h('g', { key: 'col' + c.x }, h('line', { x1: c.x, x2: c.x, y1: c.y0 + 12, y2: c.y1, style: { stroke: 'var(--color-surface-container-high)', strokeWidth: 1 } }), h('text', { x: c.x, y: c.y0, style: { fontSize: 10, fontWeight: 600, letterSpacing: zh ? 0 : '0.12em', textTransform: 'uppercase', fill: 'var(--text-muted)', textAnchor: 'middle' } }, c.lab))),
+        edgeEls, nodeEls));
+    const layouts = [['layered', t.layered], ['force', t.force]].map(([k, label]) => { const on = (this.state.gLayout || 'layered') === k; return { label, bg: on ? 'var(--bg)' : 'transparent', c: on ? 'var(--text)' : 'var(--text-muted)', fw: on ? 600 : 400, pick: () => this.setState({ gLayout: k }) }; });
+    const chips = [{ k: 'all', label: t.all, on: LAYER_KEYS.every(k => Ls[k]) }].concat(LAYER_KEYS.map(k => ({ k, label: t.layers[k], on: !!Ls[k] }))).map(c => ({
+      ...c, bd: c.on ? 'var(--color-deep-blue)' : 'var(--border)', bg: c.on ? 'var(--color-deep-blue)' : 'var(--bg)', c: c.on ? '#fff' : 'var(--text-body)',
+      toggle: () => this.setState(s => { if (c.k === 'all') { const allOn = LAYER_KEYS.every(k => s.layers[k]); const nl = {}; LAYER_KEYS.forEach(k => { nl[k] = allOn ? 0 : 1; }); return { layers: nl }; } return { layers: { ...s.layers, [c.k]: s.layers[c.k] ? 0 : 1 } }; }) }));
+    const legend = ['company', 'project', 'task', 'human', 'agent', 'service', 'data', 'value'].map(k => { const Sx = NSTYLE[k], sc = 7 / Sx.r; return { label: t.type[k], icon: h('svg', { width: 16, height: 16, style: { display: 'block', overflow: 'visible' } }, h('g', { transform: `translate(8,8) scale(${sc})` }, h('path', { d: Sx.d, style: { fill: Sx.fill, stroke: Sx.stroke, strokeWidth: Sx.sw / sc * 0.7 } }), Sx.deco ? h('path', { d: Sx.deco, style: { fill: Sx.decoFill } }) : null)) }; });
+    let ins = { has: false };
+    if (sel) {
+      const n = nodes[sel], props = []; let pr = null, canTask = false, canTl = false, tlPid = null, tlTid = null, idTxt = '', blocker = '';
+      if (n.type === 'task') {
+        const x = n.tk, mm = n.mm, pj = S.PROJECTS.find(p => p.id === x.proj); idTxt = x.id;
+        props.push({ k: t.project, v: pj ? pj[lang] : x.proj }, { k: t.owner, v: S.PEOPLE[x.owner] ? S.PEOPLE[x.owner][lang] : '—' });
+        if (x.agent && S.PEOPLE[x.agent]) props.push({ k: t.agent, v: S.PEOPLE[x.agent][lang] });
+        if (mm) props.push({ k: t.dates, v: `${fmtD(mm.s, zh)} – ${fmtD(mm.s + mm.d - 1, zh)}` });
+        props.push({ k: t.status, v: t.st[x.status] });
+        pr = mm ? mm.pr : S.pctOf(x); canTask = true; canTl = !!mm; tlPid = x.proj; tlTid = x.id;
+        if (x.agentState === 'blocked' && x.blocker) blocker = x.blocker[lang];
+      }
+      if (n.type === 'project') { const r = md.risks[sel]; const pj = S.PROJECTS.find(p => p.id === sel); props.push({ k: t.company, v: S.ORGS[pj.org][lang] }); if (r) { if (r.amount != null) props.push({ k: t.amount, v: S.money(r.amount, lang) }, { k: t.collected, v: S.money(r.collected, lang) + ' · ' + r.collectedPct + '%' }); props.push({ k: t.delivery, v: r.prog + '%' }, { k: t.forecast, v: fmtD(r.fc, zh) }, { k: t.status, v: t.lv[r.level] }); pr = r.prog; } canTl = true; tlPid = sel; }
+      if (n.type === 'human' || n.type === 'agent') props.push({ k: t.role, v: n.person.role[lang] }, { k: t.tasksN, v: String(Object.values(md.raw).filter(r => r.t.owner === sel || r.t.agent === sel).length) });
+      if (n.type === 'value') props.push({ k: t.expected, v: n.v.m[lang] });
+      if (n.type === 'company') props.push({ k: t.project, v: String(S.PROJECTS.filter(p => p.org === sel).length) });
+      const rels = vis.filter(e => e.a === sel || e.b === sel).map(e => { const o = e.a === sel ? e.b : e.a; return { rel: t.rel[e.rel], dir: e.a === sel ? '→' : '←', name: nodes[o].label, type: t.type[nodes[o].type], go: () => this.setState({ sel: o }) }; });
+      const taskCb = !!this.props.onOpenTask, tlCb = !!this.props.onOpenTimeline;
+      ins = { has: true, type: t.type[n.type], id: idTxt, hasId: !!idTxt, title: n.label, props, hasPr: pr != null, pr: pr || 0, hasBlocker: !!blocker, blocker, relTitle: `${t.relations} · ${rels.length}`, rels,
+        canTask, taskCb, taskLink: canTask && !taskCb, taskHref: 'Team Tasks.dc.html#task=' + sel, openTask: () => this.props.onOpenTask && this.props.onOpenTask(sel),
+        canTl, tlCb, tlLink: canTl && !tlCb, tlHref: `Team Tasks Module Plan.dc.html#gantt=${tlPid || ''}${tlTid ? ':' + tlTid : ''}`, openTl: () => this.props.onOpenTimeline && this.props.onOpenTimeline(tlPid, tlTid) };
+    }
+    return { ...base, svg, empty: !ids.length, layouts, chips, legend, ins, projOpts: S.PROJECTS.map(p => ({ id: p.id, label: p[lang] })) };
+  }
+}
+</script>
+</body>
+</html>

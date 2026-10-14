@@ -1,0 +1,24 @@
+/* TABLE AI — spacing tokens. 8px grid (tableai.tokens.json "space"). */
+:root{
+--space-unit:8px;
+--space-xs:4px;
+--space-sm:8px;
+--space-md:16px;
+--space-lg:24px;
+--space-xl:40px;
+--space-xxl:80px;
+--space-section:96px;      /* website section padding (py-24) */
+--space-section-lg:128px;  /* py-32 */
+--container-max:1200px;    /* design.md */
+--container-content:1152px;/* website content width (max-w-6xl) */
+--container-wide:1280px;
+--container-narrow:1024px;
+--container-text:768px;
+--gutter:20px;
+--gutter-md:32px;
+--gutter-lg:40px;
+--nav-height:64px;
+--nav-height-lg:80px;
+--hairline:1px;
+--accent-line-w:48px;      /* .accent-line */
+}

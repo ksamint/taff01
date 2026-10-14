@@ -14,6 +14,7 @@ import {
   expandCalendarSchedule,
   normalizeCalendarSchedule,
 } from "./calendar-recurrence";
+import { byDayAnchor } from "./prototype-seed";
 
 describe("prototype presentation content", () => {
   it("translates only unchanged real fixture fields and retains references after edits", () => {
@@ -112,5 +113,18 @@ describe("prototype presentation content", () => {
       "2026-10-08T06:00:00.000Z",
       "2026-10-08T08:30:00.000Z",
     ]);
+  });
+  it("moves a weekday-only recurring anchor off the weekend on any seed date", () => {
+    const dateOf = (today: string) => (number: number) => {
+      const date = new Date(`${today}T00:00:00Z`);
+      date.setUTCDate(date.getUTCDate() + number - 8);
+      return date.toISOString().slice(0, 10);
+    };
+    const weekdays = "FREQ=WEEKLY;COUNT=10;BYDAY=MO,TU,WE,TH,FR";
+    expect(byDayAnchor(5, weekdays, dateOf("2026-10-08"))).toBe(5);
+    expect(
+      dateOf("2026-10-14")(byDayAnchor(5, weekdays, dateOf("2026-10-14"))),
+    ).toBe("2026-10-12");
+    expect(byDayAnchor(5, "FREQ=WEEKLY;COUNT=2", dateOf("2026-10-14"))).toBe(5);
   });
 });

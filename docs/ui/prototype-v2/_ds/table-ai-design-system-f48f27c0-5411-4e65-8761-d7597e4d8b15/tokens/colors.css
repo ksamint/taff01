@@ -1,0 +1,73 @@
+/* TABLE AI — color tokens. Source: TABLEAI/tokens/tableai.tokens.json + TableAI_DESIGN.md front-matter (ksamint/dsys_tableai) */
+:root{
+/* Base palette */
+--color-white:#FFFFFF;
+--color-deep-blue:#0A1626;          /* 寰宇深蓝 Universe Deep Blue — primary text, structure, brand mark */
+--color-deep-blue-soft:#101C2C;     /* elevated dark panels */
+--color-deep-blue-muted:#3C4759;    /* borders on dark, hover on navy */
+--color-deep-blue-tint:#545F72;     /* secondary / surface tint */
+--color-deep-blue-fixed:#D7E3FA;    /* primary-fixed (light blue wash) */
+--color-deep-blue-fixed-dim:#BBC7DD;
+--color-gold:#A88B52;               /* 日晷暗金 Sundial Dark Gold — CTA, active states, key data. ≤8% of visible area */
+--color-gold-hover:#9A7E48;         /* cta hover */
+--color-gold-deep:#785F2A;          /* readable gold text on white */
+--color-gold-mist:rgba(168,139,82,0.08); /* active/focus wash */
+--color-gold-fixed:#FFDEA2;
+--color-gold-fixed-dim:#E3C284;
+--color-ink:#1B1B1D;
+--color-ink-variant:#44474C;
+--color-outline:#75777D;
+--color-outline-variant:#C5C6CD;
+--color-surface:#FBF9FA;
+--color-surface-dim:#DCD9DB;
+--color-surface-container-lowest:#FFFFFF;
+--color-surface-container-low:#F5F3F4;
+--color-surface-container:#F0EDEF;
+--color-surface-container-high:#EAE7E9;
+--color-surface-container-highest:#E4E2E3;
+--color-inverse-surface:#303032;
+--color-inverse-on-surface:#F3F0F1;
+--color-error:#BA1A1A;
+--color-error-container:#FFDAD6;
+--color-on-error-container:#93000A;
+--color-success:#2F5D4E;          /* muted pine — 7.5:1 on white */
+--color-success-container:#E3EEE9;
+--color-warning:#8A5A12;          /* deep ochre — 5.9:1 on white */
+--color-warning-container:#F6EBD7;
+--color-line:rgba(10,22,38,0.16);   /* theme.json "line" */
+
+/* Semantic aliases */
+--bg:var(--color-white);
+--bg-surface:var(--color-surface);
+--bg-container:var(--color-surface-container);
+--bg-container-low:var(--color-surface-container-low);
+--bg-inverse:var(--color-deep-blue);
+--bg-inverse-soft:var(--color-deep-blue-soft);
+--text:var(--color-deep-blue);
+--text-body:var(--color-ink);
+--text-muted:var(--color-ink-variant);
+--text-subtle:var(--color-outline);
+--text-on-inverse:var(--color-white);
+--text-on-inverse-muted:var(--color-deep-blue-fixed-dim);
+--accent:var(--color-gold);
+--accent-text:var(--color-gold-deep);
+--accent-wash:var(--color-gold-mist);
+--accent-on-dark:var(--color-gold-fixed-dim);
+--accent-hover:var(--color-gold-hover);
+--border:var(--color-outline-variant);
+--border-strong:var(--color-deep-blue);
+--border-on-dark:var(--color-deep-blue-muted);
+--border-line:var(--color-line);
+--danger:var(--color-error);
+--danger-bg:var(--color-error-container);
+--danger-text:var(--color-on-error-container);
+--success:var(--color-success);
+--success-bg:var(--color-success-container);
+--warning:var(--color-warning);
+--warning-bg:var(--color-warning-container);
+--focus-ring:var(--color-gold);
+--focus-ring-width:2px;
+--skeleton:var(--color-surface-container-high);
+--selection-bg:var(--color-deep-blue);
+--selection-text:var(--color-white);
+}

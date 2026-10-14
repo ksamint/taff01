@@ -981,9 +981,20 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
     .locator(".sx__month-grid-event")
     .filter({ hasText: task.title })
     .first();
+  // Four weekly occurrences from today; late in a month the last ones fall
+  // after the grid's final week, so count only the dates the grid shows.
+  const visibleDates = await page
+    .locator(".sx__month-grid-day[data-date]")
+    .evaluateAll((days) =>
+      days.map((day) => (day as HTMLElement).dataset.date),
+    );
+  const shownOccurrences = [0, 7, 14, 21].filter((days) =>
+    visibleDates.includes(offsetDay(date, days)),
+  ).length;
+  expect(shownOccurrences).toBeGreaterThan(0);
   await expect(
     page.locator(".sx__month-grid-event").filter({ hasText: task.title }),
-  ).toHaveCount(4);
+  ).toHaveCount(shownOccurrences);
   const monthScroll = page.locator(
     ".calendar-engine-month-grid .sx__view-container",
   );

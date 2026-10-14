@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/colors.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/typography.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/radius.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/motion.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/tokens/base.css">
+<link rel="stylesheet" href="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/styles.css">
+<script src="_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/_ds_bundle.js"></script>
+<script src="taff-store.js"></script>
+<template id="__bundler_thumbnail" data-bg-color="#0A1626"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><rect width="100" height="100" fill="#0A1626"></rect><text x="46" y="60" font-family="sans-serif" font-size="30" font-weight="700" fill="#fff" text-anchor="middle">taff</text><rect x="72" y="54" width="5" height="5" fill="#A88B52"></rect></svg></template>
+<style>
+@font-face{font-family:"Manrope";src:url("_ds/table-ai-design-system-f48f27c0-5411-4e65-8761-d7597e4d8b15/assets/fonts/Manrope%5Bwght%5D.ttf") format("truetype");font-weight:200 800;font-style:normal;font-display:swap}
+html,body{margin:0;height:100%}
+a{color:var(--text);text-decoration:none}
+a:hover{color:var(--accent-text)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+</style>
+</helmet>
+<div lang="{{ langAttr }}" style="font-family:var(--font-sans); color:var(--text); background:{{ L.outerBg }}; height:{{ L.rootH }}; display:flex; align-items:center; justify-content:center; overflow:hidden; -webkit-font-smoothing:antialiased">
+<div style="position:relative; width:{{ L.appW }}; height:{{ L.appH }}; display:flex; flex-direction:column; background:var(--bg); overflow:hidden; border:{{ L.frameBorder }}; border-radius:{{ L.frameR }}; box-shadow:{{ L.frameShadow }}; box-sizing:border-box">
+
+<sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}">
+<header style="flex:none; height:64px; display:flex; align-items:center; gap:24px; padding:0 20px 0 24px; border-bottom:1px solid var(--border); box-sizing:border-box">
+<div style="display:flex; align-items:flex-end; gap:3px; flex:none"><span style="font-size:24px; font-weight:700; letter-spacing:-0.05em; line-height:1; color:var(--color-deep-blue)">taff</span><span style="width:5px; height:5px; background:var(--accent); margin-bottom:3px"></span></div>
+<nav style="display:flex; gap:2px; align-self:stretch">
+<sc-for list="{{ navs }}" as="nv" hint-placeholder-count="4"><button onClick="{{ nv.go }}" style="all:unset; display:flex; align-items:center; gap:8px; padding:0 12px; font-size:13px; font-weight:{{ nv.fw }}; color:{{ nv.c }}; box-shadow:{{ nv.bar }}; cursor:pointer; white-space:nowrap" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="{{ nv.icon }}" size="16" hint-size="16px,16px"></x-import>{{ nv.label }}</button></sc-for>
+</nav>
+<span style="flex:1"></span>
+<div style="display:flex; align-items:center; gap:12px; flex:none">
+<button onClick="{{ toggleAi }}" aria-pressed="{{ aiOpen }}" style="all:unset; position:relative; height:32px; padding:0 10px; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:500; border:1px solid {{ aiB }}; background:{{ aiBg }}; border-radius:2px; cursor:pointer" style-hover="border-color:var(--color-deep-blue)"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="14" hint-size="14px,14px"></x-import></span>{{ t.briefBtn }}<sc-if value="{{ aiDot }}" hint-placeholder-val="{{ false }}"><span style="position:absolute; top:-4px; right:-4px; width:8px; height:8px; border-radius:50%; background:var(--accent); border:2px solid var(--bg)"></span></sc-if></button>
+<button onClick="{{ toggleLang }}" style="all:unset; height:28px; padding:0 9px; display:flex; align-items:center; border:1px solid var(--border); border-radius:2px; font-size:11px; font-weight:600; letter-spacing:.15em; cursor:pointer" style-hover="border-color:var(--color-deep-blue)">{{ langBtn }}</button>
+<span style="width:32px; height:32px; border-radius:50%; background:var(--color-surface-container-high); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600">{{ meIni }}</span>
+</div>
+</header>
+</sc-if>
+
+<sc-if value="{{ L.mob }}" hint-placeholder-val="{{ false }}">
+<header style="flex:none; height:56px; display:flex; align-items:center; gap:10px; padding:0 16px; border-bottom:1px solid var(--border); box-sizing:border-box">
+
+<div style="display:flex; align-items:flex-end; gap:3px"><span style="font-size:22px; font-weight:700; letter-spacing:-0.05em; line-height:1; color:var(--color-deep-blue)">taff</span><span style="width:5px; height:5px; background:var(--accent); margin-bottom:3px"></span></div>
+<span style="flex:1"></span>
+<button onClick="{{ toggleAi }}" aria-label="{{ t.brief }}" aria-pressed="{{ aiOpen }}" style="all:unset; position:relative; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border:1px solid {{ aiB }}; background:{{ aiBg }}; border-radius:2px; color:var(--accent-text); cursor:pointer"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="16" hint-size="16px,16px"></x-import><sc-if value="{{ aiDot }}" hint-placeholder-val="{{ false }}"><span style="position:absolute; top:-4px; right:-4px; width:8px; height:8px; border-radius:50%; background:var(--accent); border:2px solid var(--bg)"></span></sc-if></button>
+<button onClick="{{ toggleLang }}" style="all:unset; height:32px; padding:0 10px; display:flex; align-items:center; border:1px solid var(--border); border-radius:2px; font-size:11px; font-weight:600; letter-spacing:.15em; cursor:pointer">{{ langBtn }}</button>
+</header>
+</sc-if>
+
+<sc-if value="{{ ready }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1; min-height:0; overflow-x:hidden; overflow-y:{{ L.bodyOverflow }}; display:grid; grid-template-columns:{{ L.cols }}; grid-template-rows:{{ L.rows }}; grid-template-areas:{{ L.areas }}">
+
+
+<div style="grid-area:canvas; min-width:0; min-height:0; display:{{ L.canvasDisp }}; flex-direction:column">
+
+<sc-if value="{{ isProj }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none; padding:{{ L.projPad }}; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:10px">
+<button onClick="{{ goTasks }}" style="all:unset; align-self:flex-start; display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); cursor:pointer" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="arrow-left" size="14" hint-size="14px,14px"></x-import>{{ t.allTasks }}</button>
+<div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px 12px"><span style="font-size:24px; font-weight:600; letter-spacing:-0.01em; line-height:1.2">{{ proj.name }}</span><sc-if value="{{ proj.hasLevel }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Badge" variant="{{ proj.bv }}" hint-size="64px,22px">{{ proj.levelLabel }}</x-import></sc-if><span style="font-size:12px; color:var(--text-muted)">{{ proj.meta }}</span></div>
+<div role="tablist" style="display:flex; gap:20px"><sc-for list="{{ proj.tabs }}" as="pt" hint-placeholder-count="2"><button onClick="{{ pt.pick }}" role="tab" aria-selected="{{ pt.on }}" style="all:unset; height:40px; padding:0 2px; display:flex; align-items:center; font-size:13px; font-weight:{{ pt.fw }}; color:{{ pt.c }}; box-shadow:{{ pt.bar }}; cursor:pointer">{{ pt.label }}</button></sc-for>
+<div style="position:relative; display:flex">
+<button onClick="{{ toggleMore }}" aria-expanded="{{ more.open }}" style="all:unset; display:flex; align-items:center; gap:6px; height:40px; padding:0 2px; font-size:13px; font-weight:{{ more.fw }}; color:{{ more.c }}; box-shadow:{{ more.bar }}; cursor:pointer; white-space:nowrap" style-hover="color:var(--text)">{{ more.label }}<x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-down" size="14" hint-size="14px,14px"></x-import></button>
+<sc-if value="{{ more.open }}" hint-placeholder-val="{{ false }}"><div style="position:absolute; top:calc(100% + 4px); left:0; z-index:60; width:260px; background:var(--bg); border:1px solid var(--border); border-radius:4px; box-shadow:0 20px 60px -15px rgba(10,22,38,.18); padding:4px; box-sizing:border-box; display:flex; flex-direction:column"><sc-for list="{{ more.items }}" as="mi" hint-placeholder-count="2"><button onClick="{{ mi.go }}" style="all:unset; display:flex; align-items:flex-start; gap:10px; padding:10px 12px; border-radius:2px; cursor:pointer; background:{{ mi.bg }}" style-hover="background:var(--bg-container-low)"><span style="display:flex; color:var(--text-muted); padding-top:1px"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="{{ mi.icon }}" size="16" hint-size="16px,16px"></x-import></span><span style="display:flex; flex-direction:column; gap:2px; min-width:0"><span style="font-size:13px; font-weight:600; color:var(--text)">{{ mi.label }}</span><span style="font-size:12px; color:var(--text-muted); line-height:1.4">{{ mi.sub }}</span></span></button></sc-for></div></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1; min-height:0; overflow-y:auto">
+<div style="max-width:880px; margin:0 auto; padding:{{ L.listPad }}; display:flex; flex-direction:column; gap:32px">
+<sc-if value="{{ isTasks }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px"><span style="font-size:28px; font-weight:600; letter-spacing:-0.02em; line-height:1.2">{{ t.tasks }}</span><div style="display:flex; background:var(--bg-container); padding:2px; border-radius:2px; gap:2px"><sc-for list="{{ listFs }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="all:unset; height:30px; padding:0 12px; display:flex; align-items:center; font-size:12px; font-weight:{{ o.fw }}; background:{{ o.bg }}; color:{{ o.c }}; border-radius:2px; cursor:pointer; white-space:nowrap">{{ o.label }}</button></sc-for></div></div>
+</sc-if>
+<sc-for list="{{ groups }}" as="gr" hint-placeholder-count="3">
+<section style="display:flex; flex-direction:column">
+<div style="display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 10px; padding:0 12px 8px; border-bottom:1px solid var(--border)"><span style="font-size:15px; font-weight:600">{{ gr.title }}</span><span style="flex:1; min-width:0; font-size:12px; color:var(--text-muted)">{{ gr.sub }}</span><sc-if value="{{ gr.hasLevel }}" hint-placeholder-val="{{ false }}"><span style="font-size:11px; font-weight:600; color:{{ gr.levelC }}">{{ gr.levelLabel }}</span></sc-if><sc-if value="{{ gr.hasGo }}" hint-placeholder-val="{{ true }}"><button onClick="{{ gr.go }}" style="all:unset; display:flex; align-items:center; gap:2px; font-size:12px; color:var(--text-muted); cursor:pointer" style-hover="color:var(--text)">{{ t.openProj }}<x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-right" size="12" hint-size="12px,12px"></x-import></button></sc-if></div>
+<sc-for list="{{ gr.rows }}" as="r" hint-placeholder-count="3">
+<a href="{{ r.href }}" style="display:flex; align-items:center; gap:12px; min-height:56px; padding:8px 12px 8px {{ r.pad }}px; border-bottom:1px solid var(--color-surface-container-high); box-sizing:border-box; color:var(--text)" style-hover="background:var(--bg-container-low)">
+<span style="flex:none; width:10px; height:10px; border-radius:50%; box-sizing:border-box; border:1.5px solid {{ r.sc }}; background:{{ r.sf }}"></span>
+<span style="flex:1; min-width:0; display:flex; flex-direction:column; gap:3px">
+<span style="font-size:14px; font-weight:500; color:{{ r.tc }}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ r.title }}</span>
+<span style="display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); min-width:0; white-space:nowrap; overflow:hidden"><span style="font-family:var(--font-mono); font-size:11px; color:var(--text-subtle)">{{ r.id }}</span><span>{{ r.who }}</span><sc-if value="{{ r.isAgent }}" hint-placeholder-val="{{ false }}"><span style="display:flex; align-items:center; gap:3px"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="12" hint-size="12px,12px"></x-import></span>{{ r.agentName }}</span></sc-if><span>· {{ r.due }}</span></span>
+</span>
+<sc-if value="{{ r.hasWarn }}" hint-placeholder-val="{{ false }}"><span style="flex:none; font-size:11px; font-weight:600; color:{{ r.warnC }}">{{ r.warn }}</span></sc-if>
+<span style="flex:none; width:36px; text-align:right; font-size:12px; color:var(--text-muted); font-variant-numeric:tabular-nums">{{ r.pct }}</span>
+</a>
+</sc-for>
+</section>
+</sc-for>
+<sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}"><div style="padding:48px 12px; text-align:center; font-size:13px; color:var(--text-muted)">{{ t.noOpen }}</div></sc-if>
+</div>
+</div>
+</sc-if>
+
+
+<sc-if value="{{ showGantt }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1; min-height:0; display:flex; flex-direction:column">
+<div style="flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:10px 16px; border-bottom:1px solid var(--border)">
+<sc-if value="{{ g.showModes }}" hint-placeholder-val="{{ true }}"><div style="display:flex; background:var(--bg-container); padding:2px; border-radius:2px; gap:2px"><sc-for list="{{ g.modes }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="all:unset; height:28px; padding:0 10px; display:flex; align-items:center; font-size:12px; font-weight:{{ o.fw }}; background:{{ o.bg }}; color:{{ o.c }}; border-radius:2px; cursor:pointer">{{ o.label }}</button></sc-for></div></sc-if>
+<sc-if value="{{ g.showProjSel }}" hint-placeholder-val="{{ false }}"><select value="{{ gProj }}" onChange="{{ onGProj }}" style="height:32px; padding:0 8px; border:1px solid var(--border); border-radius:2px; background:var(--bg); font:inherit; font-size:13px; color:var(--text)"><sc-for list="{{ projOpts }}" as="po" hint-placeholder-count="3"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select></sc-if>
+<div style="display:flex; background:var(--bg-container); padding:2px; border-radius:2px; gap:2px"><sc-for list="{{ g.zooms }}" as="o" hint-placeholder-count="2"><button onClick="{{ o.pick }}" style="all:unset; height:28px; padding:0 10px; display:flex; align-items:center; font-size:12px; font-weight:{{ o.fw }}; background:{{ o.bg }}; color:{{ o.c }}; border-radius:2px; cursor:pointer">{{ o.label }}</button></sc-for></div>
+<button onClick="{{ toggleCrit }}" aria-pressed="{{ crit }}" style="all:unset; height:32px; padding:0 10px; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:500; border:1px solid {{ g.critBorder }}; background:{{ g.critBg }}; border-radius:2px; cursor:pointer; white-space:nowrap"><span style="width:10px; height:10px; box-shadow:0 0 0 1.5px var(--accent); background:var(--color-deep-blue-fixed)"></span>{{ t.crit }}</button>
+<button onClick="{{ toggleLink }}" aria-pressed="{{ linkMode }}" style="all:unset; height:32px; padding:0 10px; display:flex; align-items:center; gap:6px; font-size:12px; font-weight:500; border:1px solid {{ g.linkBorder }}; background:{{ g.linkBg }}; border-radius:2px; cursor:pointer; white-space:nowrap"><span style="width:8px; height:8px; border-radius:50%; border:1.5px solid var(--color-deep-blue)"></span>{{ t.link }}</button>
+<sc-if value="{{ L.desk }}" hint-placeholder-val="{{ true }}">
+<div style="margin-left:auto; display:flex; align-items:center; gap:14px; font-size:11px; color:var(--text-muted)">
+<span style="display:flex; align-items:center; gap:6px"><span style="width:16px; height:8px; background:var(--color-deep-blue-fixed); border:1px solid var(--color-deep-blue-fixed-dim)"></span>{{ t.human }}</span>
+<span style="display:flex; align-items:center; gap:6px"><span style="width:16px; height:8px; border:1px dashed var(--color-deep-blue-tint)"></span>{{ t.agent }}</span>
+<span style="display:flex; align-items:center; gap:6px"><span style="width:8px; height:8px; transform:rotate(45deg); background:var(--color-deep-blue)"></span>{{ t.milestone }}</span>
+<span style="display:flex; align-items:center; gap:6px"><span style="width:14px; height:0; border-top:1.5px solid var(--danger)"></span>{{ t.conflict }}</span>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ linkMode }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none; display:flex; align-items:center; gap:12px; padding:8px 16px; background:var(--accent-wash); border-bottom:1px solid var(--border); font-size:12px; color:var(--text-body)"><span style="flex:1">{{ g.linkHint }}</span><button onClick="{{ toggleLink }}" style="all:unset; font-size:12px; font-weight:600; cursor:pointer; text-decoration:underline">{{ t.cancel }}</button></div>
+</sc-if>
+<div ref="{{ gtRef }}" style="flex:1; min-height:0; overflow:auto; position:relative">
+<div style="position:relative; width:{{ g.totalW }}px; min-height:100%">
+<div style="position:sticky; top:0; z-index:5; display:flex; height:44px; background:var(--bg); border-bottom:1px solid var(--border); box-sizing:border-box">
+<div style="position:sticky; left:0; z-index:6; flex:none; width:{{ g.labelW }}px; background:var(--bg); border-right:1px solid var(--border); display:flex; align-items:flex-end; padding:0 12px 8px; box-sizing:border-box; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ g.colTitle }}</div>
+<div style="position:relative; flex:none; width:{{ g.tw }}px">
+<sc-for list="{{ g.weeks }}" as="w" hint-placeholder-count="6"><div style="position:absolute; left:{{ w.x }}px; top:0; height:20px; padding:6px 0 0 6px; border-left:1px solid var(--border); font-size:11px; font-weight:600; color:var(--text-body); white-space:nowrap">{{ w.label }}</div></sc-for>
+<sc-for list="{{ g.days }}" as="d" hint-placeholder-count="0"><div style="position:absolute; left:{{ d.x }}px; top:24px; width:{{ g.dw }}px; text-align:center; font-size:10px; line-height:16px; color:{{ d.c }}; font-weight:{{ d.fw }}">{{ d.n }}</div></sc-for>
+<div style="position:absolute; left:{{ g.todayX }}px; bottom:-1px; width:1px; height:8px; background:var(--accent)"></div>
+</div>
+</div>
+<div ref="{{ ovRef }}" style="position:absolute; left:{{ g.labelW }}px; top:44px; width:{{ g.tw }}px; height:{{ g.rowsH }}px; pointer-events:none">
+<sc-for list="{{ g.weekends }}" as="we" hint-placeholder-count="0"><div style="position:absolute; left:{{ we.x }}px; top:0; bottom:0; width:{{ we.w }}px; background:var(--bg-container-low)"></div></sc-for>
+<div style="position:absolute; left:{{ g.todayX }}px; top:0; bottom:0; width:1px; background:var(--accent)"></div>
+{{ g.arrows }}
+</div>
+<sc-for list="{{ g.rows }}" as="r" hint-placeholder-count="10">
+<div style="display:flex; height:{{ g.rowH }}px; border-bottom:1px solid var(--color-surface-container-high); box-sizing:border-box">
+<div onClick="{{ r.onLabel }}" style="position:sticky; left:0; z-index:4; flex:none; width:{{ g.labelW }}px; background:{{ r.labelBg }}; border-right:1px solid var(--border); display:flex; align-items:center; gap:6px; padding-left:{{ r.indent }}px; padding-right:10px; box-sizing:border-box; cursor:pointer; min-width:0">
+<sc-if value="{{ r.isSum }}" hint-placeholder-val="{{ false }}"><span style="display:flex; color:var(--text-muted); transform:{{ r.chev }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="chevron-right" size="14" hint-size="14px,14px"></x-import></span></sc-if>
+<sc-if value="{{ r.hasId }}" hint-placeholder-val="{{ false }}"><span style="flex:none; font-family:var(--font-mono); font-size:10px; color:var(--text-subtle)">{{ r.tid }}</span></sc-if>
+<span style="flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:{{ r.fs }}px; font-weight:{{ r.fw }}; color:{{ r.lc }}">{{ r.label }}</span>
+<sc-if value="{{ r.hasLevel }}" hint-placeholder-val="{{ false }}"><span style="flex:none; font-size:10px; font-weight:600; color:{{ r.levelC }}">{{ r.levelLabel }}</span></sc-if>
+</div>
+<div style="position:relative; flex:none; width:{{ g.tw }}px; pointer-events:none">
+<sc-if value="{{ r.isBar }}" hint-placeholder-val="{{ false }}">
+<div onPointerDown="{{ r.down }}" style="position:absolute; left:{{ r.x }}px; top:{{ r.y }}px; width:{{ r.w }}px; height:{{ r.h }}px; box-sizing:border-box; background:{{ r.bg }}; border:{{ r.border }}; box-shadow:{{ r.ring }}; border-radius:2px; pointer-events:auto; cursor:{{ r.cursor }}; touch-action:none; user-select:none">
+<div style="position:absolute; left:0; top:0; bottom:0; width:{{ r.prW }}%; background:{{ r.prBg }}; border-radius:1px"></div>
+<sc-if value="{{ r.resizable }}" hint-placeholder-val="{{ false }}"><div onPointerDown="{{ r.resize }}" style="position:absolute; right:-4px; top:-2px; bottom:-2px; width:9px; cursor:ew-resize"></div></sc-if>
+<sc-if value="{{ r.linkable }}" hint-placeholder-val="{{ false }}"><div onPointerDown="{{ r.link }}" title="{{ t.dragLink }}" style="position:absolute; right:-16px; top:50%; width:9px; height:9px; margin-top:-6px; border-radius:50%; border:1.5px solid var(--color-deep-blue); background:var(--bg); cursor:crosshair; opacity:.45" style-hover="opacity:1"></div></sc-if>
+<div style="position:absolute; left:100%; margin-left:{{ r.lblGap }}px; top:50%; transform:translateY(-50%); white-space:nowrap; font-size:11px; color:var(--text-muted); display:flex; align-items:center; gap:4px; pointer-events:none">
+<sc-if value="{{ r.isAgent }}" hint-placeholder-val="{{ false }}"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="12" hint-size="12px,12px"></x-import></span></sc-if>
+<span>{{ r.meta }}</span><span style="color:{{ r.warnC }}; font-weight:600">{{ r.warn }}</span>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ r.isMs }}" hint-placeholder-val="{{ false }}">
+<div onPointerDown="{{ r.down }}" style="position:absolute; left:{{ r.x }}px; top:50%; width:12px; height:12px; margin:-6px 0 0 -6px; transform:rotate(45deg); background:{{ r.bg }}; box-shadow:{{ r.ring }}; pointer-events:auto; cursor:{{ r.cursor }}; touch-action:none"></div>
+<div style="position:absolute; left:{{ r.x }}px; margin-left:14px; top:50%; transform:translateY(-50%); white-space:nowrap; font-size:11px; font-weight:600; color:var(--text-body)">{{ r.meta }}</div>
+</sc-if>
+<sc-if value="{{ r.isSum }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute; left:{{ r.x }}px; top:{{ r.y }}px; width:{{ r.w }}px; height:8px; background:var(--color-surface-container-highest)"><div style="height:100%; width:{{ r.prW }}%; background:var(--color-deep-blue-muted)"></div></div>
+<sc-if value="{{ r.hasExt }}" hint-placeholder-val="{{ false }}"><div style="position:absolute; left:{{ r.extX }}px; top:{{ r.y }}px; width:{{ r.extW }}px; height:8px; box-sizing:border-box; border:1px dashed var(--danger); background:var(--danger-bg)"></div></sc-if>
+<div style="position:absolute; left:{{ r.metaX }}px; margin-left:8px; top:50%; transform:translateY(-50%); white-space:nowrap; font-size:11px; color:var(--text-muted)">{{ r.meta }}</div>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{ g.hasSel }}" hint-placeholder-val="{{ false }}">
+<div style="flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px; padding:12px 16px; border-top:1px solid var(--border); background:var(--bg-surface); animation:fadeIn .3s cubic-bezier(.16,1,.3,1)">
+<div style="display:flex; flex-direction:column; gap:2px; min-width:0; flex:1 1 200px"><span style="font-size:11px; color:var(--text-muted)">{{ g.sel.proj }}</span><span style="font-size:15px; font-weight:600">{{ g.sel.title }}</span></div>
+<sc-for list="{{ g.sel.props }}" as="sp" hint-placeholder-count="3"><div style="display:flex; flex-direction:column; gap:2px"><span style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ sp.k }}</span><span style="font-size:13px">{{ sp.v }}</span></div></sc-for>
+<div style="display:flex; gap:8px; flex-wrap:wrap">
+<sc-if value="{{ g.sel.taskCb }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="primary" size="sm" icon="external-link" on-click="{{ g.sel.openTask }}" hint-size="120px,32px">{{ t.openTask }}</x-import></sc-if>
+<sc-if value="{{ g.sel.taskLink }}" hint-placeholder-val="{{ false }}"><a href="{{ g.sel.taskHref }}" style="display:inline-flex; align-items:center; gap:8px; height:32px; padding:0 12px; background:var(--color-deep-blue); color:#fff; font-size:13px; font-weight:500; border-radius:2px" style-hover="background:var(--color-deep-blue-muted); color:#fff"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="external-link" size="14" hint-size="14px,14px"></x-import>{{ t.openTask }}</a></sc-if>
+<sc-if value="{{ g.sel.canGraph }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="secondary" size="sm" icon="database" on-click="{{ g.sel.toGraph }}" hint-size="140px,32px">{{ t.showGraph }}</x-import></sc-if>
+<x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="ghost" size="sm" icon="x" aria-label="{{ t.close }}" on-click="{{ clearGSel }}" hint-size="36px,32px"></x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showGraph }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1; min-height:0; display:flex; flex-direction:column">
+
+<div style="flex:1; min-height:0; position:relative">
+<dc-import name="Team Tasks Module Relations" bare="{{ true }}" embedded="{{ true }}" scope="{{ gProj }}" lang="{{ lang }}" device="{{ deviceStr }}" focus="{{ graphFocus }}" on-open-timeline="{{ relOpenTl }}" on-open-task="{{ relOpenTask }}" hint-size="100%,100%" style="position:absolute; inset:0"></dc-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showMind }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1; min-height:0; display:flex; flex-direction:{{ L.mindDir }}">
+<div style="flex:1; min-width:0; min-height:0; height:{{ L.mindSvgH }}; display:flex; flex-direction:column">
+<div style="flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:8px 20px; padding:12px 16px; border-bottom:1px solid var(--border)">
+<div style="display:flex; flex-direction:column; gap:2px; flex:1 1 260px; min-width:0"><span style="font-size:15px; font-weight:600">{{ t.mindTitle }}</span><span style="font-size:12px; color:var(--text-muted); text-wrap:pretty">{{ t.mindSub }}</span></div>
+<div style="display:flex; flex-wrap:wrap; gap:6px 14px; font-size:11px; color:var(--text-muted)"><sc-for list="{{ mind.legend }}" as="lg" hint-placeholder-count="4"><span style="display:flex; align-items:center; gap:6px">{{ lg.icon }}{{ lg.label }}</span></sc-for><span style="display:flex; align-items:center; gap:4px"><span style="color:var(--accent-text); font-weight:700">↑</span>{{ t.momUp }}</span></div>
+</div>
+<div style="position:relative; flex:1; min-height:0">{{ mind.svg }}</div>
+</div>
+<aside style="flex:none; width:{{ L.mindPanelW }}; border-left:{{ L.mindPanelBorder }}; border-top:{{ L.mindPanelTop }}; overflow-y:auto; padding:{{ L.mindPanelPad }}; box-sizing:border-box; display:flex; flex-direction:column; gap:14px">
+<sc-if value="{{ mind.cur.has }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ mind.back }}" style="all:unset; align-self:flex-start; display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-muted); cursor:pointer" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="arrow-left" size="14" hint-size="14px,14px"></x-import>{{ t.back }}</button>
+<div style="display:flex; flex-direction:column; gap:6px"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ mind.cur.layer }}</span><div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap"><span style="font-size:22px; font-weight:600; letter-spacing:-0.01em">{{ mind.cur.title }}</span><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Badge" variant="{{ mind.cur.bv }}" hint-size="56px,22px">{{ mind.cur.mom }}</x-import></div></div>
+<div style="display:flex; align-items:center; gap:10px"><span style="font-size:11px; color:var(--text-muted)">{{ t.strength }}</span><div style="flex:1; height:3px; background:var(--color-surface-container-high)"><div style="height:100%; width:{{ mind.cur.st }}%; background:var(--color-deep-blue)"></div></div><span style="font-size:12px; font-variant-numeric:tabular-nums">{{ mind.cur.st }}</span></div>
+<div style="display:flex; flex-direction:column; gap:6px; padding:14px 0; border-top:1px solid var(--border); border-bottom:1px solid var(--border)"><span style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="12" hint-size="12px,12px"></x-import></span>{{ mind.cur.textLabel }}</span><p style="margin:0; font-size:15px; line-height:1.6; text-wrap:pretty">{{ mind.cur.text }}</p></div>
+<div style="display:flex; flex-direction:column; gap:8px"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ mind.cur.srcTitle }}</span>
+<sc-if value="{{ mind.cur.noSrc }}" hint-placeholder-val="{{ false }}"><div style="padding:10px 12px; background:var(--warning-bg); color:var(--warning); font-size:12px; line-height:1.5">{{ t.noSource }}</div></sc-if>
+<sc-for list="{{ mind.cur.srcs }}" as="sr" hint-placeholder-count="2"><div style="display:flex; flex-direction:column; gap:6px; padding:12px; border:1px solid var(--border)"><div style="display:flex; align-items:center; gap:8px"><span style="flex:none; height:20px; padding:0 6px; display:flex; align-items:center; font-size:10px; font-weight:600; background:{{ sr.tagBg }}; color:{{ sr.tagC }}">{{ sr.tag }}</span><a href="{{ sr.url }}" target="_blank" rel="noopener" style="flex:1; min-width:0; font-size:11px; color:var(--text-muted); line-height:1.4; text-decoration:underline; text-underline-offset:2px">{{ sr.cite }}</a></div><p style="margin:0; font-size:13px; line-height:1.55; text-wrap:pretty">{{ sr.text }}</p></div></sc-for>
+</div>
+<sc-if value="{{ mind.cur.hasFrom }}" hint-placeholder-val="{{ false }}"><div style="display:flex; flex-direction:column; gap:8px"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ t.from }}</span><div style="display:flex; flex-wrap:wrap; gap:6px"><sc-for list="{{ mind.cur.from }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="all:unset; min-height:30px; padding:0 9px; display:flex; align-items:center; gap:6px; font-size:12px; border:1px solid var(--border); border-radius:2px; cursor:pointer" style-hover="border-color:var(--color-deep-blue)"><span style="font-size:10px; color:var(--text-muted)">{{ c.layer }}</span>{{ c.name }}</button></sc-for></div></div></sc-if>
+<sc-if value="{{ mind.cur.hasTo }}" hint-placeholder-val="{{ false }}"><div style="display:flex; flex-direction:column; gap:8px"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ t.leadsTo }}</span><div style="display:flex; flex-wrap:wrap; gap:6px"><sc-for list="{{ mind.cur.to }}" as="c" hint-placeholder-count="3"><button onClick="{{ c.go }}" style="all:unset; min-height:30px; padding:0 9px; display:flex; align-items:center; gap:6px; font-size:12px; border:1px solid var(--border); border-radius:2px; cursor:pointer" style-hover="border-color:var(--color-deep-blue)"><span style="font-size:10px; color:var(--text-muted)">{{ c.layer }}</span>{{ c.name }}</button></sc-for></div></div></sc-if>
+<sc-if value="{{ mind.cur.canTask }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex; flex-direction:column; gap:8px"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ t.addTo }}</span><select value="{{ mProj }}" onChange="{{ onMProj }}" style="height:36px; padding:0 8px; border:1px solid var(--border); border-radius:2px; background:var(--bg); font:inherit; font-size:13px; color:var(--text)"><sc-for list="{{ projOpts }}" as="po" hint-placeholder-count="3"><option value="{{ po.id }}">{{ po.label }}</option></sc-for></select>
+<x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="primary" size="sm" icon="plus" on-click="{{ mind.cur.makeTask }}" hint-size="100%,32px">{{ t.makeTask }}</x-import></div>
+</sc-if>
+<sc-if value="{{ mind.cur.tasked }}" hint-placeholder-val="{{ false }}"><div style="display:flex; align-items:center; flex-wrap:wrap; gap:10px; font-size:12px"><span style="display:flex; align-items:center; gap:4px; color:var(--success)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="circle-check" size="14" hint-size="14px,14px"></x-import>{{ mind.cur.taskedLabel }}</span><sc-if value="{{ mind.cur.taskCb }}" hint-placeholder-val="{{ false }}"><button onClick="{{ mind.cur.openTask }}" style="all:unset; font-weight:600; text-decoration:underline; cursor:pointer">{{ t.openTask }}</button></sc-if><sc-if value="{{ mind.cur.taskLink }}" hint-placeholder-val="{{ false }}"><a href="{{ mind.cur.taskHref }}" style="font-weight:600; text-decoration:underline">{{ t.openTask }}</a></sc-if></div></sc-if>
+</sc-if>
+<sc-if value="{{ mind.overview }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex; align-items:center; gap:6px; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="12" hint-size="12px,12px"></x-import></span>{{ t.mindAi }}</div>
+<p style="margin:0; font-size:14px; line-height:1.65; color:var(--text-body); text-wrap:pretty">{{ t.mindSummary }}</p>
+<div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted); padding-top:12px; border-top:1px solid var(--border)">{{ t.rising }}</div>
+<div style="display:flex; flex-direction:column; margin-top:-8px"><sc-for list="{{ mind.rising }}" as="it" hint-placeholder-count="6"><button onClick="{{ it.go }}" style="all:unset; display:flex; align-items:center; gap:10px; min-height:44px; border-bottom:1px solid var(--color-surface-container-high); cursor:pointer" style-hover="background:var(--bg-container-low)"><span style="flex:none; width:72px; font-size:10px; color:var(--text-muted)">{{ it.layer }}</span><span style="flex:1; min-width:0; font-size:13px; font-weight:500">{{ it.name }}</span><span style="font-size:12px; color:var(--accent-text); font-weight:600">↑</span></button></sc-for></div>
+<div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted); padding-top:4px">{{ t.cooling }}</div>
+<div style="display:flex; flex-direction:column; margin-top:-8px"><sc-for list="{{ mind.cooling }}" as="it" hint-placeholder-count="2"><button onClick="{{ it.go }}" style="all:unset; display:flex; align-items:center; gap:10px; min-height:44px; border-bottom:1px solid var(--color-surface-container-high); cursor:pointer" style-hover="background:var(--bg-container-low)"><span style="flex:none; width:72px; font-size:10px; color:var(--text-muted)">{{ it.layer }}</span><span style="flex:1; min-width:0; font-size:13px; font-weight:500">{{ it.name }}</span><span style="font-size:12px; color:var(--text-muted); font-weight:600">↓</span></button></sc-for></div>
+<div style="display:flex; align-items:baseline; justify-content:space-between; gap:8px; padding-top:12px; border-top:1px solid var(--border)"><span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ mind.srcTitle }}</span><span style="font-size:11px; color:var(--text-muted)">{{ mind.coverage }}</span></div>
+<div style="display:flex; flex-direction:column; margin-top:-6px"><sc-for list="{{ mind.srcList }}" as="sl" hint-placeholder-count="6"><a href="{{ sl.url }}" target="_blank" rel="noopener" style="display:flex; align-items:flex-start; gap:8px; padding:8px 0; border-bottom:1px solid var(--color-surface-container-high); font-size:12px; line-height:1.45; color:var(--text-body)"><span style="flex:none; height:18px; padding:0 5px; display:flex; align-items:center; font-size:10px; font-weight:600; background:{{ sl.tagBg }}; color:{{ sl.tagC }}">{{ sl.tag }}</span><span style="flex:1; min-width:0">{{ sl.cite }}</span><span style="flex:none; display:flex; color:var(--text-muted)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="arrow-up-right" size="12" hint-size="12px,12px"></x-import></span></a></sc-for></div>
+</sc-if>
+</aside>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{ showSide }}" hint-placeholder-val="{{ false }}">
+<aside style="grid-area:side; display:{{ L.sideDisp }}; flex-direction:column; min-height:0; overflow-y:auto; border-left:{{ L.sideBorder }}; width:100%; max-width:{{ L.sideMax }}; justify-self:center; box-sizing:border-box; animation:fadeIn .3s cubic-bezier(.16,1,.3,1)">
+<div style="flex:none; padding:{{ L.secPad }}; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px">
+<div style="display:flex; align-items:center; gap:6px"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="12" hint-size="12px,12px"></x-import></span><span style="flex:1; min-width:0; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted)">{{ t.brief }} · {{ t.date }}</span><button onClick="{{ closeBrief }}" aria-label="{{ t.hideBrief }}" style="all:unset; width:32px; height:32px; margin:-6px -8px -6px 0; display:flex; align-items:center; justify-content:center; color:var(--text-muted); cursor:pointer" style-hover="color:var(--text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="x" size="16" hint-size="16px,16px"></x-import></button></div>
+<form onSubmit="{{ onAskSubmit }}" style="display:flex; align-items:center; gap:10px; height:40px; padding:0 5px 0 12px; box-sizing:border-box; border:1px solid var(--border); border-radius:2px; background:var(--bg-surface)">
+<input value="{{ ask }}" onChange="{{ onAsk }}" placeholder="{{ t.askPhM }}" aria-label="{{ t.askPhM }}" style="all:unset; flex:1; min-width:0; font-size:13px; color:var(--text)">
+<button type="submit" aria-label="{{ t.send }}" style="all:unset; flex:none; width:30px; height:30px; display:flex; align-items:center; justify-content:center; background:var(--color-deep-blue); color:#fff; border-radius:2px; cursor:pointer"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="arrow-right" size="14" hint-size="14px,14px"></x-import></button>
+</form>
+</div>
+<section style="grid-area:brief; padding:{{ L.secPad }}; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:12px">
+<div style="font-size:22px; font-weight:600; letter-spacing:-0.01em; line-height:1.2">{{ t.greet }}</div>
+<p style="margin:0; font-size:14px; line-height:1.6; color:var(--text-body); text-wrap:pretty">{{ briefText }}</p>
+<div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:var(--border); border:1px solid var(--border)"><sc-for list="{{ stats }}" as="st" hint-placeholder-count="3"><div style="background:var(--bg); padding:10px 12px; display:flex; flex-direction:column; gap:2px"><span style="font-size:24px; font-weight:300; letter-spacing:-0.03em; font-variant-numeric:tabular-nums; line-height:1.1">{{ st.n }}</span><span style="font-size:11px; color:var(--text-muted); line-height:1.3">{{ st.label }}</span></div></sc-for></div>
+<div style="display:flex; flex-wrap:wrap; gap:6px; align-items:center"><span style="font-size:11px; color:var(--text-muted)">{{ t.try }}</span><sc-for list="{{ suggs }}" as="sg" hint-placeholder-count="3"><button onClick="{{ sg.go }}" style="all:unset; height:28px; padding:0 9px; display:flex; align-items:center; font-size:12px; border:1px solid var(--border); border-radius:2px; cursor:pointer" style-hover="border-color:var(--color-deep-blue)">{{ sg.q }}</button></sc-for></div>
+</section>
+<section style="grid-area:risks; padding:{{ L.secPad }}; border-bottom:1px solid var(--border)">
+<div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted); margin-bottom:8px">{{ t.risk }}</div>
+<div style="display:flex; flex-direction:column; gap:8px; padding:12px; background:var(--bg-surface); border:1px solid var(--border)">
+<span style="font-size:11px; color:var(--text-muted)">{{ portfolio.label }}</span>
+<div style="display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px"><sc-for list="{{ portfolio.cells }}" as="pc" hint-placeholder-count="3"><div style="display:flex; flex-direction:column; gap:2px; min-width:0"><span style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted); white-space:nowrap">{{ pc.k }}</span><span style="display:flex; align-items:baseline; gap:4px; flex-wrap:wrap; font-size:16px; font-weight:400; letter-spacing:-0.02em; font-variant-numeric:tabular-nums">{{ pc.v }}<span style="font-size:11px; font-weight:400; color:var(--text-muted); letter-spacing:0">{{ pc.sub }}</span></span></div></sc-for></div>
+</div>
+<sc-for list="{{ risks }}" as="rk" hint-placeholder-count="3">
+<button onClick="{{ rk.open }}" style="all:unset; display:flex; flex-direction:column; gap:6px; padding:12px 0; border-bottom:1px solid var(--color-surface-container-high); cursor:pointer; width:100%; box-sizing:border-box" style-hover="background:var(--bg-container-low)">
+<div style="display:flex; align-items:center; gap:8px"><span style="flex:1; min-width:0; display:flex; flex-direction:column"><span style="font-size:11px; color:var(--text-muted)">{{ rk.org }}</span><span style="font-size:14px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap">{{ rk.name }}</span></span><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Badge" variant="{{ rk.bv }}" hint-size="64px,22px">{{ rk.levelLabel }}</x-import></div>
+<span style="font-size:12px; line-height:1.5; color:var(--text-body); text-wrap:pretty">{{ rk.reason }}</span>
+<div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(0,1fr)); gap:12px; padding-top:2px">
+<sc-for list="{{ rk.fin }}" as="fc" hint-placeholder-count="3"><div style="display:flex; flex-direction:column; gap:3px; min-width:0"><span style="font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted); white-space:nowrap">{{ fc.k }}</span><span style="display:flex; align-items:baseline; gap:4px; flex-wrap:wrap; font-size:13px; font-weight:600; font-variant-numeric:tabular-nums">{{ fc.v }}<span style="font-size:11px; font-weight:400; color:var(--text-muted)">{{ fc.sub }}</span></span><sc-if value="{{ fc.bar }}" hint-placeholder-val="{{ false }}"><div style="height:3px; background:var(--color-surface-container-high)"><div style="height:100%; width:{{ fc.bar }}%; background:var(--color-deep-blue)"></div></div></sc-if></div></sc-for>
+</div>
+<span style="font-size:11px; color:var(--text-muted); font-variant-numeric:tabular-nums">{{ rk.meta }}</span>
+</button>
+</sc-for>
+</section>
+<section style="grid-area:actions; padding:{{ L.secPad }}">
+<div style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:var(--ls-track-sm); color:var(--text-muted); margin-bottom:4px">{{ t.actions }}</div>
+<sc-for list="{{ acts }}" as="a" hint-placeholder-count="4">
+<div style="padding:14px 0; border-bottom:1px solid var(--color-surface-container-high); display:flex; flex-direction:column; gap:6px; opacity:{{ a.op }}">
+<div style="display:flex; align-items:center; gap:6px; font-size:11px; color:var(--text-muted)"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="12" hint-size="12px,12px"></x-import></span>{{ a.by }} · {{ a.proj }}<a href="{{ a.taskHref }}" style="margin-left:auto; font-family:var(--font-mono); font-size:10px; color:var(--text-muted)">{{ a.task }}</a></div>
+<div style="font-size:14px; font-weight:500; line-height:1.4; text-wrap:pretty">{{ a.title }}</div>
+<div style="font-size:12px; line-height:1.5; color:var(--text-muted); text-wrap:pretty">{{ a.why }}</div>
+<sc-if value="{{ a.pending }}" hint-placeholder-val="{{ true }}"><div style="display:flex; gap:8px; margin-top:4px"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="primary" size="sm" icon="check" on-click="{{ a.approve }}" hint-size="90px,32px">{{ t.approve }}</x-import><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Button" variant="ghost" size="sm" on-click="{{ a.dismiss }}" hint-size="70px,32px">{{ t.dismiss }}</x-import></div></sc-if>
+<sc-if value="{{ a.resolved }}" hint-placeholder-val="{{ false }}"><div style="display:flex; align-items:center; gap:10px; font-size:12px; margin-top:2px"><span style="display:flex; align-items:center; gap:4px; color:{{ a.stC }}"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="{{ a.stIcon }}" size="14" hint-size="14px,14px"></x-import>{{ a.stLabel }}</span><sc-if value="{{ a.canUndo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ a.undo }}" style="all:unset; font-weight:600; text-decoration:underline; cursor:pointer">{{ t.undo }}</button></sc-if></div></sc-if>
+</div>
+</sc-for>
+</section>
+</aside>
+</sc-if>
+</div>
+</sc-if>
+
+
+<sc-if value="{{ more.open }}" hint-placeholder-val="{{ false }}"><div onClick="{{ closeMore }}" style="position:absolute; inset:0; z-index:55"></div></sc-if>
+
+<sc-if value="{{ ans.has }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute; z-index:40; top:{{ L.ansTop }}; left:{{ L.ansLeft }}; right:{{ L.ansRight }}; width:{{ L.ansW }}; transform:{{ L.ansTf }}; max-height:70%; overflow:auto; background:var(--bg); border:1px solid var(--border); border-radius:4px; box-shadow:0 20px 60px -15px rgba(10,22,38,.18); padding:16px 18px; box-sizing:border-box; display:flex; flex-direction:column; gap:10px">
+<div style="display:flex; align-items:center; gap:8px"><span style="display:flex; color:var(--accent-text)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="sparkles" size="14" hint-size="14px,14px"></x-import></span><span style="flex:1; min-width:0; font-size:13px; font-weight:600">{{ ans.q }}</span><button onClick="{{ closeAns }}" aria-label="{{ t.close }}" style="all:unset; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text-muted)"><x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="x" size="16" hint-size="16px,16px"></x-import></button></div>
+<sc-if value="{{ ans.loading }}" hint-placeholder-val="{{ false }}"><div style="font-size:13px; color:var(--text-muted); animation:pulse 1.6s ease-in-out infinite">{{ t.thinking }}</div></sc-if>
+<sc-if value="{{ ans.ready }}" hint-placeholder-val="{{ false }}"><p style="margin:0; font-size:14px; line-height:1.65; color:var(--text-body); white-space:pre-wrap; text-wrap:pretty">{{ ans.text }}</p></sc-if>
+<sc-if value="{{ ans.hasRefs }}" hint-placeholder-val="{{ false }}"><div style="display:flex; flex-wrap:wrap; gap:6px"><sc-for list="{{ ans.refs }}" as="rf" hint-placeholder-count="2"><a href="{{ rf.href }}" style="height:28px; padding:0 9px; display:flex; align-items:center; gap:6px; font-size:12px; border:1px solid var(--border); border-radius:2px" style-hover="border-color:var(--color-deep-blue)"><span style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted)">{{ rf.id }}</span>{{ rf.label }}<x-import component-from-global-scope="TableAIDesignSystem_f48f27.Icon" name="arrow-up-right" size="12" hint-size="12px,12px"></x-import></a></sc-for></div></sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast.has }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute; z-index:50; left:50%; bottom:{{ L.toastBottom }}; transform:translateX(-50%); max-width:calc(100% - 32px); display:flex; align-items:center; gap:14px; padding:10px 16px; background:var(--color-deep-blue); color:#fff; border-radius:4px; font-size:13px; box-shadow:0 20px 60px -15px rgba(10,22,38,.3); animation:fadeIn .3s cubic-bezier(.16,1,.3,1)"><span>{{ toast.msg }}</span><sc-if value="{{ toast.hasUndo }}" hint-placeholder-val="{{ false }}"><button onClick="{{ toast.undo }}" style="all:unset; font-weight:600; color:var(--accent-on-dark); cursor:pointer">{{ t.undo }}</button></sc-if></div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showBrief&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;desktop&quot;,&quot;mobile&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;'auto' | 'desktop' | 'mobile'&quot;,&quot;section&quot;:&quot;Layout&quot;},&quot;startPage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tasks&quot;,&quot;gantt&quot;,&quot;graph&quot;,&quot;mind&quot;,&quot;brief&quot;],&quot;default&quot;:&quot;tasks&quot;,&quot;tsType&quot;:&quot;'tasks' | 'gantt' | 'graph' | 'mind' | 'brief'&quot;,&quot;section&quot;:&quot;Embed&quot;},&quot;embedded&quot;:{&quot;editor&quot;:null,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;bare&quot;:{&quot;editor&quot;:null,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;project&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;string&quot;},&quot;lang&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;'zh' | 'en'&quot;},&quot;onOpenTask&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id: string) =&gt; void&quot;}}">
+const KEY = 'taff-home-ui-v5', NDAYS = 42;
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const dOf = n => new Date(2026, 8, 28 + n);
+const fmtD = (n, zh) => { const d = dOf(Math.round(n)); return zh ? `${d.getMonth()+1}月${d.getDate()}日` : `${d.getDate()} ${MON[d.getMonth()]}`; };
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const circ = (r, cx = 0, cy = 0) => `M${cx - r},${cy} a${r},${r} 0 1,0 ${2*r},0 a${r},${r} 0 1,0 ${-2*r},0`;
+const polar = (r, a) => { const t = a * Math.PI / 180; return { x: r * Math.sin(t), y: -r * Math.cos(t) }; };
+
+const T = {
+  zh: { tasks: '任務', more: '更多', allTasks: '全部任務', fAll: '全部', fMine: '我負責的', openProj: '打開項目', noOpen: '沒有未完成的任務', briefBtn: '簡報', hideBrief: '收起簡報', relSub: '人、智能體與任務之間的依賴', mindSub2: '從深層動機到場景的需求來源', home: '首頁', gantt: '時間線', graph: '關係圖', mind: '心智圖', tasksApp: '任務', openRel: '獨立打開關係圖', greet: '早晨，林曉', date: '10月8日 星期四', askPh: '詢問所有項目，例如：v2.4 發佈有甚麼阻礙？', askPhM: '詢問所有項目…', send: '發送', brief: 'AI 每日簡報', try: '試問', sugg: ['v2.4 發佈有甚麼阻礙？', '誰的工作量最重？', '智能體正在做甚麼？'], stActive: '進行中任務', stAgents: '工作中智能體', stReview: '待你確認', risk: '風險與延誤預測', amount: '項目金額', collected: '已收費用', delivery: '交付進度', total: '合計', finTotal: '{n} 個收費項目', actions: '待批准的建議', approve: '批准', dismiss: '略過', applied: '已套用', dismissed: '已略過', elsewhere: '已在 Team Tasks 處理', undo: '復原', high: '高風險', med: '需留意', low: '按計劃', homeCanvas: '首頁畫布', optA: 'A · 關係圖', optB: 'B · 時間線', portfolio: '組合', project: '項目', day: '日', week: '週', crit: '關鍵路徑', link: '連線模式', linkHint: '點選前置任務，再點選後續任務。也可從任務條右端的圓點直接拖出連線。點擊箭頭可移除依賴。', linkHint2: '已選「{a}」，請點選後續任務。', dragLink: '拖出依賴連線', cancel: '取消', human: '人員', agent: '智能體', milestone: '里程碑', conflict: '依賴衝突', colProj: '項目 / 任務', colTask: '任務', owner: '負責人', dates: '日期', progress: '進度', status: '狀態', preds: '前置', openTask: '在任務中打開', showGraph: '在關係圖顯示', close: '關閉', depAdded: '已加入依賴', depRemoved: '已移除依賴', depExists: '依賴已存在', cycle: '會形成循環依賴，未加入', moved: '已改期', resized: '已調整工期', thinking: '正在分析所有項目…', forecast: '預計', approvedT: '已套用', planner: 'taff 規劃', behind: '落後 {n}%', blocked: '被阻礙', inReview: '待確認', onTrack: '按計劃於 {d} 完成',
+    st: { todo: '待處理', doing: '進行中', review: '待確認', done: '已完成' },
+    mindTitle: '用戶心智圖', mindSub: '從集體潛意識、文化、人群到場景，看清需求從哪裏來。', mindAi: 'AI 洞察', mindSummary: '「療癒」與「確定感」兩股深層動機正在上升。安慰食物能減輕孤獨感（Troisi & Gabriel, 2011），但跨文化重複實驗結果不一；消費者亦更審慎，只有 18% 經常衝動消費（Euromonitor 2025）。香港五分一住戶獨居，增長主要來自 45 歲以上（統計處 2021），帶動深夜一人餐與健康外賣。', evidence: '證據', sources: '資料來源', coverage: '{a} / {b} 個節點有外部佐證', noSource: '暫無外部佐證，屬內部觀察，建議先驗證。', caveat: '限制', kind: { paper: '論文', report: '行業報告', stat: '官方統計', book: '專書' }, openSrc: '查看原文', rising: '上升中的趨勢', cooling: '正在降溫', insight: '洞察', opportunity: '機會', strength: '強度', from: '源自', leadsTo: '影響', addTo: '加入項目', makeTask: '轉為驗證任務', taskMade: '已建立任務', back: '返回總覽', consumer: '消費者', momUp: '上升', momFlat: '平穩', momDown: '降溫' },
+  en: { tasks: 'Tasks', more: 'More', allTasks: 'All tasks', fAll: 'All', fMine: 'Mine', openProj: 'Open project', noOpen: 'No open tasks', briefBtn: 'Brief', hideBrief: 'Hide brief', relSub: 'Dependencies between people, agents and tasks', mindSub2: 'Where demand comes from, motive to scenario', home: 'Home', gantt: 'Timeline', graph: 'Relations', mind: 'Mindscape', tasksApp: 'Tasks', openRel: 'Open relation map', greet: 'Good morning, Lin Xiao', date: 'Thursday, 8 October', askPh: 'Ask across all projects, e.g. What is blocking the v2.4 release?', askPhM: 'Ask across all projects…', send: 'Send', brief: 'Daily brief', try: 'Try', sugg: ['What is blocking the v2.4 release?', 'Who has the heaviest load?', 'What are agents working on?'], stActive: 'Tasks in progress', stAgents: 'Agents working', stReview: 'Awaiting your confirmation', risk: 'Risk & slip forecast', amount: 'Project amount', collected: 'Fees collected', delivery: 'Delivered', total: 'Total', finTotal: '{n} billable projects', actions: 'Suggested actions', approve: 'Approve', dismiss: 'Dismiss', applied: 'Applied', dismissed: 'Dismissed', elsewhere: 'Handled in Team Tasks', undo: 'Undo', high: 'High risk', med: 'Watch', low: 'On track', homeCanvas: 'Home canvas', optA: 'A · Graph', optB: 'B · Timeline', portfolio: 'Portfolio', project: 'Project', day: 'Day', week: 'Week', crit: 'Critical path', link: 'Link mode', linkHint: 'Select the predecessor, then the successor. You can also drag from the dot at the end of a bar. Click an arrow to remove it.', linkHint2: '“{a}” selected. Now select the successor.', dragLink: 'Drag to add a dependency', cancel: 'Cancel', human: 'Human', agent: 'Agent', milestone: 'Milestone', conflict: 'Dependency conflict', colProj: 'Project / task', colTask: 'Task', owner: 'Owner', dates: 'Dates', progress: 'Progress', status: 'Status', preds: 'After', openTask: 'Open task', showGraph: 'Show in graph', close: 'Close', depAdded: 'Dependency added', depRemoved: 'Dependency removed', depExists: 'Dependency already exists', cycle: 'That would create a loop', moved: 'Rescheduled', resized: 'Duration changed', thinking: 'Reading across all projects…', forecast: 'Forecast', approvedT: 'Applied', planner: 'taff planner', behind: '{n}% behind', blocked: 'Blocked', inReview: 'To confirm', onTrack: 'On track for {d}',
+    st: { todo: 'To do', doing: 'In progress', review: 'To confirm', done: 'Done' },
+    mindTitle: 'Consumer mindscape', mindSub: 'From the collective unconscious through culture and audiences to scenarios: see where demand comes from.', mindAi: 'AI insight', mindSummary: 'Two deep motives, Healing and Certainty, are rising. Comfort food reduces loneliness (Troisi & Gabriel, 2011), though cross-cultural replications are mixed, and consumers are more deliberate: only 18% often buy on impulse (Euromonitor 2025). One in five Hong Kong households live alone, with growth mainly among people over 45 (C&SD 2021), which supports late-night solo meals and healthy delivery.', evidence: 'Evidence', sources: 'Sources', coverage: '{a} of {b} nodes have external evidence', noSource: 'No external evidence yet. This is an internal observation; validate it first.', caveat: 'Caveat', kind: { paper: 'Paper', report: 'Industry report', stat: 'Official statistics', book: 'Book' }, openSrc: 'Open source', rising: 'Rising', cooling: 'Cooling', insight: 'Insight', opportunity: 'Opportunity', strength: 'Strength', from: 'Rooted in', leadsTo: 'Leads to', addTo: 'Add to project', makeTask: 'Turn into a validation task', taskMade: 'Task created', back: 'Back to overview', consumer: 'Consumer', momUp: 'Rising', momFlat: 'Stable', momDown: 'Cooling' },
+};
+
+const MIND_LAYERS = [{ r: 80, zh: '集體潛意識', en: 'Collective unconscious' }, { r: 165, zh: '文化', en: 'Culture' }, { r: 250, zh: '人群', en: 'Audiences' }, { r: 335, zh: '場景', en: 'Scenarios' }];
+const MIND = [
+  { id: 'u1', L: 0, a: 315, st: 84, mo: 'up', zh: '歸屬感', en: 'Belonging', izh: '「被認得」的感覺比折扣更能帶來回頭客。', ien: 'Being recognised brings people back more than discounts do.' },
+  { id: 'u2', L: 0, a: 45, st: 78, mo: 'up', zh: '確定感', en: 'Certainty', izh: '經濟前景不明朗時，消費者偏好可預期的價格與品質。', ien: 'In uncertain times, people favour predictable price and quality.' },
+  { id: 'u4', L: 0, a: 135, st: 74, mo: 'up', zh: '療癒', en: 'Healing', izh: '食物被視為自我照顧，而不只是填飽肚子。', ien: 'Food is treated as self-care, not only as fuel.' },
+  { id: 'u3', L: 0, a: 225, st: 70, mo: 'flat', zh: '自我表達', en: 'Self-expression', izh: '餐桌成為展示品味與身份的舞台。', ien: 'The table has become a stage for taste and identity.' },
+  { id: 'c6', L: 1, a: 20, st: 80, mo: 'up', zh: '性價比理性', en: 'Value rationalism', izh: '「值得」取代「便宜」成為選擇標準。', ien: '“Worth it” has replaced “cheap” as the test.' },
+  { id: 'c3', L: 1, a: 62, st: 61, mo: 'up', zh: '食材溯源', en: 'Ingredient traceability', izh: '產地、批次與處理方式成為信任的依據。', ien: 'Origin, batch and handling now carry trust.' },
+  { id: 'c4', L: 1, a: 108, st: 66, mo: 'up', zh: '輕養生', en: 'Light wellness', izh: '少油少鹽，但不犧牲味道。', ien: 'Less oil and salt without giving up flavour.' },
+  { id: 'c2', L: 1, a: 175, st: 69, mo: 'up', zh: '一人食', en: 'Solo dining', izh: '獨自用餐不再尷尬，而是主動的選擇。', ien: 'Eating alone is a deliberate choice, no longer awkward.' },
+  { id: 'c5', L: 1, a: 255, st: 58, mo: 'down', zh: '打卡社交', en: 'Social check-in', izh: '熱度仍在，但只靠「好看」的新鮮感正在下降。', ien: 'Still visible, but novelty that is only photogenic is fading.' },
+  { id: 'c1', L: 1, a: 315, st: 72, mo: 'up', zh: '懷舊港味', en: 'Hong Kong nostalgia', izh: '茶餐廳與冰室元素正被年輕一代重新詮釋。', ien: 'Cha chaan teng and bing sutt codes are being reinterpreted by younger diners.' },
+  { id: 'g2', L: 2, a: 32, st: 74, mo: 'flat', zh: '雙職家庭', en: 'Dual-income families', izh: '決策快，重視孩子吃進肚裏的食材。', ien: 'Decide fast; care about what their children eat.' },
+  { id: 'g5', L: 2, a: 128, st: 77, mo: 'flat', zh: '商務白領', en: 'Office professionals', izh: '午飯時間有限，願意為健康與效率付溢價。', ien: 'Short lunch breaks; will pay more for healthy and fast.' },
+  { id: 'g1', L: 2, a: 210, st: 68, mo: 'up', zh: '都市獨居人士', en: 'Urban solo dwellers', izh: '五分一住戶獨居，增長主要來自 45 歲以上。重視合適份量與個人空間。', ien: 'One in five households live alone, with growth mainly among people over 45. They want right-sized portions and personal space.' },
+  { id: 'g4', L: 2, a: 282, st: 62, mo: 'flat', zh: 'Z 世代學生', en: 'Gen Z students', izh: '對復古元素有好感，但對價格敏感。', ien: 'Drawn to retro codes, but budget-sensitive.' },
+  { id: 'g3', L: 2, a: 342, st: 55, mo: 'up', zh: '銀髮新食客', en: 'Active seniors', izh: '單身長者住戶十年增加 58%。有時間、有預算，重視熟悉味道與衛生。', ien: 'Single-elderly households grew 58% in ten years. They have time and budget, and value familiar taste and hygiene.' },
+  { id: 's2', L: 3, a: 40, st: 72, mo: 'flat', zh: '週末家庭聚餐', en: 'Weekend family meal', izh: '設兒童份量及開放式廚房，回應食材安全的顧慮。', ien: 'Add child portions and an open kitchen to answer food-safety concerns.' },
+  { id: 's3', L: 3, a: 100, st: 81, mo: 'flat', zh: '午市快餐', en: 'Weekday quick lunch', izh: '15 分鐘內出餐的輕養生套餐。', ien: 'A light wellness set served within 15 minutes.' },
+  { id: 's6', L: 3, a: 158, st: 64, mo: 'up', zh: '健康外賣', en: 'Healthy delivery', izh: '營養標示清晰的單人外賣盒。', ien: 'Single-portion delivery boxes with clear nutrition labels.' },
+  { id: 's1', L: 3, a: 212, st: 59, mo: 'up', zh: '深夜一人餐', en: 'Late-night solo meal', izh: '深夜時段增設吧枱座位及一人份套餐。', ien: 'Late-night bar seating and single-portion sets.' },
+  { id: 's5', L: 3, a: 272, st: 50, mo: 'down', zh: '打卡下午茶', en: 'Photo-worthy afternoon tea', izh: '由「好看」轉向「好味而且有故事」的懷舊茶點。', ien: 'Move from photogenic to nostalgic treats with a story.' },
+  { id: 's4', L: 3, a: 332, st: 70, mo: 'flat', zh: '節慶團圓', en: 'Festival reunion', izh: '推出可預訂的節慶家庭套餐，並標示食材來源。', ien: 'Offer bookable festival family sets with ingredient origins shown.' },
+];
+const SOURCES = {
+  troisi: { kind: 'paper', cite: 'Troisi & Gabriel (2011). Psychological Science, 22(6), 747–753', url: 'https://doi.org/10.1177/0956797611407931', zh: '兩項實驗顯示，「安慰食物」會自動喚起與人際關係相關的概念，並能減輕孤獨感。', en: 'Two experiments found that comfort foods automatically activate relationship concepts and reduce loneliness.' },
+  ong: { kind: 'paper', caveat: true, cite: 'Ong, IJzerman & Leung (2015). Frontiers in Psychology, 6, 314', url: 'https://doi.org/10.3389/fpsyg.2015.00314', zh: '在美國、荷蘭與新加坡共 649 人的重複實驗中，減輕孤獨感的效果只在美國樣本重現。應用到香港前需要本地驗證。', en: 'A replication with 649 participants in the US, the Netherlands and Singapore reproduced the loneliness effect only in the US sample. Validate locally before applying it in Hong Kong.' },
+  loveland: { kind: 'paper', cite: 'Loveland, Smeesters & Mandel (2010). Journal of Consumer Research, 37(3), 393–408', url: 'https://doi.org/10.1086/653043', zh: '歸屬需求被喚起時，消費者更偏好懷舊產品；實際消費懷舊產品（而非只是看到或選擇）能滿足這種需求。', en: 'When the need to belong is activated, consumers prefer nostalgic products, and consuming them (not just seeing or choosing them) satisfies that need.' },
+  euro25: { kind: 'report', cite: 'Euromonitor International, Top Global Consumer Trends 2025', url: 'https://www.euromonitor.com/press/press-releases/november-2024/euromonitor-international-reveals-top-global-consumer-trends-for-2025', zh: '「Wiser Wallets」：只有 18% 受訪者表示 2024 年經常衝動消費；72% 擔心日常開支上升。品質、功能、便利與價格是主要購買因素。', en: '“Wiser Wallets”: only 18% often made impulse purchases in 2024, and 72% worry about rising everyday costs. Quality, function, convenience and price drive purchases.' },
+  euroTime: { kind: 'report', cite: 'Euromonitor International, Top Global Consumer Trends 2025', url: 'https://licensinginternational.org/news/key-consumer-trends-in-2025/', zh: '50% 消費者願意為節省時間付更多錢。', en: '50% of consumers are willing to pay more to save time.' },
+  mck: { kind: 'report', cite: 'McKinsey, Future of Wellness survey 2025 (9,000+ consumers, US/UK/DE/CN)', url: 'https://www.mckinsey.com/industries/consumer-packaged-goods/our-insights/future-of-wellness-trends', zh: '84% 美國消費者視健康為「首要」或「重要」優先事項，中國為 94%。約半數美國、英國、德國消費者過去一年買過功能性營養產品。', en: '84% of US consumers call wellness a top or important priority; in China it is 94%. About half of US, UK and German consumers bought functional nutrition in the past year.' },
+  mintel: { kind: 'report', cite: 'Mintel, Global Food & Drink Trends 2025', url: 'https://www.mintel.com/press-centre/mintel-announces-global-food-and-drink-trends-for-2025/', zh: '「Chain Reaction」：供應鏈受干擾時，品牌需要讓消費者信任新的產地與食材；食物在情緒健康管理中的角色會增加。', en: '“Chain Reaction”: as supply is disrupted, brands must earn trust in new origins and ingredients; food will play a larger role in managing mental health.' },
+  census: { kind: 'stat', cite: '香港政府統計處 C&SD, 2021 Population Census – One-person Households', url: 'https://www.census2021.gov.hk/doc/pub/21c-One-Person-Households.pdf', zh: '2021 年全港有 538,324 個單人住戶，佔家庭住戶 20%，較 2011 年增加 33%。增長主要來自 45 歲及以上人士，25–44 歲單人住戶輕微下降。', en: 'Hong Kong had 538,324 one-person households in 2021, 20% of all households and 33% more than in 2011. Growth came mainly from people aged 45 and over; 25–44 one-person households fell slightly.' },
+  censusOld: { kind: 'stat', cite: '香港政府統計處 C&SD, 2021 Population Census – Domestic Households', url: 'https://www.census2021.gov.hk/doc/pub/21C_Articles_Household.pdf', zh: '單身長者住戶由 2011 年的 119,376 戶增至 2021 年的 188,569 戶，增幅 58%。', en: 'Single-elderly households grew 58%, from 119,376 in 2011 to 188,569 in 2021.' },
+  koponen: { kind: 'paper', cite: 'Koponen & Mustonen (2022). Journal of Consumer Culture, 22(2)', url: 'https://doi.org/10.1177/1469540520955219', zh: '獨自用餐被視為更專注享受食物的方式，也是一種與志趣相投者「匿名同桌」的新型共餐。', en: 'Solo dining is framed as a way to focus on the food and as a new form of commensality, sharing meals anonymously with like-minded diners.' },
+  herseo: { kind: 'paper', cite: 'Her & Seo (2018). International Journal of Hospitality Management, 70, 16–24', url: 'https://www.sciencedirect.com/science/article/abs/pii/S0278431916304431', zh: '其他食客是否同樣獨自用餐，是獨食意願的主要預測因素；作用經由預期孤獨感與被他人負面評價的擔憂。', en: 'Whether other diners are also alone is a major predictor of solo dining intention, working through anticipated loneliness and fear of negative evaluation.' },
+  huang: { kind: 'paper', cite: 'Huang, Feng & Wong (2025). International Journal of Hospitality Management, 130, 104226', url: 'https://doi.org/10.1016/j.ijhm.2025.104226', zh: '獨食研究的系統性文獻回顧，整理了動機、體驗與餐廳設計的研究結果。', en: 'A systematic review of solo dining research covering motives, experience and restaurant design.' },
+};
+const NODE_SRC = { u1: ['troisi', 'loveland'], u2: ['euro25', 'loveland'], u4: ['troisi', 'ong', 'mintel', 'mck'], c6: ['euro25'], c3: ['mintel'], c4: ['mck', 'mintel'], c2: ['koponen', 'huang', 'census'], c1: ['loveland'], g1: ['census'], g3: ['censusOld', 'census'], s3: ['euroTime', 'mck'], s6: ['mck', 'euroTime'], s1: ['herseo', 'koponen'], s4: ['loveland'] };
+const MIND_E = [['u1','c1'],['u1','c5'],['u2','c6'],['u2','c3'],['u2','c4'],['u4','c4'],['u4','c2'],['u3','c2'],['u3','c5'],['c1','g3'],['c1','g4'],['c3','g3'],['c3','g2'],['c6','g2'],['c4','g5'],['c2','g5'],['c2','g1'],['c5','g1'],['c5','g4'],['g2','s2'],['g3','s2'],['g2','s4'],['g3','s4'],['g5','s3'],['g5','s6'],['g1','s6'],['g1','s1'],['g4','s5'],['g1','s5']];
+const UI_KEYS = ['lang', 'page', 'pTab', 'listF', 'expanded', 'gProj', 'zoom', 'crit', 'mProj'];
+
+class Component extends DCLogic {
+  state = this.load();
+  ptrs = new Map();
+  load() {
+    const p = this.props;
+    const base = { lang: 'zh', page: p.startPage || 'tasks', pTab: 'tasks', listF: 'all', ai: !!p.showBrief, more: false, expanded: { chk: true, web: true }, gMode: 'project', gProj: p.project || 'chk', zoom: 'day', crit: true, linkMode: false, linkSrc: null, mSel: null, mProj: p.project || 'web', gSel: null, graphFocus: null, ask: '', answer: null, toast: null, winW: typeof window !== 'undefined' ? window.innerWidth : 1280, ready: !!window.TaffStore };
+    if (p.embedded || p.bare) return base;
+    try { const s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && typeof s === 'object') UI_KEYS.forEach(k => { if (s[k] !== undefined) base[k] = s[k]; }); } catch (e) {}
+    Object.assign(base, this.fromHash());
+    if (base.page === 'graph' || base.page === 'mind') { base.pTab = base.page; base.page = 'project'; }
+    if (!['tasks', 'project'].includes(base.page)) base.page = 'tasks';
+    return base;
+  }
+  fromHash() {
+    try {
+      const h = location.hash || ''; let m;
+      if ((m = /gantt=([\w-]*)(?::([\w-]+))?/.exec(h))) return { page: 'project', pTab: 'timeline', gProj: m[1] || this.state?.gProj || 'chk', gSel: m[2] || null };
+      if ((m = /proj=([\w-]+)/.exec(h))) return { page: 'project', pTab: 'tasks', gProj: m[1] };
+      if (/#gantt\b/.test(h)) return { page: 'project', pTab: 'timeline' };
+      if (/#mind\b/.test(h)) return { page: 'project', pTab: 'mind' };
+      if (/#graph\b/.test(h)) return { page: 'project', pTab: 'graph' };
+      if (/#tasks\b/.test(h)) return { page: 'tasks' };
+    } catch (e) {}
+    return {};
+  }
+  componentDidMount() {
+    this.onMove = e => this.pMove(e); this.onUp = e => this.pUp(e);
+    this.onResize = () => this.setState({ winW: window.innerWidth });
+    this.onKey = e => { if (e.key === 'Escape') this.setState({ linkMode: false, linkSrc: null, answer: null, more: false }); };
+    this.onHash = () => this.setState(this.fromHash());
+    window.addEventListener('pointermove', this.onMove); window.addEventListener('pointerup', this.onUp); window.addEventListener('pointercancel', this.onUp);
+    window.addEventListener('resize', this.onResize); window.addEventListener('keydown', this.onKey);
+    if (!this.props.embedded && !this.props.bare) window.addEventListener('hashchange', this.onHash);
+    const hook = () => { if (!window.TaffStore) { this.wait = setTimeout(hook, 40); return; } this.unsub = window.TaffStore.subscribe(() => this.forceUpdate()); if (!this.state.ready) this.setState({ ready: true }); };
+    hook();
+  }
+  componentWillUnmount() {
+    window.removeEventListener('pointermove', this.onMove); window.removeEventListener('pointerup', this.onUp); window.removeEventListener('pointercancel', this.onUp);
+    window.removeEventListener('resize', this.onResize); window.removeEventListener('keydown', this.onKey); window.removeEventListener('hashchange', this.onHash);
+    if (this.unsub) this.unsub(); clearTimeout(this.wait); clearTimeout(this.toastT);
+  }
+  componentDidUpdate(pp, ps) {
+    if (pp.showBrief !== this.props.showBrief) this.setState({ ai: !!this.props.showBrief });
+    if (pp.project !== this.props.project && this.props.project) this.setState({ gProj: this.props.project, gMode: 'project', mProj: this.props.project, gSel: null });
+    if (pp.startPage !== this.props.startPage && this.props.startPage) this.setState({ page: this.props.startPage });
+    if (!this.props.embedded && !this.props.bare && ps && UI_KEYS.some(k => ps[k] !== this.state[k])) { try { const o = {}; UI_KEYS.forEach(k => { o[k] = this.state[k]; }); localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} }
+  }
+  lang() { return this.props.lang || this.state.lang; }
+  S() { return window.TaffStore; }
+  showToast(msg, undo) { clearTimeout(this.toastT); this.setState({ toast: { msg, undo } }); this.toastT = setTimeout(() => this.setState({ toast: null }), 4000); }
+  tn(x) { return x ? x[this.lang()] : ''; }
+  pn(id) { const p = this.S().PEOPLE[id]; return p ? p[this.lang()] : (id === 'taff' ? T[this.lang()].planner : ''); }
+  finCells(r, lang) {
+    const S = this.S(), t = T[lang], m = S.money;
+    if (r.amount == null) return [{ k: t.delivery, v: r.prog + '%', sub: '', bar: r.prog || 0.01 }];
+    return [{ k: t.amount, v: m(r.amount, lang), sub: '', bar: 0 }, { k: t.collected, v: m(r.collected, lang), sub: r.collectedPct + '%', bar: r.collectedPct || 0.01 }, { k: t.delivery, v: r.prog + '%', sub: '', bar: r.prog || 0.01 }];
+  }
+  dateOf(r) { return r.lastMs ? r.fc : r.fc - 1; }
+  riskReason(r) {
+    const zh = this.lang() === 'zh', t = T[this.lang()], m = this.md.m;
+    if (r.level === 'low') return t.onTrack.replace('{d}', fmtD(this.dateOf(r), zh));
+    let s = '';
+    if (r.blockedT) { const raw = this.md.raw[r.blockedT.id].t; const b = raw.blocker ? raw.blocker[this.lang()] : ''; s = zh ? `「${this.tn(r.blockedT)}」被阻礙：${b}` : `${this.tn(r.blockedT)} is blocked: ${b}`; }
+    else if (r.conf) s = zh ? `「${this.tn(m[r.conf[1]])}」在「${this.tn(m[r.conf[0]])}」完成前開始。` : `${this.tn(m[r.conf[1]])} starts before ${this.tn(m[r.conf[0]])} finishes.`;
+    else if (r.drv) s = zh ? `「${this.tn(r.drv)}」落後計劃 ${r.drvPct}%。` : `${this.tn(r.drv)} is ${r.drvPct}% behind plan.`;
+    const ms = r.lastMs ? this.tn(r.lastMs) : this.tn(r.p);
+    if (r.slip > 0) s += zh ? `${ms}預計延後 ${r.slip} 天。` : ` ${ms} forecast ${r.slip} day${r.slip > 1 ? 's' : ''} late.`;
+    return s;
+  }
+  briefText() {
+    const zh = this.lang() === 'zh', md = this.md, rs = Object.values(md.risks);
+    const on = rs.filter(r => r.level === 'low').length, n = rs.length, rank = { high: 2, med: 1, low: 0 };
+    const worst = rs.slice().sort((a, b) => (rank[b.level] - rank[a.level]) || (b.slip - a.slip))[0];
+    let s = zh ? `${n} 個項目中有 ${on} 個按計劃進行。` : `${on} of ${n} projects are on track.`;
+    if (worst && worst.level !== 'low') s += zh ? `「${this.tn(worst.p)}」最需要關注：${this.riskReason(worst)}` : ` ${this.tn(worst.p)} needs the most attention: ${this.riskReason(worst)}`;
+    s += zh ? `${md.agentsActive} 個智能體正在工作，${md.review.length} 項交付等待你確認。` : ` ${md.agentsActive} agents are working and ${md.review.length} deliverables are waiting for your confirmation.`;
+    return s;
+  }
+  openTimeline(pid, tid) { this.setState({ page: this.props.bare ? this.state.page : 'project', pTab: 'timeline', gProj: pid || this.state.gProj, gSel: tid || null }); }
+  openGraph(id) { this.setState({ page: 'project', pTab: 'graph', graphFocus: id, gSel: null, more: false }); }
+
+  // gantt interactions
+  barDown = (id, mode) => e => { e.stopPropagation(); if (e.button > 0) return; e.preventDefault(); const x = this.md.m[id]; if (!x) return; this.drag = { id, mode, x0: e.clientX, y0: e.clientY, d0: x.d, moved: false }; };
+  pMove(e) {
+    const d = this.drag; if (!d) return; if (Math.abs(e.clientX - d.x0) + Math.abs(e.clientY - d.y0) > 4) d.moved = true; if (!d.moved) return;
+    if (d.mode === 'link') { if (this.ovEl) { const r = this.ovEl.getBoundingClientRect(); this.linkPt = { x: e.clientX - r.left, y: e.clientY - r.top }; this.forceUpdate(); } return; }
+    const dx = Math.round((e.clientX - d.x0) / this.dw);
+    if (d.mode === 'move') this.pv = { id: d.id, sh: dx }; else if (d.mode === 'resize') this.pv = { id: d.id, dd: Math.max(1, d.d0 + dx) };
+    this.forceUpdate();
+  }
+  pUp() {
+    const d = this.drag; if (!d) return; this.drag = null; const S = this.S(), t = T[this.lang()], zh = this.lang() === 'zh';
+    if (d.mode === 'link') { const pt = this.linkPt; this.linkPt = null; if (pt && d.moved) { const tgt = this.rowIds[Math.floor(pt.y / this.rowH)]; if (tgt) this.addDep(d.id, tgt); } this.forceUpdate(); return; }
+    if (!d.moved) {
+      if (this.state.linkMode) { if (!this.state.linkSrc) this.setState({ linkSrc: d.id }); else { const a = this.state.linkSrc; this.setState({ linkSrc: null }); this.addDep(a, d.id); } }
+      else this.setState({ gSel: d.id });
+      return;
+    }
+    const pv = this.pv; this.pv = null; if (!pv) { this.forceUpdate(); return; }
+    const snap = S.snapshot();
+    if (pv.sh) S.shiftTask(d.id, pv.sh); else if (pv.dd != null && pv.dd !== d.d0) S.resizeTask(d.id, pv.dd); else { this.forceUpdate(); return; }
+    const x = S.model(S.get()).m[d.id];
+    this.showToast(`${pv.sh ? t.moved : t.resized}：${this.tn(x)} · ${x.ms ? fmtD(x.s, zh) : fmtD(x.s, zh) + '–' + fmtD(x.s + x.d - 1, zh)}`, () => { S.restore(snap, ['tasks', 'plan', 'milestones']); this.setState({ toast: null }); });
+  }
+  addDep(a, b) {
+    const S = this.S(), t = T[this.lang()], m = this.md.m; if (!a || !b || a === b) return;
+    const deps = S.get().deps;
+    if (deps.some(([x, y]) => x === a && y === b)) { this.showToast(t.depExists); return; }
+    const reach = (from, to, seen = {}) => from === to || deps.some(([x, y]) => x === from && !seen[y] && (seen[y] = 1) && reach(y, to, seen));
+    if (reach(b, a)) { this.showToast(t.cycle); return; }
+    S.update(db => { db.deps.push([a, b]); });
+    this.showToast(`${t.depAdded}：${this.tn(m[a])} → ${this.tn(m[b])}`, () => { S.update(db => { db.deps = db.deps.filter(([x, y]) => !(x === a && y === b)); }); this.setState({ toast: null }); });
+  }
+  removeDep(a, b) { const S = this.S(), t = T[this.lang()], m = this.md.m; S.update(db => { db.deps = db.deps.filter(([x, y]) => !(x === a && y === b)); }); this.showToast(`${t.depRemoved}：${this.tn(m[a])} → ${this.tn(m[b])}`, () => { S.update(db => { db.deps.push([a, b]); }); this.setState({ toast: null }); }); }
+  gtRef = el => { if (el && el !== this.gtEl) { this.gtEl = el; setTimeout(() => { el.scrollLeft = Math.max(0, (this.S() ? this.S().TODAY_IDX - 6 : 4) * (this.dw || 28)); }, 80); } if (!el) this.gtEl = null; };
+  ovRef = el => { this.ovEl = el; };
+
+  buildGantt(isM) {
+    const S = this.S(), md = this.md, s = this.state, lang = this.lang(), zh = lang === 'zh', t = T[lang], h = React.createElement, TI = S.TODAY_IDX;
+    const dw = s.zoom === 'day' ? (isM ? 24 : 28) : (isM ? 10 : 12), rowH = isM ? 40 : 36, labelW = isM ? 132 : 268, tw = NDAYS * dw;
+    this.dw = dw; this.rowH = rowH;
+    const rows = [], topOf = pid => md.top.filter(x => x.p === pid);
+    const fixed = true, mode = 'project', gProj = this.props.project || s.gProj;
+    if (mode === 'portfolio') S.PROJECTS.forEach(p => { if (!md.risks[p.id]) return; rows.push({ kind: 'sum', p }); if (s.expanded[p.id]) topOf(p.id).forEach(x => rows.push({ kind: x.ms ? 'ms' : 'task', x })); });
+    else topOf(gProj).forEach(x => { rows.push({ kind: x.ms ? 'ms' : 'task', x }); (md.kids[x.id] || []).slice().sort((a, b) => a.s - b.s).forEach(k => rows.push({ kind: 'sub', x: k })); });
+    this.rowIds = rows.map(r => r.x ? r.x.id : null);
+    const idx = {}; rows.forEach((r, i) => { if (r.x) idx[r.x.id] = i; });
+    const confTo = new Set([...md.conflicts].map(k => k.split('>')[1]));
+    const vrows = rows.map(r => {
+      const base = { isSum: false, isBar: false, isMs: false, hasLevel: false, hasExt: false, hasId: false, tid: '', resizable: false, linkable: false, isAgent: false, warn: '', warnC: 'var(--danger-text)', meta: '', labelBg: 'var(--bg)', fs: 13, fw: 400, lc: 'var(--text)', chev: 'none' };
+      if (r.kind === 'sum') {
+        const rk = md.risks[r.p.id], open = !!s.expanded[r.p.id];
+        return { ...base, isSum: true, label: r.p[lang], indent: 10, fw: 600, labelBg: 'var(--bg-surface)', chev: open ? 'rotate(90deg)' : 'none', hasLevel: rk.level !== 'low', levelLabel: t[rk.level], levelC: rk.level === 'high' ? 'var(--danger-text)' : 'var(--warning)',
+          x: rk.start * dw, w: (rk.pe - rk.start) * dw, y: (rowH - 8) / 2, prW: rk.prog, hasExt: rk.slip > 0, extX: rk.pe * dw, extW: rk.slip * dw, metaX: (rk.pe + rk.slip) * dw,
+          meta: `${S.ORGS[r.p.org][lang]}${rk.amount != null ? ' · ' + S.money(rk.amount, lang) + ' · ' + t.collected + ' ' + rk.collectedPct + '%' : ''} · ${t.delivery} ${rk.prog}% · ${t.forecast} ${fmtD(this.dateOf(rk), zh)}${rk.slip ? (zh ? `（+${rk.slip} 天）` : ` (+${rk.slip}d)`) : ''}`,
+          onLabel: () => this.setState(st => ({ expanded: { ...st.expanded, [r.p.id]: !st.expanded[r.p.id] } })), down: null };
+      }
+      const x = r.x, id = x.id, isCrit = s.crit && md.crit.has(id), isSel = s.gSel === id || s.linkSrc === id;
+      const indent = mode === 'portfolio' ? 30 : (r.kind === 'sub' ? 30 : 14);
+      const common = { ...base, label: x[lang], hasId: !x.ms, tid: x.ms ? '' : id, indent, fs: r.kind === 'sub' ? 12 : 13, lc: r.kind === 'sub' ? 'var(--text-body)' : 'var(--text)', onLabel: () => this.setState({ gSel: id }), down: this.barDown(id, 'move') };
+      if (r.kind === 'ms') return { ...common, isMs: true, x: x.s * dw, bg: isCrit ? 'var(--accent)' : 'var(--color-deep-blue)', ring: isSel ? '0 0 0 2px #fff, 0 0 0 4px var(--color-deep-blue)' : 'none', cursor: s.linkMode ? 'pointer' : 'grab', meta: fmtD(x.s, zh) };
+      const ag = !!x.agent, sub = r.kind === 'sub', bh = sub ? 12 : 20, beh = md.behind(x);
+      let warn = '', warnC = 'var(--danger-text)';
+      if (x.blocked) warn = t.blocked; else if (x.status === 'review') { warn = t.inReview; warnC = 'var(--accent-text)'; } else if (beh > 0.5) warn = t.behind.replace('{n}', Math.round(clamp((TI - x.s) / x.d, 0, 1) * 100 - x.pr));
+      return { ...common, isBar: true, isAgent: ag, x: x.s * dw, w: Math.max(x.d * dw, 6), h: bh, y: (rowH - bh) / 2,
+        bg: ag ? 'var(--bg)' : 'var(--color-deep-blue-fixed)', border: (confTo.has(id) || x.blocked) ? '1px solid var(--danger)' : ag ? '1px dashed var(--color-deep-blue-tint)' : '1px solid var(--color-deep-blue-fixed-dim)',
+        prW: x.pr, prBg: ag ? 'var(--color-deep-blue-tint)' : 'var(--color-deep-blue)', ring: isSel ? '0 0 0 2px var(--color-deep-blue)' : isCrit ? '0 0 0 1.5px var(--accent)' : 'none',
+        cursor: s.linkMode ? 'pointer' : 'grab', resizable: !x.hasKids && !s.linkMode, linkable: !sub && !s.linkMode, lblGap: !sub && !s.linkMode ? 22 : 8,
+        meta: `${this.pn(x.agent || x.owner)} · ${x.pr}%`, warn, warnC, resize: this.barDown(id, 'resize'), link: this.barDown(id, 'link') };
+    });
+    const vis = id => { if (idx[id] != null) return id; const x = md.m[id]; if (x && x.parent && idx[x.parent] != null) return x.parent; return null; };
+    const endX = x => (x.ms ? x.s * dw + 6 : (x.s + x.d) * dw), startX = x => (x.ms ? x.s * dw - 7 : x.s * dw);
+    const arrowEls = [], seen = {};
+    (S.get().deps || []).forEach(([a0, b0]) => {
+      const a = vis(a0), b = vis(b0); if (!a || !b || a === b || seen[a + b]) return; seen[a + b] = 1; const A = md.m[a], B = md.m[b];
+      const x1 = endX(A), y1 = idx[a] * rowH + rowH / 2, x2 = startX(B), y2 = idx[b] * rowH + rowH / 2;
+      let d; if (x2 - x1 >= 14) d = `M${x1},${y1} H${x1 + 7} V${y2} H${x2}`; else { const ym = y2 > y1 ? idx[b] * rowH : idx[b] * rowH + rowH; d = `M${x1},${y1} H${x1 + 7} V${ym} H${x2 - 9} V${y2} H${x2}`; }
+      d += ` M${x2 - 5},${y2 - 4} L${x2},${y2} L${x2 - 5},${y2 + 4}`;
+      const conf = md.conflicts.has(a0 + '>' + b0), cr = s.crit && md.crit.has(a0) && md.crit.has(b0);
+      const stroke = conf ? 'var(--danger)' : cr ? 'var(--accent)' : 'var(--color-outline)';
+      arrowEls.push(h('g', { key: a0 + '>' + b0 }, h('path', { d, style: { fill: 'none', stroke, strokeWidth: conf || cr ? 1.5 : 1 } }),
+        h('path', { d, onClick: () => this.removeDep(a0, b0), style: { fill: 'none', stroke: 'transparent', strokeWidth: 10, pointerEvents: 'stroke', cursor: 'pointer' } }, h('title', null, t.depRemoved))));
+    });
+    if (this.drag && this.drag.mode === 'link' && this.linkPt && idx[this.drag.id] != null) { const A = md.m[this.drag.id]; arrowEls.push(h('path', { key: 'tmp', d: `M${endX(A)},${idx[this.drag.id] * rowH + rowH / 2} L${this.linkPt.x},${this.linkPt.y}`, style: { fill: 'none', stroke: 'var(--color-deep-blue)', strokeWidth: 1.5, strokeDasharray: '4 3' } })); }
+    const arrows = h('svg', { width: tw, height: rows.length * rowH, style: { position: 'absolute', left: 0, top: 0, overflow: 'visible', pointerEvents: 'none' } }, arrowEls);
+    const weeks = []; for (let n = 0; n < NDAYS; n += 7) weeks.push({ x: n * dw, label: fmtD(n, zh) });
+    const days = dw >= 20 ? Array.from({ length: NDAYS }, (_, n) => ({ x: n * dw, n: dOf(n).getDate(), c: n === TI ? 'var(--accent-text)' : (n % 7 >= 5 ? 'var(--text-subtle)' : 'var(--text-muted)'), fw: n === TI ? 700 : 400 })) : [];
+    const weekends = []; for (let n = 5; n < NDAYS; n += 7) weekends.push({ x: n * dw, w: 2 * dw });
+    const seg = (opts, cur, key) => opts.map(([v, label]) => ({ label, on: cur === v, bg: cur === v ? 'var(--bg)' : 'transparent', c: cur === v ? 'var(--text)' : 'var(--text-muted)', fw: cur === v ? 600 : 400, pick: () => this.setState({ [key]: v }) }));
+    let gsel = null;
+    if (s.gSel && md.m[s.gSel]) {
+      const x = md.m[s.gSel], pj = S.PROJECTS.find(p => p.id === x.p), ps = (md.preds[x.id] || []).map(i => this.tn(md.m[i])).filter(Boolean);
+      const props = x.ms ? [{ k: t.dates, v: fmtD(x.s, zh) }] : [{ k: t.owner, v: this.pn(x.owner) + (x.agent ? ' · ' + this.pn(x.agent) : '') }, { k: t.dates, v: `${fmtD(x.s, zh)} – ${fmtD(x.s + x.d - 1, zh)}` }, { k: t.status, v: `${t.st[x.status]} · ${x.pr}%` }];
+      if (ps.length) props.push({ k: t.preds, v: ps.join(zh ? '、' : ', ') });
+      const cb = !!this.props.onOpenTask;
+      gsel = { proj: (pj ? pj[lang] : '') + (x.ms ? '' : ' · ' + x.id), title: x[lang], props, canGraph: !x.ms && !this.props.bare, toGraph: () => this.openGraph(x.id),
+        taskCb: !x.ms && cb, taskLink: !x.ms && !cb, taskHref: 'Team Tasks.dc.html#task=' + x.id, openTask: () => this.props.onOpenTask && this.props.onOpenTask(x.id) };
+    }
+    return { dw, rowH, labelW, tw, totalW: labelW + tw, rowsH: rows.length * rowH, todayX: TI * dw, rows: vrows, arrows, weeks, days, weekends,
+      colTitle: mode === 'portfolio' ? t.colProj : t.colTask, showModes: !fixed, showProjSel: !fixed && mode === 'project',
+      modes: seg([['portfolio', t.portfolio], ['project', t.project]], s.gMode, 'gMode'), zooms: seg([['day', t.day], ['week', t.week]], s.zoom, 'zoom'),
+      critBorder: s.crit ? 'var(--accent)' : 'var(--border)', critBg: s.crit ? 'var(--accent-wash)' : 'var(--bg)', linkBorder: s.linkMode ? 'var(--accent)' : 'var(--border)', linkBg: s.linkMode ? 'var(--accent-wash)' : 'var(--bg)',
+      linkHint: s.linkSrc && md.m[s.linkSrc] ? t.linkHint2.replace('{a}', this.tn(md.m[s.linkSrc])) : t.linkHint, hasSel: !!gsel, sel: gsel || { props: [] } };
+  }
+
+  buildMind() {
+    const S = this.S(), s = this.state, lang = this.lang(), zh = lang === 'zh', t = T[lang], h = React.createElement, db = S.get();
+    const byId = {}; MIND.forEach(n => { byId[n.id] = n; });
+    const sel = byId[s.mSel] ? s.mSel : null;
+    const up = {}, down = {}; MIND_E.forEach(([a, b]) => { (down[a] = down[a] || []).push(b); (up[b] = up[b] || []).push(a); });
+    const coll = (id, map, set) => (map[id] || []).forEach(x => { if (!set.has(x)) { set.add(x); coll(x, map, set); } });
+    const anc = new Set(), desc = new Set(); if (sel) { coll(sel, up, anc); coll(sel, down, desc); }
+    const lit = id => !sel || id === sel || anc.has(id) || desc.has(id);
+    const FILL = [['var(--color-deep-blue)', 'none', 0], ['var(--color-deep-blue-muted)', 'none', 0], ['#fff', 'var(--color-deep-blue)', 1.5], ['var(--color-gold-fixed)', 'var(--accent-text)', 1.2]];
+    const rings = MIND_LAYERS.map((L, i) => h('g', { key: 'r' + i }, h('path', { d: circ(L.r), style: { fill: 'none', stroke: 'var(--color-outline-variant)', strokeWidth: 1 } }), h('text', { x: 0, y: -L.r + 18, style: { fontSize: 12, fontWeight: 600, letterSpacing: zh ? 0 : '0.12em', textTransform: 'uppercase', fill: 'var(--text-muted)', textAnchor: 'middle' } }, L[lang])));
+    const edges = MIND_E.map(([a, b]) => {
+      const A = byId[a], B = byId[b], r1 = MIND_LAYERS[A.L].r, r2 = MIND_LAYERS[B.L].r, rm = (r1 + r2) / 2, p1 = polar(r1, A.a), c1 = polar(rm, A.a), c2 = polar(rm, B.a), p2 = polar(r2, B.a);
+      const onPath = sel && (((a === sel || anc.has(a)) && (b === sel || anc.has(b))) || ((a === sel || desc.has(a)) && (b === sel || desc.has(b))));
+      return h('path', { key: a + b, d: `M${p1.x},${p1.y} C${c1.x},${c1.y} ${c2.x},${c2.y} ${p2.x},${p2.y}`, style: { fill: 'none', stroke: onPath ? 'var(--color-deep-blue)' : 'var(--color-outline-variant)', strokeWidth: onPath ? 1.6 : 1, opacity: sel && !onPath ? 0.3 : 1 } });
+    });
+    const nodes = MIND.map(n => {
+      const R = MIND_LAYERS[n.L].r, p = polar(R, n.a), r = 6 + n.st / 11, [fill, stroke, sw] = FILL[n.L], on = lit(n.id);
+      const lp = polar(R + r + 8, n.a), anchor = lp.x > 12 ? 'start' : lp.x < -12 ? 'end' : 'middle', ly = Math.abs(lp.x) <= 12 ? (lp.y < 0 ? lp.y - 3 : lp.y + 14) : lp.y + 5;
+      return h('g', { key: n.id, onClick: e => { e.stopPropagation(); this.setState({ mSel: n.id === s.mSel ? null : n.id }); }, style: { cursor: 'pointer', opacity: on ? 1 : 0.22 } },
+        h('path', { d: circ(r + 10, p.x, p.y), style: { fill: 'transparent' } }),
+        n.id === sel ? h('path', { d: circ(r + 5, p.x, p.y), style: { fill: 'var(--accent-wash)', stroke: 'var(--accent)', strokeWidth: 1.5 } }) : null,
+        h('path', { d: circ(r, p.x, p.y), style: { fill, stroke, strokeWidth: sw } }),
+        NODE_SRC[n.id] ? h('path', { d: circ(3.2, p.x + r * 0.75, p.y - r * 0.75), style: { fill: 'var(--accent)', stroke: '#fff', strokeWidth: 1.2 } }) : null,
+        h('text', { x: lp.x, y: ly, style: { fontSize: n.L === 0 ? 16 : 14, fontWeight: n.L === 0 || n.id === sel ? 600 : 500, fill: 'var(--text)', textAnchor: anchor, paintOrder: 'stroke', stroke: '#fff', strokeWidth: 4, strokeLinejoin: 'round', pointerEvents: 'none' } }, n[lang],
+          n.mo === 'up' ? h('tspan', { style: { fill: 'var(--accent-text)', fontWeight: 700 } }, ' ↑') : n.mo === 'down' ? h('tspan', { style: { fill: 'var(--text-muted)', fontWeight: 700 } }, ' ↓') : null));
+    });
+    const svg = h('svg', { viewBox: '-470 -395 940 790', onClick: () => this.setState({ mSel: null }), style: { position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' } }, rings, edges, h('path', { d: circ(36), style: { fill: 'var(--color-deep-blue)' } }), h('text', { x: 0, y: 5, style: { fontSize: 13, fontWeight: 600, fill: '#fff', textAnchor: 'middle', pointerEvents: 'none' } }, t.consumer), nodes);
+    const mom = { up: t.momUp, flat: t.momFlat, down: t.momDown }, momBv = { up: 'gold', flat: 'neutral', down: 'warning' };
+    const item = n => ({ name: n[lang], layer: MIND_LAYERS[n.L][lang], go: () => this.setState({ mSel: n.id }) });
+    const legend = MIND_LAYERS.map((L, i) => ({ label: L[lang], icon: h('svg', { width: 12, height: 12, style: { display: 'block' } }, h('path', { d: circ(5, 6, 6), style: { fill: FILL[i][0], stroke: FILL[i][1], strokeWidth: FILL[i][2] } })) })).concat([{ label: t.evidence, icon: h('svg', { width: 12, height: 12, style: { display: 'block' } }, h('path', { d: circ(3.5, 6, 6), style: { fill: 'var(--accent)' } })) }]);
+    let cur = { has: false, from: [], to: [], srcs: [] };
+    if (sel) {
+      const n = byId[sel], linked = (db.mindTasks || {})[sel], linkedTask = linked && S.findTask(db, linked);
+      const chips = set => [...set].map(id => byId[id]).sort((a, b) => a.L - b.L || a.a - b.a).map(m => ({ name: m[lang], layer: MIND_LAYERS[m.L][lang], go: () => this.setState({ mSel: m.id }) }));
+      const from = chips(anc), to = chips(desc), cb = !!this.props.onOpenTask;
+      const srcs = (NODE_SRC[n.id] || []).map(k => { const x = SOURCES[k]; return { kind: t.kind[x.kind], cite: x.cite, text: x[lang], url: x.url, caveat: !!x.caveat, tagBg: x.caveat ? 'var(--warning-bg)' : 'var(--bg-container)', tagC: x.caveat ? 'var(--warning)' : 'var(--text-muted)', tag: x.caveat ? t.caveat : t.kind[x.kind] }; });
+      cur = { has: true, srcs, hasSrc: srcs.length > 0, noSrc: !srcs.length, srcTitle: t.evidence + ' · ' + srcs.length, layer: MIND_LAYERS[n.L][lang], title: n[lang], mom: mom[n.mo], bv: momBv[n.mo], st: n.st, textLabel: n.L === 3 ? t.opportunity : t.insight, text: zh ? n.izh : n.ien,
+        from, to, hasFrom: from.length > 0, hasTo: to.length > 0, canTask: !linkedTask, tasked: !!linkedTask, taskedLabel: linkedTask ? `${t.taskMade} · ${linkedTask.id}` : '',
+        taskCb: cb, taskLink: !cb, taskHref: 'Team Tasks.dc.html#task=' + (linked || ''), openTask: () => this.props.onOpenTask && this.props.onOpenTask(linked),
+        makeTask: () => {
+          const pj = S.PROJECTS.find(p => p.id === (this.props.project || s.mProj)) || S.PROJECTS[1]; let id = null;
+          S.update(d2 => { id = S.addTask(d2, pj.org, { title: { zh: `驗證機會：${n.zh}`, en: `Validate: ${n.en}` }, status: 'todo', owner: 'lx', due: S.TODAY + 5, pri: 3, proj: pj.id, desc: { zh: n.izh, en: n.ien }, activity: [{ who: 'lx', kind: 'event', zh: '從 taff 心智圖建立了任務', en: 'created the task from the taff mindscape', at: { zh: '剛剛', en: 'Just now' } }] }, { dur: 5 }); d2.mindTasks = { ...(d2.mindTasks || {}), [n.id]: id }; }, 'taff');
+          this.showToast(`${t.taskMade}：${id} · ${zh ? '驗證機會：' + n.zh : 'Validate: ' + n.en}`, () => { S.update(d2 => { const org = S.orgOf(d2, id); if (org) d2.tasks[org] = d2.tasks[org].filter(k => k.id !== id); delete d2.plan[id]; if (d2.mindTasks) delete d2.mindTasks[n.id]; }); this.setState({ toast: null }); });
+        } };
+    }
+    const usedSrc = [...new Set(Object.values(NODE_SRC).flat())].map(k => ({ ...SOURCES[k], k })).sort((a, b) => ['paper', 'stat', 'report'].indexOf(a.kind) - ['paper', 'stat', 'report'].indexOf(b.kind));
+    return { overview: !sel, svg, legend, coverage: t.coverage.replace('{a}', MIND.filter(n => NODE_SRC[n.id]).length).replace('{b}', MIND.length), srcList: usedSrc.map(x => ({ cite: x.cite, url: x.url, tag: x.caveat ? t.caveat : t.kind[x.kind], tagBg: x.caveat ? 'var(--warning-bg)' : 'var(--bg-container)', tagC: x.caveat ? 'var(--warning)' : 'var(--text-muted)' })), srcTitle: t.sources + ' · ' + usedSrc.length, rising: MIND.filter(n => n.mo === 'up').sort((a, b) => b.st - a.st).slice(0, 6).map(item), cooling: MIND.filter(n => n.mo === 'down').map(item), cur, back: () => this.setState({ mSel: null }) };
+  }
+
+  buildList(go) {
+    const S = this.S(), md = this.md, s = this.state, lang = this.lang(), zh = lang === 'zh', t = T[lang], TI = S.TODAY_IDX;
+    const SC = { todo: ['var(--color-outline)', 'transparent'], doing: ['var(--color-deep-blue)', 'var(--color-deep-blue-fixed)'], review: ['var(--accent)', 'var(--accent-wash)'], done: ['var(--color-deep-blue)', 'var(--color-deep-blue)'] };
+    const row = (x, sub) => {
+      let warn = '', warnC = 'var(--danger-text)';
+      if (x.blocked) warn = t.blocked; else if (x.status === 'review') { warn = t.inReview; warnC = 'var(--accent-text)'; } else if (x.status !== 'done' && md.behind(x) > 0.5) warn = t.behind.replace('{n}', Math.round(clamp((TI - x.s) / x.d, 0, 1) * 100 - x.pr));
+      const [sc, sf] = SC[x.status] || SC.todo;
+      return { id: x.id, title: x[lang], who: this.pn(x.owner), isAgent: !!x.agent, agentName: x.agent ? this.pn(x.agent) : '', due: fmtD(x.s + x.d - 1, zh), pct: x.pr + '%', warn, hasWarn: !!warn, warnC, sc, sf, tc: x.status === 'done' ? 'var(--text-muted)' : 'var(--text)', pad: sub ? 36 : 12, href: 'Team Tasks.dc.html#task=' + x.id };
+    };
+    const lvl = rk => ({ hasLevel: !!rk && rk.level !== 'low', levelLabel: rk ? t[rk.level] : '', levelC: rk && rk.level === 'high' ? 'var(--danger-text)' : 'var(--warning)' });
+    let groups;
+    if (s.page === 'project') {
+      const top = md.top.filter(x => x.p === s.gProj && !x.ms);
+      groups = ['doing', 'review', 'todo', 'done'].map(st => { const rows = []; top.filter(x => x.status === st).sort((a, b) => a.s - b.s).forEach(x => { rows.push(row(x)); (md.kids[x.id] || []).slice().sort((a, b) => a.s - b.s).forEach(k => rows.push(row(k, true))); }); return { title: t.st[st], sub: String(rows.length), hasGo: false, go: null, rows, hasLevel: false, levelLabel: '', levelC: '' }; }).filter(g => g.rows.length);
+    } else {
+      const mine = s.listF === 'mine', me = x => x.owner === 'lx' || (md.kids[x.id] || []).some(k => k.owner === 'lx');
+      groups = S.PROJECTS.filter(p => md.risks[p.id]).map(p => { const rk = md.risks[p.id]; const rows = md.top.filter(x => x.p === p.id && !x.ms && x.status !== 'done' && (!mine || me(x))).sort((a, b) => a.s - b.s).map(x => row(x)); return { title: p[lang], sub: S.ORGS[p.org][lang] + ' · ' + t.delivery + ' ' + rk.prog + '%', hasGo: true, go: () => go({ page: 'project', pTab: 'tasks', gProj: p.id, gSel: null }), rows, ...lvl(rk) }; }).filter(g => g.rows.length);
+    }
+    const p = S.PROJECTS.find(x => x.id === s.gProj), rk = md.risks[s.gProj];
+    const proj = { name: p ? p[lang] : '', meta: p ? [S.ORGS[p.org][lang], rk ? t.delivery + ' ' + rk.prog + '%' : '', rk ? t.forecast + ' ' + fmtD(this.dateOf(rk), zh) : ''].filter(Boolean).join(' · ') : '', ...lvl(rk), bv: rk && rk.level === 'high' ? 'error' : 'warning',
+      tabs: [['tasks', t.tasks], ['timeline', t.gantt]].map(([v, label]) => { const on = (s.pTab || 'tasks') === v; return { label, on, fw: on ? 600 : 400, c: on ? 'var(--text)' : 'var(--text-muted)', bar: on ? 'inset 0 -2px 0 var(--color-deep-blue)' : 'none', pick: () => this.setState({ pTab: v, gSel: null, more: false }) }; }) };
+    const listFs = [['all', t.fAll], ['mine', t.fMine]].map(([v, label]) => { const on = (s.listF || 'all') === v; return { label, bg: on ? 'var(--bg)' : 'transparent', c: on ? 'var(--text)' : 'var(--text-muted)', fw: on ? 600 : 400, pick: () => this.setState({ listF: v }) }; });
+    return { groups, listFs, proj, listEmpty: !groups.length };
+  }
+
+  async runAsk(q) {
+    q = (q || '').trim(); if (!q) return; const lang = this.lang(), S = this.S();
+    this.setState({ answer: { q, text: null }, ask: '' }); const md = this.md; let text = null;
+    try {
+      if (window.claude && window.claude.complete) {
+        const iso = n => { const d = dOf(Math.round(n)); return `2026-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+        const ctx = S.PROJECTS.map(p => { const r = md.risks[p.id]; if (!r) return null; return { project: p.en, organisation: S.ORGS[p.org].en, progress: r.prog + '%', risk: r.level, forecast: iso(this.dateOf(r)), tasks: Object.values(md.m).filter(x => x.p === p.id).map(x => x.ms ? { milestone: x.en, date: iso(x.s) } : { id: x.id, task: x.en, zh: x.zh, owner: S.PEOPLE[x.owner] ? S.PEOPLE[x.owner].en : '', agent: x.agent ? S.PEOPLE[x.agent].en : null, start: iso(x.s), end: iso(x.s + x.d - 1), status: x.status, progress: x.pr + '%', blocked: x.blocked ? (x.blocker && x.blocker.en) || true : false }) }; }).filter(Boolean);
+        const prompt = `You are taff, an AI progress manager for teams of humans and AI agents. Today is Thursday 8 October 2026. Portfolio data (JSON): ${JSON.stringify({ projects: ctx })}\n\nQuestion: ${q}\n\nAnswer in ${lang === 'zh' ? 'Traditional Chinese as used in Hong Kong (繁體中文, 「」 quotes, use the zh task names)' : 'English'}. Be specific: name tasks with their ids, people and dates. At most 4 sentences. Plain text, no markdown, no lists.`;
+        text = await window.claude.complete(prompt);
+      }
+    } catch (e) { text = null; }
+    if (!text) text = this.canned(q);
+    if (this.state.answer && this.state.answer.q === q) this.setState({ answer: { q, text } });
+  }
+  canned(q) {
+    const zh = this.lang() === 'zh', md = this.md;
+    if (/阻|block|v2\.4|發佈|release/i.test(q)) { const r = md.risks.chk; return (zh ? `「結賬改版」目前${T.zh[r.level]}。` : `Checkout v2 is ${T.en[r.level].toLowerCase()}. `) + this.riskReason(r) + (zh ? '可在右側批准給運維智能體的臨時寫權限（僅 NW-144，24 小時）。' : ' You can approve temporary write access for Ops Agent on the right (NW-144 only, 24 hours).'); }
+    if (/重|忙|負|overload|busy|load|heav/i.test(q)) { const cnt = {}; Object.values(md.m).filter(x => !x.ms && !x.hasKids && x.pr < 100).forEach(x => { cnt[x.owner] = (cnt[x.owner] || 0) + 1; }); const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]; return top ? (zh ? `${this.pn(top[0])}負責 ${top[1]} 項未完成任務，負荷最重。` : `${this.pn(top[0])} owns ${top[1]} open tasks, the heaviest load.`) : this.briefText(); }
+    if (/智能體|agent|做甚麼|working/i.test(q)) return md.working.map(x => zh ? `${this.pn(x.agent)}正在處理「${this.tn(x)}」（${x.id}，${x.pr}%）` : `${this.pn(x.agent)} is on ${this.tn(x)} (${x.id}, ${x.pr}%)`).join(zh ? '；' : '; ') + (zh ? '。' : '.');
+    return this.briefText();
+  }
+
+  renderVals() {
+    const s = this.state, lang = this.lang(), zh = lang === 'zh', t = T[lang], S = this.S(), bare = !!this.props.bare;
+    const device = this.props.device || 'auto', isM = device === 'mobile' || (device === 'auto' && s.winW < 720);
+    const framed = isM && !this.props.embedded && !bare && device === 'mobile' && s.winW >= 480;
+    const page = s.page, isProj = !bare && page === 'project', isTasks = !bare && page === 'tasks';
+    const pt = s.pTab || 'tasks', showList = isTasks || (isProj && pt === 'tasks'), showGantt = page === 'gantt' || (isProj && pt === 'timeline'), showGraph = isProj && pt === 'graph', showMind = page === 'mind' || (isProj && pt === 'mind'), briefOnly = bare && page === 'brief', ai = briefOnly || (!!s.ai && !bare);
+    const L = {
+      desk: !isM && !bare, mob: isM && !bare, 
+      outerBg: framed ? 'var(--color-surface-container)' : 'var(--bg)', rootH: this.props.embedded || bare ? '100%' : '100vh',
+      appW: framed ? '390px' : '100%', appH: framed ? 'min(844px, calc(100vh - 32px))' : '100%',
+      frameBorder: framed ? '1px solid var(--color-outline-variant)' : 'none', frameR: framed ? '28px' : '0', frameShadow: framed ? '0 20px 60px -15px rgba(10,22,38,.18)' : 'none',
+      bodyOverflow: isM && (showMind || ai) && !briefOnly ? 'auto' : 'hidden', sideMax: briefOnly && !isM ? '760px' : 'none', mindDir: isM ? 'column' : 'row', mindSvgH: isM ? '400px' : 'auto', mindPanelW: isM ? 'auto' : '360px', mindPanelBorder: isM ? 'none' : '1px solid var(--border)', mindPanelTop: isM ? '1px solid var(--border)' : 'none', mindPanelPad: isM ? '18px 16px' : '20px 24px',
+      cols: !isM && ai && !briefOnly ? 'minmax(0,1fr) minmax(320px,380px)' : 'minmax(0,1fr)', rows: isM && (showMind || ai) && !briefOnly ? 'auto' : 'minmax(0,1fr)',
+      areas: ai ? (isM || briefOnly ? '"side"' : '"canvas side"') : '"canvas"', canvasDisp: (isM && ai) || briefOnly ? 'none' : 'flex',
+      sideDisp: 'flex', sideBorder: isM || briefOnly ? 'none' : '1px solid var(--border)', secPad: isM ? '18px 16px' : '20px 24px',
+      listPad: isM ? '20px 16px 40px' : '28px 32px 56px', projPad: isM ? '12px 16px 0' : '20px 32px 0',
+      ansTop: isM ? '64px' : '60px', ansLeft: isM ? '12px' : '50%', ansRight: isM ? '12px' : 'auto', ansW: isM ? 'auto' : 'min(640px, 90%)', ansTf: isM ? 'none' : 'translateX(-50%)', toastBottom: '24px',
+    };
+    const go = st => this.setState({ more: false, answer: null, ...st });
+    const navs = [['tasks', t.tasks, 'check']].map(([k, label, icon]) => { const on = true; return { label, icon, fw: on ? 600 : 400, c: on ? 'var(--text)' : 'var(--text-muted)', bar: on ? 'inset 0 -2px 0 var(--color-deep-blue)' : 'none', go: () => go({ page: 'tasks' }) }; });
+    const secOn = showGraph || showMind;
+    const more = { open: !!s.more, label: showGraph ? t.graph : showMind ? t.mind : t.more, fw: secOn ? 600 : 400, c: secOn ? 'var(--text)' : 'var(--text-muted)', bar: secOn ? 'inset 0 -2px 0 var(--color-deep-blue)' : 'none',
+      items: [['graph', t.graph, t.relSub, 'database'], ['mind', t.mind, t.mindSub2, 'users']].map(([k, label, sub, icon]) => ({ label, sub, icon, bg: pt === k ? 'var(--accent-wash)' : 'transparent', go: () => go({ pTab: k, gSel: null, mSel: null, mProj: s.gProj }) })) };
+    const base = { t, L, lang, langAttr: zh ? 'zh-Hant-HK' : 'en', langBtn: zh ? 'EN' : '中', meIni: zh ? '林' : 'LX', toggleLang: () => this.setState({ lang: zh ? 'en' : 'zh' }), navs, more, ready: !!S,
+      toggleMore: () => this.setState({ more: !s.more }), closeMore: () => this.setState({ more: false }), goTasks: () => go({ page: 'tasks' }),
+      aiOpen: ai, aiB: ai ? 'var(--accent)' : 'var(--border)', aiBg: ai ? 'var(--accent-wash)' : 'var(--bg)', aiDot: false, toggleAi: () => this.setState({ ai: !s.ai, more: false }), closeBrief: () => { if (briefOnly) { if (this.props.onClose) this.props.onClose(); } else this.setState({ ai: false }); },
+      isTasks, isProj, showList, groups: [], listFs: [], proj: { tabs: [] }, listEmpty: false,
+      ask: s.ask, onAsk: e => this.setState({ ask: e.target.value }), onAskSubmit: e => { e.preventDefault(); this.runAsk(s.ask); }, ans: { has: false }, toast: { has: false } };
+    
+    const db = S.get(); this.md = S.model(db, this.pv); const md = this.md;
+    
+    const risks = S.PROJECTS.map(p => md.risks[p.id]).filter(Boolean).map(r => ({
+      name: r.p[lang], org: S.ORGS[r.p.org][lang], levelLabel: t[r.level], bv: r.level === 'high' ? 'error' : r.level === 'med' ? 'warning' : 'success', reason: this.riskReason(r), prog: r.prog,
+      meta: `${t.forecast} ${fmtD(this.dateOf(r), zh)}`, hasFin: r.amount != null, fin: this.finCells(r, lang), open: () => briefOnly ? (this.props.onOpenProject && this.props.onOpenProject(r.p.id)) : go({ page: 'project', pTab: 'timeline', gProj: r.p.id, gSel: null, ai: isM ? false : s.ai }) }));
+    const acts = S.suggestions(db).map(a => {
+      const pj = S.PROJECTS.find(p => p.id === a.proj), st = a.state;
+      return { by: this.pn(a.by), proj: pj ? pj[lang] : '', task: a.task, taskHref: 'Team Tasks.dc.html#task=' + a.task, title: a[lang], why: zh ? a.wzh : a.wen, pending: st === 'pending', resolved: st !== 'pending', canUndo: st === 'applied' || st === 'dismissed', op: st === 'pending' ? 1 : 0.6,
+        stLabel: st === 'applied' ? t.applied : st === 'dismissed' ? t.dismissed : t.elsewhere, stIcon: st === 'dismissed' ? 'x' : 'circle-check', stC: st === 'dismissed' ? 'var(--text-muted)' : 'var(--success)',
+        approve: () => { S.applySugg(a.id); this.showToast(`${t.approvedT}：${a[lang]}`); }, dismiss: () => S.dismissSugg(a.id), undo: () => S.undoSugg(a.id) };
+    });
+    const g = showGantt ? this.buildGantt(isM) : { rows: [], modes: [], zooms: [], weeks: [], days: [], weekends: [], sel: { props: [] } };
+    const an = s.answer;
+    const refs = an && an.text ? Object.values(md.m).filter(x => !x.ms && (an.text.includes(x[lang]) || an.text.includes(x.id))).slice(0, 4).map(x => ({ id: x.id, label: x[lang], href: 'Team Tasks.dc.html#task=' + x.id })) : [];
+    return {
+      ...base, showGantt, showGraph, showMind, showSide: ai, aiDot: !ai && acts.some(a => a.pending), ...(showList || isProj ? this.buildList(go) : {}),
+      mind: showMind ? this.buildMind() : { legend: [], rising: [], cooling: [], srcList: [], cur: { has: false, from: [], to: [], srcs: [] } },
+      deviceStr: isM ? 'mobile' : 'desktop', graphFocus: s.graphFocus || null,
+      relOpenTl: (pid, tid) => this.openTimeline(pid, tid), relOpenTask: this.props.onOpenTask || null,
+      suggs: t.sugg.map(q => ({ q, go: () => this.runAsk(q) })),
+      ans: { has: !!an && (!bare || briefOnly), q: an ? an.q : '', loading: !!an && !an.text, ready: !!an && !!an.text, text: an ? an.text : '', refs, hasRefs: refs.length > 0 }, closeAns: () => this.setState({ answer: null }),
+      briefText: this.briefText(), stats: [{ n: md.live.length, label: t.stActive }, { n: md.agentsActive, label: t.stAgents }, { n: md.review.length, label: t.stReview }],
+      risks, acts, g, portfolio: (() => { const rs = Object.values(md.risks).filter(r => r.amount != null); const A = rs.reduce((a, r) => a + r.amount, 0), C = rs.reduce((a, r) => a + r.collected, 0); const W = rs.reduce((a, r) => a + r.prog * r.amount, 0); return { label: t.total + ' · ' + t.finTotal.replace('{n}', rs.length), cells: [{ k: t.amount, v: S.money(A, lang), sub: '' }, { k: t.collected, v: S.money(C, lang), sub: A ? Math.round(C / A * 100) + '%' : '' }, { k: t.delivery, v: (A ? Math.round(W / A) : 0) + '%', sub: '' }] }; })(), gProj: s.gProj, crit: s.crit, linkMode: s.linkMode, mProj: this.props.project || s.mProj,
+      projOpts: S.PROJECTS.map(p => ({ id: p.id, label: p[lang] })), onGProj: e => this.setState({ gProj: e.target.value, gSel: null }), onMProj: e => this.setState({ mProj: e.target.value }),
+      toggleCrit: () => this.setState({ crit: !s.crit }), toggleLink: () => this.setState({ linkMode: !s.linkMode, linkSrc: null }), clearGSel: () => this.setState({ gSel: null }), gtRef: this.gtRef, ovRef: this.ovRef,
+      toast: { has: !!s.toast, msg: s.toast ? s.toast.msg : '', hasUndo: !!(s.toast && s.toast.undo), undo: () => s.toast && s.toast.undo && s.toast.undo() },
+    };
+  }
+}
+</script>
+</body>
+</html>
