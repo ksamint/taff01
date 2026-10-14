@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (184 distinct, 960 uses)
+## Test ids (184 distinct, 961 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -63,7 +63,7 @@ several do). “Also rendered by” lists the other files.
 | `calendar-tools` | 1 |  | support/calendar.ts |
 | `calendar-undo` | 12 |  | calendar.spec.ts, release/checklist.spec.ts |
 | `calendar-week` | 4 |  | calendar.spec.ts, release/checklist.spec.ts, ui-parity.spec.ts |
-| `desktop-new-task` | 2 | projects-view.tsx, today-view.tsx | release/checklist.spec.ts, support/tasks.ts |
+| `desktop-new-task` | 3 | projects-view.tsx, today-view.tsx | release/checklist.spec.ts, support/tasks.ts, ui-parity.spec.ts |
 | `schedule-task-*` | 3 |  | calendar.spec.ts, release/checklist.spec.ts |
 
 ### digest-view.tsx
@@ -502,6 +502,7 @@ read (`data-event-id`, `data-date`).
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
+| `[data-testid="desktop-new-task"]` | 1 | ui-parity.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#grant-reason` | 1 | optimistic-m4.spec.ts |
 | `#grant-task` | 1 | optimistic-m4.spec.ts |
