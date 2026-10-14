@@ -1,11 +1,11 @@
 "use client";
 import "../styles/task-detail.css";
 
-import { type Locale, taskReference } from "@taff/schemas";
+import { taskReference } from "@taff/schemas";
 import { useIsMutating, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, ChevronDown, Play, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronDown, Sparkles, X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { invalidateM3, useRun, useRuns, useTask } from "../lib/m3-queries";
@@ -13,10 +13,12 @@ import { useTaskAccess } from "../lib/m5-queries";
 import { useAssignTask, useStartRun } from "../lib/mutations/tasks";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
+import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
 import { ReviewView } from "./review-view";
 import { RunPanel } from "./run-panel";
+import { TaskContacts } from "./task-contacts";
 import { TaskEditor } from "./task-editor";
 import { TaskScheduleButton } from "./task-schedule-button";
 import { Badge } from "./ui/badge";
@@ -24,6 +26,10 @@ import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
 
+/**
+ * Task detail (prototype v2): a sheet on phone, the right-hand panel on
+ * desktop. `embedded` renders it inside a sheet or panel that owns the frame.
+ */
 export function TaskDetailView({
   taskId,
   embedded = false,
@@ -33,10 +39,11 @@ export function TaskDetailView({
   embedded?: boolean;
   onClose?: () => void;
 }) {
-  const { me, workspace } = useWorkspace();
-  const { t, i18n } = useTranslation();
+  const { workspace } = useWorkspace();
+  const { t } = useTranslation();
+  const desktop = useDesktop();
+  const workerId = useId();
   const [workerEditing, setWorkerEditing] = useState(false);
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const client = useQueryClient();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const task = useTask(taskId);
@@ -84,13 +91,71 @@ export function TaskDetailView({
       latest.status,
     );
   const workerName = worker ? worker.name : t("unassigned");
-  const workerControl = (
+  const assignDisabled =
+    busy || !!active || !members.data || !access.data?.canAssign;
+  const canStart =
+    worker?.kind === "agent" && !active && task.data.status !== "done";
+  const startButton = canStart && (
+    <Button
+      type="button"
+      className="task-start"
+      data-testid="run-start"
+      disabled={
+        busy || runs.isPending || runs.isError || !access.data?.canAssign
+      }
+      onClick={() => start.mutate()}
+    >
+      <ArrowRight size={14} aria-hidden="true" />
+      {t("run.start")}
+    </Button>
+  );
+  const runState = latest && (
+    <Badge className="task-worker-state">
+      <span
+        className={`agent-status-dot agent-status-${latest.status}`}
+        aria-hidden="true"
+      />
+      {t(`run.status.${latest.status}`)}
+    </Badge>
+  );
+  const workerControl = desktop ? (
+    <div className="task-worker-controls">
+      <div className="task-field-row">
+        <label htmlFor={workerId}>{t("worker")}</label>
+        <span className="task-field-control">
+          {worker?.kind === "agent" && (
+            <Sparkles
+              className="task-agent-icon"
+              size={14}
+              aria-hidden="true"
+            />
+          )}
+          <select
+            id={workerId}
+            data-testid="detail-worker"
+            value={task.data.workerId ?? ""}
+            disabled={assignDisabled}
+            onChange={(event) =>
+              assign.mutate({
+                workerId: event.target.value || null,
+                version: task.data.version,
+              })
+            }
+          >
+            <MemberOptions members={members.data ?? []} />
+          </select>
+          {runState}
+        </span>
+      </div>
+      {startButton}
+    </div>
+  ) : (
     <div className="task-worker-controls">
       <Button
         type="button"
         className="task-field-row"
         data-testid="task-field-worker"
-        disabled={busy || !!active || !members.data || !access.data?.canAssign}
+        disabled={assignDisabled}
         onClick={() => setWorkerEditing(true)}
       >
         <span>{t("worker")}</span>
@@ -102,33 +167,12 @@ export function TaskDetailView({
           )}
           <span className="task-worker-copy">
             <span className="task-worker-name">{workerName}</span>
-            {latest && (
-              <Badge className="task-worker-state">
-                <span
-                  className={`agent-status-dot agent-status-${latest.status}`}
-                  aria-hidden="true"
-                />
-                {t(`run.status.${latest.status}`)}
-              </Badge>
-            )}
+            {runState}
           </span>
         </span>
         <ChevronDown size={14} aria-hidden="true" />
       </Button>
-      {worker?.kind === "agent" && !active && task.data.status !== "done" && (
-        <Button
-          type="button"
-          className="button-primary task-start"
-          data-testid="run-start"
-          disabled={
-            busy || runs.isPending || runs.isError || !access.data?.canAssign
-          }
-          onClick={() => start.mutate()}
-        >
-          <Play size={14} aria-hidden="true" />
-          {t("run.start")}
-        </Button>
-      )}
+      {startButton}
       {workerEditing && (
         <SheetDialog
           title={t("worker")}
@@ -139,9 +183,7 @@ export function TaskDetailView({
             id="detail-worker"
             data-testid="detail-worker"
             value={task.data.workerId ?? ""}
-            disabled={
-              busy || !!active || !members.data || !access.data?.canAssign
-            }
+            disabled={assignDisabled}
             onChange={(event) =>
               assign.mutate(
                 {
@@ -165,23 +207,39 @@ export function TaskDetailView({
   );
   return (
     <article
-      className={`task-detail-view${embedded ? " task-detail-embedded" : ""}${hasReview ? " task-detail-has-review" : ""}`}
+      className={`task-detail-view${embedded ? " task-detail-embedded" : ""}${desktop ? " is-panel" : " is-sheet"}${hasReview ? " task-detail-has-review" : ""}`}
     >
       <header className="task-detail-toolbar">
         {onClose ? (
-          <Button
-            className="button-quiet"
-            onClick={onClose}
-            aria-label={t("taskDetail.back")}
-          >
-            <ArrowLeft size={16} aria-hidden="true" />
-          </Button>
+          desktop ? (
+            <Button
+              type="button"
+              className="button-quiet task-detail-close"
+              onClick={onClose}
+              aria-label={t("taskDetail.close")}
+            >
+              <X size={16} aria-hidden="true" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              className="button-quiet task-detail-back"
+              onClick={onClose}
+              aria-label={t("taskDetail.back")}
+            >
+              <ArrowLeft size={16} aria-hidden="true" />
+              <span aria-hidden="true">{t("actions.back")}</span>
+            </Button>
+          )
         ) : !embedded ? (
-          <Link className="button button-quiet" href="/">
+          <Link className="button button-quiet task-detail-back" href="/">
+            <ArrowLeft size={16} aria-hidden="true" />
             {t("taskDetail.back")}
           </Link>
         ) : null}
-        <span>{taskReference(workspace.key, task.data.number)}</span>
+        <span className="task-detail-ref">
+          {taskReference(workspace.key, task.data.number)}
+        </span>
         <Badge
           className={`status status-${task.data.status}`}
           data-testid="task-status"
@@ -192,8 +250,10 @@ export function TaskDetailView({
       <div className="task-detail-body">
         <TaskEditor
           task={task.data}
+          desktop={desktop}
           workerControl={workerControl}
           scheduleControl={<TaskScheduleButton taskId={taskId} />}
+          contacts={<TaskContacts task={task.data} />}
           runControl={
             detail.isError ? (
               <p className="alert" role="alert">
@@ -223,18 +283,7 @@ export function TaskDetailView({
                   )}
                 </p>
               )}
-              {hasReview && (
-                <>
-                  <Link
-                    data-testid="open-review"
-                    className="task-review-link"
-                    href={`/tasks/${taskId}/review`}
-                  >
-                    {t("review.open")}
-                  </Link>
-                  <ReviewView taskId={taskId} embedded />
-                </>
-              )}
+              {hasReview && <ReviewView taskId={taskId} embedded />}
             </>
           }
         />
