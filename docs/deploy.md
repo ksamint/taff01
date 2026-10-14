@@ -1062,8 +1062,10 @@ audited personal workspace and auth defaults`, at
 `packages/core/src/integration.test.ts:91:7`. It compares the roster as an
 ordered array `[person/admin, agent]`; the returned roster has the same two
 fixture members in `[agent/member, person/admin]` order. The current
-`listMembers` query in `packages/core/src/index.ts` has no `ORDER BY`, so the
-test assumes an order the query does not guarantee. This needs investigation
+`listMembers` query in `packages/core/src/index.ts` orders by `createdAt`.
+The reason that these fixture timestamps place the agent before the person
+needs investigation; the ordered person-first assertion does not hold in
+this local run. This needs investigation
 and a fresh candidate; the deploy agent did not change tests or application
 code, weaken the assertion, or retry the failed command.
 Per Step 1, build, build:server, perf:budget, e2e, MCP smoke, Lighthouse, LCP
