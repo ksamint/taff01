@@ -312,7 +312,7 @@ export function renderContract(base = root) {
     "",
     "`*` stands for a dynamic part (an id, a key or a status). Perf scripts depend",
     "on `today-heading` and the `auth-*` ids; the visual suite",
-    "(`e2e/ui-parity.spec.ts`) is listed with the rest.",
+    "(`e2e/ui-v2.spec.ts`) is listed with the rest.",
     "",
     `## Test ids (${suites.testIds.size} distinct, ${[...suites.testIds.values()].reduce((sum, files) => sum + total(files), 0)} uses)`,
     "",

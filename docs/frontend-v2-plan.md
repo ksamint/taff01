@@ -202,8 +202,8 @@ patches listed in its README. Reviewed:
    ids.
 3. **Visual CI.** CI compares 86 visual baselines (16 screens × 4 projects)
    before it runs e2e. `visual-baselines.yml` pins that count, and
-   `ui-parity.spec.ts` pins the screen list and asserts exactly four font
-   faces.
+   `ui-v2.spec.ts` (formerly `ui-parity.spec.ts`) pins the screen list and
+   asserts exactly four font faces.
 4. **Budget headroom.** The Today bundle has about 8.6 KB of gzip headroom
    (196,205 / 204,800 B). Every new area must be a lazy route chunk.
 5. **Font subsets.** The Noto Sans TC subsets in `public/fonts` were cut from

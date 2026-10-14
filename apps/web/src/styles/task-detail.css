@@ -116,14 +116,6 @@
   gap: 16px;
   padding: 4px 20px 0;
 }
-.projects-detail .task-detail-toolbar {
-  padding-left: 0;
-  padding-right: 0;
-}
-.projects-detail .task-detail-body {
-  padding-left: 0;
-  padding-right: 0;
-}
 
 /* Heading --------------------------------------------------------------- */
 .task-parent-link {
