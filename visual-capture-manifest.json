@@ -1,0 +1,813 @@
+{
+  "sourceSha": "1f716cfca705fcebfadc5a8371a4c0908cc71613",
+  "repository": "ksamint/taff01",
+  "workflowSha": "1f716cfca705fcebfadc5a8371a4c0908cc71613",
+  "runId": "38500810173",
+  "runAttempt": "1",
+  "sourceTree": "790866a6578ef41918ec26a0f393627b297e38c0",
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261004.327.1",
+  "os": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "node": "v24.21.0",
+  "playwright": "1.64.0",
+  "monospace": "DejaVuSansMono.ttf: \"DejaVu Sans Mono\" \"Book\"",
+  "fontRuntime": "fontconfig\t2.15.0-1.1ubuntu2\nlibfreetype6:amd64\t2.13.2+dfsg-1ubuntu0.2",
+  "screenResults": [
+    {
+      "screen": "shell",
+      "stats": {
+        "startTime": "2026-10-14T02:27:48.657Z",
+        "duration": 11887.824999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "d838c01efcc81fd8e54d35225f9470d467de09297e0eb58c887a717e7e057192"
+    },
+    {
+      "screen": "today",
+      "stats": {
+        "startTime": "2026-10-14T02:28:01.078Z",
+        "duration": 9294.996,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "17983dcbc4cfa3880d8be180610ea2fcbc7ba3adfd02d5e49c933905b3072da4"
+    },
+    {
+      "screen": "projects",
+      "stats": {
+        "startTime": "2026-10-14T02:28:10.904Z",
+        "duration": 12339.537,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "cb3e0f264d9a70a487879b71e9888e5bff8f7fa61a372c07a638fd786a60c074"
+    },
+    {
+      "screen": "task-detail",
+      "stats": {
+        "startTime": "2026-10-14T02:28:23.759Z",
+        "duration": 10854.057999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "f19add5c694c1247f01d400f232be47124469229b94cb0fe6e4bacbc09d70acd"
+    },
+    {
+      "screen": "review",
+      "stats": {
+        "startTime": "2026-10-14T02:28:35.122Z",
+        "duration": 12702.285,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "6efa709e5ed445478da1f954e9cc9bba1ac347c9dc614ec5501f9c4e0c27e9d0"
+    },
+    {
+      "screen": "inbox",
+      "stats": {
+        "startTime": "2026-10-14T02:28:48.345Z",
+        "duration": 9838.518,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "0e6564ba79742641de12231c869102af9db2abc0dcab27196a6140fa01eb54a0"
+    },
+    {
+      "screen": "calendar",
+      "stats": {
+        "startTime": "2026-10-14T02:28:58.691Z",
+        "duration": 13733.376,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "fbcb7dec1785b32506b5c23720c7494dadd131318dc0a52f4387b27ba44db6e4"
+    },
+    {
+      "screen": "me",
+      "stats": {
+        "startTime": "2026-10-14T02:29:12.942Z",
+        "duration": 9462.911,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "9665e153b0c2c72bf278044b3f2fe2d0d39b1155c59973b93b7d764c562a84b1"
+    },
+    {
+      "screen": "type",
+      "stats": {
+        "startTime": "2026-10-14T02:29:22.914Z",
+        "duration": 12606.724,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "6c27c59a03855f314ee7177ee2f6643b4df89451987f03ebbcbfd7b3c092dc12"
+    },
+    {
+      "screen": "search",
+      "stats": {
+        "startTime": "2026-10-14T02:29:36.030Z",
+        "duration": 11476.207,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "52b4f491033efb95c7ec6222bfd3a11cacf51c770c758d38ab45afaa7fbffdb3"
+    },
+    {
+      "screen": "notifications",
+      "stats": {
+        "startTime": "2026-10-14T02:29:48.023Z",
+        "duration": 9184.313,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "4f9ac4f27a2a2c35c47d685cc22a59ccf8689a498825927f54bf632004012a60"
+    },
+    {
+      "screen": "agent",
+      "stats": {
+        "startTime": "2026-10-14T02:29:57.720Z",
+        "duration": 9477.284,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "8b23e4c052f90430c9764a9050767a99f2dd90b37b8e72fbed1c3b10e98aa2f2"
+    },
+    {
+      "screen": "team",
+      "stats": {
+        "startTime": "2026-10-14T02:30:07.695Z",
+        "duration": 9516.939999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "134b2bed09233389a17ec8471303d025a22f3c95527b27f611685d23102089e4"
+    },
+    {
+      "screen": "mcp",
+      "stats": {
+        "startTime": "2026-10-14T02:30:17.725Z",
+        "duration": 9213.065999999999,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "c5bfae01e4b2bd99fcf84ec896cee5c3f6993d5f8b5a458a2cf854a8b2ce471f"
+    },
+    {
+      "screen": "organizations",
+      "stats": {
+        "startTime": "2026-10-14T02:30:27.462Z",
+        "duration": 9649.404,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "eec7248f332b187464d96c1e16600d8fd7c42bb5f1dbd1022832553d6b04e2a3"
+    },
+    {
+      "screen": "quick-add",
+      "stats": {
+        "startTime": "2026-10-14T02:30:37.629Z",
+        "duration": 10678.918,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "71dd58aacaac552331b5bf8002063d3a9190978d2d7918fd2462ba0d4b95994a"
+    }
+  ],
+  "captures": [
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/agent.png",
+      "bytes": 70473,
+      "width": 1280,
+      "height": 800,
+      "sha256": "eacef78a8a934e0edadd641c522f276c4926bdbe07bc1eb3527ceeba3670a4c7"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar-month.png",
+      "bytes": 83146,
+      "width": 1280,
+      "height": 800,
+      "sha256": "55048f0f10af1050fc2ffae6fd8ddbf947c81cce0f63897eecf813f28ea73fb0"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar-week.png",
+      "bytes": 98210,
+      "width": 1280,
+      "height": 800,
+      "sha256": "09bdae8c72337fa198b69e3b7c77530dd3d63d0c85e6017724efc6e64cc47c31"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/calendar.png",
+      "bytes": 81152,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5ac53421b18bbf017b2cc6bfc455797f28fbed246407be410d57189f5da98f2d"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/inbox.png",
+      "bytes": 141468,
+      "width": 1280,
+      "height": 800,
+      "sha256": "3b407f4c5c546b582809015adaffa4f8d5d236de0ebc4c781b326bdcd4c90c7e"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/mcp.png",
+      "bytes": 62831,
+      "width": 1280,
+      "height": 800,
+      "sha256": "2a92066295efaa9e9acadba71be20230e9b9a583a7904bae31e68f528179c1fd"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/me.png",
+      "bytes": 58649,
+      "width": 1280,
+      "height": 800,
+      "sha256": "6156d28191d92bc7112a7ea74c42646a468c516cbe6375e3a01e3013e61a6d38"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/notifications.png",
+      "bytes": 63427,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f7e6698dce4248d1538d1a1fd187fcafd65fda204b5d5cfa574b9a3a4a261184"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/organizations.png",
+      "bytes": 113238,
+      "width": 1280,
+      "height": 800,
+      "sha256": "6f663d62155d0dd556048e63c3a0889701a4d478531745d966fd694888a9a6f1"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/projects-list.png",
+      "bytes": 152883,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b9945830a32984dcb02c2cf5aa0f66c6f2490cb97f5174fc05cc115015330429"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/projects.png",
+      "bytes": 155028,
+      "width": 1280,
+      "height": 800,
+      "sha256": "3b8d9d5786ba13376d1c25a1c7e8c1b947e0d2f6d56eb3b67423e7e28edaea3c"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/quick-add.png",
+      "bytes": 79180,
+      "width": 1280,
+      "height": 800,
+      "sha256": "54ab5b57b4390e8c94bf99580a843f4e1925af1b5e33aaa83b1e0347867b036b"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/review-deliverable.png",
+      "bytes": 155717,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ef552f39af224646dc524c53ce8a71c03c04b4c897c129793c2ccb6a3baec448"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/review.png",
+      "bytes": 147339,
+      "width": 1280,
+      "height": 800,
+      "sha256": "90d9aaf9dfa2ae16c86a3f6dd08bd3c8a543b6f74e489c9a0b2360fc2c866c75"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/search.png",
+      "bytes": 113765,
+      "width": 1280,
+      "height": 800,
+      "sha256": "eeeeac5efa8557639631e471407ec1cc19f95d3c72f120da904772c5f1b67e6d"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/sidebar.png",
+      "bytes": 16936,
+      "width": 208,
+      "height": 800,
+      "sha256": "992b65cf789d3ec758ec12ead6ff10d2162315f0eaea74648b784237fad1941e"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/task-detail.png",
+      "bytes": 151966,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f311ef82ba83c2a9e750eb1eaeb292602bf41453102ec714b0653168ebe923b8"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/team.png",
+      "bytes": 72401,
+      "width": 1280,
+      "height": 800,
+      "sha256": "6d2f92bef3706b76efb1c6ef29ed4d24575b4b455b0acb17a7ced20ee9adab26"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/today.png",
+      "bytes": 90900,
+      "width": 1280,
+      "height": 800,
+      "sha256": "bfecbba09f2ec96add204e517b6c60d515865aba6f79537cd773cf7a28f8b86a"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/type-dark.png",
+      "bytes": 157867,
+      "width": 1280,
+      "height": 800,
+      "sha256": "25cb57a98899e1be9f16da8fc94426ad6dd7a4218aac21c8c133673bc58a59b0"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-en/type.png",
+      "bytes": 155028,
+      "width": 1280,
+      "height": 800,
+      "sha256": "3b8d9d5786ba13376d1c25a1c7e8c1b947e0d2f6d56eb3b67423e7e28edaea3c"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/agent.png",
+      "bytes": 81836,
+      "width": 1280,
+      "height": 800,
+      "sha256": "697e1cc121c03122b837b6b06730120053ddf015aac683a1312265ec287f0aca"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar-month.png",
+      "bytes": 81299,
+      "width": 1280,
+      "height": 800,
+      "sha256": "4d3b2db3b77eff9108d96e4f1bdf2b1853ee306af642f7b52663aebaf48e991e"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar-week.png",
+      "bytes": 94986,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a6724c2348ae1277cbe0af48dd964d6ffe24568f28ed3545f740d575f74ac638"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/calendar.png",
+      "bytes": 78213,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c8a27bfbbb859b1121beccb0a5d2fae11c6066ed3b13ef3afa73f37bde75f331"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/inbox.png",
+      "bytes": 142690,
+      "width": 1280,
+      "height": 800,
+      "sha256": "501fa51a77e74878a0a564027d521e96f3915e0565eb920e51c39a326993a17e"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/mcp.png",
+      "bytes": 69411,
+      "width": 1280,
+      "height": 800,
+      "sha256": "7c10c07eaafd2996b6f67fb1560d0609cda6e429070b2866a22ef9c6769f341d"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/me.png",
+      "bytes": 58092,
+      "width": 1280,
+      "height": 800,
+      "sha256": "333984c71fc5ff9dfd25749b0d7030c2d0b27ad31518e514a9c0562dc058a117"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/notifications.png",
+      "bytes": 67289,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ee0ee23fb19959539d47b901f6aff2d26f9410e10bbfbbcc1c6d3bf0526974df"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/organizations.png",
+      "bytes": 111375,
+      "width": 1280,
+      "height": 800,
+      "sha256": "abe85598f79846a19c89dd38d47c57c00f8059f9c04c542d7af494b6f75b8f57"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/projects-list.png",
+      "bytes": 151390,
+      "width": 1280,
+      "height": 800,
+      "sha256": "3c36342cc644e0494f414a630168f732591655ec16d30ee48e0412679c3779b1"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/projects.png",
+      "bytes": 154122,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9e26e4baa5c0331f7c0cebcf9f837517a515749bcf5467a99ecb3a69f1c56269"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/quick-add.png",
+      "bytes": 82664,
+      "width": 1280,
+      "height": 800,
+      "sha256": "caacb4e29ed25826e5a44769552fa0f7871740313a4c5b536fc9689b43b26e39"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/review-deliverable.png",
+      "bytes": 160764,
+      "width": 1280,
+      "height": 800,
+      "sha256": "d7696124ffc07b8300388b1b9e82e40551e253712a68dc8c075f74d0e03a9b5a"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/review.png",
+      "bytes": 149862,
+      "width": 1280,
+      "height": 800,
+      "sha256": "0357d5f3f32af04984574c663ff8e8820250a1f40bc5d33111eb94f1e32fc12f"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/search.png",
+      "bytes": 115340,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f201661a65d2304875289ab2dfd4d8bc4f8ba8563b70b994abd9d999a05b24e6"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/sidebar.png",
+      "bytes": 16316,
+      "width": 208,
+      "height": 800,
+      "sha256": "7c996b032037602ed5133375db3fdd53bd1b5ec65898bfa0901e995e61894754"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/task-detail.png",
+      "bytes": 149194,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a98ed5318ab77e8e767c2da813b2370207367f5845d451564b5826be37c160bd"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/team.png",
+      "bytes": 80315,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b8b06a10b53bf37efc478f9ebcea67cce83055dbcd54c511761d991fedbd0075"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/today.png",
+      "bytes": 89504,
+      "width": 1280,
+      "height": 800,
+      "sha256": "3356fb14317c58344dc56f5392d381464e231b6fed44cb630cfa8d25afabde6a"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/type-dark.png",
+      "bytes": 156697,
+      "width": 1280,
+      "height": 800,
+      "sha256": "d7e5699aade307f52526462112ed9c8c3bf5da0490071488a2036df9b926c7d5"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/desktop-zh-HK/type.png",
+      "bytes": 154122,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9e26e4baa5c0331f7c0cebcf9f837517a515749bcf5467a99ecb3a69f1c56269"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/agent.png",
+      "bytes": 49073,
+      "width": 390,
+      "height": 844,
+      "sha256": "d875e4979adb6f7f8e0dfe02d47810cce4499d8b92fb74d727fa7f8bdaf108e9"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar-month.png",
+      "bytes": 42806,
+      "width": 390,
+      "height": 844,
+      "sha256": "c8c2d89cd73e5f45b96ff6913cec44a22f361075f87587e2018f24cf747cc3e6"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar-week.png",
+      "bytes": 54760,
+      "width": 390,
+      "height": 844,
+      "sha256": "7fe746bde7312783379caae37862bff0bccfc5aa476b58fa36eea4c34c222065"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/calendar.png",
+      "bytes": 50128,
+      "width": 390,
+      "height": 844,
+      "sha256": "a3748ddd5efd3cee27337453d5021c79f5d56132fd58bf8d292096c7c5e27dd3"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/fab.png",
+      "bytes": 402,
+      "width": 52,
+      "height": 52,
+      "sha256": "826e870520fe30029f4a914d237ff7dd9f3fd6f7f3648d8f35e4aea9c9233904"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/inbox.png",
+      "bytes": 84310,
+      "width": 390,
+      "height": 844,
+      "sha256": "70d0af624c54010976bdceed745e05ce8fb3b1d21e151005954fdd773fa71c8f"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/mcp.png",
+      "bytes": 39400,
+      "width": 390,
+      "height": 844,
+      "sha256": "ba6497278ba4072f4351ec9327ae3248afd6215421d45072c96049432609e822"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/me.png",
+      "bytes": 41891,
+      "width": 390,
+      "height": 844,
+      "sha256": "04d3e18566d7c7b5f21de5e970680c543f07957a67a2aadfc0791d1fefb69f31"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/notifications.png",
+      "bytes": 44045,
+      "width": 390,
+      "height": 844,
+      "sha256": "686e6d3adde9b638014f0432ca41a1ea80ef58564ffd197cf14cfb5cd6fbe774"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/organizations.png",
+      "bytes": 36343,
+      "width": 390,
+      "height": 844,
+      "sha256": "5ebc2d4317a70ad03e85c3c8ae2c92bad81a1f61e35cd8e2e0e7e671965d6ecd"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/projects-list.png",
+      "bytes": 85677,
+      "width": 390,
+      "height": 844,
+      "sha256": "4bd91172002acfdab01e52bab2fdaee72abc350179cad8588dbad781aff692f4"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/projects.png",
+      "bytes": 49209,
+      "width": 390,
+      "height": 844,
+      "sha256": "afbc7f521258072702befe5f1275d1564052bc2b16f475be4ecb5c4f2ce55e68"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/quick-add.png",
+      "bytes": 40433,
+      "width": 390,
+      "height": 844,
+      "sha256": "eb5ee555d2ef2e81fa0a1a3a5b6263f89bbe4a1de61269260bf5bcd88d8fe21a"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/review-deliverable.png",
+      "bytes": 64700,
+      "width": 390,
+      "height": 844,
+      "sha256": "cc55ef42ad4573047d9d259fac50af46bb2af7bcb235577d572452f46549934c"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/review.png",
+      "bytes": 58136,
+      "width": 390,
+      "height": 844,
+      "sha256": "3b813ae0067d2ed5947c508c107b61cb68f65a1b83c3ef8760be54d26477290e"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/search.png",
+      "bytes": 25551,
+      "width": 390,
+      "height": 844,
+      "sha256": "610b9a3fcf09494955ec104345864b56cb509e8bad7ed400761c04ee117cba53"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/tabbar.png",
+      "bytes": 5693,
+      "width": 390,
+      "height": 56,
+      "sha256": "3e74ac4d2cc6417734f3f596f4bbfd61912408873def3aa3e219595086050912"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/task-detail.png",
+      "bytes": 52997,
+      "width": 390,
+      "height": 844,
+      "sha256": "916ead672b5e22d34ed2bc158f06a3cb8d3523eaa020df597e0b54d2351f7929"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/team.png",
+      "bytes": 48472,
+      "width": 390,
+      "height": 844,
+      "sha256": "6442514ee4246d613658a51287f1170fcc954d6c32df27c93bb99b716a17ddbc"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/today.png",
+      "bytes": 72634,
+      "width": 390,
+      "height": 844,
+      "sha256": "d4e93c957d07cfcefa8ace7d7685019e9258639ac50c8358a66d29a68aaae36a"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/type-dark.png",
+      "bytes": 50184,
+      "width": 390,
+      "height": 844,
+      "sha256": "8a90cc04da2128ec971379a1cccd4bc7f3def5b59103c8b987ce7d97e2067044"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-en/type.png",
+      "bytes": 49209,
+      "width": 390,
+      "height": 844,
+      "sha256": "afbc7f521258072702befe5f1275d1564052bc2b16f475be4ecb5c4f2ce55e68"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/agent.png",
+      "bytes": 61383,
+      "width": 390,
+      "height": 844,
+      "sha256": "160f8b19a20c82b037875383d9c0f58cb0c3ae920e90e8e817d0def536b698fa"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar-month.png",
+      "bytes": 42548,
+      "width": 390,
+      "height": 844,
+      "sha256": "5fdf8f3b687b5d49b93de66c1b479a371a237995dbee5975caae4c791b487f9d"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar-week.png",
+      "bytes": 53881,
+      "width": 390,
+      "height": 844,
+      "sha256": "ffa2a797c48564b48f44349f874ef0db552a53333eec2781014f1672cbf723c5"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/calendar.png",
+      "bytes": 48333,
+      "width": 390,
+      "height": 844,
+      "sha256": "95a7ac66da1ed3c1e97ce34d77287dc0c0358f0da4739370eb85bc4134798e41"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/fab.png",
+      "bytes": 402,
+      "width": 52,
+      "height": 52,
+      "sha256": "826e870520fe30029f4a914d237ff7dd9f3fd6f7f3648d8f35e4aea9c9233904"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/inbox.png",
+      "bytes": 89090,
+      "width": 390,
+      "height": 844,
+      "sha256": "f2629c233e8af0638712520e98cd0f42942a719702a7768d1bbee1a2f827f0be"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/mcp.png",
+      "bytes": 47543,
+      "width": 390,
+      "height": 844,
+      "sha256": "17232e378d703d47e8701d69d143594bdb48cb39454dfc384c113c293dac4672"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/me.png",
+      "bytes": 42427,
+      "width": 390,
+      "height": 844,
+      "sha256": "a01052c1fa444cbcd4cb1273ccf765eccff72869a004bff8a88836fba12ee042"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/notifications.png",
+      "bytes": 52877,
+      "width": 390,
+      "height": 844,
+      "sha256": "02074486a2b70115820c86457e02756f5b31ce663112ae9af5b55f0caa60ee2b"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/organizations.png",
+      "bytes": 40257,
+      "width": 390,
+      "height": 844,
+      "sha256": "496ca68e61e5c4faa3698958c9d91bbbc0a3e3a698044a9789537e210c1d1c26"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/projects-list.png",
+      "bytes": 83878,
+      "width": 390,
+      "height": 844,
+      "sha256": "f0f7ac5bdfe27d141af015c99530527877336cdff979a58aa366f4d6e00e71a7"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/projects.png",
+      "bytes": 49846,
+      "width": 390,
+      "height": 844,
+      "sha256": "a272b190a21eab27c00971a37facd6aed732bb2df85a5f2e6848f7c24da23cac"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/quick-add.png",
+      "bytes": 43398,
+      "width": 390,
+      "height": 844,
+      "sha256": "fc445a510a964400eef9374199e48e771eaff0792770d8fcd86c11f9bc18c513"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/review-deliverable.png",
+      "bytes": 65398,
+      "width": 390,
+      "height": 844,
+      "sha256": "819c9542f7a851ad89e5aaf712a37e0f35cca994b9426d17cea9599ea91d0f65"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/review.png",
+      "bytes": 60613,
+      "width": 390,
+      "height": 844,
+      "sha256": "e3ed1443be84054dcbfbe68197d7bdd19cffd4b8bf1765ac6b47c82e3d69d33f"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/search.png",
+      "bytes": 28137,
+      "width": 390,
+      "height": 844,
+      "sha256": "6ac580c553da5fc7640056e3f267be1db556709dd9bcd334136bcb14cc93a333"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/tabbar.png",
+      "bytes": 5565,
+      "width": 390,
+      "height": 56,
+      "sha256": "cc838270b160757c375b5fae7d7cfadffca09b5d7a0e2adfafb0317b4c6e83c7"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/task-detail.png",
+      "bytes": 53859,
+      "width": 390,
+      "height": 844,
+      "sha256": "2ecc1e119ef111e78e9a88ec6de19b59645156001b12d22b466d70741e38f895"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/team.png",
+      "bytes": 58846,
+      "width": 390,
+      "height": 844,
+      "sha256": "e46f72520de30ec9f7133c0b85e652e11191a2812e845519c43a4139be040410"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/today.png",
+      "bytes": 72188,
+      "width": 390,
+      "height": 844,
+      "sha256": "8239e685c858685560ea294765d8d569208f2e40ccc6bc9762c7f7c0764a2e3d"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/type-dark.png",
+      "bytes": 50788,
+      "width": 390,
+      "height": 844,
+      "sha256": "b8a7994188fa66b87969847b42f27fd5d9165d844e01c899278c46ad8bae4127"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-parity.spec.ts/phone-zh-HK/type.png",
+      "bytes": 49846,
+      "width": 390,
+      "height": 844,
+      "sha256": "a272b190a21eab27c00971a37facd6aed732bb2df85a5f2e6848f7c24da23cac"
+    }
+  ]
+}
