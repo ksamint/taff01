@@ -11,7 +11,16 @@ import { workspaceAccessSchema } from "@taff/schemas/workspace-read";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ApiError, request } from "./api";
 import { m3MutationKey } from "./optimistic-m3";
-import { calendarKey, membersKey, runsKey, tasksKey } from "./query-keys";
+import {
+  calendarKey,
+  inboxKey,
+  membersKey,
+  runsKey,
+  tasksKey,
+} from "./query-keys";
+
+export { inboxKey };
+
 import { currentSession } from "./session-cache";
 
 export const meKey = ["me"] as const;
@@ -77,9 +86,6 @@ export function useTasks(workspaceId: string) {
       ),
   });
 }
-
-export const inboxKey = (workspaceId: string) =>
-  ["inbox", workspaceId] as const;
 
 export function useInbox(workspaceId: string) {
   const client = useQueryClient();

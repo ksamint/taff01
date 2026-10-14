@@ -2,32 +2,25 @@
 
 import {
   type ReviewChecks,
-  type ReviewCommentInput,
   type ReviewRun,
   type ReviewWorkspace,
   reviewCommentSchema,
   reviewRunSchema,
 } from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, FileText } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
-import { invalidateM3, reviewKey, useReview } from "../lib/m3-queries";
+import { errorKey } from "../lib/api";
+import { invalidateM3, useReview } from "../lib/m3-queries";
 import {
-  m3MutationKey,
-  patchRun,
-  patchTask,
-  resolveInbox,
-  snapshotM3,
-} from "../lib/optimistic-m3";
+  reviewDraftKey,
+  useAddReviewComment,
+  useReviewRun,
+} from "../lib/mutations/review";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
-import { restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { RunPanel } from "./run-panel";
 import { Badge } from "./ui/badge";
@@ -92,76 +85,13 @@ function ReviewEditor({
   >({});
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [validationError, setValidationError] = useState(false);
-  const review = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: ReviewRun) =>
-      request(`/api/runs/${data.run.id}/review`, {
-        method: "POST",
-        body: JSON.stringify(reviewRunSchema.parse(body)),
-      }),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      patchRun(client, data.run.id, {
-        status: body.decision === "approve" ? "completed" : "changes_requested",
-      });
-      patchTask(client, data.task.id, {
-        status: body.decision === "approve" ? "done" : "in_progress",
-      });
-      client.setQueryData<ReviewWorkspace>(
-        reviewKey(data.task.id),
-        (current) => (current ? { ...current, checks: body.checks } : current),
-      );
-      resolveInbox(
-        client,
-        (item) => item.runId === data.run.id && item.kind === "review",
-      );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: () => invalidateM3(client),
-  });
-  const addComment = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: ReviewCommentInput) =>
-      request(`/api/runs/${data.run.id}/comments`, {
-        method: "POST",
-        body: JSON.stringify(reviewCommentSchema.parse(body)),
-      }),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      if (authorId)
-        client.setQueryData<ReviewWorkspace>(
-          reviewKey(data.task.id),
-          (current) =>
-            current
-              ? {
-                  ...current,
-                  comments: [
-                    ...current.comments,
-                    {
-                      id: `optimistic:${crypto.randomUUID()}`,
-                      workspaceId: data.task.workspaceId,
-                      runId: data.run.id,
-                      authorId,
-                      body: body.body,
-                      artifactId: body.artifactId ?? null,
-                      eventId: body.eventId ?? null,
-                      line: body.line ?? null,
-                      createdAt: new Date().toISOString(),
-                    },
-                  ],
-                }
-              : current,
-        );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSuccess: (_, body) =>
+  const review = useReviewRun(data);
+  const addComment = useAddReviewComment(data, authorId, {
+    onAdded: (body) =>
       setDrafts((current) => ({
         ...current,
-        [body.artifactId ?? body.eventId ?? "overall"]: "",
+        [reviewDraftKey(body)]: "",
       })),
-    onSettled: () => invalidateM3(client),
   });
   const checkKeys: (keyof ReviewChecks)[] = [
     "matchesDescription",

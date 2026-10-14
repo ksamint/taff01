@@ -41,6 +41,13 @@ const initialToday: NonNullable<TodayBootstrap["today"]> = {
   members: [],
   runs: [],
   calendar: { occurrences: [], unscheduled: [], truncated: false },
+  inbox: {
+    items: [],
+    groups: [],
+    unreadCount: 0,
+    reviewCount: 0,
+    blockerCount: 0,
+  },
 };
 
 it("retains only authenticated server reads on matching confirmation, reconciles them and still gates writes", async () => {
@@ -48,7 +55,7 @@ it("retains only authenticated server reads on matching confirmation, reconciles
   bootstrapSession(client, initialMe, initialToday);
   const taskKey = ["tasks", initialToday.workspaceId];
   client.setQueryData(
-    ["inbox", initialToday.workspaceId],
+    ["mcp-calls", initialToday.workspaceId],
     "untrusted provisional data",
   );
   const removed: string[] = [];
@@ -65,7 +72,7 @@ it("retains only authenticated server reads on matching confirmation, reconciles
     workspaceFingerprint(initialMe),
   );
   expect(currentSession(client)?.confirmed).toBe(true);
-  expect(removed).toEqual(["inbox"]);
+  expect(removed).toEqual(["mcp-calls"]);
   expect(client.getQueryData(taskKey)).toEqual([]);
   expect(client.getQueryState(taskKey)?.isInvalidated).toBe(true);
   const snapshot = await snapshotQueries(client, [taskKey]);

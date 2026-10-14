@@ -1,17 +1,8 @@
 "use client";
 import "../styles/run-panel-parity.css";
 
-import {
-  type ControlRun,
-  controlRunSchema,
-  type RunDetail,
-  runSchema,
-} from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import type { RunDetail } from "@taff/schemas";
+import { useIsMutating } from "@tanstack/react-query";
 import {
   Check,
   ChevronDown,
@@ -25,17 +16,11 @@ import {
 import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
+import { errorKey } from "../lib/api";
 import { isLocale } from "../lib/i18n";
-import { invalidateM3, useAgent } from "../lib/m3-queries";
-import {
-  m3MutationKey,
-  patchRun,
-  patchTask,
-  resolveInbox,
-  snapshotM3,
-} from "../lib/optimistic-m3";
-import { restoreQueries } from "../lib/query-snapshot";
+import { useAgent } from "../lib/m3-queries";
+import { useControlRun } from "../lib/mutations/review";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { useWorkspace } from "./app-shell";
 import { GrantActions } from "./grant-actions";
 import { Button } from "./ui/button";
@@ -50,7 +35,6 @@ export function RunPanel({
 }) {
   const { me } = useWorkspace();
   const { t, i18n } = useTranslation();
-  const client = useQueryClient();
   const dialog = useRef<HTMLDialogElement>(null);
   const { run } = detail;
   const headingId = useId();
@@ -58,33 +42,8 @@ export function RunPanel({
   const agent = useAgent(run.agentId);
   const [grantId, setGrantId] = useState<string | null>(null);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
-  const control = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: ControlRun) =>
-      request(`/api/runs/${run.id}/control`, {
-        method: "POST",
-        body: JSON.stringify(controlRunSchema.parse(body)),
-      }).then(runSchema.parse),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      patchRun(client, run.id, {
-        status:
-          body.action === "pause"
-            ? "paused"
-            : body.action === "resume"
-              ? "running"
-              : "canceled",
-      });
-      patchTask(client, run.taskId, {
-        status: body.action === "cancel" ? "todo" : "in_progress",
-      });
-      if (body.action === "cancel")
-        resolveInbox(client, (item) => item.runId === run.id);
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSuccess: () => dialog.current?.close(),
-    onSettled: () => invalidateM3(client),
+  const control = useControlRun(run, {
+    onControlled: () => dialog.current?.close(),
   });
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const when = (iso: string) =>

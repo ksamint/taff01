@@ -1,19 +1,14 @@
 "use client";
-import {
-  emailVerificationConsumeSchema,
-  emailVerificationRequestResultSchema,
-  emailVerificationStatusSchema,
-} from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { emailVerificationStatusSchema } from "@taff/schemas";
+import { useIsMutating, useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
+import {
+  emailVerificationKey,
+  useConfirmEmailVerification,
+  useRequestEmailVerification,
+} from "../lib/mutations/email-verification";
 import { m3MutationKey } from "../lib/optimistic-m3";
-import { isCurrentSnapshot, snapshotQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { useWorkspaceSelection } from "./providers";
 import { Button } from "./ui/button";
@@ -23,8 +18,7 @@ export function EmailVerification({ token = false }: { token?: boolean }) {
   const { me, confirmed } = useWorkspace();
   const { emailVerificationToken, setEmailVerificationToken } =
     useWorkspaceSelection();
-  const client = useQueryClient();
-  const key = ["email-verification", me.user.id];
+  const key = emailVerificationKey(me.user.id);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const status = useQuery({
     queryKey: key,
@@ -36,41 +30,12 @@ export function EmailVerification({ token = false }: { token?: boolean }) {
         await request("/api/me/email-verification", { cache: "no-store" }),
       ),
   });
-  const send = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async () =>
-      emailVerificationRequestResultSchema.parse(
-        await request("/api/me/email-verification/request", {
-          method: "POST",
-          body: "{}",
-        }),
-      ),
-    onMutate: () => snapshotQueries(client, []),
-    onSuccess: (value, _, snapshot) => {
-      if (isCurrentSnapshot(client, snapshot))
-        client.setQueryData(key, { emailVerified: value.emailVerified });
-    },
-  });
-  const verify = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async () =>
-      emailVerificationStatusSchema.parse(
-        await request("/api/me/email-verification/verify", {
-          method: "POST",
-          body: JSON.stringify(
-            emailVerificationConsumeSchema.parse({
-              token: emailVerificationToken,
-            }),
-          ),
-        }),
-      ),
-    onMutate: () => snapshotQueries(client, []),
-    onSuccess: (value, _, snapshot) => {
-      if (!isCurrentSnapshot(client, snapshot)) return;
-      client.setQueryData(key, value);
-      setEmailVerificationToken(null);
-    },
-  });
+  const send = useRequestEmailVerification(me.user.id);
+  const verify = useConfirmEmailVerification(
+    me.user.id,
+    emailVerificationToken,
+    { onVerified: () => setEmailVerificationToken(null) },
+  );
   const error = status.error ?? send.error ?? verify.error;
   return (
     <section

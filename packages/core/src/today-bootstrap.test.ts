@@ -51,6 +51,13 @@ function setup(person: Me = me) {
       unscheduled: [],
       truncated: false,
     }),
+    listInbox: vi.fn().mockResolvedValue({
+      items: [],
+      groups: [],
+      unreadCount: 0,
+      reviewCount: 0,
+      blockerCount: 0,
+    }),
   };
   return {
     reads,

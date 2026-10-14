@@ -864,19 +864,6 @@ select:focus-visible,
 .me-section:last-child {
   border-bottom: 0;
 }
-.me-row {
-  display: grid;
-  gap: var(--space-xs);
-}
-.me-row dt {
-  color: var(--text-subtle);
-  font-size: var(--text-label-sm);
-  letter-spacing: var(--ls-track-sm);
-  text-transform: uppercase;
-}
-.me-row dd {
-  margin: 0;
-}
 .radio-row {
   display: flex;
   flex-wrap: wrap;
@@ -1308,46 +1295,6 @@ time {
   border: 1px solid var(--border);
   padding: var(--space-md);
   margin-top: var(--space-md);
-  font-size: 13px;
-}
-.inbox-groups {
-  display: grid;
-  gap: var(--space-lg);
-}
-.inbox-group h2 {
-  font-size: 14px;
-  padding-bottom: var(--space-sm);
-  color: var(--text-muted);
-}
-.inbox-card {
-  border: 1px solid var(--border);
-  padding: var(--space-md);
-  background: var(--bg);
-}
-.inbox-card.is-unread {
-  border-left: 3px solid var(--accent);
-}
-.inbox-card h3 {
-  margin-top: var(--space-sm);
-  font-size: 15px;
-}
-.inbox-tabs {
-  display: flex;
-  width: fit-content;
-  max-width: 100%;
-}
-.inbox-tabs button {
-  padding: 0 12px;
-}
-.inbox-tabs button > span {
-  color: var(--text-subtle);
-  font-size: 12px;
-  margin-left: 4px;
-}
-.inbox-notice {
-  padding: var(--space-sm) var(--space-md);
-  margin-bottom: var(--space-md);
-  border: 1px solid var(--border);
   font-size: 13px;
 }
 .agents-card li {

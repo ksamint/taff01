@@ -1,29 +1,15 @@
 "use client";
 import "../styles/quick-add-parity.css";
-import {
-  type CreateTask,
-  createTaskSchema,
-  type Locale,
-  quickAddInputSchema,
-  quickAddResultSchema,
-  type Task,
-  taskSchema,
-} from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { createTaskSchema, type Locale } from "@taff/schemas";
+import { useIsMutating } from "@tanstack/react-query";
 import { ChevronDown, Sparkles } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
-import { invalidateM3 } from "../lib/m3-queries";
+import { errorKey } from "../lib/api";
 import { useProjects, useWorkspaceAccess } from "../lib/m5-queries";
-import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
-import { tasksKey, useMembers } from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
-import { sessionVersion } from "../lib/session-cache";
+import { useCreateTask, useParseQuickAdd } from "../lib/mutations/tasks";
+import { m3MutationKey } from "../lib/optimistic-m3";
+import { useMembers } from "../lib/queries";
 import { deadlineIso } from "../lib/task-date";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
@@ -36,7 +22,6 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
   const { workspace, me } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
-  const client = useQueryClient();
   const members = useMembers(workspace.id);
   const projects = useProjects(workspace.id);
   const access = useWorkspaceAccess(workspace.id);
@@ -56,15 +41,8 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
   >(null);
   const [invalid, setInvalid] = useState<string | null>(null);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
-  const parse = useMutation({
-    mutationFn: (text: string) =>
-      request(`/api/quick-add/parse?workspaceId=${workspace.id}`, {
-        method: "POST",
-        body: JSON.stringify(quickAddInputSchema.parse({ text })),
-      }).then(quickAddResultSchema.parse),
-    onMutate: () => sessionVersion(client),
-    onSuccess: (result, _, version) => {
-      if (version !== sessionVersion(client)) return;
+  const parse = useParseQuickAdd(workspace.id, {
+    onParsed: (result) => {
       setForm({
         title: result.title,
         ownerId: result.ownerId ?? workspace.memberId,
@@ -78,47 +56,7 @@ export function QuickAddDialog({ onClose }: { onClose: () => void }) {
       setInvalid(null);
     },
   });
-  const create = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: CreateTask) =>
-      request("/api/tasks", {
-        method: "POST",
-        body: JSON.stringify(createTaskSchema.parse(body)),
-      }).then(taskSchema.parse),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      const id = `optimistic:${crypto.randomUUID()}`;
-      const now = new Date().toISOString();
-      client.setQueryData<Task[]>(tasksKey(workspace.id), (current = []) => [
-        {
-          ...body,
-          id,
-          number: 0,
-          description: body.description ?? "",
-          priority: body.priority ?? 3,
-          projectId: body.projectId ?? null,
-          parentId: body.parentId ?? null,
-          labels: body.labels ?? [],
-          dueAt: body.dueAt ?? null,
-          status: "todo",
-          version: 1,
-          createdAt: now,
-          updatedAt: now,
-        },
-        ...current,
-      ]);
-      return { snapshot, id };
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (task, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<Task[]>(tasksKey(workspace.id), (current) =>
-        current?.map((item) => (item.id === context.id ? task : item)),
-      );
-      onClose();
-    },
-    onSettled: () => invalidateM3(client),
-  });
+  const create = useCreateTask(workspace.id, { onCreated: () => onClose() });
   const change = (key: keyof typeof form, value: string) =>
     setForm((current) => ({ ...current, [key]: value }));
   const presentName = (id: string, name: string) => name;

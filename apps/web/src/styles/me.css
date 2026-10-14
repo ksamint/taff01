@@ -1,21 +1,14 @@
-/* Port of prototype Me, team-tasks.dc.html lines 323–375. */
-.me-view {
-  padding: 8px 0 24px;
-}
-.me-title {
-  padding: 0 20px 8px;
-  margin: 0;
-  font-size: var(--type-product-h1-size);
-  font-weight: var(--weight-heading);
-  line-height: 1.2;
-}
+/* Prototype v2 Me: phone 414–496, desktop tabs 1230 and 1443–1537. */
+
+/* Shared pieces */
 .me-profile {
   display: flex;
   align-items: center;
   gap: 16px;
   padding: 16px 20px 24px;
 }
-.me-avatar {
+.me-avatar,
+.me-person-avatar {
   display: flex;
   flex: none;
   align-items: center;
@@ -27,6 +20,11 @@
   font-size: 20px;
   font-weight: var(--weight-label);
 }
+.me-person-avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 12px;
+}
 .me-profile-copy {
   display: flex;
   min-width: 0;
@@ -37,55 +35,22 @@
   font-size: 18px;
   font-weight: var(--weight-label);
 }
-.me-profile-copy > span {
-  font-size: 13px;
+.me-profile-copy > span,
+.me-row-summary {
   color: var(--text-muted);
-}
-.me-rows {
-  border-top: var(--hairline) solid var(--border-line);
-}
-.me-view .me-row-control,
-.me-preference-row {
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: initial;
-  gap: 12px;
-  width: 100%;
-  min-height: 56px;
-  padding: 0 20px;
-  border: 0;
-  border-bottom: var(--hairline) solid var(--border-line);
-  border-radius: 0;
-  background: transparent;
-  color: var(--text);
-  text-align: start;
-  text-decoration: none;
-}
-.me-view .me-row-control:hover:not(:disabled) {
-  background: var(--bg-container-low);
-  box-shadow: none;
-}
-.me-row-control > svg,
-.me-preference-row > svg {
-  flex: none;
-  color: var(--text-muted);
-}
-.me-row-label {
-  flex: 1;
-  min-width: 0;
-  font-size: 15px;
-  font-weight: var(--weight-medium);
-}
-.me-row-value {
-  min-width: 0;
-  max-width: 45%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-size: 13px;
   font-weight: var(--weight-body);
-  color: var(--text-subtle);
+  line-height: 1.4;
+}
+.me-row-summary {
+  font-size: 12px;
+}
+.me-row-stack {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
 }
 .me-workspace-mark {
   display: flex;
@@ -100,78 +65,86 @@
   font-size: 12px;
   font-weight: var(--weight-label);
 }
-.me-section-label {
-  margin: 0;
-  padding: 32px 20px 8px;
+.me-workspace-mark.is-large {
+  width: 24px;
+  height: 24px;
+}
+.me-agent-mark {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-dialog);
+  background: var(--bg);
+  color: var(--text-muted);
+}
+.me-agent-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
   color: var(--text-muted);
   font-size: 12px;
-  font-weight: var(--weight-label);
-  letter-spacing: var(--ls-track-sm);
-  text-transform: uppercase;
+  font-weight: var(--weight-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.me-agent-dot.agent-status-running {
+  animation: me-pulse 1.6s var(--ease-standard) infinite;
+}
+@keyframes me-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .me-agent-dot.agent-status-running {
+    animation: none;
+  }
+}
+.me-running {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-subtle);
+  font-size: 13px;
+  font-weight: var(--weight-body);
+}
+.me-running-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--success);
 }
 .me-segmented {
   display: inline-flex;
   flex: none;
   gap: 2px;
   padding: 2px;
-  background: var(--bg-container);
   border-radius: var(--radius-control);
+  background: var(--bg-container);
 }
-.me-view .me-segmented .button {
+.me-segmented .button {
   min-height: 44px;
   padding: 0 12px;
   border: 0;
   background: transparent;
   color: var(--text-muted);
   font-size: 13px;
-  font-weight: var(--weight-body);
+  font-weight: var(--weight-medium);
 }
-.me-view .me-segmented .button[aria-pressed="true"] {
+.me-segmented .button[aria-pressed="true"] {
   background: var(--bg);
   color: var(--text);
   font-weight: var(--weight-label);
 }
-.me-view .me-segmented .button:hover:not(:disabled) {
-  background: var(--bg-container-low);
+.me-segmented .button:hover:not(:disabled) {
   box-shadow: none;
-}
-.me-view .me-notification-row {
-  min-height: 64px;
-  padding-block: 8px;
-}
-.me-notification-copy {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-.me-row-summary {
-  font-size: 12px;
-  font-weight: var(--weight-body);
-  line-height: 1.4;
-  color: var(--text-muted);
-}
-.me-view .me-signout {
-  color: var(--danger);
-}
-.me-signout > svg {
-  color: inherit;
-}
-.me-org-choices {
-  display: grid;
-  gap: 8px;
-}
-.me-org-choices > .button {
-  justify-content: space-between;
-}
-.me-org-choices > .button[aria-pressed="true"] {
-  background: var(--bg-container);
-}
-.me-manage-link {
-  display: flex;
-  align-items: center;
-  min-height: 44px;
   color: var(--text);
 }
 .me-account-details {
@@ -193,4 +166,356 @@
   margin-bottom: 8px;
   font-size: 13px;
   font-weight: var(--weight-label);
+}
+
+/* Phone */
+.me-view {
+  padding: 8px 0 24px;
+}
+.me-title {
+  margin: 0;
+  padding: 8px 20px;
+  font-size: var(--type-product-h1-size);
+  font-weight: var(--weight-heading);
+  line-height: 1.2;
+}
+.me-rows {
+  border-top: var(--hairline) solid var(--border-line);
+}
+.me-view .me-row-control,
+.me-preference-row {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 0 20px;
+  border: 0;
+  border-bottom: var(--hairline) solid var(--border-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: start;
+  text-decoration: none;
+}
+.me-view .me-row-control:hover:not(:disabled) {
+  background: var(--bg-container-low);
+  box-shadow: none;
+}
+.me-row-control > svg,
+.me-preference-row > svg {
+  flex: none;
+  color: var(--text-muted);
+}
+.me-row-control > svg:last-child {
+  color: var(--text-subtle);
+}
+.me-row-label {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: var(--weight-medium);
+}
+.me-row-stack > .me-row-label {
+  flex: none;
+}
+.me-row-value {
+  min-width: 0;
+  max-width: 45%;
+  overflow: hidden;
+  color: var(--text-subtle);
+  font-size: 13px;
+  font-weight: var(--weight-body);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.me-count {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--text-on-inverse);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  font-variant-numeric: tabular-nums;
+}
+.me-view .me-agent-row,
+.me-view .me-tall-row {
+  min-height: 64px;
+  padding-block: 8px;
+}
+.me-row-note {
+  margin: 0;
+  padding: 16px 20px;
+  border-bottom: var(--hairline) solid var(--border-line);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.me-section-label {
+  margin: 0;
+  padding: 28px 20px 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: var(--ls-track-sm);
+  text-transform: uppercase;
+}
+.me-section-label:lang(zh) {
+  letter-spacing: 0;
+}
+
+/* Desktop: header bar with tabs, then the tab panel */
+.me-desk {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+}
+.me-desk-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 20px;
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.me-desk-header h1 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: var(--weight-label);
+  white-space: nowrap;
+}
+.me-desk-tabs {
+  display: flex;
+  gap: 2px;
+  margin-left: 8px;
+}
+.me-desk-tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 10px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.me-desk-tab:hover {
+  color: var(--text);
+}
+.me-desk-tab[aria-selected="true"] {
+  color: var(--text);
+  font-weight: var(--weight-label);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+.me-desk-tab-count {
+  color: var(--text-subtle);
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+.me-desk-panel {
+  flex: 1;
+  min-width: 0;
+}
+.me-desk-note {
+  margin: 0;
+  padding: 24px 20px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Desktop › 智能體 */
+.me-agents {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px 20px 40px;
+}
+.me-agent-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.me-agent-card {
+  box-sizing: border-box;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: var(--hairline) solid var(--border);
+  border-radius: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.me-agent-card:hover {
+  border-color: var(--text-subtle);
+}
+.me-agent-card[aria-pressed="true"] {
+  border-color: var(--border-strong);
+  background: var(--bg-container-low);
+}
+.me-agent-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.me-agent-card-name {
+  font-size: 14px;
+  font-weight: var(--weight-label);
+}
+.me-agent-card-work {
+  overflow: hidden;
+  color: var(--text-body);
+  font-size: 12px;
+  line-height: 1.5;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.me-agent-card-meta {
+  color: var(--text-subtle);
+  font-size: 12px;
+}
+.me-agent-profile {
+  border-top: var(--hairline) solid var(--border-line);
+}
+
+/* Desktop › 設定 */
+.me-settings {
+  display: flex;
+  max-width: 720px;
+  flex-direction: column;
+  gap: 32px;
+  padding: 24px 24px 48px;
+}
+.me-settings .me-profile {
+  padding: 0;
+}
+.me-settings section {
+  display: flex;
+  flex-direction: column;
+}
+.me-settings-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.me-settings-label {
+  margin: 0;
+  padding-bottom: 8px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  letter-spacing: var(--ls-track-sm);
+  text-transform: uppercase;
+}
+.me-settings-label:lang(zh) {
+  letter-spacing: 0;
+}
+.me-settings-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.me-settings-link:hover {
+  color: var(--text);
+}
+.me-settings-list {
+  margin: 0;
+  padding: 0;
+  border-top: var(--hairline) solid var(--border-line);
+  list-style: none;
+}
+.me-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 4px 0;
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.me-settings > section > .me-settings-row:first-of-type,
+.me-signout-row {
+  border-top: var(--hairline) solid var(--border-line);
+}
+.me-settings-name {
+  min-width: 0;
+  font-size: 14px;
+  font-weight: var(--weight-medium);
+}
+.me-grow {
+  flex: 1;
+}
+.me-settings-meta {
+  color: var(--text-subtle);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.me-settings-key {
+  flex: none;
+  width: 120px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.me-settings-mono {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.me-settings .me-outline {
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 12px;
+  border-color: var(--border);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  text-decoration: none;
+}
+.me-role-select {
+  width: auto;
+  min-width: 140px;
+  font-size: 13px;
+}
+.me-invites {
+  margin-top: 20px;
+}
+.me-invites .me-row-summary {
+  margin: 0;
+}
+/* The notifications panel sits inside the settings column. */
+.me-settings .notifications-parity .notification-section > h2 {
+  padding-inline: 0;
+}
+.me-settings .notifications-parity .notification-preference,
+.me-settings .notifications-parity .notification-times,
+.me-settings .notifications-parity .notification-note,
+.me-settings .notifications-parity .notification-secondary {
+  padding-inline: 0;
+}
+.me-settings .notifications-parity .notifications-body {
+  padding-bottom: 0;
 }

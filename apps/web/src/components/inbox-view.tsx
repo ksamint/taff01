@@ -1,43 +1,34 @@
 "use client";
 import "../styles/inbox.css";
 
-import {
-  type Inbox,
-  type InboxItem,
-  type InboxItemInput,
-  inboxItemInputSchema,
-  type Locale,
-  taskReference,
-} from "@taff/schemas";
+import { type InboxItem, type Locale, taskReference } from "@taff/schemas";
 import {
   calendarCivilTime,
   calendarWallToInstant,
 } from "@taff/schemas/calendar-read";
+import { useIsMutating } from "@tanstack/react-query";
 import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import { Bell, Check, Eye, EyeOff, Search, Sparkles } from "lucide-react";
+  ArrowLeft,
+  Bell,
+  Check,
+  Eye,
+  EyeOff,
+  Lock,
+  Search,
+  Sparkles,
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { type MouseEvent, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
-import { invalidateM3 } from "../lib/m3-queries";
-import {
-  inboxFromItems,
-  m3MutationKey,
-  snapshotM3,
-} from "../lib/optimistic-m3";
-import {
-  inboxKey,
-  useInbox,
-  useMembers,
-  useRuns,
-  useTasks,
-} from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
+import { errorKey } from "../lib/api";
+import { useUpdateInboxItem } from "../lib/mutations/inbox";
+import { needsYouItems } from "../lib/needs-you";
+import { m3MutationKey } from "../lib/optimistic-m3";
+import { useInbox, useMembers, useRuns, useTasks } from "../lib/queries";
+import { showToast } from "../lib/toast";
+import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
@@ -48,22 +39,36 @@ const TaskDetailView = dynamic(
 );
 type Tab = "all" | "reviews" | "blockers";
 type Selection = { workspaceId: string; taskId: string };
-type Update = {
-  id: string;
-  body: InboxItemInput;
-  snooze?: InboxItem;
-  undo?: boolean;
-};
+const TABS: Tab[] = ["all", "reviews", "blockers"];
 
-// Prototype phone 280–322 and desktop 1001–1020, sharing actual task/review panes.
-export function InboxView() {
+/**
+ * Prototype v2 Inbox: the phone pushed screen (lines 371–412) and the
+ * desktop Me › 收件箱 tab (lines 1444–1468). On desktop `/inbox` opens the
+ * tab, so the inbox has one home per layout.
+ */
+export function InboxView({ embedded = false }: { embedded?: boolean }) {
+  const desktop = useDesktop();
+  const router = useRouter();
+  useEffect(() => {
+    if (desktop && !embedded) router.replace("/me?tab=inbox");
+  }, [desktop, embedded, router]);
+  if (desktop && !embedded) return null;
+  return <InboxScreen embedded={embedded} desktop={desktop} />;
+}
+
+function InboxScreen({
+  embedded,
+  desktop,
+}: {
+  embedded: boolean;
+  desktop: boolean;
+}) {
   const { me, workspace, openSearch } = useWorkspace();
   const { t, i18n } = useTranslation();
   const inbox = useInbox(workspace.id);
   const tasks = useTasks(workspace.id);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
-  const client = useQueryClient();
   const pending = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const [markingAll, setMarkingAll] = useState(false);
   const busy = pending || markingAll;
@@ -71,67 +76,44 @@ export function InboxView() {
   const [snoozed, setSnoozed] = useState<InboxItem | null>(null);
   const activeSnoozed = snoozed?.workspaceId === workspace.id ? snoozed : null;
   const [selected, setSelected] = useState<Selection | null | undefined>();
-  const [desktop, setDesktop] = useState(false);
-  useEffect(() => {
-    const media = window.matchMedia("(min-width: 1024px)");
-    const sync = () => setDesktop(media.matches);
-    sync();
-    media.addEventListener("change", sync);
-    return () => media.removeEventListener("change", sync);
-  }, []);
-  const update = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: ({ id, body }: Update) =>
-      request(`/api/inbox/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(inboxItemInputSchema.parse(body)),
-      }),
-    onMutate: async ({ id, body, undo }) => {
-      const snapshot = await snapshotM3(client);
-      client.setQueryData<Inbox>(inboxKey(workspace.id), (current) => {
-        if (!current) return current;
-        const items =
-          undo && activeSnoozed && !current.items.some((item) => item.id === id)
-            ? [activeSnoozed, ...current.items]
-            : current.items;
-        return inboxFromItems(
-          items.map((item) =>
-            item.id !== id
-              ? item
-              : {
-                  ...item,
-                  ...(body.read === undefined
-                    ? {}
-                    : { readAt: body.read ? new Date().toISOString() : null }),
-                  ...(body.snoozedUntil === undefined
-                    ? {}
-                    : { snoozedUntil: body.snoozedUntil }),
-                },
-          ),
-        );
-      });
-      return snapshot;
+  const update = useUpdateInboxItem(workspace.id, {
+    snoozed: activeSnoozed,
+    onSnoozedChange: (item) => {
+      setSnoozed(item);
+      // Undo calls the inverse API operation, never a cache snapshot.
+      if (item)
+        showToast(t("inbox.snoozedTomorrow"), {
+          label: t("inbox.undo"),
+          run: () =>
+            update.mutate({
+              id: item.id,
+              body: { snoozedUntil: null, read: !!item.readAt },
+              undo: true,
+            }),
+        });
     },
-    onSuccess: (_, input, snapshot) => {
-      if (!isCurrentSnapshot(client, snapshot)) return;
-      if (input.snooze) setSnoozed(input.snooze);
-      else if (input.undo) setSnoozed(null);
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: () => invalidateM3(client),
   });
+  // One rule everywhere (plan §2.4 item 1): the review and blocker tabs hold
+  // the unresolved items that count; mentions and history stay in 全部.
+  const needsYou = needsYouItems(inbox.data);
+  const reviews = needsYou.filter((item) => item.kind === "review");
+  const blockers = needsYou.filter((item) => item.kind === "blocker");
+  const visible = new Set(
+    (tab === "all"
+      ? (inbox.data?.items ?? [])
+      : tab === "reviews"
+        ? reviews
+        : blockers
+    ).map((item) => item.id),
+  );
   const groups = (inbox.data?.groups ?? [])
     .map((group) => ({
       ...group,
-      items: group.items.filter(
-        (item) =>
-          tab === "all" ||
-          item.kind === (tab === "reviews" ? "review" : "blocker"),
-      ),
+      items: group.items.filter((item) => visible.has(item.id)),
     }))
     .filter((group) => group.items.length > 0);
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
-  const { when, numbers } = useMemo(
+  const { when, numbers, day } = useMemo(
     () => ({
       when: new Intl.DateTimeFormat(locale, {
         timeZone: me.user.tz,
@@ -140,13 +122,17 @@ export function InboxView() {
         hourCycle: "h23",
       }),
       numbers: new Intl.NumberFormat(locale),
+      day: new Intl.DateTimeFormat(locale, {
+        dateStyle: "long",
+        timeZone: "UTC",
+      }),
     }),
     [locale, me.user.tz],
   );
   const counts = {
     all: inbox.data?.items.length ?? 0,
-    reviews: inbox.data?.reviewCount ?? 0,
-    blockers: inbox.data?.blockerCount ?? 0,
+    reviews: reviews.length,
+    blockers: blockers.length,
   };
   const first = groups
     .flatMap((group) => group.items)
@@ -155,12 +141,10 @@ export function InboxView() {
     selected === undefined ||
     (selected && selected.workspaceId !== workspace.id)
       ? first?.taskId
-        ? {
-            workspaceId: workspace.id,
-            taskId: first.taskId,
-          }
+        ? { workspaceId: workspace.id, taskId: first.taskId }
         : null
       : selected;
+  const showDetail = desktop && embedded && !!selection;
   const readError = inbox.error ?? tasks.error ?? members.error ?? runs.error;
   async function markAll() {
     setMarkingAll(true);
@@ -186,7 +170,7 @@ export function InboxView() {
       event.shiftKey
     )
       return;
-    if (desktop && item.taskId && !item.digestId) {
+    if (desktop && embedded && item.taskId && !item.digestId) {
       event.preventDefault();
       setSelected({ workspaceId: workspace.id, taskId: item.taskId });
     }
@@ -201,70 +185,72 @@ export function InboxView() {
       me.user.tz,
     );
   }
+  const markAllButton = !!inbox.data?.unreadCount && (
+    <Button
+      className="button-quiet inbox-mark-all"
+      data-testid="inbox-mark-all"
+      disabled={busy}
+      onClick={() => void markAll()}
+    >
+      {t("inbox.markAllRead")}
+    </Button>
+  );
   return (
     <div
-      className={`inbox-view${desktop && selection ? " inbox-with-detail" : ""}`}
+      className={`inbox-view${embedded ? " is-embedded" : ""}${showDetail ? " inbox-with-detail" : ""}`}
     >
       <div className="inbox-main">
-        <header className="inbox-header">
-          <h1>{t("inbox.title")}</h1>
-          <div className="inbox-header-actions">
-            {!!inbox.data?.unreadCount && (
-              <Button
-                className="button-quiet inbox-mark-all"
-                data-testid="inbox-mark-all"
-                disabled={busy}
-                onClick={() => void markAll()}
+        {!embedded && (
+          <header className="inbox-header">
+            <span className="inbox-header-title">
+              <Link
+                className="inbox-back"
+                href="/me"
+                prefetch={false}
+                aria-label={t("actions.back")}
+                title={t("actions.back")}
+                data-testid="inbox-back"
               >
-                {t("inbox.markAllRead")}
+                <ArrowLeft size={20} strokeWidth={1.5} aria-hidden="true" />
+              </Link>
+              <h1>{t("inbox.title")}</h1>
+            </span>
+            <span className="inbox-header-actions">
+              {markAllButton}
+              <Button
+                className="button-quiet inbox-icon-button"
+                aria-label={t("search.title")}
+                data-testid="open-search"
+                onClick={openSearch}
+              >
+                <Search size={20} strokeWidth={1.5} aria-hidden="true" />
               </Button>
-            )}
-            <Button
-              className="button-quiet inbox-search"
-              aria-label={t("search.title")}
-              data-testid="open-search"
-              onClick={openSearch}
-            >
-              <Search size={20} strokeWidth={1.5} aria-hidden="true" />
-            </Button>
-          </div>
-        </header>
-        <div
-          className="inbox-source-tabs"
-          role="group"
-          aria-label={t("inbox.title")}
-        >
-          {(["all", "reviews", "blockers"] as const).map((item) => (
-            <Button
-              key={item}
-              className="button-quiet"
-              aria-pressed={tab === item}
-              data-testid={`inbox-tab-${item}`}
-              onClick={() => setTab(item)}
-            >
-              {t(`inbox.${item}`)}
-              <span>{numbers.format(counts[item])}</span>
-            </Button>
-          ))}
-        </div>
-        {activeSnoozed && (
-          <div className="inbox-notice" role="status">
-            {t("inbox.snoozedTomorrow")}
-            <Button
-              className="button-quiet"
-              disabled={busy}
-              onClick={() =>
-                update.mutate({
-                  id: activeSnoozed.id,
-                  body: { snoozedUntil: null, read: !!activeSnoozed.readAt },
-                  undo: true,
-                })
-              }
-            >
-              {t("inbox.undo")}
-            </Button>
-          </div>
+            </span>
+          </header>
         )}
+        <div className="inbox-tabs">
+          <div
+            className="inbox-tab-list"
+            role="group"
+            aria-label={t("inbox.title")}
+          >
+            {TABS.map((item) => (
+              <Button
+                key={item}
+                className="inbox-tab"
+                aria-pressed={tab === item}
+                data-testid={`inbox-tab-${item}`}
+                onClick={() => setTab(item)}
+              >
+                {t(`inbox.${item}`)}
+                <span className="inbox-tab-count">
+                  {numbers.format(counts[item])}
+                </span>
+              </Button>
+            ))}
+          </div>
+          {embedded && markAllButton}
+        </div>
         {update.isError && (
           <p className="inbox-message alert" role="alert">
             {t(errorKey(update.error))}
@@ -289,11 +275,11 @@ export function InboxView() {
           </div>
         )}
         {inbox.isPending ? (
-          <p className="inbox-message quiet" aria-live="polite">
+          <p className="inbox-message inbox-quiet" aria-live="polite">
             {t("loading")}
           </p>
         ) : !inbox.isError && groups.length === 0 ? (
-          <div className="inbox-source-empty">
+          <div className="inbox-empty">
             <span className="inbox-empty-ring" aria-hidden="true">
               <span>
                 <span />
@@ -303,18 +289,17 @@ export function InboxView() {
             <p>{t("inbox.zeroSub")}</p>
           </div>
         ) : (
-          <div className="inbox-source-groups">
+          <div className="inbox-groups">
             {groups.map((group) => (
               <section
                 key={group.taskId ?? "workspace"}
-                className="inbox-source-group"
                 aria-label={
                   group.taskId
                     ? t("inbox.taskGroup")
                     : t("inbox.workspaceGroup")
                 }
               >
-                <ul>
+                <ul className="inbox-list">
                   {group.items.map((item) => {
                     const task = tasks.data?.find(
                       (entry) => entry.id === item.taskId,
@@ -335,10 +320,7 @@ export function InboxView() {
                         );
                     const digestDay =
                       item.digestId && /^\d{4}-\d{2}-\d{2}$/.test(item.title)
-                        ? new Intl.DateTimeFormat(locale, {
-                            dateStyle: "long",
-                            timeZone: "UTC",
-                          }).format(new Date(`${item.title}T00:00:00Z`))
+                        ? day.format(new Date(`${item.title}T00:00:00Z`))
                         : null;
                     const title = task
                       ? task.title
@@ -364,22 +346,23 @@ export function InboxView() {
                         ? `/tasks/${item.taskId}${item.kind === "review" ? "/review" : ""}`
                         : null;
                     const selectedRow =
-                      desktop && selection?.taskId === item.taskId;
+                      showDetail && selection?.taskId === item.taskId;
                     return (
                       <li
                         key={item.id}
-                        className={`inbox-source-row${item.readAt ? "" : " is-unread"}${selectedRow ? " is-selected" : ""}`}
+                        className={`inbox-row${item.readAt ? "" : " is-unread"}${selectedRow ? " is-selected" : ""}`}
                         data-testid="inbox-item"
                         data-kind={item.kind}
                       >
                         {!item.readAt && (
                           <span
                             className="inbox-unread-dot"
+                            role="img"
                             aria-label={t("inbox.unread", { count: 1 })}
                           />
                         )}
                         <span
-                          className={`inbox-source-avatar${agent ? " is-agent" : ""}`}
+                          className={`inbox-avatar${agent ? " is-agent" : ""}`}
                           aria-hidden="true"
                         >
                           {agent ? (
@@ -387,11 +370,11 @@ export function InboxView() {
                           ) : item.digestId ? (
                             <Bell size={16} strokeWidth={1.5} />
                           ) : (
-                            name.slice(0, 1)
+                            Array.from(name).slice(0, 1).join("")
                           )}
                         </span>
-                        <div className="inbox-source-content">
-                          <div className="inbox-source-meta">
+                        <div className="inbox-content">
+                          <div className="inbox-meta">
                             <span>
                               <strong>{name}</strong>{" "}
                               {t(`inbox.kind.${item.kind}`)} ·{" "}
@@ -400,7 +383,7 @@ export function InboxView() {
                               </time>
                             </span>
                             <Badge
-                              className={`inbox-source-status inbox-source-${item.kind}`}
+                              className={`inbox-badge inbox-badge-${item.kind}`}
                             >
                               {t(`inbox.kind.${item.kind}`)}
                             </Badge>
@@ -412,16 +395,18 @@ export function InboxView() {
                               prefetch={false}
                               onClick={(event) => open(event, item)}
                             >
-                              {reference && <span>{reference}</span>}
+                              {reference && (
+                                <span className="inbox-ref">{reference}</span>
+                              )}
                               {title}
                             </Link>
                           ) : (
                             <p className="inbox-source-title">{title}</p>
                           )}
                           {excerpt && (
-                            <p className="inbox-source-excerpt">{excerpt}</p>
+                            <p className="inbox-excerpt">{excerpt}</p>
                           )}
-                          <div className="inbox-source-actions">
+                          <div className="inbox-actions">
                             {item.kind === "review" && href && (
                               <Link
                                 className="button button-primary"
@@ -446,7 +431,7 @@ export function InboxView() {
                                 href={`/agents/${item.agentId}`}
                                 prefetch={false}
                               >
-                                <Sparkles
+                                <Lock
                                   size={14}
                                   strokeWidth={1.5}
                                   aria-hidden="true"
@@ -475,58 +460,59 @@ export function InboxView() {
                                 )}
                               </Link>
                             )}
-                            <span className="inbox-action-spacer" />
-                            <Button
-                              className="button-quiet inbox-read-toggle"
-                              disabled={busy}
-                              aria-label={t(
-                                item.readAt
-                                  ? "inbox.markUnread"
-                                  : "inbox.markRead",
-                              )}
-                              title={t(
-                                item.readAt
-                                  ? "inbox.markUnread"
-                                  : "inbox.markRead",
-                              )}
-                              onClick={() =>
-                                update.mutate({
-                                  id: item.id,
-                                  body: { read: !item.readAt },
-                                })
-                              }
-                            >
-                              {item.readAt ? (
-                                <EyeOff
-                                  size={14}
-                                  strokeWidth={1.5}
-                                  aria-hidden="true"
-                                />
-                              ) : (
-                                <Eye
-                                  size={14}
-                                  strokeWidth={1.5}
-                                  aria-hidden="true"
-                                />
-                              )}
-                            </Button>
-                            <Button
-                              className="button-quiet inbox-snooze"
-                              data-testid="inbox-snooze"
-                              disabled={busy}
-                              onClick={() =>
-                                update.mutate({
-                                  id: item.id,
-                                  body: {
-                                    read: true,
-                                    snoozedUntil: tomorrow(),
-                                  },
-                                  snooze: item,
-                                })
-                              }
-                            >
-                              {t("inbox.tomorrow")}
-                            </Button>
+                            <span className="inbox-action-end">
+                              <Button
+                                className="button-quiet inbox-icon-button"
+                                disabled={busy}
+                                aria-label={t(
+                                  item.readAt
+                                    ? "inbox.markUnread"
+                                    : "inbox.markRead",
+                                )}
+                                title={t(
+                                  item.readAt
+                                    ? "inbox.markUnread"
+                                    : "inbox.markRead",
+                                )}
+                                onClick={() =>
+                                  update.mutate({
+                                    id: item.id,
+                                    body: { read: !item.readAt },
+                                  })
+                                }
+                              >
+                                {item.readAt ? (
+                                  <EyeOff
+                                    size={16}
+                                    strokeWidth={1.5}
+                                    aria-hidden="true"
+                                  />
+                                ) : (
+                                  <Eye
+                                    size={16}
+                                    strokeWidth={1.5}
+                                    aria-hidden="true"
+                                  />
+                                )}
+                              </Button>
+                              <Button
+                                className="button-quiet"
+                                data-testid="inbox-snooze"
+                                disabled={busy}
+                                onClick={() =>
+                                  update.mutate({
+                                    id: item.id,
+                                    body: {
+                                      read: true,
+                                      snoozedUntil: tomorrow(),
+                                    },
+                                    snooze: item,
+                                  })
+                                }
+                              >
+                                {t("inbox.tomorrow")}
+                              </Button>
+                            </span>
                           </div>
                         </div>
                       </li>
@@ -538,7 +524,7 @@ export function InboxView() {
           </div>
         )}
       </div>
-      {desktop && selection && (
+      {showDetail && selection && (
         <aside className="inbox-detail-pane" aria-label={t("inbox.taskGroup")}>
           <TaskDetailView
             key={selection.taskId}

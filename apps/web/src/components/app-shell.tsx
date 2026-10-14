@@ -1,20 +1,8 @@
 "use client";
 
 import type { Locale, Me } from "@taff/schemas";
-import { profileSchema } from "@taff/schemas/base";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  CalendarDays,
-  Inbox,
-  KanbanSquare,
-  Plus,
-  Sun,
-  User,
-} from "lucide-react";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
+import { CalendarDays, KanbanSquare, Plus, Sun, User } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -28,20 +16,16 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
+import { errorKey } from "../lib/api";
 import {
   browserTimeZone,
   LAST_WORKSPACE_KEY,
   readPreference,
   savePreference,
 } from "../lib/i18n";
-import { m3MutationKey } from "../lib/optimistic-m3";
-import { meKey, useInbox, useMeQuery } from "../lib/queries";
-import {
-  isCurrentSnapshot,
-  restoreQueries,
-  snapshotQueries,
-} from "../lib/query-snapshot";
+import { useSignOut, useUpdateProfile } from "../lib/mutations/session";
+import { needsYouCount } from "../lib/needs-you";
+import { useInbox, useMeQuery } from "../lib/queries";
 import { connectWorkspace } from "../lib/realtime";
 import {
   currentSession,
@@ -53,11 +37,15 @@ import {
 } from "../lib/session-cache";
 import { saveWorkspacePreference } from "../lib/workspace-preference";
 import { useWorkspaceSelection } from "./providers";
+import { Toaster } from "./shell/toaster";
 import { Button } from "./ui/button";
-import { Label } from "./ui/label";
 
 const SearchDialog = dynamic(
   () => import("./search-dialog").then((module) => module.SearchDialog),
+  { ssr: false },
+);
+const Landing = dynamic(
+  () => import("./landing").then((module) => module.Landing),
   { ssr: false },
 );
 const Auth = dynamic(() => import("./auth").then((module) => module.Auth), {
@@ -105,13 +93,15 @@ export function useWorkspace(): WorkspaceValue {
   return value;
 }
 
+// Prototype v2 phone tab bar (lines 503–524): four tabs, the badge on 我的.
 const NAV = [
   { href: "/", key: "today", Icon: Sun },
   { href: "/calendar", key: "calendar", Icon: CalendarDays },
   { href: "/projects", key: "projects", Icon: KanbanSquare },
-  { href: "/inbox", key: "inbox", Icon: Inbox },
   { href: "/me", key: "me", Icon: User },
 ] as const;
+/** Screens pushed from 我的 keep the Me tab current. */
+const ME_PATHS = ["/me", "/inbox", "/agents", "/orgs", "/digests"];
 
 function Wordmark({ label }: { label: string }) {
   return (
@@ -134,7 +124,12 @@ function NavItems({
   workspaceId?: string;
 }) {
   return NAV.map(({ href, key, Icon }) => {
-    const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
+    const active =
+      href === "/"
+        ? pathname === "/"
+        : href === "/me"
+          ? ME_PATHS.some((path) => pathname.startsWith(path))
+          : pathname.startsWith(href);
     return (
       <Link
         key={href}
@@ -145,7 +140,7 @@ function NavItems({
       >
         <Icon aria-hidden="true" strokeWidth={1.5} />
         {t(`nav.${key}`)}
-        {key === "inbox" && workspaceId && (
+        {key === "me" && workspaceId && (
           <InboxBadge workspaceId={workspaceId} />
         )}
       </Link>
@@ -153,15 +148,16 @@ function NavItems({
   });
 }
 
-function InboxBadge({ workspaceId }: { workspaceId: string }) {
+/** Reviews and blockers waiting for this person; the same number as Today › 待你處理. */
+export function InboxBadge({ workspaceId }: { workspaceId: string }) {
   const { t, i18n } = useTranslation();
   const inbox = useInbox(workspaceId);
-  const count = inbox.data?.unreadCount ?? 0;
+  const count = needsYouCount(inbox.data);
   return count > 0 ? (
     <span
       data-testid="inbox-badge"
       className="nav-badge"
-      aria-label={t("inbox.unread", { count })}
+      aria-label={t("inbox.needsYou", { count })}
     >
       {new Intl.NumberFormat(i18n.resolvedLanguage).format(count)}
     </span>
@@ -265,49 +261,13 @@ export function AppShell({ children }: { children: ReactNode }) {
       savePreference(me.data.user.locale);
     }
   }, [me.data?.user.locale, i18n, confirmed]);
-  const profile = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: ({ locale, tz }: { locale: Locale; tz: string }) =>
-      request("/api/profile", {
-        method: "PATCH",
-        body: JSON.stringify(profileSchema.parse({ locale, tz })),
-      }),
-    onMutate: async ({ locale, tz }) => {
-      const snapshot = await snapshotQueries(client, [meKey]);
-      const previous = i18n.language;
-      client.setQueryData<Me | null>(meKey, (current) =>
-        current
-          ? { ...current, user: { ...current.user, locale, tz } }
-          : current,
-      );
-      setSessionError(null);
-      void i18n.changeLanguage(locale);
-      return { previous, snapshot };
-    },
-    onSuccess: (_, { locale, tz }, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      savePreference(locale);
-      client.setQueryData<Me | null>(meKey, (current) =>
-        current
-          ? { ...current, user: { ...current.user, locale, tz } }
-          : current,
-      );
-    },
-    onError: (_, __, context) => {
-      if (!isCurrentSnapshot(client, context?.snapshot)) return;
-      restoreQueries(client, context?.snapshot);
-      void i18n.changeLanguage(context?.previous ?? "en");
-      setSessionError("errors.profile");
-    },
-    onSettled: () => client.invalidateQueries({ queryKey: meKey }),
+  const profile = useUpdateProfile({
+    i18n,
+    onStart: () => setSessionError(null),
+    onFailure: setSessionError,
   });
-  const signOut = useMutation({
-    mutationFn: () =>
-      request("/api/auth/sign-out", { method: "POST", body: "{}" }),
-    onSuccess: () => {
-      synchronizeSession(client, null);
-      client.clear();
-      client.setQueryData(meKey, null);
+  const signOut = useSignOut({
+    onSignedOut: () => {
       setWorkspaceId("");
       // A pending invitation belongs to the account that opened it.
       setInvitation(null);
@@ -315,7 +275,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       setSessionError(null);
       router.replace("/");
     },
-    onError: (error) => setSessionError(errorKey(error)),
+    onFailure: setSessionError,
   });
   const setLocale = (locale: Locale) => {
     if (me.data) profile.mutate({ locale, tz: me.data.user.tz });
@@ -352,6 +312,24 @@ export function AppShell({ children }: { children: ReactNode }) {
       profile.mutate({ locale, tz: me.data.user.tz });
     }
   }, [me.data, profile, confirmed]);
+  // `#task=ID` deep links always open their target once signed in (ADR 0014).
+  const signedInId = me.data?.user.id;
+  useEffect(() => {
+    if (!signedInId) return;
+    const open = () => {
+      const match = /^#task=([0-9a-f-]{36})$/i.exec(window.location.hash);
+      if (!match) return;
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+      router.push(`/tasks/${match[1]}`);
+    };
+    open();
+    window.addEventListener("hashchange", open);
+    return () => window.removeEventListener("hashchange", open);
+  }, [router, signedInId]);
   const workspace =
     me.data?.workspaces.find(({ id }) => id === workspaceId) ??
     me.data?.workspaces[0];
@@ -361,28 +339,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [client, workspace?.id, me.data?.user.id, identityReady, confirmed]);
   return (
     <div className={`app-shell${me.data ? " signed-in" : ""}`}>
-      {!me.data && (
-        <header className="topbar" inert={!confirmed}>
-          <Wordmark label={t("app")} />
-          <div className="header-actions">
-            <Label htmlFor="locale-select">
-              <span className="sr-only">{t("language")}</span>
-            </Label>
-            <select
-              id="locale-select"
-              data-testid="locale-select"
-              className="language-select"
-              value={i18n.resolvedLanguage ?? "en"}
-              disabled={busy || me.isPending}
-              onChange={(event) => setLocale(event.target.value as Locale)}
-            >
-              <option value="en">{t("en")}</option>
-              <option value="zh-CN">{t("zh-CN")}</option>
-              <option value="zh-HK">{t("zh-HK")}</option>
-            </select>
-          </div>
-        </header>
-      )}
       {(me.isPending && !provisionalToday) ||
       ((!identityReady || !confirmed) && !provisionalToday && !me.isError) ? (
         <main className="loading" aria-live="polite">
@@ -394,7 +350,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Button onClick={() => void me.refetch()}>{t("retry")}</Button>
         </main>
       ) : !me.data ? (
-        <main className="content">
+        <Landing
+          locale={(i18n.resolvedLanguage ?? "en") as Locale}
+          onLocale={setLocale}
+          localeDisabled={busy || me.isPending}
+        >
           {sessionError && (
             <p className="alert" role="alert">
               {t(sessionError)}
@@ -415,7 +375,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {emailVerificationToken && (
             <p className="invite-banner">{t("emailVerification.signInHint")}</p>
           )}
-        </main>
+        </Landing>
       ) : workspace ? (
         <WorkspaceContext.Provider
           value={{
@@ -485,7 +445,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       ) : (
         <main className="loading">{t("noWorkspace")}</main>
       )}
-      <footer className="tagline">{t("tagline")}</footer>
+      <Toaster />
+      {me.data && <footer className="tagline">{t("tagline")}</footer>}
       {me.data && (
         <nav className="tabbar" aria-label={t("nav.label")} inert={!confirmed}>
           <NavItems

@@ -118,12 +118,17 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   await page.evaluate(prepareFonts);
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
+  // One count everywhere (ADR 0014): unresolved reviews and blockers.
+  const needsYou = inbox.items.filter(
+    (item) =>
+      !item.resolvedAt && (item.kind === "review" || item.kind === "blocker"),
+  ).length;
   if (desktop) {
     await expect(page.locator(".sidebar")).toBeVisible();
-    await expect(page.locator(".sidebar-agents .sidebar-link")).toHaveCount(3);
-    await expect(
-      page.locator('.sidebar-primary a[href="/inbox"] .sidebar-count'),
-    ).toHaveText(String(inbox.unreadCount));
+    await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(3);
+    await expect(page.locator(".sidebar-me .nav-badge")).toHaveText(
+      String(needsYou),
+    );
   }
   const reviewItem = inbox.items.find(
     (item) => item.taskId === prototypeId("task", "nw", 141),
@@ -218,7 +223,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       }
     }
     if (screen === "quick-add") {
-      await page.locator(".quick-fab").click();
+      // Desktop Today opens quick add from its 新建任務 button (ADR 0014).
+      await page
+        .locator(desktop ? '[data-testid="desktop-new-task"]' : ".quick-fab")
+        .click();
       await expect(page.getByTestId("quick-title")).toBeVisible();
       await expect(page.getByTestId("quick-title")).toBeEnabled();
     }
@@ -263,10 +271,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         page.getByText(messages[locale].loading, { exact: true }),
       ).toHaveCount(0);
       if (screen === "today") {
-        await expect(page.getByTestId("today-schedule")).toHaveCount(5);
         await expect(page.getByTestId("task-card")).toHaveCount(2);
-        await expect(page.locator(".today-meeting-block")).toHaveCount(3);
-        await expect(page.locator(".today-past")).toHaveCount(1);
+        await expect(
+          page.getByTestId("today-needs-item").first(),
+        ).toBeVisible();
       } else if (screen === "projects" || screen === "type") {
         await expect(page.getByTestId("board-task")).toHaveCount(12);
       } else if (screen === "task-detail" || screen === "review") {
@@ -372,44 +380,20 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   }
   const shell = page.locator(desktop ? "aside.sidebar" : "nav.tabbar");
   await expect(shell).toBeVisible();
-  await expect(shell.locator('a[href="/inbox"]')).toContainText(
-    messages[locale].nav.inbox,
-  );
   if (desktop) {
-    await expect(shell.locator(".sidebar-agents a")).toHaveCount(3);
-    await expect(shell.locator('a[href="/inbox"] .sidebar-count')).toHaveText(
-      String(inbox.unreadCount),
+    await expect(shell.locator(".sidebar-primary .sidebar-link")).toHaveCount(
+      3,
     );
-    await expect(
-      shell.locator('a[href="/projects"] .sidebar-count'),
-    ).toHaveText(
-      String(
-        new Set(
-          tasks.flatMap((task) => (task.projectId ? [task.projectId] : [])),
-        ).size,
-      ),
+    await expect(shell.locator('a[href="/me"] .nav-badge')).toHaveText(
+      String(needsYou),
     );
-    for (const agent of prototypeAgents) {
-      const latest = runs
-        .filter(
-          (run) => run.agentId === prototypeId("member", "nw", agent.number),
-        )
-        .sort((left, right) =>
-          right.updatedAt.localeCompare(left.updatedAt),
-        )[0];
-      expect(latest, "Seed agent must have its real run").toBeDefined();
-      await expect(
-        shell.locator(
-          `a[href="/agents/${prototypeId("member", "nw", agent.number)}"] .agent-status-dot`,
-        ),
-      ).toHaveClass(
-        new RegExp(`(?:^|\\s)agent-status-${latest.status}(?:\\s|$)`),
-      );
-    }
   } else {
-    await expect(shell.getByRole("link")).toHaveCount(5);
-    await expect(shell.locator('a[href="/inbox"] .nav-badge')).toHaveText(
-      String(inbox.unreadCount),
+    await expect(shell.getByRole("link")).toHaveCount(4);
+    await expect(shell.locator('a[href="/me"]')).toContainText(
+      messages[locale].nav.me,
+    );
+    await expect(shell.locator('a[href="/me"] .nav-badge')).toHaveText(
+      String(needsYou),
     );
   }
   await page.evaluate(() => document.fonts.ready);
@@ -425,8 +409,9 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       ["/", true],
       ["/calendar", true],
       ["/projects", true],
-      ["/inbox", false],
+      // v2: the inbox is reached from 我的 (ADR 0014), so visit Me first.
       ["/me", false],
+      ["/inbox", false],
     ] as const) {
       if (new URL(page.url()).pathname !== route)
         await page.locator(`a[href="${route}"]:visible`).first().click();

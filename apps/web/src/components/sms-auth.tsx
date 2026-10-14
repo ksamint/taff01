@@ -1,18 +1,16 @@
 "use client";
 
 import { sendPhoneOtpSchema, verifyPhoneOtpSchema } from "@taff/schemas/base";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ApiError, request } from "../lib/api";
-import { meKey } from "../lib/queries";
+import { ApiError } from "../lib/api";
+import { useSendPhoneOtp, useVerifyPhoneOtp } from "../lib/mutations/auth";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
 export function SmsAuth({ onBack }: { onBack: () => void }) {
   const { t } = useTranslation();
-  const client = useQueryClient();
   const [phone, setPhone] = useState("");
   const [destination, setDestination] = useState<string | null>(null);
   const [code, setCode] = useState("");
@@ -32,33 +30,16 @@ export function SmsAuth({ onBack }: { onBack: () => void }) {
     setCooldown(seconds);
     setResendAt(Date.now() + seconds * 1000);
   }
-  const send = useMutation({
-    mutationFn: (phoneNumber: string) =>
-      request("/api/auth/phone-number/send-otp", {
-        method: "POST",
-        body: JSON.stringify({ phoneNumber }),
-      }),
-    onSuccess: (_response, phoneNumber) => {
+  const send = useSendPhoneOtp({
+    onSent: (phoneNumber) => {
       setDestination(phoneNumber);
       setCode("");
       startCooldown(60);
       verify.reset();
     },
-    onError: (error) => {
-      if (error instanceof ApiError && error.status === 429)
-        startCooldown(error.retryAfter ?? 60);
-    },
+    onRateLimited: startCooldown,
   });
-  const verify = useMutation({
-    mutationFn: (body: ReturnType<typeof verifyPhoneOtpSchema.parse>) =>
-      request("/api/auth/phone-number/verify", {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: meKey });
-    },
-  });
+  const verify = useVerifyPhoneOtp();
   const pending = send.isPending || verify.isPending;
   function sendCode(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();

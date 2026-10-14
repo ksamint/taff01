@@ -6,11 +6,11 @@ import {
   signUpSchema,
   usernameSignInSchema,
 } from "@taff/schemas/base";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError, request } from "../lib/api";
-import { meKey } from "../lib/queries";
+import { useCredentialAuth } from "../lib/mutations/auth";
 import { SmsAuth } from "./sms-auth";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -18,7 +18,6 @@ import { Label } from "./ui/label";
 
 export function Auth() {
   const { t } = useTranslation();
-  const client = useQueryClient();
   const [signup, setSignup] = useState(false);
   const [sms, setSms] = useState(false);
   const [validationError, setValidationError] = useState(false);
@@ -29,25 +28,7 @@ export function Auth() {
     retry: false,
     staleTime: 60_000,
   });
-  const auth = useMutation({
-    mutationFn: ({
-      endpoint,
-      body,
-    }: {
-      endpoint: "sign-up/email" | "sign-in/email" | "sign-in/username";
-      body:
-        | ReturnType<typeof signUpSchema.parse>
-        | ReturnType<typeof signInSchema.parse>
-        | ReturnType<typeof usernameSignInSchema.parse>;
-    }) =>
-      request(`/api/auth/${endpoint}`, {
-        method: "POST",
-        body: JSON.stringify(body),
-      }),
-    onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: meKey });
-    },
-  });
+  const auth = useCredentialAuth();
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -74,12 +55,6 @@ export function Auth() {
   }
   return (
     <div className="auth-layout">
-      <div className="auth-intro">
-        <p className="eyebrow">{t("app")}</p>
-        <h1>{t("welcome")}</h1>
-        <p>{t("authDescription")}</p>
-        <div className="accent-line" aria-hidden="true" />
-      </div>
       <section className="panel auth-panel" aria-labelledby="auth-heading">
         <h2 id="auth-heading">
           {t(sms ? "sms.title" : signup ? "signUp" : "signIn")}
