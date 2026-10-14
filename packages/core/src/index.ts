@@ -415,6 +415,10 @@ export function createCore(options: {
       .orderBy(
         sql`CASE WHEN ${workspaces.seedKey} IS NOT NULL THEN 0 ELSE 1 END`,
         workspaces.createdAt,
+        // Workspaces created in one transaction share createdAt; the first
+        // one is the default workspace, so ties must not follow the plan.
+        sql`${workspaces.name} COLLATE "C"`,
+        workspaces.id,
       );
     return {
       user: {
