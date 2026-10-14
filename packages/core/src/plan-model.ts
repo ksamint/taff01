@@ -279,7 +279,7 @@ export function buildPlanModel(input: PlanModelInput): PlanModel {
     );
     while (current && !critical.has(current.key)) {
       critical.add(current.key);
-      const before = (preds.get(current.key) ?? []).map(
+      const before: Node[] = (preds.get(current.key) ?? []).map(
         (key) => nodes.get(key) as Node,
       );
       current = before.length

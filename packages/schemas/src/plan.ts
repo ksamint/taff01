@@ -17,6 +17,7 @@ import {
   trim,
   enum as zodEnum,
 } from "zod/mini";
+import { taskSchema } from "./base";
 import {
   boundedText,
   idSchema,
@@ -71,6 +72,16 @@ export const milestoneSchema = object({
   version: versionSchema,
   createdAt: iso.datetime(),
   updatedAt: iso.datetime(),
+});
+export const milestoneListSchema = array(milestoneSchema);
+/**
+ * What PATCH /api/tasks/:id/plan changed: `plans` holds the edited task's plan
+ * first, then each descendant plan moved by `shiftChildren`; `tasks` holds
+ * every task whose `dueAt` moved with a plan or a shift, at its new version.
+ */
+export const taskPlanResultSchema = object({
+  plans: array(taskPlanSchema),
+  tasks: array(taskSchema),
 });
 export const milestoneInputSchema = strictObject({
   name: boundedText(200),
@@ -237,3 +248,4 @@ export type TimelineItem = Infer<typeof timelineItemSchema>;
 export type TimelineDependency = Infer<typeof timelineDependencySchema>;
 export type ProjectRisk = Infer<typeof projectRiskSchema>;
 export type Timeline = Infer<typeof timelineSchema>;
+export type TaskPlanResult = Infer<typeof taskPlanResultSchema>;

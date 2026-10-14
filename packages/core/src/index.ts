@@ -74,6 +74,7 @@ import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRunOperations } from "./runs";
+import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
 
 export class CoreError extends Error {
@@ -988,6 +989,13 @@ export function createCore(options: {
     email: options.email,
     onEmailStatus: options.onEmailStatus,
   });
+  const timeline = createTimelineOperations({
+    db,
+    mutation,
+    requireMember,
+    lockTask,
+    currentRunId,
+  });
   const runOperations = createRunOperations({
     db,
     mutation,
@@ -1022,6 +1030,7 @@ export function createCore(options: {
     ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,
+    ...timeline.operations,
     ...runOperations,
     getTodayBootstrap,
     auth,
