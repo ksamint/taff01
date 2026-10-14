@@ -38,8 +38,8 @@ rides this pull request.
   - **Checklist:** runs plan §6.0 on phone and desktop in en and zh-HK.
   - **MCP round trip:** a real `@modelcontextprotocol/client` session calls
     every tool. The round trip is shared with `pnpm mcp:smoke`.
-  - **Result:** 32/32 checks passed, and all 38 MCP tools completed the round
-    trip.
+  - **Result:** 32/32 checks passed, and the MCP round trip passed all 38 checks, which cover the 27 tools in
+    `MCP_TOOLS`.
 
 ## Missing
 
@@ -76,7 +76,7 @@ They are tracked for M19 QA.
 | `pnpm mcp:smoke` | passed |
 | `pnpm perf:lcp` (median of 3) | en 792 ms, zh-CN 1020 ms, zh-HK 980 ms (limit 2000) |
 | `pnpm perf:lighthouse` | en 92/100/100, zh-CN 93/100/100, zh-HK 94/100/100 (performance / accessibility / best practices) |
-| `pnpm release:checklist` | 32 / 32; MCP round trip 38 / 38 tools |
+| `pnpm release:checklist` | 32 / 32; MCP round trip 38 / 38 checks (27 tools) |
 | Visual suite | Baselines recaptured on CI's Chromium with `visual-baselines.yml` (source `09de9e0`) and committed with this milestone |
 
 One local unit failure was investigated and found not to be a code defect.
