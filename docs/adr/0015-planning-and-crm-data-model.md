@@ -92,3 +92,38 @@ constraint is forbidden in production migrations. Phone and email need the separ
   `canManageCrm` and `canArchiveCrm`.
 - The prototype's single project per organization is not assumed; the client
   company is per project.
+
+## Implementation notes (M12)
+
+- **Time zone.** A person's timeline uses `users.tz`. An agent uses its
+  supervisor's zone (`agent_profiles.supervisor_id`) and UTC without one.
+  The same zone sets "today", civil due dates and the due-time rule.
+- **Plan writes.** `PATCH /api/tasks/:id/plan` returns `{plans, tasks}`: the
+  edited plan first, then each shifted descendant plan, and every task whose
+  `due_at` changed (with its new version). A start-only edit returns no
+  tasks. `due_at` keeps its previous local time of day, or 23:59 local when
+  it had none; a time inside a DST gap falls back to 23:59.
+- **Subtree moves (D10).** The shift is measured from the start the timeline
+  shows (a parent's children span). Every descendant that moves needs
+  `task:schedule` on itself; otherwise the whole move is refused (403).
+- **Milestones** count as the end of their day: task → milestone conflicts
+  only when the milestone date is before the predecessor's last day, and
+  milestone → task conflicts when the task starts on or before it.
+  `DELETE /api/milestones/:id` archives; `?version=` makes it conditional.
+- **Dependencies.** Duplicates, self-links and cycles answer 409. An end in
+  another workspace answers 404 so its existence stays private; an archived
+  milestone answers 400. Removal returns the deleted row so undo can re-add
+  it.
+- **Blocked.** A task is blocked while it has a pending grant; a parent shows
+  blocked when a child is, but only a task's own blocker adds the two-day
+  minimum to its days behind.
+- **CRM errors.** 400 for a role outside its scope, a record from another
+  workspace, a company link to a non-employer, a task without a project, or
+  a new link to an archived contact, company or project; 403 for an entity
+  in a workspace the caller does not belong to; 404 when unlinking a link
+  that does not exist. Archive needs `?version=`.
+- **Redaction.** Without `contact:details` (agents by default), phone and
+  email are null, and CRM search matches only names and titles, so a query
+  cannot probe hidden details.
+- **Realtime.** `project_payments` events reach admins only (D7); CRM table
+  events skip guests.
