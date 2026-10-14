@@ -223,7 +223,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       }
     }
     if (screen === "quick-add") {
-      await page.locator(".quick-fab").click();
+      // Desktop Today opens quick add from its 新建任務 button (ADR 0014).
+      await page
+        .locator(desktop ? '[data-testid="desktop-new-task"]' : ".quick-fab")
+        .click();
       await expect(page.getByTestId("quick-title")).toBeVisible();
       await expect(page.getByTestId("quick-title")).toBeEnabled();
     }
@@ -406,8 +409,9 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       ["/", true],
       ["/calendar", true],
       ["/projects", true],
-      ["/inbox", false],
+      // v2: the inbox is reached from 我的 (ADR 0014), so visit Me first.
       ["/me", false],
+      ["/inbox", false],
     ] as const) {
       if (new URL(page.url()).pathname !== route)
         await page.locator(`a[href="${route}"]:visible`).first().click();
