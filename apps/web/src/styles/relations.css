@@ -179,7 +179,8 @@
 .relations-zoom {
   position: absolute;
   right: 12px;
-  bottom: 12px;
+  /* Top on phone: the quick-add button floats over the bottom right. */
+  top: 12px;
   display: grid;
   background: var(--bg);
   border: var(--hairline) solid var(--border);
@@ -338,6 +339,10 @@
 }
 
 @media (min-width: 1024px) {
+  .relations-zoom {
+    top: auto;
+    bottom: 12px;
+  }
   .relations-body {
     grid-template-columns: minmax(0, 1fr) 300px;
   }
