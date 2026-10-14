@@ -748,3 +748,42 @@ diff is empty, but the required second exact-SHA CI result is absent. Publish
 a corrected candidate with both exact-source CI links before deployment.
 No local release validation, migration, build or container replacement was
 started; production remains `23387723f8c438d990db00d561cba2899f48ab80`.
+
+### Frontend v2 release candidate R1b — 2026-10-14
+
+R1 republished under the corrected Step 0 CI rule. The source is unchanged:
+`5e616dd27bb167508155f4c5dd9bde9284538a7c` (`main`, the merge of PR #10).
+The R1 section above holds everything else: scope, validation numbers,
+migrations, env, Compose, checklist and local production-mode result.
+
+R1 was blocked because the rule asked for a feature run on the exact merge
+SHA, which a merged PR never has. The rule now accepts:
+
+- **`main` push CI on the exact SHA:**
+  [38521546475](https://github.com/ksamint/taff01/actions/runs/38521546475),
+  completed/success. The local agent confirmed this in the block note.
+- **PR #10 CI on its head:**
+  [38519911336](https://github.com/ksamint/taff01/actions/runs/38519911336),
+  completed/success. The head is `ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`,
+  an ancestor of the source.
+
+Everything after the source on `main` touches only `docs/`.
+
+**Blocked: local `pnpm e2e` readiness failure — 2026-10-14.** R1b passed
+the revised Step 0: main CI is green for source
+`5e616dd27bb167508155f4c5dd9bde9284538a7c`, PR CI is green for its ancestor
+`ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`, and the source-to-main code
+diff is empty. In a clean detached checkout on Node 24.19.0, local lint,
+typecheck, licence, 683 tests in 67 files, build, build:server and perf:budget
+passed; Today initial JavaScript is 193,190 bytes gzipped (204,800 limit).
+The deploy agent interrupted a local readiness setup to set the web port,
+but its detached API helper remained running. `pnpm e2e` then exited 1:
+`http://127.0.0.1:4601/api/health is already used`. No browser cases ran.
+This is a local deploy-helper failure, not evidence of an application defect;
+the checkout-owned API/web helpers have been stopped and the ignored local
+environment now explicitly sets `PORT=4600`. Step 1 requires stopping on a
+failed command, so MCP smoke, Lighthouse, LCP and production deployment were
+not run. Publish a fresh unblocked candidate to repeat the complete local
+validation. No production lock, backup, migration, image build or container
+replacement was started; the live SHA is still
+`23387723f8c438d990db00d561cba2899f48ab80`.
