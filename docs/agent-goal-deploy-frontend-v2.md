@@ -20,8 +20,9 @@ The build agent appends one section per candidate to `docs/deploy.md` on
 `main`, headed `### Frontend v2 release candidate <R1|M15|M16|M17|M18|v0.2.0>
 — <date>`. Each section holds:
 
-- the exact 40-character source SHA and its two CI run links (feature and
-  `main`);
+- the exact 40-character source SHA (a `main` commit) and two CI run links:
+  - the `main` push run on that exact SHA;
+  - the merged PR's run on its PR head, whose tree the merge carries;
 - the validation numbers: the nine commands, Lighthouse, three-locale LCP and
   `perf:budget`;
 - the migrations added since the live SHA, each marked additive, with
@@ -52,8 +53,10 @@ belongs to the cloud build agent.
 
 Read first:
 
-1. `AGENTS.md`. Run its op-cli preflight and follow its sign-in procedure if
-   access is unavailable.
+1. `AGENTS.md`. Run its op-cli preflight. If the script path it names no
+   longer exists, run the Mac's canonical op-automation preflight instead,
+   and correct the path in `AGENTS.md` in a docs-only commit to `main`.
+   Follow the sign-in procedure if access is unavailable.
 2. `docs/deploy.md` end to end, especially "Apuch server layout", "Operations"
    and the checkpoints from 2026-10-10 onward.
 3. `docs/agent-goal-deploy.md`, the previous release procedure; it is the
@@ -65,6 +68,47 @@ Read first:
 Never commit or print secrets, private env values, tokens, passwords, OTPs or
 cookies.
 
+**Verification account.** This is a one-time setup, repeated only if the
+account is lost. The earlier private credential files are gone (readiness
+check, 2026-10-14). If no verification credential item exists in the ops
+vault:
+
+1. Create the credentials in 1Password first, through the `op` CLI
+   authorized by the 1Password desktop app (the user enables desktop app
+   integration and approves the prompt). The service account cannot create
+   items, so run `op` without `OP_SERVICE_ACCOUNT_TOKEN` in its
+   environment, and confirm `op whoami` shows the user account.
+   - Let 1Password generate the password, so it is never typed, echoed or
+     logged: `op item create --category login --vault "Codex Automation"
+     --title "Taff production verification account" --generate-password='20,letters,digits'
+     username=taff-verify
+     website=https://taff.apuch.cn`.
+   - If that vault refuses the write, use the user's `Private` vault with the
+     same command.
+   - Read the password only by piping `op read
+     "op://<vault>/Taff production verification account/password"` straight
+     into the sign-up and sign-in steps, never into a file, terminal output
+     or report.
+   - After the workspace exists, add a `workspace` field to the item with
+     `op item edit`.
+
+   No credential file is kept on the Mac or the host.
+   Never write the credentials to the repo, logs or reports.
+2. Sign up through the public site with the normal username sign-up, using
+   that item's username and password:
+   - if `taff-verify` is taken, use `taff-verify-<yyyymmdd>` and update the
+     item's `username` field first;
+   - an address you control, if email is required.
+3. Signed in as that account, create the workspace `Taff verification`.
+4. Add one agent through Team, named `Verification agent`.
+5. Record only the account's username, the workspace name and where the
+   credentials live (vault and item name) in `docs/deploy.md`,
+   under "Operations".
+
+This creates only that account's own data; it seeds nothing, changes no
+other account and copies no demo agents. Use this account and workspace for
+every public check and the live MCP round trip.
+
 **Step 0 — pick the candidate.**
 
 1. `git fetch origin` and find the newest candidate section that has no
@@ -74,7 +118,10 @@ cookies.
 3. Otherwise check all of the following:
    - the candidate SHA is an ancestor of `origin/main`;
    - `git diff --stat <SHA> origin/main -- . ':!docs'` is empty;
-   - both linked CI runs are green for that exact SHA.
+   - the linked `main` push CI run is green for that exact SHA;
+   - the linked PR CI run is green on the PR's head commit, and that commit is
+     an ancestor of the SHA. A merge commit always has a different SHA from
+     its PR head, so this run is never on the exact SHA.
 
    If the code moved past the candidate, wait for the next candidate section;
    never deploy an unlisted SHA.
@@ -142,8 +189,8 @@ detached keeper so an SSH drop does not release it.
 
 - en and zh-HK on a phone viewport (390×844) and on desktop (1280×800);
 - a zh-CN spot check of Today, Projects and Me;
-- the verification account and workspace from the earlier checkpoints, never
-  the demo seed;
+- the dedicated verification account and workspace (see "Verification
+  account" below), never the demo seed or a real user's workspace;
 - zero browser page errors.
 
 1. **Platform:**

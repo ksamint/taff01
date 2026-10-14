@@ -292,6 +292,13 @@ commit and the agent-creation follow-up.
 
 ## Operations
 
+### Production verification account
+
+- Username: `taff_verify`.
+- Workspace: `Taff verification`.
+- Credentials: 1Password vault `Codex Automation`, item
+  `Taff production verification account`.
+
 ### Username and administrative setup
 
 Sign-in accepts email or a 2–30 character ASCII username (letters, digits,
@@ -502,6 +509,92 @@ flock probe then acquired the same lock and confirmed the accepted runtime
 images were still running and API healthy. The lock is free. This checkpoint
 is a documentation-only commit ahead of the accepted source.
 
+## Release candidate checks
+
+Every frontend v2 candidate passes the plan §6.0 checklist
+(`e2e/release/checklist.spec.ts`, `playwright.release.config.ts`) twice:
+against a local production-mode stack before the candidate section is
+written, and against the live origin after the deploy. It never starts
+servers; it drives whatever `RELEASE_BASE_URL` points at.
+
+**Local production-mode stack, without Docker image builds.**
+`scripts/release-stack.mjs` (`pnpm release:stack`) runs the bundled API from
+`pnpm build:server` (`dist/runtime/api/api.mjs`, as `deploy/Dockerfile.server`
+does) and the Next standalone server (`apps/web/.next/standalone/apps/web/server.js`,
+as `deploy/Dockerfile.web` does, with `.next/static` and `public` copied
+beside it), both with `NODE_ENV=production`. `next start` is not used: it
+warns under `output: "standalone"`.
+
+```sh
+# Ports default to 3000/3001 and the database to DATABASE_URL from .env.
+pnpm release:stack --build --migrate --seed   # --worker also starts the worker
+```
+
+- `--build` runs `pnpm build` and `pnpm build:server`. Next bakes the `/api`
+  and `/mcp` rewrite target (`API_INTERNAL_URL`) into the build, so the script
+  refuses a build made for another API URL; rebuild after changing it.
+- On other ports or another database, export the values first; exported
+  variables win over `.env`:
+
+  ```sh
+  export DATABASE_URL=postgres://…/taff_r1 API_PORT=4201 WEB_PORT=4200 \
+    API_INTERNAL_URL=http://127.0.0.1:4201 AUTH_URL=http://localhost:4200 \
+    EMAIL_LOG_PATH=/tmp/taff-r1/mail/messages.jsonl
+  pnpm release:stack --build --migrate --seed
+  ```
+
+- `AUTH_URL` must be the browser origin: the MCP page shows `AUTH_URL/mcp` as
+  the endpoint and the checklist asserts it equals `RELEASE_BASE_URL/mcp`.
+- Ctrl-C stops every process the script started.
+
+**Run the checklist.**
+
+```sh
+# Against the local stack, with full coverage of owner and role changes:
+RELEASE_BASE_URL=http://localhost:4200 \
+RELEASE_MAIL_LOG=/tmp/taff-r1/mail/messages.jsonl pnpm release:checklist
+
+# Against the live origin, from the local agent:
+RELEASE_BASE_URL=https://taff.apuch.cn \
+RELEASE_DEMO_EMAIL=<verification account> RELEASE_DEMO_PASSWORD=<from the private env> \
+pnpm release:checklist
+```
+
+- Projects: `phone-en`, `phone-zh-HK` (Pixel 7) and `desktop-en`,
+  `desktop-zh-HK` (1280×800); `--project` selects one, `-g "item 8"` one item.
+- One test per §6.0 item. Each signs up its own fresh account
+  (`release-<id>@example.test`, random password) and works only in that
+  account's workspace; agents are added through Team › Add agent. Nothing
+  depends on the clock or on seeded counts.
+- Owner and member-role changes need a second person with a verified email:
+  `RELEASE_MAIL_LOG` (the local stack's `EMAIL_LOG_PATH`) lets a second fresh
+  account verify itself; otherwise the `RELEASE_DEMO_*` account accepts the
+  invitation (it must have a verified email). Without either, those two
+  sub-steps are skipped and the reason is recorded.
+- SMS is exercised only when `/api/auth/methods` reports it enabled, and then
+  only up to the open form: no code is ever sent. Otherwise the step is
+  recorded as skipped with the reason.
+- Item 8 runs the shared MCP round trip (`apps/api/scripts/mcp-round-trip.ts`,
+  the same code as `pnpm mcp:smoke`) with the official client against
+  `RELEASE_BASE_URL/mcp`, using a token issued on the MCP page: every tool
+  (all 30 in `MCP_TOOLS`, including `relations.get`, `brief.get` and
+  `suggestions.create`),
+  the rate limit (`RELEASE_MCP_RATE_LIMIT`, default `MCP_RATE_LIMIT` or 60;
+  `RELEASE_SKIP_RATE_LIMIT=1` skips the probe with a recorded reason), the
+  call log in the UI, the created task arriving on an open board in real
+  time, and revocation from the UI. The probe sends at most limit + 2
+  requests on the run's own throwaway token; where the deploy goal says not
+  to probe production, set `RELEASE_SKIP_RATE_LIMIT=1`.
+- Tokens, passwords and cookies are never printed: the token is asserted by
+  its `taff_` prefix only, traces and screenshots are off (`RELEASE_DEBUG=1`
+  turns them on for local debugging only), and the report is redacted.
+- The report lands in `release-reports/checklist-<timestamp>.{json,md}`
+  (gitignored): each item × project with pass, fail or skip-with-reason,
+  durations, skipped sub-steps and the MCP checks. Paste the Markdown table
+  into the candidate section.
+- Optional: `RELEASE_WORKERS` (default 1), `RELEASE_RETRIES` (default 0),
+  `RELEASE_REPORT_DIR`.
+
 ## Frontend v2 releases
 
 Frontend v2 (`docs/frontend-v2-plan.md`) is released in stages. The cloud
@@ -510,3 +603,340 @@ section here for each validated `main` SHA. The local agent deploys it with
 `docs/agent-goal-deploy-frontend-v2.md`. Then it appends the matching
 `### Frontend v2 <name> upgrade checkpoint — <date>`, or a `Blocked:` note
 under the candidate.
+
+### Frontend v2 release candidate R1 — 2026-10-14
+
+**Source.** `main` at `5e616dd27bb167508155f4c5dd9bde9284538a7c`, the merge of
+PR #10 (M14). It includes PR #7 (M12), PR #9 (M13) and PR #10 (M14) on top of
+the last recorded deployment, `23387723f8c438d990db00d561cba2899f48ab80`
+(agent creation upgrade checkpoint, 2026-10-11).
+
+**CI.**
+
+- Pull requests:
+  - [PR #9 CI](https://github.com/ksamint/taff01/actions/runs/38512986433)
+  - [PR #10 CI](https://github.com/ksamint/taff01/actions/runs/38519911336)
+- `main` CI:
+  - [after #9](https://github.com/ksamint/taff01/actions/runs/38514991407)
+  - [after #10](https://github.com/ksamint/taff01/actions/runs/38521546475)
+- Visual baselines on CI's Chromium:
+  - [M13 capture](https://github.com/ksamint/taff01/actions/runs/38512400959)
+  - [M14 capture](https://github.com/ksamint/taff01/actions/runs/38519032163)
+
+**What changes for people.**
+
+- **Navigation (v2 shell):**
+  - phone: a four-tab bar (今天 · 日曆 · 項目 · 我的);
+  - desktop: a foldable sidebar;
+  - signed out: a landing page.
+- **Screens:** Today, Me, Inbox and MCP use the v2 layouts.
+- **Projects:** the v2 board and list.
+- **Task detail:** contacts, and a right panel on desktop.
+- **Calendar:** the v2 calendar.
+- **Search:** ⌘K also finds companies and contacts.
+- **Undo:** toasts with undo on both layouts.
+- **Backend only for now:** planning and CRM (M12). Its screens arrive with
+  later candidates.
+
+Reports:
+
+- `docs/milestones/12-planning-crm-backend.md`
+- `docs/milestones/13-shell-today-me.md`
+- `docs/milestones/14-projects-task-calendar-search.md`
+
+**Validation numbers** (M14 head, then `main`).
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 683 / 683 |
+| e2e | 141 / 141 |
+| visual suite | 16 screens × 4 projects |
+| Today initial JS | 193,325 B gzipped / 204,800 B budget |
+| Today LCP (median of 3, slow 4G, 4× CPU) | en 792 ms, zh-CN 1020 ms, zh-HK 980 ms (limit 2000 ms) |
+| Lighthouse (performance / accessibility / best practices) | en 92/100/100, zh-CN 93/100/100, zh-HK 94/100/100 |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+**Migrations.** One new migration, `0023_m12_planning_crm.sql`. It is
+**additive**, with no backfill (0 rows rewritten):
+
+- **New tables:** 10, all workspace-scoped, with composite foreign keys and
+  `_audit` triggers: companies, contacts, company_contacts,
+  project_contacts, task_contacts, contact_roles, task_plans, milestones,
+  task_dependencies and project_payments.
+- **New project columns:** three nullable ones (`contract_amount`,
+  `currency`, `client_company_id`).
+- **New unique constraint:** `tasks (workspace_id, id, project_id)`, which
+  builds an index on `tasks`.
+- **Checks:** a role-rule CHECK on contact_roles.
+- **Nothing destructive:** no `DROP`, `TRUNCATE`, `DELETE`, rename or data
+  rewrite.
+
+**Environment.** No new variables for frontend v2. Since `2338772`, these
+settings are new or changed:
+
+- **`EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_FROM`:** optional
+  and all-or-none. Unset, mail goes to the private log at `EMAIL_LOG_PATH`.
+  `EMAIL_PORT` (465) and `EMAIL_SECURE` (true) only apply with SMTP.
+  Partial settings stop the API at start.
+- **`EMAIL_LOG_PATH`:** defaults to `/app/.taff-mail/messages.jsonl` in the
+  image. Its directory must be mode 0700 and owned by the API user, or
+  delivery fails closed.
+- **`AUTH_URL`:** an existing variable, now also passed to the web
+  container. The MCP page shows `AUTH_URL/mcp` as the client endpoint, so it
+  must be the public origin.
+
+No secret values are recorded here.
+
+**Compose, Docker and Caddy.**
+
+- **`compose.prod.yaml`:**
+  - the API receives the `EMAIL_*` settings above;
+  - the worker uses its own image, `${TAFF_IMAGE_WORKER:-taff-worker}`,
+    built from `deploy/Dockerfile.server` with `TARGET=worker`;
+  - web receives `AUTH_URL`.
+- **`deploy/Dockerfile.server`:** creates `/app/.taff-mail` as 0700, owned
+  by `node`.
+- **Caddy:** no changes.
+
+**Release checklist (plan §6.0)** against a local production-mode stack built
+from `5e616dd`:
+
+- **Stack:** `pnpm release:stack --build --migrate --seed` on a fresh
+  database, API on 4201 and web on 4200. That is
+  `dist/runtime/api/api.mjs` and the Next standalone server with
+  `NODE_ENV=production`.
+- **Command:** `RELEASE_MAIL_LOG=… pnpm release:checklist`.
+- **Result: passed, 32 / 32** (8 items × phone-en, phone-zh-HK, desktop-en,
+  desktop-zh-HK), 0 failed, 0 skipped.
+- **Covered:** owner and role changes (a second person verifies from the
+  mail log) and the rate-limit probe.
+- **One sub-step skipped**, in every project: SMS sign-in, because
+  `/api/auth/methods` reports `smsEnabled=false` locally. Live SMS stays
+  covered by the 2026-10-10 checkpoint.
+- **MCP:** each project's real `@modelcontextprotocol/client` round trip
+  passed 38/38 checks, covering all 27 tools in `MCP_TOOLS`.
+
+| Item | phone-en | phone-zh-HK | desktop-en | desktop-zh-HK |
+| --- | --- | --- | --- | --- |
+| 1. Sign-in and preferences | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) |
+| 2. Tasks | pass | pass | pass | pass |
+| 3. Agents and review | pass | pass | pass | pass |
+| 4. Projects | pass | pass | pass | pass |
+| 5. Calendar | pass | pass | pass | pass |
+| 6. Search and organizations | pass | pass | pass | pass |
+| 7. Settings | pass | pass | pass | pass |
+| 8. MCP | pass | pass | pass | pass |
+
+**Notes for the deploy.**
+
+- Build and push both server images (`api` and `worker`) and the web image,
+  then migrate with the API image as before.
+- After the deploy, run the checklist against the live origin with the
+  verification account (see "Release candidate checks").
+
+**Blocked: exact-source feature CI is missing — 2026-10-14.** Step 0 of
+`docs/agent-goal-deploy-frontend-v2.md` requires both linked CI runs to be
+green for the listed source `5e616dd27bb167508155f4c5dd9bde9284538a7c`.
+Main run [38521546475](https://github.com/ksamint/taff01/actions/runs/38521546475)
+is completed/success for that SHA. Feature run
+[38519911336](https://github.com/ksamint/taff01/actions/runs/38519911336)
+is completed/success for `ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`,
+not the listed source. The exact-source run inventory contains only the main
+run. The source is an ancestor of `origin/main`, and the non-documentation
+diff is empty, but the required second exact-SHA CI result is absent. Publish
+a corrected candidate with both exact-source CI links before deployment.
+No local release validation, migration, build or container replacement was
+started; production remains `23387723f8c438d990db00d561cba2899f48ab80`.
+
+### Frontend v2 release candidate R1b — 2026-10-14
+
+R1 republished under the corrected Step 0 CI rule. The source is unchanged:
+`5e616dd27bb167508155f4c5dd9bde9284538a7c` (`main`, the merge of PR #10).
+The R1 section above holds everything else: scope, validation numbers,
+migrations, env, Compose, checklist and local production-mode result.
+
+R1 was blocked because the rule asked for a feature run on the exact merge
+SHA, which a merged PR never has. The rule now accepts:
+
+- **`main` push CI on the exact SHA:**
+  [38521546475](https://github.com/ksamint/taff01/actions/runs/38521546475),
+  completed/success. The local agent confirmed this in the block note.
+- **PR #10 CI on its head:**
+  [38519911336](https://github.com/ksamint/taff01/actions/runs/38519911336),
+  completed/success. The head is `ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`,
+  an ancestor of the source.
+
+Everything after the source on `main` touches only `docs/`.
+
+**Blocked: local `pnpm e2e` readiness failure — 2026-10-14.** R1b passed
+the revised Step 0: main CI is green for source
+`5e616dd27bb167508155f4c5dd9bde9284538a7c`, PR CI is green for its ancestor
+`ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`, and the source-to-main code
+diff is empty. In a clean detached checkout on Node 24.19.0, local lint,
+typecheck, licence, 683 tests in 67 files, build, build:server and perf:budget
+passed; Today initial JavaScript is 193,190 bytes gzipped (204,800 limit).
+The deploy agent interrupted a local readiness setup to set the web port,
+but its detached API helper remained running. `pnpm e2e` then exited 1:
+`http://127.0.0.1:4601/api/health is already used`. No browser cases ran.
+This is a local deploy-helper failure, not evidence of an application defect;
+the checkout-owned API/web helpers have been stopped and the ignored local
+environment now explicitly sets `PORT=4600`. Step 1 requires stopping on a
+failed command, so MCP smoke, Lighthouse, LCP and production deployment were
+not run. Publish a fresh unblocked candidate to repeat the complete local
+validation. No production lock, backup, migration, image build or container
+replacement was started; the live SHA is still
+`23387723f8c438d990db00d561cba2899f48ab80`.
+
+### Frontend v2 release candidate M15 — 2026-10-14
+
+**Source:** `main` at `8019c6943e453e087a6cfa6c48651c99b9840a9d`. This
+candidate supersedes R1b and answers its `Blocked:` note: it contains all of
+R1/R1b plus M15, so one deploy covers both.
+
+The R1b blocker was a local helper still holding port 4601 when `pnpm e2e`
+started. The application was not at fault. Before `pnpm e2e`, make sure
+nothing listens on the configured API and web ports. The Playwright web
+servers refuse a busy port on purpose (`reuseExistingServer` is false).
+
+Scope since R1:
+
+- PR #11 (`m15-crm`), merged as `7872024`.
+- `main` commits after `7872024`, which touch only `docs/`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source:**
+  [38528200033](https://github.com/ksamint/taff01/actions/runs/38528200033).
+  The run for `7872024` was cancelled by the next push to `main`.
+- **PR #11 CI on its head `58ea2cb141cfdcd57791e19fe6b81603ee88143c`:**
+  [38525583386](https://github.com/ksamint/taff01/actions/runs/38525583386),
+  success. That head is an ancestor of the source, and the source-to-head
+  diff is only `docs/agent-goal-deploy-frontend-v2.md` and `docs/deploy.md`.
+- **Visual baselines and gated Lighthouse on CI's Chromium:**
+  [38524514460](https://github.com/ksamint/taff01/actions/runs/38524514460).
+
+**What changes for people.**
+
+- **CRM screens:** companies and contacts, each with list, detail, create,
+  edit and archive (archive asks for confirmation; every change has undo).
+  On desktop, list and detail share a split view.
+- **Stakeholders:** 相關方 at `?view=stakeholders`, with the client company
+  per project.
+- **Navigation:** 公司 · 聯繫人 sit under 項目 in the desktop sidebar and the
+  Projects switch. They are shown only to people who can read CRM.
+- **Phase B backend, ahead of its screens (M16–M18):**
+  - brief and Ask taff, rules-based;
+  - suggestions;
+  - the relations graph;
+  - mind-map APIs.
+- **New MCP tools:** `brief.get`, `relations.get` and `suggestions.create`
+  (30 tools in all).
+
+Reports: `docs/milestones/15-crm-screens.md` and
+`docs/milestones/16-18-phase-b-backend.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green (PR CI) |
+| unit and integration tests | 814 / 814 locally; green in PR CI |
+| e2e | green in PR CI |
+| visual suite | 16 screens × 4 projects, locally and on CI |
+| Today initial JS | 193,457 B gzipped / 204,800 B (CI) |
+| Today LCP, median of 3 (slow 4G, 4× CPU), local production build | en 640 ms, zh-CN 656 ms, zh-HK 664 ms |
+| Lighthouse (gated, CI Chromium) | en 96/100/100, zh-CN 95/100/100, zh-HK 96/100/100 (performance / accessibility / best practices) |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+The cloud container's local Lighthouse scores were 82–91 after a host
+restart. The same container measured the unchanged M14 build at 87–93,
+against 92–94 before the restart. The CI run above is the gated
+measurement.
+
+**Migrations.** Two new migrations, both additive, with no backfill (0 rows
+rewritten):
+
+- **`0024_m17_suggestions_ai.sql`:**
+  - a `suggestions` table, workspace-scoped, with composite foreign keys and
+    an `_audit` trigger;
+  - `workspaces.ai_enabled boolean NOT NULL DEFAULT false`. The default is a
+    constant, so PostgreSQL stores it as metadata and does not rewrite the
+    table. Every workspace starts opted out.
+- **`0025_m18_mind_map.sql`:** `mind_nodes`, `mind_edges`, `mind_sources`
+  and `mind_node_sources`, workspace-scoped, with composite foreign keys and
+  `_audit` triggers.
+
+Neither migration has a `DROP`, `TRUNCATE`, `DELETE`, rename or data
+rewrite.
+
+**Environment.** `.env.example` documents four optional variables, none
+needed in production:
+
+- **`ASK_RATE_LIMIT`:** Ask requests per person per minute. Default 20.
+- **`AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`:** the optional model path for
+  Ask taff (ADR 0016). `compose.prod.yaml` does not pass them to the API, so
+  in production the path stays off and no workspace data goes to any model.
+  Ask answers by rules. Turning the path on would need a Compose change, all
+  three values, and a workspace admin's opt-in. Do not set them for this
+  deploy.
+
+No secret values are recorded here.
+
+**Compose, Docker and Caddy.** No changes since R1.
+
+**Release checklist (plan §6.0)** against a local production-mode stack built
+from PR head `58ea2cb`, which has the same application code as the source:
+
+- **Stack:** `pnpm release:stack --build --migrate --seed` on a fresh
+  database, API on 4201 and web on 4200.
+- **Command:** `RELEASE_MAIL_LOG=… pnpm release:checklist`. The mail-log
+  directory must be mode 0700.
+- **Result: passed, 32 / 32**, 0 failed, 0 skipped. Owner and role changes
+  and the rate-limit probe ran.
+- **One sub-step skipped**, in every project: SMS sign-in, because
+  `smsEnabled=false` locally.
+- **MCP:** each project's `@modelcontextprotocol/client` round trip passed
+  42/42 checks, covering all 30 tools in `MCP_TOOLS`.
+
+| Item | phone-en | phone-zh-HK | desktop-en | desktop-zh-HK |
+| --- | --- | --- | --- | --- |
+| 1. Sign-in and preferences | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) |
+| 2. Tasks | pass | pass | pass | pass |
+| 3. Agents and review | pass | pass | pass | pass |
+| 4. Projects | pass | pass | pass | pass |
+| 5. Calendar | pass | pass | pass | pass |
+| 6. Search and organizations | pass | pass | pass | pass |
+| 7. Settings | pass | pass | pass | pass |
+| 8. MCP | pass | pass | pass | pass |
+
+**Notes for the deploy.**
+
+- The live SHA is still `2338772`, so this deploy applies migrations 0023,
+  0024 and 0025 together, in order, with the API image.
+- After the deploy, run the checklist against the live origin. Because of the
+  new CRM screens, check that a member without CRM access sees no 公司 ·
+  聯繫人 entries.
+
+**Blocked: local `pnpm e2e` calendar assertion — 2026-10-14.** The M15
+source `8019c6943e453e087a6cfa6c48651c99b9840a9d` passed Step 0 with
+main CI [38528200033](https://github.com/ksamint/taff01/actions/runs/38528200033)
+and ancestor-head PR CI
+[38525583386](https://github.com/ksamint/taff01/actions/runs/38525583386).
+A clean detached checkout on macOS arm64, Node 24.19.0 and pnpm 12.10.1
+passed lint, typecheck, licence, 814 tests in 77 files, build, build:server
+and perf:budget (Today: 193,320 bytes gzipped, limit 204,800).
+The browser suite completed with **154 passed, 2 failed** in 9.4 minutes.
+Both failures are the `calendar phone touch, cancellation, month move, tray
+scheduling, empty-slot create and list navigation` case, in **en** and
+**zh-CN**, at `e2e/calendar.spec.ts:994:28`: expected a value greater than
+zero, received zero. The zh-HK case passed. The API and web ports were free
+before the run, agreed with the local origin settings, and the checkout-owned
+helper servers were cleaned up afterward; this is not the R1b port conflict.
+The failure's cause is not yet established. Step 1 forbids deployment after
+a failed command, so MCP smoke, Lighthouse, LCP and production deployment
+did not run. The build agent should investigate and publish a fresh candidate
+with the assertion passing. Production remains
+`23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
+migration, image build or container replacement was started.
+
