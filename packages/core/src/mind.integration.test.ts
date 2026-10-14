@@ -205,7 +205,27 @@ describe.skipIf(!url)("M18 mind map", () => {
     expect((await core.getMindMap(bob, w)).edges.map((e) => e.id)).toContain(
       edge.id,
     );
-    expect(await core.removeMindEdge(bob, edge.id)).toEqual(edge);
+    // The kind is editable with the edge's version (M18 screens).
+    expect(edge.version).toBe(1);
+    const supports = await core.updateMindEdge(bob, edge.id, {
+      version: 1,
+      kind: "supports",
+    });
+    expect(supports).toMatchObject({ kind: "supports", version: 2 });
+    await expect(
+      core.updateMindEdge(bob, edge.id, { version: 1, kind: "contradicts" }),
+    ).rejects.toMatchObject({ code: "conflict" });
+    await expect(
+      core.updateMindEdge(guest, edge.id, { version: 2, kind: "relates" }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.updateMindEdge(outsider, edge.id, { version: 2, kind: "relates" }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    const restored = await core.updateMindEdge(bob, edge.id, {
+      version: 2,
+      kind: "relates",
+    });
+    expect(await core.removeMindEdge(bob, edge.id)).toEqual(restored);
     await expect(core.removeMindEdge(bob, edge.id)).rejects.toMatchObject({
       code: "not_found",
     });
@@ -217,6 +237,8 @@ describe.skipIf(!url)("M18 mind map", () => {
       );
     expect(audit.map((row) => row.action)).toEqual([
       "mind_edges.insert",
+      "mind_edges.update",
+      "mind_edges.update",
       "mind_edges.delete",
     ]);
   });

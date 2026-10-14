@@ -12,6 +12,7 @@ import {
   idSchema,
   type MindEdge,
   type MindEdgeInput,
+  type MindEdgeUpdate,
   type MindMap,
   type MindMapQuery,
   type MindNode,
@@ -24,6 +25,7 @@ import {
   type MindValidationTaskInput,
   type MindValidationTaskResult,
   mindEdgeInputSchema,
+  mindEdgeUpdateSchema,
   mindMapQuerySchema,
   mindNodeInputSchema,
   mindNodeUpdateSchema,
@@ -81,6 +83,7 @@ function dtoEdge(row: typeof mindEdges.$inferSelect): MindEdge {
     fromNodeId: row.fromNodeId,
     toNodeId: row.toNodeId,
     kind: row.kind as MindEdge["kind"],
+    version: row.version,
     createdAt: row.createdAt.toISOString(),
   };
 }
@@ -349,6 +352,36 @@ export function createMindOperations({
       return dtoEdge(row);
     });
   }
+  /** Changes a link's kind (M18 screens), with the edge's version. */
+  async function updateMindEdge(
+    p: Principal,
+    id: string,
+    input: MindEdgeUpdate,
+  ): Promise<MindEdge> {
+    parse(idSchema, id);
+    const body = parse(mindEdgeUpdateSchema, input);
+    return mutation(p, async (tx) => {
+      const [row] = await tx
+        .select()
+        .from(mindEdges)
+        .where(eq(mindEdges.id, id))
+        .for("update");
+      if (!row) notFound();
+      const edge = row as typeof mindEdges.$inferSelect;
+      await requireMember(tx, p, edge.workspaceId, "mind:write");
+      if (edge.version !== body.version) conflict();
+      const [updated] = await tx
+        .update(mindEdges)
+        .set({
+          kind: body.kind,
+          version: edge.version + 1,
+          updatedAt: new Date(),
+        })
+        .where(eq(mindEdges.id, id))
+        .returning();
+      return dtoEdge(updated);
+    });
+  }
   /** Removes a link row; the audit trigger records it, undo re-adds it. */
   async function removeMindEdge(p: Principal, id: string): Promise<MindEdge> {
     parse(idSchema, id);
@@ -531,6 +564,7 @@ export function createMindOperations({
       createMindNode,
       updateMindNode,
       createMindEdge,
+      updateMindEdge,
       removeMindEdge,
       createMindSource,
       updateMindSource,

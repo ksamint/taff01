@@ -7,7 +7,11 @@ import { describe, expect, it } from "vitest";
  * DELETE, rename or rewrite of existing data, constraints included. Every
  * Phase B statement must be one of the additive forms below.
  */
-const PHASE_B = ["0024_m17_suggestions_ai.sql", "0025_m18_mind_map.sql"];
+const PHASE_B = [
+  "0024_m17_suggestions_ai.sql",
+  "0025_m18_mind_map.sql",
+  "0026_m18_mind_edge_version.sql",
+];
 const ADDITIVE = [
   /^CREATE TABLE "[a-z_]+" \(/,
   /^ALTER TABLE "[a-z_]+" ADD COLUMN "[a-z_]+" [^;]+;$/,

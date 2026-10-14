@@ -2,6 +2,7 @@ import { type createCore, userPrincipal } from "@taff/core";
 import {
   idSchema,
   mindEdgeInputSchema,
+  mindEdgeUpdateSchema,
   mindMapQuerySchema,
   mindNodeInputSchema,
   mindNodeUpdateSchema,
@@ -89,6 +90,15 @@ export function registerMindRoutes(app: Hono<Env>, core: Core) {
         mindEdgeInputSchema.parse(await c.req.json()),
       ),
       201,
+    ),
+  );
+  app.patch("/api/mind/edges/:id", async (c) =>
+    c.json(
+      await core.updateMindEdge(
+        me(c),
+        idSchema.parse(c.req.param("id")),
+        mindEdgeUpdateSchema.parse(await c.req.json()),
+      ),
     ),
   );
   app.delete("/api/mind/edges/:id", async (c) =>

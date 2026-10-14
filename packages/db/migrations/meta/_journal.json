@@ -183,6 +183,13 @@
       "when": 1791944083769,
       "tag": "0025_m18_mind_map",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791956916653,
+      "tag": "0026_m18_mind_edge_version",
+      "breakpoints": true
     }
   ]
 }
