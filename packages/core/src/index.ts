@@ -440,11 +440,15 @@ export function createCore(options: {
   ): Promise<Member[]> {
     parse(idSchema, workspaceId);
     await requireMember(db, principal, workspaceId, "workspace:read");
-    return db
-      .select()
-      .from(members)
-      .where(eq(members.workspaceId, workspaceId))
-      .orderBy(members.createdAt);
+    return (
+      db
+        .select()
+        .from(members)
+        .where(eq(members.workspaceId, workspaceId))
+        // Signup creates the person and the agent in one transaction, so they
+        // share createdAt: list people first, then break ties by id.
+        .orderBy(members.createdAt, members.kind, members.id)
+    );
   }
   async function createWorkspaceAgent(
     principal: Principal,
@@ -894,7 +898,7 @@ export function createCore(options: {
       .from(agentTokens)
       .leftJoin(lastUsed, eq(lastUsed.tokenId, agentTokens.id))
       .where(eq(agentTokens.workspaceId, workspaceId))
-      .orderBy(desc(agentTokens.createdAt));
+      .orderBy(desc(agentTokens.createdAt), desc(agentTokens.id));
     return rows.map(({ token, lastUsedAt }) =>
       toAgentToken(token, lastUsedAt ? new Date(lastUsedAt) : null),
     );
@@ -955,7 +959,7 @@ export function createCore(options: {
             eq(activity.action, "agent_tokens.update"),
           ),
         )
-        .orderBy(desc(activity.createdAt))
+        .orderBy(desc(activity.createdAt), desc(activity.id))
         .limit(1);
       const [revoker] = change
         ? await tx
@@ -1051,7 +1055,7 @@ export function createCore(options: {
       .select()
       .from(mcpCalls)
       .where(eq(mcpCalls.workspaceId, workspaceId))
-      .orderBy(desc(mcpCalls.createdAt))
+      .orderBy(desc(mcpCalls.createdAt), desc(mcpCalls.id))
       .limit(200);
     return rows.map(toMcpCall);
   }

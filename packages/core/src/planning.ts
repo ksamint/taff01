@@ -571,7 +571,7 @@ export function createPlanningOperations({
         .select()
         .from(workspaceInvites)
         .where(eq(workspaceInvites.workspaceId, w))
-        .orderBy(desc(workspaceInvites.createdAt))
+        .orderBy(desc(workspaceInvites.createdAt), desc(workspaceInvites.id))
     ).map(dtoInvite);
   }
   async function createWorkspaceInvite(
