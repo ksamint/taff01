@@ -80,7 +80,6 @@
   padding: 0;
   margin: 0;
 }
-.today-block-title,
 .today-task-title {
   font-size: 15px;
   font-weight: 500;
@@ -90,7 +89,6 @@
   white-space: nowrap;
   min-width: 0;
 }
-.today-block-meta,
 .today-task-meta {
   font-size: 12px;
   color: var(--text-muted);
