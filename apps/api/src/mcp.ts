@@ -93,7 +93,7 @@ export function createMcpServer(
   state: CallState,
   logger?: ErrorLogger,
 ) {
-  const server = new McpServer({ name: "taff", version: "0.1.0" });
+  const server = new McpServer({ name: "taff", version: "0.2.0" });
   const run = async (fn: () => Promise<unknown>) => {
     try {
       return ok(await fn());

@@ -4,12 +4,22 @@ An open-source, performance-first task and calendar app where people and AI
 agents work as one team. Mobile web and PWA first, in English, Simplified Chinese
 and Traditional Chinese (Hong Kong).
 
-Live app: [taff.apuch.cn](https://taff.apuch.cn). See
-[the deployment checkpoint](docs/deploy.md#agent-creation-upgrade-checkpoint--2026-10-11)
-for the running release and server layout. Neo4j integration is pending its
+Live app: [taff.apuch.cn](https://taff.apuch.cn). The latest checkpoint in
+[the deployment guide](docs/deploy.md) records the running release and server
+layout. Neo4j integration is pending its
 graph data and isolation scope.
 
 ## Status
+
+**v0.2.0 — frontend v2.** The UI follows prototype v2 (ADR 0014):
+- **Phone:** four tabs (今天 · 日曆 · 項目 · 我的).
+- **Desktop:** a sidebar with ⌘K.
+- **Projects:** board, list, timeline, stakeholders, relations and mind map.
+- **Also new:** companies and contacts, an AI brief and Ask taff (both
+  rules-based; the model path is off by default, ADR 0016), and 30 MCP tools.
+
+See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
+The history below describes the v1 milestones.
 
 Phase 1 provides a mobile Today view, email/password sign-up and sign-in,
 personal workspaces, task creation, person ownership and person/agent
@@ -94,12 +104,14 @@ Open [the local app](http://localhost:3000). Sign in as `alex@taff.local` using 
 three agents. Re-running the seed preserves existing accounts, passwords and tasks.
 Changing `DEMO_PASSWORD` after seeding does not reset existing passwords.
 
-The UI parity work takes priority over the remaining M9 items; its scope and
-acceptance are in [the UI goal](docs/agent-goal-ui-parity.md). After installing
-Playwright Chromium, `pnpm ui:prototype-shots` serves the offline prototype and
-captures its reference screens. `pnpm ui:app-shots` captures the running app in
-all three locales using the seeded demo account from `.env`. Run app captures
-against an isolated development database: they change the demo account's locale.
+The UI follows prototype v2; [the UI guide](docs/ui/README.md) maps each
+screen to its route and data. After installing Playwright Chromium:
+- `pnpm ui:prototype-shots --v2` serves the offline prototype and captures its
+  reference screens.
+- `pnpm ui:app-shots` captures the running app in all three locales, using the
+  seeded demo account from `.env`. Run it against an isolated development
+  database, because it changes the demo account's locale.
+
 Use `SEED_DATE=2026-10-08 pnpm db:seed` to anchor visual fixtures to the prototype.
 The idempotent seed adds Northwind, Qingshi Studio and Personal with their
 people, agents, tasks, calendar, permissions, grants and review evidence. Each

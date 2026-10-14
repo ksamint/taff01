@@ -1,5 +1,46 @@
 # Changelog
 
+## v0.2.0
+
+The frontend v2 release. Prototype v2 (ADR 0014) replaces the v1 UI on phone
+and desktop. The tag is created only when every M19 gate and CI are green;
+production follows the pinned release candidates in `docs/deploy.md`.
+
+- M11: v2 intake. ADR 0014 records the prototype as the UI source of truth,
+  with the plan's decisions D1–D11. It adds the v2 reference captures and
+  string table, and makes `main` green again.
+- M12: planning and CRM backend. Additive migration `0023` adds plans,
+  milestones, dependencies, payments, companies, contacts and their roles.
+  The planning read model gives progress, forecast, critical path and risk.
+  Finance figures are visible to admins only.
+- M13: v2 shell. Phone has four tabs (今天 · 日曆 · 項目 · 我的) with one badge
+  count; desktop has a sidebar with ⌘K and fold-to-rail. Also new: Today,
+  Me with the Inbox, the MCP page and a signed-out home. Every write goes
+  through shared mutation hooks.
+- M14: projects board and list, task detail with contacts, the desktop
+  calendar and ⌘K search. The plan §6.0 release checklist and the MCP round
+  trip run against a production-mode stack.
+- M15: companies, contacts and project stakeholders (相關方). Archive and
+  restore replace deletion, and every change offers undo.
+- M16: the timeline (a Gantt with drag, resize and dependency links,
+  critical path and risk) and the relations graph. MCP gains
+  `relations.get`.
+- M17: the AI brief and Ask taff. Both are rules-based. The model path is off
+  unless a workspace opts in and the deployment sets the AI variables
+  (ADR 0016); production ships without them.
+- M18: the editable mind map (`?view=mind`). It has a canvas and an
+  accessible list view, evidence sources, archive and restore, and
+  validation tasks. Migration `0026` (edge versions) is additive.
+- M19: v1 leftovers are removed and the visual suite is renamed
+  `ui-v2.spec.ts`. The Noto Sans TC subsets are regenerated from the v2
+  strings, and a lint test catches Simplified characters in zh-HK strings. A
+  rerun accessibility audit covers 348 contexts with 0 failures, and the
+  locale route captures cover 186 states.
+
+All migrations since v0.1.0 (`0023`–`0026`) are additive. MCP has 30 tools.
+Release candidates, CI evidence and deployment checkpoints are recorded in
+`docs/deploy.md`. Milestone reports are in `docs/milestones/11-*` to `19-*`.
+
 ## v0.1.0
 
 The release tag is created only after complete M9 validation and green CI. The

@@ -1,9 +1,11 @@
 # M19 — Cleanup, accessibility, i18n, release
 
-Plan §6.1 M19 (`docs/frontend-v2-plan.md`). M19 is split across branches.
-This file starts on `m19-a11y`, which covers the **Accessibility** bullet and
-the i18n bullet's **locale route captures**. Other branches fill in the v1
-cleanup, fonts, key parity, the Traditional-character lint and the release.
+Plan §6.1 M19 (`docs/frontend-v2-plan.md`). M19 shipped in four pull requests:
+- #21, cleanup;
+- #22, fonts and i18n;
+- #23, accessibility and locale captures;
+- the release pull request (`m19-release`), with the changelog, README,
+  version and this report.
 
 ## What works
 
@@ -94,19 +96,68 @@ cleanup, fonts, key parity, the Traditional-character lint and the release.
 - `scripts/test-id-contract.mts` now also scans `scripts/ui/a11y-audit.mjs`.
   `e2e/support/test-id-contract.md` has been regenerated.
 
-### Cleanup, fonts, key parity, Traditional-character lint, release
+### Cleanup (PR #21)
 
-TODO (other M19 branches).
+- **Visual suite renamed.** `e2e/ui-parity.spec.ts` is now
+  `e2e/ui-v2.spec.ts`. Its 86 baselines moved byte for byte to
+  `e2e/__screenshots__/ui-v2.spec.ts/`. Both Playwright configs,
+  `visual-baselines.yml` and the test-id contract are updated to match.
+- **No screens dropped.** The plan's "86 v1 baselines" predates M13. D11
+  replaced baselines screen by screen through M13–M18, so all 16 screens
+  are v2 routes, and the screen list and PNG count stay the same.
+- **Dead CSS removed.** 317 lines of v1 rules whose classes appear nowhere
+  else in the repo were removed from `base.css`, `task-detail.css` and
+  `today.css`. An import-graph check found no unreachable TS/TSX module.
+  `/digests` is unchanged.
+
+### Fonts and i18n (PR #22)
+
+- **Noto Sans TC subsets.**
+  - **Regenerated** with the procedure in `apps/web/public/fonts/README.md`
+    from these sources: the locale strings, hard-coded CJK in the app, the
+    seed content and Intl date text. With the old character set, the
+    procedure reproduces the old files byte for byte.
+  - **Size:** 714 → 975 characters, and 219,496 → 295,616 bytes across the
+    two files.
+  - **Faces and ranges:** there are still four faces, so `prepare-fonts.ts`
+    is unchanged. The `unicode-range` values match each file's character
+    map exactly.
+  - **Visual baselines:** 69 of 86 were recaptured on CI.
+- **Traditional-character lint.** `apps/web/src/lib/zh-hk-characters.test.ts`
+  holds the plan §2.4 item 13 list in one constant. The test fails on any
+  of those characters or words in a zh-HK string and names the key,
+  character and correction. A self-test proves it catches every entry and
+  allows legitimate words such as 注意, 恢復 and 批准. No current string
+  violated it.
+- **Key parity.** The new test also requires matching `_one` and `_other`
+  plural pairs and identical `{{placeholders}}` in every string across en,
+  zh-CN and zh-HK. The existing nested-key parity test still passes.
+
+### Visual capture readiness (PR #23)
+
+The Me screen had no readiness check in `ui-v2.spec.ts`. One CI capture saved
+`desktop-zh-HK/me.png` with the main pane still blank, and the next comparison
+failed by 33,948 px.
+- **Fix:** desktop Me now waits for every inbox item and the task detail
+  heading; phone Me waits for its inbox and brief rows. These are added
+  assertions; none was removed or loosened.
+- **M18 note:** the same race most likely caused the M18 `desktop-en/me.png`
+  mismatch, which was put down to font metrics at the time.
+
+### Release
+
+- `CHANGELOG.md` has a v0.2.0 section covering M11–M19. The README gains a
+  v2 status summary and the v2 capture commands in the quick start. All
+  workspace packages and the MCP server version are now `0.2.0`.
+- Release candidates are recorded in `docs/deploy.md`:
+  - **M18b:** live.
+  - **M19a:** `9577c8c`, which includes PR #21 and PR #22.
+  - **Next:** the merge of this pull request is the v0.2.0 candidate.
 
 ## Missing
 
 ### Accessibility and locale captures
 
-- **Visual baselines.** The badge text colour (`inbox-badge`, `.me-count`)
-  changed, as did the timeline divider and the target sizes listed above.
-  Phone baselines that show the tab badge will differ until the v2
-  baselines are regenerated with `visual-baselines.yml` (M19 baseline
-  work).
 - **Locale captures are light theme only.** Dark theme is covered by the
   audit, not by captures.
 - **Brief date in captures.** The brief's date line uses the server clock,
@@ -117,7 +168,13 @@ TODO (other M19 branches).
 
 ### Other parts
 
-TODO.
+- **Fonts.** The TC font has no glyphs for 173 Simplified characters used in
+  zh-CN strings and seed content, so those still use the system font, as
+  before.
+- **Monospace.** The `⌘K` hint uses the system monospace stack, so it can
+  render differently from one machine to the next.
+- **Relations view.** In English, the view now downloads the 225 KB
+  remaining font file for `↔`.
 
 ## Open decisions
 
@@ -130,7 +187,7 @@ TODO.
 
 ### Other parts
 
-TODO.
+None.
 
 ## Validation
 
@@ -154,4 +211,12 @@ Valkey DB 9, seed date 2026-10-08.
 
 ### Other parts
 
-TODO.
+Under the 2026-10-14 working rules, contributors run only the fast checks
+locally, and CI runs the full suite on every pull request and on `main`.
+
+| Check | Result |
+| --- | --- |
+| PR #21: lint, typecheck, `pnpm test` (873), build | pass locally; CI [38565883593](https://github.com/ksamint/taff01/actions/runs/38565883593) green |
+| PR #22: lint, typecheck, licence, `pnpm test` (877), build, `perf:budget` (Today 194,431 B / 204,800 B) | pass locally; CI [38569973363](https://github.com/ksamint/taff01/actions/runs/38569973363) green |
+| PR #23 CI (LCP guard, gated Lighthouse, visual suite, e2e, MCP smoke) | [38576480541](https://github.com/ksamint/taff01/actions/runs/38576480541) green |
+| `main` CI on `9577c8c` (M19a candidate) | [38572631759](https://github.com/ksamint/taff01/actions/runs/38572631759) green |
