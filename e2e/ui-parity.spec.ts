@@ -125,7 +125,11 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   ).length;
   if (desktop) {
     await expect(page.locator(".sidebar")).toBeVisible();
-    await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(3);
+    // 今天 · 日曆 · 項目, with 公司 · 聯繫人 nested under 項目 (ADR 0014 §2).
+    await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(5);
+    await expect(page.locator(".sidebar-primary .sidebar-sublink")).toHaveCount(
+      2,
+    );
     await expect(page.locator(".sidebar-me .nav-badge")).toHaveText(
       String(needsYou),
     );
@@ -143,7 +147,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     await expect(page.getByTestId("task-detail-heading")).toBeVisible();
   }
   if (screen === "task-detail") {
-    await expect(page.getByTestId("task-field-worker")).toBeEnabled();
+    // The desktop panel edits the worker inline; the phone sheet opens a row.
+    await expect(
+      page.getByTestId(desktop ? "detail-worker" : "task-field-worker"),
+    ).toBeEnabled();
     await expect(page.getByTestId("task-schedule")).toBeEnabled();
     await expect(page.locator(".task-parent-link")).toContainText("NW-140");
   }
@@ -223,7 +230,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       }
     }
     if (screen === "quick-add") {
-      await page.locator(".quick-fab").click();
+      // Desktop Today opens quick add from its 新建任務 button (ADR 0014).
+      await page
+        .locator(desktop ? '[data-testid="desktop-new-task"]' : ".quick-fab")
+        .click();
       await expect(page.getByTestId("quick-title")).toBeVisible();
       await expect(page.getByTestId("quick-title")).toBeEnabled();
     }
@@ -379,8 +389,14 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   await expect(shell).toBeVisible();
   if (desktop) {
     await expect(shell.locator(".sidebar-primary .sidebar-link")).toHaveCount(
-      3,
+      5,
     );
+    await expect(
+      shell.locator('.sidebar-primary .sidebar-sublink[href="/companies"]'),
+    ).toBeVisible();
+    await expect(
+      shell.locator('.sidebar-primary .sidebar-sublink[href="/contacts"]'),
+    ).toBeVisible();
     await expect(shell.locator('a[href="/me"] .nav-badge')).toHaveText(
       String(needsYou),
     );
@@ -406,8 +422,9 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       ["/", true],
       ["/calendar", true],
       ["/projects", true],
-      ["/inbox", false],
+      // v2: the inbox is reached from 我的 (ADR 0014), so visit Me first.
       ["/me", false],
+      ["/inbox", false],
     ] as const) {
       if (new URL(page.url()).pathname !== route)
         await page.locator(`a[href="${route}"]:visible`).first().click();
