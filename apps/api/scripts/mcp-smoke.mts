@@ -6,6 +6,7 @@ import {
 } from "@modelcontextprotocol/client";
 import { createCore, userPrincipal } from "@taff/core";
 import {
+  briefSchema,
   calendarViewDataSchema,
   companyListSchema,
   contactDetailSchema,
@@ -17,6 +18,7 @@ import {
   runDetailSchema,
   runSchema,
   searchResultSchema,
+  suggestionSchema,
   taskCalendarSchema,
   taskPlanResultSchema,
   taskSchema,
@@ -96,9 +98,10 @@ try {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists every task, calendar, timeline, project, search, draft, run, grant, file and CRM tool",
+    "lists every task, calendar, timeline, project, search, draft, run, grant, file, CRM, relations, brief and suggestion tool",
     JSON.stringify(tools) ===
       JSON.stringify([
+        "brief.get",
         "calendar.list",
         "calendar.schedule",
         "calendar.set",
@@ -119,6 +122,7 @@ try {
         "runs.start",
         "runs.submit",
         "search.query",
+        "suggestions.create",
         "tasks.comments.add",
         "tasks.comments.list",
         "tasks.create",
@@ -437,6 +441,49 @@ try {
       ) &&
       !/phone|email/.test(JSON.stringify(relations)),
     relations,
+  );
+  const brief = briefSchema.parse(
+    text(await client.callTool({ name: "brief.get", arguments: {} })),
+  );
+  check(
+    "brief.get reads the token workspace's projects without finance",
+    JSON.stringify(brief.workspaceIds) === JSON.stringify([workspace.id]) &&
+      brief.projects.some((item) => item.projectId === project.id) &&
+      brief.projects.every((item) => item.risk.finance === null),
+    brief,
+  );
+  const proposal = suggestionSchema.parse(
+    text(
+      await client.callTool({
+        name: "suggestions.create",
+        arguments: {
+          taskId,
+          kind: "reschedule",
+          payload: {
+            startDate: "2026-12-01",
+            durationDays: 2,
+            reason: "MCP smoke",
+          },
+        },
+      }),
+    ),
+  );
+  const unchanged = await core.getTimeline(asUser, project.id);
+  check(
+    "suggestions.create records a pending proposal and changes nothing",
+    proposal.status === "pending" &&
+      proposal.createdBy === agent.id &&
+      unchanged.items.find((item) => item.id === taskId)?.start !==
+        "2026-12-01",
+    proposal,
+  );
+  const dismissed = await core.dismissSuggestion(asUser, proposal.id, {
+    version: proposal.version,
+  });
+  check(
+    "a person dismisses the agent's proposal",
+    dismissed.status === "dismissed",
+    dismissed,
   );
   const unlinked = dependencySchema.parse(
     text(

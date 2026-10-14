@@ -65,6 +65,8 @@ const TOOLS = [
   ["contacts.list", "listContacts"],
   ["contacts.get", "readContact"],
   ["relations.get", "readRelations"],
+  ["brief.get", "readBrief"],
+  ["suggestions.create", "proposeChange"],
 ] as const;
 const SCOPES = scopeSchema.options as Scope[];
 

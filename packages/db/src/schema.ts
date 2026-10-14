@@ -150,6 +150,8 @@ export const workspaces = pgTable("workspaces", {
   /** Short prefix of every task reference in the workspace, such as NW in NW-141. */
   key: text("key").default("WS").notNull(),
   seedKey: text("seed_key").unique(),
+  /** Opt-in for the optional model path of Ask taff (D6, ADR 0016). */
+  aiEnabled: boolean("ai_enabled").default(false).notNull(),
   ...dates,
 });
 export const memberKind = pgEnum("member_kind", ["person", "agent"]);
@@ -1243,5 +1245,59 @@ export const contactRoles = pgTable(
     uniqueIndex("contact_roles_task_exclusive_idx")
       .on(t.taskId, t.role)
       .where(sql`${t.scope} = 'task' AND ${t.role} = 'signoff'`),
+  ],
+);
+/**
+ * Agent proposals (M17): an agent proposes, a person applies through the
+ * normal core operations or dismisses. Never deleted.
+ */
+export const suggestions = pgTable(
+  "suggestions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    taskId: uuid("task_id"),
+    createdBy: uuid("created_by").notNull(),
+    kind: text("kind").notNull(),
+    payload: jsonb("payload").notNull(),
+    status: text("status").default("pending").notNull(),
+    decidedBy: uuid("decided_by"),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("suggestions_workspace_id_unique").on(t.workspaceId, t.id),
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "suggestions_task_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.createdBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "suggestions_creator_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.decidedBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "suggestions_decider_fk",
+    }),
+    index("suggestions_workspace_status_idx").on(
+      t.workspaceId,
+      t.status,
+      t.createdAt,
+    ),
+    index("suggestions_task_idx").on(t.workspaceId, t.taskId),
+    check("suggestions_kind", sql`${t.kind} IN ('split','reschedule')`),
+    check(
+      "suggestions_status",
+      sql`${t.status} IN ('pending','applied','dismissed')`,
+    ),
+    check(
+      "suggestions_decision",
+      sql`(${t.status} = 'pending') = (${t.decidedBy} IS NULL AND ${t.decidedAt} IS NULL)`,
+    ),
+    check("suggestions_version", sql`${t.version} > 0`),
   ],
 );

@@ -18,7 +18,8 @@
     "./today-bootstrap": "./src/today-bootstrap.ts",
     "./crm": "./src/crm.ts",
     "./plan": "./src/plan.ts",
-    "./graph": "./src/graph.ts"
+    "./graph": "./src/graph.ts",
+    "./assistant": "./src/assistant.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json"

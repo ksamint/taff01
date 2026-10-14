@@ -43,6 +43,7 @@ import {
   civilDate,
   dayNumber,
   type PlanEnd,
+  type PlanModelInput,
   type PlanModelTask,
 } from "./plan-model";
 import { localDate, zonedInstant } from "./quick-add";
@@ -230,14 +231,18 @@ export function createTimelineOperations({
     return project;
   }
 
-  async function getTimeline(
-    p: Principal,
-    projectId: string,
-  ): Promise<Timeline> {
-    const project = await readProject(projectId);
+  /**
+   * The plan-model input of one project as `actor` sees it: finance only
+   * with finance:read (D7). The timeline and the brief share it, so their
+   * numbers are the same by construction.
+   */
+  async function planSource(
+    actor: Actor,
+    project: typeof projects.$inferSelect,
+    timeZone: string,
+  ) {
     const w = project.workspaceId;
-    const actor = await requireMember(db, p, w, "workspace:read");
-    const timeZone = await zoneOf(db, p, actor);
+    const projectId = project.id;
     const rows = await db
       .select({ task: tasks, plan: taskPlans, workerKind: members.kind })
       .from(tasks)
@@ -328,7 +333,7 @@ export function createTimelineOperations({
       taskId
         ? { kind: "task", id: taskId }
         : { kind: "milestone", id: milestoneId as string };
-    const model = buildPlanModel({
+    const input: PlanModelInput = {
       today: localDate(new Date(), timeZone),
       tasks: rows.map(
         ({ task, plan, workerKind }): PlanModelTask => ({
@@ -352,14 +357,32 @@ export function createTimelineOperations({
           version: task.version,
         }),
       ),
-      milestones: milestoneRows,
+      milestones: milestoneRows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        date: row.date,
+        version: row.version,
+      })),
       dependencies: dependencyRows.map((row) => ({
         id: row.id,
         from: end(row.predecessorTaskId, row.predecessorMilestoneId),
         to: end(row.successorTaskId, row.successorMilestoneId),
       })),
       finance,
-    });
+    };
+    return { input, rows, runIds };
+  }
+
+  async function getTimeline(
+    p: Principal,
+    projectId: string,
+  ): Promise<Timeline> {
+    const project = await readProject(projectId);
+    const w = project.workspaceId;
+    const actor = await requireMember(db, p, w, "workspace:read");
+    const timeZone = await zoneOf(db, p, actor);
+    const { input, rows, runIds } = await planSource(actor, project, timeZone);
+    const model = buildPlanModel(input);
     return {
       projectId,
       timeZone,
@@ -412,7 +435,19 @@ export function createTimelineOperations({
   ): Promise<TaskPlanResult> {
     parse(idSchema, taskId);
     const body = parse(taskPlanInputSchema, input);
-    return mutation(p, async (tx) => {
+    return mutation(p, (tx) => applyTaskPlan(tx, p, taskId, body));
+  }
+  /**
+   * The plan write inside a caller's transaction, with the same checks as
+   * PATCH /api/tasks/:id/plan (applying a reschedule suggestion uses it).
+   */
+  async function applyTaskPlan(
+    tx: Transaction,
+    p: Principal,
+    taskId: string,
+    body: TaskPlanInput,
+  ): Promise<TaskPlanResult> {
+    {
       const task = await lockTask(tx, taskId);
       const actor = await requireMember(
         tx,
@@ -542,7 +577,7 @@ export function createTimelineOperations({
         result.tasks.unshift(dtoTask(updated));
       }
       return result;
-    });
+    }
   }
 
   async function listMilestones(
@@ -842,6 +877,9 @@ export function createTimelineOperations({
   }
 
   return {
+    zoneOf,
+    planSource,
+    applyTaskPlan,
     operations: {
       getTimeline,
       setTaskPlan,

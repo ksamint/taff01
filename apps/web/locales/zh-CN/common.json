@@ -277,7 +277,9 @@
       "listCompanies": "列出公司",
       "listContacts": "列出联系人（未获授权不含电话与邮箱）",
       "readContact": "读取联系人及其关联",
-      "readRelations": "读取关系图（不含电话与邮箱）"
+      "readRelations": "读取关系图（不含电话与邮箱）",
+      "readBrief": "读取简报（只含代码与数字，不含财务）",
+      "proposeChange": "提出拆分或改期建议，由人决定是否采用"
     },
     "back": "返回",
     "copyEndpoint": "复制端点",

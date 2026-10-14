@@ -39,6 +39,11 @@ const FAMILIES = [
   "crm-audit",
   // Relations graph (M16), keyed by workspace: ["graph", workspaceId, scope].
   "graph",
+  // Brief and agent suggestions (M17): ["brief", scope, workspaceId] and
+  // ["suggestions", workspaceId, filter]; the model-path switch per workspace.
+  "brief",
+  "suggestions",
+  "workspace-ai",
 ];
 
 export function connectWorkspace(

@@ -54,12 +54,17 @@ import { createEmailVerificationOperations } from "./email-verification";
 import { createSmsAuth } from "./sms-auth";
 import type { SmsProvider } from "./tencent-sms";
 
+export type { AiConfig, AiProvider } from "./ai-provider";
+export {
+  aiConfigFromEnv,
+  createAiProvider,
+  createAiProviderFromEnv,
+} from "./ai-provider";
 export type { EmailMessage, EmailStatus, EmailTransport } from "./email";
 export {
   createEmailTransportFromEnv,
   createLoggingEmailTransport,
 } from "./email";
-
 export type { SmsProvider } from "./tencent-sms";
 export {
   createTencentSmsProvider,
@@ -69,6 +74,8 @@ export {
 
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { createAdministrationOperations } from "./administration";
+import type { AiProvider } from "./ai-provider";
+import { createAssistantOperations } from "./assistant";
 import { createCalendarOperations } from "./calendar";
 import { createCrmOperations } from "./crm";
 import { createNotificationOperations } from "./notifications";
@@ -76,6 +83,7 @@ import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRelationOperations } from "./relations";
 import { createRunOperations } from "./runs";
+import { createSuggestionOperations } from "./suggestions";
 import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
 
@@ -155,6 +163,8 @@ export function createCore(options: {
   sms?: SmsProvider;
   email?: EmailTransport;
   onEmailStatus?: (status: EmailStatus) => void;
+  /** Optional model path for Ask taff (D6, ADR 0016); unset in production. */
+  ai?: AiProvider;
 }) {
   if (options.tokenPepper.length < 16)
     throw new Error("TOKEN_PEPPER must be at least 16 characters");
@@ -529,8 +539,16 @@ export function createCore(options: {
     input: CreateTask,
   ): Promise<Task> {
     const body = parse(createTaskSchema, input);
+    return mutation(principal, (tx) => insertTask(tx, principal, body));
+  }
+  /** The create path inside a caller's transaction (also used by suggestions). */
+  async function insertTask(
+    tx: Transaction,
+    principal: Principal,
+    body: CreateTask,
+  ): Promise<Task> {
     const { calendar: initialCalendar, ...fields } = body;
-    return mutation(principal, async (tx) => {
+    {
       await requireMember(tx, principal, body.workspaceId, "task:create", {
         workspaceId: body.workspaceId,
         taskId: body.parentId ?? undefined,
@@ -572,7 +590,7 @@ export function createCore(options: {
       if (initialCalendar)
         await calendar.storeOnCreate(tx, principal, task, initialCalendar);
       return toTask(task);
-    });
+    }
   }
   /** Numbers are dense per workspace; the workspace row lock serializes creation. */
   async function nextTaskNumber(tx: Transaction, workspaceId: string) {
@@ -1000,6 +1018,23 @@ export function createCore(options: {
   });
   const crm = createCrmOperations({ db, mutation, requireMember });
   const relations = createRelationOperations({ db, requireMember });
+  const suggestionOperations = createSuggestionOperations({
+    db,
+    mutation,
+    requireMember,
+    lockTask,
+    currentRunId,
+    insertTask,
+    applyTaskPlan: timeline.applyTaskPlan,
+  });
+  const assistant = createAssistantOperations({
+    db,
+    mutation,
+    requireMember,
+    zoneOf: timeline.zoneOf,
+    planSource: timeline.planSource,
+    ai: options.ai,
+  });
   const runOperations = createRunOperations({
     db,
     mutation,
@@ -1037,6 +1072,8 @@ export function createCore(options: {
     ...timeline.operations,
     ...crm.operations,
     ...relations.operations,
+    ...suggestionOperations.operations,
+    ...assistant.operations,
     ...runOperations,
     getTodayBootstrap,
     auth,

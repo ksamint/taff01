@@ -47,7 +47,11 @@ export type Action =
   | "contact:details"
   | "contact:manage"
   | "crm:archive"
-  | "crm:audit";
+  | "crm:audit"
+  | "suggestion:create"
+  | "suggestion:decide"
+  | "mind:write"
+  | "mind:archive";
 export type Resource =
   | {
       workspaceId: string;
@@ -121,10 +125,26 @@ export function can(
     action === "finance:read" ||
     action === "finance:manage" ||
     action === "crm:archive" ||
-    action === "crm:audit"
+    action === "crm:audit" ||
+    action === "mind:archive"
   )
     return actor.kind === "person" && actor.role === "admin";
-  if (action === "contact:manage") return actor.kind === "person";
+  if (action === "contact:manage" || action === "mind:write")
+    return actor.kind === "person";
+  if (action === "suggestion:create")
+    // Agents only propose, and only on work they hold (M17).
+    return (
+      actor.kind === "agent" &&
+      actor.id === resource.workerId &&
+      !!actor.scopes?.includes("tasks:write") &&
+      can(actor, "capability:use", { ...resource, capability: "tasks.write" })
+    );
+  if (action === "suggestion:decide")
+    // A person decides; applying also needs the normal operation's right.
+    return (
+      actor.kind === "person" &&
+      (actor.role === "admin" || actor.id === resource.ownerId)
+    );
   if (action === "contact:read" || action === "contact:details") {
     if (actor.kind === "person") return true;
     // Agents read CRM with tasks:read plus the crm.read capability a person

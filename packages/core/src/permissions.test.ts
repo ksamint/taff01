@@ -935,3 +935,115 @@ describe("M12 planning and CRM permission decisions", () => {
     expect(can(actor, action, resource)).toBe(expected),
   );
 });
+
+describe("Phase B suggestion and mind-map permission decisions", () => {
+  const admin: Actor = { ...person, id: "admin", role: "admin" };
+  const other: Actor = { ...person, id: "other" };
+  const guest: Actor = { ...person, id: "guest", role: "guest" };
+  const workspace = { workspaceId: "workspace" };
+  const elsewhere = { ...task, workspaceId: "other" };
+  it.each<[string, Actor, Action, Resource, boolean]>([
+    [
+      "the task's agent worker proposes",
+      agent,
+      "suggestion:create",
+      task,
+      true,
+    ],
+    [
+      "an agent that is not the worker cannot propose",
+      agent,
+      "suggestion:create",
+      { ...task, workerId: "someone" },
+      false,
+    ],
+    [
+      "an agent without tasks:write cannot propose",
+      { ...agent, scopes: ["tasks:read"] },
+      "suggestion:create",
+      task,
+      false,
+    ],
+    [
+      "a denied tasks.write capability blocks proposals",
+      {
+        ...agent,
+        permissions: [{ capability: "tasks.write", decision: "deny" }],
+      },
+      "suggestion:create",
+      task,
+      false,
+    ],
+    [
+      "an agent in another workspace cannot propose",
+      agent,
+      "suggestion:create",
+      elsewhere,
+      false,
+    ],
+    [
+      "a person never proposes as an agent",
+      person,
+      "suggestion:create",
+      { ...task, workerId: "owner" },
+      false,
+    ],
+    ["the task owner decides", person, "suggestion:decide", task, true],
+    ["an admin decides", admin, "suggestion:decide", task, true],
+    ["another member cannot decide", other, "suggestion:decide", task, false],
+    [
+      "a guest cannot decide",
+      { ...guest, id: "owner" },
+      "suggestion:decide",
+      task,
+      false,
+    ],
+    [
+      "an agent never decides, even as the worker",
+      { ...agent, role: "admin" },
+      "suggestion:decide",
+      task,
+      false,
+    ],
+    ["a member writes the mind map", person, "mind:write", workspace, true],
+    [
+      "a guest cannot write the mind map",
+      guest,
+      "mind:write",
+      workspace,
+      false,
+    ],
+    [
+      "an agent cannot write the mind map",
+      { ...agent, scopes: ["tasks:write"] },
+      "mind:write",
+      workspace,
+      false,
+    ],
+    [
+      "another workspace's member cannot write",
+      person,
+      "mind:write",
+      { workspaceId: "other" },
+      false,
+    ],
+    ["an admin archives mind nodes", admin, "mind:archive", workspace, true],
+    [
+      "a member cannot archive mind nodes",
+      person,
+      "mind:archive",
+      workspace,
+      false,
+    ],
+    [
+      "an agent cannot archive mind nodes",
+      { ...agent, role: "admin" },
+      "mind:archive",
+      workspace,
+      false,
+    ],
+    ["a guest reads the mind map", guest, "workspace:read", workspace, true],
+  ])("%s", (_, actor, action, resource, expected) =>
+    expect(can(actor, action, resource)).toBe(expected),
+  );
+});

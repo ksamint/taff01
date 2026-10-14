@@ -169,6 +169,13 @@
       "when": 1791939751835,
       "tag": "0023_m12_planning_crm",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791943296297,
+      "tag": "0024_m17_suggestions_ai",
+      "breakpoints": true
     }
   ]
 }

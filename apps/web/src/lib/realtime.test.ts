@@ -152,6 +152,23 @@ describe("workspace realtime lifecycle", () => {
       expect(client.getQueryState(key)?.isInvalidated).toBe(true);
     }
   });
+  it("invalidates the brief and suggestions on a proposal or plan change", () => {
+    const keys = [
+      ["brief", "all"],
+      ["brief", "workspace", workspaceId],
+      ["suggestions", workspaceId, { status: "pending" }],
+      ["workspace-ai", workspaceId],
+    ];
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    for (const action of ["suggestions.insert", "task_plans.update"]) {
+      for (const key of keys) client.setQueryData(key, {});
+      socket.message({ ...event, action });
+      for (const key of keys)
+        expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    }
+  });
   it("defers change refetches until a pending optimistic mutation settles", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
     cleanup = connectWorkspace(client, workspaceId, userId);

@@ -52,6 +52,7 @@ import {
 } from "./primitives";
 import { runSchema, runStatusSchema } from "./run-read";
 
+export * from "./assistant";
 export * from "./base";
 
 export * from "./calendar-read";
