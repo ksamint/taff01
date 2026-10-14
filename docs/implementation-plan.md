@@ -111,6 +111,14 @@ reviews. The agent prompt that drives this is `agent-goal.md`.
   against the floor in `docs/ui/README.md`; i18n QA in all locales;
   prototype seed data; release notes; clean-checkout quick start verified.
 
+### Phase 5 — Frontend v2
+
+The approved prototype v2 (`ui/prototype-v2/`) replaces the v1 UI and adds
+CRM, a planning timeline, a relations graph, an AI brief and a mind map.
+[The frontend v2 plan](frontend-v2-plan.md) holds the review, the backend
+design, the open decisions and milestones M11–M19; the agent prompt is
+[agent-goal-frontend-v2.md](agent-goal-frontend-v2.md).
+
 ## Review protocol
 
 Report working behavior, missing requirements, open decisions and validation

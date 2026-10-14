@@ -1,5 +1,9 @@
 # Agent goal: finish Taff M9 and hand over
 
+> **Next (2026-10-14):** after item 7 (tag `v0.1.0`), the frontend is replaced
+> by prototype v2: `docs/agent-goal-frontend-v2.md` drives that work and
+> `docs/frontend-v2-plan.md` is the plan.
+
 > The prototype port from `docs/agent-goal-ui-parity.md` is merged (PR 2,
 > 2026-10-10). Item 0 below (LCP) and the visual baselines are done on
 > `main` as of `828443e` (LCP 704/780/772 ms). `docs/agent-goal-deploy.md`

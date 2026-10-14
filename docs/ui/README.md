@@ -1,3 +1,8 @@
+> **Superseded for new work (2026-10-14):** prototype v2 in `prototype-v2/`
+> is the UI source of truth for the frontend replacement planned in
+> `../frontend-v2-plan.md`. This file describes the v1 port on `main` until
+> milestone M11 rewrites it.
+
 # UI and UX specification
 
 The approved UI lives in `prototype/`: a working single-file React prototype
