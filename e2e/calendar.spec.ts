@@ -983,11 +983,18 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
     .first();
   // Four weekly occurrences from today; late in a month the last ones fall
   // after the grid's final week, so count only the dates the grid shows.
-  const visibleDates = await page
-    .locator(".sx__month-grid-day[data-date]")
-    .evaluateAll((days) =>
-      days.map((day) => (day as HTMLElement).dataset.date),
-    );
+  // Wait until the month grid has rendered and shows today (in the member's
+  // time zone): reading it straight after the click can see no days yet.
+  const monthDates = () =>
+    page
+      .locator(".sx__month-grid-day[data-date]")
+      .evaluateAll((days) =>
+        days.map((day) => (day as HTMLElement).dataset.date),
+      );
+  await expect
+    .poll(monthDates, { message: `month grid shows today (${date})` })
+    .toContain(date);
+  const visibleDates = await monthDates();
   const shownOccurrences = [0, 7, 14, 21].filter((days) =>
     visibleDates.includes(offsetDay(date, days)),
   ).length;

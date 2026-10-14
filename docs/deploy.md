@@ -940,3 +940,135 @@ with the assertion passing. Production remains
 `23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
 migration, image build or container replacement was started.
 
+### Frontend v2 release candidate M16 — 2026-10-14 (answers the M15 calendar block)
+
+**Source.** `main` at `78c68ab9182fa1d9bdbdd9219108f276176567db`. It is the
+merge of PR #15 (calendar e2e fix) on top of PR #13 (`m16-timeline`, merged as
+`4989a27`). It supersedes the blocked M15 candidate, so one deploy covers R1,
+M15 and M16.
+
+**Answer to the M15 `Blocked:` note** (`calendar.spec.ts:994`, "expected > 0,
+received 0" in en and zh-CN on macOS arm64):
+
+- **Cause:** `calendar-engine.tsx` switches to month view with
+  `setView("month-grid")`. The SDK renders the month DOM on a later frame,
+  and the engine itself waits for `.sx__month-grid-wrapper`. The test read
+  `.sx__month-grid-day[data-date]` straight after the click, so a slower host
+  could find no cells and count 0.
+- **Fix (PR #15, test only):** the test now polls the grid until it contains
+  today in the member's time zone, then counts. The assertion is unchanged; a
+  grid that never shows today now fails with that message.
+- **Validation:** `calendar.spec.ts` passed 15/15 in en, zh-CN and zh-HK with
+  `TZ=Asia/Shanghai` on a fresh database.
+- **Not reproduced here:** neither a browser time zone whose date differs from
+  the member's (`TZ=Pacific/Honolulu`) nor full CPU load made the old test
+  fail. The code path above is the only way the count can reach 0 without
+  navigation.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `78c68ab`:** [38544901342](https://github.com/ksamint/taff01/actions/runs/38544901342), success (pushed only after it succeeded).
+- **PR #15 CI on its head `4d5a0ae8121477111010ed096b7ac9a78c8a30de`:**
+  [38542333878](https://github.com/ksamint/taff01/actions/runs/38542333878),
+  success. That head is an ancestor of the source.
+- **PR #13 CI on its head `721887866ed725dbcea6675f5ce7dfd30d5525d7`:**
+  [38538390232](https://github.com/ksamint/taff01/actions/runs/38538390232),
+  success. Between that head and the source, only `docs/deploy.md` and
+  `e2e/calendar.spec.ts` differ.
+- **Visual baselines and gated Lighthouse on CI Chromium:**
+  - [38530381663](https://github.com/ksamint/taff01/actions/runs/38530381663),
+    which also ran the Lighthouse gate;
+  - [38537224735](https://github.com/ksamint/taff01/actions/runs/38537224735),
+    which recaptured the baselines after the fix below.
+
+**What changes for people.**
+
+- **Timeline (`?view=timeline`).**
+  - **Display:** day and week zoom, summary bars, milestones and the critical
+    path. Blocked and conflicting tasks are marked. Risk, forecast and slip
+    come from the plan model.
+  - **Editing:** move and resize bars; moving a parent bar moves its
+    subtree. Add or remove dependencies by drag, link mode or form.
+  - **Undo:** every change shows a toast with 撤銷 (undo), which calls the
+    inverse API with `version`.
+  - **Keyboard:** row selection, with a footer form for editing.
+- **Relations graph (`?view=relations`).**
+  - **Layouts:** layered and seeded-force, both deterministic.
+  - **Navigation:** pan, zoom and fit, plus layer chips. The scope is this
+    project or the workspace.
+  - **Inspector:** reachable by keyboard, with an "as list" alternative.
+- **Fix: Today opened an arbitrary workspace.** A person's default workspace
+  could depend on the query plan when several workspaces were created
+  together, as the seed does. `getMe` now breaks `createdAt` ties by name
+  (`COLLATE "C"`), then id. Existing people may see seeded workspaces listed
+  in a different order.
+
+Report: `docs/milestones/16-timeline-relations.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 839 / 839 (fresh database) |
+| e2e | 165 / 165 (fresh database); green in PR CI |
+| visual suite | 16 screens × 4 projects, green in PR CI |
+| Today initial JS | 193,537 B gzipped / 204,800 B |
+| Today LCP, median of 3, slow 4G, 4× CPU, local production build | en 636 ms, zh-CN 640 ms, zh-HK 640 ms |
+| Lighthouse, gated, CI Chromium (performance / accessibility / best practices) | 99/100/100 in en, zh-CN and zh-HK |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+**Migrations.** None. The last migration is still `0025` from the M15
+candidate.
+
+**Environment.** No changes.
+
+**Compose, Docker and Caddy.** No changes.
+
+**Release checklist (plan §6.0).** It ran on PR #13 head `7218878` against a
+local production-mode stack. That head has the source's application code:
+only `docs/deploy.md` and the calendar test differ.
+
+- **Setup:** `pnpm release:stack --build --migrate --seed` on a fresh database,
+  then `RELEASE_MAIL_LOG=… pnpm release:checklist`.
+- **Result: passed, 32 / 32,** with 0 failed and 0 skipped.
+- **Sub-step skipped:** SMS sign-in, in every project, because
+  `smsEnabled=false` locally.
+- **MCP:** the `@modelcontextprotocol/client` round trip passed 42/42 checks
+  over the 30 tools, in every project.
+
+All eight items passed on phone-en, phone-zh-HK, desktop-en and desktop-zh-HK.
+
+**Notes for the deploy.**
+
+- If the live origin is still on `2338772`, migrations `0023`–`0025` apply
+  together, as described in the M15 candidate.
+- After the deploy, open a project's 時間線 (timeline) and 關係圖 (relations
+  graph) views as an admin and as a member. Members must not see finance
+  figures.
+
+**Blocked: local `pnpm test` member-order assertion — 2026-10-14.** Source
+`78c68ab9182fa1d9bdbdd9219108f276176567db` passed Step 0: exact-source
+main CI [38544901342](https://github.com/ksamint/taff01/actions/runs/38544901342)
+and ancestor-head PR CI
+[38542333878](https://github.com/ksamint/taff01/actions/runs/38542333878)
+are completed/success, the source is an ancestor of main, and its code diff
+to main is empty. On a clean detached macOS arm64 checkout with fresh isolated
+local databases, Node 24.19.0 and pnpm 12.10.1, lint, typecheck and licence
+passed. `pnpm test` exited 1: **838 passed, 1 failed**, across **78 passed,
+1 failed test files** (839 tests, 79 files total).
+The failing test is `core PostgreSQL integration > signup provisions an
+audited personal workspace and auth defaults`, at
+`packages/core/src/integration.test.ts:91:7`. It compares the roster as an
+ordered array `[person/admin, agent]`; the returned roster has the same two
+fixture members in `[agent/member, person/admin]` order. The current
+`listMembers` query in `packages/core/src/index.ts` orders by `createdAt`.
+The reason that these fixture timestamps place the agent before the person
+needs investigation; the ordered person-first assertion does not hold in
+this local run. This needs investigation
+and a fresh candidate; the deploy agent did not change tests or application
+code, weaken the assertion, or retry the failed command.
+Per Step 1, build, build:server, perf:budget, e2e, MCP smoke, Lighthouse, LCP
+and production deployment did not run. Production remains
+`23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
+migration, image build or container replacement was started.

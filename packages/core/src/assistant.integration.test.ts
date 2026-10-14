@@ -491,6 +491,14 @@ describe.skipIf(!url)(
             fetch.mock.calls[0] as unknown as [string, RequestInit]
           )[1].body as string;
           expect(body).toContain("What needs me?");
+          expect(body).not.toContain(w);
+          // Ids are random UUIDs and can contain any digit run (a task id like
+          // aefe0170-1000-… once matched "1000"); the contract amount must not
+          // appear anywhere else in the request.
+          const withoutIds = body.replace(
+            /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g,
+            "<id>",
+          );
           for (const secret of [
             "Checkout v2",
             "Needs a grant",
@@ -498,9 +506,8 @@ describe.skipIf(!url)(
             "Bob Lee",
             "Split Agent",
             "1000",
-            w,
           ])
-            expect(body).not.toContain(secret);
+            expect(withoutIds).not.toContain(secret);
         } finally {
           await core.setAiSettings(alice, w, { enabled: false });
         }

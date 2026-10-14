@@ -51,17 +51,35 @@ function BriefOverlay({ onClose }: { onClose: () => void }) {
     dialog?.showModal();
     return () => {
       dialog?.close();
-      // The opener lives on 我的, which remounts after the route changes:
-      // wait a few frames for the connected row, then restore focus to it.
+      // The opener lives on 我的, which remounts after the route changes.
+      // /brief also renders 我的 underneath, so a row found before the
+      // navigation lands can be replaced right after it takes focus: keep
+      // restoring until we are back on /me and the live row has focus.
       let frames = 0;
+      let stable = 0;
       const restore = () => {
+        const row = document.querySelector<HTMLElement>(
+          '[data-testid="me-brief"]',
+        );
+        // After a client navigation the opener is often <body>, which is
+        // never a useful place to return to; fall back to the 我的 row.
         const back =
-          previous instanceof HTMLElement && previous.isConnected
+          previous instanceof HTMLElement &&
+          previous !== document.body &&
+          previous.isConnected &&
+          previous !== row &&
+          !previous.closest("dialog")
             ? previous
-            : document.querySelector<HTMLElement>('[data-testid="me-brief"]');
+            : row;
         if (back?.isConnected && !back.closest("dialog")) back.focus();
-        if (document.activeElement !== back && ++frames < 30)
-          requestAnimationFrame(restore);
+        // The URL changes before the new page commits, so require the focus
+        // to hold for a few frames before stopping.
+        const settled =
+          window.location.pathname !== "/brief" &&
+          !!back &&
+          document.activeElement === back;
+        stable = settled ? stable + 1 : 0;
+        if (stable < 20 && ++frames < 300) requestAnimationFrame(restore);
       };
       requestAnimationFrame(restore);
     };
