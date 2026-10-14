@@ -1,20 +1,11 @@
 "use client";
 import {
-  createTaskSchema,
   type Locale,
   type Task,
-  type TaskComment,
-  taskCommentInputSchema,
-  taskCommentSchema,
   taskReference,
-  taskSchema,
   updateTaskSchema,
 } from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating } from "@tanstack/react-query";
 import { ArrowLeft, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import {
@@ -25,18 +16,16 @@ import {
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
-import { invalidateM3 } from "../lib/m3-queries";
+import { errorKey } from "../lib/api";
 import {
-  commentsKey,
   useEditTask,
   useProjects,
   useTaskAccess,
   useTaskComments,
 } from "../lib/m5-queries";
-import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
-import { tasksKey, useMembers, useTasks } from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
+import { useAddSubtask, useAddTaskComment } from "../lib/mutations/tasks";
+import { m3MutationKey } from "../lib/optimistic-m3";
+import { useMembers, useTasks } from "../lib/queries";
 import { deadlineFields, deadlineIso } from "../lib/task-date";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
@@ -62,7 +51,6 @@ export function TaskEditor({
   const taskWorkspace = me.workspaces.find(({ id }) => id === task.workspaceId);
   const authorId = taskWorkspace?.memberId;
   const { t, i18n } = useTranslation();
-  const client = useQueryClient();
   const members = useMembers(task.workspaceId);
   const projects = useProjects(task.workspaceId);
   const access = useTaskAccess(task.id);
@@ -115,91 +103,11 @@ export function TaskEditor({
     setEditing(true);
     setForm((current) => ({ ...current, [key]: value }));
   };
-  const addSubtask = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (title: string) =>
-      request("/api/tasks", {
-        method: "POST",
-        body: JSON.stringify(
-          createTaskSchema.parse({
-            workspaceId: task.workspaceId,
-            title,
-            ownerId: task.ownerId,
-            parentId: task.id,
-          }),
-        ),
-      }).then(taskSchema.parse),
-    onMutate: async (title) => {
-      const snapshot = await snapshotM3(client);
-      const id = `optimistic:${crypto.randomUUID()}`;
-      const now = new Date().toISOString();
-      client.setQueryData<Task[]>(
-        tasksKey(task.workspaceId),
-        (current = []) => [
-          {
-            ...task,
-            id,
-            title,
-            parentId: task.id,
-            workerId: null,
-            status: "todo",
-            description: "",
-            labels: [],
-            version: 1,
-            createdAt: now,
-            updatedAt: now,
-          },
-          ...current,
-        ],
-      );
-      return { snapshot, id };
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (created, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<Task[]>(tasksKey(task.workspaceId), (current) =>
-        current?.map((item) => (item.id === context.id ? created : item)),
-      );
-      setSubtaskTitle("");
-    },
-    onSettled: () => invalidateM3(client),
+  const addSubtask = useAddSubtask(task, {
+    onAdded: () => setSubtaskTitle(""),
   });
-  const addComment = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: string) =>
-      request(`/api/tasks/${task.id}/comments`, {
-        method: "POST",
-        body: JSON.stringify(taskCommentInputSchema.parse({ body })),
-      }).then(taskCommentSchema.parse),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      const id = `optimistic:${crypto.randomUUID()}`;
-      if (authorId)
-        client.setQueryData<TaskComment[]>(
-          commentsKey(task.id),
-          (current = []) => [
-            ...current,
-            {
-              id,
-              workspaceId: task.workspaceId,
-              taskId: task.id,
-              authorId,
-              body,
-              createdAt: new Date().toISOString(),
-            },
-          ],
-        );
-      return { snapshot, id };
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (created, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<TaskComment[]>(commentsKey(task.id), (current) =>
-        current?.map((item) => (item.id === context.id ? created : item)),
-      );
-      setComment("");
-    },
-    onSettled: () => invalidateM3(client),
+  const addComment = useAddTaskComment(task, authorId, {
+    onAdded: () => setComment(""),
   });
   function save(event: FormEvent) {
     event.preventDefault();

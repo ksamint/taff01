@@ -2,50 +2,34 @@
 import "../styles/team-parity.css";
 import "../styles/organizations.css";
 import {
-  issuedWorkspaceInviteSchema,
   type Locale,
   type Member,
-  memberRoleInputSchema,
-  memberSchema,
   type Run,
-  type WorkspaceAgentInput,
-  type WorkspaceCreate,
-  type WorkspaceInvite,
   type WorkspaceInviteInput,
   workspaceAgentInputSchema,
   workspaceCreateSchema,
-  workspaceInviteAcceptSchema,
   workspaceInviteInputSchema,
   workspaceInviteSchema,
-  workspaceSchema,
 } from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating, useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
-import { invalidateM3, useAgent } from "../lib/m3-queries";
+import { useAgent } from "../lib/m3-queries";
 import { useWorkspaceAccess } from "../lib/m5-queries";
-import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
 import {
-  meKey,
-  membersKey,
-  useMembers,
-  useRuns,
-  useTasks,
-} from "../lib/queries";
-import {
-  isCurrentSnapshot,
-  restoreQueries,
-  snapshotQueries,
-} from "../lib/query-snapshot";
-import { sessionVersion } from "../lib/session-cache";
+  invitesKey,
+  useAcceptWorkspaceInvite,
+  useAddWorkspaceAgent,
+  useChangeMemberRole,
+  useCreateWorkspace,
+  useIssueWorkspaceInvite,
+  useRevokeWorkspaceInvite,
+} from "../lib/mutations/organizations";
+import { m3MutationKey } from "../lib/optimistic-m3";
+import { useMembers, useRuns, useTasks } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
 import { EmailVerification } from "./email-verification";
 import { useWorkspaceSelection } from "./providers";
@@ -131,17 +115,14 @@ export function OrganizationsView() {
   const { me, workspace, setWorkspaceId, confirmed } = useWorkspace();
   const { invitation, setInvitation } = useWorkspaceSelection();
   const { t, i18n } = useTranslation();
-  const client = useQueryClient();
   const access = useWorkspaceAccess(workspace.id);
   const members = useMembers(workspace.id);
   const tasks = useTasks(workspace.id);
   const runs = useRuns(workspace.id);
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
-  const key = ["invites", workspace.id] as const;
-  const drafts = ["org-drafts", me.user.id] as const;
   const invites = useQuery({
-    queryKey: key,
+    queryKey: invitesKey(workspace.id),
     enabled: !!access.data?.canInvite,
     queryFn: async () =>
       (await request<unknown[]>(`/api/workspaces/${workspace.id}/invites`)).map(
@@ -163,167 +144,34 @@ export function OrganizationsView() {
   } | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [validation, setValidation] = useState(false);
-  const invalidate = () => {
-    if (client.isMutating() > 1) return;
-    return Promise.all([
-      invalidateM3(client),
-      client.invalidateQueries({ queryKey: meKey }),
-    ]);
-  };
-  const create = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: WorkspaceCreate) =>
-      request("/api/workspaces", {
-        method: "POST",
-        body: JSON.stringify(workspaceCreateSchema.parse(body)),
-      }).then(workspaceSchema.parse),
-    onMutate: async (body) => {
-      const snapshot = await snapshotQueries(client, [drafts]);
-      client.setQueryData(drafts, body.name);
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSuccess: (value, _, snapshot) => {
-      if (!isCurrentSnapshot(client, snapshot)) return;
-      client.removeQueries({ queryKey: drafts });
+  const create = useCreateWorkspace(me.user.id, {
+    onCreated: (value) => {
       setDialog(null);
       setName("");
       setWorkspaceId(value.id);
     },
-    onSettled: invalidate,
   });
-  const addAgent = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (body: WorkspaceAgentInput) =>
-      request(`/api/workspaces/${workspace.id}/members`, {
-        method: "POST",
-        body: JSON.stringify(workspaceAgentInputSchema.parse(body)),
-      }).then(memberSchema.parse),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      const id = `optimistic:${crypto.randomUUID()}`;
-      client.setQueryData<Member[]>(membersKey(workspace.id), (current) => [
-        ...(current ?? []),
-        {
-          id,
-          workspaceId: workspace.id,
-          userId: null,
-          name: body.name,
-          kind: "agent",
-          role: "member",
-        },
-      ]);
-      return { id, snapshot };
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (member, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<Member[]>(membersKey(workspace.id), (current) =>
-        current?.map((item) => (item.id === context.id ? member : item)),
-      );
+  const addAgent = useAddWorkspaceAgent(workspace.id, {
+    onAdded: () => {
       setDialog(null);
       setAgentName("");
     },
-    onSettled: invalidate,
   });
-  const accept = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: () =>
-      request("/api/workspace-invites/accept", {
-        method: "POST",
-        body: JSON.stringify(
-          workspaceInviteAcceptSchema.parse({ token: invitation }),
-        ),
-      }).then(workspaceSchema.parse),
-    onMutate: () => snapshotQueries(client, []),
-    onSuccess: (value, _, snapshot) => {
-      if (!isCurrentSnapshot(client, snapshot)) return;
+  const accept = useAcceptWorkspaceInvite(invitation, {
+    onAccepted: (value) => {
       setInvitation(null);
       setWorkspaceId(value.id);
     },
-    onSettled: invalidate,
   });
-  const changeRole = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: ({ id, next }: { id: string; next: Member["role"] }) =>
-      request(`/api/workspaces/${workspace.id}/members/${id}`, {
-        method: "PATCH",
-        body: JSON.stringify(memberRoleInputSchema.parse({ role: next })),
-      }),
-    onMutate: async ({ id, next }) => {
-      const snapshot = await snapshotM3(client);
-      client.setQueryData<Member[]>(membersKey(workspace.id), (current) =>
-        current?.map((item) =>
-          item.id === id ? { ...item, role: next } : item,
-        ),
-      );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: invalidate,
-  });
-  const issue = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async (body: WorkspaceInviteInput) => {
-      const version = sessionVersion(client);
-      const { token, ...metadata } = issuedWorkspaceInviteSchema.parse(
-        await request(`/api/workspaces/${workspace.id}/invites`, {
-          method: "POST",
-          body: JSON.stringify(workspaceInviteInputSchema.parse(body)),
-        }),
-      );
-      if (version === sessionVersion(client))
-        setIssued({
-          link: `${window.location.origin}/#invite=${encodeURIComponent(token)}`,
-          expiresAt: metadata.expiresAt,
-          emailDelivery: metadata.emailDelivery,
-        });
-      return metadata;
-    },
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      const id = `optimistic:${crypto.randomUUID()}`;
-      client.setQueryData<WorkspaceInvite[]>(key, (current) => [
-        {
-          ...body,
-          id,
-          workspaceId: workspace.id,
-          status: "pending",
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
-        },
-        ...(current ?? []),
-      ]);
+  const changeRole = useChangeMemberRole(workspace.id);
+  const issue = useIssueWorkspaceInvite(workspace.id, {
+    onStart: () => {
       setIssued(null);
       setCopied(null);
-      return { id, snapshot };
     },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSuccess: (value, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      const metadata = value;
-      client.setQueryData<WorkspaceInvite[]>(key, (current) =>
-        current?.map((item) => (item.id === context.id ? metadata : item)),
-      );
-    },
-    onSettled: invalidate,
+    onIssued: setIssued,
   });
-  const revoke = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (id: string) =>
-      request(`/api/workspace-invites/${id}`, { method: "DELETE" }),
-    onMutate: async (id) => {
-      const snapshot = await snapshotM3(client);
-      client.setQueryData<WorkspaceInvite[]>(key, (current) =>
-        current?.map((item) =>
-          item.id === id ? { ...item, status: "revoked" } : item,
-        ),
-      );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: invalidate,
-  });
+  const revoke = useRevokeWorkspaceInvite(workspace.id);
   const formatDate = (value: string) =>
     new Intl.DateTimeFormat(i18n.resolvedLanguage, {
       dateStyle: "medium",

@@ -4,21 +4,13 @@ import "temporal-polyfill/global";
 import type { CalendarEvent } from "@schedule-x/calendar";
 import {
   type CalendarScheduleInput,
-  type CalendarViewData,
-  type CreateTask,
   calendarWallToInstant,
-  createTaskSchema,
   shiftCalendarSeries,
   type Task,
   type TaskCalendar,
   taskReference,
-  taskSchema,
 } from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   ChevronLeft,
@@ -28,13 +20,13 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
+import { errorKey } from "../lib/api";
 import { useCalendar, useSetCalendar } from "../lib/calendar-queries";
 import { invalidateM3 } from "../lib/m3-queries";
 import { useWorkspaceAccess } from "../lib/m5-queries";
-import { m3MutationKey, snapshotM3 } from "../lib/optimistic-m3";
-import { tasksKey, useMembers, useRuns } from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
+import { useCreateCalendarTask } from "../lib/mutations/calendar";
+import { m3MutationKey } from "../lib/optimistic-m3";
+import { useMembers, useRuns } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
 import {
   CalendarEngine,
@@ -92,69 +84,8 @@ export function CalendarScene() {
     schedule: CalendarScheduleInput | null;
   }>();
   const [localError, setLocalError] = useState(false);
-  const create = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async (body: CreateTask) =>
-      taskSchema.parse(
-        await request("/api/tasks", {
-          method: "POST",
-          body: JSON.stringify(createTaskSchema.parse(body)),
-        }),
-      ),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client, [tasksKey(workspace.id)]);
-      const task: Task = {
-        ...body,
-        id: `optimistic:${crypto.randomUUID()}`,
-        number: 0,
-        dueAt: body.dueAt ?? null,
-        description: body.description ?? "",
-        priority: body.priority ?? 3,
-        projectId: body.projectId ?? null,
-        labels: body.labels ?? [],
-        parentId: body.parentId ?? null,
-        status: "todo",
-        workerId: body.workerId ?? null,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        version: 1,
-      };
-      client.setQueryData(tasksKey(workspace.id), (items: unknown[] = []) => [
-        task,
-        ...items,
-      ]);
-      client.setQueriesData<CalendarViewData>(
-        { queryKey: ["calendar", workspace.id] },
-        (current) =>
-          current && body.calendar
-            ? {
-                ...current,
-                occurrences: [
-                  ...current.occurrences,
-                  {
-                    id: task.id,
-                    task,
-                    schedule: {
-                      ...body.calendar,
-                      taskId: task.id,
-                      workspaceId: workspace.id,
-                    },
-                    startAt: body.calendar.startAt,
-                    endAt: body.calendar.endAt,
-                    canSchedule: false,
-                    isAgent: false,
-                  },
-                ],
-              }
-            : current,
-      );
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSuccess: (_, __, snapshot) => {
-      if (isCurrentSnapshot(client, snapshot)) setEditor(undefined);
-    },
-    onSettled: () => invalidateM3(client),
+  const create = useCreateCalendarTask(workspace.id, {
+    onCreated: () => setEditor(undefined),
   });
   const save = (
     current: TaskCalendar,

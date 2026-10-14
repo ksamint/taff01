@@ -1,39 +1,18 @@
 "use client";
 import "../styles/task-detail.css";
 
-import {
-  type AssignTask,
-  assignTaskSchema,
-  type Locale,
-  type Run,
-  type RunDetail,
-  runSchema,
-  startRunSchema,
-  taskReference,
-  taskSchema,
-} from "@taff/schemas";
-import {
-  useIsMutating,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { type Locale, taskReference } from "@taff/schemas";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, ChevronDown, Play, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { errorKey, request } from "../lib/api";
-import {
-  invalidateM3,
-  runKey,
-  runsKey,
-  useRun,
-  useRuns,
-  useTask,
-} from "../lib/m3-queries";
+import { errorKey } from "../lib/api";
+import { invalidateM3, useRun, useRuns, useTask } from "../lib/m3-queries";
 import { useTaskAccess } from "../lib/m5-queries";
-import { m3MutationKey, patchTask, snapshotM3 } from "../lib/optimistic-m3";
+import { useAssignTask, useStartRun } from "../lib/mutations/tasks";
+import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
-import { isCurrentSnapshot, restoreQueries } from "../lib/query-snapshot";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
 import { ReviewView } from "./review-view";
@@ -87,75 +66,8 @@ export function TaskDetailView({
       ? settledPlacement.hasReview
       : reviewStatus;
   const detail = useRun(latest?.id);
-  const assign = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: async (body: AssignTask) =>
-      taskSchema.parse(
-        await request(`/api/tasks/${taskId}/assignment`, {
-          method: "PATCH",
-          body: JSON.stringify(assignTaskSchema.parse(body)),
-        }),
-      ),
-    onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
-      patchTask(client, taskId, { workerId: body.workerId });
-      return snapshot;
-    },
-    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
-    onSettled: () => invalidateM3(client),
-  });
-  const start = useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: () =>
-      request(`/api/tasks/${taskId}/runs`, {
-        method: "POST",
-        body: JSON.stringify(startRunSchema.parse({})),
-      }).then(runSchema.parse),
-    onMutate: async () => {
-      const snapshot = await snapshotM3(client);
-      const id = `optimistic:${crypto.randomUUID()}`;
-      const now = new Date().toISOString();
-      const run: Run = {
-        id,
-        workspaceId: task.data!.workspaceId,
-        taskId,
-        agentId: task.data!.workerId!,
-        status: "running",
-        version: 1,
-        summary: "",
-        startedAt: now,
-        finishedAt: null,
-        updatedAt: now,
-        durationMs: 0,
-        costMicros: 0,
-      };
-      client.setQueryData<Run[]>(runsKey(workspaceId), (current = []) => [
-        run,
-        ...current,
-      ]);
-      client.setQueryData<RunDetail>(runKey(id), {
-        run,
-        events: [],
-        artifacts: [],
-        canControl: false,
-        canSubmit: false,
-      });
-      patchTask(client, taskId, { status: "in_progress" });
-      return { snapshot, id };
-    },
-    onSuccess: (run, _, context) => {
-      if (!isCurrentSnapshot(client, context.snapshot)) return;
-      client.setQueryData<Run[]>(runsKey(workspaceId), (current) =>
-        current?.map((item) => (item.id === context.id ? run : item)),
-      );
-    },
-    onError: (_, __, context) => restoreQueries(client, context?.snapshot),
-    onSettled: (_, __, ___, context) => {
-      if (context)
-        client.removeQueries({ queryKey: runKey(context.id), exact: true });
-      return invalidateM3(client);
-    },
-  });
+  const assign = useAssignTask(taskId);
+  const start = useStartRun(taskId, workspaceId, task.data);
   if (task.isPending) return <p className="loading">{t("loading")}</p>;
   if (task.isError)
     return (
