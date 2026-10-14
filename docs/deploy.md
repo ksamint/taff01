@@ -1279,3 +1279,37 @@ tree as the source), on a fresh database, with
 
 - If the live origin is still on `2338772`, migrations `0023`–`0026` apply
   together.
+
+### Frontend v2 release candidate M18b — 2026-10-14
+
+**Source.** `main` at `ab243e8379c952f37c459a60596e4754ba33967e`. It supersedes
+the M18 candidate, whose source was `98cf3c6`. Since that source, it adds:
+
+- **PR #19, test only.** A shared `holdRequest` helper keeps request
+  interception on for the rest of each test. It is used in the planning,
+  persistence, notifications, me and optimistic-m4 specs. The specs no longer
+  unroute in the middle of a test, which could leave app refetches hanging (the
+  same race PR #16 fixed in optimistic-m4).
+- This candidate's own M18 section, docs only.
+
+Outside `e2e/` and `docs/`, nothing has changed since the M18 candidate. If M18
+is already deploying, finish it; this candidate then changes nothing at
+runtime.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `ab243e8`:**
+  [38564795332](https://github.com/ksamint/taff01/actions/runs/38564795332),
+  success.
+- **PR CI on the merged head,** an ancestor of the source:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #19 | `5e1abc2cd156be43d9ca07f2c1cbdcd1b5f68ad0` | [38559438423](https://github.com/ksamint/taff01/actions/runs/38559438423), success |
+
+**Validation, migrations, environment, Compose, Docker and Caddy.** These are
+the same as for the M18 candidate: migration `0026` is additive, and there are
+no environment or infrastructure changes. Under the current working rules,
+the local production-mode checklist is optional and was not rerun for this
+test-only change. The M18 checklist, which passed 32 / 32 with MCP 42 / 42,
+covers the same application tree.
