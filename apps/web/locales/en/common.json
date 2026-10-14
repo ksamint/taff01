@@ -269,7 +269,11 @@
       "submitRun": "Submit for review",
       "requestGrant": "Request permission",
       "calendarList": "List actual scheduled occurrences",
-      "calendarSet": "Set a whole-series calendar schedule"
+      "calendarSet": "Set a whole-series calendar schedule",
+      "readTimeline": "Read project timeline",
+      "planTask": "Plan start date and duration",
+      "addDependency": "Add dependency",
+      "removeDependency": "Remove dependency"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",

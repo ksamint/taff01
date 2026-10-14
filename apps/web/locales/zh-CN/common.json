@@ -269,7 +269,11 @@
       "submitRun": "提交审核",
       "requestGrant": "请求权限",
       "calendarList": "列出真实日程实例",
-      "calendarSet": "设置整个系列的日程"
+      "calendarSet": "设置整个系列的日程",
+      "readTimeline": "读取项目时间线",
+      "planTask": "规划开始日期与工期",
+      "addDependency": "添加依赖",
+      "removeDependency": "移除依赖"
     },
     "back": "返回",
     "copyEndpoint": "复制端点",

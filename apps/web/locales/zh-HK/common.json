@@ -269,7 +269,11 @@
       "submitRun": "提交審核",
       "requestGrant": "請求權限",
       "calendarList": "列出實際日程項目",
-      "calendarSet": "設定整個系列的日程"
+      "calendarSet": "設定整個系列的日程",
+      "readTimeline": "讀取專案時間線",
+      "planTask": "規劃開始日期與工期",
+      "addDependency": "新增依賴",
+      "removeDependency": "移除依賴"
     },
     "back": "返回",
     "copyEndpoint": "複製端點",
