@@ -203,7 +203,9 @@
     "notificationsOff": "已关闭",
     "digestSummary": "每日摘要 {{time}}",
     "languageHK": "繁體中文",
-    "languageCN": "简体"
+    "languageCN": "简体",
+    "noAgents": "暂无智能体",
+    "noActiveTasks": "暂无进行中任务"
   },
   "mcp": {
     "title": "MCP 服务器",
@@ -277,7 +279,8 @@
     },
     "back": "返回",
     "copyEndpoint": "复制端点",
-    "copyConfig": "复制配置"
+    "copyConfig": "复制配置",
+    "running": "执行中"
   },
   "taskDetail": {
     "back": "返回今天",
@@ -307,7 +310,8 @@
       "changes_requested": "已要求修改",
       "completed": "已完成",
       "canceled": "已取消",
-      "failed": "失败"
+      "failed": "失败",
+      "idle": "空闲"
     },
     "eventKind": {
       "step": "步骤",
@@ -535,12 +539,14 @@
     },
     "current": "当前组织",
     "roleFor": "{{name}}的角色",
-    "people": "人员",
+    "people": "成员",
     "emailDelivery": {
       "sent": "邀请邮件已发送，也可复制下方链接。",
       "logged": "尚未配置邮件发送。邀请已私下记录，请复制下方链接分享。",
       "failed": "邀请邮件未能发送，下方链接仍然有效，可复制分享。"
-    }
+    },
+    "label": "组织",
+    "switchShort": "切换"
   },
   "pwa": {
     "description": "人与智能体协作的任务和日历。",
@@ -652,6 +658,14 @@
     "featureReview": "智能体交付等你确认",
     "featureReviewText": "智能体的交付，经成员确认后才算完成。",
     "featureMcp": "接入你的智能体",
-    "featureMcpText": "智能体经 MCP 接入，令牌有范围，随时可撤销。"
+    "featureMcpText": "智能体经 MCP 接入，令牌有范围，随时可撤销。",
+    "signedIn": "已登录"
+  },
+  "actions": {
+    "back": "返回"
+  },
+  "toast": {
+    "orgSwitched": "已切换到 {{name}}",
+    "orgCreated": "已创建组织 {{name}}"
   }
 }
