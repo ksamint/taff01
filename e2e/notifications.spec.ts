@@ -16,6 +16,7 @@ import {
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
 import { agentWorkspace } from "./support/agent-workspace";
+import { holdRequest } from "./support/routes";
 
 test.use({ actionTimeout: 15000 });
 test("notification preferences save optimistically roll back failure and muted blockers still reach Inbox", async ({
@@ -56,30 +57,21 @@ test("notification preferences save optimistically roll back failure and muted b
     quiet: true,
     block: true,
   });
-  let release!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  await page.route("**/api/me/notifications", async (route) => {
-    if (route.request().method() !== "PATCH") {
-      await route.continue();
-      return;
-    }
-    await gate;
-    await route.fulfill({ status: 403, json: { error: "forbidden" } });
+  const denied = await holdRequest(page, "/api/me/notifications", {
+    method: "PATCH",
+    reply: "reject",
   });
   await page.getByTestId("notification-block").click();
   await expect(page.getByTestId("notification-block")).not.toBeChecked();
   await expect(page.getByTestId("notification-block")).not.toBeChecked();
   await expect(page.getByTestId("notification-review")).toBeDisabled();
-  release();
+  denied.release();
   await expect(page.getByTestId("notification-block")).toBeChecked();
   await expect(
     page
       .getByRole("alert")
       .filter({ hasText: messages[locale].errors.forbidden }),
   ).toBeVisible();
-  await page.unroute("**/api/me/notifications");
   expect(
     (
       await page.request.put(`/api/agents/${agent.id}/permissions`, {

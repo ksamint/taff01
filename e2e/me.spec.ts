@@ -3,6 +3,7 @@ import { memberListSchema, meSchema } from "../packages/schemas/src/base";
 import { workspaceSchema } from "../packages/schemas/src/index";
 import { notificationPreferencesSchema } from "../packages/schemas/src/notification-preferences";
 import { freshAccount, messages, type TestLocale } from "./support/account";
+import { holdRequest } from "./support/routes";
 
 test("Me switches real organizations and preserves theme, time-zone rollback and notification preferences", async ({
   page,
@@ -143,26 +144,16 @@ test("Me switches real organizations and preserves theme, time-zone rollback and
   expect(
     meSchema.parse(await (await page.request.get("/api/me")).json()).user.tz,
   ).toBe(nextZone);
-  let release!: () => void;
-  let entered!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const seen = new Promise<void>((resolve) => {
-    entered = resolve;
-  });
-  await page.route("**/api/profile", async (route) => {
-    if (route.request().method() !== "PATCH") return route.continue();
-    entered();
-    await gate;
-    await route.fulfill({ status: 403, json: { error: "forbidden" } });
+  const denied = await holdRequest(page, "/api/profile", {
+    method: "PATCH",
+    reply: "reject",
   });
   try {
     await page.getByTestId("me-tz").selectOption("America/New_York");
-    await seen;
+    await denied.seen;
     await expect(page.getByTestId("me-tz")).toHaveValue("America/New_York");
     await expect(page.getByTestId("me-tz")).toBeDisabled();
-    release();
+    denied.release();
     await expect(advanced.getByRole("alert")).toHaveText(m.errors.profile);
     await expect(page.getByTestId("me-tz")).toHaveValue(nextZone);
     await expect(page.getByTestId("me-tz")).toBeEnabled();
@@ -173,8 +164,7 @@ test("Me switches real organizations and preserves theme, time-zone rollback and
       .getByRole("button", { name: m.planning.close, exact: true })
       .click();
   } finally {
-    release();
-    await page.unroute("**/api/profile");
+    denied.release();
   }
   await page.reload();
   await page.getByTestId("me-advanced").click();

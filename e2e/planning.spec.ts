@@ -13,6 +13,7 @@ import {
 } from "../packages/schemas/src/index";
 import { verificationLink } from "./support/email-verification";
 import { selectLocale } from "./support/preferences";
+import { holdRequest } from "./support/routes";
 import {
   closeFieldSheet,
   closeTaskField,
@@ -48,24 +49,8 @@ async function freshWorkspace(page: Page, locale: Locale) {
   return workspace;
 }
 async function rejectLater(page: Page, path: string, method: string) {
-  let release!: () => void;
-  let arrived!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const seen = new Promise<void>((resolve) => {
-    arrived = resolve;
-  });
-  await page.route(`**${path}`, async (route) => {
-    if (route.request().method() !== method) {
-      await route.continue();
-      return;
-    }
-    arrived();
-    await gate;
-    await route.fulfill({ status: 403, json: { error: "forbidden" } });
-  });
-  return { seen, reject: () => release() };
+  const held = await holdRequest(page, path, { method, reply: "reject" });
+  return { seen: held.seen, reject: () => held.release() };
 }
 
 test("planning edits, actual subtasks/comments, board drag, editable Quick Add and localized search", async ({
@@ -570,7 +555,6 @@ test("rejected planning fields, comments, project move and invitation restore ca
     "Rejected renamed title",
   );
   await closeTaskField(page, "text");
-  await page.unroute(`**/api/tasks/${task.id}`);
   denied = await rejectLater(page, `/api/tasks/${task.id}/comments`, "POST");
   await page.getByTestId("task-comment").fill("Rejected task comment");
   await page.getByTestId("task-comment-submit").click();
@@ -850,20 +834,9 @@ test("nested field Escape preserves drafts and direct tasks use their own worksp
     ).title,
   ).toBe(task.title);
   const comment = `Task-local author ${locale} ${crypto.randomUUID()}`;
-  let release!: () => void;
-  let arrived!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const seen = new Promise<void>((resolve) => {
-    arrived = resolve;
-  });
-  const commentPath = `**/api/tasks/${task.id}/comments`;
-  await page.route(commentPath, async (route) => {
-    if (route.request().method() !== "POST") return route.continue();
-    arrived();
-    await gate;
-    await route.continue();
+  const held = await holdRequest(page, `/api/tasks/${task.id}/comments`, {
+    method: "POST",
+    reply: "continue",
   });
   try {
     const acknowledged = page.waitForResponse(
@@ -873,13 +846,13 @@ test("nested field Escape preserves drafts and direct tasks use their own worksp
     );
     await page.getByTestId("task-comment").fill(comment);
     await page.getByTestId("task-comment-submit").click();
-    await seen;
+    await held.seen;
     const optimistic = page
       .locator("dialog.task-detail-sheet .review-comments li")
       .filter({ hasText: comment });
     await expect(optimistic).toBeVisible();
     await expect(optimistic.locator("strong")).toHaveText(me.user.name);
-    release();
+    held.release();
     const response = await acknowledged;
     expect(response.status()).toBe(201);
     const saved = taskCommentSchema.parse(await response.json());
@@ -887,8 +860,7 @@ test("nested field Escape preserves drafts and direct tasks use their own worksp
     expect(saved.authorId).toBe(target.memberId);
     await expect(page.getByTestId("task-comment")).toHaveValue("");
   } finally {
-    release();
-    await page.unroute(commentPath);
+    held.release();
   }
   const firstResponse = await page.request.post(`/api/tasks/${task.id}/runs`, {
     data: {},
