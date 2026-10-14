@@ -17,8 +17,11 @@ import {
   taskCommentInputSchema,
   taskCommentSchema,
   taskSchema,
+  type UpdateTask,
+  updateTaskSchema,
 } from "@taff/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { request } from "../api";
 import { invalidateM3, runKey, runsKey } from "../m3-queries";
 import { commentsKey } from "../m5-queries";
@@ -26,6 +29,7 @@ import { m3MutationKey, patchTask, snapshotM3 } from "../optimistic-m3";
 import { tasksKey } from "../queries";
 import { isCurrentSnapshot, restoreQueries } from "../query-snapshot";
 import { sessionVersion } from "../session-cache";
+import { showToast } from "../toast";
 import { replaceById } from "./replace";
 
 /** The quick-add task shown at the top of the list until the create returns. */
@@ -323,4 +327,71 @@ export function useAddTaskComment(
     },
     onSettled: () => invalidateM3(client),
   });
+}
+
+type TaskPatch = Omit<UpdateTask, "version">;
+
+/** The task's current values of the fields a patch changes, for undo. */
+export function inversePatch(task: Task, patch: TaskPatch): TaskPatch {
+  const inverse: Record<string, unknown> = {};
+  for (const key of Object.keys(patch) as (keyof TaskPatch)[])
+    inverse[key] = task[key as keyof Task];
+  return inverse as TaskPatch;
+}
+
+/**
+ * One-field edits from the desktop panel (status, owner, priority, project,
+ * description). Each shows a toast whose 撤銷 PATCHes the previous values
+ * back with the version the edit returned (plan §2.4 item 6).
+ */
+export function useUndoableTaskEdit() {
+  const client = useQueryClient();
+  const { t } = useTranslation();
+  const mutation = useMutation({
+    mutationKey: m3MutationKey,
+    mutationFn: ({ id, body }: { id: string; body: UpdateTask }) =>
+      request(`/api/tasks/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(updateTaskSchema.parse(body)),
+      }).then(taskSchema.parse),
+    onMutate: async ({ id, body }) => {
+      const snapshot = await snapshotM3(client);
+      patchTask(client, id, { ...body, version: body.version + 1 });
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
+    onSuccess: (task, _, snapshot) => {
+      if (isCurrentSnapshot(client, snapshot)) patchTask(client, task.id, task);
+    },
+    onSettled: () => invalidateM3(client),
+  });
+  return {
+    isError: mutation.isError,
+    error: mutation.error,
+    isPending: mutation.isPending,
+    change(
+      task: Task,
+      patch: TaskPatch,
+      message: () => string,
+      onDone?: () => void,
+    ) {
+      const undo = inversePatch(task, patch);
+      mutation.mutate(
+        { id: task.id, body: { ...patch, version: task.version } },
+        {
+          onSuccess: (saved) => {
+            onDone?.();
+            showToast(message(), {
+              label: t("actions.undo"),
+              run: () =>
+                mutation.mutate({
+                  id: saved.id,
+                  body: { ...undo, version: saved.version },
+                }),
+            });
+          },
+        },
+      );
+    },
+  };
 }

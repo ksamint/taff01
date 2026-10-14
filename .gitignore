@@ -17,3 +17,4 @@ lighthouse-reports/
 !.env.production.example
 
 .taff-mail/
+release-reports/

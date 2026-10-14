@@ -50,7 +50,7 @@
   "status": {
     "todo": "To do",
     "in_progress": "In progress",
-    "needs_review": "Needs review",
+    "needs_review": "To confirm",
     "done": "Done"
   },
   "errors": {
@@ -82,7 +82,7 @@
   "calendar": {
     "title": "Calendar",
     "hint": "Schedules and deadlines are separate.",
-    "unscheduled": "Unscheduled",
+    "unscheduled": "No time set",
     "day": "Day",
     "week": "Week",
     "month": "Month",
@@ -112,7 +112,7 @@
     "saved": "Updated",
     "titleLabel": "Title",
     "truncated": "Too many events. Narrow dates or workspace.",
-    "agentLane": "Agents",
+    "agentLane": "Agents · background",
     "agentHint": "Open tasks for agent run status.",
     "emptyTray": "No unscheduled tasks.",
     "invalid": "Check dates, duration, zone and repeat.",
@@ -120,8 +120,13 @@
     "selectView": "View",
     "noEvents": "No scheduled tasks",
     "tools": "Calendar controls",
-    "dragHint": "Drag to move; use list for keyboard scheduling",
-    "goToDate": "Go to date"
+    "dragHint": "Drag to reschedule; tap an empty slot to add",
+    "goToDate": "Go to date",
+    "keyboardHint": "Without a pointer, use the list or open an item to change its time.",
+    "toast": {
+      "moved": "Moved to {{date}} {{time}}",
+      "durationSet": "Duration set to {{start}}–{{end}}"
+    }
   },
   "projects": {
     "title": "Projects",
@@ -148,7 +153,21 @@
     "drag": "Drag task to another status column",
     "dragHint": "Drag a handle to move a task, or use its status selector.",
     "moved": "Moved to {{status}}",
-    "labelFilter": "Filter by label"
+    "labelFilter": "Filter by label",
+    "moreViews": "More",
+    "timelineView": "Timeline",
+    "stakeholdersView": "Stakeholders",
+    "relationsView": "Relations",
+    "mindView": "Mindscape",
+    "views": "Project views",
+    "sections": "Projects, companies and contacts",
+    "filterAll": "All",
+    "switchProject": "Switch or manage project",
+    "clearAgentFilter": "Clear agent filter: {{name}}",
+    "statusTabs": "Jump to a status column",
+    "buildingNote": "This view is still being built. The board and list work now.",
+    "openBoard": "Open the board",
+    "openList": "Open the list"
   },
   "inbox": {
     "title": "Inbox",
@@ -326,7 +345,12 @@
   "taskDetail": {
     "back": "Back to Today",
     "due": "Due",
-    "unscheduled": "Unscheduled"
+    "unscheduled": "Unscheduled",
+    "close": "Close task",
+    "activity": "Activity",
+    "statusChanged": "Status set to {{status}}",
+    "fieldSaved": "{{field}} updated",
+    "descriptionPlaceholder": "Add a description"
   },
   "run": {
     "title": "Agent run",
@@ -347,7 +371,7 @@
     "status": {
       "running": "Working",
       "paused": "Paused",
-      "needs_review": "Needs review",
+      "needs_review": "To confirm",
       "changes_requested": "Changes requested",
       "completed": "Completed",
       "canceled": "Canceled",
@@ -396,7 +420,8 @@
     "approveHint": "Check all three items and approve each deliverable before approving the run. A change request needs a comment.",
     "approved": "Approved. The task is complete.",
     "readonly": "This review is read-only for your account or its current state.",
-    "comments": "Review comments"
+    "comments": "Review comments",
+    "changesHint": "Describe what to change; the agent continues from there."
   },
   "agentProfile": {
     "open": "Agent profile",
@@ -476,7 +501,8 @@
       "allowed": "Allowed",
       "denied": "Denied",
       "revoked": "Revoked"
-    }
+    },
+    "always": "Always allow"
   },
   "planning": {
     "close": "Close",
@@ -509,7 +535,7 @@
   },
   "search": {
     "title": "Search",
-    "placeholder": "Search tasks, comments and settings",
+    "placeholder": "Search tasks, comments, contacts and settings",
     "thisOrg": "This organization",
     "allOrgs": "All organizations",
     "all": "All",
@@ -524,7 +550,11 @@
     "matchingComment": "Matched a comment",
     "matchingDescription": "Matched the description",
     "cancel": "Cancel",
-    "clear": "Clear search"
+    "clear": "Clear search",
+    "companies": "Companies",
+    "contacts": "Contacts",
+    "company": "Company",
+    "contact": "Contact"
   },
   "quickAdd": {
     "title": "Quick add",
@@ -715,10 +745,56 @@
     "badgeBlocker": "Blocked"
   },
   "actions": {
-    "back": "Back"
+    "back": "Back",
+    "undo": "Undo",
+    "remove": "Remove",
+    "done": "Done"
   },
   "toast": {
     "orgSwitched": "Switched to {{name}}",
     "orgCreated": "Created {{name}}"
+  },
+  "crm": {
+    "role": {
+      "decider": "Decision maker",
+      "chair": "Chairman",
+      "ops": "Operations lead",
+      "broker": "Intermediary",
+      "tech": "Technical contact",
+      "finance": "Finance contact",
+      "signoff": "Sign-off"
+    },
+    "roleSeparator": ", ",
+    "contacts": {
+      "title": "Contacts",
+      "add": "Add contact",
+      "addConfirm": "Add",
+      "others": "Other contacts",
+      "search": "Search contacts",
+      "noMatches": "No contacts to add.",
+      "needsProject": "Add this task to a project to link contacts.",
+      "noneOnTask": "No contacts on this task yet.",
+      "someone": "another contact"
+    },
+    "stakeholders": {
+      "fromProject": "Project stakeholders"
+    },
+    "external": "External",
+    "rolesTitle": "Roles",
+    "noRole": "No role",
+    "rolesFor": "Roles for {{name}}",
+    "editRolesFor": "Edit roles for {{name}}",
+    "doneEditingFor": "Done editing roles for {{name}}",
+    "roles": {
+      "task": "Task roles"
+    },
+    "toast": {
+      "added": "Added {{name}}",
+      "rolesUpdated": "Updated {{name}}’s roles",
+      "roleReplaced": "{{name}} is now the {{role}}; {{previous}} was replaced",
+      "addedStakeholder": "added as a stakeholder of {{project}}",
+      "removed": "Removed {{name}}",
+      "separator": "; "
+    }
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 import "temporal-polyfill/global";
-import "./calendar.css";
+import "../styles/calendar.css";
 import {
   type CalendarScheduleInput,
   calendarScheduleInputSchema,

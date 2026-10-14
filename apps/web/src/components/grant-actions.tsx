@@ -2,10 +2,11 @@
 
 import type { Grant } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
+import { ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
-import { useDecideGrant } from "../lib/mutations/agents";
+import { useAlwaysAllowGrant, useDecideGrant } from "../lib/mutations/agents";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
@@ -14,9 +15,12 @@ import { Label } from "./ui/label";
 export function GrantActions({
   grant,
   canDecide,
+  canAlwaysAllow = false,
 }: {
   grant: Grant;
   canDecide: boolean;
+  /** 始終允許 also needs permission to manage the agent. */
+  canAlwaysAllow?: boolean;
 }) {
   const { t } = useTranslation();
   const [hours, setHours] = useState(24);
@@ -26,6 +30,7 @@ export function GrantActions({
   )?.memberId;
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const decide = useDecideGrant(grant, actorId);
+  const always = useAlwaysAllowGrant(grant, actorId);
   if (!canDecide) return null;
   return (
     <div>
@@ -70,6 +75,17 @@ export function GrantActions({
               {t("grants.deny")}
             </Button>
           </div>
+          {canAlwaysAllow && (
+            <Button
+              data-testid="grant-always"
+              className="grant-always"
+              disabled={busy || grant.id.startsWith("optimistic:")}
+              onClick={() => always.mutate()}
+            >
+              <ShieldCheck size={16} aria-hidden="true" />
+              {t("grants.always")}
+            </Button>
+          )}
         </>
       )}
       {grant.status === "allowed" && (
@@ -81,9 +97,9 @@ export function GrantActions({
           {t("grants.revoke")}
         </Button>
       )}
-      {decide.isError && (
+      {(decide.isError || always.isError) && (
         <p className="alert" role="alert">
-          {t(errorKey(decide.error))}
+          {t(errorKey(decide.error ?? always.error))}
         </p>
       )}
     </div>

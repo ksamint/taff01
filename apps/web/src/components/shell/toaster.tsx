@@ -1,6 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import {
   dismissToast,
   holdToast,
@@ -8,10 +9,25 @@ import {
   subscribeToast,
 } from "../../lib/toast";
 
-/** Live region for optimistic results; rendered once by the shell on both layouts. */
+/** The open modal dialog on top, if any: everything outside it is inert. */
+function topDialog() {
+  const open = document.querySelectorAll("dialog[open]");
+  return open[open.length - 1] ?? null;
+}
+
+/**
+ * Live region for optimistic results; rendered once by the shell on both
+ * layouts. While a modal sheet is open (the phone task detail) the toast
+ * renders inside it, so its 撤銷 stays visible and focusable.
+ */
 export function Toaster() {
   const toast = useSyncExternalStore(subscribeToast, readToast, () => null);
-  return (
+  const [host, setHost] = useState<Element | null>(null);
+  const id = toast?.id;
+  useEffect(() => {
+    setHost(id === undefined ? null : topDialog());
+  }, [id]);
+  const region = (
     <div className="toast-region" aria-live="polite" aria-atomic="true">
       {toast && (
         <div
@@ -43,4 +59,5 @@ export function Toaster() {
       )}
     </div>
   );
+  return host?.isConnected ? createPortal(region, host) : region;
 }

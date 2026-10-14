@@ -1,5 +1,5 @@
 "use client";
-import "../styles/search-parity.css";
+import "../styles/search.css";
 import {
   type Locale,
   type SearchInput,
@@ -8,11 +8,21 @@ import {
   taskReference,
 } from "@taff/schemas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Clock, MessageSquare, Search, Settings, X } from "lucide-react";
+import {
+  Building2,
+  Clock,
+  MessageSquare,
+  Search,
+  Settings,
+  X,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useDeferredValue, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
+import { useCrmSearch } from "../lib/crm-queries";
+import { initials } from "../lib/initials";
+import { useWorkspaceAccess } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -62,6 +72,12 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
       ).map((value) => searchResultSchema.parse(value)),
     retry: false,
   });
+  const access = useWorkspaceAccess(workspace.id);
+  const crm = useCrmSearch(
+    workspace.id,
+    deferred,
+    type === "all" && !!access.data?.canReadCrm,
+  );
   const settings =
     ["all", "settings"].includes(type) && deferred
       ? SETTINGS.filter((item) =>
@@ -82,7 +98,49 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
       offset: taskHits.length,
     },
   ];
-  const count = hits.length + settings.length;
+  // Companies and contacts of this organization (M12 CRM search), for
+  // people who may read the CRM; they never leave the organization.
+  const crmShown = type === "all" && !!access.data?.canReadCrm;
+  const companies = crmShown ? (crm.data?.companies ?? []) : [];
+  const contacts = crmShown ? (crm.data?.contacts ?? []) : [];
+  const crmRows = [
+    ...companies.map((company) => ({
+      kind: "company" as const,
+      id: company.id,
+      title: company.name,
+      meta: company.industry,
+      href: `/companies/${company.id}`,
+    })),
+    ...contacts.map((contact) => ({
+      kind: "contact" as const,
+      id: contact.id,
+      title: contact.name,
+      meta: [
+        contact.title,
+        companies.find((company) => company.id === contact.companyId)?.name,
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      href: `/contacts/${contact.id}`,
+    })),
+  ];
+  const crmGroups = [
+    {
+      kind: "company",
+      label: "search.companies",
+      items: crmRows.filter((row) => row.kind === "company"),
+      offset: hits.length,
+    },
+    {
+      kind: "contact",
+      label: "search.contacts",
+      items: crmRows.filter((row) => row.kind === "contact"),
+      offset: hits.length + companies.length,
+    },
+  ];
+  const settingsOffset = hits.length + crmRows.length;
+  const count = settingsOffset + settings.length;
+  const fetching = results.isFetching || (crmShown && crm.isFetching);
   useEffect(() => setIndex(0), [deferred, scope, type]);
   useEffect(() => {
     buttons.current[index]?.scrollIntoView({ block: "nearest" });
@@ -99,10 +157,10 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
     <SheetDialog
       title={t("search.title")}
       onClose={onClose}
-      className="search-parity-dialog"
+      className="search-dialog"
     >
       <div
-        className="search-parity-content"
+        className="search-content"
         onKeyDown={(event) => {
           if (
             !(event.target instanceof HTMLInputElement) ||
@@ -123,8 +181,8 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
           }
         }}
       >
-        <div className="search-parity-header">
-          <div className="search-parity-field">
+        <div className="search-header">
+          <div className="search-field">
             <Search size={18} strokeWidth={1.5} aria-hidden="true" />
             <Input
               id={`${listId}-input`}
@@ -146,7 +204,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
             {!!query && (
               <Button
                 type="button"
-                className="search-parity-clear"
+                className="search-clear"
                 aria-label={t("search.clear")}
                 onClick={() => {
                   setQuery("");
@@ -157,16 +215,12 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
               </Button>
             )}
           </div>
-          <Button
-            type="button"
-            className="search-parity-cancel"
-            onClick={onClose}
-          >
+          <Button type="button" className="search-cancel" onClick={onClose}>
             {t("search.cancel")}
           </Button>
         </div>
         <div
-          className="search-parity-scope"
+          className="search-scope"
           role="group"
           aria-label={t("organization.title")}
         >
@@ -183,7 +237,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
           ))}
         </div>
         <div
-          className="search-parity-types"
+          className="search-types"
           role="group"
           aria-label={t("search.title")}
         >
@@ -201,11 +255,11 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
             </Button>
           ))}
         </div>
-        <div className="search-parity-scroll">
+        <div className="search-scroll">
           {!deferred ? (
-            <div className="search-parity-empty-query">
+            <div className="search-empty-query">
               {!!recent.length && (
-                <section className="search-parity-recent">
+                <section className="search-recent">
                   <h3>{t("search.recent")}</h3>
                   {recent.map((value) => (
                     <Button
@@ -219,7 +273,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                   ))}
                 </section>
               )}
-              <section className="search-parity-quick">
+              <section className="search-quick">
                 <h3>{t("search.quickFilters")}</h3>
                 <div>
                   {[
@@ -242,19 +296,19 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
             </div>
           ) : (
             <>
-              {results.isFetching && type !== "settings" && (
-                <p className="search-parity-message" role="status">
+              {fetching && type !== "settings" && (
+                <p className="search-message" role="status">
                   {t("loading")}
                 </p>
               )}
               {results.isError && type !== "settings" && (
-                <p role="alert" className="alert search-parity-message">
+                <p role="alert" className="alert search-message">
                   {t(errorKey(results.error))}
                 </p>
               )}
               <div
                 id={listId}
-                className="search-parity-results"
+                className="search-results"
                 role="listbox"
                 aria-label={t("search.title")}
               >
@@ -266,10 +320,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                       role="group"
                       aria-label={t(group.label)}
                     >
-                      <div
-                        className="search-parity-group-heading"
-                        aria-hidden="true"
-                      >
+                      <div className="search-group-heading" aria-hidden="true">
                         <span>{t(group.label)}</span>
                         <span>{group.items.length}</span>
                       </div>
@@ -288,7 +339,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                             }}
                             data-testid="search-result"
                             tabIndex={-1}
-                            className="search-parity-result"
+                            className="search-result"
                             onMouseEnter={() => setIndex(row)}
                             onClick={() => {
                               remember();
@@ -298,7 +349,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                             }}
                           >
                             <span
-                              className="search-parity-result-icon"
+                              className="search-result-icon"
                               aria-hidden="true"
                             >
                               {hit.type === "task" ? (
@@ -307,9 +358,9 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                                 <MessageSquare size={16} strokeWidth={1.5} />
                               )}
                             </span>
-                            <span className="search-parity-result-copy">
-                              <span className="search-parity-result-title">
-                                <span className="search-parity-reference">
+                            <span className="search-result-copy">
+                              <span className="search-result-title">
+                                <span className="search-reference">
                                   {taskReference(
                                     hit.workspaceKey,
                                     hit.task.number,
@@ -318,22 +369,92 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                                 <SearchMatch text={title} query={deferred} />
                               </span>
                               {!!hit.snippet && (
-                                <span className="search-parity-snippet preserve-text">
+                                <span className="search-snippet preserve-text">
                                   <SearchMatch
                                     text={hit.snippet}
                                     query={deferred}
                                   />
                                 </span>
                               )}
-                              <span className="search-parity-result-meta">
+                              <span className="search-result-meta">
                                 <span>
                                   {t(`status.${hit.task.status}`)}
                                   {hit.match !== "title"
                                     ? ` · ${t(hit.match === "comment" ? "search.matchingComment" : "search.matchingDescription")}`
                                     : ""}
                                 </span>
-                                <span className="search-parity-org">
+                                <span className="search-org">
                                   {hit.workspaceName}
+                                </span>
+                              </span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
+                {crmGroups
+                  .filter((group) => group.items.length)
+                  .map((group) => (
+                    <div
+                      key={group.kind}
+                      role="group"
+                      aria-label={t(group.label)}
+                    >
+                      <div className="search-group-heading" aria-hidden="true">
+                        <span>{t(group.label)}</span>
+                        <span>{group.items.length}</span>
+                      </div>
+                      {group.items.map((item, offset) => {
+                        const row = group.offset + offset;
+                        return (
+                          <button
+                            key={`${item.kind}:${item.id}`}
+                            type="button"
+                            role="option"
+                            aria-selected={index === row}
+                            id={`${listId}-${row}`}
+                            ref={(node) => {
+                              buttons.current[row] = node;
+                            }}
+                            tabIndex={-1}
+                            data-testid={`search-${item.kind}`}
+                            className="search-result"
+                            onMouseEnter={() => setIndex(row)}
+                            onClick={() => {
+                              remember();
+                              router.push(item.href);
+                              onClose();
+                            }}
+                          >
+                            <span
+                              className={`search-result-icon${item.kind === "contact" ? " is-person" : ""}`}
+                              aria-hidden="true"
+                            >
+                              {item.kind === "company" ? (
+                                <Building2 size={16} strokeWidth={1.5} />
+                              ) : (
+                                initials(item.title)
+                              )}
+                            </span>
+                            <span className="search-result-copy">
+                              <span className="search-result-title">
+                                <SearchMatch
+                                  text={item.title}
+                                  query={deferred}
+                                />
+                              </span>
+                              <span className="search-result-meta">
+                                <span>
+                                  {t(
+                                    item.kind === "company"
+                                      ? "search.company"
+                                      : "search.contact",
+                                  )}
+                                  {item.meta ? ` · ${item.meta}` : ""}
+                                </span>
+                                <span className="search-org">
+                                  {workspace.name}
                                 </span>
                               </span>
                             </span>
@@ -344,15 +465,12 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                   ))}
                 {!!settings.length && (
                   <div role="group" aria-label={t("search.settings")}>
-                    <div
-                      className="search-parity-group-heading"
-                      aria-hidden="true"
-                    >
+                    <div className="search-group-heading" aria-hidden="true">
                       <span>{t("search.settings")}</span>
                       <span>{settings.length}</span>
                     </div>
                     {settings.map((item, offset) => {
-                      const row = hits.length + offset;
+                      const row = settingsOffset + offset;
                       return (
                         <button
                           key={item.key}
@@ -365,7 +483,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                           }}
                           tabIndex={-1}
                           data-testid="search-setting"
-                          className="search-parity-result"
+                          className="search-result"
                           onMouseEnter={() => setIndex(row)}
                           onClick={() => {
                             remember();
@@ -374,19 +492,19 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                           }}
                         >
                           <span
-                            className="search-parity-result-icon"
+                            className="search-result-icon"
                             aria-hidden="true"
                           >
                             <Settings size={16} strokeWidth={1.5} />
                           </span>
-                          <span className="search-parity-result-copy">
-                            <span className="search-parity-result-title">
+                          <span className="search-result-copy">
+                            <span className="search-result-title">
                               <SearchMatch
                                 text={t(item.key)}
                                 query={deferred}
                               />
                             </span>
-                            <span className="search-parity-result-meta">
+                            <span className="search-result-meta">
                               {t("search.settings")}
                             </span>
                           </span>
@@ -396,8 +514,8 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
                   </div>
                 )}
               </div>
-              {!results.isFetching && !count && !results.isError && (
-                <div className="search-parity-no-results">
+              {!fetching && !count && !results.isError && (
+                <div className="search-no-results">
                   <span aria-hidden="true">
                     <Search size={20} strokeWidth={1.5} />
                   </span>
@@ -407,7 +525,7 @@ export function SearchDialog({ onClose }: { onClose: () => void }) {
             </>
           )}
         </div>
-        <div className="search-parity-footer">
+        <div className="search-footer">
           <span>{t("search.keyboard")}</span>
           <kbd>⌘K</kbd>
         </div>

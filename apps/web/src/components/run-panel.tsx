@@ -297,6 +297,7 @@ export function RunPanel({
           <GrantActions
             grant={selectedGrant}
             canDecide={agent.data?.canDecideGrants ?? false}
+            canAlwaysAllow={agent.data?.canManage ?? false}
           />
         </SheetDialog>
       )}

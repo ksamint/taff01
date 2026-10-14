@@ -51,7 +51,7 @@
   "status": {
     "todo": "待辦",
     "in_progress": "進行中",
-    "needs_review": "待審核",
+    "needs_review": "待確認",
     "done": "已完成"
   },
   "errors": {
@@ -82,7 +82,7 @@
   "calendar": {
     "title": "日曆",
     "hint": "日程與任務截止時間分開設定。",
-    "unscheduled": "未安排",
+    "unscheduled": "未安排時間",
     "day": "日",
     "week": "週",
     "month": "月",
@@ -108,11 +108,11 @@
     "series": "修改與完成狀態套用至所有日期。",
     "save": "儲存",
     "clear": "取消安排",
-    "undo": "復原",
+    "undo": "撤銷",
     "saved": "已更新",
     "titleLabel": "標題",
     "truncated": "日程過多，請縮小日期或工作區範圍。",
-    "agentLane": "智能體",
+    "agentLane": "智能體背景執行",
     "agentHint": "開啟任務查看代理執行狀態。",
     "emptyTray": "沒有待安排任務。",
     "invalid": "請檢查日期、時長、時區及重複規則。",
@@ -120,8 +120,13 @@
     "selectView": "檢視",
     "noEvents": "沒有日程任務",
     "tools": "日曆控制",
-    "dragHint": "拖動以移動；使用列表以鍵盤安排",
-    "goToDate": "前往日期"
+    "dragHint": "拖動改期，點空白處新建",
+    "goToDate": "前往日期",
+    "keyboardHint": "不用拖動時，可用列表或開啟日程以鍵盤修改時間。",
+    "toast": {
+      "moved": "已改期至 {{date}} {{time}}",
+      "durationSet": "時長改為 {{start}}–{{end}}"
+    }
   },
   "projects": {
     "title": "項目",
@@ -148,7 +153,21 @@
     "drag": "將任務拖到其他狀態欄",
     "dragHint": "拖動手柄移動任務，或使用狀態選擇器。",
     "moved": "已移至{{status}}",
-    "labelFilter": "按標籤篩選"
+    "labelFilter": "按標籤篩選",
+    "moreViews": "更多",
+    "timelineView": "時間線",
+    "stakeholdersView": "相關方",
+    "relationsView": "關係圖",
+    "mindView": "心智圖",
+    "views": "項目視圖",
+    "sections": "項目、公司與聯繫人",
+    "filterAll": "全部",
+    "switchProject": "切換或管理項目",
+    "clearAgentFilter": "清除智能體篩選：{{name}}",
+    "statusTabs": "跳到狀態欄",
+    "buildingNote": "此視圖仍在建設中，看板和列表現已可用。",
+    "openBoard": "打開看板",
+    "openList": "打開列表"
   },
   "inbox": {
     "title": "收件箱",
@@ -326,7 +345,12 @@
   "taskDetail": {
     "back": "返回今天",
     "due": "到期時間",
-    "unscheduled": "未安排日期"
+    "unscheduled": "未安排日期",
+    "close": "關閉任務",
+    "activity": "動態",
+    "statusChanged": "狀態已改為{{status}}",
+    "fieldSaved": "已更新{{field}}",
+    "descriptionPlaceholder": "添加描述"
   },
   "run": {
     "title": "智能體執行",
@@ -347,7 +371,7 @@
     "status": {
       "running": "工作中",
       "paused": "已暫停",
-      "needs_review": "待審核",
+      "needs_review": "待確認",
       "changes_requested": "已要求修改",
       "completed": "已完成",
       "canceled": "已取消",
@@ -396,7 +420,8 @@
     "approveHint": "批准執行前，請完成三個檢查項並批准每個交付物。要求修改時需填寫評論。",
     "approved": "已批准，任務已完成。",
     "readonly": "目前帳戶或執行狀態下只能查看審核內容。",
-    "comments": "審核評論"
+    "comments": "審核評論",
+    "changesHint": "說明需要修改的地方，智能體會據此繼續工作。"
   },
   "agentProfile": {
     "open": "智能體資料",
@@ -476,7 +501,8 @@
       "allowed": "已允許",
       "denied": "已拒絕",
       "revoked": "已撤銷"
-    }
+    },
+    "always": "始終允許"
   },
   "planning": {
     "close": "關閉",
@@ -509,7 +535,7 @@
   },
   "search": {
     "title": "搜尋",
-    "placeholder": "搜尋任務、評論與設定",
+    "placeholder": "搜尋任務、評論、聯繫人與設定",
     "thisOrg": "目前組織",
     "allOrgs": "所有組織",
     "all": "全部",
@@ -524,7 +550,11 @@
     "matchingComment": "符合評論",
     "matchingDescription": "符合描述",
     "cancel": "取消",
-    "clear": "清除搜尋"
+    "clear": "清除搜尋",
+    "companies": "公司",
+    "contacts": "聯繫人",
+    "company": "公司",
+    "contact": "聯繫人"
   },
   "quickAdd": {
     "title": "快速新增",
@@ -715,10 +745,56 @@
     "badgeBlocker": "已阻塞"
   },
   "actions": {
-    "back": "返回"
+    "back": "返回",
+    "undo": "撤銷",
+    "remove": "移除",
+    "done": "完成"
   },
   "toast": {
     "orgSwitched": "已切換到 {{name}}",
     "orgCreated": "已建立組織 {{name}}"
+  },
+  "crm": {
+    "role": {
+      "decider": "決策者",
+      "chair": "董事長",
+      "ops": "運營負責人",
+      "broker": "項目中間人",
+      "tech": "技術對接人",
+      "finance": "財務聯繫人",
+      "signoff": "驗收人"
+    },
+    "roleSeparator": "、",
+    "contacts": {
+      "title": "聯繫人",
+      "add": "添加聯繫人",
+      "addConfirm": "添加",
+      "others": "其他聯繫人",
+      "search": "搜尋聯繫人",
+      "noMatches": "沒有可添加的聯繫人。",
+      "needsProject": "任務加入項目後才能添加聯繫人。",
+      "noneOnTask": "此任務暫無聯繫人。",
+      "someone": "另一位聯繫人"
+    },
+    "stakeholders": {
+      "fromProject": "項目相關方"
+    },
+    "external": "外部",
+    "rolesTitle": "角色",
+    "noRole": "未設角色",
+    "rolesFor": "{{name}} 的角色",
+    "editRolesFor": "編輯 {{name}} 的角色",
+    "doneEditingFor": "完成編輯 {{name}} 的角色",
+    "roles": {
+      "task": "任務角色"
+    },
+    "toast": {
+      "added": "已添加 {{name}}",
+      "rolesUpdated": "已更新 {{name}} 的角色",
+      "roleReplaced": "{{name}} 現為{{role}}，已取代 {{previous}}",
+      "addedStakeholder": "並已加入「{{project}}」項目相關方",
+      "removed": "已移除 {{name}}",
+      "separator": "；"
+    }
   }
 }

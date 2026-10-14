@@ -1,4 +1,7 @@
 "use client";
+// Task fields, subtasks and activity (prototype v2 phone 533–691, desktop
+// panel 1590–1707). Phone rows open pickers; the desktop panel edits inline
+// and its status control shows a toast whose 撤銷 PATCHes the old value back.
 import {
   type Locale,
   type Task,
@@ -6,24 +9,30 @@ import {
   updateTaskSchema,
 } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
-import { ArrowLeft, ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronDown, Send, Sparkles } from "lucide-react";
 import Link from "next/link";
 import {
   type FormEvent,
   type ReactNode,
   useCallback,
   useEffect,
+  useId,
   useState,
 } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
+import { initials } from "../lib/initials";
 import {
   useEditTask,
   useProjects,
   useTaskAccess,
   useTaskComments,
 } from "../lib/m5-queries";
-import { useAddSubtask, useAddTaskComment } from "../lib/mutations/tasks";
+import {
+  useAddSubtask,
+  useAddTaskComment,
+  useUndoableTaskEdit,
+} from "../lib/mutations/tasks";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useTasks } from "../lib/queries";
 import { deadlineFields, deadlineIso } from "../lib/task-date";
@@ -34,29 +43,38 @@ import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
 import { StatusGlyph } from "./ui/status-glyph";
 
+const PRIORITIES = ["urgent", "high", "medium", "low"] as const;
+
 export function TaskEditor({
   task,
+  desktop = false,
   workerControl,
   scheduleControl,
   runControl,
+  contacts,
   afterDescription,
 }: {
   task: Task;
+  /** The desktop right panel: inline controls instead of picker rows. */
+  desktop?: boolean;
   workerControl: ReactNode;
   scheduleControl: ReactNode;
   runControl: ReactNode;
+  contacts?: ReactNode;
   afterDescription?: ReactNode;
 }) {
   const { me } = useWorkspace();
   const taskWorkspace = me.workspaces.find(({ id }) => id === task.workspaceId);
   const authorId = taskWorkspace?.memberId;
   const { t, i18n } = useTranslation();
+  const ids = useId();
   const members = useMembers(task.workspaceId);
   const projects = useProjects(task.workspaceId);
   const access = useTaskAccess(task.id);
   const tasks = useTasks(task.workspaceId);
   const comments = useTaskComments(task.id);
   const edit = useEditTask();
+  const inline = useUndoableTaskEdit();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const fields = useCallback(
     (value: Task) => ({
@@ -87,10 +105,10 @@ export function TaskEditor({
     | null
   >(null);
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
-  const presentName = (id: string, value: string) => value;
   const [invalid, setInvalid] = useState<string | null>(null);
   const [subtaskTitle, setSubtaskTitle] = useState("");
   const [comment, setComment] = useState("");
+  const [description, setDescription] = useState<string | null>(null);
   useEffect(() => {
     if (!editing && !busy) {
       const value = fields(task);
@@ -156,32 +174,147 @@ export function TaskEditor({
   const children = (tasks.data ?? []).filter(
     (item) => item.parentId === task.id,
   );
+  const doneChildren = children.filter((item) => item.status === "done").length;
   const parent = tasks.data?.find((item) => item.id === task.parentId);
   const owner = members.data?.find((item) => item.id === form.ownerId);
-  const ownerName = owner
-    ? presentName(owner.id, owner.name)
-    : t("unknownMember");
+  const ownerName = owner ? owner.name : t("unknownMember");
+  const project = projects.data?.find((item) => item.id === task.projectId);
+  const formProject = projects.data?.find((item) => item.id === form.projectId);
   const writable = access.data?.canEditMetadata ?? access.data?.canEdit;
+  const inlineDisabled = busy || editing;
+  const statuses = [
+    ...new Set([task.status, ...(access.data?.allowedStatuses ?? [])]),
+  ];
+  const dueText = form.date
+    ? !editing && task.dueAt
+      ? new Intl.DateTimeFormat(locale, {
+          timeZone: me.user.tz,
+          month: "short",
+          day: "numeric",
+          ...(form.time
+            ? { hour: "2-digit" as const, minute: "2-digit" as const }
+            : {}),
+        }).format(new Date(task.dueAt))
+      : `${form.date} ${form.time}`.trim()
+    : t("taskDetail.unscheduled");
+  const fieldLabel = (key: string) =>
+    key === "owner" ? t("owner") : t(`planning.${key}`);
+  const statusRow = desktop ? (
+    <div className="task-field-row">
+      <label htmlFor={`${ids}-status`}>{t("planning.status")}</label>
+      <span className="task-field-control">
+        <StatusGlyph status={task.status} />
+        <select
+          id={`${ids}-status`}
+          data-testid="detail-status"
+          value={task.status}
+          disabled={inlineDisabled || !access.data?.allowedStatuses.length}
+          onChange={(event) => {
+            const status = event.target.value as Task["status"];
+            inline.change(task, { status }, () =>
+              t("taskDetail.statusChanged", { status: t(`status.${status}`) }),
+            );
+          }}
+        >
+          {statuses.map((status) => (
+            <option
+              key={status}
+              value={status}
+              disabled={
+                status !== task.status &&
+                !access.data?.allowedStatuses.includes(status)
+              }
+            >
+              {t(`status.${status}`)}
+            </option>
+          ))}
+        </select>
+      </span>
+    </div>
+  ) : (
+    <Button
+      type="button"
+      className="task-field-row"
+      data-testid="task-field-status"
+      onClick={() => setPicker("status")}
+      disabled={busy || !access.data?.allowedStatuses.length}
+    >
+      <span>{t("planning.status")}</span>
+      <span>
+        <StatusGlyph status={task.status} />
+        {t(`status.${task.status}`)}
+      </span>
+      <ChevronDown size={14} aria-hidden="true" />
+    </Button>
+  );
+  const pickerRow = (
+    key: "owner" | "due" | "priority" | "project" | "labels",
+    value: ReactNode,
+    enabled: boolean,
+  ) => (
+    <Button
+      type="button"
+      className="task-field-row"
+      data-testid={`task-field-${key}`}
+      onClick={() => setPicker(key)}
+      disabled={!enabled || busy}
+    >
+      <span>{key === "due" ? t("planning.dueDate") : fieldLabel(key)}</span>
+      <span>{value}</span>
+      <ChevronDown size={14} aria-hidden="true" />
+    </Button>
+  );
+  const ownerValue = (
+    <>
+      <span className="task-person-avatar" aria-hidden="true">
+        {owner ? initials(ownerName) : ""}
+      </span>
+      <span className="task-field-value">{ownerName}</span>
+    </>
+  );
+  const selectRow = (
+    key: "owner" | "priority" | "project",
+    value: string,
+    options: ReactNode,
+    enabled: boolean,
+    onChange: (value: string) => void,
+  ) => (
+    <div className="task-field-row">
+      <label htmlFor={`${ids}-${key}`}>{fieldLabel(key)}</label>
+      <span className="task-field-control">
+        <select
+          id={`${ids}-${key}`}
+          data-testid={`detail-${key}`}
+          value={value}
+          disabled={!enabled || inlineDisabled}
+          onChange={(event) => onChange(event.target.value)}
+        >
+          {options}
+        </select>
+      </span>
+    </div>
+  );
+  const saved = (key: string) => () =>
+    t("taskDetail.fieldSaved", { field: fieldLabel(key) });
   return (
     <>
       {task.parentId && (
         <Link className="task-parent-link" href={`/tasks/${task.parentId}`}>
           <ArrowLeft size={12} aria-hidden="true" />
-          {t("planning.parent")} ·{" "}
-          {parent
-            ? `${taskWorkspace ? `${taskReference(taskWorkspace.key, parent.number)} ` : ""}${parent.title}`
-            : t("agentProfile.task")}
+          <span>
+            {t("planning.parent")} ·{" "}
+            {parent
+              ? `${taskWorkspace ? `${taskReference(taskWorkspace.key, parent.number)} ` : ""}${parent.title}`
+              : t("agentProfile.task")}
+          </span>
         </Link>
       )}
       <div className="task-source-heading">
-        <span className="task-project-label">
-          {projects.data?.find((item) => item.id === task.projectId)?.name
-            ? presentName(
-                task.projectId!,
-                projects.data!.find((item) => item.id === task.projectId)!.name,
-              )
-            : t("planning.noProject")}
-        </span>
+        {!desktop && (
+          <span className="task-project-label">
+            {project?.name ?? t("planning.noProject")}
+          </span>
+        )}
         <h1 data-testid="task-detail-heading">
           <Button
             type="button"
@@ -196,108 +329,79 @@ export function TaskEditor({
       </div>
       {runControl}
       <div className="task-field-rows">
-        <Button
-          type="button"
-          className="task-field-row"
-          data-testid="task-field-status"
-          onClick={() => setPicker("status")}
-          disabled={busy || !access.data?.allowedStatuses.length}
-        >
-          <span>{t("planning.status")}</span>
-          <span>
-            <StatusGlyph status={task.status} />
-            {t(`status.${task.status}`)}
-          </span>
-          <ChevronDown size={14} aria-hidden="true" />
-        </Button>
-        <Button
-          type="button"
-          className="task-field-row"
-          data-testid="task-field-owner"
-          onClick={() => setPicker("owner")}
-          disabled={!access.data?.canEdit || busy}
-        >
-          <span>{t("owner")}</span>
-          <span>
-            <span className="task-person-avatar" aria-hidden="true">
-              {owner ? ownerName.slice(0, 1) : ""}
-            </span>
-            <span className="task-field-value">{ownerName}</span>
-          </span>
-          <ChevronDown size={14} aria-hidden="true" />
-        </Button>
+        {statusRow}
+        {desktop
+          ? selectRow(
+              "owner",
+              task.ownerId,
+              members.data
+                ?.filter((member) => member.kind === "person")
+                .map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                )),
+              !!access.data?.canEdit && !!members.data,
+              (ownerId) => inline.change(task, { ownerId }, saved("owner")),
+            )
+          : pickerRow("owner", ownerValue, !!access.data?.canEdit)}
         {workerControl}
-        <Button
-          type="button"
-          className="task-field-row"
-          data-testid="task-field-due"
-          onClick={() => setPicker("due")}
-          disabled={!writable || busy}
-        >
-          <span>{t("planning.dueDate")}</span>
-          <span>
-            {form.date
-              ? !editing && task.dueAt
-                ? new Intl.DateTimeFormat(locale, {
-                    timeZone: me.user.tz,
-                    month: "short",
-                    day: "numeric",
-                    ...(form.time
-                      ? { hour: "2-digit" as const, minute: "2-digit" as const }
-                      : {}),
-                  }).format(new Date(task.dueAt))
-                : `${form.date} ${form.time}`.trim()
-              : t("taskDetail.unscheduled")}
-          </span>
-          <ChevronDown size={14} aria-hidden="true" />
-        </Button>
+        {pickerRow("due", dueText, !!writable)}
         {scheduleControl}
-        <Button
-          type="button"
-          className="task-field-row"
-          data-testid="task-field-priority"
-          onClick={() => setPicker("priority")}
-          disabled={!writable || busy}
-        >
-          <span>{t("planning.priority")}</span>
-          <span>
-            {t(
-              `planning.${["urgent", "high", "medium", "low"][Number(form.priority) - 1]}`,
+        {desktop
+          ? selectRow(
+              "priority",
+              String(task.priority),
+              PRIORITIES.map((key, index) => (
+                <option key={key} value={index + 1}>
+                  {t(`planning.${key}`)}
+                </option>
+              )),
+              !!writable,
+              (priority) =>
+                inline.change(
+                  task,
+                  { priority: Number(priority) },
+                  saved("priority"),
+                ),
+            )
+          : pickerRow(
+              "priority",
+              t(`planning.${PRIORITIES[Number(form.priority) - 1]}`),
+              !!writable,
             )}
-          </span>
-          <ChevronDown size={14} aria-hidden="true" />
-        </Button>
-        <Button
-          type="button"
-          className="task-field-row"
-          data-testid="task-field-project"
-          onClick={() => setPicker("project")}
-          disabled={!writable || busy}
-        >
-          <span>{t("planning.project")}</span>
-          <span>
-            {projects.data?.find((item) => item.id === form.projectId)
-              ? presentName(
-                  form.projectId,
-                  projects.data.find((item) => item.id === form.projectId)!
-                    .name,
-                )
-              : t("planning.noProject")}
-          </span>
-          <ChevronDown size={14} aria-hidden="true" />
-        </Button>
-        <Button
-          type="button"
-          className="task-field-row"
-          data-testid="task-field-labels"
-          onClick={() => setPicker("labels")}
-          disabled={!writable || busy}
-        >
-          <span>{t("planning.labels")}</span>
-          <span>{form.labels || "—"}</span>
-          <ChevronDown size={14} aria-hidden="true" />
-        </Button>
+        {desktop
+          ? selectRow(
+              "project",
+              task.projectId ?? "",
+              <>
+                <option value="">{t("planning.noProject")}</option>
+                {projects.data
+                  ?.filter(
+                    (item) => !item.archived || item.id === task.projectId,
+                  )
+                  .map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.name}
+                    </option>
+                  ))}
+              </>,
+              !!writable && !!projects.data,
+              (projectId) =>
+                inline.change(
+                  task,
+                  { projectId: projectId || null },
+                  saved("project"),
+                ),
+            )
+          : pickerRow(
+              "project",
+              formProject?.name ?? t("planning.noProject"),
+              !!writable,
+            )}
+        {pickerRow("labels", form.labels || "—", !!writable)}
       </div>
+      {contacts}
       <form className="task-field-editor" onSubmit={save}>
         {editing && (
           <Button
@@ -365,7 +469,7 @@ export function TaskEditor({
                     ?.filter((member) => member.kind === "person")
                     .map((member) => (
                       <option key={member.id} value={member.id}>
-                        {presentName(member.id, member.name)}
+                        {member.name}
                       </option>
                     ))}
                 </select>
@@ -406,7 +510,7 @@ export function TaskEditor({
                     value={form.priority}
                     onChange={(event) => change("priority", event.target.value)}
                   >
-                    {["urgent", "high", "medium", "low"].map((key, index) => (
+                    {PRIORITIES.map((key, index) => (
                       <option key={key} value={index + 1}>
                         {t(`planning.${key}`)}
                       </option>
@@ -465,15 +569,73 @@ export function TaskEditor({
           </SheetDialog>
         )}
       </form>
-      {task.description && (
-        <p className="task-description preserve-text">{task.description}</p>
+      {desktop ? (
+        <form
+          className="task-description-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            if (description !== null && description !== task.description)
+              inline.change(
+                task,
+                { description },
+                () =>
+                  t("taskDetail.fieldSaved", {
+                    field: t("planning.description"),
+                  }),
+                () => setDescription(null),
+              );
+          }}
+        >
+          <Label htmlFor={`${ids}-description`}>
+            {t("planning.description")}
+          </Label>
+          <textarea
+            id={`${ids}-description`}
+            data-testid="detail-description"
+            className="input"
+            value={description ?? task.description}
+            placeholder={t("taskDetail.descriptionPlaceholder")}
+            maxLength={20000}
+            rows={3}
+            disabled={!access.data?.canEdit || inlineDisabled}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+          {description !== null && description !== task.description && (
+            <div className="action-row">
+              <Button
+                type="submit"
+                className="button-primary"
+                data-testid="detail-description-save"
+                disabled={inlineDisabled}
+              >
+                {t("planning.save")}
+              </Button>
+              <Button type="button" onClick={() => setDescription(null)}>
+                {t("search.cancel")}
+              </Button>
+            </div>
+          )}
+        </form>
+      ) : (
+        task.description && (
+          <p className="task-description preserve-text">{task.description}</p>
+        )
       )}
       {!access.data?.canEdit && (
         <p className="section-hint">{t("planning.readOnly")}</p>
       )}
-      {(invalid || edit.isError || access.isError || projects.isError) && (
+      {(invalid ||
+        edit.isError ||
+        inline.isError ||
+        access.isError ||
+        projects.isError) && (
         <p className="alert" role="alert">
-          {t(invalid ?? errorKey(edit.error ?? access.error ?? projects.error))}
+          {t(
+            invalid ??
+              errorKey(
+                edit.error ?? inline.error ?? access.error ?? projects.error,
+              ),
+          )}
         </p>
       )}
       {edit.isError && editing && (
@@ -504,7 +666,6 @@ export function TaskEditor({
           title={t("planning.status")}
           onClose={() => setPicker(null)}
         >
-          {" "}
           <div className="field">
             <Label htmlFor="edit-status">{t("planning.status")}</Label>
             <select
@@ -522,12 +683,7 @@ export function TaskEditor({
                 })
               }
             >
-              {[
-                ...new Set([
-                  task.status,
-                  ...(access.data?.allowedStatuses ?? []),
-                ]),
-              ].map((status) => (
+              {statuses.map((status) => (
                 <option
                   key={status}
                   value={status}
@@ -543,35 +699,65 @@ export function TaskEditor({
           </div>
         </SheetDialog>
       )}
-      <section className="profile-section">
-        <h2>
-          {t("planning.subtasks")}{" "}
-          <span className="count-badge">
-            {children.filter((item) => item.status === "done").length}/
-            {children.length}
+      <section className="task-section" aria-labelledby={`${ids}-subtasks`}>
+        <div className="task-section-heading">
+          <h2 id={`${ids}-subtasks`}>{t("planning.subtasks")}</h2>
+          <span className="task-section-count count-badge">
+            {doneChildren}/{children.length}
           </span>
-        </h2>
-        <ul className="history-list">
-          {children.map((child) => (
-            <li key={child.id}>
-              {child.id.startsWith("optimistic:") ? (
-                <span className="text-link" aria-busy="true">
-                  {child.title}
-                </span>
-              ) : (
-                <Link href={`/tasks/${child.id}`} className="text-link">
-                  {child.title}
-                </Link>
-              )}
-
-              <span className={`status status-${child.status}`}>
-                {t(`status.${child.status}`)}
-              </span>
-            </li>
-          ))}
+        </div>
+        {!!children.length && (
+          <div className="task-subtask-progress" aria-hidden="true">
+            <span
+              style={{ width: `${(doneChildren / children.length) * 100}%` }}
+            />
+          </div>
+        )}
+        <ul className="history-list task-subtasks">
+          {children.map((child) => {
+            const worker = members.data?.find(
+              (member) => member.id === child.workerId,
+            );
+            return (
+              <li key={child.id}>
+                <StatusGlyph status={child.status} />
+                {taskWorkspace && child.number > 0 && (
+                  <span className="task-subtask-ref">
+                    {taskReference(taskWorkspace.key, child.number)}
+                  </span>
+                )}
+                {child.id.startsWith("optimistic:") ? (
+                  <span className="text-link" aria-busy="true">
+                    {child.title}
+                  </span>
+                ) : (
+                  <Link
+                    href={`/tasks/${child.id}`}
+                    className={`text-link${child.status === "done" ? " is-done" : ""}`}
+                  >
+                    {child.title}
+                  </Link>
+                )}
+                <span className="sr-only">{t(`status.${child.status}`)}</span>
+                {worker && (
+                  <span
+                    className={`task-subtask-worker${worker.kind === "agent" ? " is-agent" : ""}`}
+                    title={worker.name}
+                    aria-hidden="true"
+                  >
+                    {worker.kind === "agent" ? (
+                      <Sparkles size={12} />
+                    ) : (
+                      initials(worker.name)
+                    )}
+                  </span>
+                )}
+              </li>
+            );
+          })}
         </ul>
         <form
-          className="action-row"
+          className="task-inline-form"
           onSubmit={(event) => {
             event.preventDefault();
             if (subtaskTitle.trim()) addSubtask.mutate(subtaskTitle);
@@ -600,8 +786,10 @@ export function TaskEditor({
           </p>
         )}
       </section>
-      <section className="profile-section">
-        <h2>{t("planning.comments")}</h2>
+      <section className="task-section" aria-labelledby={`${ids}-activity`}>
+        <div className="task-section-heading">
+          <h2 id={`${ids}-activity`}>{t("taskDetail.activity")}</h2>
+        </div>
         {comments.isError ? (
           <p className="alert" role="alert">
             {t(errorKey(comments.error))}
@@ -609,58 +797,76 @@ export function TaskEditor({
         ) : !comments.data?.length ? (
           <p className="section-hint">{t("planning.noComments")}</p>
         ) : (
-          <ul className="review-comments">
-            {comments.data.map((entry) => (
-              <li key={entry.id}>
-                <strong>
-                  {members.data?.find((member) => member.id === entry.authorId)
-                    ?.name ?? t("unknownMember")}
-                </strong>
-                <time dateTime={entry.createdAt}>
-                  {new Intl.DateTimeFormat(
-                    i18n.resolvedLanguage ?? me.user.locale,
-                    {
-                      timeZone: me.user.tz,
-                      dateStyle: "medium",
-                      timeStyle: "short",
-                    },
-                  ).format(new Date(entry.createdAt))}
-                </time>
-                <p className="preserve-text">{entry.body}</p>
-              </li>
-            ))}
+          <ul className="review-comments task-activity">
+            {comments.data.map((entry) => {
+              const author = members.data?.find(
+                (member) => member.id === entry.authorId,
+              );
+              const name = author?.name ?? t("unknownMember");
+              return (
+                <li key={entry.id}>
+                  <span
+                    className={`task-activity-avatar${author?.kind === "agent" ? " is-agent" : ""}`}
+                    aria-hidden="true"
+                  >
+                    {author?.kind === "agent" ? (
+                      <Sparkles size={12} />
+                    ) : (
+                      initials(name)
+                    )}
+                  </span>
+                  <div className="task-activity-copy">
+                    <div className="task-activity-meta">
+                      <strong>{name}</strong>
+                      <time dateTime={entry.createdAt}>
+                        {new Intl.DateTimeFormat(locale, {
+                          timeZone: me.user.tz,
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                        }).format(new Date(entry.createdAt))}
+                      </time>
+                    </div>
+                    <p className="preserve-text">{entry.body}</p>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         )}
-        <form
-          onSubmit={(event) => {
-            event.preventDefault();
-            if (comment.trim()) addComment.mutate(comment);
-          }}
+      </section>
+      <form
+        className="task-comment-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (comment.trim()) addComment.mutate(comment);
+        }}
+      >
+        <textarea
+          className="input"
+          data-testid="task-comment"
+          aria-label={t("planning.commentPlaceholder")}
+          placeholder={t("planning.commentPlaceholder")}
+          value={comment}
+          onChange={(event) => setComment(event.target.value)}
+          maxLength={5000}
+          rows={1}
+          disabled={!access.data?.canComment || busy}
+        />
+        <Button
+          data-testid="task-comment-submit"
+          type="submit"
+          className="button-primary"
+          aria-label={t("planning.addComment")}
+          disabled={!access.data?.canComment || busy || !comment.trim()}
         >
-          <textarea
-            className="input"
-            data-testid="task-comment"
-            aria-label={t("planning.commentPlaceholder")}
-            value={comment}
-            onChange={(event) => setComment(event.target.value)}
-            maxLength={5000}
-            rows={3}
-            disabled={!access.data?.canComment || busy}
-          />
-          <Button
-            data-testid="task-comment-submit"
-            type="submit"
-            disabled={!access.data?.canComment || busy || !comment.trim()}
-          >
-            {t("planning.addComment")}
-          </Button>
-        </form>
+          <Send size={16} aria-hidden="true" />
+        </Button>
         {addComment.isError && (
           <p className="alert" role="alert">
             {t(errorKey(addComment.error))}
           </p>
         )}
-      </section>
+      </form>
     </>
   );
 }
