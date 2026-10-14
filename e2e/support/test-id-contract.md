@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (161 distinct, 769 uses)
+## Test ids (161 distinct, 770 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -314,7 +314,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
-| `desktop-new-task` | 1 |  | support/tasks.ts |
+| `desktop-new-task` | 2 |  | support/tasks.ts, ui-parity.spec.ts |
 | `task-card` | 12 |  | accessibility.spec.ts, agent-creation.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-parity.spec.ts |
 | `today-heading` | 42 |  | agent-review.spec.ts, calendar.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-parity.spec.ts |
@@ -456,6 +456,7 @@ read (`data-event-id`, `data-date`).
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
+| `[data-testid="desktop-new-task"]` | 1 | ui-parity.spec.ts |
 | `#auth-name` | 6 | optimistic-m4.spec.ts, planning.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#grant-reason` | 1 | optimistic-m4.spec.ts |
 | `#grant-task` | 1 | optimistic-m4.spec.ts |
