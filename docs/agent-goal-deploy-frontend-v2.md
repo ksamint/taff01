@@ -1,7 +1,7 @@
 # Agent goal: deploy frontend v2 to taff.apuch.cn (local agent)
 
 > Status 2026-10-14: ready. The live site runs
-> `23387723f8c438d990db00d561cba2899f48ab80` (agent-creation checkpoint in
+> `ab243e8379c952f37c459a60596e4754ba33967e` (M18b upgrade checkpoint in
 > `docs/deploy.md`).
 >
 > Work is split between two agents:
@@ -113,8 +113,9 @@ every public check and the live MCP round trip.
 
 1. `git fetch origin` and find the newest candidate section that has no
    matching upgrade checkpoint yet.
-2. If there is none, report "no candidate newer than <live SHA>" and stop.
-   Rerun this command when the build agent publishes one.
+2. If there is none, record "no candidate newer than <live SHA>" and wait
+   30 minutes before checking again. Keep watching until v0.2.0 is deployed
+   and recorded.
 3. Otherwise check all of the following:
    - the candidate SHA is an ancestor of `origin/main`;
    - the linked `main` push CI run is green for that exact SHA;
@@ -127,22 +128,20 @@ every public check and the live MCP round trip.
    deployed as its pinned SHA, and later code ships with a later candidate.
    Never deploy an unlisted SHA, and never build from the `main` head.
    - If several candidates are pending, deploy only the newest.
-   - Once a candidate has started deploying, finish it even if a newer
-     candidate appears, then pick up the newer one.
+   - A newer published candidate always supersedes an older or blocked
+     candidate, including one already in progress. Reconcile the held lock
+     and runtime, then deploy the newer pinned candidate.
 
-**Step 1 — validate locally** on a quiet machine, on a clean detached
-checkout of the SHA.
+**Step 1 — CI validation and local production smoke.**
 
-1. Run `pnpm lint && pnpm typecheck && pnpm licence:check && pnpm test && pnpm
-   build && pnpm build:server && pnpm perf:budget && pnpm e2e && pnpm
-   mcp:smoke`.
-2. Run `pnpm perf:lighthouse`.
-3. Run `pnpm perf:lcp` three times for each of `LCP_LOCALE=en`, `zh-CN` and
-   `zh-HK`.
-4. Record the numbers.
+The green CI runs from Step 0 are the validation. Do not re-run the full
+local suite, Lighthouse or LCP. On a clean detached checkout of the pinned
+SHA, build the API, worker and web images, then run `pnpm mcp:smoke`
+against a production-mode stack. Record image identities and smoke results.
 
-Any failure means no deploy: append a `Blocked:` note with the failing
-command to the candidate section and stop.
+If a check fails, re-run that check once. Block the candidate only if it
+fails twice; record both attempts and continue watching for the next
+candidate. A newer candidate supersedes the blocked one.
 
 **Step 2 — check the release is safe for production data.**
 
@@ -249,14 +248,16 @@ detached keeper so an SSH drop does not release it.
       HTTP 401.
    7. Do not flood production to prove the rate limit; CI's smoke covers it.
    8. Archive the verification entities the run created.
-4. **Failure handling.** One rollback-free retry is allowed for a check that
-   fails from test-helper or timing issues. If it fails again, roll back:
-   - restore the env backup and the recorded previous image identities;
-   - recreate only API, worker and web;
-   - additive migrations and data stay.
+4. **Failure handling.** Re-run a failed check once. Roll back only if
+   sign-in, Today, task create/edit, review approve or the live MCP round
+   trip fails twice. Restore the env backup and recorded previous image
+   identities; recreate only API, worker and web. Additive migrations and
+   data stay. Record both attempts under the candidate as `Blocked:`.
 
-   Then record the failure under the candidate as `Blocked:` with the evidence
-   for the build agent.
+   Record any other failed check as a follow-up in the checkpoint and keep
+   the release live. These rules are the user's effective 2026-10-14
+   deployment override; the lock, database/env backups, additive-only
+   migrations and secrets rules remain unchanged.
 
 **Step 5 — record and release the lock.**
 
@@ -282,5 +283,6 @@ detached keeper so an SSH drop does not release it.
 - what is new to review, with the milestone report links;
 - anything blocked.
 
-Then check for the next candidate (Step 0). Repeat for every candidate until
+Then check for the next candidate (Step 0) every 30 minutes. Deploy each
+new candidate using these rules. Repeat until
 `v0.2.0` is deployed, and tag it in the M19 release.

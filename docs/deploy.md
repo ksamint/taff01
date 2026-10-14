@@ -1075,6 +1075,16 @@ migration, image build or container replacement was started.
 
 ### Frontend v2 release candidate M17 — 2026-10-14 (answers the M16 member-order block)
 
+**Superseded during deployment:** M18 was published while M17 was live under
+the native lock. The user's effective 2026-10-14 rules require the newest
+candidate to supersede an in-progress one. M17 was healthy, migrations
+0023–0025 had applied, and the brief overlay passed on the live phone UI.
+A proposal test failed only during harness cleanup of agent-assigned tasks;
+its two residual verification tasks were completed through supported,
+version-checked assignment/task APIs after repairing the helper. M17 was
+not recorded as an accepted release. The same keeper retained the lock
+while M18 took a fresh database/env backup and superseded it.
+
 **Source.** `main` at `c38cde71ba7e2a5d440eed8da2052cd4fa6bb59c`. It supersedes
 the M16 candidate, so one deploy covers R1, M15, M16 and M17. Since the M16
 candidate's source `78c68ab`, it adds:
@@ -1188,6 +1198,17 @@ fresh database, with `pnpm release:stack --build --migrate --seed` and
 
 
 ### Frontend v2 release candidate M18 — 2026-10-14
+
+**Superseded during deployment:** M18b was published before the M18
+checkpoint. Per the user's effective newest-candidate rule, M18b took over
+under the same native lock with fresh backups and pinned image builds.
+M18 was healthy and its 21 critical public cases passed (four task
+cleanup-only failures passed their single retry after descendant-first
+cleanup was fixed). The application code is unchanged in M18b; the
+completed M18 public milestone coverage is identified separately in the
+M18b checkpoint, alongside fresh critical checks on the M18b runtime.
+M18 was not marked accepted and deployment.done was not advanced to it.
+
 
 **Source.** `main` at `98cf3c64b63a397512dc9bf940f2152d2c305a44`. It supersedes
 the M17 candidate, so one deploy covers R1 and M15–M18. If the M17 deploy is
@@ -1313,3 +1334,141 @@ no environment or infrastructure changes. Under the current working rules,
 the local production-mode checklist is optional and was not rerun for this
 test-only change. The M18 checklist, which passed 32 / 32 with MCP 42 / 42,
 covers the same application tree.
+
+
+### Frontend v2 M18b upgrade checkpoint — 2026-10-14
+
+M18b superseded healthy M18, which had superseded M17, under the user's effective
+2026-10-14 deployment rules. The live pinned source is
+`ab243e8379c952f37c459a60596e4754ba33967e`, tree `30e53242c2723e30a84bb753a3fa7271c4e601dc`.
+Application commits newer than this source on main do not block deployment.
+The Git diff outside `e2e/` and `docs/` from M18 to M18b is empty; PR #19
+changes test interception helpers only. Application/migration/env/Compose,
+Docker and Caddy sources are identical to M18.
+
+**Validation.** Exact-source main-push CI
+[38564795332](https://github.com/ksamint/taff01/actions/runs/38564795332)
+and PR #19 head CI
+[38559438423](https://github.com/ksamint/taff01/actions/runs/38559438423)
+were completed/success; both source ancestry and PR-head ancestry were
+verified again before build, migration and container start. CI is the
+validation; the full local suite, Lighthouse and LCP were not re-run for
+M18b. The candidate records 866 tests, 194,424 B Today initial JS and
+640/640/648 ms en/zh-CN/zh-HK LCP; these are candidate/CI evidence, not new
+local measurements. On this Mac all three pinned Docker images built and
+`pnpm mcp:smoke` passed against production-mode API/worker containers on an
+isolated local-development database. The Mac used its existing Colima builder; production builds retained
+`--builder default`. Local smoke containers were removed.
+
+**Lock and backups.** Detached native lock keeper PID `3710910` retained
+`/srv/taff/deploy.lock` continuously through the M17-to-M18 handoff.
+M18b took a fresh dedicated dump, verified by `pg_restore --list`:
+`/srv/taff/secrets/db.before-ab243e8379c952f37c459a60596e4754ba33967e.dump`, 424,832 B,
+SHA-256 `b4c17a1a4537ccfc87fb0aa5a23d81622c075908ff5c1963355afd4cc27ad846`; catalog includes 88 tables, tasks,
+workspaces and migration journal. Exclusive env backup:
+`/srv/taff/secrets/.env.before-ab243e8379c952f37c459a60596e4754ba33967e`, mode 0600.
+Git bundle: 8,177 B, SHA-256 `0c6867ae0720f5bd76b1cca383f42abf0085e6107a1682b20e680d4744faf0bb`;
+`git bundle verify`, detached SHA, clean tree and GitHub origin verified.
+The tracked public source modes were normalized to Git's 0644/0755 before
+building, leaving private Git/env/secret files protected.
+
+**Migrations and runtime.** Earlier M17/M18 applied additive 0023–0026. M18b adds no migration;
+the most recent remains `0026_m18_mind_edge_version.sql`, hash
+`3dd0bf9837fbe740fac652712f32a71b84bddd619a6f9198a5c5ebe0b9e0b520`.
+It adds integer version default 1 and a positive-version constraint, with
+no rewrite of existing user data. The canonical M18b one-shot migrator
+exited 0, and all four migration hashes were present. Only API, worker
+and web were recreated with SHA-stamped tags/cache assets:
+
+- api: `sha256:e3ec7ac800fe6e540d173ead9fa16c7ba9d587cc29abe945d5f03e42602bbbe7`
+- worker: `sha256:bcdd2a0d96d33c3533a138851ec05fcbb56f00a9eec8d76c89f14a3f0a245163`
+- web: `sha256:63825ed6a64ca62304f3a9423112b0e37788a9b7bcec3043968dfb56434c6bbb`
+
+Caddy, Valkey and all 46 neighboring containers kept their IDs, start
+times and health; Traefik route hash unchanged. Private env changed only
+TAFF_TAG, retaining mode 0600. Email/SMS values unchanged; AI_* unset and
+all workspace AI flags disabled. PostgreSQL remained on its existing host,
+role and TLS connection, with postmaster start
+`2026-08-29 01:19:14.878015+00`. No database restart, DNS, route or role
+change.
+
+**Rollback identities.** The immediately preceding M18 images were retained:
+
+- api: `sha256:8eda1e0abdf2154d89bc43c8a7086d450ebd28b66b360316011ee6e22b9cbfad`
+- worker: `sha256:d5ab6682906ca664be8729983298d6710a124940dcb017a5fefa9a40c87a1ff7`
+- web: `sha256:e42d02b6be57391f87157ac51deb4608b87a4f247d3d75c8f140ff8c3c7992dd`
+
+The last previously accepted `23387723f8c438d990db00d561cba2899f48ab80`
+images and its original env/database backups also remain available:
+
+- api: `sha256:c828844901e46b97b58d0bb537922f807079cbc5aa65129b8a78d538ea467e25`
+- worker: `sha256:1531e2630e941710d7604a5106884cae2c6424f47bba434b97945f70f2375c7e`
+- web: `sha256:c8daf2f869c5594a7ae3eceda850474bf507261dfe4345b94ec0274b1fed9625`
+
+**Public acceptance.** On the fresh M18b runtime, 21 / 21 critical and
+platform cases passed on the first attempt: en and zh-HK on 390×844 phone
+and 1280×800 desktop, plus a zh-CN phone platform/Today/Projects/Me spot
+check. Username and email sign-in, sign-out/re-sign-in, Today, task create,
+edit and person/agent assignment, run start/pause/resume/cancel, Inbox
+review approve/request changes, grant access, and the real official MCP
+client round trip passed. Each of the four MCP projects listed/exercised
+all 30 tools, checked live browser updates and call logs, submitted work
+for human review, regenerated/revoked tokens, and confirmed revocation
+returns 401. HTTPS/health, Secure/HttpOnly session cookies, foreign-origin
+rejection, unchanged auth methods, navigation, locale/theme preferences
+passed. All 21 journals report zero browser errors and zero cleanup failures.
+No public rate-limit flood or SMS OTP request was made: the rate-limit
+probe is covered by local MCP smoke; SMS was offered and its form opened.
+
+**Additional public coverage, explicitly on M18's equivalent application.**
+Before switching to M18b, the full remaining public batch completed 94
+unique cases: 89 applicable cases passed, five expected brief form-factor
+counterparts skipped, one initial failure passed its single retry (95
+attempts). CRM roles/stakeholders/cascade/archives and undo, timeline
+move/resize/dependencies/cycle rejection/graph and undo, brief/Ask rules and
+human-approved proposals, mind-map keyboard node/link/evidence editing and
+undo plus person-owned validation tasks, board/list/calendar/search,
+organizations and fresh invitations, notifications/permissions/settings,
+restricted-member access, and realtime between independently authenticated
+Chromium processes were exercised across en/zh-HK phone and desktop and
+zh-CN phone milestones. This is application-equivalence evidence, not a
+claim that the optional batch ran again on M18b. All 95 entity journals
+report zero browser errors and successful cleanup.
+
+**Follow-up (release kept live).** The restricted-member check on desktop
+zh-HK initially failed at `platform.spec.ts:28` and passed the one permitted
+retry. The underlying first-attempt cause remains unestablished; investigate
+verification stability. There is no twice-failing critical flow, so no
+rollback was required. Earlier verification-helper failures were resolved:
+M17's restrictive checkout permissions prevented the first migrator from
+reading its journal before SQL; tracked public source modes were repaired
+and images rebuilt. A retained historical stopped migrator confused a
+uniqueness check; verification now selects the canonical one-shot by name
+and immutable image. Task cleanup initially tried to finish parents before
+open children and to finish agent-assigned work directly; supported
+version-checked unassignment and descendant-first completion fixed it.
+The four affected M18 task cases passed their single retry and all residual
+verification parents were completed through public APIs. No application
+permission or data-integrity guard was weakened.
+
+Verification tokens/new grants were revoked, active runs canceled, agent
+settings and profile/notification preferences restored, schedules cleared,
+and current-run projects/CRM/mind nodes and sources archived. Current-run
+mind edges were removed through the supported link API. Tasks, accepted
+invitations, verification recipients/members and workspaces retain their
+auditable verification history because no supported archive/delete API
+exists; they were not reported deleted. No demo seed or real user's
+workspace was used.
+
+**Receipt and lock release.** The acceptance receipt is
+`/srv/taff/frontend-v2-m18b-accepted-ab243e8379c952f37c459a60596e4754ba33967e.json`.
+`deployment.done` is `ab243e8379c952f37c459a60596e4754ba33967e`. The adopted
+keeper was released through its original job's reconciled unlock receipt.
+An independent native flock probe acquired and released the lock; exact
+M18b image identities/running state, API healthy, public health 200,
+Caddy/Valkey/all 46 neighbors, route hash and PostgreSQL start time were
+verified again after unlock. The release stayed live. No deployment is
+blocked; the one retry-passing noncritical follow-up is recorded above.
+The local agent continues newest-candidate discovery every 30 minutes until
+v0.2.0 is deployed and recorded, using the effective user rules in the
+updated runbook.
