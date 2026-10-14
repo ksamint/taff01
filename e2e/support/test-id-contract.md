@@ -39,7 +39,6 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `inbox-badge` | 2 |  | optimistic-m4.spec.ts |
-| `locale-select` | 9 | me-view.tsx | me.spec.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts |
 | `open-quick` | 15 |  | accessibility.spec.ts, agent-review.spec.ts, persistence.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts |
 
 ### auth.tsx
@@ -98,6 +97,12 @@ several do). “Also rendered by” lists the other files.
 | `inbox-snooze` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `inbox-tab-blockers` | 1 |  | agent-review.spec.ts |
 | `open-search` | 3 | projects-view.tsx, today-view.tsx | planning.spec.ts |
+
+### landing.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `locale-select` | 9 | me-view.tsx | me.spec.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts |
 
 ### mcp-view.tsx
 
