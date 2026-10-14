@@ -1641,7 +1641,7 @@ and recorded.
 
 ### Frontend v2 release candidate v0.2.0 — 2026-10-14
 
-**Source.** `main` at `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, tagged **`v0.2.0`**. It supersedes M19a,
+**Source.** `main` at `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, the **`v0.2.0`** release. It supersedes M19a,
 whose source `9577c8c` is live and accepted. This candidate completes M19 and
 is the frontend v2 release. Since M19a, it adds:
 
@@ -1695,3 +1695,13 @@ rules, the local production-mode checklist was not rerun.
 migration since v0.1.0 (`0023`–`0026`) is additive.
 
 **Environment, Compose, Docker and Caddy.** No changes.
+
+**Tag.** The build session cannot push tags because its git proxy refuses
+tag refs with a 403. When this candidate is accepted, the deploy agent
+creates the tag from a workstation with push access, on the exact source:
+
+```sh
+git fetch origin
+git tag -a v0.2.0 191243d25ea4f72116aadf2a9f7fec844a0ffa6e -m "Taff v0.2.0 — frontend v2 (M11–M19)"
+git push origin v0.2.0
+```
