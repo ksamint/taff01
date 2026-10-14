@@ -39,7 +39,6 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `inbox-badge` | 2 |  | optimistic-m4.spec.ts |
-| `locale-select` | 9 | me-view.tsx | me.spec.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts |
 | `open-quick` | 15 |  | accessibility.spec.ts, agent-review.spec.ts, persistence.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts |
 
 ### auth.tsx
@@ -98,6 +97,12 @@ several do). “Also rendered by” lists the other files.
 | `inbox-snooze` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `inbox-tab-blockers` | 1 |  | agent-review.spec.ts |
 | `open-search` | 3 | projects-view.tsx, today-view.tsx | planning.spec.ts |
+
+### landing.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `locale-select` | 9 | me-view.tsx | me.spec.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts |
 
 ### mcp-view.tsx
 
@@ -301,7 +306,7 @@ several do). “Also rendered by” lists the other files.
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 12 |  | accessibility.spec.ts, agent-creation.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-parity.spec.ts |
 | `today-heading` | 42 |  | agent-review.spec.ts, calendar.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, today.spec.ts, username-auth.spec.ts |
-| `today-schedule` | 1 |  | ui-parity.spec.ts |
+| `today-needs-item` | 1 |  | ui-parity.spec.ts |
 
 ## Role and name locators
 
@@ -439,9 +444,6 @@ read (`data-event-id`, `data-date`).
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mjs |
 | `.team-directory-list li` | 1 | ui-parity.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
-| `.today-block-title` | 2 | ssr-session.spec.ts |
-| `.today-meeting-block` | 1 | ui-parity.spec.ts |
-| `.today-past` | 1 | ui-parity.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
 | `#auth-name` | 6 | optimistic-m4.spec.ts, planning.spec.ts, today.spec.ts, username-auth.spec.ts |
