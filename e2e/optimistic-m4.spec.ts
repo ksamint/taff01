@@ -50,7 +50,17 @@ async function signIn(page: Page, locale: Locale) {
   const task = taskSchema.parse(await response.json());
   return { workspace, agent, task };
 }
+/**
+ * Holds the next `method` request to `path` until `reject()`, then answers it
+ * 403. The route stays registered afterwards and passes every later request
+ * through: unrouting would switch Chromium request interception off while the
+ * rollback's refetch burst is in flight, and Playwright then strands requests
+ * that were paused under the old patterns (they never complete). Those reads
+ * are awaited by the mutation's onSettled, so the write would stay pending and
+ * neither its rollback alert nor re-enabled controls would ever appear.
+ */
 async function rejectLater(page: Page, path: string, method = "POST") {
+  let used = false;
   let release!: () => void;
   let arrived!: () => void;
   let completed!: () => void;
@@ -65,10 +75,13 @@ async function rejectLater(page: Page, path: string, method = "POST") {
   });
   const pattern = `**${path}`;
   await page.route(pattern, async (route) => {
-    if (route.request().method() !== method) {
-      await route.continue();
+    // Later holds on the same path are registered after this one and so run
+    // first; an exhausted hold falls back to them or to the network.
+    if (used || route.request().method() !== method) {
+      await route.fallback();
       return;
     }
+    used = true;
     arrived();
     await gate;
     await route.fulfill({
@@ -83,7 +96,6 @@ async function rejectLater(page: Page, path: string, method = "POST") {
     reject: async () => {
       release();
       await done;
-      await page.unroute(pattern);
     },
   };
 }
