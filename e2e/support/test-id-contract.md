@@ -541,6 +541,9 @@ read (`data-event-id`, `data-date`).
 | `.sidebar a[href^="/agents/optimistic:"]` | 1 | agent-creation.spec.ts |
 | `.sidebar-me .nav-badge` | 1 | ui-parity.spec.ts |
 | `.sidebar-primary .sidebar-link` | 3 | scripts/ui/app-shots.mjs, ui-parity.spec.ts |
+| `.sidebar-primary .sidebar-sublink` | 1 | ui-parity.spec.ts |
+| `.sidebar-primary .sidebar-sublink[href="/companies"]` | 1 | ui-parity.spec.ts |
+| `.sidebar-primary .sidebar-sublink[href="/contacts"]` | 1 | ui-parity.spec.ts |
 | `.sidebar-workspace > summary` | 1 | ui-parity.spec.ts |
 | `.tabbar` | 2 | me.spec.ts, ui-parity.spec.ts |
 | `.task-detail-sheet .task-detail-toolbar` | 1 | ui-parity.spec.ts |

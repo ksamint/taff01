@@ -125,7 +125,11 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   ).length;
   if (desktop) {
     await expect(page.locator(".sidebar")).toBeVisible();
-    await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(3);
+    // 今天 · 日曆 · 項目, with 公司 · 聯繫人 nested under 項目 (ADR 0014 §2).
+    await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(5);
+    await expect(page.locator(".sidebar-primary .sidebar-sublink")).toHaveCount(
+      2,
+    );
     await expect(page.locator(".sidebar-me .nav-badge")).toHaveText(
       String(needsYou),
     );
@@ -385,8 +389,14 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   await expect(shell).toBeVisible();
   if (desktop) {
     await expect(shell.locator(".sidebar-primary .sidebar-link")).toHaveCount(
-      3,
+      5,
     );
+    await expect(
+      shell.locator('.sidebar-primary .sidebar-sublink[href="/companies"]'),
+    ).toBeVisible();
+    await expect(
+      shell.locator('.sidebar-primary .sidebar-sublink[href="/contacts"]'),
+    ).toBeVisible();
     await expect(shell.locator('a[href="/me"] .nav-badge')).toHaveText(
       String(needsYou),
     );
