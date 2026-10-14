@@ -203,7 +203,9 @@
     "notificationsOff": "已關閉",
     "digestSummary": "每日摘要 {{time}}",
     "languageHK": "繁體中文",
-    "languageCN": "简体"
+    "languageCN": "简体",
+    "noAgents": "暫無智能體",
+    "noActiveTasks": "暫無進行中任務"
   },
   "mcp": {
     "title": "MCP 伺服器",
@@ -277,7 +279,8 @@
     },
     "back": "返回",
     "copyEndpoint": "複製端點",
-    "copyConfig": "複製設定"
+    "copyConfig": "複製設定",
+    "running": "執行中"
   },
   "taskDetail": {
     "back": "返回今天",
@@ -307,7 +310,8 @@
       "changes_requested": "已要求修改",
       "completed": "已完成",
       "canceled": "已取消",
-      "failed": "失敗"
+      "failed": "失敗",
+      "idle": "空閒"
     },
     "eventKind": {
       "step": "步驟",
@@ -536,12 +540,14 @@
     },
     "current": "目前組織",
     "roleFor": "{{name}}的角色",
-    "people": "人員",
+    "people": "成員",
     "emailDelivery": {
       "sent": "邀請電郵已傳送，亦可複製下方連結。",
       "logged": "尚未設定電郵傳送。邀請已私下記錄，請複製下方連結分享。",
       "failed": "邀請電郵未能傳送，下方連結仍然有效，可複製分享。"
-    }
+    },
+    "label": "組織",
+    "switchShort": "切換"
   },
   "pwa": {
     "description": "人與代理協作的任務和日曆。",
@@ -653,7 +659,8 @@
     "featureReview": "智能體交付等你確認",
     "featureReviewText": "智能體的交付，經成員確認後才算完成。",
     "featureMcp": "接入你的智能體",
-    "featureMcpText": "智能體經 MCP 接入，權杖有範圍，隨時可撤銷。"
+    "featureMcpText": "智能體經 MCP 接入，權杖有範圍，隨時可撤銷。",
+    "signedIn": "已登入"
   },
   "todayNeeds": {
     "title": "待你處理",
@@ -662,5 +669,12 @@
     "blockedBy": "{{name}} 已受阻",
     "badgeReview": "待確認",
     "badgeBlocker": "已阻塞"
+  },
+  "actions": {
+    "back": "返回"
+  },
+  "toast": {
+    "orgSwitched": "已切換到 {{name}}",
+    "orgCreated": "已建立組織 {{name}}"
   }
 }

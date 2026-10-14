@@ -203,7 +203,9 @@
     "notificationsOff": "Off",
     "digestSummary": "Daily digest {{time}}",
     "languageHK": "繁體中文",
-    "languageCN": "简体"
+    "languageCN": "简体",
+    "noAgents": "No agents yet",
+    "noActiveTasks": "No active tasks"
   },
   "mcp": {
     "title": "MCP server",
@@ -277,7 +279,8 @@
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",
-    "copyConfig": "Copy configuration"
+    "copyConfig": "Copy configuration",
+    "running": "Running"
   },
   "taskDetail": {
     "back": "Back to Today",
@@ -307,7 +310,8 @@
       "changes_requested": "Changes requested",
       "completed": "Completed",
       "canceled": "Canceled",
-      "failed": "Failed"
+      "failed": "Failed",
+      "idle": "Idle"
     },
     "eventKind": {
       "step": "Step",
@@ -541,7 +545,9 @@
       "sent": "Invitation email sent. The link below is also available to copy.",
       "logged": "Email delivery is not configured. The invitation was recorded privately; copy the link below to share it.",
       "failed": "The invitation email could not be sent. The link below is still valid and can be shared."
-    }
+    },
+    "label": "Organization",
+    "switchShort": "Switch"
   },
   "pwa": {
     "description": "Tasks and calendars for people and agents.",
@@ -653,7 +659,8 @@
     "featureReview": "Agent work waits for you",
     "featureReviewText": "Nothing an agent delivers is final until a person confirms it.",
     "featureMcp": "Bring your own agents",
-    "featureMcpText": "Agents connect over MCP with scoped tokens you can revoke."
+    "featureMcpText": "Agents connect over MCP with scoped tokens you can revoke.",
+    "signedIn": "Signed in"
   },
   "todayNeeds": {
     "title": "Needs you",
@@ -662,5 +669,12 @@
     "blockedBy": "{{name}} is blocked",
     "badgeReview": "To confirm",
     "badgeBlocker": "Blocked"
+  },
+  "actions": {
+    "back": "Back"
+  },
+  "toast": {
+    "orgSwitched": "Switched to {{name}}",
+    "orgCreated": "Created {{name}}"
   }
 }
