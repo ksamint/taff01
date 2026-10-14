@@ -1046,3 +1046,27 @@ All eight items passed on phone-en, phone-zh-HK, desktop-en and desktop-zh-HK.
 - After the deploy, open a project's 時間線 (timeline) and 關係圖 (relations
   graph) views as an admin and as a member. Members must not see finance
   figures.
+
+**Blocked: local `pnpm test` member-order assertion — 2026-10-14.** Source
+`78c68ab9182fa1d9bdbdd9219108f276176567db` passed Step 0: exact-source
+main CI [38544901342](https://github.com/ksamint/taff01/actions/runs/38544901342)
+and ancestor-head PR CI
+[38542333878](https://github.com/ksamint/taff01/actions/runs/38542333878)
+are completed/success, the source is an ancestor of main, and its code diff
+to main is empty. On a clean detached macOS arm64 checkout with fresh isolated
+local databases, Node 24.19.0 and pnpm 12.10.1, lint, typecheck and licence
+passed. `pnpm test` exited 1: **838 passed, 1 failed**, across **78 passed,
+1 failed test files** (839 tests, 79 files total).
+The failing test is `core PostgreSQL integration > signup provisions an
+audited personal workspace and auth defaults`, at
+`packages/core/src/integration.test.ts:91:7`. It compares the roster as an
+ordered array `[person/admin, agent]`; the returned roster has the same two
+fixture members in `[agent/member, person/admin]` order. The current
+`listMembers` query in `packages/core/src/index.ts` has no `ORDER BY`, so the
+test assumes an order the query does not guarantee. This needs investigation
+and a fresh candidate; the deploy agent did not change tests or application
+code, weaken the assertion, or retry the failed command.
+Per Step 1, build, build:server, perf:budget, e2e, MCP smoke, Lighthouse, LCP
+and production deployment did not run. Production remains
+`23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
+migration, image build or container replacement was started.
