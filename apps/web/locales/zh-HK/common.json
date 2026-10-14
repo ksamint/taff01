@@ -270,7 +270,14 @@
       "submitRun": "提交審核",
       "requestGrant": "請求權限",
       "calendarList": "列出實際日程項目",
-      "calendarSet": "設定整個系列的日程"
+      "calendarSet": "設定整個系列的日程",
+      "readTimeline": "讀取專案時間線",
+      "planTask": "規劃開始日期與工期",
+      "addDependency": "新增依賴",
+      "removeDependency": "移除依賴",
+      "listCompanies": "列出公司",
+      "listContacts": "列出聯繫人（未獲授權不含電話與電郵）",
+      "readContact": "讀取聯繫人及其關聯"
     },
     "back": "返回",
     "copyEndpoint": "複製端點",
@@ -432,7 +439,10 @@
       "deploy.prod": "發佈至正式環境",
       "staging.read": "讀取預發環境",
       "staging.write": "修改預發環境",
-      "alerts": "管理警報"
+      "alerts": "管理警報",
+      "crm.read": "讀取公司與聯繫人",
+      "crm.write": "修改公司與聯繫人",
+      "crm.contact_details": "查看聯繫人電話與電郵"
     },
     "historyGrantChanged": "{{capability}}：{{previousStatus}} → {{status}}",
     "historyGrant": "{{capability}}：{{status}}",

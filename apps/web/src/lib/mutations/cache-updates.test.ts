@@ -388,6 +388,9 @@ describe("projects", () => {
     name: "Old",
     archived: false,
     version: 2,
+    contractAmount: null,
+    currency: null,
+    clientCompanyId: null,
     createdAt: NOW,
     updatedAt: NOW,
   };
@@ -406,6 +409,9 @@ describe("projects", () => {
       name: "New",
       archived: false,
       version: 1,
+      contractAmount: null,
+      currency: null,
+      clientCompanyId: null,
       createdAt: NOW,
       updatedAt: NOW,
     });

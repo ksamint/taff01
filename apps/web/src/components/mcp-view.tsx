@@ -68,6 +68,13 @@ export const TOOLS: readonly (readonly [string, string])[] = [
   ["files.attach", "attachFile"],
   ["runs.submit", "submitRun"],
   ["grants.request", "requestGrant"],
+  ["timeline.get", "readTimeline"],
+  ["tasks.plan", "planTask"],
+  ["dependencies.add", "addDependency"],
+  ["dependencies.remove", "removeDependency"],
+  ["companies.list", "listCompanies"],
+  ["contacts.list", "listContacts"],
+  ["contacts.get", "readContact"],
 ];
 /** Third-party tools the prototype lists. None is connected yet. */
 const INTEGRATIONS = ["github", "figma", "slack", "gcal"] as const;

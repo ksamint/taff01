@@ -35,7 +35,10 @@ const allowed = new Set([
   `alice:${workspace}`,
   `bob:${otherWorkspace}`,
   `charlie:${workspace}`,
+  `dana:${workspace}`,
 ]);
+/** Dana is a guest: guests never read CRM, so they get no CRM events. */
+const guests = new Set(["dana"]);
 const unsubscribe = vi.fn(async () => {});
 const sockets = new Set<WebSocket>();
 
@@ -87,7 +90,12 @@ beforeAll(async () => {
         !allowed.has(`${principal.userId}:${workspaceId}`)
       )
         throw new CoreError("forbidden", 403);
-      return [];
+      return [
+        {
+          userId: principal.userId,
+          role: guests.has(principal.userId) ? "guest" : "member",
+        },
+      ] as Awaited<ReturnType<typeof core.listMembers>>;
     },
   );
   realtime = await createRealtime(core);
@@ -199,6 +207,24 @@ describe("authenticated realtime boundaries", () => {
     expect(await third).toEqual(change());
     expect(bobMessages).toEqual([]);
   });
+  it("routes planning changes to the workspace and keeps payments from non-admins", async () => {
+    const alice = await connect("alice");
+    const seen: ChangeEvent[] = [];
+    alice.on("message", (data) => seen.push(JSON.parse(data.toString())));
+    for (const action of [
+      "project_payments.insert",
+      "task_plans.update",
+      "milestones.insert",
+      "task_dependencies.delete",
+    ])
+      await deliver(change({ action }));
+    await vi.waitFor(() => expect(seen).toHaveLength(3));
+    expect(seen.map((event) => event.action)).toEqual([
+      "task_plans.update",
+      "milestones.insert",
+      "task_dependencies.delete",
+    ]);
+  });
   it("closes sockets on membership removal, session deletion and listener reconnect", async () => {
     const alice = await connect("alice");
     const bob = await connect("bob", otherWorkspace);
@@ -271,6 +297,34 @@ describe("authenticated realtime boundaries", () => {
     expect(await toUser).toEqual(membership);
     expect(await toWorkspace).toEqual(membership);
     expect(unrelated).toEqual([]);
+  });
+  it("routes CRM changes to members of the workspace but not to guests", async () => {
+    const alice = await connect("alice");
+    const dana = await connect("dana");
+    const danaSeen: ChangeEvent[] = [];
+    dana.on("message", (data) => danaSeen.push(JSON.parse(data.toString())));
+    // Wait until both sockets finished post-upgrade authorization.
+    const warmAlice = message(alice);
+    const warmDana = message(dana);
+    await deliver(change());
+    await Promise.all([warmAlice, warmDana]);
+    danaSeen.length = 0;
+    for (const action of [
+      "companies.insert",
+      "contacts.update",
+      "company_contacts.delete",
+      "project_contacts.insert",
+      "task_contacts.update",
+      "contact_roles.delete",
+    ]) {
+      const received = message(alice);
+      await deliver(change({ action }));
+      expect((await received).action).toBe(action);
+    }
+    const task = message(dana);
+    await deliver(change());
+    expect(await task).toEqual(change());
+    expect(danaSeen).toEqual([change()]);
   });
   it("expires authenticated connections and rejects client writes", async () => {
     expiresAt = Date.now() + 200;

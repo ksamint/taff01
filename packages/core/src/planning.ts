@@ -1,11 +1,14 @@
 import { randomBytes } from "node:crypto";
 import {
+  companies,
   type Database,
   members,
+  projectContacts,
   projects,
   reviewComments,
   type Transaction,
   taskComments,
+  taskContacts,
   tasks,
   user,
   workspaceInvites,
@@ -81,9 +84,15 @@ function dtoTask(row: typeof tasks.$inferSelect): Task {
     updatedAt: row.updatedAt.toISOString(),
   };
 }
-function dtoProject(row: typeof projects.$inferSelect): Project {
+/** Finance stays null unless the reader may see it (D7). */
+export function dtoProject(
+  row: typeof projects.$inferSelect,
+  finance = false,
+): Project {
   return {
     ...row,
+    contractAmount: finance ? row.contractAmount : null,
+    currency: finance ? row.currency : null,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -156,6 +165,43 @@ export function createPlanningOperations({
       .for("share");
     if (!row || row.archived) invalid();
   }
+  /**
+   * Task contacts follow their task's project (ADR 0015, plan §4.2).
+   * task_contacts_task_fk cascades tasks.project_id onto the links, and
+   * task_contacts_stakeholder_fk then needs every contact to be a stakeholder
+   * of the new project, so add those first. A task without a project holds no
+   * contacts: its links (and their roles, by cascade) are removed instead.
+   * Runs before tasks.project_id changes.
+   */
+  async function moveTaskContacts(
+    tx: Transaction,
+    task: typeof tasks.$inferSelect,
+    projectId: string | null,
+  ) {
+    const where = and(
+      eq(taskContacts.workspaceId, task.workspaceId),
+      eq(taskContacts.taskId, task.id),
+    );
+    if (!projectId) {
+      await tx.delete(taskContacts).where(where);
+      return;
+    }
+    const linked = await tx
+      .select({ contactId: taskContacts.contactId })
+      .from(taskContacts)
+      .where(where);
+    if (linked.length)
+      await tx
+        .insert(projectContacts)
+        .values(
+          linked.map(({ contactId }) => ({
+            workspaceId: task.workspaceId,
+            projectId,
+            contactId,
+          })),
+        )
+        .onConflictDoNothing();
+  }
   async function getWorkspaceAccess(
     p: Principal,
     w: string,
@@ -167,6 +213,12 @@ export function createPlanningOperations({
       canManageProjects: can(actor, "project:manage", { workspaceId: w }),
       canInvite: can(actor, "workspace:manage", { workspaceId: w }),
       canManageRoles: can(actor, "workspace:manage", { workspaceId: w }),
+      // Plans follow task:schedule per task; this says whether any edit is possible.
+      canEditPlan: actor.kind === "person" && actor.role !== "guest",
+      canReadFinance: can(actor, "finance:read", { workspaceId: w }),
+      canReadCrm: can(actor, "contact:read", { workspaceId: w }),
+      canManageCrm: can(actor, "contact:manage", { workspaceId: w }),
+      canArchiveCrm: can(actor, "crm:archive", { workspaceId: w }),
     };
   }
   async function readTask(p: Principal, id: string) {
@@ -275,8 +327,10 @@ export function createPlanningOperations({
           body.ownerId !== undefined)
       )
         conflict();
-      if (body.projectId !== undefined && body.projectId !== task.projectId)
+      if (body.projectId !== undefined && body.projectId !== task.projectId) {
         await validateProject(tx, task.workspaceId, body.projectId);
+        await moveTaskContacts(tx, task, body.projectId);
+      }
       if (body.status !== undefined) {
         await requireMember(
           tx,
@@ -358,14 +412,15 @@ export function createPlanningOperations({
   }
   async function listProjects(p: Principal, w: string): Promise<Project[]> {
     parse(idSchema, w);
-    await requireMember(db, p, w, "workspace:read");
+    const actor = await requireMember(db, p, w, "workspace:read");
+    const finance = can(actor, "finance:read", { workspaceId: w });
     return (
       await db
         .select()
         .from(projects)
         .where(eq(projects.workspaceId, w))
         .orderBy(projects.createdAt, projects.id)
-    ).map(dtoProject);
+    ).map((row) => dtoProject(row, finance));
   }
   async function createProject(
     p: Principal,
@@ -380,7 +435,7 @@ export function createPlanningOperations({
         .insert(projects)
         .values({ ...body, workspaceId: w })
         .returning();
-      return dtoProject(row);
+      return dtoProject(row, true);
     });
   }
   async function updateProject(
@@ -399,12 +454,37 @@ export function createPlanningOperations({
       if (!row) throw new CoreError("not_found", 404);
       await requireMember(tx, p, row.workspaceId, "project:manage");
       if (row.version !== body.version) conflict();
+      if (
+        body.contractAmount !== undefined ||
+        body.currency !== undefined ||
+        body.clientCompanyId !== undefined
+      )
+        await requireMember(tx, p, row.workspaceId, "finance:manage");
+      const currency =
+        body.currency === undefined ? row.currency : body.currency;
+      const amount =
+        body.contractAmount === undefined
+          ? row.contractAmount
+          : body.contractAmount;
+      if (amount !== null && currency === null) invalid();
+      if (body.clientCompanyId) {
+        const [company] = await tx
+          .select({ archivedAt: companies.archivedAt })
+          .from(companies)
+          .where(
+            and(
+              eq(companies.id, body.clientCompanyId),
+              eq(companies.workspaceId, row.workspaceId),
+            ),
+          );
+        if (!company || company.archivedAt) invalid();
+      }
       const [updated] = await tx
         .update(projects)
         .set({ ...body, version: row.version + 1, updatedAt: new Date() })
         .where(eq(projects.id, id))
         .returning();
-      return dtoProject(updated);
+      return dtoProject(updated, true);
     });
   }
   async function lockWorkspace(tx: Transaction, w: string) {
