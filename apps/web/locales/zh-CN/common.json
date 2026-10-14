@@ -50,7 +50,7 @@
   "status": {
     "todo": "待办",
     "in_progress": "进行中",
-    "needs_review": "待审核",
+    "needs_review": "待确认",
     "done": "已完成"
   },
   "errors": {
@@ -148,7 +148,21 @@
     "drag": "将任务拖到其他状态列",
     "dragHint": "拖动手柄移动任务，或使用状态选择器。",
     "moved": "已移至{{status}}",
-    "labelFilter": "按标签筛选"
+    "labelFilter": "按标签筛选",
+    "moreViews": "更多",
+    "timelineView": "时间线",
+    "stakeholdersView": "相关方",
+    "relationsView": "关系图",
+    "mindView": "心智图",
+    "views": "项目视图",
+    "sections": "项目、公司与联系人",
+    "filterAll": "全部",
+    "switchProject": "切换或管理项目",
+    "clearAgentFilter": "清除智能体筛选：{{name}}",
+    "statusTabs": "跳到状态栏",
+    "buildingNote": "此视图仍在建设中，看板和列表现已可用。",
+    "openBoard": "打开看板",
+    "openList": "打开列表"
   },
   "inbox": {
     "title": "收件箱",
@@ -310,7 +324,7 @@
     "status": {
       "running": "工作中",
       "paused": "已暂停",
-      "needs_review": "待审核",
+      "needs_review": "待确认",
       "changes_requested": "已要求修改",
       "completed": "已完成",
       "canceled": "已取消",
@@ -672,5 +686,8 @@
     "blockedBy": "{{name}} 已受阻",
     "badgeReview": "待确认",
     "badgeBlocker": "已阻塞"
+  },
+  "actions": {
+    "undo": "撤销"
   }
 }
