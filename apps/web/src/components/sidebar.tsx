@@ -1,135 +1,170 @@
 "use client";
-import type { Locale } from "@taff/schemas";
 
 import {
   CalendarDays,
   ChevronDown,
+  KanbanSquare,
+  PanelLeft,
   Search,
-  Sparkles,
   Sun,
-  User,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useInbox, useMembers, useRuns, useTasks } from "../lib/queries";
-import { useWorkspace } from "./app-shell";
+import { InboxBadge, useWorkspace } from "./app-shell";
 import { OrganizationChooser } from "./organization-chooser";
-import { Button } from "./ui/button";
 
-// Prototype desktop sidebar, lines 940–953; counts and status come from the API.
+const NAV = [
+  { href: "/", key: "today", Icon: Sun },
+  { href: "/calendar", key: "calendar", Icon: CalendarDays },
+  { href: "/projects", key: "projects", Icon: KanbanSquare },
+] as const;
+const ME_PATHS = ["/me", "/inbox", "/agents", "/orgs", "/digests"];
+const foldKey = (userId: string) => `taff:sidebar-folded:${userId}`;
+
+/** Fold state is remembered per person on this device. */
+function useFolded(userId: string) {
+  const [folded, setFolded] = useState(false);
+  useEffect(() => {
+    try {
+      setFolded(window.localStorage.getItem(foldKey(userId)) === "1");
+    } catch {
+      /* Storage can be blocked; the sidebar then starts open. */
+    }
+  }, [userId]);
+  const toggle = () =>
+    setFolded((current) => {
+      try {
+        window.localStorage.setItem(foldKey(userId), current ? "0" : "1");
+      } catch {
+        /* The choice still applies to this page. */
+      }
+      return !current;
+    });
+  return [folded, toggle] as const;
+}
+
+// Prototype v2 desktop sidebar (lines 1185–1218) and its folded rail.
 export function Sidebar() {
   const { me, workspace, setWorkspaceId, openSearch } = useWorkspace();
-  const { t, i18n } = useTranslation();
-  const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
+  const { t } = useTranslation();
   const pathname = usePathname();
-  const workspaceName = workspace.name;
-  const members = useMembers(workspace.id);
-  const runs = useRuns(workspace.id);
-  const tasks = useTasks(workspace.id);
-  const inbox = useInbox(workspace.id);
-  const projects = new Set(
-    tasks.data?.flatMap((task) => (task.projectId ? [task.projectId] : [])),
-  );
+  const [folded, toggle] = useFolded(me.user.id);
+  const role = me.workspaces.find((item) => item.id === workspace.id)?.role;
+  const active = (href: string) =>
+    href === "/" ? pathname === "/" : pathname.startsWith(href);
+  const meActive = ME_PATHS.some((path) => pathname.startsWith(path));
   return (
-    <aside className="sidebar">
-      <details className="sidebar-workspace">
-        <summary>
-          <span className="workspace-mark" aria-hidden="true">
-            {workspaceName.slice(0, 1)}
-          </span>
-          <span>{workspaceName}</span>
-          <ChevronDown size={14} aria-hidden="true" />
-        </summary>
-        <div className="workspace-menu">
-          <OrganizationChooser
-            heading
-            onSelect={(id, event) => {
-              setWorkspaceId(id);
-              event.currentTarget.closest("details")?.removeAttribute("open");
-            }}
-          />
-        </div>
-      </details>
-      <Button
+    <aside
+      className={`sidebar${folded ? " sidebar-folded" : ""}`}
+      data-testid="sidebar"
+      data-folded={folded ? "true" : "false"}
+    >
+      <div className="sidebar-top">
+        <details className="sidebar-workspace">
+          <summary
+            aria-label={folded ? workspace.name : undefined}
+            title={folded ? workspace.name : undefined}
+          >
+            <span className="workspace-mark" aria-hidden="true">
+              {workspace.name.slice(0, 1)}
+            </span>
+            {!folded && <span>{workspace.name}</span>}
+            {!folded && <ChevronDown size={14} aria-hidden="true" />}
+          </summary>
+          <div className="workspace-menu">
+            <OrganizationChooser
+              heading
+              onSelect={(id, event) => {
+                setWorkspaceId(id);
+                event.currentTarget.closest("details")?.removeAttribute("open");
+              }}
+            />
+          </div>
+        </details>
+        {!folded && (
+          <button
+            type="button"
+            className="sidebar-fold"
+            data-testid="sidebar-fold"
+            aria-label={t("nav.fold")}
+            title={t("nav.fold")}
+            aria-expanded="true"
+            onClick={toggle}
+          >
+            <PanelLeft size={16} strokeWidth={1.5} aria-hidden="true" />
+          </button>
+        )}
+      </div>
+      <button
+        type="button"
         className="sidebar-search"
         data-testid="sidebar-search"
+        aria-label={folded ? t("search.title") : undefined}
+        title={folded ? `${t("search.title")} ⌘K` : undefined}
         onClick={openSearch}
       >
         <Search size={14} aria-hidden="true" />
-        {t("search.title")}
-        <kbd>⌘K</kbd>
-      </Button>
+        {!folded && (
+          <>
+            <span>{t("search.title")}</span>
+            <kbd>⌘K</kbd>
+          </>
+        )}
+      </button>
       <nav className="sidebar-primary" aria-label={t("nav.label")}>
-        {(
-          [
-            ["/projects", "projects", projects.size],
-            ["/inbox", "inbox", inbox.data?.unreadCount ?? 0],
-          ] as const
-        ).map(([href, key, count]) => (
+        {NAV.map(({ href, key, Icon }) => (
           <Link
             key={href}
             href={href}
             prefetch={false}
             className="sidebar-link"
-            aria-current={pathname.startsWith(href) ? "page" : undefined}
+            aria-current={active(href) ? "page" : undefined}
+            aria-label={folded ? t(`nav.${key}`) : undefined}
+            title={folded ? t(`nav.${key}`) : undefined}
           >
-            <span className="sidebar-nav-mark" aria-hidden="true" />
-            <span>{t(`nav.${key}`)}</span>
-            <span className="sidebar-count">{count}</span>
+            <Icon size={16} strokeWidth={1.5} aria-hidden="true" />
+            {!folded && <span>{t(`nav.${key}`)}</span>}
           </Link>
         ))}
       </nav>
-      <section className="sidebar-agents" aria-label={t("agentProfile.team")}>
-        <h2>{t("agentProfile.team")}</h2>
-        {members.data
-          ?.filter(
-            (member) =>
-              member.kind === "agent" && !member.id.startsWith("optimistic:"),
-          )
-          .map((agent) => {
-            const run = runs.data
-              ?.filter((item) => item.agentId === agent.id)
-              .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
-            return (
-              <Link
-                key={agent.id}
-                className="sidebar-link"
-                href={`/agents/${agent.id}`}
-                prefetch={false}
-              >
-                <Sparkles size={14} aria-hidden="true" />
-                <span>{agent.name}</span>
-                <span
-                  className={`agent-status-dot${run ? ` agent-status-${run.status}` : ""}`}
-                  aria-label={
-                    run ? t(`run.status.${run.status}`) : t("agentsIdle")
-                  }
-                />
-              </Link>
-            );
-          })}
-      </section>
-      <nav className="sidebar-utilities" aria-label={t("me.preferences")}>
-        {(
-          [
-            ["/", "today", Sun],
-            ["/calendar", "calendar", CalendarDays],
-            ["/me", "me", User],
-          ] as const
-        ).map(([href, key, Icon]) => (
-          <Link
-            key={href}
-            className="sidebar-link"
-            href={href}
-            prefetch={false}
-            aria-current={pathname === href ? "page" : undefined}
-          >
-            <Icon size={14} aria-hidden="true" />
-            <span>{t(`nav.${key}`)}</span>
-          </Link>
-        ))}
-      </nav>
+      <span className="sidebar-spacer" />
+      {folded && (
+        <button
+          type="button"
+          className="sidebar-fold"
+          data-testid="sidebar-fold"
+          aria-label={t("nav.unfold")}
+          title={t("nav.unfold")}
+          aria-expanded="false"
+          onClick={toggle}
+        >
+          <PanelLeft size={16} strokeWidth={1.5} aria-hidden="true" />
+        </button>
+      )}
+      <Link
+        href="/me"
+        prefetch={false}
+        className="sidebar-me"
+        data-testid="sidebar-me"
+        aria-current={meActive ? "page" : undefined}
+        aria-label={folded ? t("nav.me") : undefined}
+        title={folded ? me.user.name : undefined}
+      >
+        <span className="sidebar-avatar" aria-hidden="true">
+          {me.user.name.slice(0, 1)}
+        </span>
+        {!folded && (
+          <span className="sidebar-me-copy">
+            <span className="sidebar-me-name">{me.user.name}</span>
+            <span className="sidebar-me-role">
+              {role ? t(`organization.${role}`) : ""}
+            </span>
+          </span>
+        )}
+        <InboxBadge workspaceId={workspace.id} />
+      </Link>
     </aside>
   );
 }

@@ -3,6 +3,7 @@
 /* House defaults stay below each source-port screen's CSS. */
 @import "../src/styles/base.css" layer(taff-base);
 @import "../src/styles/today.css";
+@import "../src/styles/shell.css";
 /* Route stylesheets are imported by the component that owns their classes, so
    a route ships only the CSS it renders (projects.css from projects-view.tsx,
    calendar-parity.css from calendar-scene.tsx, and so on). */

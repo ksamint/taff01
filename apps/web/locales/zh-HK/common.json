@@ -73,7 +73,9 @@
     "calendar": "日曆",
     "projects": "項目",
     "inbox": "收件箱",
-    "me": "我的"
+    "me": "我的",
+    "fold": "收起側欄",
+    "unfold": "展開側欄"
   },
   "agentsAtWork": "智能體工作中",
   "agentsIdle": "目前沒有智能體在工作。",
@@ -178,7 +180,9 @@
     "view": "查看",
     "tomorrow": "延後到明天",
     "snoozedTomorrow": "已延後到明天",
-    "closeDetail": "關閉詳情"
+    "closeDetail": "關閉詳情",
+    "needsYou_one": "{{count}} 項待你處理",
+    "needsYou_other": "{{count}} 項待你處理"
   },
   "me": {
     "title": "我的",
@@ -636,5 +640,18 @@
     "date": "YYYY-MM-DD",
     "time": "HH:mm",
     "dateTime": "YYYY-MM-DDTHH:mm"
+  },
+  "home": {
+    "eyebrow": "人機協作任務",
+    "title": "成員與智能體，在同一張任務表上協作",
+    "subtitle": "把任務分配給成員或智能體，審核交付，掌握每個項目的進度。",
+    "start": "開始",
+    "featuresLabel": "功能",
+    "featureBoard": "成員與智能體共用一張任務表",
+    "featureBoardText": "每項任務都有負責人，由成員或智能體執行。",
+    "featureReview": "智能體交付等你確認",
+    "featureReviewText": "智能體的交付，經成員確認後才算完成。",
+    "featureMcp": "接入你的智能體",
+    "featureMcpText": "智能體經 MCP 接入，權杖有範圍，隨時可撤銷。"
   }
 }

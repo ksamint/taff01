@@ -55,12 +55,6 @@ export function Auth() {
   }
   return (
     <div className="auth-layout">
-      <div className="auth-intro">
-        <p className="eyebrow">{t("app")}</p>
-        <h1>{t("welcome")}</h1>
-        <p>{t("authDescription")}</p>
-        <div className="accent-line" aria-hidden="true" />
-      </div>
       <section className="panel auth-panel" aria-labelledby="auth-heading">
         <h2 id="auth-heading">
           {t(sms ? "sms.title" : signup ? "signUp" : "signIn")}

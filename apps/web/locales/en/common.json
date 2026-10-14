@@ -73,7 +73,9 @@
     "calendar": "Calendar",
     "projects": "Projects",
     "inbox": "Inbox",
-    "me": "Me"
+    "me": "Me",
+    "fold": "Fold sidebar",
+    "unfold": "Open sidebar"
   },
   "agentsAtWork": "Agents at work",
   "agentsIdle": "No agents are working right now.",
@@ -178,7 +180,9 @@
     "view": "View",
     "tomorrow": "Tomorrow",
     "snoozedTomorrow": "Snoozed until tomorrow",
-    "closeDetail": "Close detail"
+    "closeDetail": "Close detail",
+    "needsYou_one": "{{count}} needs you",
+    "needsYou_other": "{{count}} need you"
   },
   "me": {
     "title": "Me",
@@ -636,5 +640,18 @@
     "date": "YYYY-MM-DD",
     "time": "HH:mm",
     "dateTime": "YYYY-MM-DDTHH:mm"
+  },
+  "home": {
+    "eyebrow": "Human–AI task collaboration",
+    "title": "People and agents on one task board",
+    "subtitle": "Assign work to people or agents, review what they deliver and follow every project.",
+    "start": "Get started",
+    "featuresLabel": "What you get",
+    "featureBoard": "One board for people and agents",
+    "featureBoardText": "Give a task an owner and let a person or an agent do the work.",
+    "featureReview": "Agent work waits for you",
+    "featureReviewText": "Nothing an agent delivers is final until a person confirms it.",
+    "featureMcp": "Bring your own agents",
+    "featureMcpText": "Agents connect over MCP with scoped tokens you can revoke."
   }
 }

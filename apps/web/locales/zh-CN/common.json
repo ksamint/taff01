@@ -73,7 +73,9 @@
     "calendar": "日历",
     "projects": "项目",
     "inbox": "收件箱",
-    "me": "我的"
+    "me": "我的",
+    "fold": "收起侧栏",
+    "unfold": "展开侧栏"
   },
   "agentsAtWork": "智能体工作中",
   "agentsIdle": "目前没有智能体在工作。",
@@ -178,7 +180,9 @@
     "view": "查看",
     "tomorrow": "延后到明天",
     "snoozedTomorrow": "已延后到明天",
-    "closeDetail": "关闭详情"
+    "closeDetail": "关闭详情",
+    "needsYou_one": "{{count}} 项待你处理",
+    "needsYou_other": "{{count}} 项待你处理"
   },
   "me": {
     "title": "我的",
@@ -636,5 +640,18 @@
     "date": "YYYY-MM-DD",
     "time": "HH:mm",
     "dateTime": "YYYY-MM-DDTHH:mm"
+  },
+  "home": {
+    "eyebrow": "人机协作任务",
+    "title": "成员与智能体，在同一张任务表上协作",
+    "subtitle": "把任务分配给成员或智能体，审核交付，掌握每个项目的进度。",
+    "start": "开始",
+    "featuresLabel": "功能",
+    "featureBoard": "成员与智能体共用一张任务表",
+    "featureBoardText": "每项任务都有负责人，由成员或智能体执行。",
+    "featureReview": "智能体交付等你确认",
+    "featureReviewText": "智能体的交付，经成员确认后才算完成。",
+    "featureMcp": "接入你的智能体",
+    "featureMcpText": "智能体经 MCP 接入，令牌有范围，随时可撤销。"
   }
 }
