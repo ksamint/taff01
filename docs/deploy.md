@@ -732,3 +732,17 @@ from `5e616dd`:
   then migrate with the API image as before.
 - After the deploy, run the checklist against the live origin with the
   verification account (see "Release candidate checks").
+
+**Blocked: exact-source feature CI is missing — 2026-10-14.** Step 0 of
+`docs/agent-goal-deploy-frontend-v2.md` requires both linked CI runs to be
+green for the listed source `5e616dd27bb167508155f4c5dd9bde9284538a7c`.
+Main run [38521546475](https://github.com/ksamint/taff01/actions/runs/38521546475)
+is completed/success for that SHA. Feature run
+[38519911336](https://github.com/ksamint/taff01/actions/runs/38519911336)
+is completed/success for `ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`,
+not the listed source. The exact-source run inventory contains only the main
+run. The source is an ancestor of `origin/main`, and the non-documentation
+diff is empty, but the required second exact-SHA CI result is absent. Publish
+a corrected candidate with both exact-source CI links before deployment.
+No local release validation, migration, build or container replacement was
+started; production remains `23387723f8c438d990db00d561cba2899f48ab80`.
