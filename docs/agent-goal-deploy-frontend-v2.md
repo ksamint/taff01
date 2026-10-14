@@ -76,13 +76,24 @@ vault:
    - username `taff-verify`, or `taff-verify-<yyyymmdd>` if taken;
    - a generated strong password;
    - an address you control, if email is required.
-2. Store the credentials immediately as a new item in the 1Password ops
-   vault used for Taff, named `Taff production verification account`. Never
-   write them to the repo, logs or reports.
+2. Store the credentials immediately, before signing up, so they are never
+   unrecoverable:
+   - **Preferred:** a 1Password item named `Taff production verification
+     account`, in any vault the automation can write to.
+   - **Fallback** (the service account cannot create items in Codex
+     Automation, readiness check 2026-10-14): on the Taff host, write
+     `/srv/taff/secrets/verification-account.json`. Give it the same owner as
+     the private env file and mode 0600. Write it with `umask 077` and
+     without echoing the password; it holds `username`, `password` and
+     `workspace`. Never print or copy it elsewhere. Move it to 1Password once
+     a writable vault exists, then delete the file.
+
+   Never write the credentials to the repo, logs or reports.
 3. Signed in as that account, create the workspace `Taff verification`.
 4. Add one agent through Team, named `Verification agent`.
-5. Record only the account's username and the workspace name in
-   `docs/deploy.md`, under "Operations".
+5. Record only the account's username, the workspace name and where the
+   credentials live (the item name or the host path) in `docs/deploy.md`,
+   under "Operations".
 
 This creates only that account's own data; it seeds nothing, changes no
 other account and copies no demo agents. Use this account and workspace for
