@@ -74,6 +74,7 @@ import { createCrmOperations } from "./crm";
 import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
+import { createRelationOperations } from "./relations";
 import { createRunOperations } from "./runs";
 import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
@@ -998,6 +999,7 @@ export function createCore(options: {
     currentRunId,
   });
   const crm = createCrmOperations({ db, mutation, requireMember });
+  const relations = createRelationOperations({ db, requireMember });
   const runOperations = createRunOperations({
     db,
     mutation,
@@ -1034,6 +1036,7 @@ export function createCore(options: {
     ...planning.operations,
     ...timeline.operations,
     ...crm.operations,
+    ...relations.operations,
     ...runOperations,
     getTodayBootstrap,
     auth,

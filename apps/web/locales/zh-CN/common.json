@@ -276,7 +276,8 @@
       "removeDependency": "移除依赖",
       "listCompanies": "列出公司",
       "listContacts": "列出联系人（未获授权不含电话与邮箱）",
-      "readContact": "读取联系人及其关联"
+      "readContact": "读取联系人及其关联",
+      "readRelations": "读取关系图（不含电话与邮箱）"
     },
     "back": "返回",
     "copyEndpoint": "复制端点",

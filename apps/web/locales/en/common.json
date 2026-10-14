@@ -276,7 +276,8 @@
       "removeDependency": "Remove dependency",
       "listCompanies": "List companies",
       "listContacts": "List contacts (no phone or email without permission)",
-      "readContact": "Read a contact and its links"
+      "readContact": "Read a contact and its links",
+      "readRelations": "Read the relations graph (no phone or email)"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",

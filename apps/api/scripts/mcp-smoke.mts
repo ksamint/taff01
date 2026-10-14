@@ -13,6 +13,7 @@ import {
   dependencySchema,
   grantSchema,
   quickAddResultSchema,
+  relationGraphSchema,
   runDetailSchema,
   runSchema,
   searchResultSchema,
@@ -111,6 +112,7 @@ try {
         "inbox.request_review",
         "projects.list",
         "quickadd.parse",
+        "relations.get",
         "runs.control",
         "runs.event",
         "runs.get",
@@ -415,6 +417,26 @@ try {
       plan.dependencies.some((dep) => dep.id === link.id && !dep.conflict) &&
       plan.risk.finance === null,
     plan,
+  );
+  const relations = relationGraphSchema.parse(
+    text(
+      await client.callTool({
+        name: "relations.get",
+        arguments: { projectId: project.id, layers: ["dependencies", "org"] },
+      }),
+    ),
+  );
+  check(
+    "relations.get reads the project graph with its dependency and no contact details",
+    relations.nodes.some((node) => node.id === taskId) &&
+      relations.edges.some(
+        (edge) =>
+          edge.kind === "depends_on" &&
+          [edge.from, edge.to].includes(`task:${taskId}`) &&
+          [edge.from, edge.to].includes(`task:${follower.id}`),
+      ) &&
+      !/phone|email/.test(JSON.stringify(relations)),
+    relations,
   );
   const unlinked = dependencySchema.parse(
     text(

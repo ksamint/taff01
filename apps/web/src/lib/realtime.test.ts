@@ -135,6 +135,23 @@ describe("workspace realtime lifecycle", () => {
       client.getQueryState(["unrelated", workspaceId])?.isInvalidated,
     ).toBe(false);
   });
+  it("invalidates the relations graph on any task, member or CRM change", () => {
+    const key = ["graph", workspaceId, { projectId: null }];
+    client.setQueryData(key, {});
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    client.setQueryData(key, {});
+    for (const action of [
+      "tasks.update",
+      "task_dependencies.delete",
+      "project_contacts.insert",
+    ]) {
+      client.setQueryData(key, {});
+      socket.message({ ...event, action });
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    }
+  });
   it("defers change refetches until a pending optimistic mutation settles", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
     cleanup = connectWorkspace(client, workspaceId, userId);

@@ -37,6 +37,8 @@ const FAMILIES = [
   "contact-links",
   "crm-search",
   "crm-audit",
+  // Relations graph (M16), keyed by workspace: ["graph", workspaceId, scope].
+  "graph",
 ];
 
 export function connectWorkspace(

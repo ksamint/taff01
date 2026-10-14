@@ -58,6 +58,7 @@ export * from "./calendar-read";
 export * from "./changes";
 export * from "./crm";
 export * from "./email-verification";
+export * from "./graph";
 export * from "./inbox-read";
 export * from "./notification-preferences";
 export * from "./plan";

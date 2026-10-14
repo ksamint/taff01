@@ -64,6 +64,7 @@ const TOOLS = [
   ["companies.list", "listCompanies"],
   ["contacts.list", "listContacts"],
   ["contacts.get", "readContact"],
+  ["relations.get", "readRelations"],
 ] as const;
 const SCOPES = scopeSchema.options as Scope[];
 
