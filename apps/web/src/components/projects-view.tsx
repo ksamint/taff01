@@ -71,6 +71,11 @@ const RelationsView = dynamic(
   () => import("./relations-view").then((module) => module.RelationsView),
   { ssr: false },
 );
+// The mind map (M18) is its own lazy chunk too.
+const MindView = dynamic(
+  () => import("./mind-view").then((module) => module.MindView),
+  { ssr: false },
+);
 const PRIORITIES = ["urgent", "high", "medium", "low"] as const;
 const VIEW_LABEL: Record<ProjectView, string> = {
   board: "projects.boardView",
@@ -660,6 +665,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         <TimelineView project={selected} />
       ) : view === "relations" ? (
         <RelationsView project={selected} />
+      ) : view === "mind" ? (
+        <MindView project={selected} />
       ) : PLANNED_VIEWS.includes(view) ? (
         <section
           className="projects-placeholder"
