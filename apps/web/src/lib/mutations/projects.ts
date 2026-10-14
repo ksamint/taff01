@@ -1,16 +1,20 @@
-// Project mutations (create and rename/archive from the project dialog).
+// Project mutations: create and rename/archive from the project dialog, and
+// board status moves with undo.
 import {
   type Project,
   type ProjectInput,
   type ProjectUpdate,
   projectSchema,
+  type Task,
+  type TaskStatus,
 } from "@taff/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { request } from "../api";
 import { invalidateM3 } from "../m3-queries";
-import { projectsKey } from "../m5-queries";
+import { projectsKey, useEditTask } from "../m5-queries";
 import { m3MutationKey, snapshotM3 } from "../optimistic-m3";
 import { isCurrentSnapshot, restoreQueries } from "../query-snapshot";
+import { showToast } from "../toast";
 
 export type ProjectDialogMode = "new" | "edit" | null;
 
@@ -91,4 +95,41 @@ export function useManageProject(
     },
     onSettled: () => invalidateM3(client),
   });
+}
+
+/**
+ * Board status change (drag, keyboard menu or select) through the optimistic
+ * task edit. On success a toast offers 撤銷: undo sends the inverse status
+ * change with the saved version, never a snapshot (plan §2.4 item 6).
+ */
+export function useMoveTaskStatus({
+  describe,
+  undoLabel,
+}: {
+  describe: (status: TaskStatus) => string;
+  undoLabel: string;
+}) {
+  const edit = useEditTask();
+  const move = (task: Task, status: TaskStatus) => {
+    if (task.status === status) return;
+    const previous = task.status;
+    edit.mutate(
+      { id: task.id, body: { version: task.version, status } },
+      {
+        onSuccess: (saved) =>
+          showToast(describe(status), {
+            label: undoLabel,
+            run: () =>
+              edit.mutate(
+                {
+                  id: saved.id,
+                  body: { version: saved.version, status: previous },
+                },
+                { onSuccess: () => showToast(describe(previous)) },
+              ),
+          }),
+      },
+    );
+  };
+  return { move, edit };
 }

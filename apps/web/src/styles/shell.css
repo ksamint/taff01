@@ -360,7 +360,8 @@
 @media (min-width: 1024px) {
   /* Desktop creates tasks from each view's 新建任務 button (prototype 1230);
      views without one yet keep the FAB until they are ported. */
-  .signed-in:has(.today-view) .quick-fab {
+  .signed-in:has(.today-view) .quick-fab,
+  .signed-in:has(.projects-view) .quick-fab {
     display: none;
   }
 }
