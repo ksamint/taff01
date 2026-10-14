@@ -13,7 +13,7 @@
   padding: 0 5px;
   border-radius: 9px;
   background: var(--accent);
-  color: var(--text-on-inverse);
+  color: var(--text-on-accent);
   font-size: 12px;
   font-weight: var(--weight-label);
   line-height: 18px;
@@ -151,7 +151,7 @@
   padding: 0 5px;
   border-radius: 9px;
   background: var(--accent);
-  color: var(--text-on-inverse);
+  color: var(--text-on-accent);
   font-size: 12px;
   font-weight: var(--weight-label);
   line-height: 18px;

@@ -241,7 +241,7 @@
   padding: 0 6px;
   border-radius: 10px;
   background: var(--accent);
-  color: var(--text-on-inverse);
+  color: var(--text-on-accent);
   font-size: 12px;
   font-weight: var(--weight-label);
   font-variant-numeric: tabular-nums;

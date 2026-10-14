@@ -525,6 +525,9 @@
   min-height: 44px;
 }
 .crm-field a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   color: var(--text);
   text-decoration: underline;
   text-decoration-color: var(--border);

@@ -1,0 +1,42 @@
+{
+  "script": "scripts/ui/a11y-audit.mjs",
+  "baseSha": "98cf3c64b63a397512dc9bf940f2152d2c305a44",
+  "date": "2026-10-14",
+  "measuredContexts": 348,
+  "routeStates": {
+    "phone": 28,
+    "desktop": 30
+  },
+  "localeCount": 3,
+  "themes": ["light", "dark"],
+  "viewports": {
+    "phone": [390, 844],
+    "desktop": [1280, 800]
+  },
+  "before": {
+    "contrastFailures": 165,
+    "smallEffectivePhoneTargets": 184,
+    "below12pxText": 0,
+    "missingNames": 0,
+    "missingFocusRings": 12,
+    "incompleteTabCycles": 0,
+    "hiddenFocusStops": 0,
+    "langMismatches": 0,
+    "renderErrors": 0
+  },
+  "after": {
+    "contrastFailures": 0,
+    "smallEffectivePhoneTargets": 0,
+    "below12pxText": 0,
+    "missingNames": 0,
+    "missingFocusRings": 0,
+    "incompleteTabCycles": 0,
+    "hiddenFocusStops": 0,
+    "langMismatches": 0,
+    "renderErrors": 0
+  },
+  "focusStops": 9402,
+  "interactiveObservations": 11112,
+  "textObservations": 25254,
+  "manualBackgroundObservations": 216
+}
