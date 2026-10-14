@@ -84,6 +84,47 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
     if (core) await core.close();
     if (connection) await connection.close();
   });
+  it("seeds the prototype timeline, finance and CRM links once per workspace", async () => {
+    const count = async (table: string, workspace: string) =>
+      Number(
+        (
+          await connection.client.unsafe(
+            `select count(*)::int as n from ${table} where workspace_id = $1`,
+            [workspace],
+          )
+        )[0].n,
+      );
+    const qs = prototypeId("workspace", "qs");
+    expect(await count("task_plans", w)).toBe(11);
+    expect(await count("task_dependencies", w)).toBe(7);
+    expect(await count("milestones", w)).toBe(1);
+    expect(await count("companies", w)).toBe(3);
+    expect(await count("contacts", w)).toBe(5);
+    expect(await count("company_contacts", w)).toBe(2);
+    expect(await count("project_contacts", w)).toBe(5);
+    expect(await count("task_contacts", w)).toBe(2);
+    expect(await count("contact_roles", w)).toBe(11);
+    expect(await count("task_plans", qs)).toBe(5);
+    expect(await count("contact_roles", qs)).toBe(3);
+    const [project] = await connection.client`
+      select contract_amount, currency, client_company_id from projects where id = ${p}`;
+    expect(project).toEqual({
+      contract_amount: "1280000.00",
+      currency: "HKD",
+      client_company_id: prototypeId("company", "nw", 1),
+    });
+    const [plan] = await connection.client`
+      select start_date::text as start, duration_days from task_plans
+      where id = ${prototypeId("task", "nw", 133)}`;
+    expect(plan).toEqual({ start: "2026-10-01", duration_days: 5 });
+    // Re-seeding never re-adds a link a person removed.
+    await connection.client.begin(async (tx) => {
+      await tx`select set_config('taff.actor_id', ${alexId}, true)`;
+      await tx`delete from task_contacts where id = ${prototypeId("contactLink", "nw", 9)}`;
+    });
+    await seedDemo({ ...options, password, seedDate: "2026-10-08" });
+    expect(await count("task_contacts", w)).toBe(1);
+  });
   it("stores the exact Checkout hierarchy and isolated real organization memberships", async () => {
     const actor = userPrincipal(alexId);
     const rows = (await core.listTasks(actor, w)).filter(
