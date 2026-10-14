@@ -61,8 +61,13 @@ import type { Logger } from "pino";
 import { createMcpHttpHandler, describeCall } from "./mcp";
 import type { RateLimiter } from "./rate-limit";
 import type { Realtime } from "./realtime";
+import { registerCrmRoutes } from "./routes/crm";
 
 type Core = ReturnType<typeof createCore>;
+/** Request variables set by the session middleware, shared with route modules. */
+export type AppEnv = {
+  Variables: { userId: string; sessionId: string; sessionExpiresAt: number };
+};
 
 /** Tool results that the SDK itself rejected (bad arguments, unknown tool) still count as errors. */
 async function callStatus(response: Response): Promise<"ok" | "error"> {
@@ -89,9 +94,7 @@ export function createApp(
   emailRateLimiter?: RateLimiter,
 ) {
   const origin = new URL(authUrl).origin;
-  const app = new Hono<{
-    Variables: { userId: string; sessionId: string; sessionExpiresAt: number };
-  }>();
+  const app = new Hono<AppEnv>();
   const mcp = createMcpHttpHandler(core, logger);
   app.use(
     "/mcp",
@@ -788,6 +791,7 @@ export function createApp(
     );
     return c.json({ success: true });
   });
+  registerCrmRoutes(app, core);
   app.notFound((c) => c.json({ error: "not_found" }, 404));
   app.onError((error, c) => {
     if (error instanceof SchemaError || error instanceof SyntaxError)

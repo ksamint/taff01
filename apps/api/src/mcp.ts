@@ -12,7 +12,7 @@ import {
 } from "zod/v4/core";
 
 /** zod/mini schemas validate but carry no JSON Schema; the SDK needs both. */
-function toolSchema<T extends $ZodType>(
+export function toolSchema<T extends $ZodType>(
   schema: T,
 ): StandardSchemaWithJSON<input<T>, output<T>> {
   const standard = schema["~standard"] as StandardSchemaWithJSON<
@@ -57,6 +57,7 @@ import {
   mcpTasksListArgs,
   mcpTasksUpdateArgs,
 } from "@taff/schemas";
+import { registerCrmTools } from "./mcp-crm";
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
 type CallState = { failed?: McpCall["status"] };
@@ -325,6 +326,7 @@ export function createMcpServer(
     ({ agentId, ...input }) =>
       run(() => core.requestGrant(principal, agentId, input)),
   );
+  registerCrmTools(server, core, principal, run);
   return server;
 }
 
