@@ -110,6 +110,27 @@ describe("workspace realtime lifecycle", () => {
     socket.message({ ...event, action: "task_plans.update" });
     for (const key of ["timeline", "milestones", "payments"])
       expect(client.getQueryState([key, project])?.isInvalidated).toBe(true);
+  });
+  it("invalidates the CRM families on a company, contact or link change", () => {
+    const keys = [
+      ["companies", workspaceId],
+      ["company", "company-1"],
+      ["contacts", workspaceId, { query: "lee" }],
+      ["contact", "contact-1"],
+      ["contact-links", "project", "project-1"],
+      ["crm-search", workspaceId, "north"],
+      ["crm-audit", workspaceId],
+    ];
+    for (const key of keys) client.setQueryData(key, []);
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    for (const key of keys) client.setQueryData(key, []);
+    for (const key of keys)
+      expect(client.getQueryState(key)?.isInvalidated).toBe(false);
+    socket.message({ ...event, action: "contact_roles.insert" });
+    for (const key of keys)
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true);
     expect(
       client.getQueryState(["unrelated", workspaceId])?.isInvalidated,
     ).toBe(false);

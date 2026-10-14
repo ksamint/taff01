@@ -57,6 +57,7 @@ import {
   mcpTasksListArgs,
   mcpTasksUpdateArgs,
 } from "@taff/schemas";
+import { registerCrmTools } from "./mcp-crm";
 import { registerTimelineTools } from "./mcp-timeline";
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
@@ -327,6 +328,7 @@ export function createMcpServer(
       run(() => core.requestGrant(principal, agentId, input)),
   );
   registerTimelineTools(server, core, principal, run);
+  registerCrmTools(server, core, principal, run);
   return server;
 }
 

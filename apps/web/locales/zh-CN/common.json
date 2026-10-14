@@ -273,7 +273,10 @@
       "readTimeline": "读取项目时间线",
       "planTask": "规划开始日期与工期",
       "addDependency": "添加依赖",
-      "removeDependency": "移除依赖"
+      "removeDependency": "移除依赖",
+      "listCompanies": "列出公司",
+      "listContacts": "列出联系人（未获授权不含电话与邮箱）",
+      "readContact": "读取联系人及其关联"
     },
     "back": "返回",
     "copyEndpoint": "复制端点",

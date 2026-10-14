@@ -273,7 +273,10 @@
       "readTimeline": "Read project timeline",
       "planTask": "Plan start date and duration",
       "addDependency": "Add dependency",
-      "removeDependency": "Remove dependency"
+      "removeDependency": "Remove dependency",
+      "listCompanies": "List companies",
+      "listContacts": "List contacts (no phone or email without permission)",
+      "readContact": "Read a contact and its links"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",

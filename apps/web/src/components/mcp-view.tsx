@@ -61,6 +61,9 @@ const TOOLS = [
   ["tasks.plan", "planTask"],
   ["dependencies.add", "addDependency"],
   ["dependencies.remove", "removeDependency"],
+  ["companies.list", "listCompanies"],
+  ["contacts.list", "listContacts"],
+  ["contacts.get", "readContact"],
 ] as const;
 const SCOPES = scopeSchema.options as Scope[];
 

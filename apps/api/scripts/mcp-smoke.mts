@@ -7,6 +7,9 @@ import {
 import { createCore, userPrincipal } from "@taff/core";
 import {
   calendarViewDataSchema,
+  companyListSchema,
+  contactDetailSchema,
+  contactListSchema,
   dependencySchema,
   grantSchema,
   quickAddResultSchema,
@@ -92,12 +95,15 @@ try {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists every task, calendar, timeline, project, search, draft, run, grant and file tool",
+    "lists every task, calendar, timeline, project, search, draft, run, grant, file and CRM tool",
     JSON.stringify(tools) ===
       JSON.stringify([
         "calendar.list",
         "calendar.schedule",
         "calendar.set",
+        "companies.list",
+        "contacts.get",
+        "contacts.list",
         "dependencies.add",
         "dependencies.remove",
         "files.attach",
@@ -647,6 +653,101 @@ try {
     denied.isError === true,
     denied,
   );
+  // CRM reads need tasks:read plus the crm.read capability a person allows;
+  // phone and email stay hidden without crm.contact_details.
+  const crmCompany = await core.createCompany(asUser, workspace.id, {
+    name: `Smoke Co ${Date.now()}`,
+  });
+  const crmContact = await core.createContact(asUser, workspace.id, {
+    name: `Smoke Contact ${Date.now()}`,
+    companyId: crmCompany.id,
+    phone: "+852 0000 0000",
+    email: "smoke@example.com",
+  });
+  const priorCrm = (
+    await core.getAgentProfile(asUser, agent.id)
+  ).permissions.filter(({ capability }) =>
+    ["crm.read", "crm.contact_details"].includes(capability),
+  );
+  const deniedCrm = await client.callTool({
+    name: "contacts.list",
+    arguments: {},
+  });
+  const crmGranted = priorCrm.some(
+    ({ capability, decision }) =>
+      capability === "crm.read" && decision === "allow",
+  );
+  check(
+    "contacts.list is refused until a person allows crm.read",
+    crmGranted || deniedCrm.isError === true,
+    deniedCrm,
+  );
+  await core.setAgentPermission(asUser, agent.id, {
+    capability: "crm.read",
+    decision: "allow",
+  });
+  await core.setAgentPermission(asUser, agent.id, {
+    capability: "crm.contact_details",
+    decision: "deny",
+  });
+  try {
+    const crmCompanies = companyListSchema.parse(
+      text(await client.callTool({ name: "companies.list", arguments: {} })),
+    );
+    check(
+      "companies.list reads the token workspace's companies",
+      crmCompanies.some((company) => company.id === crmCompany.id),
+    );
+    const crmContacts = contactListSchema.parse(
+      text(
+        await client.callTool({
+          name: "contacts.list",
+          arguments: { companyId: crmCompany.id },
+        }),
+      ),
+    );
+    check(
+      "contacts.list hides phone and email without crm.contact_details",
+      crmContacts.length === 1 &&
+        crmContacts[0].id === crmContact.id &&
+        crmContacts[0].phone === null &&
+        crmContacts[0].email === null,
+      crmContacts,
+    );
+    const crmDetail = contactDetailSchema.parse(
+      text(
+        await client.callTool({
+          name: "contacts.get",
+          arguments: { contactId: crmContact.id },
+        }),
+      ),
+    );
+    check(
+      "contacts.get reads one contact with its company and no details",
+      crmDetail.contact.id === crmContact.id &&
+        crmDetail.company?.id === crmCompany.id &&
+        crmDetail.contact.phone === null &&
+        crmDetail.contact.email === null,
+      crmDetail,
+    );
+  } finally {
+    // Leave the demo agent's CRM permissions as they were.
+    for (const capability of ["crm.read", "crm.contact_details"] as const)
+      await core.setAgentPermission(asUser, agent.id, {
+        capability,
+        decision:
+          priorCrm.find((item) => item.capability === capability)?.decision ??
+          (capability === "crm.read" ? "ask" : "deny"),
+      });
+    await core.updateContact(asUser, crmContact.id, {
+      version: crmContact.version,
+      archived: true,
+    });
+    await core.updateCompany(asUser, crmCompany.id, {
+      version: crmCompany.version,
+      archived: true,
+    });
+  }
   let limited = false;
   for (let i = 0; i < limit + 2 && !limited; i++) {
     const response = await fetch(apiUrl, {
