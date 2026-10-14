@@ -20,8 +20,9 @@ The build agent appends one section per candidate to `docs/deploy.md` on
 `main`, headed `### Frontend v2 release candidate <R1|M15|M16|M17|M18|v0.2.0>
 — <date>`. Each section holds:
 
-- the exact 40-character source SHA and its two CI run links (feature and
-  `main`);
+- the exact 40-character source SHA (a `main` commit) and two CI run links:
+  - the `main` push run on that exact SHA;
+  - the merged PR's run on its PR head, whose tree the merge carries;
 - the validation numbers: the nine commands, Lighthouse, three-locale LCP and
   `perf:budget`;
 - the migrations added since the live SHA, each marked additive, with
@@ -117,7 +118,10 @@ every public check and the live MCP round trip.
 3. Otherwise check all of the following:
    - the candidate SHA is an ancestor of `origin/main`;
    - `git diff --stat <SHA> origin/main -- . ':!docs'` is empty;
-   - both linked CI runs are green for that exact SHA.
+   - the linked `main` push CI run is green for that exact SHA;
+   - the linked PR CI run is green on the PR's head commit, and that commit is
+     an ancestor of the SHA. A merge commit always has a different SHA from
+     its PR head, so this run is never on the exact SHA.
 
    If the code moved past the candidate, wait for the next candidate section;
    never deploy an unlisted SHA.
