@@ -423,3 +423,36 @@
     max-width: 880px;
   }
 }
+.today-new-task {
+  display: none;
+}
+@media (min-width: 1024px) {
+  .today-header {
+    align-items: center;
+    min-height: 52px;
+    padding: 0 20px;
+    border-bottom: 1px solid var(--border-line);
+    margin-bottom: 20px;
+  }
+  .today-header-title {
+    flex-direction: row-reverse;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .today-header h1 {
+    font-size: 15px;
+  }
+  .today-date {
+    font-size: 13px;
+    font-weight: var(--weight-body);
+    letter-spacing: 0;
+  }
+  .today-new-task {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .today-avatar-link {
+    display: none;
+  }
+}

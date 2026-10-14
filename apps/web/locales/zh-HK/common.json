@@ -494,7 +494,8 @@
       "invalid_time": "請檢查辨識出的時間。",
       "invalid_date": "請檢查辨識出的日期。",
       "empty_title": "請填寫任務標題。"
-    }
+    },
+    "newTask": "新建任務"
   },
   "organization": {
     "title": "組織",

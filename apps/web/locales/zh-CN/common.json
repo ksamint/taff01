@@ -494,7 +494,8 @@
       "invalid_time": "请检查识别出的时间。",
       "invalid_date": "请检查识别出的日期。",
       "empty_title": "请填写任务标题。"
-    }
+    },
+    "newTask": "新建任务"
   },
   "organization": {
     "title": "组织",

@@ -8,7 +8,7 @@ import {
   calendarWallToInstant,
 } from "@taff/schemas/calendar-read";
 import { useIsMutating, useQueryClient } from "@tanstack/react-query";
-import { ChevronRight, Search, Sparkles } from "lucide-react";
+import { ChevronRight, Plus, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,7 +37,7 @@ const TODAY_RUNS = 6;
 // Prototype v2 Today (lines 83–139, desktop 1359–1404): agents at work,
 // 待你處理 with the one needs-you count, and what is due today.
 export function TodayView({ initialNow }: { initialNow: number }) {
-  const { me, workspace, openSearch } = useWorkspace();
+  const { me, workspace, openSearch, openQuick } = useWorkspace();
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const members = useMembers(workspace.id);
@@ -115,6 +115,14 @@ export function TodayView({ initialNow }: { initialNow: number }) {
           <h1 data-testid="today-heading">{t("today")}</h1>
         </div>
         <div className="today-header-actions">
+          <Button
+            className="button-primary today-new-task"
+            data-testid="desktop-new-task"
+            onClick={openQuick}
+          >
+            <Plus size={16} strokeWidth={1.5} aria-hidden="true" />
+            {t("quickAdd.newTask")}
+          </Button>
           <Button
             className="today-search"
             data-testid="open-search"

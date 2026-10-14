@@ -494,7 +494,8 @@
       "invalid_time": "Check the detected time.",
       "invalid_date": "Check the detected date.",
       "empty_title": "Add a task title."
-    }
+    },
+    "newTask": "New task"
   },
   "organization": {
     "title": "Organizations",
