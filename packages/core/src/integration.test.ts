@@ -550,7 +550,11 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
     }
   });
   it("seeds exactly five people and three agents idempotently without changing credentials", async () => {
-    const first = await seedDemo({ ...options, password });
+    const first = await seedDemo({
+      ...options,
+      password,
+      seedDate: "2026-10-08",
+    });
     const team = await core.listMembers(
       userPrincipal(
         (
@@ -569,7 +573,11 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       .from(activity)
       .where(eq(activity.workspaceId, first.workspaceId));
     expect(
-      await seedDemo({ ...options, password: `another-${randomUUID()}` }),
+      await seedDemo({
+        ...options,
+        password: `another-${randomUUID()}`,
+        seedDate: "2026-10-08",
+      }),
     ).toEqual(first);
     expect(
       await connection.db

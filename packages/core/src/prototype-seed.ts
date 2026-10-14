@@ -88,6 +88,24 @@ const blocker = "需要預發資料庫寫權限，當前權杖為只讀。";
 const mention =
   "@林曉 失敗狀態的文案需要你確認，三個版本已放在 Figma 裡。（原型示例，未連接 Figma）";
 
+const RRULE_DAYS = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
+/** A BYDAY rule must start on one of its days; relative seed days can land on others. */
+export function byDayAnchor(
+  day: number,
+  rrule: string | undefined,
+  dateOf: (day: number) => string,
+): number {
+  const days = /BYDAY=([A-Z,]+)/.exec(rrule ?? "")?.[1].split(",");
+  if (!days) return day;
+  let anchor = day;
+  while (
+    !days.includes(
+      RRULE_DAYS[new Date(`${dateOf(anchor)}T00:00:00Z`).getUTCDay()],
+    )
+  )
+    anchor += 1;
+  return anchor;
+}
 /** Validated real fixtures; called inside the same seed lock/audited content transaction. */
 export async function seedPrototype(
   tx: Transaction,
@@ -291,11 +309,12 @@ export async function seedPrototype(
         !can(actor, "task:schedule", { workspaceId, taskId, ownerId: owner.id })
       )
         throw new Error("Prototype schedule permission required");
+      const anchorDay = byDayAnchor(schedule.day, schedule.rrule, day);
       const input = normalizeCalendarSchedule(
         calendarScheduleInputSchema.parse({
-          startAt: at(schedule.day, schedule.start).toISOString(),
+          startAt: at(anchorDay, schedule.start).toISOString(),
           endAt: at(
-            schedule.day,
+            anchorDay,
             schedule.start + schedule.duration,
           ).toISOString(),
           timeZone: options.timeZone,
