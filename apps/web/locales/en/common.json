@@ -289,7 +289,12 @@
   "taskDetail": {
     "back": "Back to Today",
     "due": "Due",
-    "unscheduled": "Unscheduled"
+    "unscheduled": "Unscheduled",
+    "close": "Close task",
+    "activity": "Activity",
+    "statusChanged": "Status set to {{status}}",
+    "fieldSaved": "{{field}} updated",
+    "descriptionPlaceholder": "Add a description"
   },
   "run": {
     "title": "Agent run",
@@ -358,7 +363,8 @@
     "approveHint": "Check all three items and approve each deliverable before approving the run. A change request needs a comment.",
     "approved": "Approved. The task is complete.",
     "readonly": "This review is read-only for your account or its current state.",
-    "comments": "Review comments"
+    "comments": "Review comments",
+    "changesHint": "Describe what to change; the agent continues from there."
   },
   "agentProfile": {
     "open": "Agent profile",
@@ -438,7 +444,8 @@
       "allowed": "Allowed",
       "denied": "Denied",
       "revoked": "Revoked"
-    }
+    },
+    "always": "Always allow"
   },
   "planning": {
     "close": "Close",
@@ -471,7 +478,7 @@
   },
   "search": {
     "title": "Search",
-    "placeholder": "Search tasks, comments and settings",
+    "placeholder": "Search tasks, comments, contacts and settings",
     "thisOrg": "This organization",
     "allOrgs": "All organizations",
     "all": "All",
@@ -486,7 +493,11 @@
     "matchingComment": "Matched a comment",
     "matchingDescription": "Matched the description",
     "cancel": "Cancel",
-    "clear": "Clear search"
+    "clear": "Clear search",
+    "companies": "Companies",
+    "contacts": "Contacts",
+    "company": "Company",
+    "contact": "Contact"
   },
   "quickAdd": {
     "title": "Quick add",
@@ -672,5 +683,54 @@
     "blockedBy": "{{name}} is blocked",
     "badgeReview": "To confirm",
     "badgeBlocker": "Blocked"
+  },
+  "actions": {
+    "undo": "Undo",
+    "remove": "Remove",
+    "back": "Back",
+    "done": "Done"
+  },
+  "crm": {
+    "role": {
+      "decider": "Decision maker",
+      "chair": "Chairman",
+      "ops": "Operations lead",
+      "broker": "Intermediary",
+      "tech": "Technical contact",
+      "finance": "Finance contact",
+      "signoff": "Sign-off"
+    },
+    "roleSeparator": ", ",
+    "contacts": {
+      "title": "Contacts",
+      "add": "Add contact",
+      "addConfirm": "Add",
+      "others": "Other contacts",
+      "search": "Search contacts",
+      "noMatches": "No contacts to add.",
+      "needsProject": "Add this task to a project to link contacts.",
+      "noneOnTask": "No contacts on this task yet.",
+      "someone": "another contact"
+    },
+    "stakeholders": {
+      "fromProject": "Project stakeholders"
+    },
+    "external": "External",
+    "rolesTitle": "Roles",
+    "noRole": "No role",
+    "rolesFor": "Roles for {{name}}",
+    "editRolesFor": "Edit roles for {{name}}",
+    "doneEditingFor": "Done editing roles for {{name}}",
+    "roles": {
+      "task": "Task roles"
+    },
+    "toast": {
+      "added": "Added {{name}}",
+      "rolesUpdated": "Updated {{name}}’s roles",
+      "roleReplaced": "{{name}} is now the {{role}}; {{previous}} was replaced",
+      "addedStakeholder": "added as a stakeholder of {{project}}",
+      "removed": "Removed {{name}}",
+      "separator": "; "
+    }
   }
 }

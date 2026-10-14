@@ -289,7 +289,12 @@
   "taskDetail": {
     "back": "返回今天",
     "due": "到期时间",
-    "unscheduled": "未安排日期"
+    "unscheduled": "未安排日期",
+    "close": "关闭任务",
+    "activity": "动态",
+    "statusChanged": "状态已改为{{status}}",
+    "fieldSaved": "已更新{{field}}",
+    "descriptionPlaceholder": "添加描述"
   },
   "run": {
     "title": "智能体执行",
@@ -358,7 +363,8 @@
     "approveHint": "批准执行前，请完成三个检查项并批准每个交付物。要求修改时需填写评论。",
     "approved": "已批准，任务已完成。",
     "readonly": "当前账户或执行状态下只能查看审核内容。",
-    "comments": "审核评论"
+    "comments": "审核评论",
+    "changesHint": "说明需要修改的地方，智能体会据此继续工作。"
   },
   "agentProfile": {
     "open": "智能体资料",
@@ -438,7 +444,8 @@
       "allowed": "已允许",
       "denied": "已拒绝",
       "revoked": "已撤销"
-    }
+    },
+    "always": "始终允许"
   },
   "planning": {
     "close": "关闭",
@@ -471,7 +478,7 @@
   },
   "search": {
     "title": "搜索",
-    "placeholder": "搜索任务、评论和设置",
+    "placeholder": "搜索任务、评论、联系人和设置",
     "thisOrg": "当前组织",
     "allOrgs": "所有组织",
     "all": "全部",
@@ -486,7 +493,11 @@
     "matchingComment": "匹配到评论",
     "matchingDescription": "匹配到描述",
     "cancel": "取消",
-    "clear": "清除搜索"
+    "clear": "清除搜索",
+    "companies": "公司",
+    "contacts": "联系人",
+    "company": "公司",
+    "contact": "联系人"
   },
   "quickAdd": {
     "title": "快速添加",
@@ -672,5 +683,54 @@
     "blockedBy": "{{name}} 已受阻",
     "badgeReview": "待确认",
     "badgeBlocker": "已阻塞"
+  },
+  "actions": {
+    "undo": "撤销",
+    "remove": "移除",
+    "back": "返回",
+    "done": "完成"
+  },
+  "crm": {
+    "role": {
+      "decider": "决策者",
+      "chair": "董事长",
+      "ops": "运营负责人",
+      "broker": "项目中间人",
+      "tech": "技术对接人",
+      "finance": "财务联系人",
+      "signoff": "验收人"
+    },
+    "roleSeparator": "、",
+    "contacts": {
+      "title": "联系人",
+      "add": "添加联系人",
+      "addConfirm": "添加",
+      "others": "其他联系人",
+      "search": "搜索联系人",
+      "noMatches": "没有可添加的联系人。",
+      "needsProject": "任务加入项目后才能添加联系人。",
+      "noneOnTask": "此任务暂无联系人。",
+      "someone": "另一位联系人"
+    },
+    "stakeholders": {
+      "fromProject": "项目相关方"
+    },
+    "external": "外部",
+    "rolesTitle": "角色",
+    "noRole": "未设角色",
+    "rolesFor": "{{name}} 的角色",
+    "editRolesFor": "编辑 {{name}} 的角色",
+    "doneEditingFor": "完成编辑 {{name}} 的角色",
+    "roles": {
+      "task": "任务角色"
+    },
+    "toast": {
+      "added": "已添加 {{name}}",
+      "rolesUpdated": "已更新 {{name}} 的角色",
+      "roleReplaced": "{{name}} 现为{{role}}，已取代 {{previous}}",
+      "addedStakeholder": "并已加入“{{project}}”项目相关方",
+      "removed": "已移除 {{name}}",
+      "separator": "；"
+    }
   }
 }

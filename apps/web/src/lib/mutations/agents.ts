@@ -186,6 +186,61 @@ export function useRequestGrant(
   });
 }
 
+/**
+ * 始終允許 (always allow): sets the agent's standing permission for the
+ * grant's capability to allow, then allows the pending grant itself for the
+ * longest expiry the server accepts so the paused run can continue.
+ */
+export function useAlwaysAllowGrant(
+  grant: Pick<Grant, "id" | "agentId" | "capability">,
+  actorId: string | undefined,
+) {
+  const client = useQueryClient();
+  return useMutation({
+    mutationKey: m3MutationKey,
+    mutationFn: async () => {
+      await request(`/api/agents/${grant.agentId}/permissions`, {
+        method: "PUT",
+        body: JSON.stringify(
+          agentPermissionInputSchema.parse({
+            capability: grant.capability,
+            decision: "allow",
+          }),
+        ),
+      });
+      return request(`/api/grants/${grant.id}/decision`, {
+        method: "POST",
+        body: JSON.stringify(
+          decideGrantSchema.parse({
+            decision: "allow",
+            expiresAt: new Date(
+              Date.now() + 30 * 86_400_000 - 60_000,
+            ).toISOString(),
+          }),
+        ),
+      });
+    },
+    onMutate: async () => {
+      const snapshot = await snapshotM3(client);
+      client.setQueryData<AgentProfile>(agentKey(grant.agentId), (current) =>
+        withGrantDecision(
+          withAgentPermission(current, {
+            capability: grant.capability,
+            decision: "allow",
+          }),
+          grant.id,
+          { decision: "allow" },
+          actorId,
+        ),
+      );
+      resolveInbox(client, (item) => item.grantId === grant.id);
+      return snapshot;
+    },
+    onError: (_, __, snapshot) => restoreQueries(client, snapshot),
+    onSettled: () => invalidateM3(client),
+  });
+}
+
 /** Allows, denies or revokes a grant and resolves its inbox item. */
 export function useDecideGrant(
   grant: Pick<Grant, "id" | "agentId">,
