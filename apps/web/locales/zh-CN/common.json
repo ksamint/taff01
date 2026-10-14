@@ -868,5 +868,158 @@
       "cancel": "取消",
       "delete": "删除"
     }
+  },
+  "timeline": {
+    "pickProject": "选择一个项目以查看时间线。",
+    "empty": "暂时没有可规划的任务或里程碑。",
+    "zoom": "缩放",
+    "day": "日",
+    "week": "周",
+    "criticalPath": "关键路径",
+    "linkMode": "连线模式",
+    "linkHint": "点选前置任务，再点选后续任务。也可从任务条右端的圆点直接拖出连线。点击箭头可移除依赖。",
+    "linkSelected": "已选“{{task}}”，请点选后续任务。",
+    "cancel": "取消",
+    "close": "关闭",
+    "keyboardHint": "用上下方向键在各行之间移动，并在图表下方的面板修改日期和前置任务。",
+    "colTask": "任务",
+    "rowsLabel": "{{project}} 的任务和里程碑",
+    "rowLabel": "{{title}}，{{start}} 至 {{end}}，{{duration}}，{{who}}，已完成 {{progress}}%",
+    "milestoneLabel": "里程碑 {{title}}，{{date}}",
+    "days_one": "{{count}} 天",
+    "days_other": "{{count}} 天",
+    "behind_one": "落后 {{count}} 天",
+    "behind_other": "落后 {{count}} 天",
+    "slip_one": "延迟 {{count}} 天",
+    "slip_other": "延迟 {{count}} 天",
+    "blocked": "被阻碍",
+    "conflict": "依赖冲突",
+    "agentWork": "智能体工作",
+    "human": "人员",
+    "milestone": "里程碑",
+    "legend": "图例",
+    "dragLink": "拖出依赖连线",
+    "removeDependency": "移除依赖：{{from}} → {{to}}",
+    "forecast": "预计",
+    "delivery": "交付进度",
+    "risk": {
+      "level": {
+        "low": "按计划",
+        "medium": "需留意",
+        "high": "高风险"
+      },
+      "reason": {
+        "dependency_conflict": "依赖冲突",
+        "slip": "预计晚于计划完成",
+        "blocked": "有任务被阻碍",
+        "behind": "进度落后"
+      }
+    },
+    "finance": {
+      "amount": "项目金额",
+      "collected": "已收费用"
+    },
+    "date": "日期",
+    "start": "开始",
+    "duration": "工期（天）",
+    "apply": "应用",
+    "parentNote": "移动父任务会一并移动所有子任务；工期由子任务决定。",
+    "predecessors": "前置",
+    "noPredecessors": "没有前置任务。",
+    "removePredecessor": "移除前置任务“{{task}}”",
+    "addPredecessor": "加入前置任务",
+    "choosePredecessor": "选择任务或里程碑",
+    "add": "加入",
+    "openTask": "在任务中打开",
+    "showInRelations": "在关系图显示",
+    "rescheduled": "已改期",
+    "resized": "已调整工期",
+    "depAdded": "已加入依赖",
+    "depRemoved": "已移除依赖",
+    "depExists": "依赖已存在",
+    "cycle": "会形成循环依赖，未加入"
+  },
+  "relations": {
+    "layoutLabel": "布局",
+    "layout": {
+      "layered": "结构",
+      "force": "自由"
+    },
+    "layersTitle": "关系",
+    "filterAll": "全部",
+    "layer": {
+      "dependencies": "任务依赖",
+      "people": "人员 ↔ 任务",
+      "org": "项目 ↔ 公司",
+      "crm": "联系人"
+    },
+    "scope": "范围",
+    "scopeProject": "此项目：{{project}}",
+    "scopeWorkspace": "整个工作区",
+    "asList": "以列表显示",
+    "empty": "暂时没有可显示的内容。",
+    "inspector": "详情",
+    "nodes": "节点",
+    "selectHint": "在画布或此列表中选择节点，查看它的关系。",
+    "noLayers": "未选择任何关系层",
+    "noRelations": "所选关系层中没有关系。",
+    "canvasLabel": "关系图，共 {{count}} 个节点。可用详情面板或“以列表显示”以键盘浏览。",
+    "zoomIn": "放大",
+    "zoomOut": "缩小",
+    "fit": "适应画面",
+    "legend": "图例",
+    "close": "关闭",
+    "role": "角色",
+    "detail": "详情",
+    "memberRole": {
+      "admin": "管理员",
+      "member": "成员",
+      "guest": "访客"
+    },
+    "openTask": "在任务中打开",
+    "openInTimeline": "在时间线打开",
+    "nodeType": {
+      "workspace": "工作区",
+      "project": "项目",
+      "task": "任务",
+      "person": "人员",
+      "agent": "智能体",
+      "company": "公司",
+      "contact": "联系人"
+    },
+    "edge": {
+      "contains": {
+        "out": "包含",
+        "in": "属于"
+      },
+      "owns": {
+        "out": "负责",
+        "in": "负责人"
+      },
+      "works_on": {
+        "out": "执行",
+        "in": "执行者"
+      },
+      "depends_on": {
+        "out": "依赖",
+        "in": "被依赖"
+      },
+      "client_of": {
+        "out": "客户项目",
+        "in": "客户"
+      },
+      "stakeholder_of": {
+        "out": "相关方",
+        "in": "相关方"
+      },
+      "contact_of": {
+        "out": "任职于",
+        "in": "联系人"
+      },
+      "supervises": {
+        "out": "督导",
+        "in": "督导人"
+      }
+    }
   }
 }

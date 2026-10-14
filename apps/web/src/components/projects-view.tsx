@@ -62,6 +62,15 @@ const StakeholdersView = dynamic(
     import("./crm/stakeholders-view").then((module) => module.StakeholdersView),
   { ssr: false },
 );
+// Timeline and relations (M16) are their own lazy chunks, like 相關方.
+const TimelineView = dynamic(
+  () => import("./timeline-view").then((module) => module.TimelineView),
+  { ssr: false },
+);
+const RelationsView = dynamic(
+  () => import("./relations-view").then((module) => module.RelationsView),
+  { ssr: false },
+);
 const PRIORITIES = ["urgent", "high", "medium", "low"] as const;
 const VIEW_LABEL: Record<ProjectView, string> = {
   board: "projects.boardView",
@@ -647,6 +656,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       ) : null}
       {view === "stakeholders" ? (
         <StakeholdersView workspaceId={workspace.id} project={selected} />
+      ) : view === "timeline" ? (
+        <TimelineView project={selected} />
+      ) : view === "relations" ? (
+        <RelationsView project={selected} />
       ) : PLANNED_VIEWS.includes(view) ? (
         <section
           className="projects-placeholder"
