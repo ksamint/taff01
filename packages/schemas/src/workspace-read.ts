@@ -7,5 +7,10 @@ export const workspaceAccessSchema = object({
   canManageProjects: boolean(),
   canInvite: boolean(),
   canManageRoles: boolean(),
+  canEditPlan: boolean(),
+  canReadFinance: boolean(),
+  canReadCrm: boolean(),
+  canManageCrm: boolean(),
+  canArchiveCrm: boolean(),
 });
 export type WorkspaceAccess = Infer<typeof workspaceAccessSchema>;

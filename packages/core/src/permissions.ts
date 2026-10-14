@@ -39,7 +39,15 @@ export type Action =
   | "inbox:update"
   | "capability:use"
   | "review:comment"
-  | "task:finish";
+  | "task:finish"
+  | "dependency:edit"
+  | "finance:read"
+  | "finance:manage"
+  | "contact:read"
+  | "contact:details"
+  | "contact:manage"
+  | "crm:archive"
+  | "crm:audit";
 export type Resource =
   | {
       workspaceId: string;
@@ -107,8 +115,40 @@ export function can(
     )
   )
     return false;
-  if (action === "workspace:manage" || action === "project:manage")
+  if (
+    action === "workspace:manage" ||
+    action === "project:manage" ||
+    action === "finance:read" ||
+    action === "finance:manage" ||
+    action === "crm:archive" ||
+    action === "crm:audit"
+  )
     return actor.kind === "person" && actor.role === "admin";
+  if (action === "contact:manage") return actor.kind === "person";
+  if (action === "contact:read" || action === "contact:details") {
+    if (actor.kind === "person") return true;
+    // Agents read CRM through the crm:read scope; phone and email need a
+    // separate capability so they are never shared by default.
+    return (
+      !!actor.scopes?.includes("crm:read") &&
+      can(actor, "capability:use", { ...resource, capability: "crm.read" }) &&
+      (action === "contact:read" ||
+        can(actor, "capability:use", {
+          ...resource,
+          capability: "crm.contact_details",
+        }))
+    );
+  }
+  if (action === "dependency:edit") {
+    // Owner or admin of the successor task; an agent only as its worker.
+    if (actor.kind === "person")
+      return actor.role === "admin" || actor.id === resource.ownerId;
+    return (
+      actor.id === resource.workerId &&
+      !!actor.scopes?.includes("tasks:write") &&
+      can(actor, "capability:use", { ...resource, capability: "tasks.write" })
+    );
+  }
   const owns = actor.role === "admin" || actor.id === resource.ownerId;
   if (["task:edit", "task:owner", "task:comment"].includes(action)) {
     if (actor.kind === "person") return action === "task:comment" || owns;
@@ -264,6 +304,9 @@ export const DEFAULT_PERMISSIONS: Record<Capability, PermissionDecision> = {
   "staging.read": "ask",
   "staging.write": "ask",
   alerts: "ask",
+  "crm.read": "ask",
+  "crm.write": "deny",
+  "crm.contact_details": "deny",
 };
 
 function capabilityScope(capability: Capability): Scope {
@@ -273,5 +316,7 @@ function capabilityScope(capability: Capability): Scope {
       ? "calendar:write"
       : capability === "files.attach"
         ? "files:write"
-        : "tasks:write";
+        : capability.startsWith("crm.")
+          ? "crm:read"
+          : "tasks:write";
 }

@@ -223,7 +223,8 @@
       "tasks:write": "建立與更新任務",
       "calendar:write": "修改日程",
       "inbox:review": "提交審核",
-      "files:write": "附加交付物"
+      "files:write": "附加交付物",
+      "crm:read": "讀取公司與聯繫人"
     },
     "createToken": "建立權杖",
     "tokens": "權杖",
@@ -390,7 +391,10 @@
       "deploy.prod": "發佈至正式環境",
       "staging.read": "讀取預發環境",
       "staging.write": "修改預發環境",
-      "alerts": "管理警報"
+      "alerts": "管理警報",
+      "crm.read": "讀取公司與聯繫人",
+      "crm.write": "修改公司與聯繫人",
+      "crm.contact_details": "查看聯繫人電話與電郵"
     },
     "historyGrantChanged": "{{capability}}：{{previousStatus}} → {{status}}",
     "historyGrant": "{{capability}}：{{status}}",

@@ -223,7 +223,8 @@
       "tasks:write": "Create and update tasks",
       "calendar:write": "Change events",
       "inbox:review": "Submit for review",
-      "files:write": "Attach deliverables"
+      "files:write": "Attach deliverables",
+      "crm:read": "Read companies and contacts"
     },
     "createToken": "Create token",
     "tokens": "Tokens",
@@ -390,7 +391,10 @@
       "deploy.prod": "Deploy to production",
       "staging.read": "Read staging",
       "staging.write": "Change staging",
-      "alerts": "Manage alerts"
+      "alerts": "Manage alerts",
+      "crm.read": "Read companies and contacts",
+      "crm.write": "Change companies and contacts",
+      "crm.contact_details": "See contact phone and email"
     },
     "historyGrantChanged": "{{capability}}: {{previousStatus}} → {{status}}",
     "historyGrant": "{{capability}}: {{status}}",

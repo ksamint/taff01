@@ -223,7 +223,8 @@
       "tasks:write": "创建与更新任务",
       "calendar:write": "修改日程",
       "inbox:review": "提交审核",
-      "files:write": "附加交付物"
+      "files:write": "附加交付物",
+      "crm:read": "读取公司与联系人"
     },
     "createToken": "创建令牌",
     "tokens": "令牌",
@@ -390,7 +391,10 @@
       "deploy.prod": "发布到生产环境",
       "staging.read": "读取预发环境",
       "staging.write": "修改预发环境",
-      "alerts": "管理告警"
+      "alerts": "管理告警",
+      "crm.read": "读取公司与联系人",
+      "crm.write": "修改公司与联系人",
+      "crm.contact_details": "查看联系人电话与邮箱"
     },
     "historyGrantChanged": "{{capability}}：{{previousStatus}} → {{status}}",
     "historyGrant": "{{capability}}：{{status}}",

@@ -751,3 +751,187 @@ describe("M5 authenticated workspace identity rules", () => {
     );
   }
 });
+
+describe("M12 planning and CRM permission decisions", () => {
+  const admin: Actor = { ...person, id: "admin", role: "admin" };
+  const other: Actor = { ...person, id: "other" };
+  const guest: Actor = { ...person, id: "guest", role: "guest" };
+  const crmAgent: Actor = { ...agent, scopes: ["crm:read"] };
+  const allow = (capability: "crm.read" | "crm.contact_details") => ({
+    capability,
+    decision: "allow" as const,
+  });
+  const grant = {
+    capability: "crm.read" as const,
+    taskId: null,
+    runId: null,
+    status: "allowed" as const,
+    expiresAt: new Date(Date.now() + 60000).toISOString(),
+  };
+  const workspace = { workspaceId: "workspace" };
+  it.each<[string, Actor, Action, Resource, boolean]>([
+    ["admin reads finance", admin, "finance:read", workspace, true],
+    ["member cannot read finance", person, "finance:read", workspace, false],
+    ["admin manages finance", admin, "finance:manage", workspace, true],
+    [
+      "member cannot manage finance",
+      person,
+      "finance:manage",
+      workspace,
+      false,
+    ],
+    [
+      "agent cannot read finance",
+      { ...agent, role: "admin" },
+      "finance:read",
+      workspace,
+      false,
+    ],
+    [
+      "cross-workspace admin cannot read finance",
+      admin,
+      "finance:read",
+      { workspaceId: "other" },
+      false,
+    ],
+    ["member reads contacts", person, "contact:read", workspace, true],
+    [
+      "member reads contact details",
+      person,
+      "contact:details",
+      workspace,
+      true,
+    ],
+    ["guest cannot read contacts", guest, "contact:read", workspace, false],
+    ["member manages contacts", person, "contact:manage", workspace, true],
+    ["guest cannot manage contacts", guest, "contact:manage", workspace, false],
+    [
+      "agent never manages contacts",
+      crmAgent,
+      "contact:manage",
+      workspace,
+      false,
+    ],
+    ["admin archives CRM records", admin, "crm:archive", workspace, true],
+    [
+      "member cannot archive CRM records",
+      person,
+      "crm:archive",
+      workspace,
+      false,
+    ],
+    ["admin audits CRM", admin, "crm:audit", workspace, true],
+    ["member cannot audit CRM", person, "crm:audit", workspace, false],
+    [
+      "agent without crm:read cannot read contacts",
+      { ...agent, permissions: [allow("crm.read")] },
+      "contact:read",
+      workspace,
+      false,
+    ],
+    [
+      "crm:read defaults to ask, so no grant means no read",
+      crmAgent,
+      "contact:read",
+      workspace,
+      false,
+    ],
+    [
+      "crm:read with an allowed grant reads contacts",
+      { ...crmAgent, grants: [grant] },
+      "contact:read",
+      workspace,
+      true,
+    ],
+    [
+      "crm:read with allow permission reads contacts",
+      { ...crmAgent, permissions: [allow("crm.read")] },
+      "contact:read",
+      workspace,
+      true,
+    ],
+    [
+      "contact details stay hidden from agents by default",
+      { ...crmAgent, permissions: [allow("crm.read")] },
+      "contact:details",
+      workspace,
+      false,
+    ],
+    [
+      "contact details need their own allow",
+      {
+        ...crmAgent,
+        permissions: [allow("crm.read"), allow("crm.contact_details")],
+      },
+      "contact:details",
+      workspace,
+      true,
+    ],
+    [
+      "denied crm.read blocks details too",
+      {
+        ...crmAgent,
+        permissions: [
+          { capability: "crm.read", decision: "deny" },
+          allow("crm.contact_details"),
+        ],
+      },
+      "contact:details",
+      workspace,
+      false,
+    ],
+    [
+      "successor owner edits dependencies",
+      person,
+      "dependency:edit",
+      task,
+      true,
+    ],
+    ["admin edits dependencies", admin, "dependency:edit", task, true],
+    [
+      "other member cannot edit dependencies",
+      other,
+      "dependency:edit",
+      task,
+      false,
+    ],
+    ["guest cannot edit dependencies", guest, "dependency:edit", task, false],
+    ["worker agent edits dependencies", agent, "dependency:edit", task, true],
+    [
+      "agent that is not the worker cannot edit dependencies",
+      agent,
+      "dependency:edit",
+      { ...task, workerId: "someone" },
+      false,
+    ],
+    [
+      "read-only agent cannot edit dependencies",
+      { ...agent, scopes: ["tasks:read"] },
+      "dependency:edit",
+      task,
+      false,
+    ],
+    [
+      "denied tasks.write blocks agent dependency edits",
+      {
+        ...agent,
+        permissions: [{ capability: "tasks.write", decision: "deny" }],
+      },
+      "dependency:edit",
+      task,
+      false,
+    ],
+    ["owner schedules plans", person, "task:schedule", task, true],
+    ["other member cannot schedule plans", other, "task:schedule", task, false],
+    ["admin manages milestones", admin, "project:manage", workspace, true],
+    [
+      "member cannot manage milestones",
+      person,
+      "project:manage",
+      workspace,
+      false,
+    ],
+  ])("%s", (_, actor, action, resource, expected) =>
+    expect(can(actor, action, resource)).toBe(expected),
+  );
+});

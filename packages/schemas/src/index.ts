@@ -34,6 +34,7 @@ import {
   memberSchema,
   taskSchema,
 } from "./base";
+import { projectFinanceFields } from "./plan";
 import {
   boundedText,
   calendarInstantSchema,
@@ -49,16 +50,17 @@ import {
   timeZone,
   versionSchema,
 } from "./primitives";
-
 import { runSchema, runStatusSchema } from "./run-read";
 
 export * from "./base";
 
 export * from "./calendar-read";
 export * from "./changes";
+export * from "./crm";
 export * from "./email-verification";
 export * from "./inbox-read";
 export * from "./notification-preferences";
+export * from "./plan";
 export * from "./project-read";
 export * from "./run-read";
 export * from "./today-bootstrap";
@@ -97,6 +99,7 @@ export const scopeSchema = zodEnum([
   "calendar:write",
   "inbox:review",
   "files:write",
+  "crm:read",
 ]);
 export const createAgentTokenSchema = strictObject({
   workspaceId: idSchema,
@@ -174,6 +177,9 @@ export const capabilitySchema = zodEnum([
   "staging.read",
   "staging.write",
   "alerts",
+  "crm.read",
+  "crm.write",
+  "crm.contact_details",
 ]);
 export const permissionDecisionSchema = zodEnum(["allow", "ask", "deny"]);
 export const reviewPolicySchema = zodEnum(["always_review", "ask_only"]);
@@ -446,7 +452,14 @@ export const projectUpdateSchema = strictObject({
   version: versionSchema,
   name: optional(boundedText(100)),
   archived: optional(boolean()),
-}).check(refine((v) => v.name !== undefined || v.archived !== undefined));
+  ...projectFinanceFields,
+}).check(
+  refine((v) =>
+    [v.name, v.archived, v.contractAmount, v.currency, v.clientCompanyId].some(
+      (field) => field !== undefined,
+    ),
+  ),
+);
 export const workspaceCreateSchema = strictObject({
   name: boundedText(100),
   agentIds: optional(
