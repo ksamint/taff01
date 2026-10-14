@@ -1,5 +1,6 @@
 // Self-served, offline reference captures. No app, account, or API is involved.
 // Usage: pnpm ui:prototype-shots [--dark | --extra] [output-directory]
+//        pnpm ui:prototype-shots --v2 [--only=<substring>] [output-directory]
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import {
@@ -14,6 +15,12 @@ import { createServer } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium, expect } from "@playwright/test";
+
+if (process.argv.includes("--v2")) {
+  // Prototype v2 (docs/ui/prototype-v2) has its own capture driver.
+  await import("./prototype-shots-v2.mjs");
+  process.exit();
+}
 
 const repo = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
