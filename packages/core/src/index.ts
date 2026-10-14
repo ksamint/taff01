@@ -1073,6 +1073,8 @@ export function createCore(options: {
     listMembers,
     listRuns: runOperations.listRuns,
     listCalendar: calendar.operations.listCalendar,
+    listInbox: (principal, workspaceId) =>
+      runOperations.listInbox(principal, workspaceId),
   });
   return {
     provisionAdministration: async (

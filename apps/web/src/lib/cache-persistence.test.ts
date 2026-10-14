@@ -166,6 +166,13 @@ it("never replaces authenticated server reads with a future-clock durable snapsh
     members: [],
     runs: [],
     calendar: { occurrences: [], unscheduled: [], truncated: false },
+    inbox: {
+      items: [],
+      groups: [],
+      unreadCount: 0,
+      reviewCount: 0,
+      blockerCount: 0,
+    },
   });
   dispose = installCachePersistence(client, store);
   await flush();

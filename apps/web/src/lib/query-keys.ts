@@ -5,3 +5,5 @@ export const membersKey = (workspaceId: string) =>
 export const runsKey = (workspaceId: string) => ["runs", workspaceId] as const;
 export const calendarKey = (workspaceId: string, from: string, to: string) =>
   ["calendar", workspaceId, from, to] as const;
+export const inboxKey = (workspaceId: string) =>
+  ["inbox", workspaceId] as const;

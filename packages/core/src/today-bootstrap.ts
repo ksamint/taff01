@@ -3,6 +3,7 @@ import {
   type CalendarViewData,
   calendarCivilTime,
   calendarWallToInstant,
+  type Inbox,
   type Me,
   type Member,
   meSchema,
@@ -25,6 +26,7 @@ type TodayReads = {
     workspaceId: string,
     range: CalendarRange,
   ): Promise<CalendarViewData>;
+  listInbox(principal: Principal, workspaceId: string): Promise<Inbox>;
 };
 
 /** Compose existing independently authorized reads; never read a hinted workspace. */
@@ -59,15 +61,26 @@ export function createTodayBootstrap(
     );
     const principal = userPrincipal(userId);
     const workspaceId = workspace.id;
-    const [tasks, members, runs, calendar] = await Promise.all([
+    const [tasks, members, runs, calendar, inbox] = await Promise.all([
       reads.listTasks(principal, workspaceId),
       reads.listMembers(principal, workspaceId),
       reads.listRuns(principal, workspaceId),
       reads.listCalendar(principal, workspaceId, { from, to }),
+      reads.listInbox(principal, workspaceId),
     ]);
     return todayBootstrapSchema.parse({
       me,
-      today: { workspaceId, now, from, to, tasks, members, runs, calendar },
+      today: {
+        workspaceId,
+        now,
+        from,
+        to,
+        tasks,
+        members,
+        runs,
+        calendar,
+        inbox,
+      },
     });
   };
 }

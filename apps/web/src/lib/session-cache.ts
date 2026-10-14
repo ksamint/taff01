@@ -1,7 +1,13 @@
 import type { Me } from "@taff/schemas";
 import type { TodayBootstrap } from "@taff/schemas/today-bootstrap";
 import type { QueryClient, QueryKey } from "@tanstack/react-query";
-import { calendarKey, membersKey, runsKey, tasksKey } from "./query-keys";
+import {
+  calendarKey,
+  inboxKey,
+  membersKey,
+  runsKey,
+  tasksKey,
+} from "./query-keys";
 
 const listeners = new WeakMap<QueryClient, Set<() => void>>();
 export function subscribeSession(client: QueryClient, listener: () => void) {
@@ -47,6 +53,7 @@ export function bootstrapSession(
     { key: tasksKey(today.workspaceId), data: today.tasks },
     { key: membersKey(today.workspaceId), data: today.members },
     { key: runsKey(today.workspaceId), data: today.runs },
+    { key: inboxKey(today.workspaceId), data: today.inbox },
     {
       key: calendarKey(today.workspaceId, today.from, today.to),
       data: today.calendar,
