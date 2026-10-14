@@ -3,10 +3,12 @@ import {
   bigint,
   boolean,
   check,
+  date,
   foreignKey,
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
   text,
@@ -183,6 +185,28 @@ export const taskStatus = pgEnum("task_status", [
   "needs_review",
   "done",
 ]);
+/** CRM: client and partner companies. Archived, never deleted (ADR 0015). */
+export const companies = pgTable(
+  "companies",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    name: text("name").notNull(),
+    industry: text("industry").default("").notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("companies_workspace_id_unique").on(t.workspaceId, t.id),
+    index("companies_workspace_name_idx").on(t.workspaceId, t.name),
+    check("companies_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 200`),
+    check("companies_industry", sql`length(${t.industry}) <= 100`),
+    check("companies_version", sql`${t.version} > 0`),
+  ],
+);
 export const projects = pgTable(
   "projects",
   {
@@ -193,12 +217,29 @@ export const projects = pgTable(
     name: text("name").notNull(),
     archived: boolean("archived").default(false).notNull(),
     version: integer("version").default(1).notNull(),
+    /** Finance (admins only, D7): contract value in `currency`. */
+    contractAmount: numeric("contract_amount", { precision: 14, scale: 2 }),
+    currency: text("currency"),
+    clientCompanyId: uuid("client_company_id"),
     ...dates,
   },
   (t) => [
     unique("projects_workspace_id_unique").on(t.workspaceId, t.id),
     check("projects_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 100`),
     check("projects_version", sql`${t.version}>0`),
+    check(
+      "projects_currency",
+      sql`${t.currency} IS NULL OR ${t.currency} ~ '^[A-Z]{3}$'`,
+    ),
+    check(
+      "projects_contract",
+      sql`${t.contractAmount} IS NULL OR (${t.contractAmount} >= 0 AND ${t.currency} IS NOT NULL)`,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.clientCompanyId],
+      foreignColumns: [companies.workspaceId, companies.id],
+      name: "projects_client_company_fk",
+    }),
   ],
 );
 export const tasks = pgTable(
@@ -226,6 +267,12 @@ export const tasks = pgTable(
   (t) => [
     unique("tasks_workspace_id_unique").on(t.workspaceId, t.id),
     unique("tasks_workspace_number_unique").on(t.workspaceId, t.number),
+    /** Target of task_contacts so a task's contacts follow its project. */
+    unique("tasks_workspace_id_project_unique").on(
+      t.workspaceId,
+      t.id,
+      t.projectId,
+    ),
     index("tasks_workspace_created_idx").on(t.workspaceId, t.createdAt),
     foreignKey({
       columns: [t.workspaceId, t.ownerId],
@@ -878,5 +925,323 @@ export const taskCalendar = pgTable(
       "task_calendar_rrule",
       sql`${t.rrule} IS NULL OR length(${t.rrule}) BETWEEN 1 AND 500`,
     ),
+  ],
+);
+
+/** Timeline plan of a task (ADR 0015); `tasks.due_at` follows its end date. */
+export const taskPlans = pgTable(
+  "task_plans",
+  {
+    taskId: uuid("id").primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    startDate: date("start_date", { mode: "string" }).notNull(),
+    durationDays: integer("duration_days").notNull(),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "task_plans_task_fk",
+    }).onDelete("cascade"),
+    check("task_plans_duration", sql`${t.durationDays} BETWEEN 1 AND 3650`),
+    check("task_plans_version", sql`${t.version} > 0`),
+  ],
+);
+export const milestones = pgTable(
+  "milestones",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    name: text("name").notNull(),
+    date: date("date", { mode: "string" }).notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("milestones_workspace_id_unique").on(t.workspaceId, t.id),
+    foreignKey({
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+      name: "milestones_project_fk",
+    }),
+    index("milestones_project_idx").on(t.workspaceId, t.projectId),
+    check("milestones_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 200`),
+    check("milestones_version", sql`${t.version} > 0`),
+  ],
+);
+/** Finish-to-start links; each end is a task or a milestone, never both. */
+export const taskDependencies = pgTable(
+  "task_dependencies",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    predecessorTaskId: uuid("predecessor_task_id"),
+    predecessorMilestoneId: uuid("predecessor_milestone_id"),
+    successorTaskId: uuid("successor_task_id"),
+    successorMilestoneId: uuid("successor_milestone_id"),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.predecessorTaskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "task_dependencies_predecessor_task_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.successorTaskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "task_dependencies_successor_task_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.predecessorMilestoneId],
+      foreignColumns: [milestones.workspaceId, milestones.id],
+      name: "task_dependencies_predecessor_milestone_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.successorMilestoneId],
+      foreignColumns: [milestones.workspaceId, milestones.id],
+      name: "task_dependencies_successor_milestone_fk",
+    }).onDelete("cascade"),
+    check(
+      "task_dependencies_ends",
+      sql`num_nonnulls(${t.predecessorTaskId}, ${t.predecessorMilestoneId}) = 1 AND num_nonnulls(${t.successorTaskId}, ${t.successorMilestoneId}) = 1`,
+    ),
+    check(
+      "task_dependencies_self",
+      sql`${t.predecessorTaskId} IS DISTINCT FROM ${t.successorTaskId} OR ${t.predecessorTaskId} IS NULL`,
+    ),
+    check(
+      "task_dependencies_self_milestone",
+      sql`${t.predecessorMilestoneId} IS DISTINCT FROM ${t.successorMilestoneId} OR ${t.predecessorMilestoneId} IS NULL`,
+    ),
+    unique("task_dependencies_pair")
+      .on(
+        t.workspaceId,
+        t.predecessorTaskId,
+        t.predecessorMilestoneId,
+        t.successorTaskId,
+        t.successorMilestoneId,
+      )
+      .nullsNotDistinct(),
+    index("task_dependencies_workspace_idx").on(t.workspaceId),
+  ],
+);
+export const projectPayments = pgTable(
+  "project_payments",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    amount: numeric("amount", { precision: 14, scale: 2 }).notNull(),
+    paidOn: date("paid_on", { mode: "string" }).notNull(),
+    note: text("note").default("").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+      name: "project_payments_project_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.createdBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "project_payments_creator_fk",
+    }),
+    index("project_payments_project_idx").on(t.workspaceId, t.projectId),
+    check("project_payments_amount", sql`${t.amount} > 0`),
+    check("project_payments_note", sql`length(${t.note}) <= 500`),
+  ],
+);
+/** CRM: one record per person; companies, projects and tasks hold links. */
+export const contacts = pgTable(
+  "contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    /** Employer; ON DELETE SET NULL (company_id) is in hand-written SQL. */
+    companyId: uuid("company_id"),
+    name: text("name").notNull(),
+    title: text("title").default("").notNull(),
+    phone: text("phone").default("").notNull(),
+    email: text("email").default("").notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("contacts_workspace_id_unique").on(t.workspaceId, t.id),
+    unique("contacts_workspace_id_company_unique").on(
+      t.workspaceId,
+      t.id,
+      t.companyId,
+    ),
+    index("contacts_workspace_name_idx").on(t.workspaceId, t.name),
+    index("contacts_company_idx").on(t.workspaceId, t.companyId),
+    check("contacts_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 200`),
+    check("contacts_title", sql`length(${t.title}) <= 200`),
+    check("contacts_phone", sql`length(${t.phone}) <= 50`),
+    check("contacts_email", sql`length(${t.email}) <= 320`),
+    check("contacts_version", sql`${t.version} > 0`),
+  ],
+);
+export const companyContacts = pgTable(
+  "company_contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    companyId: uuid("company_id").notNull(),
+    contactId: uuid("contact_id").notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("company_contacts_link_unique").on(
+      t.workspaceId,
+      t.companyId,
+      t.contactId,
+    ),
+    // Only the contact's employer can hold a company link.
+    foreignKey({
+      columns: [t.workspaceId, t.contactId, t.companyId],
+      foreignColumns: [contacts.workspaceId, contacts.id, contacts.companyId],
+      name: "company_contacts_employer_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.companyId],
+      foreignColumns: [companies.workspaceId, companies.id],
+      name: "company_contacts_company_fk",
+    }).onDelete("cascade"),
+  ],
+);
+export const projectContacts = pgTable(
+  "project_contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    contactId: uuid("contact_id").notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("project_contacts_link_unique").on(
+      t.workspaceId,
+      t.projectId,
+      t.contactId,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+      name: "project_contacts_project_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.contactId],
+      foreignColumns: [contacts.workspaceId, contacts.id],
+      name: "project_contacts_contact_fk",
+    }).onDelete("cascade"),
+  ],
+);
+export const taskContacts = pgTable(
+  "task_contacts",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    taskId: uuid("task_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    contactId: uuid("contact_id").notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("task_contacts_link_unique").on(
+      t.workspaceId,
+      t.taskId,
+      t.contactId,
+    ),
+    // A task contact is a stakeholder of the task's project; removing the
+    // stakeholder removes the task links.
+    foreignKey({
+      columns: [t.workspaceId, t.projectId, t.contactId],
+      foreignColumns: [
+        projectContacts.workspaceId,
+        projectContacts.projectId,
+        projectContacts.contactId,
+      ],
+      name: "task_contacts_stakeholder_fk",
+    }).onDelete("cascade"),
+    // The link follows the task's project; core adds the new stakeholder first.
+    foreignKey({
+      columns: [t.workspaceId, t.taskId, t.projectId],
+      foreignColumns: [tasks.workspaceId, tasks.id, tasks.projectId],
+      name: "task_contacts_task_fk",
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
+    index("task_contacts_project_idx").on(t.workspaceId, t.projectId),
+  ],
+);
+/** One row per (link, role); the allowed pairs come from CONTACT_ROLE_RULES. */
+export const contactRoles = pgTable(
+  "contact_roles",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    contactId: uuid("contact_id").notNull(),
+    scope: text("scope").notNull(),
+    role: text("role").notNull(),
+    companyId: uuid("company_id"),
+    projectId: uuid("project_id"),
+    taskId: uuid("task_id"),
+    ...dates,
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.companyId, t.contactId],
+      foreignColumns: [
+        companyContacts.workspaceId,
+        companyContacts.companyId,
+        companyContacts.contactId,
+      ],
+      name: "contact_roles_company_link_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.projectId, t.contactId],
+      foreignColumns: [
+        projectContacts.workspaceId,
+        projectContacts.projectId,
+        projectContacts.contactId,
+      ],
+      name: "contact_roles_project_link_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.taskId, t.contactId],
+      foreignColumns: [
+        taskContacts.workspaceId,
+        taskContacts.taskId,
+        taskContacts.contactId,
+      ],
+      name: "contact_roles_task_link_fk",
+    }).onDelete("cascade"),
+    check(
+      "contact_roles_target",
+      sql`(${t.scope} = 'company' AND ${t.companyId} IS NOT NULL AND ${t.projectId} IS NULL AND ${t.taskId} IS NULL) OR (${t.scope} = 'project' AND ${t.projectId} IS NOT NULL AND ${t.companyId} IS NULL AND ${t.taskId} IS NULL) OR (${t.scope} = 'task' AND ${t.taskId} IS NOT NULL AND ${t.companyId} IS NULL AND ${t.projectId} IS NULL)`,
+    ),
+    unique("contact_roles_unique")
+      .on(t.contactId, t.role, t.companyId, t.projectId, t.taskId)
+      .nullsNotDistinct(),
+    uniqueIndex("contact_roles_company_exclusive_idx")
+      .on(t.companyId, t.role)
+      .where(sql`${t.scope} = 'company' AND ${t.role} = 'chair'`),
+    uniqueIndex("contact_roles_project_exclusive_idx")
+      .on(t.projectId, t.role)
+      .where(sql`${t.scope} = 'project' AND ${t.role} = 'signoff'`),
+    uniqueIndex("contact_roles_task_exclusive_idx")
+      .on(t.taskId, t.role)
+      .where(sql`${t.scope} = 'task' AND ${t.role} = 'signoff'`),
   ],
 );

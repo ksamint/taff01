@@ -336,6 +336,11 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
       canManageProjects: false,
       canInvite: false,
       canManageRoles: false,
+      canEditPlan: false,
+      canReadFinance: false,
+      canReadCrm: false,
+      canManageCrm: false,
+      canArchiveCrm: false,
     });
     expect(await core.getTaskAccess(guest, task.id)).toMatchObject({
       canEdit: false,

@@ -70,10 +70,12 @@ export {
 import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
 import { createAdministrationOperations } from "./administration";
 import { createCalendarOperations } from "./calendar";
+import { createCrmOperations } from "./crm";
 import { createNotificationOperations } from "./notifications";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRunOperations } from "./runs";
+import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
 
 export class CoreError extends Error {
@@ -988,6 +990,14 @@ export function createCore(options: {
     email: options.email,
     onEmailStatus: options.onEmailStatus,
   });
+  const timeline = createTimelineOperations({
+    db,
+    mutation,
+    requireMember,
+    lockTask,
+    currentRunId,
+  });
+  const crm = createCrmOperations({ db, mutation, requireMember });
   const runOperations = createRunOperations({
     db,
     mutation,
@@ -1022,6 +1032,8 @@ export function createCore(options: {
     ...notifications.operations,
     ...calendar.operations,
     ...planning.operations,
+    ...timeline.operations,
+    ...crm.operations,
     ...runOperations,
     getTodayBootstrap,
     auth,

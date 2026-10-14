@@ -1,10 +1,17 @@
 import {
   agentPermissions,
   agentProfiles,
+  companies,
+  companyContacts,
+  contactRoles,
+  contacts,
   dailyDigests,
   grants,
   inboxItems,
   members,
+  milestones,
+  projectContacts,
+  projectPayments,
   projects,
   reviewChecks,
   reviewComments,
@@ -15,6 +22,9 @@ import {
   type Transaction,
   taskCalendar,
   taskComments,
+  taskContacts,
+  taskDependencies,
+  taskPlans,
   tasks,
   user,
   workspaces,
@@ -35,11 +45,18 @@ import {
   type PrototypeOrg,
   type PrototypeTask,
   prototypeAgents,
+  prototypeCompanies,
+  prototypeContactLinks,
+  prototypeContacts,
+  prototypeDependencies,
+  prototypeFinance,
   prototypeId,
   prototypeMeetingDescription,
   prototypeMeetings,
+  prototypeMilestones,
   prototypeOrgs,
   prototypePeople,
+  prototypePlans,
   prototypeTasks,
 } from "@taff/schemas/prototype-data";
 import { eq, sql } from "drizzle-orm";
@@ -421,6 +438,7 @@ export async function seedPrototype(
       });
       await insertCalendar(id, definition);
     }
+    await seedPlanningAndCrm(tx, org.key, workspaceId, projectId, owner, day);
     for (const [personKey, member] of team) {
       if (member.kind !== "person" || !member.userId) continue;
       const person = people.find((row) => row.id === member.userId);
@@ -674,5 +692,193 @@ async function seedRun(
         createdAt: at(8, minute),
       });
     }
+  }
+}
+
+/**
+ * Timeline and CRM fixtures (M12). Seeded once per workspace: when the
+ * marker row already exists, later edits (moved plans, removed links) stay.
+ */
+async function seedPlanningAndCrm(
+  tx: Transaction,
+  org: PrototypeOrg,
+  workspaceId: string,
+  projectId: string,
+  owner: Actor,
+  day: (number: number) => string,
+) {
+  const task = (number: number) => prototypeId("task", org, number);
+  if (!can(owner, "project:manage", { workspaceId }))
+    throw new Error("Prototype planning permission required");
+  const planned = await tx
+    .select({ id: taskPlans.taskId })
+    .from(taskPlans)
+    .where(eq(taskPlans.workspaceId, workspaceId))
+    .limit(1);
+  const firstMilestone = prototypeMilestones.find((row) => row.org === org);
+  const milestoneSeeded = firstMilestone
+    ? (
+        await tx
+          .select({ id: milestones.id })
+          .from(milestones)
+          .where(eq(milestones.id, prototypeId("milestone", org, 1)))
+      ).length > 0
+    : false;
+  if (!planned.length && !milestoneSeeded) {
+    for (const plan of prototypePlans.filter((row) => row.org === org)) {
+      const definition = prototypeTasks.find(
+        (row) => row.org === org && row.number === plan.number,
+      );
+      if (!definition) throw new Error("Prototype plan task missing");
+      await tx
+        .insert(taskPlans)
+        .values({
+          taskId: task(plan.number),
+          workspaceId,
+          startDate: day(definition.due - plan.days + 1),
+          durationDays: plan.days,
+        })
+        .onConflictDoNothing();
+    }
+    for (const milestone of prototypeMilestones.filter(
+      (row) => row.org === org,
+    ))
+      await tx
+        .insert(milestones)
+        .values({
+          id: prototypeId("milestone", org, milestone.key),
+          workspaceId,
+          projectId,
+          name: milestone.name["zh-HK"],
+          date: day(milestone.day),
+        })
+        .onConflictDoNothing();
+    const end = (value: { task: number } | { milestone: number }) =>
+      "task" in value
+        ? { taskId: task(value.task), milestoneId: null }
+        : {
+            taskId: null,
+            milestoneId: prototypeId("milestone", org, value.milestone),
+          };
+    for (const link of prototypeDependencies.filter((row) => row.org === org)) {
+      const from = end(link.from);
+      const to = end(link.to);
+      await tx
+        .insert(taskDependencies)
+        .values({
+          id: prototypeId("dependency", org, link.key),
+          workspaceId,
+          predecessorTaskId: from.taskId,
+          predecessorMilestoneId: from.milestoneId,
+          successorTaskId: to.taskId,
+          successorMilestoneId: to.milestoneId,
+        })
+        .onConflictDoNothing();
+    }
+  }
+  const firstCompany = prototypeCompanies.find((row) => row.org === org);
+  if (!firstCompany) return;
+  const company = (key: number) => prototypeId("company", org, key);
+  const contact = (key: number) => prototypeId("contact", org, key);
+  if (
+    (
+      await tx
+        .select({ id: companies.id })
+        .from(companies)
+        .where(eq(companies.id, company(firstCompany.key)))
+    ).length
+  )
+    return;
+  if (!can(owner, "contact:manage", { workspaceId }))
+    throw new Error("Prototype CRM permission required");
+  for (const row of prototypeCompanies.filter((item) => item.org === org))
+    await tx.insert(companies).values({
+      id: company(row.key),
+      workspaceId,
+      name: row.name["zh-HK"],
+      industry: row.industry["zh-HK"],
+    });
+  for (const row of prototypeContacts.filter((item) => item.org === org))
+    await tx.insert(contacts).values({
+      id: contact(row.key),
+      workspaceId,
+      companyId: company(row.company),
+      name: row.name["zh-HK"],
+      title: row.title["zh-HK"],
+      phone: row.phone,
+      email: row.email,
+    });
+  const finance = prototypeFinance.find((row) => row.org === org);
+  if (finance) {
+    if (!can(owner, "finance:manage", { workspaceId }))
+      throw new Error("Prototype finance permission required");
+    await tx
+      .update(projects)
+      .set({
+        contractAmount: finance.contract,
+        currency: "HKD",
+        clientCompanyId: company(finance.client),
+        version: sql`${projects.version} + 1`,
+        updatedAt: new Date(),
+      })
+      .where(eq(projects.id, projectId));
+    await tx.insert(projectPayments).values({
+      id: prototypeId("payment", org, 1),
+      workspaceId,
+      projectId,
+      amount: finance.collected,
+      paidOn: day(1),
+      note: "",
+      createdBy: owner.id,
+    });
+  }
+  // Stakeholders first: task links reference them.
+  const links = [
+    ...prototypeContactLinks.filter((row) => row.org === org),
+  ].sort((a, b) => Number(a.scope === "task") - Number(b.scope === "task"));
+  for (const link of links) {
+    const contactId = contact(link.contact);
+    const target =
+      link.scope === "company"
+        ? { companyId: company(link.entity) }
+        : link.scope === "project"
+          ? { projectId }
+          : { taskId: task(link.entity) };
+    if (link.scope === "company")
+      await tx.insert(companyContacts).values({
+        id: prototypeId("contactLink", org, link.key),
+        workspaceId,
+        companyId: company(link.entity),
+        contactId,
+      });
+    else if (link.scope === "project")
+      await tx.insert(projectContacts).values({
+        id: prototypeId("contactLink", org, link.key),
+        workspaceId,
+        projectId,
+        contactId,
+      });
+    else {
+      await tx
+        .insert(projectContacts)
+        .values({ workspaceId, projectId, contactId })
+        .onConflictDoNothing();
+      await tx.insert(taskContacts).values({
+        id: prototypeId("contactLink", org, link.key),
+        workspaceId,
+        taskId: task(link.entity),
+        projectId,
+        contactId,
+      });
+    }
+    for (const [index, role] of link.roles.entries())
+      await tx.insert(contactRoles).values({
+        id: prototypeId("contactRole", org, link.key * 10 + index),
+        workspaceId,
+        contactId,
+        scope: link.scope,
+        role,
+        ...target,
+      });
   }
 }

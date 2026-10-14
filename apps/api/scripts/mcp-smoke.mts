@@ -7,13 +7,19 @@ import {
 import { createCore, userPrincipal } from "@taff/core";
 import {
   calendarViewDataSchema,
+  companyListSchema,
+  contactDetailSchema,
+  contactListSchema,
+  dependencySchema,
   grantSchema,
   quickAddResultSchema,
   runDetailSchema,
   runSchema,
   searchResultSchema,
   taskCalendarSchema,
+  taskPlanResultSchema,
   taskSchema,
+  timelineSchema,
 } from "@taff/schemas";
 
 const env = (name: string) => {
@@ -89,12 +95,17 @@ try {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists every task, calendar, project, search, draft, run, grant and file tool",
+    "lists every task, calendar, timeline, project, search, draft, run, grant, file and CRM tool",
     JSON.stringify(tools) ===
       JSON.stringify([
         "calendar.list",
         "calendar.schedule",
         "calendar.set",
+        "companies.list",
+        "contacts.get",
+        "contacts.list",
+        "dependencies.add",
+        "dependencies.remove",
         "files.attach",
         "grants.request",
         "inbox.request_review",
@@ -111,7 +122,9 @@ try {
         "tasks.create",
         "tasks.edit",
         "tasks.list",
+        "tasks.plan",
         "tasks.update",
+        "timeline.get",
       ]),
     tools,
   );
@@ -328,6 +341,92 @@ try {
     cleared.schedule === null &&
       cleared.task.dueAt === scheduled?.dueAt &&
       cleared.task.version === interval.task.version + 1,
+  );
+  // Timeline (ADR 0015): plan both smoke tasks, link them, refuse a cycle.
+  const civil = (days: number) =>
+    new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+  const planned = taskPlanResultSchema.parse(
+    text(
+      await client.callTool({
+        name: "tasks.plan",
+        arguments: { taskId, startDate: civil(1), durationDays: 2 },
+      }),
+    ),
+  );
+  check(
+    "tasks.plan stores a new plan and moves the deadline to its last day",
+    planned.plans[0]?.taskId === taskId &&
+      planned.plans[0]?.version === 1 &&
+      planned.tasks[0]?.id === taskId,
+    planned,
+  );
+  const follower = taskSchema.parse(
+    text(
+      await client.callTool({
+        name: "tasks.create",
+        arguments: {
+          title: `Smoke follow-up ${Date.now()}`,
+          ownerId: workspace.memberId,
+          projectId: project.id,
+        },
+      }),
+    ),
+  );
+  await client.callTool({
+    name: "tasks.plan",
+    arguments: { taskId: follower.id, startDate: civil(3), durationDays: 1 },
+  });
+  const link = dependencySchema.parse(
+    text(
+      await client.callTool({
+        name: "dependencies.add",
+        arguments: { predecessorTaskId: taskId, successorTaskId: follower.id },
+      }),
+    ),
+  );
+  check(
+    "dependencies.add links two tasks in the token workspace",
+    link.predecessorTaskId === taskId &&
+      link.successorTaskId === follower.id &&
+      link.workspaceId === workspace.id,
+  );
+  const cycle = await client.callTool({
+    name: "dependencies.add",
+    arguments: { predecessorTaskId: follower.id, successorTaskId: taskId },
+  });
+  check(
+    "dependencies.add refuses a cycle",
+    cycle.isError === true &&
+      (cycle.content as { text?: string }[])[0]?.text === "conflict",
+    cycle,
+  );
+  const plan = timelineSchema.parse(
+    text(
+      await client.callTool({
+        name: "timeline.get",
+        arguments: { projectId: project.id },
+      }),
+    ),
+  );
+  check(
+    "timeline.get reads spans and links without finance",
+    plan.items.some((item) => item.id === taskId && item.planned) &&
+      plan.items.some((item) => item.id === follower.id) &&
+      plan.dependencies.some((dep) => dep.id === link.id && !dep.conflict) &&
+      plan.risk.finance === null,
+    plan,
+  );
+  const unlinked = dependencySchema.parse(
+    text(
+      await client.callTool({
+        name: "dependencies.remove",
+        arguments: { dependencyId: link.id },
+      }),
+    ),
+  );
+  check(
+    "dependencies.remove returns the removed link",
+    unlinked.id === link.id,
   );
   let run = runSchema.parse(
     text(await client.callTool({ name: "runs.start", arguments: { taskId } })),
@@ -554,6 +653,101 @@ try {
     denied.isError === true,
     denied,
   );
+  // CRM reads need tasks:read plus the crm.read capability a person allows;
+  // phone and email stay hidden without crm.contact_details.
+  const crmCompany = await core.createCompany(asUser, workspace.id, {
+    name: `Smoke Co ${Date.now()}`,
+  });
+  const crmContact = await core.createContact(asUser, workspace.id, {
+    name: `Smoke Contact ${Date.now()}`,
+    companyId: crmCompany.id,
+    phone: "+852 0000 0000",
+    email: "smoke@example.com",
+  });
+  const priorCrm = (
+    await core.getAgentProfile(asUser, agent.id)
+  ).permissions.filter(({ capability }) =>
+    ["crm.read", "crm.contact_details"].includes(capability),
+  );
+  const deniedCrm = await client.callTool({
+    name: "contacts.list",
+    arguments: {},
+  });
+  const crmGranted = priorCrm.some(
+    ({ capability, decision }) =>
+      capability === "crm.read" && decision === "allow",
+  );
+  check(
+    "contacts.list is refused until a person allows crm.read",
+    crmGranted || deniedCrm.isError === true,
+    deniedCrm,
+  );
+  await core.setAgentPermission(asUser, agent.id, {
+    capability: "crm.read",
+    decision: "allow",
+  });
+  await core.setAgentPermission(asUser, agent.id, {
+    capability: "crm.contact_details",
+    decision: "deny",
+  });
+  try {
+    const crmCompanies = companyListSchema.parse(
+      text(await client.callTool({ name: "companies.list", arguments: {} })),
+    );
+    check(
+      "companies.list reads the token workspace's companies",
+      crmCompanies.some((company) => company.id === crmCompany.id),
+    );
+    const crmContacts = contactListSchema.parse(
+      text(
+        await client.callTool({
+          name: "contacts.list",
+          arguments: { companyId: crmCompany.id },
+        }),
+      ),
+    );
+    check(
+      "contacts.list hides phone and email without crm.contact_details",
+      crmContacts.length === 1 &&
+        crmContacts[0].id === crmContact.id &&
+        crmContacts[0].phone === null &&
+        crmContacts[0].email === null,
+      crmContacts,
+    );
+    const crmDetail = contactDetailSchema.parse(
+      text(
+        await client.callTool({
+          name: "contacts.get",
+          arguments: { contactId: crmContact.id },
+        }),
+      ),
+    );
+    check(
+      "contacts.get reads one contact with its company and no details",
+      crmDetail.contact.id === crmContact.id &&
+        crmDetail.company?.id === crmCompany.id &&
+        crmDetail.contact.phone === null &&
+        crmDetail.contact.email === null,
+      crmDetail,
+    );
+  } finally {
+    // Leave the demo agent's CRM permissions as they were.
+    for (const capability of ["crm.read", "crm.contact_details"] as const)
+      await core.setAgentPermission(asUser, agent.id, {
+        capability,
+        decision:
+          priorCrm.find((item) => item.capability === capability)?.decision ??
+          (capability === "crm.read" ? "ask" : "deny"),
+      });
+    await core.updateContact(asUser, crmContact.id, {
+      version: crmContact.version,
+      archived: true,
+    });
+    await core.updateCompany(asUser, crmCompany.id, {
+      version: crmCompany.version,
+      archived: true,
+    });
+  }
   let limited = false;
   for (let i = 0; i < limit + 2 && !limited; i++) {
     const response = await fetch(apiUrl, {

@@ -25,6 +25,18 @@ const FAMILIES = [
   "notificationPreferences",
   "dailyDigests",
   "dailyDigest",
+  // Planning (ADR 0015), keyed by project: ["timeline", projectId] and so on.
+  "timeline",
+  "milestones",
+  "payments",
+  // CRM (M12): lists, one record, an entity's contact links, ⌘K and audit.
+  "companies",
+  "company",
+  "contacts",
+  "contact",
+  "contact-links",
+  "crm-search",
+  "crm-audit",
 ];
 
 export function connectWorkspace(
