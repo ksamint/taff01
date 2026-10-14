@@ -15,6 +15,7 @@ import {
 } from "../packages/schemas/src/index";
 import { openDisclosure } from "./support/disclosures";
 import { chooseLocale, openMe, selectLocale } from "./support/preferences";
+import { holdRequest } from "./support/routes";
 import { closeTaskField, openTaskField } from "./support/task-fields";
 
 const messages = { en, "zh-CN": zhCN, "zh-HK": zhHK };
@@ -52,50 +53,15 @@ async function signIn(page: Page, locale: Locale) {
 }
 /**
  * Holds the next `method` request to `path` until `reject()`, then answers it
- * 403. The route stays registered afterwards and passes every later request
- * through: unrouting would switch Chromium request interception off while the
- * rollback's refetch burst is in flight, and Playwright then strands requests
- * that were paused under the old patterns (they never complete). Those reads
- * are awaited by the mutation's onSettled, so the write would stay pending and
- * neither its rollback alert nor re-enabled controls would ever appear.
+ * 403. The route is never unrouted; see holdRequest.
  */
 async function rejectLater(page: Page, path: string, method = "POST") {
-  let used = false;
-  let release!: () => void;
-  let arrived!: () => void;
-  let completed!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const seen = new Promise<void>((resolve) => {
-    arrived = resolve;
-  });
-  const done = new Promise<void>((resolve) => {
-    completed = resolve;
-  });
-  const pattern = `**${path}`;
-  await page.route(pattern, async (route) => {
-    // Later holds on the same path are registered after this one and so run
-    // first; an exhausted hold falls back to them or to the network.
-    if (used || route.request().method() !== method) {
-      await route.fallback();
-      return;
-    }
-    used = true;
-    arrived();
-    await gate;
-    await route.fulfill({
-      status: 403,
-      contentType: "application/json",
-      body: JSON.stringify({ error: "forbidden" }),
-    });
-    completed();
-  });
+  const held = await holdRequest(page, path, { method, reply: "reject" });
   return {
-    seen,
+    seen: held.seen,
     reject: async () => {
-      release();
-      await done;
+      held.release();
+      await held.done;
     },
   };
 }

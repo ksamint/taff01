@@ -9,6 +9,7 @@ import {
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
 import { openCalendarTools } from "./support/calendar";
+import { holdRequest } from "./support/routes";
 import { openQuickAdd } from "./support/tasks";
 
 test.use({ actionTimeout: 15000 });
@@ -296,37 +297,23 @@ test("durable cache never records pending rollback data and revocation rejects a
     .toContain(original.title);
   const previous = await readCache(page);
   expect(previous).not.toBeNull();
-  let release!: () => void;
-  let entered!: () => void;
-  const gate = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  const requested = new Promise<void>((resolve) => {
-    entered = resolve;
-  });
-  await page.route("**/api/tasks", async (route) => {
-    if (route.request().method() !== "POST") {
-      await route.continue();
-      return;
-    }
-    entered();
-    await gate;
-    await route.fulfill({ status: 403, json: { error: "forbidden" } });
+  const denied = await holdRequest(page, "/api/tasks", {
+    method: "POST",
+    reply: "reject",
   });
   const pending = `Pending never saved ${locale}`;
   await openQuickAdd(page);
   await page.getByTestId("quick-title").fill(pending);
   await page.getByTestId("quick-create").click();
-  await requested;
+  await denied.seen;
   await expect(page.getByText(pending, { exact: true })).toBeVisible();
   await page.waitForTimeout(250);
   expect(JSON.stringify(await readCache(page))).not.toContain(pending);
-  release();
+  denied.release();
   await expect(page.getByText(pending, { exact: true })).toHaveCount(0);
   await expect
     .poll(async () => JSON.stringify(await readCache(page)))
     .toContain(original.title);
-  await page.unroute("**/api/tasks");
   const remote = await browser.newContext({
     baseURL: process.env.AUTH_URL,
     storageState: await page.context().storageState(),
