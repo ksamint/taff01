@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (184 distinct, 961 uses)
+## Test ids (184 distinct, 962 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -305,7 +305,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `detail-worker` | 11 | task-editor.tsx | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/task-fields.ts, today.spec.ts |
+| `detail-worker` | 12 | task-editor.tsx | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/task-fields.ts, today.spec.ts, ui-parity.spec.ts |
 | `run-start` | 9 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts |
 | `task-field-*` | 2 | task-editor.tsx | support/task-fields.ts |
 | `task-field-worker` | 5 | task-editor.tsx | planning.spec.ts, release/checklist.spec.ts, ui-parity.spec.ts |

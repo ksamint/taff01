@@ -143,7 +143,10 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     await expect(page.getByTestId("task-detail-heading")).toBeVisible();
   }
   if (screen === "task-detail") {
-    await expect(page.getByTestId("task-field-worker")).toBeEnabled();
+    // The desktop panel edits the worker inline; the phone sheet opens a row.
+    await expect(
+      page.getByTestId(desktop ? "detail-worker" : "task-field-worker"),
+    ).toBeEnabled();
     await expect(page.getByTestId("task-schedule")).toBeEnabled();
     await expect(page.locator(".task-parent-link")).toContainText("NW-140");
   }
