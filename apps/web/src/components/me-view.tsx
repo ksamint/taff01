@@ -409,6 +409,14 @@ function MePhone() {
           href="/brief"
           prefetch={false}
           data-testid="me-brief"
+          onClick={() => {
+            // The overlay goes back here on close instead of adding history.
+            try {
+              window.sessionStorage.setItem("taff:brief-back", "1");
+            } catch {
+              /* Without storage, closing replaces the entry instead. */
+            }
+          }}
         >
           <Sparkles size={20} strokeWidth={1.5} aria-hidden="true" />
           <span className="me-row-label">{t("brief.nav")}</span>
