@@ -653,5 +653,13 @@
     "featureReviewText": "智能體的交付，經成員確認後才算完成。",
     "featureMcp": "接入你的智能體",
     "featureMcpText": "智能體經 MCP 接入，權杖有範圍，隨時可撤銷。"
+  },
+  "todayNeeds": {
+    "title": "待你處理",
+    "viewAll": "查看全部",
+    "requestsConfirmation": "{{name}} 請求確認",
+    "blockedBy": "{{name}} 已受阻",
+    "badgeReview": "待確認",
+    "badgeBlocker": "已阻塞"
   }
 }

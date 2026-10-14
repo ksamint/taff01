@@ -653,5 +653,13 @@
     "featureReviewText": "智能体的交付，经成员确认后才算完成。",
     "featureMcp": "接入你的智能体",
     "featureMcpText": "智能体经 MCP 接入，令牌有范围，随时可撤销。"
+  },
+  "todayNeeds": {
+    "title": "待你处理",
+    "viewAll": "查看全部",
+    "requestsConfirmation": "{{name}} 请求确认",
+    "blockedBy": "{{name}} 已受阻",
+    "badgeReview": "待确认",
+    "badgeBlocker": "已阻塞"
   }
 }

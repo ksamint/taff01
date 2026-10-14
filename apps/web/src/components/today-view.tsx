@@ -8,15 +8,16 @@ import {
   calendarWallToInstant,
 } from "@taff/schemas/calendar-read";
 import { useIsMutating, useQueryClient } from "@tanstack/react-query";
-import { Search, Sparkles } from "lucide-react";
+import { ChevronRight, Search, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { useAssignTodayTask } from "../lib/mutations/today";
+import { needsYouItems } from "../lib/needs-you";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import {
-  useCalendar,
+  useInbox,
   useMembers,
   useRuns,
   useTasks,
@@ -30,10 +31,11 @@ import { Button } from "./ui/button";
 import { StatusGlyph } from "./ui/status-glyph";
 
 const TODAY_PAGE = 20;
-/** Unscheduled agent work shown on Today before it points to Projects. */
+/** Agent runs shown on Today before it points to Projects. */
 const TODAY_RUNS = 6;
 
-// Prototype Today, lines 47–114: schedules and deadlines are distinct reads.
+// Prototype v2 Today (lines 83–139, desktop 1359–1404): agents at work,
+// 待你處理 with the one needs-you count, and what is due today.
 export function TodayView({ initialNow }: { initialNow: number }) {
   const { me, workspace, openSearch } = useWorkspace();
   const { t, i18n } = useTranslation();
@@ -42,6 +44,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
   const access = useWorkspaceAccess(workspace.id);
   const tasks = useTasks(workspace.id);
   const runs = useRuns(workspace.id);
+  const inbox = useInbox(workspace.id);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const serverNow = useInitialTodayTime();
   const [now, setNow] = useState(
@@ -61,18 +64,6 @@ export function TodayView({ initialNow }: { initialNow: number }) {
   const localDate = calendarCivilTime(now, me.user.tz)
     .toISOString()
     .slice(0, 10);
-  const range = useMemo(() => {
-    const next = new Date(`${localDate}T00:00:00Z`);
-    next.setUTCDate(next.getUTCDate() + 1);
-    return {
-      from: calendarWallToInstant(`${localDate}T00:00`, me.user.tz),
-      to: calendarWallToInstant(
-        `${next.toISOString().slice(0, 10)}T00:00`,
-        me.user.tz,
-      ),
-    };
-  }, [localDate, me.user.tz]);
-  const calendar = useCalendar(workspace.id, range.from, range.to);
   const mutation = useAssignTodayTask();
   const visibleTasks = todayTasks(
     (tasks.data ?? []).filter(
@@ -108,71 +99,12 @@ export function TodayView({ initialNow }: { initialNow: number }) {
     const member = members.data?.find((item) => item.id === id);
     return member ? member.name : t("unknownMember");
   };
-  const occurrences = [...(calendar.data?.occurrences ?? [])].sort((a, b) =>
-    a.startAt.localeCompare(b.startAt),
-  );
   const activeRuns = (runs.data ?? []).filter((run) =>
     ["running", "paused", "changes_requested"].includes(run.status),
   );
-  const unscheduledRuns = activeRuns.filter(
-    (run) => !occurrences.some((item) => item.task.id === run.taskId),
-  );
-  const beforeNow = occurrences.filter(
-    (item) => Date.parse(item.startAt) <= now.getTime(),
-  );
-  const afterNow = occurrences.filter(
-    (item) => Date.parse(item.startAt) > now.getTime(),
-  );
+  const needs = needsYouItems(inbox.data);
   const readError = tasks.error ?? members.error ?? access.error;
-  const scheduleError = calendar.error ?? runs.error;
   const reference = (task: Task) => taskReference(workspace.key, task.number);
-  function scheduleBlock(item: CalendarOccurrence) {
-    const run = activeRuns.find((entry) => entry.taskId === item.task.id);
-    const meeting = item.task.labels.includes("meeting");
-    const past = Date.parse(item.endAt) <= now.getTime();
-    const isAgent = members.data
-      ? members.data.some(
-          (member) =>
-            member.id === item.task.workerId && member.kind === "agent",
-        )
-      : item.isAgent;
-    const description = item.task.description;
-    const meta = isAgent
-      ? `${memberName(item.task.workerId)} · ${t(run ? `run.status.${run.status}` : `status.${item.task.status}`)}`
-      : description.startsWith("Participants:") ||
-          description.startsWith("參與者：") ||
-          description.startsWith("参与者：")
-        ? description.replace(/^(?:Participants:|參與者：|参与者：)\s*/, "")
-        : memberName(item.task.workerId ?? item.task.ownerId);
-    return (
-      <li
-        className={`today-timeline-row${past ? " today-past" : ""}`}
-        key={item.id}
-      >
-        <time className="today-time" dateTime={item.startAt}>
-          {time.format(new Date(item.startAt))}
-        </time>
-        <Link
-          href={`/tasks/${item.task.id}`}
-          prefetch={false}
-          className={`today-schedule-block${isAgent ? " today-agent-block" : ""}${item.task.status === "done" ? " today-schedule-done" : ""}${meeting ? " today-meeting-block" : ""}`}
-          data-testid="today-schedule"
-        >
-          <span className="today-block-heading">
-            {!meeting && <StatusGlyph status={item.task.status} />}
-            <span className="today-block-title">{present(item.task)}</span>
-            {isAgent && (
-              <Sparkles size={14} strokeWidth={1.5} aria-hidden="true" />
-            )}
-          </span>
-          <span className="today-block-meta">
-            {time.format(new Date(item.startAt))}–
-            {time.format(new Date(item.endAt))} · {meta}
-          </span>
-        </Link>
-      </li>
-    );
-  }
   return (
     <div className="today-view">
       <header className="today-header">
@@ -204,94 +136,129 @@ export function TodayView({ initialNow }: { initialNow: number }) {
         </div>
       </header>
       <section
-        className="today-schedule"
-        aria-labelledby="today-schedule-heading"
+        className="today-agents"
+        aria-labelledby="today-agents-heading"
+        hidden={activeRuns.length === 0}
       >
-        <h2 className="today-section-label" id="today-schedule-heading">
-          {t("calendar.schedule")}
+        <h2 className="today-card-label" id="today-agents-heading">
+          {t("agentsAtWork")}
         </h2>
-        {scheduleError && (
+        {runs.error && (
           <div className="today-message alert" role="alert">
-            <p>{t(errorKey(scheduleError))}</p>
+            <p>{t(errorKey(runs.error))}</p>
             <Button
               className="button-quiet"
-              onClick={() => {
-                void calendar.refetch();
-                void runs.refetch();
-              }}
+              onClick={() => void runs.refetch()}
             >
               {t("retry")}
             </Button>
           </div>
         )}
-        {calendar.isPending ? (
-          <p className="today-message quiet">{t("loading")}</p>
-        ) : (
-          <>
-            <ol className="today-timeline">
-              {beforeNow.map(scheduleBlock)}
-              <li
-                className="today-now"
-                aria-label={`${t("todayNow")} · ${time.format(now)}`}
-              >
-                <time dateTime={now.toISOString()}>{time.format(now)}</time>
-                <span className="today-now-rule" aria-hidden="true">
-                  <span />
-                  <span />
-                </span>
-              </li>
-              {afterNow.map(scheduleBlock)}
-              {unscheduledRuns.slice(0, TODAY_RUNS).map((run) => {
-                const task = tasks.data?.find((item) => item.id === run.taskId);
-                return (
-                  <li className="today-timeline-row" key={run.id}>
-                    <span className="today-time" aria-hidden="true" />
-                    <Link
-                      className="today-schedule-block today-agent-block"
-                      href={`/tasks/${run.taskId}`}
-                      prefetch={false}
-                      data-testid="today-agent-work"
-                    >
-                      <span className="today-block-heading">
-                        <span className="today-block-title">
-                          {task ? present(task) : t("agentProfile.task")}
-                        </span>
-                        <Sparkles
-                          size={14}
-                          strokeWidth={1.5}
-                          aria-hidden="true"
-                        />
+        <ul className="today-agent-list">
+          {activeRuns.slice(0, TODAY_RUNS).map((run) => {
+            const task = tasks.data?.find((item) => item.id === run.taskId);
+            return (
+              <li key={run.id}>
+                <Link
+                  className="today-agent-row"
+                  href={`/tasks/${run.taskId}`}
+                  prefetch={false}
+                  data-testid="today-agent-work"
+                >
+                  <span className="today-agent-mark" aria-hidden="true">
+                    <Sparkles size={16} strokeWidth={1.5} />
+                  </span>
+                  <span className="today-agent-copy">
+                    <span className="today-agent-name">
+                      {memberName(run.agentId)}
+                      <span
+                        className={`today-agent-state today-agent-${run.status}`}
+                      >
+                        {t(`run.status.${run.status}`)}
                       </span>
-                      <span className="today-block-meta">
-                        {t("calendar.unscheduled")} · {memberName(run.agentId)}{" "}
-                        · {t(`run.status.${run.status}`)}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ol>
-            {unscheduledRuns.length > TODAY_RUNS && (
-              <p className="today-message quiet">
-                <Link href="/projects">
-                  {t("moreAgentWork", {
-                    count: numbers.format(unscheduledRuns.length - TODAY_RUNS),
-                  })}
+                    </span>
+                    <span className="today-agent-task">
+                      {task
+                        ? `${reference(task)} ${present(task)}`
+                        : t("agentProfile.task")}
+                    </span>
+                  </span>
                 </Link>
-              </p>
-            )}
-            {occurrences.length === 0 &&
-              unscheduledRuns.length === 0 &&
-              !calendar.isError &&
-              !runs.isPending &&
-              !runs.isError && (
-                <p className="today-message quiet">{t("todayScheduleEmpty")}</p>
-              )}
-            {calendar.data?.truncated && (
-              <p className="today-message quiet">{t("calendar.truncated")}</p>
-            )}
-          </>
+              </li>
+            );
+          })}
+        </ul>
+        {activeRuns.length > TODAY_RUNS && (
+          <p className="today-message quiet">
+            <Link href="/projects">
+              {t("moreAgentWork", {
+                count: numbers.format(activeRuns.length - TODAY_RUNS),
+              })}
+            </Link>
+          </p>
         )}
+      </section>
+      <section
+        className="today-needs"
+        aria-labelledby="today-needs-heading"
+        hidden={needs.length === 0}
+      >
+        <div className="today-needs-header">
+          <h2 className="today-section-label" id="today-needs-heading">
+            {t("todayNeeds.title")}
+            <span className="today-needs-count" data-testid="today-needs-count">
+              {numbers.format(needs.length)}
+            </span>
+          </h2>
+          <Link className="today-view-all" href="/inbox" prefetch={false}>
+            {t("todayNeeds.viewAll")}
+            <ChevronRight size={14} strokeWidth={1.5} aria-hidden="true" />
+          </Link>
+        </div>
+        <ul className="today-needs-list">
+          {needs.slice(0, 3).map((item) => {
+            const task = tasks.data?.find((entry) => entry.id === item.taskId);
+            return (
+              <li key={item.id}>
+                <Link
+                  className="today-needs-row"
+                  href={item.taskId ? `/tasks/${item.taskId}` : "/inbox"}
+                  prefetch={false}
+                  data-testid="today-needs-item"
+                >
+                  <span className="today-needs-copy">
+                    <span className="today-needs-title">
+                      {task && (
+                        <span className="today-needs-ref">
+                          {reference(task)}
+                        </span>
+                      )}
+                      {task ? present(task) : item.title}
+                    </span>
+                    <span className="today-needs-meta">
+                      {t(
+                        item.kind === "review"
+                          ? "todayNeeds.requestsConfirmation"
+                          : "todayNeeds.blockedBy",
+                        { name: memberName(item.agentId) },
+                      )}{" "}
+                      · {time.format(new Date(item.createdAt))}
+                    </span>
+                  </span>
+                  <span
+                    className={`today-needs-badge today-needs-${item.kind}`}
+                  >
+                    {t(
+                      item.kind === "review"
+                        ? "todayNeeds.badgeReview"
+                        : "todayNeeds.badgeBlocker",
+                    )}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </section>
       <section className="today-due" aria-labelledby="today-due-heading">
         <h2 className="today-section-label" id="today-due-heading">

@@ -653,5 +653,13 @@
     "featureReviewText": "Nothing an agent delivers is final until a person confirms it.",
     "featureMcp": "Bring your own agents",
     "featureMcpText": "Agents connect over MCP with scoped tokens you can revoke."
+  },
+  "todayNeeds": {
+    "title": "Needs you",
+    "viewAll": "View all",
+    "requestsConfirmation": "{{name}} requests confirmation",
+    "blockedBy": "{{name}} is blocked",
+    "badgeReview": "To confirm",
+    "badgeBlocker": "Blocked"
   }
 }
