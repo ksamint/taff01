@@ -1,8 +1,10 @@
 "use client";
 
 import {
+  Building2,
   CalendarDays,
   ChevronDown,
+  Contact,
   KanbanSquare,
   PanelLeft,
   Search,
@@ -12,6 +14,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useWorkspaceAccess } from "../lib/queries";
 import { InboxBadge, useWorkspace } from "./app-shell";
 import { OrganizationChooser } from "./organization-chooser";
 
@@ -21,6 +24,11 @@ const NAV = [
   { href: "/projects", key: "projects", Icon: KanbanSquare },
 ] as const;
 const ME_PATHS = ["/me", "/inbox", "/agents", "/orgs", "/digests"];
+/** 公司 · 聯繫人, indented under 項目 for people who can read the CRM. */
+const CRM_NAV = [
+  { href: "/companies", key: "companies", Icon: Building2 },
+  { href: "/contacts", key: "contacts", Icon: Contact },
+] as const;
 const foldKey = (userId: string) => `taff:sidebar-folded:${userId}`;
 
 /** Fold state is remembered per person on this device. */
@@ -51,6 +59,7 @@ export function Sidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [folded, toggle] = useFolded(me.user.id);
+  const crm = !!useWorkspaceAccess(workspace.id).data?.canReadCrm;
   const role = me.workspaces.find((item) => item.id === workspace.id)?.role;
   const active = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -128,6 +137,22 @@ export function Sidebar() {
             {!folded && <span>{t(`nav.${key}`)}</span>}
           </Link>
         ))}
+        {crm &&
+          CRM_NAV.map(({ href, key, Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              prefetch={false}
+              className="sidebar-link sidebar-sublink"
+              data-testid={`sidebar-${key}`}
+              aria-current={active(href) ? "page" : undefined}
+              aria-label={folded ? t(`crm.${key}.title`) : undefined}
+              title={folded ? t(`crm.${key}.title`) : undefined}
+            >
+              <Icon size={16} strokeWidth={1.5} aria-hidden="true" />
+              {!folded && <span>{t(`crm.${key}.title`)}</span>}
+            </Link>
+          ))}
       </nav>
       <span className="sidebar-spacer" />
       {folded && (

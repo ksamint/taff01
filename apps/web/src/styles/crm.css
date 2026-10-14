@@ -1,0 +1,611 @@
+/* CRM (M15): companies, contacts, 相關方 and the shared ContactRoleRow.
+   Prototype v2 phone 308–345, 805–864; desktop 1239–1358. Tokens only. */
+
+/* Role rows ------------------------------------------------------------- */
+.contact-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hairline) solid var(--border-line);
+}
+.contact-rows:empty {
+  display: none;
+}
+.contact-row {
+  display: flex;
+  flex-direction: column;
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.contact-row-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  padding: 6px 0;
+}
+.contact-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--text);
+}
+.contact-row-main:hover .contact-row-name > span:first-child {
+  text-decoration: underline;
+}
+.contact-avatar {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--hairline) solid var(--border);
+  border-radius: 50%;
+  background: var(--bg-surface);
+  font-size: 12px;
+  font-weight: 600;
+}
+.contact-row-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  text-align: start;
+}
+.contact-row-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+.contact-row-name > span:first-child,
+.contact-row-sub,
+.contact-row-roles {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.contact-row-badge,
+.crm-badge {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 5px;
+  border: var(--hairline) solid var(--border);
+  font-size: 12px;
+  font-weight: var(--weight-body);
+  color: var(--text-muted);
+}
+.crm-badge.is-client {
+  border-color: transparent;
+  background: var(--accent-wash);
+  color: var(--accent-text);
+}
+.contact-row-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.contact-row-roles {
+  font-size: 12px;
+  color: var(--text-body);
+}
+.contact-row-roles.is-empty {
+  color: var(--text-subtle);
+}
+.contact-row-edit.button {
+  flex: none;
+  padding: 0 10px;
+  border-color: var(--border);
+  font-size: 12px;
+  font-weight: var(--weight-body);
+  color: var(--text-muted);
+}
+.contact-row-edit.button:hover:not(:disabled),
+.contact-row-edit.button[aria-expanded="true"] {
+  border-color: var(--text-subtle);
+  color: var(--text);
+  box-shadow: none;
+}
+.contact-row-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 0 12px 42px;
+}
+.contact-picker-roles .contact-row-chips {
+  padding: 0;
+}
+.role-chip.button {
+  min-width: 0;
+  padding: 0 10px;
+  border-color: var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: var(--weight-body);
+  white-space: nowrap;
+}
+.role-chip.button[aria-pressed="true"] {
+  border-color: var(--bg-inverse);
+  background: var(--bg-inverse);
+  color: var(--text-on-inverse);
+}
+.role-chip.button:hover:not(:disabled) {
+  box-shadow: none;
+  border-color: var(--text-subtle);
+}
+.contact-row-remove.button {
+  padding: 0 8px;
+  border-color: transparent;
+  background: transparent;
+  color: var(--danger);
+  font-size: 12px;
+  font-weight: var(--weight-body);
+}
+.contact-row-remove.button:hover:not(:disabled) {
+  box-shadow: none;
+  background: var(--danger-bg);
+}
+.crm-add.button {
+  width: 100%;
+  margin-top: 8px;
+  justify-content: flex-start;
+  border-style: dashed;
+  border-color: var(--border);
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: var(--weight-body);
+}
+.crm-note {
+  margin: 0;
+  padding: 10px 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-subtle);
+}
+.task-contacts > .alert {
+  margin-top: 8px;
+}
+
+/* Contact picker -------------------------------------------------------- */
+.contact-picker-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 44dvh;
+  overflow-y: auto;
+}
+.contact-picker-group h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: var(--ls-track-sm);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.contact-picker-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hairline) solid var(--border-line);
+}
+.contact-picker-option.button {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 6px 4px;
+  border-width: 0 0 var(--hairline);
+  border-color: var(--border-line);
+  border-radius: 0;
+  font-weight: var(--weight-body);
+}
+.contact-picker-option.button[aria-pressed="true"] {
+  background: var(--accent-wash);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.contact-picker-roles {
+  margin: 12px 0 0;
+  padding: 0;
+  border: 0;
+}
+.contact-picker-roles legend {
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Screens --------------------------------------------------------------- */
+/* 項目 · 公司 · 聯繫人 (phone; the desktop sidebar lists them instead). */
+.crm-sections {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: 2px;
+  margin: 6px 0;
+  padding: 2px;
+  border-radius: var(--radius-control);
+  background: var(--bg-container);
+}
+.crm-section-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border-radius: var(--radius-control);
+  font-size: 13px;
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+}
+.crm-section-link[aria-current="page"] {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: 600;
+}
+.crm-view {
+  min-width: 0;
+  padding-bottom: 120px;
+}
+.crm-header {
+  padding: 8px 20px 0;
+}
+.crm-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
+}
+.crm-title-row h1,
+.crm-detail-title h1 {
+  margin: 0;
+  font-size: var(--type-product-h1-size);
+  font-weight: var(--weight-heading);
+  line-height: 1.2;
+}
+.crm-icon-button.button,
+.crm-back {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: var(--radius-control);
+}
+.crm-icon-button.button:hover:not(:disabled),
+.crm-back:hover {
+  background: var(--bg-container-low);
+  color: var(--text);
+}
+.crm-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px 10px;
+}
+.crm-tools .crm-search {
+  flex: 1;
+  min-width: 0;
+}
+.crm-tools input[type="search"] {
+  width: 100%;
+  min-height: 44px;
+  font-size: 13px;
+}
+.crm-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.crm-toggle input {
+  width: 18px;
+  height: 18px;
+}
+.crm-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: var(--hairline) solid var(--border-line);
+}
+.crm-list-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 64px;
+  padding: 10px 20px;
+  border-bottom: var(--hairline) solid var(--border-line);
+  color: var(--text);
+}
+.crm-list-row:hover {
+  background: var(--bg-container-low);
+}
+.crm-list-row[aria-current="page"] {
+  background: var(--bg-container);
+}
+.crm-list-row.is-archived .crm-list-name {
+  color: var(--text-muted);
+}
+.crm-company-mark {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-control);
+  color: var(--text-muted);
+}
+.crm-list-row .contact-avatar {
+  width: 36px;
+  height: 36px;
+  font-size: 13px;
+}
+.crm-list-copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.crm-list-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.crm-list-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 15px;
+  font-weight: 600;
+}
+.crm-list-sub {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.crm-list-chevron {
+  flex: none;
+  display: flex;
+  color: var(--text-subtle);
+}
+.crm-empty {
+  padding: 64px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Detail ---------------------------------------------------------------- */
+.crm-detail {
+  min-width: 0;
+  padding: 8px 20px 24px;
+}
+.crm-detail-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 52px;
+}
+.crm-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.crm-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 16px;
+}
+.crm-detail-title .contact-avatar,
+.crm-detail-title .crm-company-mark {
+  width: 48px;
+  height: 48px;
+  font-size: 16px;
+}
+.crm-detail-heading {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.crm-detail-heading p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.crm-section {
+  padding-top: 20px;
+}
+.crm-section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+.crm-section-heading h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: var(--ls-track-sm);
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.crm-count {
+  font-size: 12px;
+  font-weight: var(--weight-body);
+  color: var(--text-subtle);
+  letter-spacing: 0;
+}
+.crm-section-heading .button {
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.crm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.crm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: var(--hairline) solid var(--border);
+  border-radius: var(--radius-control);
+  font-size: 13px;
+  color: var(--text);
+}
+.crm-chip:hover {
+  background: var(--bg-container-low);
+}
+.crm-fields {
+  margin: 0;
+  border-top: var(--hairline) solid var(--border-line);
+}
+.crm-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.crm-field dt,
+.crm-field > label {
+  flex: none;
+  width: 72px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.crm-field dd {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.crm-field dd select {
+  width: 100%;
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+}
+.crm-field a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+}
+.crm-footer {
+  display: grid;
+  gap: 8px;
+  padding-top: 24px;
+}
+.crm-footer .button {
+  width: 100%;
+  min-height: 44px;
+}
+.crm-danger.button {
+  border-color: transparent;
+  background: transparent;
+  color: var(--danger);
+}
+.crm-danger.button:hover:not(:disabled) {
+  box-shadow: none;
+  background: var(--danger-bg);
+}
+.crm-form .field-error {
+  margin: 0;
+  font-size: 12px;
+  color: var(--danger-text);
+}
+.crm-form select {
+  min-height: 44px;
+}
+.crm-confirm p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* 相關方 ---------------------------------------------------------------- */
+.stakeholders-view {
+  max-width: 760px;
+  padding: 0 20px 120px;
+}
+.stakeholders-client {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  border-top: var(--hairline) solid var(--border-line);
+  border-bottom: var(--hairline) solid var(--border-line);
+}
+.stakeholders-client select {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+}
+.stakeholders-client-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Desktop: split list and detail --------------------------------------- */
+@media (min-width: 1024px) {
+  .crm-view.is-split {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    min-height: 100dvh;
+    padding-bottom: 0;
+  }
+  .crm-view.is-split .crm-pane {
+    min-width: 0;
+    border-right: var(--hairline) solid var(--border-line);
+  }
+  .crm-view.is-split .crm-detail {
+    max-width: 760px;
+    padding: 16px 32px 32px;
+  }
+  .crm-view .crm-sections {
+    display: none;
+  }
+  .crm-view .crm-detail .crm-back {
+    display: none;
+  }
+}

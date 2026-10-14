@@ -24,6 +24,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
 import { type Core, createCore, userPrincipal } from "./index";
+import { prototypeMindCounts } from "./prototype-mind";
 import { seedPrototype } from "./prototype-seed";
 import { seedDemo } from "./seed";
 
@@ -137,6 +138,54 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
         values (${removed}, ${w}, ${prototypeId("task", "nw", 138)}, ${p}, ${prototypeId("contact", "nw", 4)})`;
       await tx`insert into contact_roles (id, workspace_id, contact_id, scope, role, task_id)
         values (${prototypeId("contactRole", "nw", 90)}, ${w}, ${prototypeId("contact", "nw", 4)}, 'task', 'tech', ${prototypeId("task", "nw", 138)})`;
+    });
+  });
+  it("seeds Northwind's mind map once, as people's notes with sources", async () => {
+    const count = async (table: string, workspace: string) =>
+      Number(
+        (
+          await connection.client.unsafe(
+            `select count(*)::int as n from ${table} where workspace_id = $1`,
+            [workspace],
+          )
+        )[0].n,
+      );
+    expect(await count("mind_nodes", w)).toBe(prototypeMindCounts.nodes);
+    expect(await count("mind_edges", w)).toBe(prototypeMindCounts.edges);
+    expect(await count("mind_sources", w)).toBe(prototypeMindCounts.sources);
+    expect(await count("mind_node_sources", w)).toBe(
+      prototypeMindCounts.nodeSources,
+    );
+    expect(await count("mind_nodes", prototypeId("workspace", "qs"))).toBe(0);
+    const map = await core.getMindMap(userPrincipal(alexId), w);
+    expect(map.nodes).toHaveLength(21);
+    expect(map.nodes.every((node) => node.note.length > 0)).toBe(true);
+    // Notes, never presented as model output.
+    for (const node of map.nodes)
+      expect(`${node.title} ${node.note}`).not.toMatch(
+        /\bAI\b|insight|洞察|智能/i,
+      );
+    expect(
+      map.nodes.find((node) => node.id === prototypeId("mindNode", "nw", 1)),
+    ).toMatchObject({
+      title: "歸屬感",
+      layer: 0,
+      angle: 315,
+      strength: 5,
+      momentum: 1,
+      taskId: null,
+    });
+    // A removed edge stays removed when the seed runs again.
+    const removed = prototypeId("mindEdge", "nw", 1);
+    await core.removeMindEdge(userPrincipal(alexId), removed);
+    await seedDemo({ ...options, password, seedDate: "2026-10-08" });
+    expect(
+      await connection.client`select id from mind_edges where id = ${removed}`,
+    ).toHaveLength(0);
+    await connection.client.begin(async (tx) => {
+      await tx`select set_config('taff.actor_id', ${alexId}, true)`;
+      await tx`insert into mind_edges (id, workspace_id, from_node_id, to_node_id)
+        values (${removed}, ${w}, ${prototypeId("mindNode", "nw", 1)}, ${prototypeId("mindNode", "nw", 10)})`;
     });
   });
   it("stores the exact Checkout hierarchy and isolated real organization memberships", async () => {

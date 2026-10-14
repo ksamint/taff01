@@ -22,6 +22,7 @@ describe("MCP round trip helpers", () => {
       "../src/mcp.ts",
       "../src/mcp-timeline.ts",
       "../src/mcp-crm.ts",
+      "../src/mcp-insights.ts",
     ]
       .map((path) => readFileSync(new URL(path, import.meta.url), "utf8"))
       .join("\n");

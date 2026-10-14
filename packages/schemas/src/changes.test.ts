@@ -24,6 +24,18 @@ describe("change routing boundaries", () => {
     ).toBe(true);
   });
   it.each([
+    "suggestions.insert",
+    "suggestions.update",
+    "mind_nodes.update",
+    "mind_edges.delete",
+    "mind_sources.insert",
+    "mind_node_sources.delete",
+  ])("routes the Phase B table change %s", (action) => {
+    expect(changeEventSchema.safeParse({ ...event, action }).success).toBe(
+      true,
+    );
+  });
+  it.each([
     { token: "secret" },
     { action: "arbitrary.insert" },
     { action: "tasks.drop" },

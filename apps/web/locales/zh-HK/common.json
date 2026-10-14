@@ -296,7 +296,10 @@
       "removeDependency": "移除依賴",
       "listCompanies": "列出公司",
       "listContacts": "列出聯繫人（未獲授權不含電話與電郵）",
-      "readContact": "讀取聯繫人及其關聯"
+      "readContact": "讀取聯繫人及其關聯",
+      "readRelations": "讀取關係圖（不含電話與電郵）",
+      "readBrief": "讀取簡報（只含代碼與數字，不含財務）",
+      "proposeChange": "提出拆分或改期建議，由人決定是否採用"
     },
     "back": "返回",
     "copyEndpoint": "複製端點",
@@ -774,10 +777,26 @@
       "noMatches": "沒有可添加的聯繫人。",
       "needsProject": "任務加入項目後才能添加聯繫人。",
       "noneOnTask": "此任務暫無聯繫人。",
-      "someone": "另一位聯繫人"
+      "someone": "另一位聯繫人",
+      "new": "新增聯繫人",
+      "edit": "編輯聯繫人",
+      "nameLabel": "姓名",
+      "titleLabel": "職位",
+      "phoneLabel": "電話",
+      "emailLabel": "電郵",
+      "company": "公司",
+      "noCompany": "不設公司",
+      "empty": "暫無聯繫人",
+      "pick": "選擇一位聯繫人，查看關聯和角色。",
+      "delete": "刪除聯繫人",
+      "deleteConfirm": "刪除 {{name}}？聯繫人會被封存，關聯會保留，並可撤銷。"
     },
     "stakeholders": {
-      "fromProject": "項目相關方"
+      "fromProject": "項目相關方",
+      "title": "相關方",
+      "empty": "此項目暫無相關方。",
+      "note": "任務聯繫人會自動成為項目相關方；移出項目會一併移除其在任務上的聯繫。",
+      "pickProject": "選擇一個項目，查看其相關方。"
     },
     "external": "外部",
     "rolesTitle": "角色",
@@ -786,7 +805,9 @@
     "editRolesFor": "編輯 {{name}} 的角色",
     "doneEditingFor": "完成編輯 {{name}} 的角色",
     "roles": {
-      "task": "任務角色"
+      "task": "任務角色",
+      "company": "公司角色",
+      "project": "項目角色"
     },
     "toast": {
       "added": "已添加 {{name}}",
@@ -794,7 +815,58 @@
       "roleReplaced": "{{name}} 現為{{role}}，已取代 {{previous}}",
       "addedStakeholder": "並已加入「{{project}}」項目相關方",
       "removed": "已移除 {{name}}",
-      "separator": "；"
+      "separator": "；",
+      "removedWithLinks_one": "已移除 {{name}}，及其 {{count}} 項任務上的聯繫",
+      "removedWithLinks_other": "已移除 {{name}}，及其 {{count}} 項任務上的聯繫",
+      "companyChanged": "已將 {{name}} 改為 {{company}}",
+      "companyCleared": "{{name}} 已不設公司",
+      "rolesCleared": "原公司角色已清除",
+      "clientSet": "客戶公司已設為 {{company}}",
+      "clientCleared": "已清除客戶公司",
+      "companyCreated": "已新增 {{name}}",
+      "contactCreated": "已新增 {{name}}",
+      "saved": "已儲存 {{name}}",
+      "deleted": "已刪除 {{name}}",
+      "restored": "已還原 {{name}}"
+    },
+    "companies": {
+      "title": "公司",
+      "new": "新增公司",
+      "edit": "編輯公司",
+      "name": "公司名稱",
+      "industry": "行業",
+      "empty": "暫無公司",
+      "search": "搜尋公司",
+      "pick": "選擇一間公司，查看成員和角色。",
+      "people_one": "{{count}} 位成員",
+      "people_other": "{{count}} 位成員",
+      "clientOf": "客戶項目",
+      "delete": "刪除公司",
+      "deleteConfirm": "刪除 {{name}}？公司會被封存，聯繫人和關聯會保留，並可撤銷。",
+      "rolesNote": "公司角色適用於整間公司；更換聯繫人所屬公司時會清除其原公司角色。"
+    },
+    "client": "客戶公司",
+    "noClient": "未設客戶",
+    "people": "成員",
+    "noPeople": "暫無成員",
+    "noLinks": "尚未關聯項目或任務",
+    "clearCompanyRoles": "清除公司角色",
+    "removeFromProject": "移出項目",
+    "showArchived": "顯示已封存",
+    "archived": "已封存",
+    "restore": "還原",
+    "noMatches": "沒有符合搜尋的結果。",
+    "noAccess": "你在此無法查看公司和聯繫人。",
+    "searchPlaceholder": "搜尋姓名、公司、電話或電郵",
+    "form": {
+      "required": "請輸入名稱。",
+      "phone": "請輸入電話號碼（數字、空格或 + - ( )）。",
+      "email": "請輸入有效的電郵地址。",
+      "tooLong": "內容太長。",
+      "save": "儲存",
+      "create": "新增",
+      "cancel": "取消",
+      "delete": "刪除"
     }
   }
 }

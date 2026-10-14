@@ -19,6 +19,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -55,6 +56,12 @@ import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
+// 相關方 (M15) is its own chunk, loaded only for ?view=stakeholders.
+const StakeholdersView = dynamic(
+  () =>
+    import("./crm/stakeholders-view").then((module) => module.StakeholdersView),
+  { ssr: false },
+);
 const PRIORITIES = ["urgent", "high", "medium", "low"] as const;
 const VIEW_LABEL: Record<ProjectView, string> = {
   board: "projects.boardView",
@@ -374,16 +381,27 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           {workspace.name}
           <ChevronDown size={12} aria-hidden="true" />
         </Link>
-        {/* TODO(M15): add 公司 (/companies) and 聯繫人 (/contacts) here when
-            useWorkspaceAccess(...).data.canReadCrm; their routes ship in M15. */}
         <nav className="projects-sections" aria-label={t("projects.sections")}>
           <Link
             className="projects-section is-active"
             href="/projects"
             aria-current="page"
+            data-testid="crm-section-projects"
           >
             {t("projects.title")}
           </Link>
+          {workspaceAccess.data?.canReadCrm &&
+            (["companies", "contacts"] as const).map((section) => (
+              <Link
+                key={section}
+                className="projects-section"
+                href={`/${section}`}
+                prefetch={false}
+                data-testid={`crm-section-${section}`}
+              >
+                {t(`crm.${section}.title`)}
+              </Link>
+            ))}
         </nav>
         <div className="projects-title-row">
           <span className="projects-crumb" aria-hidden="true">
@@ -627,7 +645,9 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           {t(errorKey(tasks.error ?? projects.error ?? edit.error))}
         </p>
       ) : null}
-      {PLANNED_VIEWS.includes(view) ? (
+      {view === "stakeholders" ? (
+        <StakeholdersView workspaceId={workspace.id} project={selected} />
+      ) : PLANNED_VIEWS.includes(view) ? (
         <section
           className="projects-placeholder"
           data-testid="project-view-placeholder"

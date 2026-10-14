@@ -576,7 +576,9 @@ pnpm release:checklist
   recorded as skipped with the reason.
 - Item 8 runs the shared MCP round trip (`apps/api/scripts/mcp-round-trip.ts`,
   the same code as `pnpm mcp:smoke`) with the official client against
-  `RELEASE_BASE_URL/mcp`, using a token issued on the MCP page: every tool,
+  `RELEASE_BASE_URL/mcp`, using a token issued on the MCP page: every tool
+  (all 30 in `MCP_TOOLS`, including `relations.get`, `brief.get` and
+  `suggestions.create`),
   the rate limit (`RELEASE_MCP_RATE_LIMIT`, default `MCP_RATE_LIMIT` or 60;
   `RELEASE_SKIP_RATE_LIMIT=1` skips the probe with a recorded reason), the
   call log in the UI, the created task arriving on an open board in real

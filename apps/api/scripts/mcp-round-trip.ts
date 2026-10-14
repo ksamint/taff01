@@ -10,6 +10,7 @@ import {
 import {
   type AgentPermissionInput,
   type AgentProfile,
+  briefSchema,
   type Company,
   type Contact,
   type CreateAgentToken,
@@ -25,9 +26,14 @@ import {
   type ReviewRun,
   type ReviewWorkspace,
   type Run,
+  relationGraphSchema,
   runDetailSchema,
   runSchema,
+  type Suggestion,
+  type SuggestionDecision,
   searchResultSchema,
+  suggestionSchema,
+  type Timeline,
   taskCalendarSchema,
   taskPlanResultSchema,
   taskSchema,
@@ -36,6 +42,7 @@ import {
 
 /** Every tool the MCP server lists, sorted. */
 export const MCP_TOOLS = [
+  "brief.get",
   "calendar.list",
   "calendar.schedule",
   "calendar.set",
@@ -49,12 +56,14 @@ export const MCP_TOOLS = [
   "inbox.request_review",
   "projects.list",
   "quickadd.parse",
+  "relations.get",
   "runs.control",
   "runs.event",
   "runs.get",
   "runs.start",
   "runs.submit",
   "search.query",
+  "suggestions.create",
   "tasks.comments.add",
   "tasks.comments.list",
   "tasks.create",
@@ -93,6 +102,11 @@ export type McpHumanActions = {
   ): Promise<{ id: string; token: string }>;
   revokeAgentToken(tokenId: string): Promise<unknown>;
   listMcpCalls(): Promise<Pick<McpCall, "tool" | "status">[]>;
+  getTimeline(projectId: string): Promise<Pick<Timeline, "items">>;
+  dismissSuggestion(
+    suggestionId: string,
+    input: SuggestionDecision,
+  ): Promise<Pick<Suggestion, "status">>;
 };
 
 export type McpRoundTripOptions = {
@@ -159,7 +173,7 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists every task, calendar, timeline, project, search, draft, run, grant, file and CRM tool",
+    "lists every task, calendar, timeline, project, search, draft, run, grant, file, CRM, relations, brief and suggestion tool",
     JSON.stringify(tools) === JSON.stringify(MCP_TOOLS),
     tools,
   );
@@ -451,6 +465,69 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
       plan.dependencies.some((dep) => dep.id === link.id && !dep.conflict) &&
       plan.risk.finance === null,
     plan,
+  );
+  const relations = relationGraphSchema.parse(
+    text(
+      await client.callTool({
+        name: "relations.get",
+        arguments: { projectId: project.id, layers: ["dependencies", "org"] },
+      }),
+    ),
+  );
+  check(
+    "relations.get reads the project graph with its dependency and no contact details",
+    relations.nodes.some((node) => node.id === taskId) &&
+      relations.edges.some(
+        (edge) =>
+          edge.kind === "depends_on" &&
+          [edge.from, edge.to].includes(`task:${taskId}`) &&
+          [edge.from, edge.to].includes(`task:${follower.id}`),
+      ) &&
+      !/phone|email/.test(JSON.stringify(relations)),
+    relations,
+  );
+  const brief = briefSchema.parse(
+    text(await client.callTool({ name: "brief.get", arguments: {} })),
+  );
+  check(
+    "brief.get reads the token workspace's projects without finance",
+    JSON.stringify(brief.workspaceIds) === JSON.stringify([workspace.id]) &&
+      brief.projects.some((item) => item.projectId === project.id) &&
+      brief.projects.every((item) => item.risk.finance === null),
+    brief,
+  );
+  const proposal = suggestionSchema.parse(
+    text(
+      await client.callTool({
+        name: "suggestions.create",
+        arguments: {
+          taskId,
+          kind: "reschedule",
+          payload: {
+            startDate: "2026-12-01",
+            durationDays: 2,
+            reason: "MCP smoke",
+          },
+        },
+      }),
+    ),
+  );
+  const unchanged = await human.getTimeline(project.id);
+  check(
+    "suggestions.create records a pending proposal and changes nothing",
+    proposal.status === "pending" &&
+      proposal.createdBy === agentId &&
+      unchanged.items.find((item) => item.id === taskId)?.start !==
+        "2026-12-01",
+    proposal,
+  );
+  const dismissed = await human.dismissSuggestion(proposal.id, {
+    version: proposal.version,
+  });
+  check(
+    "a person dismisses the agent's proposal",
+    dismissed.status === "dismissed",
+    dismissed,
   );
   const unlinked = dependencySchema.parse(
     text(

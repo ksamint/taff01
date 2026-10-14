@@ -21,6 +21,8 @@ import {
   meSchema,
   reviewWorkspaceSchema,
   runSchema,
+  suggestionSchema,
+  timelineSchema,
 } from "../../packages/schemas/src/index";
 import { messages } from "../support/messages";
 
@@ -394,6 +396,20 @@ export function httpHuman(
         await json(
           await request.get(`/api/mcp-calls?workspaceId=${workspaceId}`),
           "call log",
+        ),
+      ),
+    getTimeline: async (projectId) =>
+      timelineSchema.parse(
+        await json(
+          await request.get(`/api/projects/${projectId}/timeline`),
+          "timeline",
+        ),
+      ),
+    dismissSuggestion: async (id, data) =>
+      suggestionSchema.parse(
+        await json(
+          await request.post(`/api/suggestions/${id}/dismiss`, { data }),
+          "suggestion dismissal",
         ),
       ),
   };

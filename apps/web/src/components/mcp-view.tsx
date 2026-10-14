@@ -75,6 +75,9 @@ export const TOOLS: readonly (readonly [string, string])[] = [
   ["companies.list", "listCompanies"],
   ["contacts.list", "listContacts"],
   ["contacts.get", "readContact"],
+  ["relations.get", "readRelations"],
+  ["brief.get", "readBrief"],
+  ["suggestions.create", "proposeChange"],
 ];
 /** Third-party tools the prototype lists. None is connected yet. */
 const INTEGRATIONS = ["github", "figma", "slack", "gcal"] as const;

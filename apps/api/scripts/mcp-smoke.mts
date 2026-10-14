@@ -84,6 +84,9 @@ try {
       createAgentToken: (input) => core.createAgentToken(asUser, input),
       revokeAgentToken: (id) => core.revokeAgentToken(asUser, id),
       listMcpCalls: () => core.listMcpCalls(asUser, workspace.id),
+      getTimeline: (projectId) => core.getTimeline(asUser, projectId),
+      dismissSuggestion: (id, input) =>
+        core.dismissSuggestion(asUser, id, input),
     },
   });
 } finally {

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (184 distinct, 962 uses)
+## Test ids (208 distinct, 1025 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -31,7 +31,7 @@ several do). “Also rendered by” lists the other files.
 | `agent-settings-details` | 5 |  | agent-creation.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `agent-supervisor` | 4 |  | agent-creation.spec.ts, agent-review.spec.ts |
 | `grant-card` | 5 |  | agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `permission-web.search-*` | 5 |  | optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `permission-web.search-*` | 5 | crm/contact-links.tsx, crm/contact-role-row.tsx | optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `permission-web.search-ask` | 4 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 
 ### app-shell.tsx
@@ -45,9 +45,9 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `auth-email` | 28 |  | agent-review.spec.ts, calendar.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-password` | 24 |  | agent-review.spec.ts, calendar.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, today.spec.ts, username-auth.spec.ts |
-| `auth-submit` | 30 |  | agent-review.spec.ts, calendar.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-email` | 29 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-password` | 25 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, today.spec.ts, username-auth.spec.ts |
+| `auth-submit` | 31 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 7 |  | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-username` | 5 |  | release/checklist.spec.ts, username-auth.spec.ts |
 
@@ -64,7 +64,80 @@ several do). “Also rendered by” lists the other files.
 | `calendar-undo` | 12 |  | calendar.spec.ts, release/checklist.spec.ts |
 | `calendar-week` | 4 |  | calendar.spec.ts, release/checklist.spec.ts, ui-parity.spec.ts |
 | `desktop-new-task` | 3 | projects-view.tsx, today-view.tsx | release/checklist.spec.ts, support/tasks.ts, ui-parity.spec.ts |
-| `schedule-task-*` | 3 |  | calendar.spec.ts, release/checklist.spec.ts |
+| `schedule-task-*` | 3 | crm/contact-links.tsx, crm/contact-role-row.tsx | calendar.spec.ts, release/checklist.spec.ts |
+
+### crm/companies-view.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `company-archive` | 1 |  | crm.spec.ts |
+| `company-contact` | 1 |  | crm.spec.ts |
+| `company-contact-edit` | 1 | crm/contact-role-row.tsx | crm.spec.ts |
+| `company-contact-role-chair` | 1 | crm/contact-role-row.tsx | crm.spec.ts |
+| `company-contact-roles` | 5 | crm/contact-role-row.tsx | crm.spec.ts |
+| `company-heading` | 1 |  | crm.spec.ts |
+| `company-row` | 3 |  | crm.spec.ts |
+
+### crm/contact-links.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `board-column-*` | 1 | crm/contact-role-row.tsx, projects-view.tsx | release/checklist.spec.ts |
+| `contact-search` | 1 | crm/contacts-view.tsx | crm.spec.ts |
+| `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx | me.spec.ts |
+| `open-search` | 3 | inbox-view.tsx, projects-view.tsx, today-view.tsx | planning.spec.ts |
+| `quick-field-*` | 2 | crm/contact-role-row.tsx, quick-add-dialog.tsx | support/tasks.ts |
+| `review-check-*` | 11 | crm/contact-role-row.tsx, review-view.tsx | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
+| `role-*` | 6 | crm/contact-role-row.tsx, organizations-view.tsx | planning.spec.ts, release/checklist.spec.ts |
+| `task-contact-add` | 3 | task-contacts.tsx | crm.spec.ts, task-contacts.spec.ts |
+| `task-contact-confirm` | 2 | task-contacts.tsx | crm.spec.ts, task-contacts.spec.ts |
+| `task-contact-new-role-signoff` | 2 | crm/contact-role-row.tsx, task-contacts.tsx | task-contacts.spec.ts |
+| `task-contact-new-role-tech` | 1 | crm/contact-role-row.tsx, task-contacts.tsx | crm.spec.ts |
+| `task-contact-option` | 3 | task-contacts.tsx | crm.spec.ts, task-contacts.spec.ts |
+| `task-contact-search` | 2 | task-contacts.tsx | crm.spec.ts, task-contacts.spec.ts |
+| `task-field-*` | 2 | crm/contact-role-row.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
+| `token-confirm` | 3 | mcp-view.tsx | release/checklist.spec.ts |
+| `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
+| `workspace-*` | 16 | crm/contact-role-row.tsx, organizations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts |
+
+### crm/contact-role-row.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `contact-link-roles` | 1 | crm/contacts-view.tsx | crm.spec.ts |
+| `stakeholder-edit` | 1 | crm/stakeholders-view.tsx | crm.spec.ts |
+| `stakeholder-remove` | 1 | crm/stakeholders-view.tsx | crm.spec.ts |
+| `stakeholder-roles` | 1 | crm/stakeholders-view.tsx | crm.spec.ts |
+| `task-contact-edit` | 3 | task-contacts.tsx | task-contacts.spec.ts |
+| `task-contact-remove` | 1 | task-contacts.tsx | task-contacts.spec.ts |
+| `task-contact-role-signoff` | 1 | task-contacts.tsx | task-contacts.spec.ts |
+| `task-contact-roles` | 4 | task-contacts.tsx | task-contacts.spec.ts |
+
+### crm/contacts-view.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `contact-archive` | 1 |  | crm.spec.ts |
+| `contact-company-select` | 2 |  | crm.spec.ts |
+| `contact-heading` | 2 |  | crm.spec.ts |
+| `contact-link` | 2 |  | crm.spec.ts |
+| `contact-row` | 4 |  | crm.spec.ts |
+
+### crm/crm-forms.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `crm-confirm-body` | 1 |  | crm.spec.ts |
+| `crm-confirm-ok` | 2 |  | crm.spec.ts |
+
+### crm/stakeholders-view.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `client-company-select` | 1 |  | crm.spec.ts |
+| `stakeholder` | 3 |  | crm.spec.ts |
+| `stakeholders-count` | 1 |  | crm.spec.ts |
+| `stakeholders-view` | 1 |  | crm.spec.ts |
 
 ### digest-view.tsx
 
@@ -78,7 +151,6 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `email-delivery-status` | 1 |  | planning.spec.ts |
 | `request-email-verification` | 1 |  | planning.spec.ts |
-| `verify-email-confirm` | 3 |  | planning.spec.ts |
 
 ### grant-actions.tsx
 
@@ -98,7 +170,6 @@ several do). “Also rendered by” lists the other files.
 | `inbox-open-review` | 2 |  | agent-review.spec.ts, release/checklist.spec.ts |
 | `inbox-snooze` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `inbox-tab-blockers` | 2 |  | agent-review.spec.ts, release/checklist.spec.ts |
-| `open-search` | 3 | projects-view.tsx, today-view.tsx | planning.spec.ts |
 
 ### landing.tsx
 
@@ -114,7 +185,6 @@ several do). “Also rendered by” lists the other files.
 | `mcp-endpoint` | 3 |  | mcp.spec.ts, release/checklist.spec.ts, ui-parity.spec.ts |
 | `token-agent` | 1 |  | release/checklist.spec.ts |
 | `token-card` | 4 |  | mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `token-confirm` | 3 |  | release/checklist.spec.ts |
 | `token-name` | 3 |  | mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `token-regenerate` | 1 |  | release/checklist.spec.ts |
 | `token-revoke` | 2 |  | release/checklist.spec.ts |
@@ -135,7 +205,6 @@ several do). “Also rendered by” lists the other files.
 | `advanced-theme-system` | 2 |  | me.spec.ts |
 | `me-team` | 3 |  | me.spec.ts, scripts/ui/app-shots.mjs |
 | `me-tz` | 9 |  | me.spec.ts |
-| `me-workspace-*` | 1 |  | me.spec.ts |
 | `open-notifications` | 4 |  | me.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs |
 | `theme-dark` | 4 |  | me.spec.ts, release/checklist.spec.ts |
 | `theme-light` | 2 |  | me.spec.ts, release/checklist.spec.ts |
@@ -174,16 +243,13 @@ several do). “Also rendered by” lists the other files.
 | `accept-invitation` | 3 |  | planning.spec.ts |
 | `agent-create` | 6 |  | agent-creation.spec.ts, release/support.ts |
 | `agent-name` | 5 |  | agent-creation.spec.ts, release/support.ts |
-| `role-*` | 6 |  | planning.spec.ts, release/checklist.spec.ts |
 | `team-add-agent` | 7 |  | agent-creation.spec.ts, release/support.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
-| `workspace-*` | 15 |  | agent-creation.spec.ts, calendar.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts |
 
 ### projects-view.tsx
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `board-column-*` | 1 |  | release/checklist.spec.ts |
 | `board-column-done` | 3 |  | planning.spec.ts, release/checklist.spec.ts |
 | `board-column-in_progress` | 4 |  | planning.spec.ts, release/checklist.spec.ts |
 | `board-column-todo` | 1 |  | planning.spec.ts |
@@ -206,7 +272,6 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `quick-create` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts |
 | `quick-date` | 1 |  | support/tasks.ts |
-| `quick-field-*` | 2 |  | support/tasks.ts |
 | `quick-field-worker` | 1 |  | accessibility.spec.ts |
 | `quick-labels` | 2 |  | planning.spec.ts, support/tasks.ts |
 | `quick-owner` | 2 |  | support/tasks.ts, today.spec.ts |
@@ -230,7 +295,6 @@ several do). “Also rendered by” lists the other files.
 | `item-comment-submit` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `review-approve` | 16 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-artifact` | 13 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
-| `review-check-*` | 11 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
 | `review-comment` | 4 |  | agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-readonly` | 9 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-request-changes` | 3 |  | agent-review.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
@@ -275,8 +339,8 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `toast` | 2 |  | release/checklist.spec.ts, task-contacts.spec.ts |
-| `toast-action` | 5 |  | release/checklist.spec.ts, task-contacts.spec.ts |
+| `toast` | 7 |  | crm.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts |
+| `toast-action` | 12 |  | crm.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts |
 
 ### sms-auth.tsx
 
@@ -288,17 +352,8 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `task-contact` | 10 |  | task-contacts.spec.ts |
-| `task-contact-add` | 2 |  | task-contacts.spec.ts |
-| `task-contact-confirm` | 1 |  | task-contacts.spec.ts |
-| `task-contact-edit` | 3 |  | task-contacts.spec.ts |
-| `task-contact-new-role-signoff` | 2 |  | task-contacts.spec.ts |
-| `task-contact-option` | 2 |  | task-contacts.spec.ts |
-| `task-contact-remove` | 1 |  | task-contacts.spec.ts |
-| `task-contact-role-signoff` | 1 |  | task-contacts.spec.ts |
-| `task-contact-roles` | 4 |  | task-contacts.spec.ts |
-| `task-contact-search` | 1 |  | task-contacts.spec.ts |
-| `task-contacts` | 1 |  | task-contacts.spec.ts |
+| `task-contact` | 11 |  | crm.spec.ts, task-contacts.spec.ts |
+| `task-contacts` | 2 |  | crm.spec.ts, task-contacts.spec.ts |
 | `task-contacts-no-project` | 1 |  | task-contacts.spec.ts |
 
 ### task-detail-view.tsx
@@ -307,7 +362,6 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `detail-worker` | 12 | task-editor.tsx | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/task-fields.ts, today.spec.ts, ui-parity.spec.ts |
 | `run-start` | 9 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts |
-| `task-field-*` | 2 | task-editor.tsx | support/task-fields.ts |
 | `task-field-worker` | 5 | task-editor.tsx | planning.spec.ts, release/checklist.spec.ts, ui-parity.spec.ts |
 | `task-status` | 6 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 
@@ -333,7 +387,7 @@ several do). “Also rendered by” lists the other files.
 | `subtask-title` | 3 |  | planning.spec.ts, release/checklist.spec.ts |
 | `task-comment` | 7 |  | planning.spec.ts, release/checklist.spec.ts |
 | `task-comment-submit` | 5 |  | planning.spec.ts, release/checklist.spec.ts |
-| `task-detail-heading` | 29 |  | accessibility.spec.ts, agent-review.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, task-contacts.spec.ts, today.spec.ts, ui-parity.spec.ts |
+| `task-detail-heading` | 30 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, task-contacts.spec.ts, today.spec.ts, ui-parity.spec.ts |
 | `task-field-due` | 2 |  | planning.spec.ts |
 | `task-field-text` | 5 |  | planning.spec.ts |
 
@@ -349,7 +403,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 14 |  | accessibility.spec.ts, agent-creation.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-parity.spec.ts |
-| `today-heading` | 50 |  | agent-review.spec.ts, calendar.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 51 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-parity.spec.ts |
 
 ## Role and name locators
@@ -388,7 +442,9 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `dialog` | 44 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-parity.spec.ts |
-| `dialog — name: m.crm.contacts.add` | 1 | task-contacts.spec.ts |
+| `dialog — name: m.crm.companies.delete` | 1 | crm.spec.ts |
+| `dialog — name: m.crm.contacts.add` | 2 | crm.spec.ts, task-contacts.spec.ts |
+| `dialog — name: m.crm.contacts.delete` | 1 | crm.spec.ts |
 | `heading` | 4 | mcp.spec.ts, release/checklist.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
@@ -485,6 +541,9 @@ read (`data-event-id`, `data-date`).
 | `.sidebar a[href^="/agents/optimistic:"]` | 1 | agent-creation.spec.ts |
 | `.sidebar-me .nav-badge` | 1 | ui-parity.spec.ts |
 | `.sidebar-primary .sidebar-link` | 3 | scripts/ui/app-shots.mjs, ui-parity.spec.ts |
+| `.sidebar-primary .sidebar-sublink` | 1 | ui-parity.spec.ts |
+| `.sidebar-primary .sidebar-sublink[href="/companies"]` | 1 | ui-parity.spec.ts |
+| `.sidebar-primary .sidebar-sublink[href="/contacts"]` | 1 | ui-parity.spec.ts |
 | `.sidebar-workspace > summary` | 1 | ui-parity.spec.ts |
 | `.tabbar` | 2 | me.spec.ts, ui-parity.spec.ts |
 | `.task-detail-sheet .task-detail-toolbar` | 1 | ui-parity.spec.ts |
@@ -550,13 +609,25 @@ Keys read from `apps/web/locales/*/common.json` through
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
-| `crm.contacts.add` | 1 | task-contacts.spec.ts |
+| `crm.companies.delete` | 5 | crm.spec.ts |
+| `crm.contacts.add` | 6 | crm.spec.ts, task-contacts.spec.ts |
+| `crm.contacts.delete` | 5 | crm.spec.ts |
+| `crm.contacts.deleteConfirm` | 5 | crm.spec.ts |
 | `crm.contacts.needsProject` | 1 | task-contacts.spec.ts |
-| `crm.noRole` | 1 | task-contacts.spec.ts |
+| `crm.noRole` | 11 | crm.spec.ts, task-contacts.spec.ts |
+| `crm.role.chair` | 5 | crm.spec.ts |
+| `crm.role.decider` | 10 | crm.spec.ts |
+| `crm.role.finance` | 5 | crm.spec.ts |
 | `crm.role.signoff` | 1 | task-contacts.spec.ts |
-| `crm.toast.addedStakeholder` | 2 | task-contacts.spec.ts |
+| `crm.roleSeparator` | 5 | crm.spec.ts |
+| `crm.toast.addedStakeholder` | 7 | crm.spec.ts, task-contacts.spec.ts |
+| `crm.toast.clientSet` | 5 | crm.spec.ts |
+| `crm.toast.companyChanged` | 5 | crm.spec.ts |
+| `crm.toast.deleted` | 10 | crm.spec.ts |
 | `crm.toast.removed` | 1 | task-contacts.spec.ts |
-| `crm.toast.roleReplaced` | 2 | task-contacts.spec.ts |
+| `crm.toast.removedWithLinks_other` | 5 | crm.spec.ts |
+| `crm.toast.roleReplaced` | 7 | crm.spec.ts, task-contacts.spec.ts |
+| `crm.toast.rolesCleared` | 5 | crm.spec.ts |
 | `emailOrUsername` | 1 | username-auth.spec.ts |
 | `emailVerification.delivery.logged` | 5 | planning.spec.ts |
 | `en` | 1 | me.spec.ts |

@@ -296,7 +296,10 @@
       "removeDependency": "Remove dependency",
       "listCompanies": "List companies",
       "listContacts": "List contacts (no phone or email without permission)",
-      "readContact": "Read a contact and its links"
+      "readContact": "Read a contact and its links",
+      "readRelations": "Read the relations graph (no phone or email)",
+      "readBrief": "Read the brief (codes and numbers, no finance)",
+      "proposeChange": "Propose a split or reschedule for a person to apply"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",
@@ -774,10 +777,26 @@
       "noMatches": "No contacts to add.",
       "needsProject": "Add this task to a project to link contacts.",
       "noneOnTask": "No contacts on this task yet.",
-      "someone": "another contact"
+      "someone": "another contact",
+      "new": "New contact",
+      "edit": "Edit contact",
+      "nameLabel": "Name",
+      "titleLabel": "Title",
+      "phoneLabel": "Phone",
+      "emailLabel": "Email",
+      "company": "Company",
+      "noCompany": "No company",
+      "empty": "No contacts yet",
+      "pick": "Choose a contact to see their links and roles.",
+      "delete": "Delete contact",
+      "deleteConfirm": "Delete {{name}}? The contact is archived with its links kept, and you can undo."
     },
     "stakeholders": {
-      "fromProject": "Project stakeholders"
+      "fromProject": "Project stakeholders",
+      "title": "Stakeholders",
+      "empty": "No stakeholders on this project yet.",
+      "note": "Task contacts are added to the project automatically. Removing someone from the project also removes their task links.",
+      "pickProject": "Choose a project to see its stakeholders."
     },
     "external": "External",
     "rolesTitle": "Roles",
@@ -786,7 +805,9 @@
     "editRolesFor": "Edit roles for {{name}}",
     "doneEditingFor": "Done editing roles for {{name}}",
     "roles": {
-      "task": "Task roles"
+      "task": "Task roles",
+      "company": "Company roles",
+      "project": "Project roles"
     },
     "toast": {
       "added": "Added {{name}}",
@@ -794,7 +815,58 @@
       "roleReplaced": "{{name}} is now the {{role}}; {{previous}} was replaced",
       "addedStakeholder": "added as a stakeholder of {{project}}",
       "removed": "Removed {{name}}",
-      "separator": "; "
+      "separator": "; ",
+      "removedWithLinks_one": "Removed {{name}} and {{count}} task link",
+      "removedWithLinks_other": "Removed {{name}} and {{count}} task links",
+      "companyChanged": "Moved {{name}} to {{company}}",
+      "companyCleared": "{{name}} no longer has a company",
+      "rolesCleared": "roles at the old company were cleared",
+      "clientSet": "Client set to {{company}}",
+      "clientCleared": "Client cleared",
+      "companyCreated": "Created {{name}}",
+      "contactCreated": "Created {{name}}",
+      "saved": "Saved {{name}}",
+      "deleted": "Deleted {{name}}",
+      "restored": "Restored {{name}}"
+    },
+    "companies": {
+      "title": "Companies",
+      "new": "New company",
+      "edit": "Edit company",
+      "name": "Company name",
+      "industry": "Industry",
+      "empty": "No companies yet",
+      "search": "Search companies",
+      "pick": "Choose a company to see its people and roles.",
+      "people_one": "{{count}} person",
+      "people_other": "{{count}} people",
+      "clientOf": "Client of",
+      "delete": "Delete company",
+      "deleteConfirm": "Delete {{name}}? It is archived: its contacts and links stay, and you can undo.",
+      "rolesNote": "Company roles apply to the whole company. Moving a contact to another company clears their roles at the old one."
+    },
+    "client": "Client",
+    "noClient": "No client",
+    "people": "People",
+    "noPeople": "No people yet",
+    "noLinks": "Not linked to a project or task",
+    "clearCompanyRoles": "Clear company roles",
+    "removeFromProject": "Remove from project",
+    "showArchived": "Show archived",
+    "archived": "Archived",
+    "restore": "Restore",
+    "noMatches": "Nothing matches your search.",
+    "noAccess": "Companies and contacts are not available to you here.",
+    "searchPlaceholder": "Search name, company, phone or email",
+    "form": {
+      "required": "Enter a name.",
+      "phone": "Enter a phone number with digits, spaces or + - ( ).",
+      "email": "Enter a valid email address.",
+      "tooLong": "This is too long.",
+      "save": "Save",
+      "create": "Create",
+      "cancel": "Cancel",
+      "delete": "Delete"
     }
   }
 }
