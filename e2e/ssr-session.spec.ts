@@ -145,6 +145,9 @@ test("server account identity stays private and read-only until the browser conf
     expect(response!.headers()["cache-control"]).toContain("no-store");
     expect(html).toContain("SSR Alice");
     expect(html).toContain(privateTitle);
+    // The authenticated bootstrap still carries today's calendar read for the
+    // calendar route, even though v2 Today no longer draws a schedule.
+    expect(html).toContain(scheduleTitle);
     for (const cookie of aliceCookies.filter(({ name }) =>
       name.includes("session_token"),
     ))
