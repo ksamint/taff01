@@ -181,3 +181,8 @@ constraint is forbidden in production migrations. Phone and email need the separ
   node's `note`, with its research sources, for Northwind only and once
   (`prototype-mind.ts`); nothing is labelled as model output (plan §2.4
   item 12, ADR 0016).
+- **Editable edges (M18 screens).** Migration `0026_m18_mind_edge_version`
+  adds `mind_edges.version integer NOT NULL DEFAULT 1` with a `> 0` check
+  (additive). `PATCH /api/mind/edges/:id {version, kind}` changes a link's
+  kind under `mind:write`; a stale version answers 409. Removal stays a
+  DELETE that returns the row for undo.
