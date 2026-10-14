@@ -757,20 +757,21 @@ function NodeButton({
   node,
   onSelect,
   t,
-  testId,
+  list,
   trailing,
 }: {
   node: MindNode;
   onSelect: (id: string) => void;
   t: Translate;
-  testId: string;
+  /** Which list the button is in; it names the test id. */
+  list: "rising" | "cooling" | "from" | "to";
   trailing?: string;
 }) {
   return (
     <button
       type="button"
       className="mind-row mind-row-inline"
-      data-testid={testId}
+      data-testid={`mind-${list}-node`}
       data-id={node.id}
       onClick={() => onSelect(node.id)}
     >
@@ -819,7 +820,7 @@ function Overview({
                   node={node}
                   onSelect={onSelect}
                   t={t}
-                  testId="mind-rising-node"
+                  list="rising"
                   trailing={momentumMark(node.momentum)}
                 />
               </li>
@@ -841,7 +842,7 @@ function Overview({
                   node={node}
                   onSelect={onSelect}
                   t={t}
-                  testId="mind-cooling-node"
+                  list="cooling"
                   trailing={momentumMark(node.momentum)}
                 />
               </li>
@@ -1205,12 +1206,7 @@ function NodeDetail({
           <ul className="mind-chips">
             {from.map((item) => (
               <li key={item.id}>
-                <NodeButton
-                  node={item}
-                  onSelect={onSelect}
-                  t={t}
-                  testId="mind-from-node"
-                />
+                <NodeButton node={item} onSelect={onSelect} t={t} list="from" />
               </li>
             ))}
           </ul>
@@ -1224,12 +1220,7 @@ function NodeDetail({
           <ul className="mind-chips">
             {to.map((item) => (
               <li key={item.id}>
-                <NodeButton
-                  node={item}
-                  onSelect={onSelect}
-                  t={t}
-                  testId="mind-to-node"
-                />
+                <NodeButton node={item} onSelect={onSelect} t={t} list="to" />
               </li>
             ))}
           </ul>

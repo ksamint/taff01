@@ -79,7 +79,7 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   page,
 }, info) => {
   const locale = info.project.name as TestLocale;
-  const m = messages[locale].mind;
+  const m = messages[locale];
   const workspace = await setUp(page, locale);
   const project = await createProject(page, workspace, `Insight ${locale}`);
   await page.goto(`/projects/${project.id}?view=mind`);
@@ -93,13 +93,13 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   await expect(form).toBeVisible();
   // Submitting without a title explains what is missing.
   await page.getByTestId("mind-node-save").click();
-  await expect(form.getByRole("alert")).toHaveText(m.form.required);
+  await expect(form.getByRole("alert")).toHaveText(m.mind.form.required);
   await page.getByTestId("mind-node-title").fill(`歸屬感 ${locale}`);
   await page.getByTestId("mind-node-momentum").selectOption("1");
   await page.getByTestId("mind-node-note").fill("Being recognised matters.");
   await page.getByTestId("mind-node-title").press("Enter");
   await expect(toast).toContainText(
-    fill(m.toast.nodeCreated, { title: `歸屬感 ${locale}` }),
+    fill(m.mind.toast.nodeCreated, { title: `歸屬感 ${locale}` }),
   );
   await expect(page.getByTestId("mind-detail-title")).toHaveText(
     `歸屬感 ${locale}`,
@@ -108,7 +108,9 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   await expect(page.getByTestId("mind-note")).toHaveText(
     "Being recognised matters.",
   );
-  await expect(page.getByTestId("mind-no-evidence")).toHaveText(m.noEvidence);
+  await expect(page.getByTestId("mind-no-evidence")).toHaveText(
+    m.mind.noEvidence,
+  );
 
   await page.getByTestId("mind-new-node").click();
   await page.getByTestId("mind-node-title").fill(`Nostalgia ${locale}`);
@@ -144,7 +146,7 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   await page.getByTestId("mind-add-link-target").selectOption(child.id);
   await page.getByTestId("mind-add-link-kind").selectOption("supports");
   await page.getByTestId("mind-add-link-submit").click();
-  await expect(toast).toContainText(m.toast.edgeAdded);
+  await expect(toast).toContainText(m.mind.toast.edgeAdded);
   await expect
     .poll(async () => (await mind(page, workspace)).edges)
     .toMatchObject([
@@ -157,7 +159,7 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   // Change the kind, then undo through PATCH with the new version.
   await page.getByTestId("mind-link-kind").selectOption("contradicts");
   await expect(toast).toContainText(
-    fill(m.toast.edgeChanged, { kind: m.edgeKind.contradicts }),
+    fill(m.mind.toast.edgeChanged, { kind: m.mind.edgeKind.contradicts }),
   );
   await expect
     .poll(async () => (await mind(page, workspace)).edges[0]?.kind)
@@ -169,7 +171,7 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
 
   // Remove the link, then undo re-creates it.
   await page.getByTestId("mind-link-remove").click();
-  await expect(toast).toContainText(m.toast.edgeRemoved);
+  await expect(toast).toContainText(m.mind.toast.edgeRemoved);
   await expect
     .poll(async () => (await mind(page, workspace)).edges.length)
     .toBe(0);
@@ -186,7 +188,7 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   await page.getByTestId("mind-node-strength").selectOption("5");
   await page.getByTestId("mind-node-save").click();
   await expect(toast).toContainText(
-    fill(m.toast.nodeSaved, { title: root.title }),
+    fill(m.mind.toast.nodeSaved, { title: root.title }),
   );
   await expect(page.getByTestId("mind-strength")).toHaveAttribute(
     "aria-valuenow",
@@ -203,7 +205,7 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   // Archive (admins), then undo restores it with its link.
   await page.getByTestId("mind-archive-node").click();
   await expect(toast).toContainText(
-    fill(m.toast.nodeArchived, { title: root.title }),
+    fill(m.mind.toast.nodeArchived, { title: root.title }),
   );
   await expect
     .poll(async () => (await mind(page, workspace)).nodes.length)
@@ -229,7 +231,7 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
 
 test("sources become evidence, with undo", async ({ page }, info) => {
   const locale = info.project.name as TestLocale;
-  const m = messages[locale].mind;
+  const m = messages[locale];
   const workspace = await setUp(page, locale);
   const project = await createProject(page, workspace, `Evidence ${locale}`);
   await addNode(page, workspace, {
@@ -240,7 +242,7 @@ test("sources become evidence, with undo", async ({ page }, info) => {
   await page.goto(`/projects/${project.id}?view=mind`);
   await expect(page.getByTestId("mind-overview")).toBeVisible();
   await expect(page.getByTestId("mind-coverage")).toHaveText(
-    fill(m.coverage, { cited: 0, total: 1 }),
+    fill(m.mind.coverage, { cited: 0, total: 1 }),
   );
   const toast = page.getByTestId("toast");
 
@@ -251,7 +253,7 @@ test("sources become evidence, with undo", async ({ page }, info) => {
   await page.getByTestId("mind-source-save").click();
   await expect(
     page.getByTestId("mind-source-form").getByRole("alert"),
-  ).toHaveText(m.form.urlError);
+  ).toHaveText(m.mind.form.urlError);
   await page
     .getByTestId("mind-source-url")
     .fill("https://doi.org/10.1177/0956797611407931");
@@ -260,7 +262,7 @@ test("sources become evidence, with undo", async ({ page }, info) => {
     .fill("Comfort food and belonging.");
   await page.getByTestId("mind-source-save").click();
   await expect(toast).toContainText(
-    fill(m.toast.sourceCreated, { title: "Troisi & Gabriel (2011)" }),
+    fill(m.mind.toast.sourceCreated, { title: "Troisi & Gabriel (2011)" }),
   );
   const source = page.getByTestId("mind-source");
   await expect(source).toHaveCount(1);
@@ -283,7 +285,10 @@ test("sources become evidence, with undo", async ({ page }, info) => {
   await page.getByTestId("mind-add-evidence").selectOption(created.id);
   await page.getByTestId("mind-add-evidence-submit").click();
   await expect(toast).toContainText(
-    fill(m.toast.evidenceAdded, { source: created.title, title: node.title }),
+    fill(m.mind.toast.evidenceAdded, {
+      source: created.title,
+      title: node.title,
+    }),
   );
   await expect(page.getByTestId("mind-evidence-item")).toHaveCount(1);
   await expect
@@ -293,7 +298,10 @@ test("sources become evidence, with undo", async ({ page }, info) => {
   // Remove it, then undo puts it back.
   await page.getByTestId("mind-evidence-remove").click();
   await expect(toast).toContainText(
-    fill(m.toast.evidenceRemoved, { source: created.title, title: node.title }),
+    fill(m.mind.toast.evidenceRemoved, {
+      source: created.title,
+      title: node.title,
+    }),
   );
   await expect
     .poll(async () => (await mind(page, workspace)).nodeSources.length)
@@ -315,7 +323,7 @@ test("sources become evidence, with undo", async ({ page }, info) => {
   // Edit a source from the overview; undo restores the old title.
   await page.getByTestId("mind-back").click();
   await expect(page.getByTestId("mind-coverage")).toHaveText(
-    fill(m.coverage, { cited: 1, total: 1 }),
+    fill(m.mind.coverage, { cited: 1, total: 1 }),
   );
   await page
     .getByTestId("mind-source")
@@ -325,7 +333,7 @@ test("sources become evidence, with undo", async ({ page }, info) => {
   await page.getByTestId("mind-source-title").fill("C&SD Census 2021");
   await page.getByTestId("mind-source-save").click();
   await expect(toast).toContainText(
-    fill(m.toast.sourceSaved, { title: "C&SD Census 2021" }),
+    fill(m.mind.toast.sourceSaved, { title: "C&SD Census 2021" }),
   );
   await toast.getByTestId("toast-action").click();
   await expect
@@ -339,7 +347,7 @@ test("turn a node into a validation task owned by the person", async ({
   page,
 }, info) => {
   const locale = info.project.name as TestLocale;
-  const m = messages[locale].mind;
+  const m = messages[locale];
   const workspace = await setUp(page, locale);
   const project = await createProject(page, workspace, `Validate ${locale}`);
   await addNode(page, workspace, {
@@ -355,14 +363,14 @@ test("turn a node into a validation task owned by the person", async ({
   const form = page.getByTestId("mind-task-form");
   await expect(form).toBeVisible();
   await expect(page.getByTestId("mind-task-title")).toHaveValue(
-    fill(m.validateTitle, { title: `深夜一人餐 ${locale}` }),
+    fill(m.mind.validateTitle, { title: `深夜一人餐 ${locale}` }),
   );
   await expect(page.getByTestId("mind-task-project")).toHaveValue(project.id);
   const due = await page.getByTestId("mind-task-due").inputValue();
   expect(due).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   await page.getByTestId("mind-task-save").click();
   const toast = page.getByTestId("toast");
-  await expect(toast).toContainText(m.toast.taskMade.split("{{")[0]!);
+  await expect(toast).toContainText(m.mind.toast.taskMade.split("{{")[0]!);
   await expect(page.getByTestId("mind-tasked")).toBeVisible();
   await expect(page.getByTestId("mind-make-task")).toHaveCount(0);
 
@@ -372,7 +380,7 @@ test("turn a node into a validation task owned by the person", async ({
     await (await page.request.get(`/api/tasks/${node.taskId}`)).json(),
   );
   expect(task).toMatchObject({
-    title: fill(m.validateTitle, { title: `深夜一人餐 ${locale}` }),
+    title: fill(m.mind.validateTitle, { title: `深夜一人餐 ${locale}` }),
     ownerId: workspace.memberId,
     workerId: null,
     projectId: project.id,

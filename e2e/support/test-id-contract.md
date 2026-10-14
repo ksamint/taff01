@@ -259,6 +259,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-edit-node` | 1 |  | mind.spec.ts |
 | `mind-empty` | 1 |  | mind.spec.ts |
 | `mind-evidence-item` | 2 |  | mind.spec.ts |
+| `mind-from-node` | 1 |  | mind.spec.ts |
 | `mind-link-kind` | 1 |  | mind.spec.ts |
 | `mind-list-node` | 3 |  | mind.spec.ts |
 | `mind-make-task` | 2 |  | mind.spec.ts |
@@ -291,6 +292,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-task-save` | 1 |  | mind.spec.ts |
 | `mind-task-title` | 1 |  | mind.spec.ts |
 | `mind-tasked` | 1 |  | mind.spec.ts |
+| `mind-to-node` | 1 |  | mind.spec.ts |
 | `mind-view` | 1 |  | mind.spec.ts |
 
 ### notification-alerts.tsx
@@ -527,13 +529,6 @@ several do). “Also rendered by” lists the other files.
 | `today-heading` | 46 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-parity.spec.ts |
 
-### (not rendered)
-
-| Test id | Uses | Also rendered by | Used in |
-| --- | ---: | --- | --- |
-| `mind-from-node` | 1 |  | mind.spec.ts |
-| `mind-to-node` | 1 |  | mind.spec.ts |
-
 ## Role and name locators
 
 `getByRole(role, { name })`. Native semantics the suites also rely on:
@@ -738,7 +733,6 @@ Keys read from `apps/web/locales/*/common.json` through
 | `brief.title` | 3 | brief.spec.ts |
 | `brief.toast.applied` | 3 | brief.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
-| `coverage` | 6 | mind.spec.ts |
 | `crm.companies.delete` | 5 | crm.spec.ts |
 | `crm.contacts.add` | 6 | crm.spec.ts, task-contacts.spec.ts |
 | `crm.contacts.delete` | 5 | crm.spec.ts |
@@ -758,7 +752,6 @@ Keys read from `apps/web/locales/*/common.json` through
 | `crm.toast.removedWithLinks_other` | 5 | crm.spec.ts |
 | `crm.toast.roleReplaced` | 7 | crm.spec.ts, task-contacts.spec.ts |
 | `crm.toast.rolesCleared` | 5 | crm.spec.ts |
-| `edgeKind.contradicts` | 3 | mind.spec.ts |
 | `emailOrUsername` | 1 | username-auth.spec.ts |
 | `emailVerification.delivery.logged` | 5 | planning.spec.ts |
 | `en` | 1 | me.spec.ts |
@@ -769,8 +762,6 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.internal_error` | 2 | calendar.spec.ts |
 | `errors.invalid_input` | 13 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
-| `form.required` | 3 | mind.spec.ts |
-| `form.urlError` | 3 | mind.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-parity.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
@@ -782,11 +773,26 @@ Keys read from `apps/web/locales/*/common.json` through
 | `me.signedInAs` | 2 | ssr-session.spec.ts |
 | `me.teamSummary` | 1 | me.spec.ts |
 | `me.title` | 1 | me.spec.ts |
-| `mind` | 3 | mind.spec.ts |
+| `mind.coverage` | 6 | mind.spec.ts |
+| `mind.edgeKind.contradicts` | 3 | mind.spec.ts |
+| `mind.form.required` | 3 | mind.spec.ts |
+| `mind.form.urlError` | 3 | mind.spec.ts |
+| `mind.noEvidence` | 3 | mind.spec.ts |
+| `mind.toast.edgeAdded` | 3 | mind.spec.ts |
+| `mind.toast.edgeChanged` | 3 | mind.spec.ts |
+| `mind.toast.edgeRemoved` | 3 | mind.spec.ts |
+| `mind.toast.evidenceAdded` | 3 | mind.spec.ts |
+| `mind.toast.evidenceRemoved` | 3 | mind.spec.ts |
+| `mind.toast.nodeArchived` | 3 | mind.spec.ts |
+| `mind.toast.nodeCreated` | 3 | mind.spec.ts |
+| `mind.toast.nodeSaved` | 3 | mind.spec.ts |
+| `mind.toast.sourceCreated` | 3 | mind.spec.ts |
+| `mind.toast.sourceSaved` | 3 | mind.spec.ts |
+| `mind.toast.taskMade` | 3 | mind.spec.ts |
+| `mind.validateTitle` | 6 | mind.spec.ts |
 | `nav.calendar` | 1 | calendar.spec.ts |
 | `nav.label` | 1 | calendar.spec.ts |
 | `nav.me` | 1 | ui-parity.spec.ts |
-| `noEvidence` | 3 | mind.spec.ts |
 | `notifications.title` | 1 | notifications.spec.ts |
 | `organization.accept` | 5 | planning.spec.ts |
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
@@ -829,18 +835,6 @@ Keys read from `apps/web/locales/*/common.json` through
 | `timeline.depRemoved` | 6 | timeline.spec.ts |
 | `timeline.rescheduled` | 6 | timeline.spec.ts |
 | `timeline.resized` | 3 | timeline.spec.ts |
-| `toast.edgeAdded` | 3 | mind.spec.ts |
-| `toast.edgeChanged` | 3 | mind.spec.ts |
-| `toast.edgeRemoved` | 3 | mind.spec.ts |
-| `toast.evidenceAdded` | 3 | mind.spec.ts |
-| `toast.evidenceRemoved` | 3 | mind.spec.ts |
-| `toast.nodeArchived` | 3 | mind.spec.ts |
-| `toast.nodeCreated` | 3 | mind.spec.ts |
-| `toast.nodeSaved` | 3 | mind.spec.ts |
-| `toast.sourceCreated` | 3 | mind.spec.ts |
-| `toast.sourceSaved` | 3 | mind.spec.ts |
-| `toast.taskMade` | 3 | mind.spec.ts |
 | `today` | 19 | optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
-| `validateTitle` | 6 | mind.spec.ts |
