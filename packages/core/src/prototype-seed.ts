@@ -63,6 +63,7 @@ import { eq, sql } from "drizzle-orm";
 import { normalizeCalendarSchedule } from "./calendar-recurrence";
 import { createDigestSnapshot } from "./notifications";
 import { type Actor, can } from "./permissions";
+import { seedMindMap } from "./prototype-mind";
 
 type Person = typeof user.$inferSelect;
 // Prototype sample data; no external tools, tests, deployments or interviews ran.
@@ -439,6 +440,7 @@ export async function seedPrototype(
       await insertCalendar(id, definition);
     }
     await seedPlanningAndCrm(tx, org.key, workspaceId, projectId, owner, day);
+    if (org.key === "nw") await seedMindMap(tx, workspaceId, owner);
     for (const [personKey, member] of team) {
       if (member.kind !== "person" || !member.userId) continue;
       const person = people.find((row) => row.id === member.userId);

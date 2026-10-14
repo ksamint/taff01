@@ -1,12 +1,13 @@
 import { serve } from "@hono/node-server";
 import {
+  createAiProviderFromEnv,
   createCore,
   createEmailTransportFromEnv,
   createTencentSmsProviderFromEnv,
 } from "@taff/core";
-import pino from "pino";
 import { z } from "zod";
 import { createApp } from "./app";
+import { createLogger } from "./logger";
 import { createRateLimiter } from "./rate-limit";
 import { createRealtime } from "./realtime";
 
@@ -21,16 +22,10 @@ const env = z
     TOKEN_PEPPER: z.string().min(16),
     REDIS_URL: z.url(),
     MCP_RATE_LIMIT: z.coerce.number().int().min(1).default(60),
+    ASK_RATE_LIMIT: z.coerce.number().int().min(1).default(20),
   })
   .parse(process.env);
-const logger = pino({
-  redact: [
-    "req.headers.authorization",
-    "req.headers.cookie",
-    "password",
-    "token",
-  ],
-});
+const logger = createLogger();
 const core = createCore({
   databaseUrl: env.DATABASE_URL,
   authUrl: env.AUTH_URL,
@@ -39,9 +34,12 @@ const core = createCore({
   sms: createTencentSmsProviderFromEnv(process.env),
   email: createEmailTransportFromEnv(process.env),
   onEmailStatus: (status) => logger.info(status, "Email delivery status"),
+  // Built only when AI_BASE_URL, AI_API_KEY and AI_MODEL are all set (ADR 0016).
+  ai: createAiProviderFromEnv(process.env),
 });
 const rateLimiter = createRateLimiter(env.REDIS_URL, env.MCP_RATE_LIMIT);
 const emailRateLimiter = createRateLimiter(env.REDIS_URL, 3);
+const askRateLimiter = createRateLimiter(env.REDIS_URL, env.ASK_RATE_LIMIT);
 const realtime = await createRealtime(core);
 const app = createApp(
   core,
@@ -50,6 +48,7 @@ const app = createApp(
   rateLimiter,
   realtime,
   emailRateLimiter,
+  askRateLimiter,
 );
 const server = serve(
   {
@@ -69,6 +68,7 @@ const shutdown = async () => {
       core.close(),
       rateLimiter.close(),
       emailRateLimiter.close(),
+      askRateLimiter.close(),
     ]).then(() => process.exit(0));
   });
 };

@@ -326,6 +326,28 @@ describe("authenticated realtime boundaries", () => {
     expect(await task).toEqual(change());
     expect(danaSeen).toEqual([change()]);
   });
+  it("routes Phase B changes to every member of the workspace, guests included", async () => {
+    const alice = await connect("alice");
+    const dana = await connect("dana");
+    const warmAlice = message(alice);
+    const warmDana = message(dana);
+    await deliver(change());
+    await Promise.all([warmAlice, warmDana]);
+    for (const action of [
+      "suggestions.insert",
+      "suggestions.update",
+      "mind_nodes.insert",
+      "mind_edges.delete",
+      "mind_sources.update",
+      "mind_node_sources.insert",
+    ]) {
+      const toAlice = message(alice);
+      const toDana = message(dana);
+      await deliver(change({ action }));
+      expect((await toAlice).action).toBe(action);
+      expect((await toDana).action).toBe(action);
+    }
+  });
   it("expires authenticated connections and rejects client writes", async () => {
     expiresAt = Date.now() + 200;
     const expiring = await connect("alice");

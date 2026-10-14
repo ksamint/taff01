@@ -61,7 +61,10 @@ import type { Logger } from "pino";
 import { createMcpHttpHandler, describeCall } from "./mcp";
 import type { RateLimiter } from "./rate-limit";
 import type { Realtime } from "./realtime";
+import { registerAssistantRoutes } from "./routes/assistant";
 import { registerCrmRoutes } from "./routes/crm";
+import { registerMindRoutes } from "./routes/mind";
+import { registerRelationRoutes } from "./routes/relations";
 import { registerTimelineRoutes } from "./routes/timeline";
 
 type Core = ReturnType<typeof createCore>;
@@ -93,6 +96,7 @@ export function createApp(
   rateLimiter: RateLimiter,
   realtime?: Realtime,
   emailRateLimiter?: RateLimiter,
+  askRateLimiter?: RateLimiter,
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<AppEnv>();
@@ -800,6 +804,9 @@ export function createApp(
     return c.json({ success: true });
   });
   registerCrmRoutes(app, core);
+  registerRelationRoutes(app, core);
+  registerMindRoutes(app, core);
+  registerAssistantRoutes(app, core, askRateLimiter ?? rateLimiter);
   app.notFound((c) => c.json({ error: "not_found" }, 404));
   app.onError((error, c) => {
     if (error instanceof SchemaError || error instanceof SyntaxError)

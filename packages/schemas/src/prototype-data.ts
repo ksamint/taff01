@@ -32,6 +32,11 @@ const kinds = [
   "contactLink",
   "contactRole",
   "payment",
+  // Appended (M18) so every earlier fixture id stays the same.
+  "mindNode",
+  "mindEdge",
+  "mindSource",
+  "mindNodeSource",
 ] as const;
 /** Fixed fixture namespace; UUIDs are identities, never authentication tokens. */
 export function prototypeId(

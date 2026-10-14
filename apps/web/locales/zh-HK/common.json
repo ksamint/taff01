@@ -296,7 +296,10 @@
       "removeDependency": "移除依賴",
       "listCompanies": "列出公司",
       "listContacts": "列出聯繫人（未獲授權不含電話與電郵）",
-      "readContact": "讀取聯繫人及其關聯"
+      "readContact": "讀取聯繫人及其關聯",
+      "readRelations": "讀取關係圖（不含電話與電郵）",
+      "readBrief": "讀取簡報（只含代碼與數字，不含財務）",
+      "proposeChange": "提出拆分或改期建議，由人決定是否採用"
     },
     "back": "返回",
     "copyEndpoint": "複製端點",

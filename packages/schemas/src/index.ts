@@ -52,13 +52,16 @@ import {
 } from "./primitives";
 import { runSchema, runStatusSchema } from "./run-read";
 
+export * from "./assistant";
 export * from "./base";
 
 export * from "./calendar-read";
 export * from "./changes";
 export * from "./crm";
 export * from "./email-verification";
+export * from "./graph";
 export * from "./inbox-read";
+export * from "./mind";
 export * from "./notification-preferences";
 export * from "./plan";
 export * from "./project-read";

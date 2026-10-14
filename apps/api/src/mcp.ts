@@ -58,6 +58,7 @@ import {
   mcpTasksUpdateArgs,
 } from "@taff/schemas";
 import { registerCrmTools } from "./mcp-crm";
+import { registerInsightTools } from "./mcp-insights";
 import { registerTimelineTools } from "./mcp-timeline";
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
@@ -329,6 +330,7 @@ export function createMcpServer(
   );
   registerTimelineTools(server, core, principal, run);
   registerCrmTools(server, core, principal, run);
+  registerInsightTools(server, core, principal, run);
   return server;
 }
 

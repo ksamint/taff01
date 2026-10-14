@@ -135,6 +135,56 @@ describe("workspace realtime lifecycle", () => {
       client.getQueryState(["unrelated", workspaceId])?.isInvalidated,
     ).toBe(false);
   });
+  it("invalidates the relations graph on any task, member or CRM change", () => {
+    const key = ["graph", workspaceId, { projectId: null }];
+    client.setQueryData(key, {});
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    client.setQueryData(key, {});
+    for (const action of [
+      "tasks.update",
+      "task_dependencies.delete",
+      "project_contacts.insert",
+    ]) {
+      client.setQueryData(key, {});
+      socket.message({ ...event, action });
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    }
+  });
+  it("invalidates the brief and suggestions on a proposal or plan change", () => {
+    const keys = [
+      ["brief", "all"],
+      ["brief", "workspace", workspaceId],
+      ["suggestions", workspaceId, { status: "pending" }],
+      ["workspace-ai", workspaceId],
+    ];
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    for (const action of ["suggestions.insert", "task_plans.update"]) {
+      for (const key of keys) client.setQueryData(key, {});
+      socket.message({ ...event, action });
+      for (const key of keys)
+        expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    }
+  });
+  it("invalidates the mind map on a node, edge or source change", () => {
+    const key = ["mind-map", workspaceId, "exclude"];
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const socket = Socket.instances[0];
+    socket.open();
+    for (const action of [
+      "mind_nodes.update",
+      "mind_edges.delete",
+      "mind_sources.insert",
+      "mind_node_sources.delete",
+    ]) {
+      client.setQueryData(key, {});
+      socket.message({ ...event, action });
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    }
+  });
   it("defers change refetches until a pending optimistic mutation settles", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
     cleanup = connectWorkspace(client, workspaceId, userId);

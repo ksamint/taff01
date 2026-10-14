@@ -21,7 +21,7 @@ export const changeEventSchema = strictObject({
   resourceId: string().check(minLength(1), maxLength(200)),
   action: string().check(
     regex(
-      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites|task_calendar|notification_preferences|daily_digests|sms_auth_challenges|sms_auth_limits|companies|contacts|company_contacts|project_contacts|task_contacts|contact_roles|task_plans|milestones|task_dependencies|project_payments)\.(insert|update|delete)$/,
+      /^(users|sessions|accounts|verifications|workspaces|members|tasks|agent_tokens|mcp_calls|agent_profiles|agent_permissions|grants|runs|run_events|run_artifacts|review_checks|review_comments|review_items|inbox_items|projects|task_comments|workspace_invites|task_calendar|notification_preferences|daily_digests|sms_auth_challenges|sms_auth_limits|companies|contacts|company_contacts|project_contacts|task_contacts|contact_roles|task_plans|milestones|task_dependencies|project_payments|suggestions|mind_nodes|mind_edges|mind_sources|mind_node_sources)\.(insert|update|delete)$/,
     ),
   ),
   actorId: string().check(minLength(1), maxLength(200)),

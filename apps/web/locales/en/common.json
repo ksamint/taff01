@@ -296,7 +296,10 @@
       "removeDependency": "Remove dependency",
       "listCompanies": "List companies",
       "listContacts": "List contacts (no phone or email without permission)",
-      "readContact": "Read a contact and its links"
+      "readContact": "Read a contact and its links",
+      "readRelations": "Read the relations graph (no phone or email)",
+      "readBrief": "Read the brief (codes and numbers, no finance)",
+      "proposeChange": "Propose a split or reschedule for a person to apply"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",
