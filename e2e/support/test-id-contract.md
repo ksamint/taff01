@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-parity.spec.ts`) is listed with the rest.
 
-## Test ids (230 distinct, 925 uses)
+## Test ids (254 distinct, 965 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -45,11 +45,42 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `auth-email` | 27 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-password` | 24 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-submit` | 30 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-email` | 28 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-password` | 25 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-submit` | 31 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 6 |  | optimistic-m4.spec.ts, planning.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-username` | 4 |  | username-auth.spec.ts |
+
+### brief-route.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `me-brief` | 4 | me-view.tsx | brief.spec.ts |
+
+### brief-view.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `ask-answer` | 2 |  | brief.spec.ts |
+| `ask-heading` | 1 |  | brief.spec.ts |
+| `ask-input` | 2 |  | brief.spec.ts |
+| `ask-item` | 2 |  | brief.spec.ts |
+| `ask-send` | 1 |  | brief.spec.ts |
+| `ask-try-atRisk` | 1 |  | brief.spec.ts |
+| `ask-try-blocked` | 1 |  | brief.spec.ts |
+| `brief-action` | 3 |  | brief.spec.ts |
+| `brief-action-open` | 2 |  | brief.spec.ts |
+| `brief-close` | 2 |  | brief.spec.ts |
+| `brief-greeting` | 2 |  | brief.spec.ts |
+| `brief-proposal-apply` | 1 |  | brief.spec.ts |
+| `brief-proposal-dismiss` | 1 |  | brief.spec.ts |
+| `brief-proposal-subtasks` | 1 |  | brief.spec.ts |
+| `brief-risk` | 1 |  | brief.spec.ts |
+| `brief-stat-agents` | 1 |  | brief.spec.ts |
+| `brief-stat-dueToday` | 1 |  | brief.spec.ts |
+| `brief-stat-toConfirm` | 1 |  | brief.spec.ts |
+| `brief-stats` | 1 |  | brief.spec.ts |
+| `brief-view` | 1 |  | brief.spec.ts |
 
 ### calendar-scene.tsx
 
@@ -191,6 +222,8 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `me-advanced` | 2 | me-view.tsx | me.spec.ts |
 | `me-organization` | 5 | me-view.tsx | me.spec.ts, scripts/ui/app-shots.mjs, ui-parity.spec.ts |
+| `me-tab-brief` | 1 |  | brief.spec.ts |
+| `me-tab-inbox` | 2 |  | brief.spec.ts |
 | `open-mcp` | 2 | me-view.tsx | mcp.spec.ts |
 
 ### me-view.tsx
@@ -198,6 +231,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `advanced-theme-system` | 2 |  | me.spec.ts |
+| `brief-dot` | 1 |  | brief.spec.ts |
 | `me-team` | 3 |  | me.spec.ts, scripts/ui/app-shots.mjs |
 | `me-tz` | 9 |  | me.spec.ts |
 | `open-notifications` | 3 |  | me.spec.ts, scripts/ui/app-shots.mjs |
@@ -435,7 +469,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 12 |  | accessibility.spec.ts, agent-creation.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-parity.spec.ts |
-| `today-heading` | 44 |  | agent-review.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 45 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-parity.spec.ts |
 
 ## Role and name locators
@@ -470,6 +504,8 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `dialog` | 37 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-parity.spec.ts |
+| `dialog — name: m.brief.proposal.title` | 1 | brief.spec.ts |
+| `dialog — name: m.brief.title` | 1 | brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 1 | crm.spec.ts |
 | `dialog — name: m.crm.contacts.add` | 2 | crm.spec.ts, task-contacts.spec.ts |
 | `dialog — name: m.crm.contacts.delete` | 1 | crm.spec.ts |
@@ -500,6 +536,7 @@ several do). “Also rendered by” lists the other files.
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
 | `status` | 1 | sms-auth.spec.ts |
+| `tabpanel` | 1 | brief.spec.ts |
 
 ## Label locators
 
@@ -576,9 +613,11 @@ read (`data-event-id`, `data-date`).
 | `.team-directory > h1` | 3 | agent-creation.spec.ts, planning.spec.ts, ui-parity.spec.ts |
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mjs |
 | `.team-directory-list li` | 1 | ui-parity.spec.ts |
+| `.toast-region` | 1 | brief.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
+| `[data-source]` | 1 | brief.spec.ts |
 | `[data-testid="relations-node"][data-key="task:*"]` | 1 | timeline.spec.ts |
 | `[data-testid="timeline-bar"][data-id="*"]` | 1 | timeline.spec.ts |
 | `[data-testid="timeline-dependency"][data-from="*"]` | 1 | timeline.spec.ts |
@@ -627,6 +666,14 @@ Keys read from `apps/web/locales/*/common.json` through
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
+| `ask.answer.unknown` | 3 | brief.spec.ts |
+| `ask.rules` | 6 | brief.spec.ts |
+| `ask.suggestion.blocked` | 3 | brief.spec.ts |
+| `brief.action.split_other` | 3 | brief.spec.ts |
+| `brief.nav` | 6 | brief.spec.ts |
+| `brief.proposal.title` | 3 | brief.spec.ts |
+| `brief.title` | 3 | brief.spec.ts |
+| `brief.toast.applied` | 3 | brief.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
 | `crm.companies.delete` | 5 | crm.spec.ts |
 | `crm.contacts.add` | 6 | crm.spec.ts, task-contacts.spec.ts |
