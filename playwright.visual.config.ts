@@ -21,13 +21,13 @@ if (
     "quick-add",
   ].includes(process.env.UI_SCREEN ?? "")
 )
-  throw new Error("Set UI_SCREEN to an implemented parity screen.");
+  throw new Error("Set UI_SCREEN to an implemented v2 screen.");
 
 export default defineConfig({
   ...behavior,
-  testMatch: "**/ui-parity.spec.ts",
+  testMatch: "**/ui-v2.spec.ts",
   testIgnore: [],
-  outputDir: `test-results/ui-parity/${process.env.UI_SCREEN}`,
+  outputDir: `test-results/ui-v2/${process.env.UI_SCREEN}`,
   // References are approved separately in the milestone; this runner must not
   // invent missing baselines. Linux generation requires an explicit CLI override.
   updateSnapshots: "none",
