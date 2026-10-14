@@ -1,0 +1,647 @@
+prototype_key,app_key,zh-HK,en,zh-CN,source
+S.today,nav.today,今天,Today,今天,Team Tasks.dc.html:1853
+S.calendar,nav.calendar,日曆,Calendar,日历,Team Tasks.dc.html:1853
+S.projects,nav.projects,項目,Projects,项目,Team Tasks.dc.html:1853
+S.inbox,nav.inbox,收件箱,Inbox,收件箱,Team Tasks.dc.html:1853
+S.me,nav.me,我的,Me,我的,Team Tasks.dc.html:1853
+S.agentsAtWork,agentsAtWork,智能體工作中,Agents at work,智能体工作中,Team Tasks.dc.html:1854
+S.schedule,new:today.schedule,日程,Schedule,日程,Team Tasks.dc.html:1854
+S.dueToday,todayDue,今天到期,Due today,今天到期,Team Tasks.dc.html:1854
+S.day,calendar.day,日,Day,日,Team Tasks.dc.html:1855
+S.week,calendar.week,週,Week,周,Team Tasks.dc.html:1855
+S.month,calendar.month,月,Month,月,Team Tasks.dc.html:1855
+S.dragHint,new:calendar.dragToReschedule,拖動改期，點空白處新建,Drag to reschedule; tap an empty slot to add,拖动改期，点空白处新建,Team Tasks.dc.html:1855
+S.todo,status.todo,待辦,To do,待办,Team Tasks.dc.html:1856
+S.doing,status.in_progress,進行中,In progress,进行中,Team Tasks.dc.html:1856
+S.review,status.needs_review,待確認,To confirm,待确认,Team Tasks.dc.html:1856
+S.done,status.done,已完成,Done,已完成,Team Tasks.dc.html:1856
+S.working,run.status.running,工作中,Working,工作中,Team Tasks.dc.html:1857
+S.blocked,new:run.status.blocked,已阻塞,Blocked,已阻塞,Team Tasks.dc.html:1857
+S.idle,new:run.status.idle,空閒,Idle,空闲,Team Tasks.dc.html:1857
+S.reviewing,run.status.needs_review,待確認,To confirm,待确认,Team Tasks.dc.html:1857
+S.delivered,new:run.status.delivered,已交付,Delivered,已交付,Team Tasks.dc.html:1857
+S.status,planning.status,狀態,Status,状态,Team Tasks.dc.html:1858
+S.owner,owner,負責人,Owner,负责人,Team Tasks.dc.html:1858
+S.worker,worker,執行者,Assigned to,执行者,Team Tasks.dc.html:1858
+S.due,taskDetail.due,截止,Due,截止,Team Tasks.dc.html:1858
+S.priority,planning.priority,優先級,Priority,优先级,Team Tasks.dc.html:1858
+S.projectL,planning.project,項目,Project,项目,Team Tasks.dc.html:1858
+S.assignAgent,new:taskDetail.assignAgent,分配給智能體,Assign to agent,分配给智能体,Team Tasks.dc.html:1859
+S.description,planning.description,描述,Description,描述,Team Tasks.dc.html:1859
+S.activity,new:taskDetail.activity,動態,Activity,动态,Team Tasks.dc.html:1859
+S.approve,review.approve,批准,Approve,批准,Team Tasks.dc.html:1860
+S.requestChanges,review.requestChanges,要求修改,Request changes,要求修改,Team Tasks.dc.html:1860
+S.commentPh,planning.commentPlaceholder,添加評論…,Add a comment…,添加评论…,Team Tasks.dc.html:1860
+S.pickAgent,new:assign.title,分配給智能體,Assign to an agent,分配给智能体,Team Tasks.dc.html:1861
+S.pickAgentSub,new:assign.hint,智能體完成後會提交給負責人確認。,The agent submits its work to the owner for confirmation.,智能体完成后会提交给负责人确认。,Team Tasks.dc.html:1861
+S.assign,new:assign.submit,分配,Assign,分配,Team Tasks.dc.html:1861
+S.cancel,new:actions.cancel,取消,Cancel,取消,Team Tasks.dc.html:1861
+S.changesSub,new:review.changesHint,說明需要修改的地方，智能體會據此繼續工作。,Describe what to change; the agent continues from there.,说明需要修改的地方，智能体会据此继续工作。,Team Tasks.dc.html:1862
+S.send,new:review.sendToAgent,發送給智能體,Send to agent,发送给智能体,Team Tasks.dc.html:1862
+S.quickAdd,quickAdd.title,快速添加,Quick add,快速添加,Team Tasks.dc.html:1863
+S.qaPh,quickAdd.placeholder,描述任務，日期、時間和執行者會自動識別,"Describe the task; dates, times and assignees are detected",描述任务，日期、时间和执行者会自动识别,Team Tasks.dc.html:1863
+S.tryL,quickAdd.try,試試,Try,试试,Team Tasks.dc.html:1863
+S.create,addTask,建立任務,Add task,创建任务,Team Tasks.dc.html:1863
+S.untitled,new:quickAdd.titlePlaceholder,任務標題,Task title,任务标题,Team Tasks.dc.html:1863
+S.pDate,new:quickAdd.field.date,日期,Date,日期,Team Tasks.dc.html:1864
+S.pTime,new:quickAdd.field.time,時間,Time,时间,Team Tasks.dc.html:1864
+S.pWorker,new:quickAdd.field.worker,執行者,Assignee,执行者,Team Tasks.dc.html:1864
+S.pProject,new:quickAdd.field.project,項目,Project,项目,Team Tasks.dc.html:1864
+S.pPri,new:quickAdd.field.priority,優先級,Priority,优先级,Team Tasks.dc.html:1864
+S.all,inbox.all,全部,All,全部,Team Tasks.dc.html:1865
+S.reviews,inbox.reviews,審核,Reviews,审核,Team Tasks.dc.html:1865
+S.blockers,inbox.blockers,阻塞,Blockers,阻塞,Team Tasks.dc.html:1865
+S.reqReview,new:activity.requestedConfirmation,請求確認,requested confirmation,请求确认,Team Tasks.dc.html:1866
+S.isBlocked,new:activity.isBlocked,被阻塞,is blocked,被阻塞,Team Tasks.dc.html:1866
+S.mentionedYou,new:activity.mentionedYou,提到了你,mentioned you,提到了你,Team Tasks.dc.html:1866
+S.mention,inbox.kind.mention,提及,Mention,提及,Team Tasks.dc.html:1866
+S.view,inbox.view,查看,View,查看,Team Tasks.dc.html:1867
+S.grant,inbox.grantAccess,授予權限,Grant access,授予权限,Team Tasks.dc.html:1867
+S.inboxZero,inbox.zero,收件箱已清空,Inbox zero,收件箱已清空,Team Tasks.dc.html:1867
+S.inboxZeroSub,inbox.zeroSub,新的審核請求和阻塞會出現在這裡。,New review requests and blockers will appear here.,新的审核请求和阻塞会出现在这里。,Team Tasks.dc.html:1867
+S.team,organization.team,團隊,Team,团队,Team Tasks.dc.html:1868
+S.people,organization.people,成員,People,成员,Team Tasks.dc.html:1868
+S.agents,agentProfile.team,智能體,Agents,智能体,Team Tasks.dc.html:1868
+S.settings,me.settings,設定,Settings,设置,Team Tasks.dc.html:1868
+S.mcp,mcp.title,MCP 伺服器,MCP server,MCP 服务器,Team Tasks.dc.html:1868
+S.preferences,me.preferences,偏好設定,Preferences,偏好设置,Team Tasks.dc.html:1868
+S.language,language,語言,Language,语言,Team Tasks.dc.html:1869
+S.appearance,me.appearance,外觀,Appearance,外观,Team Tasks.dc.html:1869
+S.notifications,notifications.title,通知,Notifications,通知,Team Tasks.dc.html:1869
+S.notifSub,new:me.notificationsHint,審核請求與阻塞,Review requests and blockers,审核请求与阻塞,Team Tasks.dc.html:1869
+S.serverUrl,mcp.endpointUrl,伺服器地址,Server URL,服务器地址,Team Tasks.dc.html:1870
+S.token,new:mcp.personalToken,個人存取權杖,Personal access token,个人访问令牌,Team Tasks.dc.html:1870
+S.regenerate,new:mcp.regenerate,重新生成,Regenerate,重新生成,Team Tasks.dc.html:1870
+S.clients,new:mcp.connectedClients,已連接客戶端,Connected clients,已连接客户端,Team Tasks.dc.html:1870
+S.tools,mcp.tools,開放的工具,Available tools,开放的工具,Team Tasks.dc.html:1870
+S.connectTools,new:mcp.connectTools,連接工具,Connect tools,连接工具,Team Tasks.dc.html:1870
+S.connect,new:mcp.connect,連接,Connect,连接,Team Tasks.dc.html:1870
+S.connected,new:mcp.connected,已連接,Connected,已连接,Team Tasks.dc.html:1870
+S.runningShort,new:mcp.running,執行中,Running,执行中,Team Tasks.dc.html:1871
+S.mcpIntro,mcp.subtitle,外部智能體和客戶端通過 MCP 讀取、建立和更新任務與日程。,"External agents and clients use MCP to read, create and update tasks and events.",外部智能体和客户端通过 MCP 读取、创建和更新任务与日程。,Team Tasks.dc.html:1871
+S.back,new:actions.back,返回,Back,返回,Team Tasks.dc.html:1872
+S.workspace,new:seed.workspaceName,北風科技 · 產品組,Northwind · Product,北风科技 · 产品组,Team Tasks.dc.html:1872
+S.blockedOn,new:taskDetail.blockedOn,阻塞原因,Blocked on,阻塞原因,Team Tasks.dc.html:1872
+S.deliverable,new:taskDetail.deliverable,交付物,Deliverable,交付物,Team Tasks.dc.html:1872
+S.newTask,newTask,新建任務,New task,新建任务,Team Tasks.dc.html:1873
+S.board,projects.boardView,看板,Board,看板,Team Tasks.dc.html:1873
+S.list,projects.listView,列表,List,列表,Team Tasks.dc.html:1873
+S.timelineV,new:projects.timelineView,時間線,Timeline,时间线,Team Tasks.dc.html:1873
+S.relV,new:projects.relationsView,關係圖,Relations,关系图,Team Tasks.dc.html:1873
+S.moreV,new:projects.moreViews,更多,More,更多,Team Tasks.dc.html:1873
+S.mindV,new:projects.mindViewShort,心智,Mind,心智,Team Tasks.dc.html:1873
+S.relVD,new:projects.relationsView,關係圖,Relations,关系图,Team Tasks.dc.html:1873
+S.mindVD,new:projects.mindView,心智圖,Mindscape,心智图,Team Tasks.dc.html:1873
+S.fAll,new:projects.filterAll,全部,All,全部,Team Tasks.dc.html:1874
+S.fAgents,projects.agents,智能體執行,Agent work,智能体执行,Team Tasks.dc.html:1874
+S.fMine,projects.mine,我負責的,Mine,我负责的,Team Tasks.dc.html:1874
+S.search,search.title,搜尋,Search,搜索,Team Tasks.dc.html:1874
+S.briefNav,new:nav.brief,AI 簡報,AI brief,AI 简报,Team Tasks.dc.html:1874
+S.briefBtn,new:brief.toggle,簡報,Brief,简报,Team Tasks.dc.html:1874
+S.kCompanies,new:crm.companies.title,公司,Companies,公司,Team Tasks.dc.html:1874
+S.kContacts,new:crm.contacts.title,聯繫人,Contacts,联系人,Team Tasks.dc.html:1874
+S.kProjects,new:crm.projects,項目,Projects,项目,Team Tasks.dc.html:1874
+S.kStake,new:crm.stakeholders.title,相關方,Stakeholders,相关方,Team Tasks.dc.html:1874
+S.kClient,new:crm.client,客戶公司,Client,客户公司,Team Tasks.dc.html:1874
+S.kNoClient,new:crm.noClient,未設客戶,No client,未设客户,Team Tasks.dc.html:1874
+S.kExternal,new:crm.external,外部,External,外部,Team Tasks.dc.html:1874
+S.kRoles,new:crm.rolesTitle,角色,Roles,角色,Team Tasks.dc.html:1874
+S.kDone,status.done,已完成,Done,已完成,Team Tasks.dc.html:1874
+S.kNoRole,new:crm.noRole,未設角色,No role,未设角色,Team Tasks.dc.html:1874
+S.kRemoveStake,new:crm.removeFromProject,移出項目,Remove from project,移出项目,Team Tasks.dc.html:1874
+S.kRemove,new:actions.remove,移除,Remove,移除,Team Tasks.dc.html:1874
+S.kClearRoles,new:crm.clearCompanyRoles,清除公司角色,Clear company roles,清除公司角色,Team Tasks.dc.html:1874
+S.kAdd,new:crm.contacts.add,＋ 添加聯繫人,+ Add contact,＋ 添加联系人,Team Tasks.dc.html:1874
+S.kFromProj,new:crm.stakeholders.fromProject,項目相關方,Project stakeholders,项目相关方,Team Tasks.dc.html:1874
+S.kOthers,new:crm.contacts.others,其他聯繫人,Other contacts,其他联系人,Team Tasks.dc.html:1874
+S.kNewCo,new:crm.companies.new,新增公司,New company,添加公司,Team Tasks.dc.html:1874
+S.kNewCt,new:crm.contacts.new,新增聯繫人,New contact,添加联系人,Team Tasks.dc.html:1874
+S.kCoName,new:crm.companies.name,公司名稱,Company name,公司名称,Team Tasks.dc.html:1874
+S.kIndustry,new:crm.companies.industry,行業,Industry,行业,Team Tasks.dc.html:1874
+S.kName,new:crm.contacts.name,姓名,Name,姓名,Team Tasks.dc.html:1874
+S.kTitle,new:crm.contacts.jobTitle,職位,Title,职位,Team Tasks.dc.html:1874
+S.kCompany,new:crm.contacts.company,公司,Company,公司,Team Tasks.dc.html:1874
+S.kPhone,new:crm.contacts.phone,電話,Phone,电话,Team Tasks.dc.html:1874
+S.kEmail,email,電郵,Email,邮箱,Team Tasks.dc.html:1874
+S.kCoRoles,new:crm.roles.company,公司角色,Company roles,公司角色,Team Tasks.dc.html:1874
+S.kProjRoles,new:crm.roles.project,項目角色,Project roles,项目角色,Team Tasks.dc.html:1874
+S.kTaskRoles,new:crm.roles.task,任務角色,Task roles,任务角色,Team Tasks.dc.html:1874
+S.kPeople,new:crm.people,成員,People,成员,Team Tasks.dc.html:1874
+S.kClientOf,new:crm.companies.clientOf,客戶項目,Client of,客户项目,Team Tasks.dc.html:1874
+S.kAddToProj,new:crm.addToProject,加入項目相關方,Add to project,加入项目相关方,Team Tasks.dc.html:1874
+S.kDelete,new:crm.contacts.delete,刪除聯繫人,Delete contact,删除联系人,Team Tasks.dc.html:1874
+S.kStakeNote,new:crm.stakeholders.note,任務聯繫人會自動成為項目相關方；移出項目會一併移除其在任務上的聯繫。,Task contacts are added to the project automatically. Removing someone from the project also removes them from its tasks.,任务联系人会自动成为项目相关方；移出项目会一并移除其在任务上的联系。,Team Tasks.dc.html:1874
+S.kSearch,new:crm.searchPlaceholder,搜尋姓名、公司或角色,"Search name, company or role",搜索姓名、公司或角色,Team Tasks.dc.html:1874
+S.kNoCts,new:crm.contacts.empty,暫無聯繫人,No contacts yet,暂无联系人,Team Tasks.dc.html:1874
+S.kNoCos,new:crm.companies.empty,暫無公司,No companies yet,暂无公司,Team Tasks.dc.html:1874
+S.kNone,new:crm.contacts.noCompany,不設公司,No company,不设公司,Team Tasks.dc.html:1874
+S.kNoLinks,new:crm.noLinks,尚未關聯項目或任務,Not linked to a project or task,尚未关联项目或任务,Team Tasks.dc.html:1874
+S.kNoPeople,new:crm.noPeople,暫無成員,No people yet,暂无成员,Team Tasks.dc.html:1874
+S.kCoNote,new:crm.companies.rolesNote,公司角色適用於整間公司；更換聯繫人所屬公司時會清除其原公司角色。,Company roles apply to the whole company. Moving a contact to another company clears their roles at the old one.,公司角色适用于整间公司；更换联系人所属公司时会清除其原公司角色。,Team Tasks.dc.html:1874
+S.foldSide,new:shell.collapseSidebar,收起側欄,Collapse sidebar,收起侧栏,Team Tasks.dc.html:1874
+S.unfoldSide,new:shell.expandSidebar,展開側欄,Expand sidebar,展开侧栏,Team Tasks.dc.html:1874
+S.openCal,new:today.openCalendar,打開日曆,Open calendar,打开日历,Team Tasks.dc.html:1874
+S.needsYou,new:today.needsYou,待你處理,Needs you,待你处理,Team Tasks.dc.html:1874
+S.viewAll,new:today.viewAll,查看全部,View all,查看全部,Team Tasks.dc.html:1874
+S.showOnBoard,new:today.showOnBoard,在看板篩選,Show on board,在看板筛选,Team Tasks.dc.html:1874
+S.noActive,new:today.noActiveTasks,暫無進行中任務,No active tasks,暂无进行中任务,Team Tasks.dc.html:1874
+S.switchL,new:organization.switchShort,切換,Switch,切换,Team Tasks.dc.html:1874
+S.selectTask,new:projects.selectTask,選擇一個任務查看詳情,Select a task to see details,选择一个任务查看详情,Team Tasks.dc.html:1875
+S.mobileLabel,new:prototype.mobileLabel,移動端原型 · 390 × 844,Mobile prototype · 390 × 844,移动端原型 · 390 × 844,Team Tasks.dc.html:1875
+S.desktopLabel,new:prototype.desktopLabel,桌面端看板 · 1280 × 800,Desktop board · 1280 × 800,桌面端看板 · 1280 × 800,Team Tasks.dc.html:1875
+S.flowsTitle,new:prototype.flowsTitle,可點擊流程,Clickable flows,可点击流程,Team Tasks.dc.html:1876
+S.supervisedBy,agentProfile.supervisor,監管人,Supervisor,监管人,Team Tasks.dc.html:1876
+S.via,new:agentProfile.via,接入,via,接入,Team Tasks.dc.html:1876
+S.agentProgress,new:taskDetail.agentProgress,智能體進度,Agent progress,智能体进度,Team Tasks.dc.html:1876
+S.orAssign,new:assign.orAssign,或直接分配：,Or assign directly:,或直接分配：,Team Tasks.dc.html:1877
+S.newOrg,organization.create,建立組織,Create organization,创建组织,Team Tasks.dc.html:1877
+S.newOrgSub,organization.createHint,你會成為所有者，之後可以邀請成員。,You become the owner and can invite members afterwards.,你会成为所有者，之后可以邀请成员。,Team Tasks.dc.html:1877
+S.orgName,organization.name,組織名稱,Organization name,组织名称,Team Tasks.dc.html:1877
+S.pickAgents,organization.agentsToCopy,加入的智能體,Agents to add,加入的智能体,Team Tasks.dc.html:1877
+S.create2,new:actions.create,建立,Create,创建,Team Tasks.dc.html:1877
+S.emptyBoard,new:projects.emptyBoard,還沒有任務。點右下角 + 建立第一個。,No tasks yet. Use + to create the first one.,还没有任务。点右下角 + 创建第一个。,Team Tasks.dc.html:1877
+S.nPush,new:notifications.push,推送通知,Push notifications,推送通知,Team Tasks.dc.html:1877
+S.nReview,notifications.review,審核請求,Review requests,审核请求,Team Tasks.dc.html:1877
+S.nReviewSub,notifications.reviewHint,智能體或同事提交交付物時,When a person or agent submits work.,智能体或同事提交交付物时,Team Tasks.dc.html:1877
+S.nBlock,notifications.block,阻塞,Blockers,阻塞,Team Tasks.dc.html:1877
+S.nBlockSub,notifications.blockHint,智能體需要權限或資訊時,When an agent needs access or input.,智能体需要权限或信息时,Team Tasks.dc.html:1877
+S.nMention,notifications.mention,提及,Mentions,提及,Team Tasks.dc.html:1877
+S.nMentionSub,notifications.mentionHint,有人 @ 你時,When someone mentions you.,有人 @ 你时,Team Tasks.dc.html:1877
+S.nDone,notifications.done,智能體完成,Agent finished,智能体完成,Team Tasks.dc.html:1877
+S.nDoneSub,notifications.doneHint,按策略自動通過的任務完成時,When policy approves an agent’s work.,按策略自动通过的任务完成时,Team Tasks.dc.html:1877
+S.nDigest,notifications.digest,每日摘要,Daily digest,每日摘要,Team Tasks.dc.html:1877
+S.nDigestL,new:notifications.sendDigest,發送每日摘要,Send a daily digest,发送每日摘要,Team Tasks.dc.html:1877
+S.nDigestSub,notifications.digestHint,待確認、今日到期和智能體進展,"Items to confirm, tasks due today and reported agent progress.",待确认、今日到期和智能体进展,Team Tasks.dc.html:1877
+S.nQuiet,notifications.quietTitle,免打擾,Quiet hours,免打扰,Team Tasks.dc.html:1877
+S.nQuietL,notifications.quiet,22:00–08:00 免打擾,Quiet from 22:00 to 08:00,22:00–08:00 免打扰,Team Tasks.dc.html:1877
+S.nQuietSub,notifications.quietHint,阻塞類通知仍會送達,Blockers still come through.,阻塞类通知仍会送达,Team Tasks.dc.html:1877
+S.nNote,notifications.inboxNote,關閉的通知類型仍會出現在收件箱中。,Muted categories still appear in the Inbox.,关闭的通知类型仍会出现在收件箱中。,Team Tasks.dc.html:1877
+S.nOff,me.notificationsOff,已關閉,Off,已关闭,Team Tasks.dc.html:1877
+S.nOn,me.notificationSummary,{{count}} 類已開啟,{{count}} on,{{count}} 类已开启,Team Tasks.dc.html:1877
+S.resizeL,new:calendar.resizeHint,拖動調整時長,Drag to change duration,拖动调整时长,Team Tasks.dc.html:1877
+S.endpoint,mcp.endpoint,MCP 端點,Endpoint,MCP 端点,Team Tasks.dc.html:1877
+S.transportL,new:mcp.transport,Streamable HTTP · 協議 2026-07-28，兼容 2025-11-25,"Streamable HTTP · protocol 2026-07-28, compatible with 2025-11-25",Streamable HTTP · 协议 2026-07-28，兼容 2025-11-25,Team Tasks.dc.html:1877
+S.authL,new:mcp.auth.title,授權,Authorization,授权,Team Tasks.dc.html:1877
+S.authBody,new:mcp.auth.body,OAuth 2.1。客戶端首次連接時，通過受保護資源元數據找到授權伺服器，由用戶在瀏覽器中確認授權範圍。,"OAuth 2.1. On first connect, clients find the authorization server through protected resource metadata, and the user approves scopes in the browser.",OAuth 2.1。客户端首次连接时，通过受保护资源元数据找到授权服务器，由用户在浏览器中确认授权范围。,Team Tasks.dc.html:1877
+S.authServer,new:mcp.auth.server,授權伺服器,Authorization server,授权服务器,Team Tasks.dc.html:1877
+S.prmL,new:mcp.auth.resourceMetadata,受保護資源元數據,Protected resource metadata,受保护资源元数据,Team Tasks.dc.html:1877
+S.regL,new:mcp.auth.registration,客戶端註冊,Client registration,客户端注册,Team Tasks.dc.html:1877
+S.cimd,new:mcp.auth.cimd,客戶端元數據文件 (CIMD),Client ID Metadata Documents (CIMD),客户端元数据文件 (CIMD),Team Tasks.dc.html:1877
+S.dcrL,new:mcp.auth.dcr,動態客戶端註冊 (DCR，已棄用),"Dynamic Client Registration (DCR, deprecated)",动态客户端注册 (DCR，已弃用),Team Tasks.dc.html:1877
+S.patL,new:mcp.auth.pat,個人存取權杖,Personal access token,个人访问令牌,Team Tasks.dc.html:1877
+S.patSub,new:mcp.auth.patHint,僅用於不支援 OAuth 的舊客戶端，作為 Authorization: Bearer 發送。,Only for older clients without OAuth; sent as Authorization: Bearer.,仅用于不支持 OAuth 的旧客户端，作为 Authorization: Bearer 发送。,Team Tasks.dc.html:1877
+S.configL,mcp.clientConfig,客戶端配置,Client configuration,客户端配置,Team Tasks.dc.html:1877
+S.capsL,new:mcp.capabilities,已開放的能力,Capabilities,已开放的能力,Team Tasks.dc.html:1877
+S.capsTxt,new:mcp.capabilitiesList,Tools · Resources · Tasks 擴展（智能體長時執行）,Tools · Resources · Tasks extension (long-running agent work),Tools · Resources · Tasks 扩展（智能体长时执行）,Team Tasks.dc.html:1877
+S.scopes,mcp.scopes,授權範圍,Scopes,授权范围,Team Tasks.dc.html:1877
+S.revoke,new:mcp.revokeAccess,撤銷訪問,Revoke access,撤销访问,Team Tasks.dc.html:1877
+S.invite,organization.invite,邀請成員,Invite member,邀请成员,Team Tasks.dc.html:1877
+S.inviteSub,new:organization.inviteJoinHint,對方接受邀請後會加入當前組織。,They join this organization once they accept.,对方接受邀请后会加入当前组织。,Team Tasks.dc.html:1877
+S.emailL,email,電郵,Email,邮箱,Team Tasks.dc.html:1877
+S.roleL,organization.role,角色,Role,角色,Team Tasks.dc.html:1877
+S.sendInvite,new:organization.sendInvite,發送邀請,Send invite,发送邀请,Team Tasks.dc.html:1877
+S.pending,organization.status.pending,待接受,Pending,待接受,Team Tasks.dc.html:1877
+S.resend,new:organization.resendShort,重新發送,Resend,重新发送,Team Tasks.dc.html:1877
+S.rMember,organization.member,成員,Member,成员,Team Tasks.dc.html:1877
+S.rAdmin,organization.admin,管理員,Admin,管理员,Team Tasks.dc.html:1877
+S.rGuest,new:organization.guestShort,訪客,Guest,访客,Team Tasks.dc.html:1877
+S.agentLane,new:calendar.agentBackground,智能體背景執行,Agents · background,智能体背景执行,Team Tasks.dc.html:1877
+S.undo,new:actions.undo,撤銷,Undo,撤销,Team Tasks.dc.html:1877
+S.snooze,inbox.tomorrow,延後到明天,Tomorrow,延后到明天,Team Tasks.dc.html:1877
+S.unsnooze,new:inbox.unsnooze,取消延後,Unsnooze,取消延后,Team Tasks.dc.html:1877
+S.snoozedT,new:inbox.snoozedShort,已延後,Snoozed,已延后,Team Tasks.dc.html:1877
+S.markAllRead,inbox.markAllRead,全部已讀,Mark all read,全部已读,Team Tasks.dc.html:1877
+S.unreadL,new:inbox.unreadShort,未讀,Unread,未读,Team Tasks.dc.html:1877
+S.close,new:actions.close,關閉,Close,关闭,Team Tasks.dc.html:1877
+S.copy,new:actions.copy,複製,Copy,复制,Team Tasks.dc.html:1877
+S.show,new:actions.toggleVisibility,顯示或隱藏,Show or hide,显示或隐藏,Team Tasks.dc.html:1877
+S.prevWeek,new:calendar.previousWeek,上一週,Previous week,上一周,Team Tasks.dc.html:1877
+S.nextWeek,new:calendar.nextWeek,下一週,Next week,下一周,Team Tasks.dc.html:1877
+S.paused,run.status.paused,已暫停,Paused,已暂停,Team Tasks.dc.html:1877
+S.pause,run.pause,暫停,Pause,暂停,Team Tasks.dc.html:1877
+S.resume,run.resume,繼續,Resume,继续,Team Tasks.dc.html:1877
+S.cancelRun,run.cancel,取消執行,Cancel run,取消执行,Team Tasks.dc.html:1877
+S.subtasks,planning.subtasks,子任務,Subtasks,子任务,Team Tasks.dc.html:1878
+S.addSubPh,planning.subtaskTitle,添加子任務，回車建立,"Add a subtask, press Enter",添加子任务，回车创建,Team Tasks.dc.html:1878
+S.splitAgent,new:planning.splitWithAgent,讓調研智能體拆分,Split with Research Agent,让调研智能体拆分,Team Tasks.dc.html:1878
+S.parentL,planning.parent,上級任務,Parent task,上级任务,Team Tasks.dc.html:1878
+S.time,new:taskDetail.time,時間,Time,时间,Team Tasks.dc.html:1879
+S.noTime,new:taskDetail.noTime,不安排,None,不安排,Team Tasks.dc.html:1879
+S.noDue,new:taskDetail.noDue,無截止日期,No due date,无截止日期,Team Tasks.dc.html:1879
+S.unscheduled,new:taskDetail.noTimeSet,未安排時間,No time set,未安排时间,Team Tasks.dc.html:1879
+S.reviewWs,review.open,審核交付物,Review the deliverable,审核交付物,Team Tasks.dc.html:1880
+S.checklist,review.checklist,審核清單,Checklist,审核清单,Team Tasks.dc.html:1880
+S.sources,new:review.sources,來源,Sources,来源,Team Tasks.dc.html:1880
+S.filesL,new:review.filesChanged,改動檔案,Files changed,改动文件,Team Tasks.dc.html:1880
+S.checksL,new:review.checks,檢查項,Checks,检查项,Team Tasks.dc.html:1880
+S.findings,new:review.findings,發現,Findings,发现,Team Tasks.dc.html:1880
+S.perms,agentProfile.permissions,權限,Permissions,权限,Team Tasks.dc.html:1881
+S.policy,agentProfile.policy,審核策略,Review policy,审核策略,Team Tasks.dc.html:1881
+S.polAlways,agentProfile.alwaysReview,每次都需審核,Always review,每次都需审核,Team Tasks.dc.html:1881
+S.polAuto,new:agentProfile.autoApproveLowRisk,低風險自動通過,Auto-approve low risk,低风险自动通过,Team Tasks.dc.html:1881
+S.grantLog,grants.history,授權記錄,Grant history,授权记录,Team Tasks.dc.html:1881
+S.noGrants,grants.none,暫無授權記錄,No grants yet.,暂无授权记录,Team Tasks.dc.html:1881
+S.allow,agentProfile.decision.allow,允許,Allow,允许,Team Tasks.dc.html:1882
+S.ask,agentProfile.decision.ask,需審批,Ask,需审批,Team Tasks.dc.html:1882
+S.deny,agentProfile.decision.deny,禁止,Deny,禁止,Team Tasks.dc.html:1882
+S.grantOnce,new:grants.thisTaskOneDay,僅本任務 · 24 小時,This task only · 24 hours,仅本任务 · 24 小时,Team Tasks.dc.html:1882
+S.grantAlways,new:grants.always,始終允許,Always allow,始终允许,Team Tasks.dc.html:1882
+S.grantSub,new:grants.recordedHint,授權會記錄在智能體的授權記錄中。,Grants are recorded in the agent's grant history.,授权会记录在智能体的授权记录中。,Team Tasks.dc.html:1882
+S.callLog,mcp.callLog,最近調用,Call log,最近调用,Team Tasks.dc.html:1883
+S.resetDemo,new:prototype.resetDemo,重置演示數據,Reset demo data,重置演示数据,Team Tasks.dc.html:1883
+S.resetBody,new:prototype.resetBody,所有改動會被清除，恢復到初始示例數據。,All changes are cleared and the sample data is restored.,所有改动会被清除，恢复到初始示例数据。,Team Tasks.dc.html:1883
+S.regenBody,new:mcp.regenerateHint,舊權杖會立即失效，已連接的客戶端需要重新配置。,The old token stops working immediately; connected clients must be reconfigured.,旧令牌会立即失效，已连接的客户端需要重新配置。,Team Tasks.dc.html:1884
+S.confirm,new:actions.confirm,確認,Confirm,确认,Team Tasks.dc.html:1884
+S.currentWork,new:agentProfile.currentWork,當前任務,Current work,当前任务,Team Tasks.dc.html:1884
+S.listV,projects.listView,列表,List,列表,Team Tasks.dc.html:1884
+S.startAgent,run.start,啟動智能體,Start agent,启动智能体,Team Tasks.dc.html:1884
+S.statusNoteTxt,new:taskDetail.statusChangeStopsRun,智能體正在工作，手動改狀態會中止當前進度。,The agent is working; changing status manually stops its current run.,智能体正在工作，手动改状态会中止当前进度。,Team Tasks.dc.html:1884
+S.org,new:organization.label,組織,Organization,组织,Team Tasks.dc.html:1884
+S.switchOrg,organization.switch,切換組織,Switch organization,切换组织,Team Tasks.dc.html:1884
+S.switchOrgSub,organization.switchHint,任務、日程、成員和 MCP 設定按組織隔離。,"Tasks, events, members and MCP settings are kept separate per organization.",任务、日程、成员和 MCP 设置按组织隔离。,Team Tasks.dc.html:1884
+S.searchPh,search.placeholder,搜尋任務、日程、成員和設定,"Search tasks, events, people and settings",搜索任务、日程、成员和设置,Team Tasks.dc.html:1885
+S.scopeOrg,search.thisOrg,當前組織,This organization,当前组织,Team Tasks.dc.html:1885
+S.scopeAll,search.allOrgs,所有組織,All organizations,所有组织,Team Tasks.dc.html:1885
+S.sAll,search.all,全部,All,全部,Team Tasks.dc.html:1886
+S.sTasks,search.tasks,任務,Tasks,任务,Team Tasks.dc.html:1886
+S.sEvents,new:search.events,日程,Events,日程,Team Tasks.dc.html:1886
+S.sPeople,new:search.people,成員與智能體,People & agents,成员与智能体,Team Tasks.dc.html:1886
+S.sPages,search.settings,設定,Settings,设置,Team Tasks.dc.html:1886
+S.recentL,search.recent,最近搜尋,Recent searches,最近搜索,Team Tasks.dc.html:1887
+S.quickFilters,search.quickFilters,快速篩選,Quick filters,快速筛选,Team Tasks.dc.html:1887
+S.syntaxHint,search.hint,可組合使用 is:review、is:blocked、is:working、agent:code 與關鍵詞。,"Combine is:review, is:blocked, is:working or agent:code with keywords.",可组合使用 is:review、is:blocked、is:working、agent:code 与关键词。,Team Tasks.dc.html:1887
+S.noResults,search.empty,沒有找到結果,No results,没有找到结果,Team Tasks.dc.html:1888
+S.noResultsSub,new:search.emptyHint,換個關鍵詞，或切換到「所有組織」。,"Try another keyword, or search all orgs.",换个关键词，或切换到“所有组织”。,Team Tasks.dc.html:1888
+S.kbdHint,search.keyboard,↑↓ 選擇 · ↵ 打開 · Tab 切換範圍 · Esc 關閉,↑↓ select · ↵ open · Tab switch scope · Esc close,↑↓ 选择 · ↵ 打开 · Tab 切换范围 · Esc 关闭,Team Tasks.dc.html:1888
+S.lastActivity,new:search.recentActivity,最近動態,Recent activity,最近动态,Team Tasks.dc.html:1888
+S.appName,new:home.appName,團隊任務,Team Tasks,团队任务,Team Tasks.dc.html:2132
+S.homeEyebrow,new:home.eyebrow,人機協作任務,Human–AI task collaboration,人机协作任务,Team Tasks.dc.html:2132
+S.homeTitle,new:home.title,成員與智能體，在同一張任務表上協作,People and agents on one task board,成员与智能体，在同一张任务表上协作,Team Tasks.dc.html:2133
+S.homeSub,new:home.subtitle,把任務分配給成員或智能體，審核交付，掌握每個項目的進度。,"Assign work to people or agents, review what they deliver and follow every project.",把任务分配给成员或智能体，审核交付，掌握每个项目的进度。,Team Tasks.dc.html:2134
+S.signIn,signIn,登入,Sign in,登录,Team Tasks.dc.html:2135
+S.startL,new:home.start,開始,Start,开始,Team Tasks.dc.html:2135
+S.openWs,new:home.openWorkspace,進入工作區,Open workspace,进入工作区,Team Tasks.dc.html:2135
+S.signOut,signOut,登出,Sign out,退出登录,Team Tasks.dc.html:2135
+S.signedInAs,new:home.signedIn,已登入,Signed in,已登录,Team Tasks.dc.html:2135
+S.hPreview,new:home.preview,預覽 · 示例數據,Preview · sample data,预览 · 示例数据,Team Tasks.dc.html:2136
+S.hYours,new:home.yourOverview,你的概覽,Your overview,你的概览,Team Tasks.dc.html:2136
+S.hToday,new:home.today,今日概要,Today,今日概要,Team Tasks.dc.html:2137
+S.hProjects,new:home.projectProgress,項目進度,Project progress,项目进度,Team Tasks.dc.html:2137
+S.hAgents,new:home.agentActivity,智能體動態,Agent activity,智能体动态,Team Tasks.dc.html:2137
+S.hEvents,new:home.scheduled,日程,Scheduled,日程,Team Tasks.dc.html:2138
+S.hDue,todayDue,今天到期,Due today,今天到期,Team Tasks.dc.html:2138
+S.hNeeds,new:today.needsYou,待你處理,Needs you,待你处理,Team Tasks.dc.html:2138
+S.hNext,new:home.next,下一項,Next,下一项,Team Tasks.dc.html:2138
+S.hWorking,new:home.workingCount,{{count}} 個工作中,{{count}} working,{{count}} 个工作中,Team Tasks.dc.html:2138
+S.skipHome,new:prototype.skipHome,跳過首頁,Skip homepage,跳过首页,Team Tasks.dc.html:2139
+S.skipHomeSub,new:prototype.skipHomeHint,已登入時直接打開工作區,Open the workspace directly when signed in,已登录时直接打开工作区,Team Tasks.dc.html:2139
+T.tasks,new:modules.tasks,任務,Tasks,任务,Team Tasks Module Plan.dc.html:317
+T.more,new:projects.moreViews,更多,More,更多,Team Tasks Module Plan.dc.html:317
+T.allTasks,projects.allTasks,全部任務,All tasks,全部任务,Team Tasks Module Plan.dc.html:317
+T.fAll,new:projects.filterAll,全部,All,全部,Team Tasks Module Plan.dc.html:317
+T.fMine,projects.mine,我負責的,Mine,我负责的,Team Tasks Module Plan.dc.html:317
+T.openProj,new:brief.openProject,打開項目,Open project,打开项目,Team Tasks Module Plan.dc.html:317
+T.noOpen,new:brief.noOpenTasks,沒有未完成的任務,No open tasks,没有未完成的任务,Team Tasks Module Plan.dc.html:317
+T.briefBtn,new:brief.toggle,簡報,Brief,简报,Team Tasks Module Plan.dc.html:317
+T.hideBrief,new:brief.hide,收起簡報,Hide brief,收起简报,Team Tasks Module Plan.dc.html:317
+T.relSub,new:relations.subtitle,人、智能體與任務之間的依賴,"Dependencies between people, agents and tasks",人、智能体与任务之间的依赖,Team Tasks Module Plan.dc.html:317
+T.mindSub2,new:mind.subtitleShort,從深層動機到場景的需求來源,"Where demand comes from, motive to scenario",从深层动机到场景的需求来源,Team Tasks Module Plan.dc.html:317
+T.home,new:modules.home,首頁,Home,首页,Team Tasks Module Plan.dc.html:317
+T.gantt,new:projects.timelineView,時間線,Timeline,时间线,Team Tasks Module Plan.dc.html:317
+T.graph,new:projects.relationsView,關係圖,Relations,关系图,Team Tasks Module Plan.dc.html:317
+T.mind,new:projects.mindView,心智圖,Mindscape,心智图,Team Tasks Module Plan.dc.html:317
+T.tasksApp,new:modules.tasks,任務,Tasks,任务,Team Tasks Module Plan.dc.html:317
+T.openRel,new:relations.openStandalone,獨立打開關係圖,Open relation map,独立打开关系图,Team Tasks Module Plan.dc.html:317
+T.greet,new:brief.greeting,早晨，{{name}},"Good morning, {{name}}",早上好，{{name}},Team Tasks Module Plan.dc.html:317
+T.date,new:seed.briefDate,10月8日 星期四,"Thursday, 8 October",10月8日 星期四,Team Tasks Module Plan.dc.html:317
+T.askPh,new:ask.placeholder,詢問所有項目，例如：v2.4 發佈有甚麼阻礙？,"Ask across all projects, e.g. What is blocking the v2.4 release?",询问所有项目，例如：v2.4 发布有什么阻碍？,Team Tasks Module Plan.dc.html:317
+T.askPhM,new:ask.placeholderShort,詢問所有項目…,Ask across all projects…,询问所有项目…,Team Tasks Module Plan.dc.html:317
+T.send,new:ask.send,發送,Send,发送,Team Tasks Module Plan.dc.html:317
+T.brief,new:brief.title,AI 每日簡報,AI daily brief,AI 每日简报,Team Tasks Module Plan.dc.html:317
+T.try,new:ask.try,試問,Try,试问,Team Tasks Module Plan.dc.html:317
+T.sugg.0,new:ask.suggestion.blocking,v2.4 發佈有甚麼阻礙？,What is blocking the v2.4 release?,v2.4 发布有什么阻碍？,Team Tasks Module Plan.dc.html:317
+T.sugg.1,new:ask.suggestion.load,誰的工作量最重？,Who has the heaviest load?,谁的工作量最重？,Team Tasks Module Plan.dc.html:317
+T.sugg.2,new:ask.suggestion.agents,智能體正在做甚麼？,What are agents working on?,智能体正在做什么？,Team Tasks Module Plan.dc.html:317
+T.stActive,new:brief.stat.active,進行中任務,Tasks in progress,进行中任务,Team Tasks Module Plan.dc.html:317
+T.stAgents,new:brief.stat.agents,工作中智能體,Agents working,工作中智能体,Team Tasks Module Plan.dc.html:317
+T.stReview,new:brief.stat.toConfirm,待你確認,Awaiting your confirmation,待你确认,Team Tasks Module Plan.dc.html:317
+T.risk,new:brief.risk.title,風險與延誤預測,Risk & slip forecast,风险与延误预测,Team Tasks Module Plan.dc.html:317
+T.amount,new:finance.amount,項目金額,Project amount,项目金额,Team Tasks Module Plan.dc.html:317
+T.collected,new:finance.collected,已收費用,Fees collected,已收费用,Team Tasks Module Plan.dc.html:317
+T.delivery,new:finance.delivery,交付進度,Delivered,交付进度,Team Tasks Module Plan.dc.html:317
+T.total,new:finance.total,合計,Total,合计,Team Tasks Module Plan.dc.html:317
+T.finTotal,new:finance.billableProjects,{{count}} 個收費項目,{{count}} billable projects,{{count}} 个收费项目,Team Tasks Module Plan.dc.html:317
+T.actions,new:brief.suggestedActions,待批准的建議,Suggested actions,待批准的建议,Team Tasks Module Plan.dc.html:317
+T.approve,new:brief.approve,批准,Approve,批准,Team Tasks Module Plan.dc.html:317
+T.dismiss,new:brief.dismiss,略過,Dismiss,跳过,Team Tasks Module Plan.dc.html:317
+T.applied,new:brief.applied,已套用,Applied,已应用,Team Tasks Module Plan.dc.html:317
+T.dismissed,new:brief.dismissed,已略過,Dismissed,已跳过,Team Tasks Module Plan.dc.html:317
+T.elsewhere,new:brief.handledElsewhere,已在 Team Tasks 處理,Handled in Team Tasks,已在 Team Tasks 处理,Team Tasks Module Plan.dc.html:317
+T.undo,new:actions.undo,撤銷,Undo,撤销,Team Tasks Module Plan.dc.html:317
+T.high,new:risk.high,高風險,High risk,高风险,Team Tasks Module Plan.dc.html:317
+T.med,new:risk.watch,需留意,Watch,需留意,Team Tasks Module Plan.dc.html:317
+T.low,new:risk.onTrack,按計劃,On track,按计划,Team Tasks Module Plan.dc.html:317
+T.homeCanvas,new:prototype.homeCanvas,首頁畫布,Home canvas,首页画布,Team Tasks Module Plan.dc.html:317
+T.optA,new:prototype.homeOptionA,A · 關係圖,A · Relations,A · 关系图,Team Tasks Module Plan.dc.html:317
+T.optB,new:prototype.homeOptionB,B · 時間線,B · Timeline,B · 时间线,Team Tasks Module Plan.dc.html:317
+T.portfolio,new:timeline.portfolio,組合,Portfolio,组合,Team Tasks Module Plan.dc.html:317
+T.project,new:timeline.project,項目,Project,项目,Team Tasks Module Plan.dc.html:317
+T.day,new:timeline.day,日,Day,日,Team Tasks Module Plan.dc.html:317
+T.week,new:timeline.week,週,Week,周,Team Tasks Module Plan.dc.html:317
+T.crit,new:timeline.criticalPath,關鍵路徑,Critical path,关键路径,Team Tasks Module Plan.dc.html:317
+T.link,new:timeline.linkMode,連線模式,Link mode,连线模式,Team Tasks Module Plan.dc.html:317
+T.linkHint,new:timeline.linkHint,點選前置任務，再點選後續任務。也可從任務條右端的圓點直接拖出連線。點擊箭頭可移除依賴。,"Select the predecessor, then the successor. You can also drag from the dot at the end of a bar. Click an arrow to remove it.",点选前置任务，再点选后续任务。也可从任务条右端的圆点直接拖出连线。点击箭头可移除依赖。,Team Tasks Module Plan.dc.html:317
+T.linkHint2,new:timeline.linkSelected,已選「{{task}}」，請點選後續任務。,“{{task}}” selected. Now select the successor.,已选“{{task}}”，请点选后续任务。,Team Tasks Module Plan.dc.html:317
+T.dragLink,new:timeline.dragLink,拖出依賴連線,Drag to add a dependency,拖出依赖连线,Team Tasks Module Plan.dc.html:317
+T.cancel,new:actions.cancel,取消,Cancel,取消,Team Tasks Module Plan.dc.html:317
+T.human,new:timeline.human,人員,Human,人员,Team Tasks Module Plan.dc.html:317
+T.agent,agent,智能體,Agent,智能体,Team Tasks Module Plan.dc.html:317
+T.milestone,new:timeline.milestone,里程碑,Milestone,里程碑,Team Tasks Module Plan.dc.html:317
+T.conflict,new:timeline.conflict,依賴衝突,Dependency conflict,依赖冲突,Team Tasks Module Plan.dc.html:317
+T.colProj,new:timeline.colProject,項目 / 任務,Project / task,项目 / 任务,Team Tasks Module Plan.dc.html:317
+T.colTask,new:timeline.colTask,任務,Task,任务,Team Tasks Module Plan.dc.html:317
+T.owner,owner,負責人,Owner,负责人,Team Tasks Module Plan.dc.html:317
+T.dates,new:timeline.dates,日期,Dates,日期,Team Tasks Module Plan.dc.html:317
+T.progress,new:timeline.progress,進度,Progress,进度,Team Tasks Module Plan.dc.html:317
+T.status,planning.status,狀態,Status,状态,Team Tasks Module Plan.dc.html:317
+T.preds,new:timeline.predecessors,前置,After,前置,Team Tasks Module Plan.dc.html:317
+T.openTask,new:timeline.openTask,在任務中打開,Open task,在任务中打开,Team Tasks Module Plan.dc.html:317
+T.showGraph,new:timeline.showInRelations,在關係圖顯示,Show in relations,在关系图显示,Team Tasks Module Plan.dc.html:317
+T.close,new:actions.close,關閉,Close,关闭,Team Tasks Module Plan.dc.html:317
+T.depAdded,new:timeline.depAdded,已加入依賴,Dependency added,已加入依赖,Team Tasks Module Plan.dc.html:317
+T.depRemoved,new:timeline.depRemoved,已移除依賴,Dependency removed,已移除依赖,Team Tasks Module Plan.dc.html:317
+T.depExists,new:timeline.depExists,依賴已存在,Dependency already exists,依赖已存在,Team Tasks Module Plan.dc.html:317
+T.cycle,new:timeline.cycle,會形成循環依賴，未加入,That would create a loop,会形成循环依赖，未加入,Team Tasks Module Plan.dc.html:317
+T.moved,new:timeline.rescheduled,已改期,Rescheduled,已改期,Team Tasks Module Plan.dc.html:317
+T.resized,new:timeline.resized,已調整工期,Duration changed,已调整工期,Team Tasks Module Plan.dc.html:317
+T.thinking,new:ask.thinking,正在分析所有項目…,Reading across all projects…,正在分析所有项目…,Team Tasks Module Plan.dc.html:317
+T.forecast,new:timeline.forecast,預計,Forecast,预计,Team Tasks Module Plan.dc.html:317
+T.approvedT,new:brief.applied,已套用,Applied,已应用,Team Tasks Module Plan.dc.html:317
+T.planner,new:brief.planner,taff 規劃,taff planner,taff 规划,Team Tasks Module Plan.dc.html:317
+T.behind,new:risk.behind,落後 {{percent}}%,{{percent}}% behind,落后 {{percent}}%,Team Tasks Module Plan.dc.html:317
+T.blocked,new:risk.blocked,被阻礙,Blocked,被阻碍,Team Tasks Module Plan.dc.html:317
+T.inReview,status.needs_review,待確認,To confirm,待确认,Team Tasks Module Plan.dc.html:317
+T.onTrack,new:risk.onTrackFor,按計劃於 {{date}} 完成,On track for {{date}},按计划于 {{date}} 完成,Team Tasks Module Plan.dc.html:317
+T.st.todo,status.todo,待辦,To do,待办,Team Tasks Module Plan.dc.html:318
+T.st.doing,status.in_progress,進行中,In progress,进行中,Team Tasks Module Plan.dc.html:318
+T.st.review,status.needs_review,待確認,To confirm,待确认,Team Tasks Module Plan.dc.html:318
+T.st.done,status.done,已完成,Done,已完成,Team Tasks Module Plan.dc.html:318
+T.mindTitle,new:mind.title,用戶心智圖,Consumer mindscape,用户心智图,Team Tasks Module Plan.dc.html:319
+T.mindSub,new:mind.subtitle,從集體潛意識、文化、人群到場景，看清需求從哪裏來。,From the collective unconscious through culture and audiences to scenarios: see where demand comes from.,从集体潜意识、文化、人群到场景，看清需求从哪里来。,Team Tasks Module Plan.dc.html:319
+T.mindAi,new:mind.aiInsight,AI 洞察,AI insight,AI 洞察,Team Tasks Module Plan.dc.html:319
+T.mindSummary,new:seed.mindSummary,"「療癒」與「確定感」兩股深層動機正在上升。安慰食物能減輕孤獨感（Troisi & Gabriel, 2011），但跨文化重複實驗結果不一；消費者亦更審慎，只有 18% 經常衝動消費（Euromonitor 2025）。香港五分一住戶獨居，增長主要來自 45 歲以上（統計處 2021），帶動深夜一人餐與健康外賣。","Two deep motives, Healing and Certainty, are rising. Comfort food reduces loneliness (Troisi & Gabriel, 2011), though cross-cultural replications are mixed, and consumers are more deliberate: only 18% often buy on impulse (Euromonitor 2025). One in five Hong Kong households live alone, with growth mainly among people over 45 (C&SD 2021), which supports late-night solo meals and healthy delivery.","“疗愈”与“确定感”两股深层动机正在上升。安慰食物能减轻孤独感（Troisi & Gabriel, 2011），但跨文化重复实验结果不一；消费者亦更审慎，只有 18% 经常冲动消费（Euromonitor 2025）。香港五分一住户独居，增长主要来自 45 岁以上（统计处 2021），带动深夜一人餐与健康外卖。",Team Tasks Module Plan.dc.html:319
+T.evidence,new:mind.evidence,證據,Evidence,证据,Team Tasks Module Plan.dc.html:319
+T.sources,new:mind.sources,資料來源,Sources,资料来源,Team Tasks Module Plan.dc.html:319
+T.coverage,new:mind.coverage,{{count}} / {{total}} 個節點有外部佐證,{{count}} of {{total}} nodes have external evidence,{{count}} / {{total}} 个节点有外部佐证,Team Tasks Module Plan.dc.html:319
+T.noSource,new:mind.noSource,暫無外部佐證，屬內部觀察，建議先驗證。,No external evidence yet. This is an internal observation; validate it first.,暂无外部佐证，属内部观察，建议先验证。,Team Tasks Module Plan.dc.html:319
+T.caveat,new:mind.caveat,限制,Caveat,限制,Team Tasks Module Plan.dc.html:319
+T.kind.paper,new:mind.sourceKind.paper,論文,Paper,论文,Team Tasks Module Plan.dc.html:319
+T.kind.report,new:mind.sourceKind.report,行業報告,Industry report,行业报告,Team Tasks Module Plan.dc.html:319
+T.kind.stat,new:mind.sourceKind.stat,官方統計,Official statistics,官方统计,Team Tasks Module Plan.dc.html:319
+T.kind.book,new:mind.sourceKind.book,專書,Book,专著,Team Tasks Module Plan.dc.html:319
+T.openSrc,new:mind.openSource,查看原文,Open source,查看原文,Team Tasks Module Plan.dc.html:319
+T.rising,new:mind.rising,上升中的趨勢,Rising,上升中的趋势,Team Tasks Module Plan.dc.html:319
+T.cooling,new:mind.cooling,正在降溫,Cooling,正在降温,Team Tasks Module Plan.dc.html:319
+T.insight,new:mind.insight,洞察,Insight,洞察,Team Tasks Module Plan.dc.html:319
+T.opportunity,new:mind.opportunity,機會,Opportunity,机会,Team Tasks Module Plan.dc.html:319
+T.strength,new:mind.strength,強度,Strength,强度,Team Tasks Module Plan.dc.html:319
+T.from,new:mind.rootedIn,源自,Rooted in,源自,Team Tasks Module Plan.dc.html:319
+T.leadsTo,new:mind.leadsTo,影響,Leads to,影响,Team Tasks Module Plan.dc.html:319
+T.addTo,new:mind.addToProject,加入項目,Add to project,加入项目,Team Tasks Module Plan.dc.html:319
+T.makeTask,new:mind.makeTask,轉為驗證任務,Turn into a validation task,转为验证任务,Team Tasks Module Plan.dc.html:319
+T.taskMade,new:mind.taskMade,已建立任務,Task created,已创建任务,Team Tasks Module Plan.dc.html:319
+T.back,new:mind.backToOverview,返回總覽,Back to overview,返回总览,Team Tasks Module Plan.dc.html:319
+T.consumer,new:mind.consumer,消費者,Consumer,消费者,Team Tasks Module Plan.dc.html:319
+T.momUp,new:mind.momentum.up,上升,Rising,上升,Team Tasks Module Plan.dc.html:319
+T.momFlat,new:mind.momentum.flat,平穩,Stable,平稳,Team Tasks Module Plan.dc.html:319
+T.momDown,new:mind.momentum.down,降溫,Cooling,降温,Team Tasks Module Plan.dc.html:319
+TR.title,new:projects.relationsView,關係圖,Relations,关系图,Team Tasks Module Relations.dc.html:107
+TR.home,new:modules.home,首頁,Home,首页,Team Tasks Module Relations.dc.html:107
+TR.timeline,new:projects.timelineView,時間線,Timeline,时间线,Team Tasks Module Relations.dc.html:107
+TR.tasks,new:modules.tasks,任務,Tasks,任务,Team Tasks Module Relations.dc.html:107
+TR.layered,new:relations.layout.layered,結構,Structured,结构,Team Tasks Module Relations.dc.html:107
+TR.force,new:relations.layout.force,自由,Free,自由,Team Tasks Module Relations.dc.html:107
+TR.all,new:relations.filterAll,全部,All,全部,Team Tasks Module Relations.dc.html:107
+TR.scopeAll,projects.allProjects,全部項目,All projects,全部项目,Team Tasks Module Relations.dc.html:107
+TR.fit,new:relations.fit,適應畫面,Fit to view,适应画面,Team Tasks Module Relations.dc.html:107
+TR.zoomIn,new:relations.zoomIn,放大,Zoom in,放大,Team Tasks Module Relations.dc.html:107
+TR.zoomOut,new:relations.zoomOut,縮小,Zoom out,缩小,Team Tasks Module Relations.dc.html:107
+TR.close,new:actions.close,關閉,Close,关闭,Team Tasks Module Relations.dc.html:107
+TR.relations,new:relations.layersTitle,關係,Relations,关系,Team Tasks Module Relations.dc.html:107
+TR.noEdges,new:relations.noLayers,未選擇任何關係層,No relation layers selected,未选择任何关系层,Team Tasks Module Relations.dc.html:107
+TR.openTask,new:relations.openTask,在任務中打開,Open task,在任务中打开,Team Tasks Module Relations.dc.html:107
+TR.openTl,new:relations.openInTimeline,在時間線打開,Open in timeline,在时间线打开,Team Tasks Module Relations.dc.html:107
+TR.project,new:relations.project,項目,Project,项目,Team Tasks Module Relations.dc.html:107
+TR.company,new:relations.company,公司,Company,公司,Team Tasks Module Relations.dc.html:107
+TR.owner,owner,負責人,Owner,负责人,Team Tasks Module Relations.dc.html:107
+TR.agent,agent,智能體,Agent,智能体,Team Tasks Module Relations.dc.html:107
+TR.dates,new:relations.dates,日期,Dates,日期,Team Tasks Module Relations.dc.html:107
+TR.status,planning.status,狀態,Status,状态,Team Tasks Module Relations.dc.html:107
+TR.forecast,new:relations.forecast,預計完成,Forecast,预计完成,Team Tasks Module Relations.dc.html:107
+TR.role,new:relations.role,角色,Role,角色,Team Tasks Module Relations.dc.html:107
+TR.tasksN,new:relations.taskCount,任務數,Tasks,任务数,Team Tasks Module Relations.dc.html:107
+TR.expected,new:finance.expectedValue,預期價值,Expected value,预期价值,Team Tasks Module Relations.dc.html:107
+TR.amount,new:finance.amount,項目金額,Project amount,项目金额,Team Tasks Module Relations.dc.html:107
+TR.collected,new:finance.collected,已收費用,Fees collected,已收费用,Team Tasks Module Relations.dc.html:107
+TR.delivery,new:finance.delivery,交付進度,Delivered,交付进度,Team Tasks Module Relations.dc.html:107
+TR.st.todo,status.todo,待辦,To do,待办,Team Tasks Module Relations.dc.html:107
+TR.st.doing,status.in_progress,進行中,In progress,进行中,Team Tasks Module Relations.dc.html:107
+TR.st.review,status.needs_review,待確認,To confirm,待确认,Team Tasks Module Relations.dc.html:107
+TR.st.done,status.done,已完成,Done,已完成,Team Tasks Module Relations.dc.html:107
+TR.lv.high,new:risk.high,高風險,High risk,高风险,Team Tasks Module Relations.dc.html:107
+TR.lv.med,new:risk.watch,需留意,Watch,需留意,Team Tasks Module Relations.dc.html:107
+TR.lv.low,new:risk.onTrack,按計劃,On track,按计划,Team Tasks Module Relations.dc.html:107
+TR.type.company,new:relations.nodeType.company,公司,Company,公司,Team Tasks Module Relations.dc.html:108
+TR.type.project,new:relations.nodeType.project,項目,Project,项目,Team Tasks Module Relations.dc.html:108
+TR.type.task,new:relations.nodeType.task,任務,Task,任务,Team Tasks Module Relations.dc.html:108
+TR.type.human,new:relations.nodeType.human,人員,Human,人员,Team Tasks Module Relations.dc.html:108
+TR.type.agent,new:relations.nodeType.agent,智能體,Agent,智能体,Team Tasks Module Relations.dc.html:108
+TR.type.service,new:relations.nodeType.service,服務,Service,服务,Team Tasks Module Relations.dc.html:108
+TR.type.data,new:relations.nodeType.data,數據,Data,数据,Team Tasks Module Relations.dc.html:108
+TR.type.value,new:relations.nodeType.value,價值,Value,价值,Team Tasks Module Relations.dc.html:108
+TR.layers.deps,new:relations.layer.deps,任務依賴,Task dependencies,任务依赖,Team Tasks Module Relations.dc.html:109
+TR.layers.people,new:relations.layer.people,人員 ↔ 任務,People ↔ tasks,人员 ↔ 任务,Team Tasks Module Relations.dc.html:109
+TR.layers.org,new:relations.layer.org,項目 ↔ 公司,Projects ↔ companies,项目 ↔ 公司,Team Tasks Module Relations.dc.html:109
+TR.layers.chain,new:relations.layer.chain,服務 → 數據 → 價值 → 項目,Service → data → value → project,服务 → 数据 → 价值 → 项目,Team Tasks Module Relations.dc.html:109
+TR.rel.DEPENDS_ON,new:relations.edge.dependsOn,依賴,Depends on,依赖,Team Tasks Module Relations.dc.html:110
+TR.rel.ASSIGNED,new:relations.edge.assigned,負責,Assigned to,负责,Team Tasks Module Relations.dc.html:110
+TR.rel.RUNS,new:relations.edge.runs,執行,Runs,执行,Team Tasks Module Relations.dc.html:110
+TR.rel.PART_OF,new:relations.edge.partOf,屬於,Part of,属于,Team Tasks Module Relations.dc.html:110
+TR.rel.SUBTASK_OF,new:relations.edge.subtaskOf,子任務,Subtask of,子任务,Team Tasks Module Relations.dc.html:110
+TR.rel.OWNS,new:relations.edge.owns,擁有,Owns,拥有,Team Tasks Module Relations.dc.html:110
+TR.rel.FEEDS,new:relations.edge.feeds,供給,Feeds,供给,Team Tasks Module Relations.dc.html:110
+TR.rel.YIELDS,new:relations.edge.yields,產生,Yields,产生,Team Tasks Module Relations.dc.html:110
+TR.rel.DELIVERS,new:relations.edge.delivers,交付,Delivers,交付,Team Tasks Module Relations.dc.html:110
+inline.tasks.1811,new:format.dateWeekday,{{month}}月{{day}}日 {{weekday}},"{{weekday}}, {{monthShort}} {{day}}",{{month}}月{{day}}日 {{weekday}},Team Tasks.dc.html:1811
+inline.tasks.1812.1,today,今天,Today,今天,Team Tasks.dc.html:1812
+inline.tasks.1812.2,new:date.tomorrow,明天,Tomorrow,明天,Team Tasks.dc.html:1812
+inline.tasks.1812.3,new:date.yesterday,昨天,Yesterday,昨天,Team Tasks.dc.html:1812
+inline.tasks.2147,new:projects.doneFraction,{{done}}/{{total}} 已完成,{{done}}/{{total}} done,{{done}}/{{total}} 已完成,Team Tasks.dc.html:2147
+inline.tasks.2206,new:toast.orgSwitched,已切換到 {{name}},Switched to {{name}},已切换到 {{name}},Team Tasks.dc.html:2206
+inline.tasks.2213,new:toast.orgCreated,已建立組織 {{name}},Created {{name}},已创建组织 {{name}},Team Tasks.dc.html:2213
+inline.tasks.2233.1,new:crm.toast.roleMoved,「{{role}}」由{{previous}}改為{{name}},{{role}} moved from {{previous}} to {{name}},“{{role}}”由{{previous}}改为{{name}},Team Tasks.dc.html:2233
+inline.tasks.2233.2,new:crm.toast.alsoStakeholder,{{name}}已同時加入項目相關方,{{name}} was also added to the project,{{name}}已同时加入项目相关方,Team Tasks.dc.html:2233
+inline.tasks.2237.1,new:crm.toast.added,已添加 {{name}},Added {{name}},已添加 {{name}},Team Tasks.dc.html:2237
+inline.tasks.2237.2,new:crm.toast.addedStakeholderSuffix,，並加入項目相關方,", also as a project stakeholder",，并加入项目相关方,Team Tasks.dc.html:2237
+inline.tasks.2241.1,new:crm.toast.removed,已移除 {{name}},Removed {{name}},已移除 {{name}},Team Tasks.dc.html:2241
+inline.tasks.2241.2,new:crm.toast.removedLinksSuffix,，及其 {{count}} 項任務上的聯繫," and {{count}} task links",，及其 {{count}} 项任务上的联系,Team Tasks.dc.html:2241
+inline.tasks.2246.1,new:crm.toast.companyChanged,已改為 {{company}},Moved to {{company}},已改为 {{company}},Team Tasks.dc.html:2246
+inline.tasks.2246.2,new:crm.toast.rolesClearedSuffix,，原公司角色已清除,; roles at the old company were cleared,，原公司角色已清除,Team Tasks.dc.html:2246
+inline.tasks.2248,new:crm.toast.clientSet,客戶公司已設為 {{company}},Client set to {{company}},客户公司已设为 {{company}},Team Tasks.dc.html:2248
+inline.tasks.2252,new:crm.toast.companyCreated,已新增 {{name}},Created {{name}},已添加 {{name}},Team Tasks.dc.html:2252
+inline.tasks.2253,new:crm.toast.contactCreated,已新增 {{name}},Created {{name}},已添加 {{name}},Team Tasks.dc.html:2253
+inline.tasks.2258.1,new:crm.toast.deleted,已刪除 {{name}},Deleted {{name}},已删除 {{name}},Team Tasks.dc.html:2258
+inline.tasks.2258.2,new:crm.toast.deletedLinksSuffix,，並移除 {{count}} 項關聯," and {{count}} links",，并移除 {{count}} 项关联,Team Tasks.dc.html:2258
+inline.tasks.2396.1,new:toast.agentFinished,{{agent}} 已完成 {{task}},{{agent}} finished {{task}},{{agent}} 已完成 {{task}},Team Tasks.dc.html:2396
+inline.tasks.2396.2,new:toast.autoApprovedSuffix," · 按策略自動通過"," · auto-approved by policy"," · 按策略自动通过",Team Tasks.dc.html:2396
+inline.tasks.2407,new:toast.runCancelled,已取消執行 · {{task}},Run cancelled · {{task}},已取消执行 · {{task}},Team Tasks.dc.html:2407
+inline.tasks.2431,new:seed.splitToast,調研智能體拆分出 3 個子任務,Research Agent split this into 3 subtasks,调研智能体拆分出 3 个子任务,Team Tasks.dc.html:2431
+inline.tasks.2436.1,new:toast.subtasksDone,{{task}} 的子任務已全部完成,All subtasks of {{task}} are done,{{task}} 的子任务已全部完成,Team Tasks.dc.html:2436
+inline.tasks.2436.2,new:toast.markDone,標記完成,Mark done,标记完成,Team Tasks.dc.html:2436
+inline.tasks.2443,new:toast.accessGranted,已授予權限，{{agent}}繼續工作,Access granted; {{agent}} is resuming,已授予权限，{{agent}}继续工作,Team Tasks.dc.html:2443
+inline.tasks.2448.1,new:toast.approved,已批准 {{task}},Approved {{task}},已批准 {{task}},Team Tasks.dc.html:2448
+inline.tasks.2448.2,new:toast.movedToDoneSuffix," · 已移至「已完成」"," · moved to Done"," · 已移至“已完成”",Team Tasks.dc.html:2448
+inline.tasks.2460,new:mcp.toast.regenerated,已生成新權杖，舊權杖立即失效,New token generated; the old one stops working now,已生成新令牌，旧令牌立即失效,Team Tasks.dc.html:2460
+inline.tasks.2464,new:toast.accessGranted,已授予權限，{{agent}}繼續工作,Access granted; {{agent}} is resuming,已授予权限，{{agent}}继续工作,Team Tasks.dc.html:2464
+inline.tasks.2486,new:toast.taskCreated,已建立 {{task}},Created {{task}},已创建 {{task}},Team Tasks.dc.html:2486
+inline.tasks.2533,new:calendar.toast.durationSet,時長改為 {{start}}–{{end}},Duration set to {{start}}–{{end}},时长改为 {{start}}–{{end}},Team Tasks.dc.html:2533
+inline.tasks.2538.1,new:calendar.toast.moved,已改期至 {{date}} {{time}},Moved to {{date}} {{time}},已改期至 {{date}} {{time}},Team Tasks.dc.html:2538
+inline.tasks.2538.2,new:actions.undo,撤銷,Undo,撤销,Team Tasks.dc.html:2538
+inline.tasks.2580,new:review.testsSummary,{{passed}} 項測試通過 · {{failed}} 項失敗,{{passed}} tests passed · {{failed}} failed,{{passed}} 项测试通过 · {{failed}} 项失败,Team Tasks.dc.html:2580
+inline.tasks.2582,new:review.runMeta,{{steps}} 步 · {{minutes}} 分 {{seconds}} 秒 · {{cost}},{{steps}} steps · {{minutes}}m {{seconds}}s · {{cost}},{{steps}} 步 · {{minutes}} 分 {{seconds}} 秒 · {{cost}},Team Tasks.dc.html:2582
+inline.tasks.2584,review.checked,已檢查 {{count}} / 3,Checked {{count}} / 3,已检查 {{count}} / 3,Team Tasks.dc.html:2584
+inline.tasks.2627,new:search.occurrences,共 {{count}} 次,{{count}} times,共 {{count}} 次,Team Tasks.dc.html:2627
+inline.tasks.2654.1,new:search.quick.toConfirm,待確認,To confirm,待确认,Team Tasks.dc.html:2654
+inline.tasks.2654.2,new:search.quick.blocked,已阻塞,Blocked,已阻塞,Team Tasks.dc.html:2654
+inline.tasks.2654.3,new:search.quick.agentsWorking,智能體工作中,Agents working,智能体工作中,Team Tasks.dc.html:2654
+inline.tasks.2654.4,new:search.quick.dueToday,今天到期,Due today,今天到期,Team Tasks.dc.html:2654
+inline.tasks.2654.5,new:seed.codeAgentFilter,代碼智能體,Code Agent,代码智能体,Team Tasks.dc.html:2654
+inline.tasks.2714,new:inbox.peopleCount,{{count}} 人,{{count}} people,{{count}} 人,Team Tasks.dc.html:2714
+inline.tasks.2741.1,new:calendar.monthTitle,{{year}}年{{month}}月,{{month}} {{year}},{{year}}年{{month}}月,Team Tasks.dc.html:2741
+inline.tasks.2741.2,new:calendar.monthOnly,{{month}}月,{{month}},{{month}}月,Team Tasks.dc.html:2741
+inline.tasks.2762,new:seed.mentionSample,@林曉 失敗狀態的文案需要你確認，三個版本已放在 Figma 裡。,@Lin Xiao please confirm the copy for the failure states. Three versions are in Figma.,@林晓 失败状态的文案需要你确认，三个版本已放在 Figma 里。,Team Tasks.dc.html:2762
+inline.tasks.2768,inbox.snoozedTomorrow,已延後到明天,Snoozed until tomorrow,已延后到明天,Team Tasks.dc.html:2768
+inline.tasks.2787,agentProfile.supervisedBy,監管人：{{name}},Supervised by {{name}},监管人：{{name}},Team Tasks.dc.html:2787
+inline.tasks.2806,new:assign.activeCount,處理中 {{count}} 項,{{count}} active,处理中 {{count}} 项,Team Tasks.dc.html:2806
+inline.tasks.2825.1,new:quickAdd.example1,明天下午3點 讓代碼智能體 修復優惠券疊加問題 #結賬改版 !高,Tomorrow 3pm @code fix stacked coupon bug #checkout !high,明天下午3点 让代码智能体 修复优惠券叠加问题 #结账改版 !高,Team Tasks.dc.html:2825
+inline.tasks.2825.2,new:quickAdd.example2,週五 調研智能體 整理 10 月用戶回饋,Fri research agent summarize October feedback,周五 调研智能体 整理 10 月用户反馈,Team Tasks.dc.html:2825
+inline.tasks.2825.3,new:quickAdd.example3,@王悅 下週一 10:00 評審空狀態插圖 !中,@wang next mon 10:00 review empty states !med,@王悦 下周一 10:00 评审空状态插图 !中,Team Tasks.dc.html:2825
+inline.tasks.2828,new:team.openCount,{{count}} 項進行中,{{count}} open,{{count}} 项进行中,Team Tasks.dc.html:2828
+inline.tasks.2830,new:organization.toast.resent,已重新發送給 {{email}},Resent to {{email}},已重新发送给 {{email}},Team Tasks.dc.html:2830
+inline.tasks.2835.1,agentProfile.supervisedBy,監管人：{{name}},Supervised by {{name}},监管人：{{name}},Team Tasks.dc.html:2835
+inline.tasks.2835.2,new:agentProfile.viaClient,接入 {{client}},via {{client}},接入 {{client}},Team Tasks.dc.html:2835
+inline.tasks.2840,new:mcp.toast.revoked,已撤銷 {{name}},Revoked {{name}},已撤销 {{name}},Team Tasks.dc.html:2840
+inline.tasks.2843,new:mcp.integrations.gcal,Google 日曆,Google Calendar,Google 日历,Team Tasks.dc.html:2843
+inline.tasks.2845,new:mcp.toast.connected,已連接 {{name}},Connected {{name}},已连接 {{name}},Team Tasks.dc.html:2845
+inline.tasks.2846,mcp.copied,已複製,Copied,已复制,Team Tasks.dc.html:2846
+inline.tasks.2859.1,agentProfile.supervisedBy,監管人：{{name}},Supervised by {{name}},监管人：{{name}},Team Tasks.dc.html:2859
+inline.tasks.2859.2,new:agentProfile.viaClient,接入 {{client}},via {{client}},接入 {{client}},Team Tasks.dc.html:2859
+inline.tasks.2862.1,new:agentProfile.policyAutoNote,「低風險自動通過」：{{agent}}的交付物不進收件箱，直接完成並記錄在動態中。,"Auto-approve: {{agent}}'s deliverables skip the inbox, complete directly and are logged in Activity.",“低风险自动通过”：{{agent}}的交付物不进收件箱，直接完成并记录在动态中。,Team Tasks.dc.html:2862
+inline.tasks.2862.2,new:agentProfile.policyDefaultNote,預設每次都由負責人審核。審核規則可稍後按智能體逐一設定。,By default the owner reviews every deliverable. Rules can be set per agent later.,默认每次都由负责人审核。审核规则可稍后按智能体逐一设置。,Team Tasks.dc.html:2862
+inline.tasks.2904.1,new:prototype.flows.assign,項目 › NW-145 撰寫發佈說明 › 分配給智能體，狀態從「工作中」變為「待確認」,Projects › NW-145 Draft release notes › Assign to agent; watch Working → To confirm,项目 › NW-145 撰写发布说明 › 分配给智能体，状态从“工作中”变为“待确认”,Team Tasks.dc.html:2904
+inline.tasks.2904.2,new:prototype.flows.approve,收件箱 › 批准（底部標籤會實時更新數量）,Inbox › Approve (the tab badge updates live),收件箱 › 批准（底部标签会实时更新数量）,Team Tasks.dc.html:2904
+inline.tasks.2904.3,new:prototype.flows.calendar,日曆 › 在日 / 週 / 月視圖中拖動任意日程,"Calendar › drag any block in Day, Week or Month",日历 › 在日 / 周 / 月视图中拖动任意日程,Team Tasks.dc.html:2904
+inline.tasks.2904.4,new:prototype.flows.quickAdd,右下角 + › 用自然語言快速添加任務,The + button › quick-add a task in natural language,右下角 + › 用自然语言快速添加任务,Team Tasks.dc.html:2904
+inline.tasks.2904.5,new:prototype.flows.preferences,我的 › 切換語言與深淺色外觀,Me › switch language and light / dark,我的 › 切换语言与深浅色外观,Team Tasks.dc.html:2904
+inline.tasks.2904.6,new:prototype.flows.search,搜尋圖標或桌面端 ⌘K › 跨任務、日程、成員與設定搜尋，可切到「所有組織」,"Search icon, or ⌘K on desktop › search tasks, events, people and settings; switch to All orgs",搜索图标或桌面端 ⌘K › 跨任务、日程、成员与设置搜索，可切到“所有组织”,Team Tasks.dc.html:2904
+inline.tasks.2904.7,new:prototype.flows.switchOrg,項目頁標題或我的 › 組織 › 切換組織,Projects title or Me › Organization › switch org,项目页标题或我的 › 组织 › 切换组织,Team Tasks.dc.html:2904
+inline.tasks.2919.1,new:calendar.weekdayNarrow.mon,一,M,一,Team Tasks.dc.html:2919
+inline.tasks.2919.2,new:calendar.weekdayNarrow.tue,二,T,二,Team Tasks.dc.html:2919
+inline.tasks.2919.3,new:calendar.weekdayNarrow.wed,三,W,三,Team Tasks.dc.html:2919
+inline.tasks.2919.4,new:calendar.weekdayNarrow.thu,四,T,四,Team Tasks.dc.html:2919
+inline.tasks.2919.5,new:calendar.weekdayNarrow.fri,五,F,五,Team Tasks.dc.html:2919
+inline.tasks.2919.6,new:calendar.weekdayNarrow.sat,六,S,六,Team Tasks.dc.html:2919
+inline.tasks.2919.7,new:calendar.weekdayNarrow.sun,日,S,日,Team Tasks.dc.html:2919
+inline.tasks.2931,me.teamSummary,{{people}} 人 · {{agents}} 個智能體,{{people}} people · {{agents}} agents,{{people}} 人 · {{agents}} 个智能体,Team Tasks.dc.html:2931
+inline.tasks.2933.1,me.light,淺色,Light,浅色,Team Tasks.dc.html:2933
+inline.tasks.2933.2,me.dark,深色,Dark,深色,Team Tasks.dc.html:2933
+inline.tasks.2955,new:quickAdd.outsideOrgNote,{{name}} 不在 {{org}}，將由你負責,{{name}} isn't in {{org}}; you'll own this task,{{name}} 不在 {{org}}，将由你负责,Team Tasks.dc.html:2955
+inline.tasks.2956,new:quickAdd.agentStartsNote,建立後 {{agent}} 會立即開始工作,{{agent}} starts working as soon as it is created,创建后 {{agent}} 会立即开始工作,Team Tasks.dc.html:2956
+inline.tasks.2966,new:mcp.toast.regenerated,已生成新權杖，舊權杖立即失效,New token generated; the old one stops working now,已生成新令牌，旧令牌立即失效,Team Tasks.dc.html:2966
+inline.tasks.2967,new:mcp.serverStatus,服務執行中 · {{count}} 個客戶端,Server running · {{count}} clients,服务执行中 · {{count}} 个客户端,Team Tasks.dc.html:2967
+inline.tasks.2981,new:organization.toast.invited,已邀請 {{email}},Invited {{email}},已邀请 {{email}},Team Tasks.dc.html:2981
+inline.tasks.2982,new:organization.toast.invited,已邀請 {{email}},Invited {{email}},已邀请 {{email}},Team Tasks.dc.html:2982
+inline.tasks.2999.1,new:calendar.monthTitle,{{year}}年{{month}}月,{{month}} {{year}},{{year}}年{{month}}月,Team Tasks.dc.html:2999
+inline.tasks.2999.2,new:calendar.monthTitle,{{year}}年{{month}}月,{{month}} {{year}},{{year}}年{{month}}月,Team Tasks.dc.html:2999
+inline.tasks.3006.1,new:calendar.weekdayShort.mon,週一,Mon,周一,Team Tasks.dc.html:3006
+inline.tasks.3006.2,new:calendar.weekdayShort.tue,週二,Tue,周二,Team Tasks.dc.html:3006
+inline.tasks.3006.3,new:calendar.weekdayShort.wed,週三,Wed,周三,Team Tasks.dc.html:3006
+inline.tasks.3006.4,new:calendar.weekdayShort.thu,週四,Thu,周四,Team Tasks.dc.html:3006
+inline.tasks.3006.5,new:calendar.weekdayShort.fri,週五,Fri,周五,Team Tasks.dc.html:3006
+inline.tasks.3006.6,new:calendar.weekdayShort.sat,週六,Sat,周六,Team Tasks.dc.html:3006
+inline.tasks.3006.7,new:calendar.weekdayShort.sun,週日,Sun,周日,Team Tasks.dc.html:3006
+inline.tasks.3022,me.teamSummary,{{people}} 人 · {{agents}} 個智能體,{{people}} people · {{agents}} agents,{{people}} 人 · {{agents}} 个智能体,Team Tasks.dc.html:3022
+inline.plan.311,new:format.monthDay,{{month}}月{{day}}日,{{day}} {{monthShort}},{{month}}月{{day}}日,Team Tasks Module Plan.dc.html:311
+inline.plan.429,new:brief.risk.blocked,「{{task}}」被阻礙：{{reason}},{{task}} is blocked: {{reason}},“{{task}}”被阻碍：{{reason}},Team Tasks Module Plan.dc.html:429
+inline.plan.430,new:brief.risk.conflict,「{{task}}」在「{{predecessor}}」完成前開始。,{{task}} starts before {{predecessor}} finishes.,“{{task}}”在“{{predecessor}}”完成前开始。,Team Tasks Module Plan.dc.html:430
+inline.plan.431,new:brief.risk.behind,「{{task}}」落後計劃 {{percent}}%。,{{task}} is {{percent}}% behind plan.,“{{task}}”落后计划 {{percent}}%。,Team Tasks Module Plan.dc.html:431
+inline.plan.433,new:brief.risk.slip,{{milestone}}預計延後 {{count}} 天。,{{milestone}} forecast {{count}} days late.,{{milestone}}预计延后 {{count}} 天。,Team Tasks Module Plan.dc.html:433
+inline.plan.440,new:brief.summary.onTrack,{{total}} 個項目中有 {{count}} 個按計劃進行。,{{count}} of {{total}} projects are on track.,{{total}} 个项目中有 {{count}} 个按计划进行。,Team Tasks Module Plan.dc.html:440
+inline.plan.441,new:brief.summary.worst,「{{project}}」最需要關注：{{reason}},{{project}} needs the most attention: {{reason}},“{{project}}”最需要关注：{{reason}},Team Tasks Module Plan.dc.html:441
+inline.plan.442,new:brief.summary.agents,{{count}} 個智能體正在工作，{{review}} 項交付等待你確認。,{{count}} agents are working and {{review}} deliverables are waiting for your confirmation.,{{count}} 个智能体正在工作，{{review}} 项交付等待你确认。,Team Tasks Module Plan.dc.html:442
+inline.plan.501,new:timeline.slipDays,（+{{count}} 天）,(+{{count}}d),（+{{count}} 天）,Team Tasks Module Plan.dc.html:501
+inline.plan.594,new:mind.validationTaskTitle,驗證機會：{{name}},Validate: {{name}},验证机会：{{name}},Team Tasks Module Plan.dc.html:594
+inline.plan.642.1,new:seed.askBlocking,「結賬改版」目前{{level}}。,Checkout v2 is {{level}}.,“结账改版”目前{{level}}。,Team Tasks Module Plan.dc.html:642
+inline.plan.642.2,new:seed.askBlockingAction,可在右側批准給運維智能體的臨時寫權限（僅 NW-144，24 小時）。,"You can approve temporary write access for Ops Agent on the right (NW-144 only, 24 hours).",可在右侧批准给运维智能体的临时写权限（仅 NW-144，24 小时）。,Team Tasks Module Plan.dc.html:642
+inline.plan.643,new:ask.answer.load,{{name}}負責 {{count}} 項未完成任務，負荷最重。,"{{name}} owns {{count}} open tasks, the heaviest load.",{{name}}负责 {{count}} 项未完成任务，负荷最重。,Team Tasks Module Plan.dc.html:643
+inline.plan.644,new:ask.answer.agent,{{agent}}正在處理「{{task}}」（{{id}}，{{percent}}%）,"{{agent}} is on {{task}} ({{id}}, {{percent}}%)",{{agent}}正在处理“{{task}}”（{{id}}，{{percent}}%）,Team Tasks Module Plan.dc.html:644
+inline.relations.86,new:format.monthDay,{{month}}月{{day}}日,{{day}} {{monthShort}},{{month}}月{{day}}日,Team Tasks Module Relations.dc.html:86
+inline.tasks.1813,new:time.justNow,剛剛,Just now,刚刚,Team Tasks.dc.html:1813
+inline.tasks.1837.1,mcp.title,MCP 伺服器,MCP server,MCP 服务器,Team Tasks.dc.html:1837
+inline.tasks.1837.2,me.settings,設定,Settings,设置,Team Tasks.dc.html:1837
+inline.tasks.1838.1,organization.team,團隊,Team,团队,Team Tasks.dc.html:1838
+inline.tasks.1838.2,new:search.people,成員與智能體,People & agents,成员与智能体,Team Tasks.dc.html:1838
+inline.tasks.1839.1,organization.switch,切換組織,Switch organization,切换组织,Team Tasks.dc.html:1839
+inline.tasks.1839.2,new:organization.label,組織,Organization,组织,Team Tasks.dc.html:1839
+inline.tasks.1840.1,language,語言,Language,语言,Team Tasks.dc.html:1840
+inline.tasks.1840.2,me.preferences,偏好設定,Preferences,偏好设置,Team Tasks.dc.html:1840
+inline.tasks.1841.1,me.appearance,外觀,Appearance,外观,Team Tasks.dc.html:1841
+inline.tasks.1841.2,me.preferences,偏好設定,Preferences,偏好设置,Team Tasks.dc.html:1841
+inline.tasks.1843.1,planning.urgent,緊急,Urgent,紧急,Team Tasks.dc.html:1843
+inline.tasks.1843.2,planning.high,高,High,高,Team Tasks.dc.html:1843
+inline.tasks.1843.3,planning.medium,中,Medium,中,Team Tasks.dc.html:1843
+inline.tasks.1843.4,planning.low,低,Low,低,Team Tasks.dc.html:1843
+inline.tasks.1844,new:run.step.readContextDone,讀取了任務上下文與相關討論,read the task context and related threads,读取了任务上下文与相关讨论,Team Tasks.dc.html:1844
+inline.tasks.1845,new:run.step.preparedDeliverable,整理了交付物,prepared the deliverable,整理了交付物,Team Tasks.dc.html:1845
+inline.tasks.1902.1,agentProfile.capability.tasks.read,讀取任務與評論,Read tasks and comments,读取任务与评论,Team Tasks.dc.html:1902
+inline.tasks.1902.2,agentProfile.capability.web.search,聯網檢索,Search the web,联网搜索,Team Tasks.dc.html:1902
+inline.tasks.1902.3,agentProfile.capability.files.attach,上傳附件,Attach files,上传附件,Team Tasks.dc.html:1902
+inline.tasks.1903.1,agentProfile.capability.repo.read,讀取代碼倉庫,Read repositories,读取代码仓库,Team Tasks.dc.html:1903
+inline.tasks.1903.2,agentProfile.capability.repo.pr,提交 PR,Open pull requests,提交 PR,Team Tasks.dc.html:1903
+inline.tasks.1903.3,agentProfile.capability.repo.merge,合併到主分支,Merge code,合并到主分支,Team Tasks.dc.html:1903
+inline.tasks.1903.4,agentProfile.capability.deploy.prod,生產環境部署,Deploy to production,生产环境部署,Team Tasks.dc.html:1903
+inline.tasks.1904.1,agentProfile.capability.staging.read,讀取預發環境,Read staging,读取预发环境,Team Tasks.dc.html:1904
+inline.tasks.1904.2,agentProfile.capability.staging.write,預發資料庫寫入,Change staging,预发数据库写入,Team Tasks.dc.html:1904
+inline.tasks.1904.3,agentProfile.capability.alerts,管理告警,Manage alerts,管理告警,Team Tasks.dc.html:1904
+inline.tasks.1904.4,agentProfile.capability.deploy.prod,生產環境部署,Deploy to production,生产环境部署,Team Tasks.dc.html:1904
+inline.tasks.1907.1,review.check.matchesDescription,交付物符合任務描述,Matches the task description,交付物符合任务描述,Team Tasks.dc.html:1907
+inline.tasks.1907.2,review.check.verifiable,來源或測試可以核查,Sources or tests can be verified,来源或测试可以核查,Team Tasks.dc.html:1907
+inline.tasks.1907.3,review.check.withinPermissions,沒有超出授權範圍的操作,No actions beyond granted permissions,没有超出授权范围的操作,Team Tasks.dc.html:1907
+inline.tasks.2081.1,mcp.scope.tasks:read,讀取任務,Read tasks,读取任务,Team Tasks.dc.html:2081
+inline.tasks.2081.2,mcp.scope.tasks:write,建立與更新任務,Create and update tasks,创建与更新任务,Team Tasks.dc.html:2081
+inline.tasks.2081.3,mcp.scope.calendar:write,修改日程,Change events,修改日程,Team Tasks.dc.html:2081
+inline.tasks.2081.4,mcp.scope.inbox:review,提交審核,Submit for review,提交审核,Team Tasks.dc.html:2081
+inline.tasks.2784.1,new:run.step.readContext,讀取上下文,Read context,读取上下文,Team Tasks.dc.html:2784
+inline.tasks.2784.2,new:run.step.prepareDeliverable,整理交付物,Prepare deliverable,整理交付物,Team Tasks.dc.html:2784
+inline.tasks.2784.3,new:run.step.submit,提交審核,Submit for review,提交审核,Team Tasks.dc.html:2784
+inline.tasks.2841.1,new:mcp.toolDescriptions.listTasks,讀取與篩選任務,Read and filter tasks,读取与筛选任务,Team Tasks.dc.html:2841
+inline.tasks.2841.2,new:mcp.toolDescriptions.createTask,建立任務,Create tasks,创建任务,Team Tasks.dc.html:2841
+inline.tasks.2841.3,new:mcp.toolDescriptions.updateTask,更新狀態、執行者與評論,"Update status, worker and comments",更新状态、执行者与评论,Team Tasks.dc.html:2841
+inline.tasks.2841.4,new:mcp.toolDescriptions.calendarSchedule,建立與改期日程,Create and reschedule events,创建与改期日程,Team Tasks.dc.html:2841
+inline.tasks.2841.5,new:mcp.toolDescriptions.requestReview,向負責人提交審核,Submit work for owner review,向负责人提交审核,Team Tasks.dc.html:2841
+inline.tasks.2841.6,new:mcp.toolDescriptions.attachFile,上傳附件,Upload attachments,上传附件,Team Tasks.dc.html:2841
+inline.tasks.2843.1,new:mcp.integrations.githubHint,代碼與 PR,Code and pull requests,代码与 PR,Team Tasks.dc.html:2843
+inline.tasks.2843.2,new:mcp.integrations.figmaHint,設計檔案,Design files,设计文件,Team Tasks.dc.html:2843
+inline.tasks.2843.3,new:mcp.integrations.slackHint,頻道通知,Channel notifications,频道通知,Team Tasks.dc.html:2843
+inline.tasks.2843.4,new:mcp.integrations.gcalHint,雙向同步日程,Two-way event sync,双向同步日程,Team Tasks.dc.html:2843
+inline.store.89,new:time.justNow,剛剛,Just now,刚刚,taff-store.js:89
+inline.store.112.1,new:activity.createdBySplit,經 taff 拆分建立,created by a split in taff,经 taff 拆分创建,taff-store.js:112
+inline.store.112.2,new:time.justNow,剛剛,Just now,刚刚,taff-store.js:112
+inline.store.130,new:crm.role.decider,決策者,Decision maker,决策者,taff-store.js:130
+inline.store.131,new:crm.role.chair,董事長,Chairman,董事长,taff-store.js:131
+inline.store.132,new:crm.role.ops,運營負責人,Operations lead,运营负责人,taff-store.js:132
+inline.store.133,new:crm.role.broker,項目中間人,Intermediary,项目中间人,taff-store.js:133
+inline.store.134,new:crm.role.tech,技術對接人,Technical contact,技术对接人,taff-store.js:134
+inline.store.135,new:crm.role.finance,財務聯繫人,Finance contact,财务联系人,taff-store.js:135
+inline.store.136,new:crm.role.signoff,驗收人,Sign-off,验收人,taff-store.js:136
+inline.store.30,new:format.tenThousand,{{amount}} 萬,{{amount}},{{amount}} 万,taff-store.js:30

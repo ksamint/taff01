@@ -2,7 +2,8 @@
 
 > Status 2026-10-14: planned, not started. The user delegated every
 > decision: the agent never stops to ask, and develops until the new
-> frontend is live and working on `https://taff.apuch.cn` for review, with
+> frontend is live and working on `https://taff.apuch.cn` for review (the local
+> agent deploys; see `docs/agent-goal-deploy-frontend-v2.md`), with
 > basic functions and MCP first.
 
 Paste everything below this line as the goal for a coding agent working in
@@ -111,7 +112,7 @@ Follow plan §6.0 and §6.1:
 | M12 | Planning and CRM backend, with seed |
 | M13 | Shell, 4-tab navigation, Today, Me, Inbox, the MCP page, signed-out landing. Its first commit extracts the ~35 inline mutations into `src/lib` hooks with no UI change. |
 | M14 | Projects, task detail with contacts, desktop calendar, search |
-| **R1** | Deploy live and pass the basic-function and live-MCP checklist of plan §6.0 |
+| **R1** | Publish the release candidate (checklist of plan §6.0 passing locally in production mode); the local agent deploys it live |
 | **Phase B** | |
 | M15 | CRM screens |
 | M16 | Timeline and relations graph |
@@ -120,7 +121,8 @@ Follow plan §6.0 and §6.1:
 | **Phase C** | |
 | M19 | Remove v1 code and baselines, regenerate font subsets, accessibility and i18n QA, release and deploy `v0.2.0` |
 
-Each Phase B milestone is redeployed live when green.
+Each Phase B milestone publishes a new candidate when green; the local agent
+redeploys it.
 
 ## Decisions
 
@@ -138,8 +140,8 @@ Hard limits, followed without asking:
 - Only allowed licences.
 - No stack swap without an ADR.
 
-When a deploy check fails, roll back to the previous SHA, fix forward and
-redeploy.
+When the local agent reports a failed deploy check (`Blocked:` under the
+candidate), fix forward and publish a new candidate.
 
 ## Validation
 
@@ -158,20 +160,36 @@ Before each milestone report, also run:
 
 `.github/workflows/ci.yml` must stay green on every merge.
 
-## Deployment
+## Deployment (handed to the local agent)
 
-Deploy with `docs/agent-goal-deploy.md` and `docs/deploy.md`:
+You do not deploy: this environment has no access to the production host. A
+local agent with the SSH connection deploys, following
+`docs/agent-goal-deploy-frontend-v2.md`.
 
-- lock and back up first;
-- deploy a detached SHA;
-- run the migrator;
-- replace only the API, worker and web;
-- run the public checks in zh-HK and en on phone and desktop;
-- write a checkpoint in `docs/deploy.md`.
+Your side of the handoff, for R1, each Phase B milestone and `v0.2.0`:
 
-The live MCP check uses a freshly issued token, calls every tool through
-`@modelcontextprotocol/client` against `https://taff.apuch.cn/mcp`, and
-revokes the token afterwards.
+1. Merge the milestone to `main` with both CI runs green.
+2. Run the release's acceptance checklist against a local production-mode
+   stack: `compose.prod.yaml`, or `pnpm build` plus `pnpm build:server`, with
+   the production env shape. The checklist is plan §6.0 plus the milestone's
+   new flows, and includes a real `@modelcontextprotocol/client` round trip
+   that calls every tool.
+3. Append `### Frontend v2 release candidate <R1|M15|…|v0.2.0> — <date>` to
+   `docs/deploy.md` with every item that file's "How releases are handed over"
+   lists:
+   - the SHA and CI links;
+   - the validation numbers;
+   - the migrations, each marked additive, with backfill row counts;
+   - new env variables and their production rule (never a secret value);
+   - Compose, Docker and Caddy changes;
+   - the acceptance checklist and your local production-mode result.
+4. Push that as a docs-only commit to `main`, then continue with the next
+   milestone without waiting.
+
+Keep every migration additive: no `DROP`, `TRUNCATE`, `DELETE`, renames or
+rewrites of user data. Keep the host layout, route file, DNS and database
+role unchanged. If the local agent writes a `Blocked:` note under a
+candidate, fix it first, then publish a new candidate.
 
 ## Milestone protocol
 
