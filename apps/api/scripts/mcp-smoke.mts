@@ -7,13 +7,16 @@ import {
 import { createCore, userPrincipal } from "@taff/core";
 import {
   calendarViewDataSchema,
+  dependencySchema,
   grantSchema,
   quickAddResultSchema,
   runDetailSchema,
   runSchema,
   searchResultSchema,
   taskCalendarSchema,
+  taskPlanResultSchema,
   taskSchema,
+  timelineSchema,
 } from "@taff/schemas";
 
 const env = (name: string) => {
@@ -89,12 +92,14 @@ try {
     .map((tool) => tool.name)
     .sort();
   check(
-    "lists every task, calendar, project, search, draft, run, grant and file tool",
+    "lists every task, calendar, timeline, project, search, draft, run, grant and file tool",
     JSON.stringify(tools) ===
       JSON.stringify([
         "calendar.list",
         "calendar.schedule",
         "calendar.set",
+        "dependencies.add",
+        "dependencies.remove",
         "files.attach",
         "grants.request",
         "inbox.request_review",
@@ -111,7 +116,9 @@ try {
         "tasks.create",
         "tasks.edit",
         "tasks.list",
+        "tasks.plan",
         "tasks.update",
+        "timeline.get",
       ]),
     tools,
   );
@@ -328,6 +335,92 @@ try {
     cleared.schedule === null &&
       cleared.task.dueAt === scheduled?.dueAt &&
       cleared.task.version === interval.task.version + 1,
+  );
+  // Timeline (ADR 0015): plan both smoke tasks, link them, refuse a cycle.
+  const civil = (days: number) =>
+    new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
+  const planned = taskPlanResultSchema.parse(
+    text(
+      await client.callTool({
+        name: "tasks.plan",
+        arguments: { taskId, startDate: civil(1), durationDays: 2 },
+      }),
+    ),
+  );
+  check(
+    "tasks.plan stores a new plan and moves the deadline to its last day",
+    planned.plans[0]?.taskId === taskId &&
+      planned.plans[0]?.version === 1 &&
+      planned.tasks[0]?.id === taskId,
+    planned,
+  );
+  const follower = taskSchema.parse(
+    text(
+      await client.callTool({
+        name: "tasks.create",
+        arguments: {
+          title: `Smoke follow-up ${Date.now()}`,
+          ownerId: workspace.memberId,
+          projectId: project.id,
+        },
+      }),
+    ),
+  );
+  await client.callTool({
+    name: "tasks.plan",
+    arguments: { taskId: follower.id, startDate: civil(3), durationDays: 1 },
+  });
+  const link = dependencySchema.parse(
+    text(
+      await client.callTool({
+        name: "dependencies.add",
+        arguments: { predecessorTaskId: taskId, successorTaskId: follower.id },
+      }),
+    ),
+  );
+  check(
+    "dependencies.add links two tasks in the token workspace",
+    link.predecessorTaskId === taskId &&
+      link.successorTaskId === follower.id &&
+      link.workspaceId === workspace.id,
+  );
+  const cycle = await client.callTool({
+    name: "dependencies.add",
+    arguments: { predecessorTaskId: follower.id, successorTaskId: taskId },
+  });
+  check(
+    "dependencies.add refuses a cycle",
+    cycle.isError === true &&
+      (cycle.content as { text?: string }[])[0]?.text === "conflict",
+    cycle,
+  );
+  const plan = timelineSchema.parse(
+    text(
+      await client.callTool({
+        name: "timeline.get",
+        arguments: { projectId: project.id },
+      }),
+    ),
+  );
+  check(
+    "timeline.get reads spans and links without finance",
+    plan.items.some((item) => item.id === taskId && item.planned) &&
+      plan.items.some((item) => item.id === follower.id) &&
+      plan.dependencies.some((dep) => dep.id === link.id && !dep.conflict) &&
+      plan.risk.finance === null,
+    plan,
+  );
+  const unlinked = dependencySchema.parse(
+    text(
+      await client.callTool({
+        name: "dependencies.remove",
+        arguments: { dependencyId: link.id },
+      }),
+    ),
+  );
+  check(
+    "dependencies.remove returns the removed link",
+    unlinked.id === link.id,
   );
   let run = runSchema.parse(
     text(await client.callTool({ name: "runs.start", arguments: { taskId } })),
