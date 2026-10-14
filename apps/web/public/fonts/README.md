@@ -58,8 +58,30 @@ of 100–900; CSS advertises the narrower range used by the application.
 
 | Asset | Unicode mappings | Bytes | SHA-256 |
 | --- | ---: | ---: | --- |
-| NotoSansTC-ui-common.woff2 | 198 | 56,892 | `b8380f48c9b26fb7e903e5db72063d3ae437382840dbf640accef90ba00e026e` |
-| NotoSansTC-ui-remaining.woff2 | 516 | 162,604 | `15dab34a82c8df28482b0f6e058f09ad00de3f9d21695f34a34585e4340c808f` |
+| NotoSansTC-ui-common.woff2 | 247 | 70,716 | `37ad32a472c41f4437229203438fa50c74a87d9ad58130ef48795ee138e989bf` |
+| NotoSansTC-ui-remaining.woff2 | 728 | 224,900 | `d5608a4e557d0a05206365b66752c7bea50d2548799142e7941f9aa1d18af283` |
+
+**M19 v2 regeneration (2026-10-14).** The subsets were regenerated from the v2
+strings. Coverage is the previous 714 mappings plus every character the approved
+TC source supports in: all strings of the three locale dictionaries, hard-coded
+non-Latin text in `apps/web/src` and `apps/web/app` (tests excluded), the shared
+seed content (`packages/schemas/src/prototype-data.ts`,
+`packages/core/src/prototype-{mind,seed}.ts`, `packages/core/src/seed.ts`) and
+the Intl date text below. That adds 261 mappings (975 in total), including
+`↔`, `⌘`, `「」` and `；`. Characters that Manrope-latin already draws
+(`–—“”›−`) are not added: Manrope precedes Noto Sans TC in the font stack, so
+those Noto glyphs would never render. The `initials.ts` regex bounds U+3400 and
+U+9FFF are not text. The TC source lacks 173 Simplified Chinese characters used
+by zh-CN strings and zh-CN seed content; these keep the system fallback.
+The common promotion now selects 49 more characters
+(`七不並五使側內全六受址处如展并忽息所拥接提擁星是時查欄權此母獲略看确確英處訊認證透這通連邀部閒非驗`),
+38 of which moved from the remaining asset. The remaining asset is the exact
+complement. All 714 earlier mappings keep identical outlines and
+horizontal/vertical metrics at weights 100, 300, 400, 500, 600 and 900; the
+procedure below with the earlier coverage and split reproduces the earlier
+assets byte for byte. The combined size grows from 219,496 to 295,616 bytes.
+The four font faces are unchanged, so `scripts/ui/prepare-fonts.ts` still
+expects four.
 
 The common set retains every prior common mapping. It contains supported
 characters from top-level strings, navigation labels, task/run statuses and
@@ -95,7 +117,8 @@ claim a browser pixel comparison pass. WOFF2 compression makes the common asset
 32 bytes larger despite removing that small table.
 
 Regenerate from the repository root using those tool versions. The existing
-runtime cmaps are the coverage boundary; retain their exact union. Node 24's Intl
+runtime cmaps are the minimum coverage; retain their union and extend it as in
+the M19 note above. Node 24's Intl
 provides the date strings, independently of task data. This prints new CSS ranges,
 which must be updated together with both assets:
 
@@ -134,7 +157,34 @@ previous_common = set(TTFont(fonts / "NotoSansTC-ui-common.woff2").getBestCmap()
 coverage = previous_common | set(
     TTFont(fonts / "NotoSansTC-ui-remaining.woff2").getBestCmap()
 )
-assert len(coverage) == 714
+assert len(coverage) >= 975
+manrope = set(TTFont(fonts / "Manrope-latin.woff2").getBestCmap())
+source_cmap = set(TTFont(source).getBestCmap())
+
+def walk(value):
+    if isinstance(value, str):
+        yield value
+    elif isinstance(value, dict):
+        for child in value.values():
+            yield from walk(child)
+
+v2 = json.loads(Path("/tmp/taff-font-date-text.json").read_text())
+for locale in ("en", "zh-CN", "zh-HK"):
+    v2.extend(walk(json.loads(
+        (Path("apps/web/locales") / locale / "common.json").read_text()
+    )))
+for path in [
+    *(p for folder in ("apps/web/src", "apps/web/app")
+      for p in Path(folder).rglob("*")
+      if p.suffix in (".ts", ".tsx") and ".test." not in p.name),
+    Path("packages/schemas/src/prototype-data.ts"),
+    Path("packages/core/src/prototype-mind.ts"),
+    Path("packages/core/src/prototype-seed.ts"),
+    Path("packages/core/src/seed.ts"),
+]:
+    v2.append(path.read_text())
+wanted = {ord(c) for text in v2 for c in text if ord(c) > 0xFF} - {0x3400, 0x9FFF}
+coverage |= (wanted & source_cmap) - manrope
 texts = json.loads(Path("/tmp/taff-font-date-text.json").read_text())
 keys = set(re.findall(
     r't\("([\w.]+)"',
