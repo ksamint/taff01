@@ -3,10 +3,12 @@ import {
   companies,
   type Database,
   members,
+  projectContacts,
   projects,
   reviewComments,
   type Transaction,
   taskComments,
+  taskContacts,
   tasks,
   user,
   workspaceInvites,
@@ -163,6 +165,43 @@ export function createPlanningOperations({
       .for("share");
     if (!row || row.archived) invalid();
   }
+  /**
+   * Task contacts follow their task's project (ADR 0015, plan §4.2).
+   * task_contacts_task_fk cascades tasks.project_id onto the links, and
+   * task_contacts_stakeholder_fk then needs every contact to be a stakeholder
+   * of the new project, so add those first. A task without a project holds no
+   * contacts: its links (and their roles, by cascade) are removed instead.
+   * Runs before tasks.project_id changes.
+   */
+  async function moveTaskContacts(
+    tx: Transaction,
+    task: typeof tasks.$inferSelect,
+    projectId: string | null,
+  ) {
+    const where = and(
+      eq(taskContacts.workspaceId, task.workspaceId),
+      eq(taskContacts.taskId, task.id),
+    );
+    if (!projectId) {
+      await tx.delete(taskContacts).where(where);
+      return;
+    }
+    const linked = await tx
+      .select({ contactId: taskContacts.contactId })
+      .from(taskContacts)
+      .where(where);
+    if (linked.length)
+      await tx
+        .insert(projectContacts)
+        .values(
+          linked.map(({ contactId }) => ({
+            workspaceId: task.workspaceId,
+            projectId,
+            contactId,
+          })),
+        )
+        .onConflictDoNothing();
+  }
   async function getWorkspaceAccess(
     p: Principal,
     w: string,
@@ -288,8 +327,10 @@ export function createPlanningOperations({
           body.ownerId !== undefined)
       )
         conflict();
-      if (body.projectId !== undefined && body.projectId !== task.projectId)
+      if (body.projectId !== undefined && body.projectId !== task.projectId) {
         await validateProject(tx, task.workspaceId, body.projectId);
+        await moveTaskContacts(tx, task, body.projectId);
+      }
       if (body.status !== undefined) {
         await requireMember(
           tx,
