@@ -81,12 +81,6 @@ export default class SafeReporter implements Reporter {
     );
   }
   onEnd(result: FullResult) {
-    if (!this.rows.length) {
-      console.log(
-        JSON.stringify({ event: "discovery-finished", status: result.status }),
-      );
-      return;
-    }
     const dir = process.env.RELEASE_REPORT_DIR ?? "reports";
     mkdirSync(dir, { recursive: true, mode: 0o700 });
     const path = join(dir, "acceptance-summary.json");
@@ -97,6 +91,7 @@ export default class SafeReporter implements Reporter {
           startedAt: this.started,
           finishedAt: new Date().toISOString(),
           status: result.status,
+          mode: process.env.TAFF_LIVE_DISCOVERY ? "discovery" : "execution",
           rows: this.rows,
         },
         null,
