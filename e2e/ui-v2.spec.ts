@@ -374,6 +374,17 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         await expect(page.getByTestId("stakeholder").first()).toBeVisible();
       if (screen === "timeline")
         await expect(page.getByTestId("timeline-bar").first()).toBeVisible();
+      if (screen === "relations")
+        await expect(page.getByTestId("relations-node").first()).toBeVisible();
+      if (screen === "brief") {
+        await expect(page.getByTestId("brief-stats")).toBeVisible();
+        await expect(page.getByTestId("brief-risk").first()).toBeVisible();
+      }
+      if (screen === "mind") {
+        await expect(page.getByTestId("mind-node").first()).toBeVisible();
+        await expect(page.getByTestId("mind-overview")).toBeVisible();
+      }
+      await page.evaluate(prepareFonts);
       if (screen === "relations" && locale === "en") {
         const downloads = await page.evaluate(() =>
           performance.getEntriesByType("resource").map((entry) => entry.name),
@@ -387,17 +398,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
           ),
         ).toBe(false);
       }
-      if (screen === "relations")
-        await expect(page.getByTestId("relations-node").first()).toBeVisible();
-      if (screen === "brief") {
-        await expect(page.getByTestId("brief-stats")).toBeVisible();
-        await expect(page.getByTestId("brief-risk").first()).toBeVisible();
-      }
-      if (screen === "mind") {
-        await expect(page.getByTestId("mind-node").first()).toBeVisible();
-        await expect(page.getByTestId("mind-overview")).toBeVisible();
-      }
-      await page.evaluate(() => document.fonts.ready);
+
       if (desktop && (screen === "projects" || screen === "type"))
         await assertDesktopBoardActions();
       await page.mouse.move(0, 0);
