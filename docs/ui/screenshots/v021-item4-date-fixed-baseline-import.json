@@ -5,7 +5,7 @@
   "fixedReadDate": "2026-10-08",
   "assertions": "Real Brief/Timeline API schema today and rendered Brief date are asserted; both Timeline today markers must align. Lazy stylesheet computed layouts are asserted.",
   "nativeManifest": "v021-item4-date-fixed-capture-manifest.json",
-  "nativeManifestSha256": "85566e211b0bbd7f7420aef6b8934505c96789d051c2a6fede671582e19b80c0",
+  "nativeManifestSha256": "d599b5511f4eff9d0673b2d7a4e921f44cdbcae4e9c46ee452935e9055717fe4",
   "verifiedCaseCount": 8,
   "verifiedPngCount": 8,
   "imported": [
@@ -74,5 +74,7 @@
       "before": "ee8522e67b1a3acbd7ae18db9ef03bb7ae52b7e83f03c77368a004e2b670d678"
     }
   ],
-  "policy": "Original native PNG bytes only. No tolerances changed. No unrelated paths imported. Failed incomplete run38673790421 was rejected."
+  "policy": "Original native PNG bytes only. No tolerances changed. No unrelated paths imported. Failed incomplete run38673790421 was rejected.",
+  "artifactManifestSha256": "85566e211b0bbd7f7420aef6b8934505c96789d051c2a6fede671582e19b80c0",
+  "manifestEncoding": "Repository JSON is formatter-normalized whitespace; parsed manifest equals the original artifact. Original artifact hash is retained separately and original bytes are retained in the verified local evidence archive."
 }

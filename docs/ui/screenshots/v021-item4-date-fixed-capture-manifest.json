@@ -14,10 +14,7 @@
   "fontRuntime": "fontconfig\t2.15.0-1.1ubuntu2\nlibfreetype6:amd64\t2.13.2+dfsg-1ubuntu0.2",
   "captureScope": {
     "mode": "selected",
-    "screens": [
-      "brief",
-      "timeline"
-    ],
+    "screens": ["brief", "timeline"],
     "expectedCases": 8,
     "expectedPngCount": 8,
     "expectedPaths": [
