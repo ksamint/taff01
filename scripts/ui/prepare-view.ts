@@ -51,9 +51,13 @@ export async function prepareView(page: Page, screen: string) {
     expect(timelineSchema.parse(await response.json()).today).toBe(
       "2026-10-08",
     );
-    await expect(page.locator(".timeline-today")).toHaveAttribute(
+    const markers = page.locator(".timeline-today");
+    // The header and chart body intentionally draw separate aligned markers.
+    await expect(markers).toHaveCount(2);
+    await expect(markers.nth(0)).toHaveAttribute("x1", /^\d+(?:\.\d+)?$/);
+    await expect(markers.nth(1)).toHaveAttribute(
       "x1",
-      /^\d+(?:\.\d+)?$/,
+      (await markers.nth(0).getAttribute("x1")) ?? "missing-marker",
     );
   }
 }
