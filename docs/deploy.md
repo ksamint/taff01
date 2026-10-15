@@ -1845,36 +1845,36 @@ and is not restarted; the deployment goal is complete.
 
 Pinned main source `5191671743d36b4d2719882514ba0d2ff44019a4`, tree `50a1dda138e779acaab9b9badb82015a9d8a15b0`.
 
-Items1–2 of plan §10.1, [PR27](https://github.com/ksamint/taff01/pull/27) and
-[PR28](https://github.com/ksamint/taff01/pull/28): the public acceptance harness,
+Items 1–2 of plan §10.1, [PR 27](https://github.com/ksamint/taff01/pull/27) and
+[PR 28](https://github.com/ksamint/taff01/pull/28): the public acceptance harness,
 mind-map own-write/undo version races and evidence IDs, initial-socket role refresh,
 and MCP copy in en/zh-CN/zh-HK. MCP continues to report taff/0.2.0 at this checkpoint.
-Items3–6 wait until this upgrade checkpoint is accepted.
+Items 3–6 wait until this upgrade checkpoint is accepted.
 
 **CI.** Exact-source main push [38670282333](https://github.com/ksamint/taff01/actions/runs/38670282333)
 and merged PR-head [38666948980](https://github.com/ksamint/taff01/actions/runs/38666948980)
-are completed/success. The PR head is an ancestor of the pinned source. The item1
+are completed/success. The PR head is an ancestor of the pinned source. The item 1
 head CI [38668491277](https://github.com/ksamint/taff01/actions/runs/38668491277) is also green.
 
 Exact-main validation: 885/885 unit/integration tests;
-Today initial JS 194427 B gzipped against204800 B;
+Today initial JS 194427 B gzipped against 204800 B;
 Today LCP medians en 592 ms, zh-CN 660 ms,
-zh-HK 648 ms (three runs/locale, slow4G,4×CPU,2000 ms ceiling).
-Lighthouse13.5.0 performance/accessibility/best-practices: en 95/100/100; zh-CN 94/100/100; zh-HK 95/100/100.
+zh-HK 648 ms (three runs/locale, slow 4G, 4× CPU, 2,000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 95/100/100; zh-CN 94/100/100; zh-HK 95/100/100.
 Full visual, browser-flow and bundled MCP smoke gates pass in that exact-source CI.
 
-**Migrations.** None since the live source. Last migration remains0026; no backfill (0 rows).
+**Migrations.** None since the live source. Last migration remains 0026; no backfill (0 rows).
 
-**Environment and infrastructure.** No .env.production.example, Compose, Dockerfile or Caddy changes. No new variables. The private env changes only TAFF_TAG, stays0600, email/SMS unchanged, AI_* unset. Host layout, route, DNS, PostgreSQL role/host stay unchanged.
+**Environment and infrastructure.** No .env.production.example, Compose, Dockerfile or Caddy changes. No new variables. The private env changes only TAFF_TAG, stays 0600, email/SMS unchanged, AI_* unset. Host layout, route, DNS, PostgreSQL role/host stay unchanged.
 
-**Acceptance checklist.** Run all122 applicable public cases in e2e/live, without runtime skips:
-plan §6.0 basic functions and all30 live official-client MCP read/write tools,
+**Acceptance checklist.** Run all 122 applicable public cases in e2e/live, without runtime skips:
+plan §6.0 basic functions and all 30 live official-client MCP read/write tools,
 CRM, timeline/relations, rules-based brief/Ask, mind-map keyboard/evidence/undo,
 validation tasks and restricted-member finance/role changes. Include held first-socket
 promotion plus demotion, and repeated mind-map operations. Platform HTTPS/health,
 Secure/HttpOnly cookies, foreign-origin rejection, unchanged auth methods, realtime,
 and independent neighbor/PostgreSQL preservation checks are required. en and zh-HK
-phone390×844 and desktop1280×800, plus zh-CN Today/Projects/Me and milestone spots.
+phone 390×844 and desktop 1280×800, plus zh-CN Today/Projects/Me and milestone spots.
 Use only the dedicated verification account/workspace, with runtime credential refs.
 Every failed check gets one retry; apply the deploy goal's critical rollback rules.
 No SMS OTP or rate-limit flood; AI model stays off.
@@ -1882,3 +1882,125 @@ No SMS OTP or rate-limit flood; AI model stays off.
 Deploy only this pinned SHA, with verified database/env backups, Git bundle,
 SHA-stamped images/service worker, native detached keeper, and fresh ancestry/CI gates.
 The [v0.2.1 milestone report](milestones/20-v0.2.1.md) records development evidence.
+
+### Frontend v2 v0.2.1-a upgrade checkpoint — 2026-10-15
+
+Live pinned source `5191671743d36b4d2719882514ba0d2ff44019a4`, tree
+`50a1dda138e779acaab9b9badb82015a9d8a15b0`. The [v0.2.1 report](milestones/20-v0.2.1.md)
+records scope and development evidence. This is the required intermediate checkpoint
+after items 1–2; items 3–6 remain for the final release.
+
+**CI and local production smoke.** Exact-source main push
+[38670282333](https://github.com/ksamint/taff01/actions/runs/38670282333) and merged
+PR-head [38666948980](https://github.com/ksamint/taff01/actions/runs/38666948980)
+completed/success. Ancestry, exact CI identity and newest-candidate eligibility were
+refreshed before build, migration, start and acceptance. Exact-main measurements:
+885/885 tests; Today initial JS 194427 B gzipped against 204800 B; Today LCP en 592 ms,
+zh-CN 660 ms, zh-HK 648 ms (three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 95/100/100; zh-CN
+94/100/100; zh-HK 95/100/100. CI includes visual/browser/MCP gates. All three images
+built on a clean detached Mac checkout and production-mode API/worker MCP smoke passed
+on the first attempt. Local smoke containers were removed. Full local suite, LCP and
+Lighthouse were not rerun.
+
+**Local image identities.**
+
+- api: `sha256:8c536552ee29cee65c2b0b2e704bf661f7727936522599ded44c903cf3e32dd0`
+- worker: `sha256:dd2936a824d61f7b88a11d4e2b9871c20268f230db1474caced482e9497c19d7`
+- web: `sha256:cfa05efac45bc424bf90e8668c333c60934c312b3740d70b69227114905d7fd0`
+
+**Lock, backup and source relay.** Detached keeper PID `3222992` held the existing
+native /srv/taff/deploy.lock. Dedicated dump
+`/srv/taff/secrets/db.before-5191671743d36b4d2719882514ba0d2ff44019a4.dump`, 1,058,528
+B, SHA-256 `dc4c41f877084777ec405f7851be3beb2b0c3b9051e750995deae90d0c794666`;
+pg_restore --list verified the catalog. Exclusive env backup
+`/srv/taff/secrets/.env.before-5191671743d36b4d2719882514ba0d2ff44019a4`, mode 0600.
+Bundle 325,964 B, SHA-256
+`7bf4529cdb0bcc960d50587acc0bcea44480eb09b6ec542c49e759acd0001237`; checksum, git bundle
+verify, exact detached SHA, clean tree and GitHub origin verified. Production used
+--builder default and SHA/ASSET_VERSION stamping. Only tracked public source modes were
+normalized.
+
+**Migrations and runtime.** No new migration or backfill since the prior live source;
+canonical one-shot migrator exited 0 and existing 0023–0026 hashes were verified. Only
+API, worker and web were recreated:
+
+- api: `sha256:54beffd8a6e814f4320a619ee4a352371d7540c3855d7bcb326b4a0bd3002695`
+- worker: `sha256:0325b1cc6562de7962f4b0e6a3c0eb66cf1ad37f1e4982301381d7ae8947a75e`
+- web: `sha256:52f14faab71782cea420c63ed8a2bbda9c8c26a37b597d346497c4ccfab135a4`
+
+Immediately after start, Caddy/Valkey and all 46 neighbors matched. The fresh
+pre-acceptance strict neighbor check later failed: four TableAI A/B app/converter
+containers were replaced/restarted by an independent rollout after 03:00UTC. 42 other
+baseline neighbors remained unchanged. Caddy/Valkey stayed unchanged. The Taff publisher
+managed only its own project; no TableAI remediation was attempted. This is retained as
+a failed noncritical platform check under the deploy goal; it was not reported as
+preservation success. Route hash unchanged; no DNS, host-layout, PostgreSQL host or role
+change. Private env changed only TAFF_TAG and remained 0600; email/SMS unchanged, AI_*
+unset and all workspace AI flags disabled. PostgreSQL postmaster start remains
+`2026-08-29 01:19:14.878015+00` with dedicated role and TLS.
+
+**Rollback identities.** Accepted prior source
+`191243d25ea4f72116aadf2a9f7fec844a0ffa6e`:
+
+- api: `sha256:fe32cd4997f9c9ee13ffe50580dd6ec2a5ed6d50f1958b5937c7a77523d24303`
+- worker: `sha256:0e4938d7e6854c3388beba670c506d0002dea94eec36b2816431530e9fee8bdb`
+- web: `sha256:797f5939f799128df6df0bac9faa7a9e2e529cd1a580814c89ddf2a626010100`
+
+**Fresh public acceptance.** 122 applicable cases executed; 122 passed, 0 failed
+test-case follow-ups and 1 platform follow-ups, no skips, across 123 attempts. All 20
+critical/platform cases passed. 123 scoped cleanup journals report zero browser page
+errors, 1 initial cleanup failures and 0 unresolved cleanup failures. en/zh-HK
+phone 390×844 and desktop 1280×800, with zh-CN Today/Projects/Me and milestone spots, used
+the dedicated verification workspace. Checks covered sign-in/out/re-sign-in; navigation,
+Today, task create/edit/person+agent assignment; run start/pause/resume/cancel; review
+approve/request changes; grants; board/status/list filters; calendar day/week/month
+schedule/drag/resize/undo; command search; organization switch/create/invite in a fresh
+browser; notification preferences, agent permissions, locale/theme; CRM
+roles/stakeholders/cascade/archive/undo; timeline/relations; rules-based brief/Ask; mind
+keyboard/evidence/undo/validation; restricted-member finance/role refresh; and
+cross-browser realtime. HTTPS/health, Secure/HttpOnly cookies, foreign-origin rejection
+and pre-upgrade auth methods passed.
+
+Four official-client MCP cases exercised every one of the 30 read/write tools on
+current-run verification entities, observed call logs and live UI changes, submitted and
+approved review, revoked tokens and confirmed a fresh initialize 401. All four separately
+verified server identity taff/0.2.0. No public flood or real SMS OTP was requested.
+Strengthened mind/evidence and held-first-socket role checks exercised the item 1
+root-cause fixes.
+
+**Retries and follow-ups.**
+
+- phone-zh-HK: move and resize bars by mouse and by the form, with undo; {"status": "failed", "retry": 0, "failureLocations": [{"file": "timeline.spec.ts", "line": 111, "column": 1}, {"file": "live.ts", "line": 816, "column": 11}]}.
+
+Real SMS OTP sign-in remains unverified. Public rate-limit flood is omitted under the
+runbook; CI MCP smoke covers rate limiting. AI model/OAuth/hard delete/value chain/Neo4j
+remain out of scope. Performance claims apply to Today. Earlier manual gradient/image
+text contrast notes remain documented.
+
+Verification tokens and own grants were revoked, runs canceled,
+profile/agent/preferences restored, schedules cleared and current-run archiveable
+entities archived. Auditable tasks, recipients/members, accepted invitations and
+workspaces remain where no supported archive API exists. No demo seed or real-user
+workspace was used.
+
+**Acceptance and unlock.** Receipt
+`/srv/taff/frontend-v2-v021a-accepted-5191671743d36b4d2719882514ba0d2ff44019a4.json`;
+deployment.done is `5191671743d36b4d2719882514ba0d2ff44019a4`. Keeper released the
+reconciled lock. Independent flock probe acquired/released it and confirmed exact
+healthy runtime, public health 200, Caddy/Valkey, route hash and unchanged PostgreSQL.
+Neighbor preservation is reported above, including any independently observed drift. No
+twice-failing critical flow required rollback.
+
+The original strict preservation probe remains failed in the evidence. A separate
+independent follow-up probe verified free native flock, exact healthy Taff runtime,
+PostgreSQL/route/env/Caddy/Valkey and 42 unchanged neighbors while explicitly reporting
+the four TableAI neighbor differences. No critical flow failed twice and no Taff
+rollback was required.
+
+One initial notification-cleanup read failed before its restore PATCH. The exact failed
+attempt created no entities, never edited notification settings, and restored
+profile/theme; its sole retry passed with complete cleanup. Pinned source control flow,
+failed/retry journal hashes and a fresh authenticated batch-end read of all seven
+semantic preference fields support zero unresolved cleanup work. The original failure
+and cleanupFailures=1 are retained; no test outcome was changed.
