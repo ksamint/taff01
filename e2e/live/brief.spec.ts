@@ -249,10 +249,45 @@ test("a person reviews an agent's proposal in the brief before anything changes"
     .poll(async () => (await children()).map((task) => task.title).sort())
     .toEqual(["Check copy", "Draft copy"]);
   await expect(splitAction).toHaveCount(0);
-  // Dismissing the reschedule leaves the plan as it was.
+  // The toast invokes the versioned inverse; generated subtasks leave active
+  // lists while their archived records and audit history remain on the server.
+  await page
+    .locator(".toast-region")
+    .getByRole("button", { name: m.actions.undo, exact: true })
+    .click();
+  await expect(page.locator(".toast-region")).toContainText(
+    m.brief.toast.undone,
+  );
+  await expect.poll(async () => (await children()).length).toBe(0);
   const moveAction = page
     .getByTestId("brief-action")
     .filter({ hasText: moveTask.title });
+  await moveAction.getByTestId("brief-action-open").click();
+  await expect(sheet).toBeVisible();
+  await sheet.getByTestId("brief-proposal-apply").click();
+  await expect(page.locator(".toast-region")).toContainText(
+    m.brief.toast.applied,
+  );
+  await page
+    .locator(".toast-region")
+    .getByRole("button", { name: m.actions.undo, exact: true })
+    .click();
+  await expect(page.locator(".toast-region")).toContainText(
+    m.brief.toast.undone,
+  );
+  expect(
+    taskSchema.parse(
+      await (await page.request.get(`/api/tasks/${moveTask.id}`)).json(),
+    ).dueAt,
+  ).toBe(moveTask.dueAt);
+  // Dismissing a further reschedule also leaves the restored plan unchanged.
+  const nextAgent = await agentClient(page, workspace.id, agent.id);
+  try {
+    await propose(nextAgent.client, moveTask.id, "reschedule");
+  } finally {
+    await nextAgent.client.close();
+    await page.request.delete(`/api/agent-tokens/${nextAgent.tokenId}`);
+  }
   await moveAction.getByTestId("brief-action-open").click();
   await expect(sheet).toBeVisible();
   await sheet.getByTestId("brief-proposal-dismiss").click();

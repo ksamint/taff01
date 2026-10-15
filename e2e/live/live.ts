@@ -38,6 +38,7 @@ type Entry = {
   kind: string;
   id: string;
   workspaceId?: string;
+  projectId?: string;
   retained?: boolean;
 };
 type State = {
@@ -239,6 +240,9 @@ async function captureResponse(method: string, url: string, response: any) {
     /^\/api\/agent-tokens\/.+\/regenerate$/.test(path)
   )
     kind = "agent-tokens";
+  else if (/^\/api\/agents\/[^/]+\/grants$/.test(path)) kind = "grants";
+  else if (/^\/api\/projects\/[^/]+\/milestones$/.test(path))
+    kind = "milestones";
   else if (/\/invites$/.test(path)) kind = "invites";
   else if (/^\/api\/workspaces\/[^/]+\/mind\/nodes$/.test(path))
     kind = "mind-nodes";
@@ -268,6 +272,9 @@ async function captureResponse(method: string, url: string, response: any) {
       kind,
       id: value.id,
       workspaceId: value.workspaceId ?? state.workspaceId,
+      ...(kind === "milestones"
+        ? { projectId: path.split("/")[3], retained: true }
+        : {}),
     });
 }
 function instrument(context: BrowserContext) {
@@ -619,6 +626,47 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
       }
     });
   }
+  // Retain milestone history while removing only this run's active milestones.
+  // The listing intentionally returns active rows; an absent ID is already inactive.
+  for (const e of entries.filter((entry) => entry.kind === "milestones"))
+    await perform(e.kind, e.id, async () => {
+      if (e.workspaceId !== current.workspaceId || !e.projectId)
+        throw new SafeApiFailure(
+          "milestone.check-scope",
+          undefined,
+          "outside_verification_workspace",
+        );
+      const list = await cleanupHttp("milestone.list-current-project", () =>
+        request.get(`/api/projects/${e.projectId}/milestones`),
+      );
+      const item = list.find((row: any) => row.id === e.id);
+      if (!item) {
+        notes.push({ kind: e.kind, id: e.id, status: "not-active-retained" });
+        return;
+      }
+      if (
+        item.workspaceId !== current.workspaceId ||
+        item.projectId !== e.projectId
+      )
+        throw new SafeApiFailure(
+          "milestone.check-current-scope",
+          undefined,
+          "outside_verification_workspace",
+        );
+      const updated = await cleanupHttp(
+        "milestone.archive-current-run-row",
+        () =>
+          request.patch(`/api/milestones/${e.id}`, {
+            data: { version: item.version, archived: true },
+          }),
+      );
+      if (!updated.archivedAt)
+        throw new SafeApiFailure(
+          "milestone.confirm-archive",
+          undefined,
+          "archive_not_confirmed",
+        );
+    });
   for (const kind of ["contacts", "companies", "projects"])
     for (const e of entries.filter((e) => e.kind === kind))
       await perform(kind, e.id, async () => {
