@@ -88,5 +88,10 @@ test("ordinary browser and MCP API launch configuration never preloads the clock
   expect(ci).not.toMatch(/TAFF_VISUAL_API_CLOCK|--import.*visual-clock/);
   const visual = readFileSync("playwright.visual.config.ts", "utf8");
   expect(visual).toContain("reuseExistingServer: false");
-  expect(visual).toContain('env: { TAFF_VISUAL_API_CLOCK: "ui-v2" }');
+  expect(visual).toContain(
+    'env: { ...server.env, TAFF_VISUAL_API_CLOCK: "ui-v2" }',
+  );
+  expect(visual).toContain(
+    "node --env-file=.env --import ./scripts/ui/visual-clock.mjs node_modules/tsx/dist/cli.mjs apps/api/src/index.ts",
+  );
 });

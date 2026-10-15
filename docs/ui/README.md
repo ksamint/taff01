@@ -136,3 +136,11 @@ Ordinary browser, MCP and production launches never enable this preload.
 with the same flag/preload when capturing Brief or Timeline. Never add this flag
 to a production environment or a general development API. The native dark-route
 workflow owns and cleans up its separate capture API/web process groups.
+
+Native capture supports an explicit partial matrix through the optional
+`visual-baselines.yml` `screens` input (space-separated allowlisted screen names,
+for example `brief timeline`). An empty input still requires all 26 screens,
+104 cases and 126 native PNGs. A partial manifest declares its selected screens,
+case count and exact expected PNG paths; every selected screen still runs all four
+light viewport/locale cases. Partial artifacts must only replace their declared
+paths and do not substitute for the complete CI visual comparison.
