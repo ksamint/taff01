@@ -190,5 +190,5 @@ records the rejected old helper, all three native loading-order/late-text
 matrices, and the independent CI Brief comparison. The capture helper loads
 rendered text using its computed font stack, reuses faces, and swaps fully loaded
 faces in CSS order. It changes no product CSS or font-display setting. The
-corrected A/B supersedes the earlier race-affected paragraph-wrap interpretation: 
+corrected A/B supersedes the earlier race-affected paragraph-wrap interpretation:
 all twelve parent/current-font captures have identical geometry and PNG bytes.
