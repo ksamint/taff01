@@ -108,6 +108,33 @@ const row = (page: Page, id: string) =>
 /** Day width on the phone layout (Pixel 7) at day zoom. */
 const DAY = 24;
 
+test("authenticated timeline setup stays ready while font responses are pending", async ({
+  page,
+}, info) => {
+  let release!: () => void;
+  const pending = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let held = 0;
+  await page.route("**/fonts/**", async (route) => {
+    held++;
+    await pending;
+    await route.continue();
+  });
+  try {
+    const locale = info.project.metadata.locale as TestLocale;
+    const { workspace } = await liveSignIn(page, locale);
+    expect(workspace.role).toBe("admin");
+    expect(
+      held,
+      "font requests must actually be pending during setup",
+    ).toBeGreaterThan(0);
+  } finally {
+    release();
+    await page.unrouteAll({ behavior: "wait" });
+  }
+});
+
 test("move and resize bars by mouse and by the form, with undo", async ({
   page,
 }, info) => {

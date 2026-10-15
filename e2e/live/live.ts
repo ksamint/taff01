@@ -18,7 +18,7 @@ import {
 } from "../../packages/schemas/src/index";
 import { messages } from "../support/messages";
 
-import { ownsGrant } from "./safety.mjs";
+import { failureCategory, ownsGrant } from "./safety.mjs";
 
 const execute = promisify(execFile);
 const origin = process.env.RELEASE_BASE_URL ?? "https://taff.apuch.cn";
@@ -100,6 +100,21 @@ async function checked(response: any, label: string) {
   return response.json();
 }
 
+/** App readiness comes from the assertions below, never font/image load. */
+async function setupNavigation(page: Page, path: "/" | "/orgs") {
+  return base.step(`live setup navigation ${path}`, async () => {
+    try {
+      await page.goto(path, { waitUntil: "domcontentloaded" });
+    } catch (error) {
+      base.info().annotations.push({
+        type: "check",
+        description: `fail|live setup navigation ${path}|${failureCategory(error)}`,
+      });
+      throw error;
+    }
+  });
+}
+
 async function captureProfileAndTheme(page: Page, me?: any) {
   if (!state) return;
   const identity =
@@ -127,7 +142,7 @@ async function cleanupHttp(step: string, operation: () => Promise<any>) {
     throw new SafeApiFailure(
       step,
       undefined,
-      "transport_or_local_error",
+      failureCategory(error),
       "e2e/live.ts#cleanupHttp",
     );
   }
@@ -142,19 +157,19 @@ export async function selectVerificationWorkspace(page: Page) {
     throw new Error("BLOCKED: exact verification admin workspace unavailable");
   const workspace = found[0];
   if (state) state.workspaceId = workspace.id;
-  await page.goto("/orgs");
+  await setupNavigation(page, "/orgs");
   await page.getByTestId(`workspace-${workspace.id}`).click();
   await expect(page.getByTestId(`workspace-${workspace.id}`)).toHaveAttribute(
     "aria-pressed",
     "true",
   );
-  await page.goto("/");
+  await setupNavigation(page, "/");
   await expect(page.getByTestId("today-heading")).toBeVisible();
   return { me, workspace };
 }
 export async function liveSignIn(page: Page, locale: string) {
   const account = credentialAccount();
-  await page.goto("/");
+  await setupNavigation(page, "/");
   await page.getByTestId("auth-email").fill(account.username);
   await page.getByTestId("auth-password").fill(account.password);
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -189,7 +204,7 @@ export async function liveSignIn(page: Page, locale: string) {
     "locale selection",
   );
   const { workspace } = await selectVerificationWorkspace(page);
-  await page.goto("/");
+  await setupNavigation(page, "/");
   await expect(page.getByTestId("today-heading")).toHaveText(
     messages[locale as keyof typeof messages].today,
   );
@@ -729,9 +744,8 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
     });
   if (current.preferences)
     await perform("notification-preferences", "dedicated-account", async () => {
-      const latest = await checked(
-        await request.get("/api/me/notifications"),
-        "notification current",
+      const latest = await cleanupHttp("notification current", () =>
+        request.get("/api/me/notifications"),
       );
       await checked(
         await request.patch("/api/me/notifications", {
