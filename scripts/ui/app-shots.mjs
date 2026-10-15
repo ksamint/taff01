@@ -331,7 +331,7 @@ try {
               theme,
             );
             await prepareView(page, view);
-            await page.evaluate(prepareFonts);
+            await page.evaluate(prepareFonts, "loaded");
             await page.mouse.move(0, 0);
             await page.screenshot({
               path: path.join(out, `${device}-${locale}-${view}.png`),
@@ -398,7 +398,7 @@ try {
           await page.keyboard.press("Control+k");
           await expect(page.getByRole("dialog")).toBeVisible();
           await page.waitForLoadState("networkidle");
-          await page.evaluate(prepareFonts);
+          await page.evaluate(prepareFonts, "loaded");
           await page.mouse.move(0, 0);
           await page.screenshot({
             path: path.join(out, `${device}-${locale}-search.png`),

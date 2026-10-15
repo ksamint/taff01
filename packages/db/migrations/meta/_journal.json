@@ -197,6 +197,13 @@
       "when": 1792030000000,
       "tag": "0027_v021_suggestion_undo",
       "breakpoints": true
+    },
+    {
+      "idx": 28,
+      "version": "7",
+      "when": 1792047349563,
+      "tag": "0028_v021_archived_subtask_guard",
+      "breakpoints": true
     }
   ]
 }

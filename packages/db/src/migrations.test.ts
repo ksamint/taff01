@@ -6,13 +6,18 @@ import { describe, expect, it } from "vitest";
  * (docs/agent-goal-deploy-frontend-v2.md, step 2): no DROP, TRUNCATE,
  * DELETE, rename or rewrite of existing data, constraints included. Every
  * Phase B statement must be one of the additive forms below.
+ * 0028 is a narrowly checked compatible guard-function repair: it changes no
+ * rows or table definitions, retaining 0011 verbatim except for excluding soft archives
+ * from the incomplete-child query. Other function replacements stay forbidden.
  */
 const PHASE_B = [
   "0024_m17_suggestions_ai.sql",
   "0025_m18_mind_map.sql",
   "0026_m18_mind_edge_version.sql",
   "0027_v021_suggestion_undo.sql",
+  "0028_v021_archived_subtask_guard.sql",
 ];
+const ARCHIVED_SUBTASK_GUARD = "0028_v021_archived_subtask_guard.sql";
 const ADDITIVE = [
   /^CREATE TABLE "[a-z_]+" \(/,
   /^ALTER TABLE "[a-z_]+" ADD COLUMN "[a-z_]+" [^;]+;$/,
@@ -25,6 +30,12 @@ const statements = (file: string) =>
     .split("--> statement-breakpoint")
     .map((part) => part.trim())
     .filter(Boolean);
+const activeChildren = "WHERE parent_id=NEW.id AND status<>'done'";
+const historicalGuard = statements("0011_m5_subtask_reopen_guard.sql")[0];
+const compatibleGuard = historicalGuard.replace(
+  activeChildren,
+  "WHERE parent_id=NEW.id AND archived_at IS NULL AND status<>'done'",
+);
 
 describe("Phase B migrations are additive", () => {
   it.each(PHASE_B)("%s uses additive statements only", (file) => {
@@ -32,7 +43,8 @@ describe("Phase B migrations are additive", () => {
     expect(list.length).toBeGreaterThan(0);
     for (const statement of list) {
       expect(
-        ADDITIVE.some((pattern) => pattern.test(statement)),
+        (file === ARCHIVED_SUBTASK_GUARD && statement === compatibleGuard) ||
+          ADDITIVE.some((pattern) => pattern.test(statement)),
         statement,
       ).toBe(true);
       expect(statement).not.toMatch(/\b(DROP|TRUNCATE|RENAME)\b/i);
@@ -42,6 +54,13 @@ describe("Phase B migrations are additive", () => {
         statement,
       ).not.toMatch(/\bDELETE\b|\bUPDATE\s+"?[a-z_]+"?\s+SET\b/i);
     }
+  });
+  it("repairs only the archived-child completion predicate in the existing hierarchy guard", () => {
+    expect(historicalGuard.split(activeChildren)).toHaveLength(2);
+    expect(statements(ARCHIVED_SUBTASK_GUARD)).toEqual([compatibleGuard]);
+    expect(compatibleGuard).toMatch(
+      /^CREATE OR REPLACE FUNCTION taff_task_planning_guard\(\)/,
+    );
   });
   it("adds a column only with a default when it is NOT NULL", () => {
     for (const file of PHASE_B)

@@ -1,5 +1,7 @@
 // Capture the installed faces deterministically; cold product renders keep optional display.
-export async function prepareFonts() {
+export async function prepareFonts(
+  nativeLayout: "preserve" | "loaded" = "preserve",
+) {
   const rules = [...document.styleSheets]
     .flatMap((sheet) => [...sheet.cssRules])
     .filter(
@@ -52,12 +54,31 @@ export async function prepareFonts() {
   await Promise.all(faces.map((face) => face.load()));
   if (faces.some((face) => face.status !== "loaded"))
     throw new Error("UI font did not load");
-  // Swap only after every face loads, in CSS order, without an await between
-  // removals/additions. Repeated preparation must not accumulate competing faces.
-  for (const face of state.__taffActiveCaptureFaces ?? [])
-    document.fonts.delete(face);
-  for (const face of faces) document.fonts.add(face);
+  // Keep already-installed faces alive. Removing and immediately re-adding a
+  // face used by a native control needlessly invalidates its cached text font.
+  // New late-text faces still enter in CSS order after all downloads finish.
+  const installed = new Set(state.__taffActiveCaptureFaces ?? []);
+  const wanted = new Set(faces);
+  for (const face of installed)
+    if (!wanted.has(face)) document.fonts.delete(face);
+  for (const face of faces) if (!installed.has(face)) document.fonts.add(face);
   state.__taffActiveCaptureFaces = faces;
   document.body.getBoundingClientRect();
   await document.fonts.ready;
+  // Authenticated captures describe the prepared, loaded-font workspace.
+  // Chromium's native select renderer can otherwise retain first-layout
+  // fallback metrics even after its glyph font changes. Refresh only when the
+  // caller explicitly requests that loaded context; cold entry captures keep
+  // their original native metrics. Attributes, focus and events remain intact.
+  if (nativeLayout === "loaded" && document.querySelector("select")) {
+    const refresh = document.createElement("style");
+    refresh.textContent = "select { font-size: 0 !important; }";
+    try {
+      document.head.append(refresh);
+      document.body.getBoundingClientRect();
+    } finally {
+      refresh.remove();
+      document.body.getBoundingClientRect();
+    }
+  }
 }
