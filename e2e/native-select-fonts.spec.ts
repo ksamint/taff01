@@ -3,8 +3,9 @@ import { expect, test } from "@playwright/test";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
 
 // Native select inner line-height is cached separately from its current glyph
-// font. Force a different-metric fallback so cold first installation is covered.
-test("capture preparation refreshes native metrics without changing control state", async ({
+// font. Preserve distinct cold and warm first-layout geometry while checking
+// that download timing and repeat preparation cannot change either contract.
+test("capture preparation preserves cold and warm native metrics without changing control state", async ({
   browser,
 }, info) => {
   test.setTimeout(60_000);
@@ -12,12 +13,14 @@ test("capture preparation refreshes native metrics without changing control stat
   const locale = info.project.use.locale ?? "en-US";
   const evidence = [];
   for (const label of ["English", "此項目：結賬改版"]) {
-    let canonical:
-      | { pixels: Buffer; lineHeight: string; textY: number }
-      | undefined;
+    const canonicals = new Map<
+      boolean,
+      { pixels: Buffer; lineHeight: string; textY: number }
+    >();
     for (const warm of [true, false])
       for (const delayed of [false, true])
         for (const late of [false, true]) {
+          let canonical = canonicals.get(warm);
           const context = await browser.newContext({
             viewport: { width: 390, height: 844 },
             locale,
@@ -97,7 +100,9 @@ test("capture preparation refreshes native metrics without changing control stat
               expect(fallback.fonts.some((font) => !font.isCustomFont)).toBe(
                 true,
               );
-              expect(fallback.lineHeight).not.toBe(canonical!.lineHeight);
+              expect(fallback.lineHeight).not.toBe(
+                canonicals.get(true)!.lineHeight,
+              );
             }
             release();
             if (warm) {
@@ -112,7 +117,7 @@ test("capture preparation refreshes native metrics without changing control stat
             if (!late && canonical)
               expect(
                 initialPrepared.lineHeight,
-                "First installation must replace cached fallback metrics",
+                "First installation must preserve its cold or warm layout metrics",
               ).toBe(canonical.lineHeight);
             if (late) {
               await control.evaluate((element, text) => {
@@ -180,9 +185,10 @@ test("capture preparation refreshes native metrics without changing control stat
               lineHeight: prepared.lineHeight,
               textY: prepared.textY,
             };
+            canonicals.set(warm, canonical);
             expect(
               first,
-              "Native baseline must match warm fonts across cold/late text and download timing",
+              "Native baseline must preserve first-layout metrics across late text and download timing",
             ).toEqual(canonical.pixels);
             expect(prepared.lineHeight).toBe(canonical.lineHeight);
             expect(prepared.textY).toBe(canonical.textY);

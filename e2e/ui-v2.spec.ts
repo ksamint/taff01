@@ -11,6 +11,7 @@ import {
   prototypeTasks,
 } from "../packages/schemas/src/prototype-data";
 import { runListSchema } from "../packages/schemas/src/run-read";
+import { navigateColdFonts } from "../scripts/ui/cold-font-layout";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
 import { prepareTime } from "../scripts/ui/prepare-time.mjs";
 import { prepareView } from "../scripts/ui/prepare-view";
@@ -32,7 +33,9 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       },
       { locale, theme },
     );
-    const loaded = await page.goto("/");
+    const loaded = await navigateColdFonts(page, "/", () =>
+      prepareView(page, screen),
+    );
     expect(loaded?.status()).toBe(200);
     await expect(page.locator(".landing-hero > h1")).toHaveText(
       messages[locale].home.title,
