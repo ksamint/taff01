@@ -233,7 +233,7 @@
     "open": "Open MCP settings",
     "endpoint": "Endpoint",
     "endpointUrl": "Server URL",
-    "endpointHint": "Authorize with a personal access token: Authorization: Bearer <token>. OAuth 2.1 arrives with the release milestone.",
+    "endpointHint": "MCP clients authenticate today with a bearer agent token: Authorization: Bearer <token>. OAuth 2.1 is not planned yet; it needs an authorization-server decision first.",
     "adminOnly": "Only workspace admins manage agent tokens.",
     "newToken": "New token",
     "showOnce": "Copy it now. It is shown only once.",
