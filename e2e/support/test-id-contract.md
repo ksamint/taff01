@@ -604,6 +604,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].sms.title` | 1 | sms-auth.spec.ts |
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
+| `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
 | `dialog` | 54 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
@@ -752,6 +753,7 @@ read (`data-event-id`, `data-date`).
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#grant-reason` | 1 | optimistic-m4.spec.ts |
 | `#grant-task` | 1 | optimistic-m4.spec.ts |
+| `#inside` | 1 | native-select-fonts.spec.ts |
 | `#invite-email` | 5 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `#invite-role` | 3 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `#issued-invite` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -759,6 +761,7 @@ read (`data-event-id`, `data-date`).
 | `#org-name` | 4 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `#paragraph` | 2 | font-readiness.spec.ts |
 | `#password-hint` | 1 | username-auth.spec.ts |
+| `#scroll` | 1 | native-select-fonts.spec.ts |
 | `#sms-phone` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `#team` | 1 | scripts/ui/app-shots.mjs |
 | `a.inbox-source-title[href="/tasks/*/review"]` | 2 | scripts/ui/app-shots.mjs, ui-v2.spec.ts |
