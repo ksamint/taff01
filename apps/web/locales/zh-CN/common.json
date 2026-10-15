@@ -233,7 +233,7 @@
     "open": "打开 MCP 设置",
     "endpoint": "MCP 端点",
     "endpointUrl": "服务器地址",
-    "endpointHint": "使用个人访问令牌授权：Authorization: Bearer <token>。OAuth 2.1 将在发布里程碑提供。",
+    "endpointHint": "MCP 客户端目前使用智能体令牌授权：Authorization: Bearer <token>。暂未计划支持 OAuth 2.1，需先确定授权服务器。",
     "adminOnly": "只有工作空间管理员可以管理智能体令牌。",
     "newToken": "新令牌",
     "showOnce": "请立即复制，令牌只显示一次。",

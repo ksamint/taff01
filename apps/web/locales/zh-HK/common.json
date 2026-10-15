@@ -233,7 +233,7 @@
     "open": "開啟 MCP 設定",
     "endpoint": "MCP 端點",
     "endpointUrl": "伺服器地址",
-    "endpointHint": "使用個人存取權杖授權：Authorization: Bearer <token>。OAuth 2.1 將於發佈里程碑提供。",
+    "endpointHint": "MCP 客戶端目前以智能體權杖授權：Authorization: Bearer <token>。暫未計劃支援 OAuth 2.1，需先決定授權伺服器。",
     "adminOnly": "只有工作空間管理員可以管理智能體權杖。",
     "newToken": "新權杖",
     "showOnce": "請立即複製，權杖只顯示一次。",
