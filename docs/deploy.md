@@ -2096,3 +2096,26 @@ stays off.
 Deploy only this pinned SHA, with verified database/env backups, Git bundle, SHA-stamped
 images/service worker, native detached keeper, and fresh ancestry/CI gates. The [v0.2.1
 milestone report](milestones/20-v0.2.1.md) records development evidence.
+
+**Blocked: archived split subtasks prevent parent completion — 2026-10-15.**
+The pinned source `e9bfa7727e57171f032712e1a222e36b50cb3f81` is running
+and healthy but is not accepted or tagged. All 20 critical/platform cases passed
+first attempt, including four official-client MCP round trips, with zero browser
+errors and cleanup failures. During the remaining public checks, phone-en's
+Brief proposal case failed both attempts in supported cleanup: completing the
+split parent returned HTTP 409 after its worker was cleared. Both journals retain
+the failures; no outcome or cleanup counter is waived.
+
+Split undo correctly archives its generated `todo` subtasks and active task lists
+hide them. The database planning guard from migration 0011 still counts archived
+unfinished children, so the parent cannot complete even though its access API
+allows it. A new regression reproduces the same 409 with the old guard in an
+isolated local database. The correction will append a compatible guard-definition
+migration with no existing-row rewrite, backfill, delete, rename or drop, retaining
+all active-child and parent invariants. Existing migrations remain immutable.
+
+The remaining checks continue as diagnostic evidence. The healthy runtime stays
+live under the detached keeper while a corrected candidate is prepared; no
+critical flow failed twice and no rollback is required. Supported cleanup must be
+resolved through the application and a fresh full checklist must pass on the
+corrected source before acceptance or the annotated v0.2.1 tag.
