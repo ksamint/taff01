@@ -68,7 +68,9 @@ describe("workspace realtime lifecycle", () => {
       `wss://taff.example/api/realtime?workspaceId=${workspaceId}`,
     );
     socket.open();
-    expect(invalidate).toHaveBeenCalledTimes(1);
+    // The first open refetches Me (roles) and marks the families stale.
+    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(invalidate).toHaveBeenNthCalledWith(1, { queryKey: ["me"] });
     expect(client.getQueryState(["tasks", workspaceId])?.isInvalidated).toBe(
       true,
     );
@@ -82,7 +84,7 @@ describe("workspace realtime lifecycle", () => {
     socket.message({ ...event, workspaceId: null, userId: "someone-else" });
     socket.message({ ...event, token: "extra fields are rejected" });
     socket.message("invalid json event");
-    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledTimes(2);
     socket.message(event);
     socket.message({
       ...event,
@@ -96,7 +98,21 @@ describe("workspace realtime lifecycle", () => {
       workspaceId: "33333333-3333-4333-8333-333333333333",
       userId,
     });
-    expect(invalidate).toHaveBeenCalledTimes(4);
+    expect(invalidate).toHaveBeenCalledTimes(5);
+  });
+  it("refetches Me on the first open so a role change made before it applies", () => {
+    const invalidate = vi.spyOn(client, "invalidateQueries");
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    const first = Socket.instances[0];
+    first.open();
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["me"] });
+    // A reconnect refetches everything, Me included, through the families.
+    first.close(1006);
+    invalidate.mockClear();
+    vi.advanceTimersByTime(250);
+    Socket.instances.at(-1)?.open();
+    expect(invalidate).not.toHaveBeenCalledWith({ queryKey: ["me"] });
+    expect(invalidate).toHaveBeenCalledTimes(1);
   });
   it("invalidates the planning families keyed by project on a planning change", () => {
     const project = "44444444-4444-4444-8444-444444444444";
@@ -200,10 +216,12 @@ describe("workspace realtime lifecycle", () => {
     await Promise.resolve();
     Socket.instances[0].open();
     Socket.instances[0].message(event);
-    expect(invalidate).not.toHaveBeenCalled();
+    // Only the role check runs at once; change refetches wait for the write.
+    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["me"] });
     finish();
     await result;
-    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledTimes(2);
   });
   it("checks revoked authentication immediately while a write is still pending", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
@@ -220,12 +238,12 @@ describe("workspace realtime lifecycle", () => {
     await Promise.resolve();
     Socket.instances[0].open();
     Socket.instances[0].close(1012);
-    expect(invalidate).toHaveBeenCalledTimes(1);
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: ["me"] });
+    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(invalidate).toHaveBeenNthCalledWith(2, { queryKey: ["me"] });
     expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
     finish();
     await result;
-    expect(invalidate).toHaveBeenCalledTimes(1);
+    expect(invalidate).toHaveBeenCalledTimes(2);
     expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
   });
   it("backs off, stops after eight failures, resumes on focus, and cleans up stale callbacks", () => {
