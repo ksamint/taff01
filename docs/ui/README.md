@@ -144,3 +144,9 @@ for example `brief timeline`). An empty input still requires all 26 screens,
 case count and exact expected PNG paths; every selected screen still runs all four
 light viewport/locale cases. Partial artifacts must only replace their declared
 paths and do not substitute for the complete CI visual comparison.
+
+The v0.2.1 visual review found that the global desktop shell sidebar column also
+constrained the signed-out landing to 240px. Desktop sidebar columns now apply
+only to `.app-shell.signed-in`; guests and loading states retain the full viewport.
+The shared Home capture readiness check requires the landing width to equal its
+phone or desktop viewport within one pixel before approving a reference.
