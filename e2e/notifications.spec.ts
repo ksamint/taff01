@@ -166,6 +166,11 @@ test("a digest time chosen while a save is in flight is kept and saved last", as
   await freshAccount(page, locale);
   await page.goto("/me/notifications");
   await expect(page.getByTestId("notification-time-09:00")).toBeChecked();
+  // A focus/mount refetch while a save is held must not replace its draft.
+  const refetch = await holdRequest(page, "/api/me/notifications", {
+    method: "GET",
+    reply: "continue",
+  });
   const initial = notificationPreferencesSchema.parse(
     await (await page.request.get("/api/me/notifications")).json(),
   );
@@ -185,6 +190,19 @@ test("a digest time chosen while a save is in flight is kept and saved last", as
   });
   await page.getByTestId("notification-time-08:00").click();
   await held.seen;
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event("visibilitychange")),
+  );
+  await refetch.seen;
+  const read = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      new URL(response.url()).pathname === "/api/me/notifications",
+  );
+  refetch.release();
+  await refetch.done;
+  expect((await read).status()).toBe(200);
+  await (await read).finished();
   await expect(page.getByTestId("notification-time-08:00")).toBeChecked();
   // The second click lands while the first PATCH is still held.
   await expect(page.getByTestId("notification-time-18:00")).toBeEnabled();
