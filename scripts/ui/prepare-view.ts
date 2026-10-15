@@ -2,6 +2,15 @@ import { expect, type Page } from "@playwright/test";
 import { briefSchema } from "../../packages/schemas/src/assistant";
 import { timelineSchema } from "../../packages/schemas/src/plan";
 
+/** Standalone browser contexts have no API baseURL. Resolve against the real
+ * rendered page so both CLI captures and Playwright fixtures use its origin. */
+export function captureRead(
+  page: Pick<Page, "url" | "request">,
+  endpoint: string,
+) {
+  return page.request.get(new URL(endpoint, page.url()).href);
+}
+
 /** Data can appear before a lazy area's stylesheet. Never bless that frame as
  * a visual reference: wait for a non-default computed style from its CSS. */
 export async function prepareView(page: Page, screen: string) {
@@ -23,7 +32,7 @@ export async function prepareView(page: Page, screen: string) {
   await expect(page.locator(probe[0]).first()).toBeVisible();
   await expect(page.locator(probe[0]).first()).toHaveCSS("display", probe[1]);
   if (view === "brief") {
-    const response = await page.request.get("/api/brief?scope=all");
+    const response = await captureRead(page, "/api/brief?scope=all");
     expect(response.status()).toBe(200);
     expect(briefSchema.parse(await response.json()).today).toBe("2026-10-08");
     const date = await page.evaluate(() =>
@@ -44,7 +53,8 @@ export async function prepareView(page: Page, screen: string) {
       /\/projects\/([0-9a-f-]{36})/i,
     )?.[1];
     expect(projectId).toBeTruthy();
-    const response = await page.request.get(
+    const response = await captureRead(
+      page,
       `/api/projects/${projectId}/timeline`,
     );
     expect(response.status()).toBe(200);
