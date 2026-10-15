@@ -16,3 +16,7 @@ lighthouse-reports
 !.env.production.example
 *.log
 .DS_Store
+
+# Private operator acceptance outputs are never build inputs.
+e2e/live/reports
+release-reports
