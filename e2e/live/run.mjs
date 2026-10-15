@@ -1,8 +1,19 @@
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { freshLiveReport, validateLiveArgs } from "./safety.mjs";
 
 const local = (name) => fileURLToPath(new URL(name, import.meta.url));
-process.env.RELEASE_REPORT_DIR ??= local("reports");
+const args = validateLiveArgs(process.argv.slice(2));
+process.env.RELEASE_REPORT_DIR = freshLiveReport(
+  process.env.RELEASE_REPORT_DIR ?? local("reports"),
+);
+process.env.TAFF_LIVE_DISCOVERY = args.includes("--list") ? "1" : "";
+console.log(
+  JSON.stringify({
+    event: "live-run",
+    reportDirectory: process.env.RELEASE_REPORT_DIR,
+  }),
+);
 const child = spawn(
   process.execPath,
   [
@@ -12,7 +23,7 @@ const child = spawn(
     "test",
     "--config",
     local("playwright.config.ts"),
-    ...process.argv.slice(2),
+    ...args,
   ],
   { stdio: "inherit", env: process.env },
 );
