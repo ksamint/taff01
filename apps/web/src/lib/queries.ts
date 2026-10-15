@@ -87,16 +87,22 @@ export function useTasks(workspaceId: string) {
   });
 }
 
-export function useInbox(workspaceId: string) {
+export function useInbox(workspaceId: string, snoozed = false) {
   const client = useQueryClient();
   return useQuery({
     refetchOnMount: () =>
       client.isMutating({ mutationKey: m3MutationKey }) === 0,
     enabled: currentSession(client)?.confirmed !== false,
     staleTime: 0,
-    queryKey: inboxKey(workspaceId),
+    queryKey: snoozed
+      ? [...inboxKey(workspaceId), "snoozed"]
+      : inboxKey(workspaceId),
     queryFn: async () =>
-      inboxSchema.parse(await request(`/api/inbox?workspaceId=${workspaceId}`)),
+      inboxSchema.parse(
+        await request(
+          `/api/inbox?workspaceId=${workspaceId}${snoozed ? "&tab=snoozed" : ""}`,
+        ),
+      ),
   });
 }
 

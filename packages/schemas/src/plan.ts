@@ -170,7 +170,8 @@ export const timelineItemSchema = object({
   workerIsAgent: boolean(),
   blocked: boolean(),
   hasChildren: boolean(),
-  behindDays: number(),
+  /** Whole days, rounded up from the progress gap. */
+  behindDays: nonnegativeInteger,
   forecastEnd: civilDateSchema,
   critical: boolean(),
   /** Plan version for tasks with a stored plan; milestone version otherwise. */

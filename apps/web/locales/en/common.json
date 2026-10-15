@@ -225,7 +225,15 @@
     "languageHK": "繁體中文",
     "languageCN": "简体",
     "noAgents": "No agents yet",
-    "noActiveTasks": "No active tasks"
+    "noActiveTasks": "No active tasks",
+    "aiSettings": "AI settings",
+    "aiEnabled": "AI model",
+    "aiDisabledHint": "Off for this release. Provider and data-consent decisions are pending; briefs and Ask taff use rules.",
+    "snoozed": "Snoozed",
+    "noSnoozed": "No snoozed items",
+    "snoozedUntil": "Snoozed until {{date}}",
+    "unsnooze": "Return to inbox",
+    "showAgentOnBoard": "Show on board"
   },
   "mcp": {
     "title": "MCP server",
@@ -790,7 +798,9 @@
       "empty": "No contacts yet",
       "pick": "Choose a contact to see their links and roles.",
       "delete": "Delete contact",
-      "deleteConfirm": "Delete {{name}}? The contact is archived with its links kept, and you can undo."
+      "deleteConfirm": "Delete {{name}}? The contact is archived with its links kept, and you can undo.",
+      "addToProject": "Add to a project",
+      "chooseProject": "Choose a project"
     },
     "stakeholders": {
       "fromProject": "Project stakeholders",
@@ -882,7 +892,7 @@
     "linkSelected": "“{{task}}” selected. Now select the successor.",
     "cancel": "Cancel",
     "close": "Close",
-    "keyboardHint": "Use the up and down arrow keys to move between rows. Edit dates and predecessors in the panel below the chart.",
+    "keyboardHint": "Up and down move between rows. Left and right move a plan by one day; hold Shift for one week. Edit dates and predecessors in the panel below.",
     "colTask": "Task",
     "rowsLabel": "Tasks and milestones in {{project}}",
     "rowLabel": "{{title}}, {{start}} to {{end}}, {{duration}}, {{who}}, {{progress}}% done",
@@ -938,7 +948,15 @@
     "depAdded": "Dependency added",
     "depRemoved": "Dependency removed",
     "depExists": "Dependency already exists",
-    "cycle": "That would create a loop, so it was not added"
+    "cycle": "That would create a loop, so it was not added",
+    "newMilestone": "New milestone",
+    "renameMilestone": "Rename milestone",
+    "archiveMilestone": "Archive milestone",
+    "archiveMilestoneConfirm": "Archive “{{name}}”? Its history is retained.",
+    "milestoneName": "Milestone name",
+    "milestoneCreated": "Milestone created",
+    "milestoneSaved": "Milestone updated",
+    "milestoneArchived": "Milestone archived"
   },
   "relations": {
     "layoutLabel": "Layout",

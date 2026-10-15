@@ -82,6 +82,7 @@ import {
   useUpdateMindEdge,
 } from "../lib/mutations/mind";
 import { useTasks } from "../lib/queries";
+import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -117,6 +118,8 @@ export function MindView({ project }: { project: Project | undefined }) {
   const { workspace, me } = useWorkspace();
   const { t } = useTranslation();
   const router = useRouter();
+  const desktop = useDesktop();
+  const panel = useRef<HTMLElement>(null);
   const searchParams = useSearchParams();
   const ids = useId();
   const [asList, setAsList] = useState(false);
@@ -150,6 +153,11 @@ export function MindView({ project }: { project: Project | undefined }) {
     focusAfter.current = null;
     heading.focus();
   });
+
+  useEffect(() => {
+    if (selected?.id && !desktop)
+      panel.current?.scrollIntoView({ block: "start", behavior: "instant" });
+  }, [selected?.id, desktop]);
 
   /** Selects a node (null: the overview); keyboard picks move focus too. */
   const choose = (id: string | null, focus = false) => {
@@ -251,6 +259,7 @@ export function MindView({ project }: { project: Project | undefined }) {
             />
           )}
           <aside
+            ref={panel}
             className="mind-panel"
             data-testid="mind-panel"
             aria-label={t("mind.panel")}

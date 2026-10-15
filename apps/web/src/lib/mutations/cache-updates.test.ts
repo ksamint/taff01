@@ -251,6 +251,65 @@ describe("inbox", () => {
     expect(unread?.items[0].readAt).toBeNull();
   });
 
+  it("moves snoozed items between caches and unsnoozes without changing read state", () => {
+    const later = new Date(Date.now() + 3_600_000).toISOString();
+    const item = inboxItem({ id: "snoozed", snoozedUntil: later });
+    const empty: Inbox = {
+      items: [],
+      groups: [],
+      unreadCount: 0,
+      reviewCount: 0,
+      blockerCount: 0,
+    };
+    const snoozed = withInboxUpdate(
+      empty,
+      {
+        id: item.id,
+        body: { snoozedUntil: later },
+      },
+      item,
+      NOW,
+      true,
+    );
+    expect(snoozed?.items).toEqual([item]);
+    expect(snoozed?.groups[0].items).toEqual([item]);
+    const resumed = withInboxUpdate(
+      empty,
+      {
+        id: item.id,
+        body: { snoozedUntil: null },
+      },
+      item,
+      NOW,
+    );
+    expect(resumed?.items).toEqual([{ ...item, snoozedUntil: null }]);
+    expect(resumed?.unreadCount).toBe(1);
+    expect(
+      withInboxUpdate(
+        snoozed,
+        {
+          id: item.id,
+          body: { snoozedUntil: null },
+        },
+        item,
+        NOW,
+        true,
+      )?.items,
+    ).toEqual([]);
+    expect(
+      withInboxUpdate(
+        snoozed,
+        {
+          id: item.id,
+          body: { read: true },
+        },
+        null,
+        NOW,
+        true,
+      )?.items[0],
+    ).toMatchObject({ readAt: NOW, snoozedUntil: later });
+  });
+
   it("hides a snoozed item and restores it on undo", () => {
     const item = inboxItem({ id: "a" });
     const current: Inbox = {

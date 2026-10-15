@@ -462,7 +462,22 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
         (row) => row.id === item.id,
       ),
     ).toBe(false);
+    const later = await core.listInbox(person, workspaceId, { tab: "snoozed" });
+    expect(later.items.some((row) => row.id === item.id)).toBe(true);
+    expect(later.groups.some((group) => group.taskId === run.taskId)).toBe(
+      true,
+    );
+    expect(
+      (
+        await core.listInbox(member, workspaceId, { tab: "snoozed" })
+      ).items.some((row) => row.id === item.id),
+    ).toBe(false);
     await core.updateInboxItem(person, item.id, { snoozedUntil: null });
+    expect(
+      (
+        await core.listInbox(person, workspaceId, { tab: "snoozed" })
+      ).items.some((row) => row.id === item.id),
+    ).toBe(false);
     inbox = await core.listInbox(person, workspaceId);
     expect(inbox.unreadCount).toBe(before);
   });

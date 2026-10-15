@@ -27,6 +27,7 @@ import { useInbox, useMembers, useRuns, useTasks } from "../lib/queries";
 import { applyTheme, readTheme, type ThemePreference } from "../lib/theme";
 import { showToast } from "../lib/toast";
 import { useDesktop } from "../lib/use-desktop";
+import { AiSettingsSection } from "./ai-settings";
 import { useWorkspace } from "./app-shell";
 import { EmailVerification } from "./email-verification";
 import { OrganizationChooser } from "./organization-chooser";
@@ -303,6 +304,7 @@ export function AdvancedSheet({
         <dd>{me.user.email}</dd>
       </dl>
       <EmailVerification />
+      <AiSettingsSection />
       <div className="field">
         <Label htmlFor="me-tz">{t("me.timeZone")}</Label>
         <select

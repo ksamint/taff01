@@ -168,6 +168,14 @@ function ContactList({ selected }: { selected: string | null }) {
                       .filter(Boolean)
                       .join(" · ") || t("crm.contacts.noCompany")}
                   </span>
+                  <span
+                    className="contact-row-roles"
+                    data-testid="contact-row-roles"
+                  >
+                    {(contact.roles ?? [])
+                      .map((role) => t(`crm.role.${role}`))
+                      .join(t("crm.roleSeparator")) || t("crm.noRole")}
+                  </span>
                 </span>
                 <span className="crm-list-chevron" aria-hidden="true">
                   <ChevronRight size={16} />
@@ -219,6 +227,7 @@ function ContactDetailView({ id }: { id: string }) {
   const archive = useArchiveCrmRecord("contact");
   const restore = useRestoreCrmRecord("contact");
   const [editing, setEditing] = useState<string | null>(null);
+  const [addingProject, setAddingProject] = useState("");
   const [dialog, setDialog] = useState<"edit" | "archive" | null>(null);
   if (detail.isPending) return <p className="loading">{t("loading")}</p>;
   if (!detail.data)
@@ -434,6 +443,75 @@ function ContactDetailView({ id }: { id: string }) {
           </ul>
         </div>
       ))}
+      {editable && (
+        <form
+          className="crm-section"
+          onSubmit={(event) => {
+            event.preventDefault();
+            const project = projects.data?.find(
+              (item) => item.id === addingProject && !item.archived,
+            );
+            if (
+              !project ||
+              links.some(
+                (link) =>
+                  link.scope === "project" && link.entityId === project.id,
+              )
+            )
+              return;
+            setRoles.mutate(
+              {
+                target: {
+                  scope: "project",
+                  entityId: project.id,
+                  projectId: project.id,
+                },
+                contact,
+                roles: [],
+                projectName: project.name,
+              },
+              { onSuccess: () => setAddingProject("") },
+            );
+          }}
+        >
+          <Label htmlFor={`${baseId}-add-project`}>
+            {t("crm.contacts.addToProject")}
+          </Label>
+          <div className="crm-tools">
+            <select
+              id={`${baseId}-add-project`}
+              data-testid="contact-add-project"
+              value={addingProject}
+              disabled={busy}
+              onChange={(event) => setAddingProject(event.target.value)}
+            >
+              <option value="">{t("crm.contacts.chooseProject")}</option>
+              {(projects.data ?? [])
+                .filter(
+                  (project) =>
+                    !project.archived &&
+                    !links.some(
+                      (link) =>
+                        link.scope === "project" &&
+                        link.entityId === project.id,
+                    ),
+                )
+                .map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+            </select>
+            <Button
+              type="submit"
+              disabled={!addingProject || busy}
+              data-testid="contact-add-project-submit"
+            >
+              {t("timeline.add")}
+            </Button>
+          </div>
+        </form>
+      )}
       {!links.length && <p className="crm-note">{t("crm.noLinks")}</p>}
       {canArchive && !contact.archivedAt && (
         <div className="crm-footer">

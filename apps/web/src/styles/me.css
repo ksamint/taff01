@@ -527,3 +527,10 @@
   border-radius: 50%;
   background: var(--accent);
 }
+
+.me-ai-switch {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  min-height: 44px;
+}
