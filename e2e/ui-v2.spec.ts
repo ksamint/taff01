@@ -33,17 +33,17 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       },
       { locale, theme },
     );
-    const loaded = await navigateColdFonts(page, "/", () =>
-      prepareView(page, screen),
-    );
+    const loaded = await navigateColdFonts(page, "/", async () => {
+      await prepareView(page, screen);
+      await expect(page.locator(".landing-hero > h1")).toHaveText(
+        messages[locale].home.title,
+      );
+      await expect(page.getByTestId("auth-submit")).toBeEnabled();
+      await expect(page.getByTestId("locale-select")).toHaveValue(locale);
+      await expect(page.locator(".landing-features li")).toHaveCount(3);
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    });
     expect(loaded?.status()).toBe(200);
-    await expect(page.locator(".landing-hero > h1")).toHaveText(
-      messages[locale].home.title,
-    );
-    await expect(page.getByTestId("auth-submit")).toBeEnabled();
-    await expect(page.locator(".landing-features li")).toHaveCount(3);
-    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
-    await prepareView(page, screen);
     await page.evaluate(prepareFonts);
     await expect(page).toHaveScreenshot("home.png", { animations: "disabled" });
     return;
@@ -392,7 +392,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       }
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await prepareView(page, screen);
-      await page.evaluate(prepareFonts);
+      await page.evaluate(prepareFonts, "loaded");
       if (desktop && (screen === "projects" || screen === "type"))
         await assertDesktopBoardActions();
       await page.mouse.move(0, 0);
@@ -504,7 +504,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   }
   // Workspace text can appear after the first font preparation. Prepare only
   // its now-selected faces so optional display cannot leave a fallback title.
-  await page.evaluate(prepareFonts);
+  await page.evaluate(prepareFonts, "loaded");
   await expect(shell).toHaveScreenshot(desktop ? "sidebar.png" : "tabbar.png", {
     animations: "disabled",
   });

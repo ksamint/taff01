@@ -1,5 +1,7 @@
 // Capture the installed faces deterministically; cold product renders keep optional display.
-export async function prepareFonts() {
+export async function prepareFonts(
+  nativeLayout: "preserve" | "loaded" = "preserve",
+) {
   const rules = [...document.styleSheets]
     .flatMap((sheet) => [...sheet.cssRules])
     .filter(
@@ -63,4 +65,20 @@ export async function prepareFonts() {
   state.__taffActiveCaptureFaces = faces;
   document.body.getBoundingClientRect();
   await document.fonts.ready;
+  // Authenticated captures describe the prepared, loaded-font workspace.
+  // Chromium's native select renderer can otherwise retain first-layout
+  // fallback metrics even after its glyph font changes. Refresh only when the
+  // caller explicitly requests that loaded context; cold entry captures keep
+  // their original native metrics. Attributes, focus and events remain intact.
+  if (nativeLayout === "loaded" && document.querySelector("select")) {
+    const refresh = document.createElement("style");
+    refresh.textContent = "select { font-size: 0 !important; }";
+    try {
+      document.head.append(refresh);
+      document.body.getBoundingClientRect();
+    } finally {
+      refresh.remove();
+      document.body.getBoundingClientRect();
+    }
+  }
 }

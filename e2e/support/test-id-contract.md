@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (335 distinct, 1752 uses)
+## Test ids (335 distinct, 1753 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -222,7 +222,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `locale-select` | 13 | me-view.tsx | live/release/checklist.spec.ts, live/release/support.ts, me.spec.ts, release/checklist.spec.ts, release/support.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts |
+| `locale-select` | 14 | me-view.tsx | live/release/checklist.spec.ts, live/release/support.ts, me.spec.ts, release/checklist.spec.ts, release/support.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 
 ### mcp-view.tsx
 
