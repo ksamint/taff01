@@ -8,6 +8,7 @@ import {
 import { type MindMap, mindMapSchema } from "../../packages/schemas/src/mind";
 import { messages, type TestLocale } from "../support/messages";
 import { selectLocale } from "../support/preferences";
+import { holdRequest } from "../support/routes";
 import { liveSignIn, test } from "./live";
 
 // M18 mind map: nodes, links, sources and evidence are created and edited
@@ -18,7 +19,7 @@ test.use({ actionTimeout: 15000 });
 
 type Workspace = { id: string; memberId: string };
 
-/** Signs in as the admin demo user and opens a new workspace they own. */
+/** Signs in to the dedicated verification workspace and preserves other data. */
 async function setUp(page: Page, locale: TestLocale): Promise<Workspace> {
   const { workspace } = await liveSignIn(page, locale);
   const response = await page.request.get(
@@ -194,16 +195,31 @@ test("create nodes and links by keyboard, edit and archive with undo", async ({
   await expect
     .poll(async () => nodeByTitle(await mind(page, workspace), root.title))
     .toMatchObject({ strength: 5 });
+  // Hold the map refetch the undo starts, so Archive below runs before it
+  // lands: the undo's own response must already carry version 3, or the
+  // archive is rejected as changed elsewhere (the first-attempt flake).
+  const refetch = await holdRequest(
+    page,
+    `/api/workspaces/${workspace.id}/mind`,
+    {
+      method: "GET",
+      reply: "continue",
+    },
+  );
   await toast.getByTestId("toast-action").click();
   await expect
     .poll(async () => nodeByTitle(await mind(page, workspace), root.title))
     .toMatchObject({ strength: 3, version: 3 });
 
   // Archive (admins), then undo restores it with its link.
-  await page.getByTestId("mind-archive-node").click();
-  await expect(toast).toContainText(
-    fill(m.mind.toast.nodeArchived, { title: root.title }),
-  );
+  try {
+    await page.getByTestId("mind-archive-node").click();
+    await expect(toast).toContainText(
+      fill(m.mind.toast.nodeArchived, { title: root.title }),
+    );
+  } finally {
+    refetch.release();
+  }
   await expect
     .poll(async () => (await mind(page, workspace)).nodes.length)
     .toBe(1);
@@ -308,26 +324,40 @@ test("sources become evidence, with undo", async ({ page }, info) => {
     .poll(async () => (await mind(page, workspace)).nodeSources.length)
     .toBe(1);
 
-  // A new source from the node is linked as its evidence at once.
-  await page.getByTestId("mind-new-evidence").click();
-  await page.getByTestId("mind-source-title").fill("Census 2021");
-  await page.getByTestId("mind-source-save").click();
-  await expect(page.getByTestId("mind-evidence-item")).toHaveCount(2);
-  await expect
-    .poll(async () => (await mind(page, workspace)).nodeSources.length)
-    .toBe(2);
-
-  // Edit a source from the overview; undo restores the old title.
-  await page.getByTestId("mind-back").click();
-  await expect(page.getByTestId("mind-coverage")).toHaveText(
-    fill(m.mind.coverage, { cited: 1, total: 1 }),
+  // A new source from the node is linked as its evidence at once. Its map
+  // refetch is held until the edit form below is open, so the form must get
+  // the saved row (real id and version), not the optimistic one.
+  const refetch = await holdRequest(
+    page,
+    `/api/workspaces/${workspace.id}/mind`,
+    {
+      method: "GET",
+      reply: "continue",
+    },
   );
-  await page
-    .getByTestId("mind-source")
-    .filter({ hasText: "Census 2021" })
-    .getByTestId("mind-source-edit")
-    .click();
-  await page.getByTestId("mind-source-title").fill("C&SD Census 2021");
+  try {
+    await page.getByTestId("mind-new-evidence").click();
+    await page.getByTestId("mind-source-title").fill("Census 2021");
+    await page.getByTestId("mind-source-save").click();
+    await expect(page.getByTestId("mind-evidence-item")).toHaveCount(2);
+    await expect
+      .poll(async () => (await mind(page, workspace)).nodeSources.length)
+      .toBe(2);
+
+    // Edit a source from the overview; undo restores the old title.
+    await page.getByTestId("mind-back").click();
+    await expect(page.getByTestId("mind-coverage")).toHaveText(
+      fill(m.mind.coverage, { cited: 1, total: 1 }),
+    );
+    await page
+      .getByTestId("mind-source")
+      .filter({ hasText: "Census 2021" })
+      .getByTestId("mind-source-edit")
+      .click();
+    await page.getByTestId("mind-source-title").fill("C&SD Census 2021");
+  } finally {
+    refetch.release();
+  }
   await page.getByTestId("mind-source-save").click();
   await expect(toast).toContainText(
     fill(m.mind.toast.sourceSaved, { title: "C&SD Census 2021" }),

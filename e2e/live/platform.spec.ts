@@ -148,6 +148,25 @@ test("Restricted verification member sees timeline and graph without finance; gu
     expect(brief.status()).toBe(200);
     for (const row of (await brief.json()).projects)
       expect(row.risk.finance).toBeNull();
+    // Reproduce a role change after initial reads but before the first socket.
+    let connect!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      connect = resolve;
+    });
+    await memberPage.routeWebSocket(/\/api\/realtime/, async (socket) => {
+      await gate;
+      socket.connectToServer();
+    });
+    await memberPage.goto(`/projects/${project.id}?view=timeline`);
+    await expect(memberPage.getByTestId("timeline-view")).toBeVisible();
+    await expect(memberPage.getByTestId("timeline-finance")).toHaveCount(0);
+    const promoted = await page.request.patch(
+      `/api/workspaces/${workspace.id}/members/${recipient.member.id}`,
+      { data: { role: "admin" } },
+    );
+    expect(promoted.status()).toBe(200);
+    connect();
+    await expect(memberPage.getByTestId("timeline-finance")).toBeVisible();
     const role = await page.request.patch(
       `/api/workspaces/${workspace.id}/members/${recipient.member.id}`,
       { data: { role: "guest" } },
