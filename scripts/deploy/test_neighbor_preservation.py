@@ -1,5 +1,5 @@
 import unittest
-from neighbor_preservation import compare, identity, load_receipts
+from neighbor_preservation import compare, identity, load_receipts, load_taff_effects
 import json
 import tempfile
 from pathlib import Path
@@ -26,6 +26,18 @@ class PreservationTest(unittest.TestCase):
             path.write_text(json.dumps([dict(receipt, source='/srv/taff/forged.json')]))
             with self.assertRaises(ValueError):
                 load_receipts(path)
+
+    def test_taff_journal_hash_and_missing_manifest(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / 'mutation.log'
+            source.write_text('docker stop other-app')
+            path = Path(folder) / 'effects.json'
+            self.assertEqual(load_taff_effects(path), [])
+            path.write_text(json.dumps(dict(source=str(source), sha256=hashlib.sha256(source.read_bytes()).hexdigest(), verifiedAt='2026-10-15T04:01:00Z', containerIds=['old'])))
+            self.assertEqual(load_taff_effects(path), ['old'])
+            source.write_text('changed')
+            with self.assertRaises(ValueError):
+                load_taff_effects(path)
 
     def test_unchanged(self):
         self.assertEqual(compare({'old': self.old}, {'old': self.old})['status'], 'passed')
