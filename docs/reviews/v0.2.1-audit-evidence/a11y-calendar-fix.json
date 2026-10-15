@@ -1,0 +1,23 @@
+{
+  "measuredContexts": 12,
+  "renderErrors": 0,
+  "localeCount": 3,
+  "themes": ["light", "dark"],
+  "viewports": {
+    "phone": [390, 844],
+    "desktop": [1280, 800]
+  },
+  "routeStates": 2,
+  "contrastFailures": 0,
+  "smallEffectivePhoneTargets": 0,
+  "below12pxText": 0,
+  "missingNames": 0,
+  "missingFocusRings": 0,
+  "incompleteTabCycles": 0,
+  "hiddenFocusStops": 0,
+  "langMismatches": 0,
+  "focusStops": 306,
+  "interactiveObservations": 306,
+  "textObservations": 762,
+  "manualBackgroundObservations": 0
+}

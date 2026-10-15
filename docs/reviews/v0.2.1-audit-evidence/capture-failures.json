@@ -1,0 +1,842 @@
+[
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 3,
+    "runs": ["38502161576", "38514533054", "38520599213"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "agent uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "brief uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "calendar uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "companies uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "company-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contact-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contacts uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "home uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "inbox uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mcp uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "me uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mind uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "notifications uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "organizations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "quick-add uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "relations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "review uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "search uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "stakeholders uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "team uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "timeline uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "type uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 3,
+    "runs": ["38502161576", "38514533054", "38520599213"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "agent uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "brief uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "calendar uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "companies uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "company-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contact-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contacts uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "home uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "inbox uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mcp uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "me uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mind uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "notifications uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "organizations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "quick-add uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "relations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "review uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "search uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "stakeholders uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "team uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "timeline uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "desktop-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "type uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 3,
+    "runs": ["38502161576", "38514533054", "38520599213"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "agent uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "brief uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "calendar uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "companies uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "company-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contact-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contacts uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "home uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "inbox uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mcp uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "me uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mind uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "notifications uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "organizations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "quick-add uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "relations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "review uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "search uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "stakeholders uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "team uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "timeline uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-en",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "type uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 3,
+    "runs": ["38502161576", "38514533054", "38520599213"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-parity.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38514533054"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "agent uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "brief uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "calendar uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "companies uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "company-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contact-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "contacts uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "home uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "inbox uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mcp uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "me uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "mind uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "notifications uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "organizations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "projects uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "quick-add uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "relations uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "review uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "search uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "shell uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "stakeholders uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "task-detail uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "team uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "timeline uses the real Northwind fixture",
+    "failedRuns": 2,
+    "runs": ["38673790421", "38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "today uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  },
+  {
+    "project": "phone-zh-HK",
+    "file": "e2e/ui-v2.spec.ts",
+    "title": "type uses the real Northwind fixture",
+    "failedRuns": 1,
+    "runs": ["38702666703"]
+  }
+]
