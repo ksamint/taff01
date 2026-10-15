@@ -15,6 +15,8 @@ test("capture preparation retains live faces and native selected text", async ({
     const context = await browser.newContext({
       viewport: { width: 390, height: 844 },
       locale,
+      isMobile: true,
+      hasTouch: true,
     });
     try {
       const page = await context.newPage();
@@ -53,7 +55,7 @@ test("capture preparation retains live faces and native selected text", async ({
           element.textContent = "此項目：結賬改版";
         });
       await page.evaluate(prepareFonts);
-      const control = page.locator("#scope");
+      const control = page.getByRole("combobox");
       const first = await control.screenshot();
       const size = await page.evaluate(() => document.fonts.size);
       for (let repeat = 0; repeat < 3; repeat++) {
