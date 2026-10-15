@@ -51,7 +51,9 @@ wanted = {ord(c) for text in texts for c in text if ord(c) > 0xFF} - {0x3400, 0x
 missing = {point for point in wanted - tc_cmap - manrope if 0x3400 <= point <= 0x9FFF}
 assert missing <= set(TTFont(sc_source).getBestCmap()), "SC source lacks required UI glyphs"
 symbols = {0x2191, 0x2192, 0x2193, 0x2194, 0x2318}
-remaining = set(TTFont(FONTS / "NotoSansTC-ui-remaining.woff2").getBestCmap()) - symbols
+common = set(TTFont(FONTS / "NotoSansTC-ui-common.woff2").getBestCmap())
+remaining = (set(TTFont(FONTS / "NotoSansTC-ui-remaining.woff2").getBestCmap())
+             | ((wanted & tc_cmap) - manrope)) - common - symbols
 
 
 def ranges(points):
