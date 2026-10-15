@@ -499,7 +499,9 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       String(needsYou),
     );
   }
-  await page.evaluate(() => document.fonts.ready);
+  // Workspace text can appear after the first font preparation. Prepare only
+  // its now-selected faces so optional display cannot leave a fallback title.
+  await page.evaluate(prepareFonts);
   await expect(shell).toHaveScreenshot(desktop ? "sidebar.png" : "tabbar.png", {
     animations: "disabled",
   });

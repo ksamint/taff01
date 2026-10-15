@@ -7,7 +7,8 @@ import { tsImport } from "tsx/esm/api";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
 import { prepareFonts } from "./prepare-fonts.ts";
 import { prepareTime } from "./prepare-time.mjs";
-import { prepareView } from "./prepare-view.ts";
+
+const { prepareView } = await tsImport("./prepare-view.ts", import.meta.url);
 
 const { inboxSchema } = await tsImport(
   "../../packages/schemas/src/inbox-read.ts",
