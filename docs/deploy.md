@@ -2115,7 +2115,7 @@ migration with no existing-row rewrite, backfill, delete, rename or drop, retain
 all active-child and parent invariants. Existing migrations remain immutable.
 
 The diagnostic checklist is now terminal: 146 unique cases, 137 passed, 156 attempts,
-20 failed attempts, 14 failed cleanup journals and zero browser/harness errors.
+19 failed attempts, 14 failed cleanup journals and zero browser/harness errors.
 Twelve cleanup failures are the Brief parent guard defect across six projects and
 two attempts. One owned pending grant incorrectly received a revoke request;
 its 409 skipped agent baseline restoration and blocked subsequent duplicate-grant
