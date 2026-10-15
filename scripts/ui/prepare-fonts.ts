@@ -8,35 +8,56 @@ export async function prepareFonts() {
     .filter((rule) => /Manrope|Noto Sans TC/.test(rule.style.fontFamily));
   if (rules.length !== 16)
     throw new Error("Expected the 16 installed UI font faces");
-  // Let the browser select the applicable Unicode faces first. Eagerly loading
-  // every rule made an English screen fetch all CJK subsets during capture.
+  // A previously resolved ready promise does not cover newly inserted text.
+  // Load this text's computed font stack before selecting capture faces; loading
+  // every rule instead would fetch unrelated CJK subsets on English screens.
+  document.body.getBoundingClientRect();
+  const text = document.body.innerText;
+  if (text)
+    await document.fonts.load(getComputedStyle(document.body).font, text);
   await document.fonts.ready;
   const active = [...document.fonts].filter((face) => face.status === "loaded");
-  await Promise.all(
-    rules
-      .filter(({ style }) =>
-        active.some(
-          (face) =>
-            face.family.replace(/["']/g, "") ===
-              style.fontFamily.replace(/["']/g, "") &&
-            face.unicodeRange === style.getPropertyValue("unicode-range"),
-        ),
-      )
-      .map(async ({ style }) => {
-        const face = new FontFace(
-          style.fontFamily.replace(/^(["'])(.*)\1$/, "$2"),
-          style.getPropertyValue("src"),
-          {
-            weight: style.fontWeight,
-            style: style.fontStyle,
-            unicodeRange: style.getPropertyValue("unicode-range"),
-            display: "block",
-          },
+  const state = window as typeof window & {
+    __taffCaptureFaces?: Map<string, FontFace>;
+    __taffActiveCaptureFaces?: FontFace[];
+  };
+  const cache = (state.__taffCaptureFaces ??= new Map());
+  const faces = rules
+    .filter(({ style }) =>
+      active.some(
+        (face) =>
+          face.family.replace(/["']/g, "") ===
+            style.fontFamily.replace(/["']/g, "") &&
+          face.unicodeRange === style.getPropertyValue("unicode-range"),
+      ),
+    )
+    .map(({ style }) => {
+      const key = style.cssText;
+      if (!cache.has(key))
+        cache.set(
+          key,
+          new FontFace(
+            style.fontFamily.replace(/^(["'])(.*)\1$/, "$2"),
+            style.getPropertyValue("src"),
+            {
+              weight: style.fontWeight,
+              style: style.fontStyle,
+              unicodeRange: style.getPropertyValue("unicode-range"),
+              display: "block",
+            },
+          ),
         );
-        await face.load();
-        if (face.status !== "loaded") throw new Error("UI font did not load");
-        document.fonts.add(face);
-      }),
-  );
+      return cache.get(key)!;
+    });
+  await Promise.all(faces.map((face) => face.load()));
+  if (faces.some((face) => face.status !== "loaded"))
+    throw new Error("UI font did not load");
+  // Swap only after every face loads, in CSS order, without an await between
+  // removals/additions. Repeated preparation must not accumulate competing faces.
+  for (const face of state.__taffActiveCaptureFaces ?? [])
+    document.fonts.delete(face);
+  for (const face of faces) document.fonts.add(face);
+  state.__taffActiveCaptureFaces = faces;
+  document.body.getBoundingClientRect();
   await document.fonts.ready;
 }

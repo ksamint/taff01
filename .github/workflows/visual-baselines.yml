@@ -162,6 +162,8 @@ jobs:
           UI_THEME=dark pnpm ui:app-shots docs/ui/screenshots/v021-dark
       - name: English Relations font download regression
         run: PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/font-network.json" pnpm exec playwright test e2e/font-loading.spec.ts --reporter=line,json
+      - name: Font readiness under delayed subsets and late text
+        run: PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/font-readiness.json" pnpm exec playwright test e2e/font-readiness.spec.ts --reporter=line,json
       - name: Record native capture and runtime identities
         run: |
           node --input-type=module <<'JS'
@@ -204,6 +206,9 @@ jobs:
           const fontNetwork = JSON.parse(fs.readFileSync('capture-results/font-network.json')).stats;
           if (fontNetwork.expected !== 6 || fontNetwork.unexpected || fontNetwork.skipped || fontNetwork.flaky)
             throw new Error('Expected all six English/real-Northwind font network cases');
+          const fontReadiness = JSON.parse(fs.readFileSync('capture-results/font-readiness.json')).stats;
+          if (fontReadiness.expected !== 3 || fontReadiness.unexpected || fontReadiness.skipped || fontReadiness.flaky)
+            throw new Error('Expected all three locale font-readiness matrices');
           fs.writeFileSync('visual-capture-manifest.json', JSON.stringify({
             sourceSha: process.env.CAPTURE_SOURCE_SHA,
             repository: process.env.GITHUB_REPOSITORY,
@@ -215,7 +220,7 @@ jobs:
             playwright: require('@playwright/test/package.json').version,
             monospace: cp.execFileSync('fc-match', ['monospace'], {encoding: 'utf8'}).trim(),
             fontRuntime: cp.execFileSync('dpkg-query', ['-W', 'fontconfig', 'libfreetype6'], {encoding: 'utf8'}).trim(),
-            captureScope: {...selection, darkScreens, expectedTotalPngCount: selection.expectedPngCount + darkPaths.length}, screenResults, fontNetwork, captures,
+            captureScope: {...selection, darkScreens, expectedTotalPngCount: selection.expectedPngCount + darkPaths.length}, screenResults, fontNetwork, fontReadiness, captures,
           }, null, 2) + '\n');
           JS
       - uses: actions/upload-artifact@v4

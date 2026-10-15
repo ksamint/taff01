@@ -757,6 +757,7 @@ read (`data-event-id`, `data-date`).
 | `#issued-invite` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `#mcp-calls-heading` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `#org-name` | 4 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
+| `#paragraph` | 2 | font-readiness.spec.ts |
 | `#password-hint` | 1 | username-auth.spec.ts |
 | `#sms-phone` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `#team` | 1 | scripts/ui/app-shots.mjs |
