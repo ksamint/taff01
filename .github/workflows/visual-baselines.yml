@@ -97,7 +97,7 @@ jobs:
           # Only this job's disposable checkout is modified. Missing snapshots
           # must be created by successful captures, not inherited from Git.
           rm -rf -- e2e/__screenshots__/ui-v2.spec.ts
-          for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add; do
+          for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add companies company-detail contacts contact-detail stakeholders timeline relations brief mind home; do
             UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
           done
       - name: Record native capture and runtime identities
@@ -107,7 +107,7 @@ jobs:
           const path = require('node:path');
           const crypto = require('node:crypto');
           const cp = require('node:child_process');
-          const screens = 'shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add'.split(' ');
+          const screens = 'shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add companies company-detail contacts contact-detail stakeholders timeline relations brief mind home'.split(' ');
           const screenResults = screens.map(screen => {
             const file = `capture-results/${screen}.json`;
             const raw = fs.readFileSync(file);
@@ -129,7 +129,7 @@ jobs:
             return {file, bytes: raw.length, width: raw.readUInt32BE(16), height: raw.readUInt32BE(20),
               sha256: crypto.createHash('sha256').update(raw).digest('hex')};
           });
-          if (captures.length !== 86) throw new Error('Expected all 86 native PNGs');
+          if (captures.length !== 126) throw new Error('Expected all 126 native PNGs');
           fs.writeFileSync('visual-capture-manifest.json', JSON.stringify({
             sourceSha: process.env.CAPTURE_SOURCE_SHA,
             repository: process.env.GITHUB_REPOSITORY,

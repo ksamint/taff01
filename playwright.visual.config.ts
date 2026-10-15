@@ -19,6 +19,16 @@ if (
     "team",
     "notifications",
     "quick-add",
+    "companies",
+    "company-detail",
+    "contacts",
+    "contact-detail",
+    "stakeholders",
+    "timeline",
+    "relations",
+    "brief",
+    "mind",
+    "home",
   ].includes(process.env.UI_SCREEN ?? "")
 )
   throw new Error("Set UI_SCREEN to an implemented v2 screen.");
