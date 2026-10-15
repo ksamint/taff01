@@ -38,6 +38,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     );
     await expect(page.getByTestId("auth-submit")).toBeEnabled();
     await expect(page.locator(".landing-features li")).toHaveCount(3);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     await page.evaluate(prepareFonts);
     await expect(page).toHaveScreenshot("home.png", { animations: "disabled" });
     return;
@@ -384,6 +385,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         await expect(page.getByTestId("mind-node").first()).toBeVisible();
         await expect(page.getByTestId("mind-overview")).toBeVisible();
       }
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await page.evaluate(prepareFonts);
       if (screen === "relations" && locale === "en") {
         const downloads = await page.evaluate(() =>

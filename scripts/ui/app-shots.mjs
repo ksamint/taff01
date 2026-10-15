@@ -324,6 +324,10 @@ try {
               await expect(page.getByTestId("quick-title")).toBeEnabled();
             }
             await page.waitForLoadState("networkidle");
+            await expect(page.locator("html")).toHaveAttribute(
+              "data-theme",
+              theme,
+            );
             await page.evaluate(prepareFonts);
             await page.mouse.move(0, 0);
             await page.screenshot({
