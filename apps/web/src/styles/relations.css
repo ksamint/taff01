@@ -116,7 +116,7 @@
 .relations-node {
   cursor: pointer;
 }
-.relations-node.is-dim {
+.relations-node.is-dim .relations-marker {
   opacity: 0.3;
 }
 .relations-hit {

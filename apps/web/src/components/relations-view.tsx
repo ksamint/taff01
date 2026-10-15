@@ -509,7 +509,9 @@ function GraphCanvas({
                     className="relations-hit"
                     data-testid="relations-node-hit"
                   />
-                  <NodeShape node={node} />
+                  <g className="relations-marker">
+                    <NodeShape node={node} />
+                  </g>
                   {(showLabels || node.key === selectedKey) && (
                     <text
                       x={12}

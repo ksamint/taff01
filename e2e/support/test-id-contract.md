@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (338 distinct, 1776 uses)
+## Test ids (339 distinct, 1777 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -415,6 +415,7 @@ several do). “Also rendered by” lists the other files.
 | `relations-open-task` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-relation` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-view` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `relations-zoom-in` | 1 |  | timeline.spec.ts |
 | `relations-zoom-out` | 1 |  | timeline.spec.ts |
 
 ### review-view.tsx
@@ -723,9 +724,11 @@ read (`data-event-id`, `data-date`).
 | `.planning-board` | 3 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `.planning-board .board-card[data-task-id="*"]` | 1 | ui-v2.spec.ts |
 | `.quick-fab` | 2 | ui-v2.spec.ts |
-| `.relations-label` | 1 | timeline.spec.ts |
+| `.relations-label` | 2 | timeline.spec.ts |
+| `.relations-marker` | 1 | timeline.spec.ts |
+| `.relations-node.is-dim` | 1 | timeline.spec.ts |
 | `.relations-svg` | 2 | live/timeline.spec.ts, timeline.spec.ts |
-| `.relations-svg > g` | 1 | timeline.spec.ts |
+| `.relations-svg > g` | 2 | timeline.spec.ts |
 | `.review-comments` | 3 | planning.spec.ts |
 | `.section-hint` | 2 | optimistic-m4.spec.ts |
 | `.sidebar` | 4 | agent-creation.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
