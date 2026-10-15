@@ -6,6 +6,11 @@ on:
         description: Full reviewed source commit to capture
         required: true
         type: string
+      screens:
+        description: Optional space-separated v2 screens; empty captures all 26 screens and 126 PNGs
+        required: false
+        type: string
+        default: ""
       publish:
         description: Also push the captures to branch visual-baselines/<source_sha> (for environments that cannot download artifacts)
         required: false
@@ -32,6 +37,7 @@ env:
   MCP_RATE_LIMIT: "60"
   CI: "1"
   NEXT_TELEMETRY_DISABLED: "1"
+  CAPTURE_SCREENS: ${{ inputs.screens }}
   CAPTURE_SOURCE_SHA: ${{ inputs.source_sha }}
   CAPTURE_WORKFLOW_SHA: ${{ github.workflow_sha }}
 jobs:
@@ -74,6 +80,15 @@ jobs:
         with:
           node-version-file: .node-version
           cache: pnpm
+      - name: Validate the selected capture matrix
+        run: |
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import {resolveCaptureSelection} from './scripts/ui/capture-selection.mjs';
+          const selection = resolveCaptureSelection(process.env.CAPTURE_SCREENS);
+          fs.appendFileSync(process.env.GITHUB_ENV, `CAPTURE_SELECTED_SCREENS=${selection.screens.join(' ')}\n`);
+          console.log(JSON.stringify(selection));
+          JS
       - run: pnpm install --frozen-lockfile
       - run: printf 'CI=1\n' > .env
       - run: pnpm lint
@@ -90,24 +105,28 @@ jobs:
       - name: Install CI Chromium and system dependencies
         run: pnpm exec playwright install --with-deps chromium
       - run: pnpm perf:lighthouse
-      - name: Regenerate every screen without changing comparison tolerances
+      - name: Regenerate the selected matrix without changing comparison tolerances
         shell: bash
         run: |
           set -euo pipefail
           # Only this job's disposable checkout is modified. Missing snapshots
           # must be created by successful captures, not inherited from Git.
           rm -rf -- e2e/__screenshots__/ui-v2.spec.ts
-          for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add; do
+          for screen in $CAPTURE_SELECTED_SCREENS; do
             UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
           done
       - name: Record native capture and runtime identities
         run: |
-          node <<'JS'
-          const fs = require('node:fs');
-          const path = require('node:path');
-          const crypto = require('node:crypto');
-          const cp = require('node:child_process');
-          const screens = 'shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add'.split(' ');
+          node --input-type=module <<'JS'
+          import fs from 'node:fs';
+          import path from 'node:path';
+          import crypto from 'node:crypto';
+          import cp from 'node:child_process';
+          import {resolveCaptureSelection, assertCapturePaths} from './scripts/ui/capture-selection.mjs';
+          import {createRequire} from 'node:module';
+          const require = createRequire(import.meta.url);
+          const selection = resolveCaptureSelection(process.env.CAPTURE_SCREENS);
+          const {screens} = selection;
           const screenResults = screens.map(screen => {
             const file = `capture-results/${screen}.json`;
             const raw = fs.readFileSync(file);
@@ -129,7 +148,8 @@ jobs:
             return {file, bytes: raw.length, width: raw.readUInt32BE(16), height: raw.readUInt32BE(20),
               sha256: crypto.createHash('sha256').update(raw).digest('hex')};
           });
-          if (captures.length !== 86) throw new Error('Expected all 86 native PNGs');
+          assertCapturePaths(selection, captures.map(capture => capture.file));
+          if (selection.mode === 'all' && captures.length !== 126) throw new Error('Expected all 126 native PNGs');
           fs.writeFileSync('visual-capture-manifest.json', JSON.stringify({
             sourceSha: process.env.CAPTURE_SOURCE_SHA,
             repository: process.env.GITHUB_REPOSITORY,
@@ -141,7 +161,7 @@ jobs:
             playwright: require('@playwright/test/package.json').version,
             monospace: cp.execFileSync('fc-match', ['monospace'], {encoding: 'utf8'}).trim(),
             fontRuntime: cp.execFileSync('dpkg-query', ['-W', 'fontconfig', 'libfreetype6'], {encoding: 'utf8'}).trim(),
-            screenResults, captures,
+            captureScope: selection, screenResults, captures,
           }, null, 2) + '\n');
           JS
       - uses: actions/upload-artifact@v4

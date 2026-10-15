@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (321 distinct, 1660 uses)
+## Test ids (321 distinct, 1672 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -47,7 +47,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `auth-email` | 37 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-password` | 31 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-submit` | 38 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-submit` | 39 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 7 |  | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-username` | 5 |  | release/checklist.spec.ts, username-auth.spec.ts |
 
@@ -75,11 +75,11 @@ several do). “Also rendered by” lists the other files.
 | `brief-proposal-apply` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-dismiss` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-subtasks` | 2 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-risk` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-risk` | 3 |  | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
 | `brief-stat-agents` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-stat-dueToday` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-stat-toConfirm` | 2 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-stats` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-stats` | 3 |  | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
 | `brief-view` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 
 ### calendar-scene.tsx
@@ -106,8 +106,8 @@ several do). “Also rendered by” lists the other files.
 | `company-contact-edit` | 2 | crm/contact-role-row.tsx | crm.spec.ts, live/crm.spec.ts |
 | `company-contact-role-chair` | 2 | crm/contact-role-row.tsx | crm.spec.ts, live/crm.spec.ts |
 | `company-contact-roles` | 10 | crm/contact-role-row.tsx | crm.spec.ts, live/crm.spec.ts |
-| `company-heading` | 2 |  | crm.spec.ts, live/crm.spec.ts |
-| `company-row` | 6 |  | crm.spec.ts, live/crm.spec.ts |
+| `company-heading` | 3 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
+| `company-row` | 7 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
 
 ### crm/contact-links.tsx
 
@@ -154,9 +154,9 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `contact-archive` | 2 |  | crm.spec.ts, live/crm.spec.ts |
 | `contact-company-select` | 4 |  | crm.spec.ts, live/crm.spec.ts |
-| `contact-heading` | 4 |  | crm.spec.ts, live/crm.spec.ts |
+| `contact-heading` | 5 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
 | `contact-link` | 4 |  | crm.spec.ts, live/crm.spec.ts |
-| `contact-row` | 8 |  | crm.spec.ts, live/crm.spec.ts |
+| `contact-row` | 9 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
 
 ### crm/crm-forms.tsx
 
@@ -170,7 +170,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `client-company-select` | 2 |  | crm.spec.ts, live/crm.spec.ts |
-| `stakeholder` | 6 |  | crm.spec.ts, live/crm.spec.ts |
+| `stakeholder` | 7 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
 | `stakeholders-count` | 2 |  | crm.spec.ts, live/crm.spec.ts |
 | `stakeholders-view` | 2 |  | crm.spec.ts, live/crm.spec.ts |
 
@@ -274,7 +274,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-new-node` | 4 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-new-source` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-no-evidence` | 4 |  | live/mind.spec.ts, mind.spec.ts |
-| `mind-node` | 4 |  | live/mind.spec.ts, mind.spec.ts |
+| `mind-node` | 5 |  | live/mind.spec.ts, mind.spec.ts, ui-v2.spec.ts |
 | `mind-node-form` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-node-layer` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-node-momentum` | 2 |  | live/mind.spec.ts, mind.spec.ts |
@@ -284,7 +284,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-node-title` | 8 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-note` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-open-task` | 2 | relations-view.tsx | live/mind.spec.ts, mind.spec.ts |
-| `mind-overview` | 4 |  | live/mind.spec.ts, mind.spec.ts |
+| `mind-overview` | 5 |  | live/mind.spec.ts, mind.spec.ts, ui-v2.spec.ts |
 | `mind-source` | 4 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-form` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-link` | 4 |  | live/mind.spec.ts, mind.spec.ts |
@@ -390,7 +390,7 @@ several do). “Also rendered by” lists the other files.
 | `relations-layout-layered` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-list-node` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-list-open-task` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `relations-node` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `relations-node` | 3 |  | live/timeline.spec.ts, timeline.spec.ts, ui-v2.spec.ts |
 | `relations-node-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-open-task` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-relation` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -523,7 +523,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `timeline-add-predecessor` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-add-predecessor-submit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline-bar` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline-bar` | 3 |  | live/timeline.spec.ts, timeline.spec.ts, ui-v2.spec.ts |
 | `timeline-bar-body` | 14 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-bar-link` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-bar-resize` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -670,6 +670,8 @@ read (`data-event-id`, `data-date`).
 | `.history-list > li` | 1 | agent-review.spec.ts |
 | `.invite-banner a[href="/orgs"]` | 1 | live/live.ts |
 | `.is-event-copy` | 2 | calendar.spec.ts |
+| `.landing-features li` | 1 | ui-v2.spec.ts |
+| `.landing-hero > h1` | 1 | ui-v2.spec.ts |
 | `.loading` | 2 | ui-v2.spec.ts |
 | `.mcp-call` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-config` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -807,6 +809,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.invalid_input` | 13 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
+| `home.title` | 1 | ui-v2.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |

@@ -19,12 +19,35 @@ if (
     "team",
     "notifications",
     "quick-add",
+    "companies",
+    "company-detail",
+    "contacts",
+    "contact-detail",
+    "stakeholders",
+    "timeline",
+    "relations",
+    "brief",
+    "mind",
+    "home",
   ].includes(process.env.UI_SCREEN ?? "")
 )
   throw new Error("Set UI_SCREEN to an implemented v2 screen.");
 
 export default defineConfig({
   ...behavior,
+  webServer: (Array.isArray(behavior.webServer) ? behavior.webServer : []).map(
+    (server, index) =>
+      index === 0
+        ? {
+            ...server,
+            command: process.env.CI
+              ? "node --import ./scripts/ui/visual-clock.mjs dist/runtime/api/api.mjs"
+              : "node --env-file=.env --import ./scripts/ui/visual-clock.mjs --import tsx apps/api/src/index.ts",
+            env: { ...server.env, TAFF_VISUAL_API_CLOCK: "ui-v2" },
+            reuseExistingServer: false,
+          }
+        : server,
+  ),
   testMatch: "**/ui-v2.spec.ts",
   testIgnore: [],
   outputDir: `test-results/ui-v2/${process.env.UI_SCREEN}`,

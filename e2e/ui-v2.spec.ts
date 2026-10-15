@@ -13,10 +13,29 @@ import {
 import { runListSchema } from "../packages/schemas/src/run-read";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
 import { prepareTime } from "../scripts/ui/prepare-time.mjs";
+import { prepareView } from "../scripts/ui/prepare-view";
 import { messages } from "./support/messages";
 
 const screen = process.env.UI_SCREEN ?? "shell";
 test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
+  if (screen === "home") {
+    const locale = info.project.name.endsWith("zh-HK") ? "zh-HK" : "en";
+    await page.addInitScript((locale) => {
+      localStorage.setItem("taff-locale", locale);
+      localStorage.setItem("taff-theme", "light");
+    }, locale);
+    const loaded = await page.goto("/");
+    expect(loaded?.status()).toBe(200);
+    await expect(page.locator(".landing-hero > h1")).toHaveText(
+      messages[locale].home.title,
+    );
+    await expect(page.getByTestId("auth-submit")).toBeEnabled();
+    await expect(page.locator(".landing-features li")).toHaveCount(3);
+    await prepareView(page, screen);
+    await page.evaluate(prepareFonts);
+    await expect(page).toHaveScreenshot("home.png", { animations: "disabled" });
+    return;
+  }
   if (!process.env.DEMO_PASSWORD) throw new Error("DEMO_PASSWORD is required");
   const locale = info.project.name.endsWith("zh-HK") ? "zh-HK" : "en";
   const desktop = info.project.name.startsWith("desktop-");
@@ -110,7 +129,29 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     team: "/orgs#team",
     notifications: "/me/notifications",
     "quick-add": "/",
+    companies: "/companies",
+    contacts: "/contacts",
+    brief: desktop ? "/me?tab=brief" : "/brief",
+    ...Object.fromEntries(
+      ["stakeholders", "timeline", "relations", "mind"].map((view) => [
+        view,
+        `/projects/${prototypeId("project", "nw")}?view=${view}`,
+      ]),
+    ),
   };
+  if (screen === "company-detail" || screen === "contact-detail") {
+    const kind = screen === "company-detail" ? "companies" : "contacts";
+    const response = await page.request.get(
+      `/api/${kind}?workspaceId=${workspaceId}`,
+    );
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    const rows = Array.isArray(body) ? body : body.items;
+    expect(rows.length).toBeGreaterThan(0);
+    // Sort by immutable id so database query order cannot change the reference.
+    const id = rows.map((row: { id: string }) => row.id).sort()[0];
+    routes[screen] = `/${kind}/${id}`;
+  }
   const loaded = await page.goto(
     screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
   );
@@ -311,6 +352,29 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         if (desktop)
           await expect(page.getByTestId("task-detail-heading")).toBeVisible();
       }
+      if (screen === "companies")
+        await expect(page.getByTestId("company-row").first()).toBeVisible();
+      if (screen === "contacts")
+        await expect(page.getByTestId("contact-row").first()).toBeVisible();
+      if (screen === "company-detail")
+        await expect(page.getByTestId("company-heading")).toBeVisible();
+      if (screen === "contact-detail")
+        await expect(page.getByTestId("contact-heading")).toBeVisible();
+      if (screen === "stakeholders")
+        await expect(page.getByTestId("stakeholder").first()).toBeVisible();
+      if (screen === "timeline")
+        await expect(page.getByTestId("timeline-bar").first()).toBeVisible();
+      if (screen === "relations")
+        await expect(page.getByTestId("relations-node").first()).toBeVisible();
+      if (screen === "brief") {
+        await expect(page.getByTestId("brief-stats")).toBeVisible();
+        await expect(page.getByTestId("brief-risk").first()).toBeVisible();
+      }
+      if (screen === "mind") {
+        await expect(page.getByTestId("mind-node").first()).toBeVisible();
+        await expect(page.getByTestId("mind-overview")).toBeVisible();
+      }
+      await prepareView(page, screen);
       await page.evaluate(() => document.fonts.ready);
       if (desktop && (screen === "projects" || screen === "type"))
         await assertDesktopBoardActions();
