@@ -7,6 +7,7 @@ import { tsImport } from "tsx/esm/api";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
 import { prepareFonts } from "./prepare-fonts.ts";
 import { prepareTime } from "./prepare-time.mjs";
+import { prepareView } from "./prepare-view.ts";
 
 const { inboxSchema } = await tsImport(
   "../../packages/schemas/src/inbox-read.ts",
@@ -321,6 +322,7 @@ try {
               await expect(page.getByTestId("quick-title")).toBeEnabled();
             }
             await page.waitForLoadState("networkidle");
+            await prepareView(page, view);
             await page.evaluate(prepareFonts);
             await page.mouse.move(0, 0);
             await page.screenshot({

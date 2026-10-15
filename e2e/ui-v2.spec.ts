@@ -13,6 +13,7 @@ import {
 import { runListSchema } from "../packages/schemas/src/run-read";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
 import { prepareTime } from "../scripts/ui/prepare-time.mjs";
+import { prepareView } from "../scripts/ui/prepare-view";
 import { messages } from "./support/messages";
 
 const screen = process.env.UI_SCREEN ?? "shell";
@@ -30,6 +31,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     );
     await expect(page.getByTestId("auth-submit")).toBeEnabled();
     await expect(page.locator(".landing-features li")).toHaveCount(3);
+    await prepareView(page, screen);
     await page.evaluate(prepareFonts);
     await expect(page).toHaveScreenshot("home.png", { animations: "disabled" });
     return;
@@ -372,6 +374,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         await expect(page.getByTestId("mind-node").first()).toBeVisible();
         await expect(page.getByTestId("mind-overview")).toBeVisible();
       }
+      await prepareView(page, screen);
       await page.evaluate(() => document.fonts.ready);
       if (desktop && (screen === "projects" || screen === "type"))
         await assertDesktopBoardActions();
