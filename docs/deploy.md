@@ -2131,3 +2131,56 @@ Original failed journals and counters remain unchanged. Exact supported cleanup
 and audited baseline restoration must finish through the application, followed by
 a fresh full checklist on the corrected source before acceptance or the annotated
 v0.2.1 tag.
+
+### Frontend v2 release candidate v0.2.1b — 2026-10-15
+
+Pinned main source `1200f704fd8bb10af890c6761618291f8370e925`, tree `0bd4f3a1f0d1ef48c05d5527aaf85fa8aa14ddd6`.
+
+All six items in plan §10.1, delivered through
+[PR27](https://github.com/ksamint/taff01/pull/27),
+[PR28](https://github.com/ksamint/taff01/pull/28),
+[PR29](https://github.com/ksamint/taff01/pull/29),
+[PR30](https://github.com/ksamint/taff01/pull/30),
+[PR31](https://github.com/ksamint/taff01/pull/31) and
+[PR32](https://github.com/ksamint/taff01/pull/32).
+This completes the mind/role race repairs, MCP copy, M14 notes, v2 baselines,
+CRM/timeline/brief/mind/desktop Me gaps, glyph coverage, font transfer and dark captures.
+Follow-up [PR33](https://github.com/ksamint/taff01/pull/33) attributes neighbour changes to their publisher; [PR34](https://github.com/ksamint/taff01/pull/34) corrects setup navigation and preserves safe diagnostics. Workspace packages and official MCP server identity are 0.2.1. §10.2 remains deferred.
+
+Follow-up [PR35](https://github.com/ksamint/taff01/pull/35) fixes the archived-child planning guard and stabilizes native-selector font readiness in CI. [PR36](https://github.com/ksamint/taff01/pull/36) closes pending verification grants by denial, confirms terminal state, continues audited agent restoration and validates semantic notification preferences. The healthy but unaccepted e9bfa77 candidate is superseded. Finish its exact journaled cleanup through supported application APIs, with fresh confirmation, before running a new full 146-case checklist. No baseline, reference or comparison-tolerance change is included.
+
+Font coverage now supplies 172 previously missing Simplified CJK glyphs and ↳, with unchanged common-TC bytes and 4,368 preserved outline/advance comparisons. Ten bounded static TC chunks replace the 224,900-byte monolith (262,464 B installed, +16.7%; largest 31,936 B). On the original Northwind English Relations fixture, total cold font transfer falls 323,348→230,120 B (−28.8%), remainder 224,900→129,368 B (−42.5%), with 3→8 requests. zh-HK Relations grows 3.5%; zh-CN grows 24.9% including 54,036 B of new SC coverage (8.2% excluding that added coverage). Six native network cases cover the original fixture and a pure English workspace. The optional manual Today transfer comparison is unverified and excluded from performance claims. The font README and network-comparison JSON record the trade-offs and reproducible source/license hashes. With the corrected font helper, a controlled HK Brief paragraph parent/current A/B across 12 cold contexts produced identical character geometry and byte-identical PNGs; the earlier wrapping attribution was a capture artifact.
+
+Fresh source-bound [native capture 38708013406](https://github.com/ksamint/taff01/actions/runs/38708013406), source `737c2d72c98a600334cd5af974aaa9785926841e` (an ancestor of this release), passes all 186 frozen references with unchanged default comparisons: 155 pixel-identical and 31 with only accepted antialias differences under the existing comparator. It also supplies 186 additional authenticated dark-route PNGs, six native network checks, three locale font-readiness checks and all three locale native-control matrices in both capture modes. Retained font faces, localized controlled cold home navigation and authenticated native metric refresh remove font lifecycle races without changing production styling. Artifact `11960196960`, archive SHA-256 `bc78c3cdcec5061fed1e0e51f6b499ec1a15d75ee013234c691064dd57baa662`, manifest SHA-256 `6da0ab04760d5b5456aa5d2c64b5e6597f7d2ca76ab60c4ea8d03c86b246b2ba`. No references were imported or changed. This fresh validation is separate from the historical baseline-import ledger linked by the UI guide; the verified archive is retained in operator evidence.
+
+**CI.** Exact-source main push [38714791084](https://github.com/ksamint/taff01/actions/runs/38714791084)
+and merged PR-head [38711738274](https://github.com/ksamint/taff01/actions/runs/38711738274)
+are completed/success. The PR head is an ancestor of the pinned source. The item 1
+head CI [38668491277](https://github.com/ksamint/taff01/actions/runs/38668491277) is also green.
+
+Exact-main validation: 952/952 unit/integration tests;
+Today initial JS 194490 B gzipped against 204800 B;
+Today LCP medians en 632 ms, zh-CN 696 ms,
+zh-HK 700 ms (three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 100/100/100; zh-CN 100/100/100; zh-HK 100/100/100.
+Full visual, browser-flow and bundled MCP smoke gates pass in that exact-source CI.
+
+**Migrations.** Production-approved 0028_v021_archived_subtask_guard.sql, SHA-256 `a4a2ff1c2eaf58f0ccd9c7c776c5cd4628c7984733b00d74a1b4a5ece9361a61`, only replaces the planning-guard function definition so archived children do not block parent completion. Existing active-child invariants remain. No row rewrite, DML, backfill (0 rows), drop or rename. This definition-only correction is explicitly allowed under Step 2. The previously applied additive 0027 is retained.
+
+**Environment and infrastructure.** No .env.production.example, Compose, Dockerfile or Caddy changes since the intermediate checkpoint. No new production variables; private env changes only TAFF_TAG and stays 0600, email/SMS unchanged, AI_* unset and all workspace AI flags disabled. Docker context now excludes live/report output directories. The scoped visual API clock is a dedicated capture driver and is absent from production/API/MCP launch paths. No host-layout, route, DNS, PostgreSQL host or role change.
+
+**Acceptance checklist.** Run all 146 applicable public cases with no runtime skips: the full
+122-case intermediate checklist, 18 feature cases and six delayed-font setup regressions. Feature cases cover contact→project/roles, milestone
+create/rename/archive/undo and keyboard nudging, split/reschedule suggestion undo,
+off admin AI settings, phone mind selection scrolling and desktop snoozed/v2-agent
+views. Follow-up PRs also verify setup navigation without waiting for unrelated font loads and attribute neighbour changes to their publisher. Keep all plan §6.0 functions, CRM/timeline/relations/rules-based brief/Ask/mind,
+restricted-member checks, platform checks and four official-client live MCP round
+trips (all 30 tools), with server identity taff/0.2.1. en and zh-HK phone 390×844 and
+desktop 1280×800 plus zh-CN spots; dedicated verification entities only. Each failure
+gets one retry and critical rollback follows the deploy goal. Require zero browser
+errors, complete per-attempt cleanup journals and all supported cleanup successful.
+No SMS OTP or public rate-limit flood; AI stays off.
+
+Deploy only this pinned SHA, with verified database/env backups, Git bundle,
+SHA-stamped images/service worker, native detached keeper, and fresh ancestry/CI gates.
+The [v0.2.1 milestone report](milestones/20-v0.2.1.md) records development evidence.
