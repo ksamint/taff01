@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (339 distinct, 1777 uses)
+## Test ids (339 distinct, 1784 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -92,7 +92,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `calendar-*` | 4 | calendar-scene.tsx, crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar-accessibility.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts |
+| `calendar-*` | 5 | calendar-scene.tsx, crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar-accessibility.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts |
 | `calendar-engine` | 1 | calendar-scene.tsx | calendar-accessibility.spec.ts |
 
 ### calendar-scene.tsx
@@ -105,10 +105,10 @@ several do). “Also rendered by” lists the other files.
 | `calendar-next` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
 | `calendar-previous` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
 | `calendar-tools` | 1 |  | support/calendar.ts |
-| `calendar-undo` | 14 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `calendar-undo` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, support/calendar.ts |
 | `calendar-week` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `desktop-new-task` | 6 | projects-view.tsx, today-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, support/tasks.ts, ui-v2.spec.ts |
-| `schedule-task-*` | 4 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `schedule-task-*` | 5 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 
 ### crm/companies-view.tsx
 
@@ -453,10 +453,10 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `schedule-clear` | 4 |  | calendar.spec.ts |
 | `schedule-count` | 3 |  | calendar.spec.ts |
-| `schedule-end` | 6 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `schedule-end` | 7 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `schedule-repeat` | 3 |  | calendar.spec.ts |
-| `schedule-save` | 15 |  | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
-| `schedule-start` | 14 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `schedule-save` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
+| `schedule-start` | 15 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `schedule-title` | 1 |  | calendar.spec.ts |
 | `schedule-zone` | 1 |  | calendar.spec.ts |
 
@@ -615,7 +615,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `combobox` | 1 | cold-font-layout.spec.ts |
 | `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
-| `dialog` | 62 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
+| `dialog` | 66 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
@@ -673,17 +673,18 @@ read (`data-event-id`, `data-date`).
 | Selector | Uses | Used in |
 | --- | ---: | --- |
 | `.sx__calendar` | 2 | calendar.spec.ts, ui-v2.spec.ts |
+| `.sx__calendar-wrapper` | 1 | support/calendar.ts |
 | `.sx__date-grid` | 1 | calendar-accessibility.spec.ts |
 | `.sx__date-grid-event` | 3 | calendar.spec.ts, live/release/checklist.spec.ts |
 | `.sx__event` | 6 | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `.sx__is-resizing` | 1 | calendar.spec.ts |
 | `.sx__month-grid-day__header` | 1 | calendar.spec.ts |
 | `.sx__month-grid-day[data-date=…]` | 3 | calendar.spec.ts |
-| `.sx__month-grid-event` | 4 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `.sx__month-grid-event` | 5 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.sx__month-grid-event[data-event-id=…]` | 2 | calendar.spec.ts, ui-v2.spec.ts |
-| `.sx__month-grid-wrapper` | 1 | calendar-accessibility.spec.ts |
-| `.sx__time-grid-day` | 4 | calendar.spec.ts |
-| `.sx__time-grid-event` | 17 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `.sx__month-grid-wrapper` | 2 | calendar-accessibility.spec.ts, support/calendar.ts |
+| `.sx__time-grid-day` | 5 | calendar.spec.ts, support/calendar.ts |
+| `.sx__time-grid-event` | 21 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `.sx__time-grid-event-resize-handle` | 5 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.sx__time-grid-event[data-event-id=…]` | 9 | calendar.spec.ts, ui-v2.spec.ts |
 | `.sx__view-container` | 6 | calendar.spec.ts, live/release/checklist.spec.ts |

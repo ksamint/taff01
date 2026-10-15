@@ -27,6 +27,10 @@ import {
   workspaceSchema,
 } from "../../../packages/schemas/src/index";
 import {
+  waitForCalendarSave,
+  waitForCalendarView,
+} from "../../support/calendar";
+import {
   closeFieldSheet,
   closeTaskField,
   openTaskField,
@@ -788,209 +792,263 @@ async function eventBox(page: Page, title: string) {
 }
 
 test("[item 5] Calendar", async ({ page }, info) => {
-  const { me, workspace } = await freshSignedIn(page, info, "calendar");
-  const tz = me.user.tz;
-  const date = new Intl.DateTimeFormat("en-CA", {
-    timeZone: tz,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(new Date());
-  const later = new Date(`${date}T12:00:00Z`);
-  later.setUTCDate(later.getUTCDate() + 3);
-  const dueAt = calendarWallToInstant(
-    `${later.toISOString().slice(0, 10)}T18:00`,
-    tz,
-  );
-  const response = await page.request.post("/api/tasks", {
-    data: {
-      workspaceId: workspace.id,
-      ownerId: workspace.memberId,
-      title: `R1 calendar ${unique()}`,
-      dueAt,
-    },
-  });
-  expect(response.status()).toBe(201);
-  const task = taskSchema.parse(await response.json());
-  const stored = async () =>
-    taskCalendarSchema.parse(
-      await (await page.request.get(`/api/tasks/${task.id}/calendar`)).json(),
-    );
-  const ack = () => waitForApi(page, "PATCH", `/api/tasks/${task.id}/calendar`);
-  await page.goto("/calendar");
-  await page.getByTestId("calendar-day").click();
-  // Schedule the unscheduled task from the tray.
-  await page.getByTestId(`schedule-task-${task.id}`).click();
-  await page.getByTestId("schedule-start").fill(`${date}T09:00`);
-  await page.getByTestId("schedule-end").fill(`${date}T10:00`);
-  const scheduled = ack();
-  await page.getByTestId("schedule-save").click();
-  expect((await scheduled).status()).toBe(200);
-  await expect(page.getByRole("dialog")).toHaveCount(0);
-  const first = (await stored()).schedule;
-  expect(first?.startAt).toBe(calendarWallToInstant(`${date}T09:00`, tz));
-  // Drag later in the day view.
-  let { box } = await eventBox(page, task.title);
-  const moved = ack();
-  await page.mouse.move(box.x + box.width / 2, box.y + 18);
-  await page.mouse.down();
-  await page.waitForTimeout(350);
-  await page.mouse.move(box.x + box.width / 2, box.y + 18 + 60, { steps: 8 });
-  await page.mouse.up();
-  expect((await moved).status()).toBe(200);
-  const afterMove = (await stored()).schedule;
-  expect(Date.parse(afterMove!.startAt)).toBeGreaterThan(
-    Date.parse(first!.startAt),
-  );
-  expect((await stored()).task.dueAt).toBe(dueAt);
-  await expect(page.getByTestId("calendar-undo")).toBeEnabled();
-  // Resize from the bottom edge.
-  ({ box } = await eventBox(page, task.title));
-  const handle = page
-    .locator(".sx__time-grid-event")
-    .filter({ hasText: task.title })
-    .first()
-    .locator(".sx__time-grid-event-resize-handle");
-  const grip = await handle.boundingBox();
-  if (!grip) throw new Error("Resize handle unavailable");
-  const resized = ack();
-  await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(
-    grip.x + grip.width / 2,
-    grip.y + grip.height / 2 + 40,
-    {
-      steps: 8,
-    },
-  );
-  await page.mouse.up();
-  expect((await resized).status()).toBe(200);
-  const afterResize = (await stored()).schedule;
-  expect(Date.parse(afterResize!.endAt)).toBeGreaterThan(
-    Date.parse(afterMove!.endAt),
-  );
-  expect(afterResize!.startAt).toBe(afterMove!.startAt);
-  // Undo the resize.
-  const undone = ack();
-  await page.getByTestId("calendar-undo").click();
-  expect((await undone).status()).toBe(200);
-  await expect
-    .poll(async () => (await stored()).schedule?.endAt)
-    .toBe(afterMove!.endAt);
-  // Week and month show the scheduled task too.
-  await page.getByTestId("calendar-week").click();
-  await expect(
-    page
-      .locator(".sx__time-grid-event")
-      .filter({ hasText: task.title })
-      .first(),
-  ).toBeAttached();
-  await page.getByTestId("calendar-month-grid").click();
-  await expect(
-    page
-      .locator(".sx__month-grid-event")
-      .filter({ hasText: task.title })
-      .first(),
-  ).toBeAttached();
-  await page.getByTestId("calendar-day").click();
-  await expect(
-    page
-      .locator(".sx__time-grid-event")
-      .filter({ hasText: task.title })
-      .first(),
-  ).toBeAttached();
-  // Keep the original drag/resize/Undo and all three view checks above. This
-  // current-run task also exercises the v0.2.2 multi-day target repair through
-  // the supported API; the existing task journal clears its schedule on failure.
-  const beforeMultiDay = (await stored()).schedule;
-  if (!beforeMultiDay) throw new Error("Owned calendar baseline unavailable");
-  const nextDay = new Date(`${date}T12:00:00Z`);
-  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+  type CalendarPhase =
+    | "setup"
+    | "schedule"
+    | "drag"
+    | "resize"
+    | "undo"
+    | "week"
+    | "month"
+    | "day"
+    | "multi-day-save"
+    | "multi-day-restore"
+    | `multi-day-${"day" | "week"}-${"view" | "scroll" | "geometry" | "pointer" | "keyboard"}`;
+  let phase: CalendarPhase = "setup";
+  let failureRecorded = false;
   try {
-    const current = await stored();
-    const multiDay = await page.request.patch(
-      `/api/tasks/${task.id}/calendar`,
+    const { me, workspace } = await freshSignedIn(page, info, "calendar");
+    const tz = me.user.tz;
+    const date = new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    const later = new Date(`${date}T12:00:00Z`);
+    later.setUTCDate(later.getUTCDate() + 3);
+    const dueAt = calendarWallToInstant(
+      `${later.toISOString().slice(0, 10)}T18:00`,
+      tz,
+    );
+    const response = await page.request.post("/api/tasks", {
+      data: {
+        workspaceId: workspace.id,
+        ownerId: workspace.memberId,
+        title: `R1 calendar ${unique()}`,
+        dueAt,
+      },
+    });
+    expect(response.status()).toBe(201);
+    const task = taskSchema.parse(await response.json());
+    const stored = async () =>
+      taskCalendarSchema.parse(
+        await (await page.request.get(`/api/tasks/${task.id}/calendar`)).json(),
+      );
+    const ack = () =>
+      waitForApi(page, "PATCH", `/api/tasks/${task.id}/calendar`);
+    await page.goto("/calendar");
+    await page.getByTestId("calendar-day").click();
+    await waitForCalendarView(page, "day");
+    phase = "schedule";
+    // Schedule the unscheduled task from the tray.
+    await page.getByTestId(`schedule-task-${task.id}`).click();
+    await page.getByTestId("schedule-start").fill(`${date}T09:00`);
+    await page.getByTestId("schedule-end").fill(`${date}T10:00`);
+    const scheduled = ack();
+    await page.getByTestId("schedule-save").click();
+    expect((await scheduled).status()).toBe(200);
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    const first = (await stored()).schedule;
+    expect(first?.startAt).toBe(calendarWallToInstant(`${date}T09:00`, tz));
+    phase = "drag";
+    await waitForCalendarSave(page);
+    // Drag later in the day view.
+    let { box } = await eventBox(page, task.title);
+    const moved = ack();
+    await page.mouse.move(box.x + box.width / 2, box.y + 18);
+    await page.mouse.down();
+    await page.waitForTimeout(350);
+    await page.mouse.move(box.x + box.width / 2, box.y + 18 + 60, { steps: 8 });
+    await page.mouse.up();
+    expect((await moved).status()).toBe(200);
+    const afterMove = (await stored()).schedule;
+    expect(Date.parse(afterMove!.startAt)).toBeGreaterThan(
+      Date.parse(first!.startAt),
+    );
+    expect((await stored()).task.dueAt).toBe(dueAt);
+    await expect(page.getByTestId("calendar-undo")).toBeEnabled();
+    phase = "resize";
+    await waitForCalendarSave(page);
+    // Resize from the bottom edge.
+    ({ box } = await eventBox(page, task.title));
+    const handle = page
+      .locator(".sx__time-grid-event")
+      .filter({ hasText: task.title })
+      .first()
+      .locator(".sx__time-grid-event-resize-handle");
+    const grip = await handle.boundingBox();
+    if (!grip) throw new Error("Resize handle unavailable");
+    const resized = ack();
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(
+      grip.x + grip.width / 2,
+      grip.y + grip.height / 2 + 40,
       {
-        data: {
-          version: current.task.version,
-          schedule: {
-            startAt: calendarWallToInstant(`${date}T09:00`, tz),
-            endAt: calendarWallToInstant(
-              `${nextDay.toISOString().slice(0, 10)}T10:00`,
-              tz,
-            ),
-            timeZone: tz,
-            rrule: null,
-          },
-        },
+        steps: 8,
       },
     );
-    expect(multiDay.status()).toBe(200);
-    // A fresh read observes the saved API schedule before measuring SDK boxes.
-    await page.reload();
-    for (const mode of ["day", "week"] as const) {
-      await page.getByTestId(`calendar-${mode}`).click();
-      const event = page
-        .locator(".sx__date-grid-event")
+    await page.mouse.up();
+    expect((await resized).status()).toBe(200);
+    const afterResize = (await stored()).schedule;
+    expect(Date.parse(afterResize!.endAt)).toBeGreaterThan(
+      Date.parse(afterMove!.endAt),
+    );
+    expect(afterResize!.startAt).toBe(afterMove!.startAt);
+    phase = "undo";
+    await waitForCalendarSave(page);
+    // Undo the resize.
+    const undone = ack();
+    await page.getByTestId("calendar-undo").click();
+    expect((await undone).status()).toBe(200);
+    await expect
+      .poll(async () => (await stored()).schedule?.endAt)
+      .toBe(afterMove!.endAt);
+    // Week and month show the scheduled task too.
+    phase = "week";
+    await page.getByTestId("calendar-week").click();
+    await waitForCalendarView(page, "week");
+    await expect(
+      page
+        .locator(".sx__time-grid-event")
         .filter({ hasText: task.title })
-        .first();
-      await expect(event).toBeVisible();
-      await event.scrollIntoViewIfNeeded();
-      await page
-        .locator(".sx__view-container")
-        .first()
-        .evaluate(async (element) => {
-          await Promise.all(
-            element
-              .getAnimations({ subtree: true })
-              .map((animation) => animation.finished.catch(() => {})),
-          );
-        });
-      await expect
-        .poll(() =>
-          event.evaluate((element) => element.getBoundingClientRect().height),
-        )
-        .toBeGreaterThanOrEqual(44);
-      const target = await event.boundingBox();
-      if (!target) throw new Error("Multi-day target geometry unavailable");
-      // Hit the real lower edge, away from the right-hand resize handle.
-      await event.click({
-        position: { x: Math.min(12, target.width / 2), y: target.height - 4 },
-      });
-      await expect(page.getByRole("dialog")).toContainText(task.title);
-      await expect(page.getByTestId("schedule-save")).toBeVisible();
-      await page.keyboard.press("Escape");
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-      await event.focus();
-      await page.keyboard.press("Enter");
-      await expect(page.getByRole("dialog")).toContainText(task.title);
-      await expect(page.getByTestId("schedule-save")).toBeVisible();
-      await page.keyboard.press("Escape");
-      await expect(page.getByRole("dialog")).toHaveCount(0);
-    }
-    recordCheck(
-      info,
-      "Calendar multi-day targets >=44px, lower-edge pointer and keyboard activation in day/week",
-      true,
-    );
-  } finally {
-    const current = await stored();
-    const restored = await page.request.patch(
-      `/api/tasks/${task.id}/calendar`,
-      {
-        data: {
-          version: current.task.version,
-          schedule: {
-            startAt: beforeMultiDay.startAt,
-            endAt: beforeMultiDay.endAt,
-            timeZone: beforeMultiDay.timeZone,
-            rrule: beforeMultiDay.rrule,
+        .first(),
+    ).toBeAttached();
+    phase = "month";
+    await page.getByTestId("calendar-month-grid").click();
+    await waitForCalendarView(page, "month-grid");
+    await expect(
+      page
+        .locator(".sx__month-grid-event")
+        .filter({ hasText: task.title })
+        .first(),
+    ).toBeAttached();
+    phase = "day";
+    await page.getByTestId("calendar-day").click();
+    await waitForCalendarView(page, "day");
+    await expect(
+      page
+        .locator(".sx__time-grid-event")
+        .filter({ hasText: task.title })
+        .first(),
+    ).toBeAttached();
+    // Keep the original drag/resize/Undo and all three view checks above. This
+    // current-run task also exercises the v0.2.2 multi-day target repair through
+    // the supported API; the existing task journal clears its schedule on failure.
+    const beforeMultiDay = (await stored()).schedule;
+    if (!beforeMultiDay) throw new Error("Owned calendar baseline unavailable");
+    const nextDay = new Date(`${date}T12:00:00Z`);
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+    try {
+      phase = "multi-day-save";
+      const current = await stored();
+      const multiDay = await page.request.patch(
+        `/api/tasks/${task.id}/calendar`,
+        {
+          data: {
+            version: current.task.version,
+            schedule: {
+              startAt: calendarWallToInstant(`${date}T09:00`, tz),
+              endAt: calendarWallToInstant(
+                `${nextDay.toISOString().slice(0, 10)}T10:00`,
+                tz,
+              ),
+              timeZone: tz,
+              rrule: null,
+            },
           },
         },
-      },
-    );
-    expect(restored.status()).toBe(200);
-    expect((await stored()).schedule).toEqual(beforeMultiDay);
+      );
+      expect(multiDay.status()).toBe(200);
+      // A fresh read observes the saved API schedule before measuring SDK boxes.
+      await page.reload();
+      for (const mode of ["day", "week"] as const) {
+        phase = `multi-day-${mode}-view`;
+        await page.getByTestId(`calendar-${mode}`).click();
+        const native = await waitForCalendarView(page, mode);
+        const event = native
+          .locator(".sx__date-grid-event")
+          .filter({ hasText: task.title })
+          .first();
+        await expect(event).toBeVisible();
+        phase = `multi-day-${mode}-scroll`;
+        await event.scrollIntoViewIfNeeded();
+        await page
+          .locator(".sx__view-container")
+          .first()
+          .evaluate(async (element) => {
+            await Promise.all(
+              element
+                .getAnimations({ subtree: true })
+                .map((animation) => animation.finished.catch(() => {})),
+            );
+          });
+        phase = `multi-day-${mode}-geometry`;
+        await expect
+          .poll(() =>
+            event.evaluate((element) => element.getBoundingClientRect().height),
+          )
+          .toBeGreaterThanOrEqual(44);
+        const target = await event.boundingBox();
+        if (!target) throw new Error("Multi-day target geometry unavailable");
+        phase = `multi-day-${mode}-pointer`;
+        // Hit the real lower edge, away from the right-hand resize handle.
+        await event.click({
+          position: { x: Math.min(12, target.width / 2), y: target.height - 4 },
+        });
+        await expect(page.getByRole("dialog")).toContainText(task.title);
+        await expect(page.getByTestId("schedule-save")).toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+        phase = `multi-day-${mode}-keyboard`;
+        await event.focus();
+        await page.keyboard.press("Enter");
+        await expect(page.getByRole("dialog")).toContainText(task.title);
+        await expect(page.getByTestId("schedule-save")).toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+      }
+      recordCheck(
+        info,
+        "Calendar multi-day targets >=44px, lower-edge pointer and keyboard activation in day/week",
+        true,
+      );
+    } catch (error) {
+      recordCheck(info, `Calendar lifecycle ${phase}`, false);
+      failureRecorded = true;
+      throw error;
+    } finally {
+      phase = "multi-day-restore";
+      try {
+        const current = await stored();
+        const restored = await page.request.patch(
+          `/api/tasks/${task.id}/calendar`,
+          {
+            data: {
+              version: current.task.version,
+              schedule: {
+                startAt: beforeMultiDay.startAt,
+                endAt: beforeMultiDay.endAt,
+                timeZone: beforeMultiDay.timeZone,
+                rrule: beforeMultiDay.rrule,
+              },
+            },
+          },
+        );
+        expect(restored.status()).toBe(200);
+        expect((await stored()).schedule).toEqual(beforeMultiDay);
+      } catch (error) {
+        recordCheck(info, "Calendar lifecycle multi-day-restore", false);
+        failureRecorded = true;
+        throw error;
+      }
+    }
+  } catch (error) {
+    // Only fixed phase names reach the safe reporter, never error/DOM payloads.
+    if (!failureRecorded)
+      recordCheck(info, `Calendar lifecycle ${phase}`, false);
+    throw error;
   }
 });
 
