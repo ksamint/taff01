@@ -320,7 +320,7 @@ describe("REST adapter boundaries", () => {
     expect(authenticate).toHaveBeenCalledWith("taff_not-a-real-token");
     expect(read).not.toHaveBeenCalled();
   });
-  it("rate-limits MCP calls per token and logs every call", async () => {
+  it("logs accepted MCP calls and never accesses the database after a limit refusal", async () => {
     const principal = {
       kind: "agent" as const,
       tokenId: id,
@@ -329,7 +329,9 @@ describe("REST adapter boundaries", () => {
       number: 1,
       scopes: ["tasks:read" as const],
     };
-    vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    const authenticate = vi
+      .spyOn(core, "authenticateAgentToken")
+      .mockResolvedValue(principal);
     const log = vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     vi.spyOn(core, "listTasks").mockResolvedValue([]);
     rateLimiter.hits = 0;
@@ -352,16 +354,44 @@ describe("REST adapter boundaries", () => {
     expect((await call()).status).toBe(200);
     const limited = await call();
     expect(limited.status).toBe(429);
-    expect(log.mock.calls.map(([entry]) => entry.status)).toEqual([
-      "ok",
-      "ok",
-      "rate_limited",
-    ]);
+    expect(authenticate).toHaveBeenCalledTimes(2);
+    expect(log.mock.calls.map(([entry]) => entry.status)).toEqual(["ok", "ok"]);
+    for (let attempt = 0; attempt < 3; attempt++) {
+      expect((await call()).status).toBe(429);
+      expect(authenticate).toHaveBeenCalledTimes(2);
+      expect(log).toHaveBeenCalledTimes(2);
+    }
     expect(log.mock.calls[0][0]).toMatchObject({
       tokenId: id,
       method: "tools/call",
       tool: "tasks.list",
     });
+  });
+  it("refuses MCP calls without database access when the limiter is unavailable", async () => {
+    const authenticate = vi.spyOn(core, "authenticateAgentToken");
+    const log = vi.spyOn(core, "recordMcpCall");
+    const limiter = {
+      limit: 2,
+      hit: vi.fn().mockRejectedValue(new Error("unavailable")),
+      close: vi.fn(),
+    };
+    const unavailableApp = createApp(
+      core,
+      "http://localhost:3000",
+      pino({ enabled: false }),
+      limiter,
+    );
+    const response = await unavailableApp.request("/mcp", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer taff_token",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+    expect(response.status).toBe(429);
+    expect(authenticate).not.toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
   });
   it("forwards every refreshed session cookie to the browser", async () => {
     const headers = new Headers();
