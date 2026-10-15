@@ -37,6 +37,19 @@ const dark = process.env.UI_THEME === "dark";
 
 export default defineConfig({
   ...behavior,
+  webServer: (Array.isArray(behavior.webServer) ? behavior.webServer : []).map(
+    (server, index) =>
+      index === 0
+        ? {
+            ...server,
+            command: process.env.CI
+              ? "node --import ./scripts/ui/visual-clock.mjs dist/runtime/api/api.mjs"
+              : "node --import ./scripts/ui/visual-clock.mjs node_modules/tsx/dist/cli.mjs apps/api/src/index.ts",
+            env: { TAFF_VISUAL_API_CLOCK: "ui-v2" },
+            reuseExistingServer: false,
+          }
+        : server,
+  ),
   testMatch: "**/ui-v2.spec.ts",
   testIgnore: [],
   outputDir: `test-results/ui-v2/${process.env.UI_SCREEN}`,
