@@ -988,9 +988,11 @@ export const taskDependencies = pgTable(
     predecessorMilestoneId: uuid("predecessor_milestone_id"),
     successorTaskId: uuid("successor_task_id"),
     successorMilestoneId: uuid("successor_milestone_id"),
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
+    check("task_dependencies_version", sql`${t.version} > 0`),
     foreignKey({
       columns: [t.workspaceId, t.predecessorTaskId],
       foreignColumns: [tasks.workspaceId, tasks.id],
@@ -1045,9 +1047,11 @@ export const projectPayments = pgTable(
     paidOn: date("paid_on", { mode: "string" }).notNull(),
     note: text("note").default("").notNull(),
     createdBy: uuid("created_by").notNull(),
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
+    check("project_payments_version", sql`${t.version} > 0`),
     foreignKey({
       columns: [t.workspaceId, t.projectId],
       foreignColumns: [projects.workspaceId, projects.id],
@@ -1104,9 +1108,11 @@ export const companyContacts = pgTable(
     workspaceId: uuid("workspace_id").notNull(),
     companyId: uuid("company_id").notNull(),
     contactId: uuid("contact_id").notNull(),
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
+    check("company_contacts_version", sql`${t.version} > 0`),
     unique("company_contacts_link_unique").on(
       t.workspaceId,
       t.companyId,
@@ -1132,9 +1138,11 @@ export const projectContacts = pgTable(
     workspaceId: uuid("workspace_id").notNull(),
     projectId: uuid("project_id").notNull(),
     contactId: uuid("contact_id").notNull(),
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
+    check("project_contacts_version", sql`${t.version} > 0`),
     unique("project_contacts_link_unique").on(
       t.workspaceId,
       t.projectId,
@@ -1160,9 +1168,11 @@ export const taskContacts = pgTable(
     taskId: uuid("task_id").notNull(),
     projectId: uuid("project_id").notNull(),
     contactId: uuid("contact_id").notNull(),
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
+    check("task_contacts_version", sql`${t.version} > 0`),
     unique("task_contacts_link_unique").on(
       t.workspaceId,
       t.taskId,
@@ -1202,9 +1212,11 @@ export const contactRoles = pgTable(
     companyId: uuid("company_id"),
     projectId: uuid("project_id"),
     taskId: uuid("task_id"),
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
+    check("contact_roles_version", sql`${t.version} > 0`),
     foreignKey({
       columns: [t.workspaceId, t.companyId, t.contactId],
       foreignColumns: [
@@ -1422,9 +1434,11 @@ export const mindNodeSources = pgTable(
     workspaceId: uuid("workspace_id").notNull(),
     nodeId: uuid("node_id").notNull(),
     sourceId: uuid("source_id").notNull(),
+    version: integer("version").default(1).notNull(),
     ...dates,
   },
   (t) => [
+    check("mind_node_sources_version", sql`${t.version} > 0`),
     unique("mind_node_sources_workspace_id_unique").on(t.workspaceId, t.id),
     unique("mind_node_sources_link_unique").on(
       t.workspaceId,

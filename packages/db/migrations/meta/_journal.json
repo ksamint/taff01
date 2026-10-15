@@ -204,6 +204,13 @@
       "when": 1792047349563,
       "tag": "0028_v021_archived_subtask_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "7",
+      "when": 1792060809687,
+      "tag": "0029_v022_relation_versions",
+      "breakpoints": true
     }
   ]
 }
