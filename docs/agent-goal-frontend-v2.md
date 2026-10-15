@@ -1,10 +1,9 @@
 # Agent goal: replace the frontend with prototype v2
 
-> Status 2026-10-14: planned, not started. The user delegated every
-> decision: the agent never stops to ask, and develops until the new
-> frontend is live and working on `https://taff.apuch.cn` for review (the local
-> agent deploys; see `docs/agent-goal-deploy-frontend-v2.md`), with
-> basic functions and MCP first.
+> Status 2026-10-15: complete. M11–M19 merged; v0.2.0 (`191243d`) is live on
+> `https://taff.apuch.cn` and tagged (v0.2.0 upgrade checkpoint in
+> `docs/deploy.md`). The working rules below are the relaxed ones the user set
+> on 2026-10-14 and apply to any follow-up work.
 
 Paste everything below this line as the goal for a coding agent working in
 `ksamint/taff01`. It is self-contained; the files it names are in the
@@ -143,22 +142,22 @@ Hard limits, followed without asking:
 When the local agent reports a failed deploy check (`Blocked:` under the
 candidate), fix forward and publish a new candidate.
 
-## Validation
+## Validation (relaxed rules, user directive 2026-10-14)
 
-Run this before every push; all of it must be green:
+Before each push, run the fast checks only:
 
-```
-pnpm lint && pnpm typecheck && pnpm licence:check && pnpm test && pnpm build
-&& pnpm build:server && pnpm perf:budget && pnpm e2e && pnpm mcp:smoke
-```
+- `pnpm lint`;
+- `pnpm typecheck`;
+- `pnpm test` for the packages you changed.
 
-Before each milestone report, also run:
+CI (`.github/workflows/ci.yml`) runs the full set: the nine commands, the
+visual suite, LCP in three locales and Lighthouse.
 
-- `pnpm perf:lcp` for each of `LCP_LOCALE=en`, `zh-CN` and `zh-HK`;
-- `pnpm perf:lighthouse`;
-- the visual suite.
+- Merge a PR as soon as its CI is green.
+- `main` must stay green.
 
-`.github/workflows/ci.yml` must stay green on every merge.
+Never skip, disable or weaken a test to get green. A known-flaky test gets one
+fix attempt; it does not hold other work.
 
 ## Deployment (handed to the local agent)
 
@@ -166,30 +165,30 @@ You do not deploy: this environment has no access to the production host. A
 local agent with the SSH connection deploys, following
 `docs/agent-goal-deploy-frontend-v2.md`.
 
-Your side of the handoff, for R1, each Phase B milestone and `v0.2.0`:
+Your side of the handoff, for every release:
 
-1. Merge the milestone to `main` with both CI runs green.
-2. Run the release's acceptance checklist against a local production-mode
-   stack: `compose.prod.yaml`, or `pnpm build` plus `pnpm build:server`, with
-   the production env shape. The checklist is plan §6.0 plus the milestone's
-   new flows, and includes a real `@modelcontextprotocol/client` round trip
-   that calls every tool.
+1. Merge to `main` with CI green.
+2. Publish a candidate once `main` CI is green on the merge commit. A local
+   production-mode checklist run is optional, because the deploy agent runs the
+   same checklist on the live site.
 3. Append `### Frontend v2 release candidate <R1|M15|…|v0.2.0> — <date>` to
    `docs/deploy.md` with every item that file's "How releases are handed over"
    lists:
    - the SHA and CI links;
-   - the validation numbers;
+   - the CI numbers (tests, budget, LCP, Lighthouse);
    - the migrations, each marked additive, with backfill row counts;
    - new env variables and their production rule (never a secret value);
    - Compose, Docker and Caddy changes;
-   - the acceptance checklist and your local production-mode result.
+   - the acceptance checklist, and the local production-mode result if you
+     ran it.
 4. Push that as a docs-only commit to `main`, then continue with the next
    milestone without waiting.
 
 Keep every migration additive: no `DROP`, `TRUNCATE`, `DELETE`, renames or
 rewrites of user data. Keep the host layout, route file, DNS and database
 role unchanged. If the local agent writes a `Blocked:` note under a
-candidate, fix it first, then publish a new candidate.
+candidate, fix it and publish a new candidate; a newer candidate always
+supersedes a blocked one.
 
 ## Milestone protocol
 

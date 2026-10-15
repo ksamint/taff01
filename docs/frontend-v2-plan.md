@@ -1,6 +1,7 @@
 # Frontend v2 — review and implementation plan
 
-Status: plan, 2026-10-14. Nothing in `apps/` has changed yet.
+Status: delivered. All of M11–M19 is merged, and v0.2.0 (`191243d`) is live
+on `https://taff.apuch.cn` and tagged (2026-10-15). §10 lists what is open.
 
 **User directive, 2026-10-14:** do not stop for decisions. The agent builds
 every default in §5 and develops through to a live, working frontend on
