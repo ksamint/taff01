@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { expect, it } from "vitest";
 import SafeReporter from "../e2e/live/reporter";
 import {
+  failureCategory,
   freshLiveReport,
   ownsGrant,
   validateLiveArgs,
@@ -127,4 +128,20 @@ it("writes a failed receipt even when startup discovers no cases", () => {
     else process.env.RELEASE_REPORT_DIR = previous;
     rmSync(parent, { recursive: true });
   }
+});
+
+it("keeps transport diagnostics categorical even with credentials in the exception", () => {
+  for (const [message, category] of [
+    [
+      "apiRequestContext.get: Timeout 30000ms exceeded secret@example.test",
+      "timeout",
+    ],
+    ["read ECONNRESET https://user:secret@example.test", "econnreset"],
+    [
+      "net::ERR_CONNECTION_CLOSED https://example.test/token",
+      "browser_network_error",
+    ],
+    ["unexpected secret body", "transport_or_local_error"],
+  ])
+    expect(failureCategory(new Error(message))).toBe(category);
 });
