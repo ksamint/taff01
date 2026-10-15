@@ -42,6 +42,7 @@ type State = {
   entries: Entry[];
   pending: Promise<void>[];
   pageErrors: number;
+  httpFailures: { method: string; path: string; status: number }[];
   workspaceId?: string;
   profiles: Map<string, any>;
   preferences?: any;
@@ -278,6 +279,14 @@ function instrument(context: BrowserContext) {
     return response;
   };
   context.on("response", (response) => {
+    const url = new URL(response.url());
+    if (response.status() >= 400 && url.pathname.startsWith("/api/"))
+      state?.httpFailures.push({
+        method: response.request().method(),
+        path: url.pathname,
+        status: response.status(),
+      });
+
     const pending = captureResponse(
       response.request().method(),
       response.url(),
@@ -792,6 +801,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
         cleanup: notes,
         failed,
         pageErrors: current.pageErrors,
+        httpFailures: current.httpFailures,
       },
       null,
       2,
@@ -953,6 +963,7 @@ export const test = base.extend<{ liveSafety: void }>({
         entries: [],
         pending: [],
         pageErrors: 0,
+        httpFailures: [],
         profiles: new Map(),
         themes: new Map(),
       };
