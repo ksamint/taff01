@@ -431,7 +431,20 @@ describe.skipIf(!url)(
             )
             .orderBy(tasks.id);
         const before = await archivedRows();
+        const archivedHistory = () =>
+          connection.db
+            .select()
+            .from(activity)
+            .where(
+              inArray(
+                activity.resourceId,
+                applied.tasks.map((child) => child.id),
+              ),
+            )
+            .orderBy(activity.id);
+        const historyBefore = await archivedHistory();
         expect(before).toHaveLength(2);
+        expect(historyBefore).toHaveLength(4);
         expect(
           before.every((child) => child.archivedAt && child.status === "todo"),
         ).toBe(true);
@@ -450,6 +463,7 @@ describe.skipIf(!url)(
         });
         expect(done.status).toBe("done");
         expect(await archivedRows()).toEqual(before);
+        expect(await archivedHistory()).toEqual(historyBefore);
       });
       it("still blocks active incomplete children and their reopening alongside archived split history", async () => {
         const task = await create("Active and archived children");
