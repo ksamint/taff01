@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { expect, test } from "vitest";
 
 const preload = "./scripts/ui/visual-clock.mjs";
@@ -18,17 +20,7 @@ function run(source: string, enabled = true) {
   );
 }
 
-test("visual API clock fails closed without its dedicated capture flag", () => {
-  const result = run("console.log('must not run')", false);
-  expect(result.status).not.toBe(0);
-  expect(result.stderr).toContain(
-    "requires explicit TAFF_VISUAL_API_CLOCK=ui-v2",
-  );
-  expect(result.stdout).not.toContain("must not run");
-});
-
-test("only concurrent Brief/Timeline GET scopes fix implicit Date reads", () => {
-  const result = run(`
+const scopedHttpProbe = `
     import assert from 'node:assert/strict';
     import {createServer} from 'node:http';
     import {setTimeout as delay} from 'node:timers/promises';
@@ -72,7 +64,19 @@ test("only concurrent Brief/Timeline GET scopes fix implicit Date reads", () => 
       assert.ok(Date.now()>=wall); assert.ok(new Date().getTime()>=wall);
       console.log('concurrent scoped and ordinary reads verified');
     } finally { await new Promise(resolve => server.close(resolve)); }
-  `);
+  `;
+
+test("visual API clock fails closed without its dedicated capture flag", () => {
+  const result = run("console.log('must not run')", false);
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain(
+    "requires explicit TAFF_VISUAL_API_CLOCK=ui-v2",
+  );
+  expect(result.stdout).not.toContain("must not run");
+});
+
+test("only concurrent Brief/Timeline GET scopes fix implicit Date reads", () => {
+  const result = run(scopedHttpProbe);
   expect(result.stderr).toBe("");
   expect(result.status).toBe(0);
   expect(result.stdout).toContain(
@@ -92,6 +96,40 @@ test("ordinary browser and MCP API launch configuration never preloads the clock
     'env: { ...server.env, TAFF_VISUAL_API_CLOCK: "ui-v2" }',
   );
   expect(visual).toContain(
-    "node --env-file=.env --import ./scripts/ui/visual-clock.mjs node_modules/tsx/dist/cli.mjs apps/api/src/index.ts",
+    "node --env-file=.env --import ./scripts/ui/visual-clock.mjs --import tsx apps/api/src/index.ts",
   );
+});
+
+test("single-process TS entry retains the visual HTTP clock preload", () => {
+  const directory = mkdtempSync(join(tmpdir(), "taff-visual-clock-"));
+  const env = { ...process.env };
+  delete env.TAFF_VISUAL_API_CLOCK;
+  try {
+    writeFileSync(join(directory, "package.json"), '{"type":"module"}');
+    writeFileSync(join(directory, ".env"), "TAFF_VISUAL_API_CLOCK=ui-v2\n");
+    const entry = join(directory, "entry.ts");
+    writeFileSync(
+      entry,
+      `const typed: number = 1; if (typed !== 1) throw new Error("TS loader failed");\n${scopedHttpProbe}`,
+    );
+    const result = spawnSync(
+      process.execPath,
+      [
+        `--env-file=${join(directory, ".env")}`,
+        "--import",
+        preload,
+        "--import",
+        "tsx",
+        entry,
+      ],
+      { env, encoding: "utf8", timeout: 10_000 },
+    );
+    expect(result.stderr).toBe("");
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain(
+      "concurrent scoped and ordinary reads verified",
+    );
+  } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
 });

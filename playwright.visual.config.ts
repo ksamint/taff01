@@ -44,7 +44,7 @@ export default defineConfig({
             ...server,
             command: process.env.CI
               ? "node --import ./scripts/ui/visual-clock.mjs dist/runtime/api/api.mjs"
-              : "node --env-file=.env --import ./scripts/ui/visual-clock.mjs node_modules/tsx/dist/cli.mjs apps/api/src/index.ts",
+              : "node --env-file=.env --import ./scripts/ui/visual-clock.mjs --import tsx apps/api/src/index.ts",
             env: { ...server.env, TAFF_VISUAL_API_CLOCK: "ui-v2" },
             reuseExistingServer: false,
           }
