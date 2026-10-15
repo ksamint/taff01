@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "sourceSha": "271bdbd694cbec233673814332d1666c7b2c1e8d",
+  "events": [
+    {
+      "event": "source-staging-transfer",
+      "status": "reconciled-before-lock",
+      "expectedBundleBytes": 985949,
+      "interruptedBundleBytes": 524288,
+      "checksummedChunks": 8,
+      "finalBundleSha256": "897e49ac10670733891e3f45d6fa6670e10f27afe9a4d27e999d88ad7824fd2b",
+      "sameStagingIdentity": true,
+      "lockFreeBeforeRecovery": true,
+      "productionApplicationWritesDuringEvent": 0,
+      "proofSha256": "0b84668103206c9385b830984fba3223bf13fd30c033df053c0813398a7b4bac"
+    },
+    {
+      "event": "unsupported-operator-targeting-option",
+      "status": "rejected-before-harness-execution",
+      "executedCases": 0,
+      "productionApplicationWritesDuringEvent": 0,
+      "safetyGuardUnchanged": true,
+      "correctedSupportedGrepDiscovered": 126,
+      "retainedCriticalCases": 20,
+      "combinedApplicableCases": 146,
+      "proofSha256": "b86fb8f3197165bc90f1987e619a6c879da06dc327aaeb950a2e49960c2c84e8"
+    }
+  ],
+  "classification": "Operator events, separate from executed live-test attempts or application defects."
+}
