@@ -32,6 +32,7 @@ export async function prepareView(page: Page, screen: string) {
   await expect(page.locator(probe[0]).first()).toBeVisible();
   await expect(page.locator(probe[0]).first()).toHaveCSS("display", probe[1]);
   if (view === "home") {
+    await expect(page.getByTestId("locale-select")).toBeEnabled();
     // Signed-out landing must not inherit the authenticated sidebar column.
     await expect
       .poll(() =>
