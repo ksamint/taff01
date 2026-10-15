@@ -350,19 +350,14 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         if (desktop)
           await expect(page.getByTestId("task-detail-heading")).toBeVisible();
       }
-      if (screen === "companies" || screen === "contacts") {
-        await expect(
-          page
-            .getByTestId(screen === "companies" ? "company-row" : "contact-row")
-            .first(),
-        ).toBeVisible();
-      }
-      if (screen === "company-detail" || screen === "contact-detail")
-        await expect(
-          page.getByTestId(
-            screen === "company-detail" ? "company-heading" : "contact-heading",
-          ),
-        ).toBeVisible();
+      if (screen === "companies")
+        await expect(page.getByTestId("company-row").first()).toBeVisible();
+      if (screen === "contacts")
+        await expect(page.getByTestId("contact-row").first()).toBeVisible();
+      if (screen === "company-detail")
+        await expect(page.getByTestId("company-heading")).toBeVisible();
+      if (screen === "contact-detail")
+        await expect(page.getByTestId("contact-heading")).toBeVisible();
       if (screen === "stakeholders")
         await expect(page.getByTestId("stakeholder").first()).toBeVisible();
       if (screen === "timeline")
