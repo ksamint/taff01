@@ -1,0 +1,180 @@
+{
+  "observations": 6,
+  "zoom": 0.25,
+  "states": [
+    {
+      "device": "desktop",
+      "locale": "en",
+      "theme": "light",
+      "view": "project-relations-min-zoom",
+      "index": 0,
+      "text": "北風科技",
+      "solidGlyphSamples": 75,
+      "minimumObservedBackgroundRatio": 18.1715,
+      "worstBackground": [255, 255, 255],
+      "worstPixel": [548, 468],
+      "computed": {
+        "fontSize": 48,
+        "strokeWidth": "12px",
+        "stroke": "rgb(255, 255, 255)",
+        "fill": "rgb(10, 22, 38)",
+        "paintOrder": "stroke",
+        "vectorEffect": "none",
+        "graphTransform": "translate(250.5,326.5) scale(0.25)",
+        "box": {
+          "x": 546.5,
+          "y": 461.8303527832031,
+          "width": 48,
+          "height": 17
+        }
+      },
+      "normalScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-en-light-project-relations-min-zoom.png",
+      "backgroundScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-en-light-project-relations-min-zoom-background.png"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "theme": "dark",
+      "view": "project-relations-min-zoom",
+      "index": 0,
+      "text": "北風科技",
+      "solidGlyphSamples": 72,
+      "minimumObservedBackgroundRatio": 16.0473,
+      "worstBackground": [10, 22, 38],
+      "worstPixel": [548, 468],
+      "computed": {
+        "fontSize": 48,
+        "strokeWidth": "12px",
+        "stroke": "rgb(10, 22, 38)",
+        "fill": "rgb(243, 240, 241)",
+        "paintOrder": "stroke",
+        "vectorEffect": "none",
+        "graphTransform": "translate(250.5,326.5) scale(0.25)",
+        "box": {
+          "x": 546.5,
+          "y": 461.8303527832031,
+          "width": 48,
+          "height": 17
+        }
+      },
+      "normalScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-en-dark-project-relations-min-zoom.png",
+      "backgroundScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-en-dark-project-relations-min-zoom-background.png"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "theme": "light",
+      "view": "project-relations-min-zoom",
+      "index": 0,
+      "text": "北風科技",
+      "solidGlyphSamples": 79,
+      "minimumObservedBackgroundRatio": 18.1715,
+      "worstBackground": [255, 255, 255],
+      "worstPixel": [548, 469],
+      "computed": {
+        "fontSize": 48,
+        "strokeWidth": "12px",
+        "stroke": "rgb(255, 255, 255)",
+        "fill": "rgb(10, 22, 38)",
+        "paintOrder": "stroke",
+        "vectorEffect": "none",
+        "graphTransform": "translate(250.5,325.5) scale(0.25)",
+        "box": {
+          "x": 546.5,
+          "y": 461.8303527832031,
+          "width": 48,
+          "height": 17
+        }
+      },
+      "normalScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-CN-light-project-relations-min-zoom.png",
+      "backgroundScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-CN-light-project-relations-min-zoom-background.png"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "theme": "dark",
+      "view": "project-relations-min-zoom",
+      "index": 0,
+      "text": "北風科技",
+      "solidGlyphSamples": 76,
+      "minimumObservedBackgroundRatio": 16.0473,
+      "worstBackground": [10, 22, 38],
+      "worstPixel": [548, 469],
+      "computed": {
+        "fontSize": 48,
+        "strokeWidth": "12px",
+        "stroke": "rgb(10, 22, 38)",
+        "fill": "rgb(243, 240, 241)",
+        "paintOrder": "stroke",
+        "vectorEffect": "none",
+        "graphTransform": "translate(250.5,325.5) scale(0.25)",
+        "box": {
+          "x": 546.5,
+          "y": 461.8303527832031,
+          "width": 48,
+          "height": 17
+        }
+      },
+      "normalScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-CN-dark-project-relations-min-zoom.png",
+      "backgroundScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-CN-dark-project-relations-min-zoom-background.png"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "theme": "light",
+      "view": "project-relations-min-zoom",
+      "index": 0,
+      "text": "北風科技",
+      "solidGlyphSamples": 75,
+      "minimumObservedBackgroundRatio": 18.1715,
+      "worstBackground": [255, 255, 255],
+      "worstPixel": [548, 469],
+      "computed": {
+        "fontSize": 48,
+        "strokeWidth": "12px",
+        "stroke": "rgb(255, 255, 255)",
+        "fill": "rgb(10, 22, 38)",
+        "paintOrder": "stroke",
+        "vectorEffect": "none",
+        "graphTransform": "translate(250.5,325.5) scale(0.25)",
+        "box": {
+          "x": 546.5,
+          "y": 461.8303527832031,
+          "width": 48,
+          "height": 17
+        }
+      },
+      "normalScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-HK-light-project-relations-min-zoom.png",
+      "backgroundScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-HK-light-project-relations-min-zoom-background.png"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "theme": "dark",
+      "view": "project-relations-min-zoom",
+      "index": 0,
+      "text": "北風科技",
+      "solidGlyphSamples": 72,
+      "minimumObservedBackgroundRatio": 16.0473,
+      "worstBackground": [10, 22, 38],
+      "worstPixel": [548, 469],
+      "computed": {
+        "fontSize": 48,
+        "strokeWidth": "12px",
+        "stroke": "rgb(10, 22, 38)",
+        "fill": "rgb(243, 240, 241)",
+        "paintOrder": "stroke",
+        "vectorEffect": "none",
+        "graphTransform": "translate(250.5,325.5) scale(0.25)",
+        "box": {
+          "x": 546.5,
+          "y": 461.8303527832031,
+          "width": 48,
+          "height": 17
+        }
+      },
+      "normalScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-HK-dark-project-relations-min-zoom.png",
+      "backgroundScreenshot": "/tmp/taff-manual-contrast-zoom-fixed/desktop-zh-HK-dark-project-relations-min-zoom-background.png"
+    }
+  ]
+}

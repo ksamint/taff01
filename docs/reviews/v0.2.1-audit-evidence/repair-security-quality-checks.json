@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "sourceSha": "271bdbd694cbec233673814332d1666c7b2c1e8d",
+  "checksOnly": true,
+  "pnpmAudit": {
+    "vulnerabilities": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "dependencies": 113,
+    "devDependencies": 251,
+    "optionalDependencies": 166,
+    "totalDependencies": 447
+  },
+  "licenceCheck": {
+    "passed": true,
+    "packages": 303,
+    "documentedExceptions": 7
+  },
+  "i18n": {
+    "locales": [
+      "en",
+      "zh-CN",
+      "zh-HK"
+    ],
+    "matchingLeafKeys": 1129
+  },
+  "privateRawSha256": {
+    "pnpmAudit": "14fdb7d24bf018c2b2515ce840fe530295f5c29b30ee6c6d4d48caf8ee86820f",
+    "licenceCheck": "77bb48bdeabd350885409f2cce2c1bc84035b8c22baf2f903d1a68b3f9130b57"
+  }
+}

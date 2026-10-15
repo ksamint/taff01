@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.2.2
+
+- Guard Timeline subtree Undo and commit CRM Undo atomically, protecting newer
+  edits and rejecting stale inverses without partial writes.
+- Give human task owners/admins the shared reviewable proposal path and person
+  attribution; agent scope, assignment and grant restrictions remain.
+- Keep MCP limit refusals outside PostgreSQL; guard self identity reads with can().
+- Patch the scoped legacy esbuild dependency. Additive migration 0029 supplies
+  seven missing relationship/ledger version columns and revision triggers.
+- Repair Calendar multi-day target size/ARIA semantics and Relations label
+  contrast, with localized browser and rendered-pixel regression evidence.
+
+Release acceptance, exact deployed source, CI and tag are recorded in
+`docs/deploy.md` and `docs/milestones/21-v0.2.2.md`. The v0.2.1 audit retains
+remaining larger quality work and product/infrastructure recommendations.
+
 ## v0.2.1
 
 - Reproducible public acceptance harness; mind-map write/undo and initial-socket

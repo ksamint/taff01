@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "candidateSha": "271bdbd694cbec233673814332d1666c7b2c1e8d",
+  "repairs": 10,
+  "versionPr": 48,
+  "prs": [
+    {
+      "pr": 38,
+      "title": "fix: keep rejected MCP requests outside Postgres",
+      "headSha": "930774178c507fec1f16779398b4a253236b3052",
+      "mergeSha": "f16395095bc770efac080c15c90c8cedbeeeeefd",
+      "mergedAt": "2026-10-15T11:43:30Z",
+      "ciRun": 38725723018,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 39,
+      "title": "fix: remove vulnerable legacy esbuild dependency",
+      "headSha": "3bf59e5484490f1c3fd280b1bb7fe4060c71efe3",
+      "mergeSha": "ccb04ae19b9763ccfba5cf28594ef9419e4fc623",
+      "mergedAt": "2026-10-15T11:11:00Z",
+      "ciRun": 38721695182,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 40,
+      "title": "fix: guard timeline undo against newer subtree edits",
+      "headSha": "2459c879c29ef36e86a7e90fedc55dd71083c870",
+      "mergeSha": "b41540fe8a654fecf704d9bb696f78449b09cc47",
+      "mergedAt": "2026-10-15T11:13:51Z",
+      "ciRun": 38721887515,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 41,
+      "title": "fix: version relationship and payment rows additively",
+      "headSha": "bba17c2637ab2e5ebd08723869dfd714b2d39f47",
+      "mergeSha": "25137a068a629f2a64fed2d714e252902fbe79a3",
+      "mergedAt": "2026-10-15T11:12:44Z",
+      "ciRun": 38722119820,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 42,
+      "title": "fix: give task owners the shared suggestion proposal path",
+      "headSha": "9a6a0f1a80ea9fc8a19f6f6f1dfe2230aa00acb0",
+      "mergeSha": "0f782c8b631fb813de6113202e927b95587b64a2",
+      "mergedAt": "2026-10-15T11:42:42Z",
+      "ciRun": 38725608812,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 43,
+      "title": "fix: check self identity reads through shared permissions",
+      "headSha": "79e323b78b122f854efae8433021505af033074c",
+      "mergeSha": "887bb3494aa9e60ea98e1d2b78712d927518626c",
+      "mergedAt": "2026-10-15T11:16:51Z",
+      "ciRun": 38722467173,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 44,
+      "title": "fix: apply CRM undo atomically with concurrent edit guards",
+      "headSha": "00cfeb9c9796c535a81299c4f187401aee450a53",
+      "mergeSha": "6bf6d2b8e878078acd444aa303e7a17aa7970445",
+      "mergedAt": "2026-10-15T11:52:35Z",
+      "ciRun": 38726958364,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 45,
+      "title": "fix: enlarge calendar multi-day event touch targets",
+      "headSha": "71748be4b28da6b806d6a09f37a05fb1bc2f046d",
+      "mergeSha": "fae3ac54254cfd1b6c82c36a9d8bc0d7883061c4",
+      "mergedAt": "2026-10-15T11:45:06Z",
+      "ciRun": 38726143355,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 46,
+      "title": "fix: give named calendar containers valid group semantics",
+      "headSha": "3e8c91fb7b34120e0bac044fb880968e44f603ab",
+      "mergeSha": "91143ce52f4d354b7318ee6a3d02cf58aab0f385",
+      "mergedAt": "2026-10-15T11:45:21Z",
+      "ciRun": 38726272440,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 47,
+      "title": "fix: preserve relations label contrast through zoom and selection",
+      "headSha": "05bcd23cd2997fc829364cafef8e9fbd83b4cb81",
+      "mergeSha": "51fdb53fc35b842aa0b0ecf1a2e1f9192321c39c",
+      "mergedAt": "2026-10-15T12:24:40Z",
+      "ciRun": 38730692180,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    },
+    {
+      "pr": 48,
+      "title": "chore: prepare v0.2.2 release identity",
+      "headSha": "b980e68f8a6dfb57facc81d7f58653e366e2b260",
+      "mergeSha": "271bdbd694cbec233673814332d1666c7b2c1e8d",
+      "mergedAt": "2026-10-15T12:24:49Z",
+      "ciRun": 38725948847,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
+    }
+  ]
+}

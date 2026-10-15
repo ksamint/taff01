@@ -9725,14 +9725,50 @@
     }
   ],
   "repairVerification": {
-    "observations": 180,
-    "sampled": 180,
+    "finalSource": {
+      "halo": "stroke-width:0.25em;paint-order:stroke;stroke:var(--bg);stroke-linejoin:round",
+      "stacking": "copied stable sort paints selected node last",
+      "dimming": "only canvas NodeShape wrapper .relations-marker is opacity0.3; node groups, labels and halo remain opacity1",
+      "vectorEffect": "not used",
+      "screenStrokeCssPx": 3
+    },
+    "observations": 246,
+    "sampled": 246,
     "below4_5": 0,
-    "minimumDark": 14.0929,
-    "minimumLight": 17.1974,
-    "fixedPixelData": "/tmp/taff-manual-contrast-fixed-pixel-review.json",
-    "method": "hide fill only while retaining opaque SVG stroke underpaint",
-    "confidence": "pixel-backed visual review of captured frames"
+    "minima": {
+      "defaultLight": 17.1974,
+      "defaultDark": 14.0929,
+      "minZoomLight": 18.1715,
+      "minZoomDark": 16.0473
+    },
+    "minZoom": 0.25,
+    "defaultObservations": 180,
+    "minZoomSelectedObservations": 6,
+    "minZoomPixelArtifact": "/tmp/taff-manual-contrast-min-zoom-final.json",
+    "minZoomPixelArtifactSha256": "677c43ca82304bd89b6f188416421f36a9cc6038976b328fe9e8f60011b85b79",
+    "finalPixelData": "/tmp/taff-manual-contrast-zoom-fixed-pixel-review.json",
+    "method": "pixel-backed visual review; background text fill hidden and verified transparent while opaque stroke retained",
+    "limits": "Pixel-backed visual review of captured default, selected minimum zoom and selected default zoom states; analytical opacity/gradient bounds. Arbitrary drag/text-text overlap/every selection state not exhaustively covered; no all-state WCAG claim.",
+    "selectedDefaultObservations": 60,
+    "selectedDefaultPreviouslyDimmedLabels": 56,
+    "selectedDefaultMinima": {
+      "light": 17.1974,
+      "dark": 14.0929
+    },
+    "selectedDefaultPixelArtifact": "/tmp/taff-manual-contrast-selected-fixed-pixel-review.json",
+    "beforeSelectedNumericalArtifact": "/tmp/taff-selected-dim-review.json",
+    "beforeSelectedPngRetained": false,
+    "beforeSelectedLimit": "Before selected-state PNG namespace reused by after capture; use immutable numerical observations and source-opacity analysis, not before-image claims.",
+    "beforeFailures": {
+      "default": {
+        "failed": 18,
+        "observations": 180
+      },
+      "selectedDefault": {
+        "failed": 56,
+        "observations": 60
+      }
+    }
   },
   "ancestorSets": {
     "47b5e0ccd9f69f3e": [
@@ -12408,6 +12444,6 @@
       }
     ]
   },
-  "originalSha256": "43d960bcaa17f2033ebdeed4221e3e82283cd63374ffc88347e44d9e3a42607a",
-  "representation": "Repeated ancestor arrays interned by content hash; all 216 item facts retained."
+  "originalSha256": "d3ed3484b53de0f95fa6ddefc8fe93fa9701867bd52f9850177da5025e186153",
+  "representation": "Repeated ancestor arrays interned by content hash; all 216 original item facts retained. Repair verification includes additional zoom/selected-state observations."
 }
