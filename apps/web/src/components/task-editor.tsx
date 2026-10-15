@@ -1,7 +1,7 @@
 "use client";
 // Task fields, subtasks and activity (prototype v2 phone 533–691, desktop
-// panel 1590–1707). Phone rows open pickers; the desktop panel edits inline
-// and its status control shows a toast whose 撤銷 PATCHes the old value back.
+// panel 1590–1707). Phone rows open pickers; the desktop panel edits inline.
+// Status changes on both show a toast whose 撤銷 PATCHes the old value back.
 import {
   type Locale,
   type Task,
@@ -673,15 +673,18 @@ export function TaskEditor({
               data-testid="edit-status"
               disabled={busy || !access.data?.allowedStatuses.length}
               value={task.status}
-              onChange={(event) =>
-                edit.mutate({
-                  id: task.id,
-                  body: {
-                    version: task.version,
-                    status: event.target.value as Task["status"],
-                  },
-                })
-              }
+              onChange={(event) => {
+                // Same optimistic edit as the desktop control: the row shows
+                // the new status at once, rolls back with an alert if the
+                // PATCH fails and offers 撤銷 once the server confirms.
+                const status = event.target.value as Task["status"];
+                setPicker(null);
+                inline.change(task, { status }, () =>
+                  t("taskDetail.statusChanged", {
+                    status: t(`status.${status}`),
+                  }),
+                );
+              }}
             >
               {statuses.map((status) => (
                 <option
