@@ -104,7 +104,46 @@ jobs:
             UI_THEME=dark UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen-dark.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
           done
       - name: Dark route captures in all three locales and both viewports
-        run: UI_THEME=dark pnpm ui:app-shots docs/ui/screenshots/v021-dark
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Playwright stops its owned servers after each baseline group.
+          # This standalone capture owns fresh process groups and cleans both.
+          setsid node dist/runtime/api/api.mjs > dark-api.log 2>&1 &
+          api_pid=$!
+          setsid pnpm --filter @taff/web start > dark-web.log 2>&1 &
+          web_pid=$!
+          cleanup() {
+            capture_status=$?
+            trap - EXIT
+            kill -- "-$api_pid" "-$web_pid" 2>/dev/null || true
+            wait "$api_pid" "$web_pid" 2>/dev/null || true
+            for attempt in $(seq 1 20); do
+              if ! kill -0 -- "-$api_pid" 2>/dev/null && ! kill -0 -- "-$web_pid" 2>/dev/null; then break; fi
+              sleep 0.2
+            done
+            if kill -0 -- "-$api_pid" 2>/dev/null || kill -0 -- "-$web_pid" 2>/dev/null; then
+              echo "Dark capture left an owned server process group running" >&2
+              exit 1
+            fi
+            if curl --max-time 1 -fs "$AUTH_URL/api/health" >/dev/null || curl --max-time 1 -fs "$API_INTERNAL_URL/api/health" >/dev/null; then
+              echo "Dark capture server health endpoints remain open after cleanup" >&2
+              exit 1
+            fi
+            echo "Dark capture cleanup verified: both owned process groups stopped and both health endpoints closed"
+            exit "$capture_status"
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            kill -0 "$api_pid"
+            kill -0 "$web_pid"
+            if curl --max-time 1 -fs "$API_INTERNAL_URL/api/health" >/dev/null && curl --max-time 1 -fs "$AUTH_URL/api/health" >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --max-time 1 -fs "$API_INTERNAL_URL/api/health"
+          curl --max-time 1 -fs "$AUTH_URL/api/health"
+          echo "Dark capture startup verified: both owned server processes alive and both health endpoints ready"
+          UI_THEME=dark pnpm ui:app-shots docs/ui/screenshots/v021-dark
       - name: English Relations font download regression
         run: pnpm exec playwright test e2e/font-loading.spec.ts
       - name: Record native capture and runtime identities
@@ -169,6 +208,8 @@ jobs:
           path: |
             test-results
             visual-browser.log
+            dark-api.log
+            dark-web.log
           retention-days: 7
       - name: Publish the captures to a review branch
         if: ${{ inputs.publish }}
