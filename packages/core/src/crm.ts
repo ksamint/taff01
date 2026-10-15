@@ -52,7 +52,17 @@ import {
   type SetContactRolesResult,
   type UnlinkContactResult,
 } from "@taff/schemas";
-import { and, asc, eq, inArray, isNull, ne, type SQL, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  inArray,
+  isNull,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import { CoreError, type Principal } from "./index";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { dtoProject } from "./planning";
@@ -556,6 +566,7 @@ export function createCrmOperations({
     parse(idSchema, w);
     const body = parse(contactInputSchema, input);
     return mutation(p, async (tx) => {
+      await lockWorkspace(tx, w);
       const actor = await requireMember(tx, p, w, "contact:manage");
       await validCompany(tx, w, body.companyId);
       const [row] = await tx
@@ -580,6 +591,12 @@ export function createCrmOperations({
     parse(idSchema, id);
     const body = parse(contactUpdateSchema, input);
     return mutation(p, async (tx) => {
+      const [first] = await tx
+        .select({ workspaceId: contacts.workspaceId })
+        .from(contacts)
+        .where(eq(contacts.id, id));
+      if (!first) notFound();
+      await lockWorkspace(tx, first.workspaceId);
       const [row] = await tx
         .select()
         .from(contacts)
@@ -616,7 +633,115 @@ export function createCrmOperations({
       );
     });
   }
-  async function crmState(tx: Transaction, w: string) {
+  /**
+   * Freeze entities whose inverse may recreate/cascade links. Task project moves
+   * take a task UPDATE lock and a destination-project SHARE lock. NOWAIT avoids
+   * waiting cycles with those task-first paths while we hold the workspace lock.
+   */
+  async function lockInverseEntities(
+    tx: Transaction,
+    w: string,
+    steps: CrmUndoStep[],
+  ) {
+    const ids = (scope: ContactScope) =>
+      [
+        ...new Set(
+          steps.flatMap((step) =>
+            step.method === "COMPANY"
+              ? scope === "company" && step.companyId
+                ? [step.companyId]
+                : []
+              : step.scope === scope
+                ? [step.entityId]
+                : [],
+          ),
+        ),
+      ].sort();
+    const state: unknown[] = [];
+    try {
+      for (const scope of ["company", "project", "task"] as const) {
+        let entityIds = ids(scope);
+        if (scope === "task") {
+          const cascades = steps.flatMap((step) =>
+            step.method === "DELETE" && step.scope === "project"
+              ? [
+                  and(
+                    eq(taskContacts.projectId, step.entityId),
+                    eq(taskContacts.contactId, step.contactId),
+                  ),
+                ]
+              : [],
+          );
+          if (cascades.length) {
+            const linked = await tx
+              .select({ taskId: taskContacts.taskId })
+              .from(taskContacts)
+              .where(and(eq(taskContacts.workspaceId, w), or(...cascades)));
+            entityIds = [
+              ...new Set([...entityIds, ...linked.map((row) => row.taskId)]),
+            ].sort();
+          }
+        }
+        if (!entityIds.length) continue;
+        if (scope === "company") {
+          const rows = await tx
+            .select()
+            .from(companies)
+            .where(inArray(companies.id, entityIds))
+            .orderBy(companies.id)
+            .for("update", { noWait: true });
+          if (rows.length !== entityIds.length) notFound();
+          if (rows.some((row) => row.workspaceId !== w)) invalid();
+          state.push(
+            ...rows.map((row) => [scope, row.id, row.version, row.archivedAt]),
+          );
+        } else if (scope === "project") {
+          const rows = await tx
+            .select()
+            .from(projects)
+            .where(inArray(projects.id, entityIds))
+            .orderBy(projects.id)
+            .for("update", { noWait: true });
+          if (rows.length !== entityIds.length) notFound();
+          if (rows.some((row) => row.workspaceId !== w)) invalid();
+          state.push(
+            ...rows.map((row) => [scope, row.id, row.version, row.archived]),
+          );
+        } else {
+          const rows = await tx
+            .select()
+            .from(tasks)
+            .where(inArray(tasks.id, entityIds))
+            .orderBy(tasks.id)
+            .for("update", { noWait: true });
+          if (rows.length !== entityIds.length) notFound();
+          if (rows.some((row) => row.workspaceId !== w)) invalid();
+          state.push(
+            ...rows.map((row) => [
+              scope,
+              row.id,
+              row.version,
+              row.projectId,
+              row.archivedAt,
+            ]),
+          );
+        }
+      }
+    } catch (error) {
+      const cause =
+        error instanceof Error && "cause" in error ? error.cause : error;
+      if (
+        cause &&
+        typeof cause === "object" &&
+        "code" in cause &&
+        cause.code === "55P03"
+      )
+        conflict();
+      throw error;
+    }
+    return state;
+  }
+  async function crmState(tx: Transaction, w: string, entities: unknown[]) {
     const people = await tx
       .select({
         id: contacts.id,
@@ -649,6 +774,7 @@ export function createCrmOperations({
     return createHash("sha256")
       .update(
         JSON.stringify({
+          entities,
           people,
           companyLinks,
           projectLinks,
@@ -665,7 +791,11 @@ export function createCrmOperations({
   ): Promise<CrmUndo> {
     return {
       workspaceId,
-      expectedState: await crmState(tx, workspaceId),
+      expectedState: await crmState(
+        tx,
+        workspaceId,
+        await lockInverseEntities(tx, workspaceId, steps),
+      ),
       steps,
     };
   }
@@ -674,7 +804,14 @@ export function createCrmOperations({
     return mutation(p, async (tx) => {
       await lockWorkspace(tx, body.workspaceId);
       await requireMember(tx, p, body.workspaceId, "contact:manage");
-      if (body.expectedState !== (await crmState(tx, body.workspaceId)))
+      const entities = await lockInverseEntities(
+        tx,
+        body.workspaceId,
+        body.steps,
+      );
+      if (
+        body.expectedState !== (await crmState(tx, body.workspaceId, entities))
+      )
         conflict();
       for (const step of body.steps) {
         // Do not let a valid guard for one workspace authorize writes in another.
@@ -856,6 +993,9 @@ export function createCrmOperations({
     // Every link mutation locks the workspace first, which serializes
     // exclusive-role moves and keeps one lock order.
     await lockWorkspace(tx, workspaceId);
+    await lockInverseEntities(tx, workspaceId, [
+      { method: "PUT", scope, entityId, contactId, roles },
+    ]);
     const entity = await findEntity(tx, scope, entityId, true);
     const actor = await requireMember(tx, p, workspaceId, "contact:manage");
     const details = can(actor, "contact:details", { workspaceId });
@@ -1006,6 +1146,9 @@ export function createCrmOperations({
   ) {
     const { workspaceId } = await findEntity(tx, scope, entityId);
     await lockWorkspace(tx, workspaceId);
+    await lockInverseEntities(tx, workspaceId, [
+      { method: "DELETE", scope, entityId, contactId },
+    ]);
     await requireMember(tx, p, workspaceId, "contact:manage");
     const previous = captureUndo
       ? await links(tx, scope, entityId, false, contactId)
@@ -1029,6 +1172,17 @@ export function createCrmOperations({
           ),
         )
         .orderBy(taskContacts.taskId);
+      await lockInverseEntities(
+        tx,
+        workspaceId,
+        removedTasks.map((row) => ({
+          method: "PUT",
+          scope: "task",
+          entityId: row.taskId,
+          contactId,
+          roles: [],
+        })),
+      );
       for (const row of removedTasks) {
         const [link] = await links(tx, "task", row.taskId, false, contactId);
         if (link)

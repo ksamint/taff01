@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { activity, connectDatabase, members } from "@taff/db";
+import {
+  activity,
+  connectDatabase,
+  members,
+  projects,
+  tasks,
+  workspaces,
+} from "@taff/db";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
@@ -841,6 +848,148 @@ describe.skipIf(!url)("M12 CRM invariants (DEPLOY.md rules 1–7)", () => {
     );
     await clean();
   });
+  it("rejects Undo after a task moved while its removed contact links were absent", async () => {
+    const source = await core.createProject(alice, w, {
+      name: "Absent-link source",
+    });
+    const destination = await core.createProject(alice, w, {
+      name: "Absent-link destination",
+    });
+    const work = await task("Absent-link task", source.id);
+    const contact = await core.createContact(alice, w, {
+      name: "Absent-link contact",
+    });
+    await core.setContactRoles(alice, "task", work.id, contact.id, {
+      roles: ["tech"],
+    });
+    const removed = await core.unlinkContact(
+      alice,
+      "project",
+      source.id,
+      contact.id,
+    );
+    await core.updateTask(alice, work.id, {
+      version: work.version,
+      projectId: destination.id,
+    });
+    expect(await status(core.undoCrm(alice, removed.undo!))).toBe(409);
+    expect(await core.listContactLinks(alice, "task", work.id)).toEqual([]);
+    expect(await core.listContactLinks(alice, "project", source.id)).toEqual(
+      [],
+    );
+    expect(
+      await core.listContactLinks(alice, "project", destination.id),
+    ).toEqual([]);
+    await clean();
+  });
+
+  it.each(["project", "task"] as const)(
+    "rejects a busy inverse %s immediately instead of waiting in a workspace lock cycle",
+    async (scope) => {
+      const project = await core.createProject(alice, w, {
+        name: `Busy inverse ${scope}`,
+      });
+      const work = await task(`Busy inverse ${scope}`, project.id);
+      const contact = await core.createContact(alice, w, {
+        name: `Busy inverse ${scope}`,
+      });
+      await core.setContactRoles(alice, "task", work.id, contact.id, {
+        roles: ["tech"],
+      });
+      const removed = await core.unlinkContact(
+        alice,
+        "project",
+        project.id,
+        contact.id,
+      );
+      let pending: Promise<number> | undefined;
+      try {
+        await connection.db.transaction(async (tx) => {
+          if (scope === "project")
+            await tx
+              .select()
+              .from(projects)
+              .where(eq(projects.id, project.id))
+              .for("share");
+          else
+            await tx
+              .select()
+              .from(tasks)
+              .where(eq(tasks.id, work.id))
+              .for("update");
+          pending = status(core.undoCrm(alice, removed.undo!));
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          const result = await Promise.race([
+            pending,
+            new Promise<string>((resolve) => {
+              timer = setTimeout(() => resolve("waited"), 5000);
+            }),
+          ]);
+          clearTimeout(timer);
+          expect(result).toBe(409);
+          // A task-first creator can now obtain the workspace; Undo released it.
+          await tx
+            .select()
+            .from(workspaces)
+            .where(eq(workspaces.id, w))
+            .for("update", { noWait: true });
+        });
+      } finally {
+        if (pending) await pending;
+      }
+      expect(await core.listContactLinks(alice, "task", work.id)).toEqual([]);
+      await core.undoCrm(alice, removed.undo!);
+      expect(
+        (await core.listContactLinks(alice, "task", work.id))[0].roles,
+      ).toEqual(["tech"]);
+      await clean();
+    },
+  );
+
+  it.each(["create", "update"] as const)(
+    "serializes contact %s before row writes when a CRM inverse holds the workspace",
+    async (action) => {
+      const contact = await core.createContact(alice, w, {
+        name: `Serialized ${action}`,
+      });
+      let pending: Promise<unknown> | undefined;
+      try {
+        await connection.db.transaction(async (tx) => {
+          await tx
+            .select()
+            .from(workspaces)
+            .where(eq(workspaces.id, w))
+            .for("update");
+          const [blocker] = await tx.execute<{ pid: number }>(
+            sql`select pg_backend_pid()::int as pid`,
+          );
+          pending =
+            action === "create"
+              ? core.createContact(alice, w, { name: "Waited creation" })
+              : core.updateContact(alice, contact.id, {
+                  version: contact.version,
+                  name: "Waited update",
+                });
+          let blocked = false;
+          for (let attempt = 0; attempt < 100; attempt++) {
+            const [row] = await connection.db.execute<{ blocked: boolean }>(
+              sql`select exists (select 1 from pg_stat_activity where ${blocker.pid} = any(pg_blocking_pids(pid))) as blocked`,
+            );
+            if (row.blocked) {
+              blocked = true;
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 10));
+          }
+          expect(blocked).toBe(true);
+        });
+      } finally {
+        if (pending) await pending;
+      }
+      await clean();
+    },
+  );
+
   it("rejects stale exclusive-role Undo without taking back a newer holder's role", async () => {
     const project = await core.createProject(alice, w, {
       name: "Guarded role undo",
@@ -970,15 +1119,16 @@ describe.skipIf(!url)("M12 CRM invariants (DEPLOY.md rules 1–7)", () => {
           steps: [
             ...undo.steps,
             {
-              method: "DELETE",
-              scope: "task",
-              entityId: randomUUID(),
+              method: "PUT",
+              scope: "company",
+              entityId: old.id,
               contactId: contact.id,
+              roles: ["signoff"],
             },
           ],
         }),
       ),
-    ).toBe(404);
+    ).toBe(400);
     expect(
       (await core.getContactDetail(alice, contact.id)).contact.companyId,
     ).toBe(next.id);
