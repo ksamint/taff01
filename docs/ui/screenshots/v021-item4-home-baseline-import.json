@@ -1,0 +1,78 @@
+{
+  "sourceSha": "1650b37aaedc044029e45839d3de908e6b2fbfb2",
+  "workflowRun": "https://github.com/ksamint/taff01/actions/runs/38679139279",
+  "scope": "Home only: all four native phone/desktop en/zh-HK cases passed. Only two changed desktop references imported; both phone references remain byte-identical.",
+  "productFix": "The desktop sidebar column now applies only to authenticated .app-shell.signed-in. Signed-out Home spans the viewport instead of the 240px sidebar column.",
+  "assertions": "Home landing width equals viewport within one pixel; language selector is enabled; real headings, three feature items, auth control and computed CSS layout remain asserted. All screenshot tolerances remain unchanged.",
+  "nativeManifest": "v021-item4-home-capture-manifest.json",
+  "artifactManifestSha256": "88487f8792fa585e40a995000805257f175485a5782abbc4decd2a6f6df5cc81",
+  "verifiedCaseCount": 4,
+  "verifiedPngCount": 4,
+  "validated": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/home.png",
+      "bytes": 45053,
+      "width": 1280,
+      "height": 800,
+      "sha256": "cfa0de270ef99b4f2b04f2c81b28037daff4918cfa01a8a5ddc247b06efe0148",
+      "before": "fc30eedc71f1ec04261153991b24de3bc023ebaa5eba51f9db1991051ff5d434"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/home.png",
+      "bytes": 68668,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c00577f24d7e70b2817a0b9dddd7c830d62b6d89aa0ef4fefe67c21a082252a9",
+      "before": "f98e9dfa327adcd6cd08a620ed5955024a6783058210d27ba719f4292aef3643"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/home.png",
+      "bytes": 44905,
+      "width": 390,
+      "height": 844,
+      "sha256": "61afbf6c7194a90379188ff5dbe65295fa9721f064d15385b4715ec9e4ea48e0",
+      "before": "61afbf6c7194a90379188ff5dbe65295fa9721f064d15385b4715ec9e4ea48e0"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/home.png",
+      "bytes": 62584,
+      "width": 390,
+      "height": 844,
+      "sha256": "d764a077229d661acf7314dd329ac60df957fd19595659fc10bad04a71557549",
+      "before": "d764a077229d661acf7314dd329ac60df957fd19595659fc10bad04a71557549"
+    }
+  ],
+  "importedPaths": [
+    "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/home.png",
+    "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/home.png"
+  ],
+  "preservedPaths": [
+    "e2e/__screenshots__/ui-v2.spec.ts/phone-en/home.png",
+    "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/home.png"
+  ],
+  "readinessEvidence": {
+    "failedRun": "https://github.com/ksamint/taff01/actions/runs/38677213754",
+    "selectedLabelRawChangedPixels": 887,
+    "labelRegion": [126, 24, 222, 39],
+    "exactLabelTranslation": {
+      "dx": 0,
+      "dy": 1,
+      "remainingDifferentPixels": 0
+    },
+    "sameGlyphEvidence": "Expected and actual have identical color histograms, including 28 fully painted RGB[68,71,76] pixels. This excludes the disabled-opacity hypothesis.",
+    "controlledProbe": "Real CSS/fonts in local Chromium, 0ms and 400ms font responses, three cold contexts for each layout/delay combination. CDP native select inner text used custom Noto Sans TC for all 8 glyphs after preparation. No fallback-font or cached-paint failure reproduced.",
+    "oldControlGeometry": {
+      "x": 113.015625,
+      "width": 133.140625
+    },
+    "newControlGeometry": {
+      "x": 1044,
+      "width": 138
+    },
+    "newLayoutByteIdenticalSamples": 6,
+    "interpretation": "Evidence supports a native-widget glyph-position shift under the constrained fractional layout. No font, repaint, sleep, retry or tolerance workaround was added. Independent full CI comparison remains required."
+  },
+  "policy": "Only original, source-pinned native PNG bytes imported. Source manifest and all artifact hashes retained.",
+  "nativeManifestSha256": "47850d1a353d6678916b077fdb1019ef754ccaf5b4e136e1ea6de90fa8d926fb",
+  "manifestEncoding": "Repository manifest whitespace is formatter-normalized; parsed contents match the original native artifact. Original bytes and raw hash remain in the evidence archive."
+}

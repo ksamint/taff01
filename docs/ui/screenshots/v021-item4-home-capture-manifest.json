@@ -1,0 +1,71 @@
+{
+  "sourceSha": "1650b37aaedc044029e45839d3de908e6b2fbfb2",
+  "repository": "ksamint/taff01",
+  "workflowSha": "1650b37aaedc044029e45839d3de908e6b2fbfb2",
+  "runId": "38679139279",
+  "runAttempt": "1",
+  "sourceTree": "e8dd94944895fa388d4cf326cd9bc2da0f7b2343",
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261012.334.1",
+  "os": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "node": "v24.21.0",
+  "playwright": "1.64.0",
+  "monospace": "DejaVuSansMono.ttf: \"DejaVu Sans Mono\" \"Book\"",
+  "fontRuntime": "fontconfig\t2.15.0-1.1ubuntu2\nlibfreetype6:amd64\t2.13.2+dfsg-1ubuntu0.2",
+  "captureScope": {
+    "mode": "selected",
+    "screens": ["home"],
+    "expectedCases": 4,
+    "expectedPngCount": 4,
+    "expectedPaths": [
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-en/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/home.png"
+    ]
+  },
+  "screenResults": [
+    {
+      "screen": "home",
+      "stats": {
+        "startTime": "2026-10-15T04:04:07.438Z",
+        "duration": 8371.819,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "2f938c1d0833068f28f5fb1828157754012734a48d6fd3d8f6d63e21736465cd"
+    }
+  ],
+  "captures": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/home.png",
+      "bytes": 45053,
+      "width": 1280,
+      "height": 800,
+      "sha256": "cfa0de270ef99b4f2b04f2c81b28037daff4918cfa01a8a5ddc247b06efe0148"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/home.png",
+      "bytes": 68668,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c00577f24d7e70b2817a0b9dddd7c830d62b6d89aa0ef4fefe67c21a082252a9"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/home.png",
+      "bytes": 44905,
+      "width": 390,
+      "height": 844,
+      "sha256": "61afbf6c7194a90379188ff5dbe65295fa9721f064d15385b4715ec9e4ea48e0"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/home.png",
+      "bytes": 62584,
+      "width": 390,
+      "height": 844,
+      "sha256": "d764a077229d661acf7314dd329ac60df957fd19595659fc10bad04a71557549"
+    }
+  ]
+}
