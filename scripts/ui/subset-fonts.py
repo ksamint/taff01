@@ -92,7 +92,7 @@ for name, origin, points in (
     rule = f'''@font-face {{
   font-family: "Noto Sans TC";
   src: url("/fonts/{name}.woff2") format("woff2");
-  font-weight: {"400" if name == "NotoSansMath-ui" else "300 600"};
+  font-weight: 300 600;
   font-style: normal;
   font-display: optional;
   unicode-range: {ranges(points)};

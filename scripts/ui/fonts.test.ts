@@ -46,6 +46,7 @@ test("all three locales' CJK strings have a bundled glyph range", () => {
   const cjkRules = css
     .split("@font-face")
     .filter((rule) => rule.includes('font-family: "Noto Sans TC"'));
+  for (const rule of cjkRules) expect(rule).toMatch(/font-weight:\s*300 600;/);
   const covered = new Set(
     cjkRules.flatMap((rule) =>
       points(rule.match(/unicode-range:\s*([^;]+);/)![1]),

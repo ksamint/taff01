@@ -57,7 +57,7 @@
 @font-face {
   font-family: "Noto Sans TC";
   src: url("/fonts/NotoSansMath-ui.woff2") format("woff2");
-  font-weight: 400;
+  font-weight: 300 600;
   font-style: normal;
   font-display: optional;
   unicode-range: U+21B3;

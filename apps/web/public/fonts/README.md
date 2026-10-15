@@ -276,7 +276,9 @@ byte-for-byte unchanged. The other 728 TC mappings split into a 723-glyph
 224,236-byte CJK asset and a five-glyph 2,304-byte symbols asset. All 728 original
 outlines and advances match the earlier asset at weights 100, 300, 400, 500, 600
 and 900. The 172-glyph SC supplement is 54,036 bytes; the one-glyph Math supplement
-is 2,852 bytes. CSS ranges are disjoint across these TC-family faces.
+is 2,852 bytes. CSS ranges are disjoint across these TC-family faces. The static Math arrow
+uses the same CSS weight descriptor as its sibling Unicode faces; its outline
+stays constant across that range.
 
 English Relations previously downloaded the 224,900-byte CJK asset solely for
 `↔`. It now requests the 2,304-byte symbols face. The visual Relations test
