@@ -15,6 +15,7 @@ const files = new Set([
   "crm.spec.ts",
   "timeline.spec.ts",
   "brief.spec.ts",
+  "v021-feature-gaps.spec.ts",
   "release/checklist.spec.ts",
 ]);
 /** Targeting only: callers cannot override artifact safety or serialization. */
@@ -51,9 +52,10 @@ export function freshLiveReport(parent) {
 }
 export function ownsGrant(grant, baseline, entries) {
   return (
-    !!grant.taskId &&
     entries.some(
-      (entry) => entry.kind === "tasks" && entry.id === grant.taskId,
+      (entry) =>
+        (entry.kind === "grants" && entry.id === grant.id) ||
+        (!!grant.taskId && entry.kind === "tasks" && entry.id === grant.taskId),
     ) &&
     !baseline.some((prior) => prior.id === grant.id) &&
     ["allowed", "pending"].includes(grant.status)
