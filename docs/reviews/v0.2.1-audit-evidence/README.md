@@ -1,6 +1,7 @@
 # v0.2.1 audit evidence
 
 The report describes tagged source `1200f704fd8bb10af890c6761618291f8370e925`.
+Corrective live-release files describe accepted source `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`.
 These files contain sanitized numeric/source evidence, not production records,
 credentials, cookies, raw browser traces or private deployment journals.
 
@@ -44,3 +45,17 @@ invent a total number of test opportunities. Cancelled runs, deliberate failing
 font experiments, deterministic defects and unresolved intermittent failures are
 kept distinct. Follow-up repair CI failures are recorded separately in the
 report so they cannot change the baseline history silently.
+
+## Accepted corrective release
+
+`live-v022-acceptance.json` records exact source/tag, green CI, fresh 146-case
+acceptance, supplemental cleanup and independent unlock/health proof hashes.
+`live-v022-route-performance.json` contains twelve real public-origin route/locale
+measurements from normal deployment Step 4, with one project, three tasks and one
+Calendar occurrence. It retains numeric results and operator hashes, excluding
+business identifiers and private paths. This is distinct from the controlled
+local v0.2.1 fixture above. Original profile, supported fixture state, sessions
+and owned browser profiles were cleaned up and verified.
+`live-v022-health.json` records the final read-only production health, migration/
+table/auditCrm checks, backup catalog, retention inventory and defined logical
+verification residual scope. Read its attribution/physical-size limitations.

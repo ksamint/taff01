@@ -1,8 +1,8 @@
 # Changelog
 
-## v0.2.2
+## v0.2.2 — 2026-10-15
 
-Merged corrective source; live acceptance and release tag are pending.
+Accepted live and annotated-tagged on exact source `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; 146/146 fresh checks and supplemental route cleanup passed.
 
 - Guard Timeline subtree Undo and commit CRM Undo atomically, protecting newer
   edits and rejecting stale inverses without partial writes.

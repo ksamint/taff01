@@ -228,7 +228,7 @@ added to the original denominators.
 | #42 / 38724259516 | Generated selector contract did not include new live proposal assertions | 1 run | Deterministic derived-document mismatch; 969 other tests passed. Regenerated from actual suites; three contract tests pass. |
 | #45 / 38722792384 | Generated selector contract did not include new Calendar coverage | 1 run | Deterministic derived-document mismatch. Regenerated; original assertions and visual thresholds retained. |
 | #44 / 38723190125 | Task-contact Undo waited for the former sequence of PUT requests | 1 run / 3 locales | Deterministic transport expectation after the atomic Undo endpoint replaced the sequence. The updated regression must observe the single atomic request and retain all role/stakeholder/UI assertions. |
-| #47 / 38727563199 | Relations reference screenshots encode the former label/edge painting | 1 run / 2 desktop locales | Stable 410-pixel intended contrast delta, confined to graph labels (x263–828/y363–582); no layout shift. Source-pinned Relations-only capture workflow 38729158742 passed. All ten outputs were reviewed: five desktop references have the intended glyph-adjacent correction; five phone references remain byte-exact. The source/hash/pixel ledger is [recorded separately](../2026-10-15-relations-render-review.md). Original prototype captures and comparator settings remain unchanged; full CI after import remains required. |
+| #47 / 38727563199 | Relations reference screenshots encode the former label/edge painting | 1 run / 2 desktop locales | Stable 410-pixel intended contrast delta, confined to graph labels (x263–828/y363–582); no layout shift. Source-pinned Relations-only capture workflow 38729158742 passed. All ten outputs were reviewed: five desktop references have the intended glyph-adjacent correction; five phone references remain byte-exact. The source/hash/pixel ledger is [recorded separately](../2026-10-15-relations-render-review.md). Original prototype captures and comparator settings remain unchanged; full PR and exact-main visual CI subsequently passed. |
 | #42 / 38723613845 | Generated selector contract was stale after new Brief/live proposal assertions | 1 run / 1 test | Deterministic derived-document mismatch, not a flake: `scripts/test-id-contract.test.ts:51` expected 335 ids / 1,758 uses; committed document retained 335 / 1,753. Exactly 1 failed / 969 passed. This is an additional run of the contract signature, distinct from 38724259516; regeneration and the combined dependency chain repaired it without weakening assertions. |
 | #47 / 38725689664 | Relations reference screenshots encode the former label/edge painting | 1 run / 2 desktop locales | Deterministic visual expectation mismatch after the initial opaque halo (`relations.css:171–176` at source `366b1a3`): desktop en and zh-HK each report a stable 299-pixel difference; two other cases passed. This precedes the later 410-pixel run 38727563199 and is retained separately. The final source-pinned capture/import review covers the accepted repair; no unchanged-source retry recovery or true flake is established here. |
 
@@ -256,3 +256,23 @@ Three separately journaled diagnostic attempts were excluded from acceptance. Fi
 ## Successful workflow coverage
 
 To check for retries hidden by a green workflow conclusion, all 112 selected successful runs since the v0.1.0 source timestamp were also reviewed: 82 CI and 30 capture runs, plus the sole earlier cancelled attempt (113 logs, 64,393,816 bytes; zero fetch failures). Selection completed at 2026-10-15 14:06 UTC and includes 97 runs before the historical cutoff and 15 later runs. The former pending historical CI run had become successful, explaining 68 successful CI runs in that refreshed historical subset rather than the original 67. No additional recovered flaky signature, failed test attempt, nonzero Playwright flaky summary or actual test-retry marker was found. The 290 broad keyword hits were configuration, echoed zero-flake guard/metadata and passing intentional retry unit tests. Root independently verified all 113 log hashes/byte counts and zero nonzero-flaky/retry-number markers. [Per-run source identities, coverage limits and log hashes](successful-workflow-flake-scan.json) preserve the audit boundary; the denominator is workflow runs, not test executions. Later release CI is recorded separately.
+
+## Accepted second v0.2.2 run
+
+Exact source `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4` passed all 146 fresh
+cases in 146 attempts, zero retries, zero browser errors and zero cleanup
+failures. The 20 critical cases and remaining 126 were fresh disjoint runs;
+no first-candidate passes were reused. Both previously failing desktop Calendar
+cases and phone zh-HK passed first attempt after PR49. Four official-client MCP
+round trips covered all 30 tools and revoked-token 401. Twelve supplementary
+live route measurements completed in one attempt with fixture/profile/session/
+browser cleanup. [Acceptance evidence](live-v022-acceptance.json) is separate
+from the rejected first candidate and its diagnostics.
+
+PR49 CI38747282203 and exact main CI38752276276 each passed 234 browser cases;
+completed ANSI-stripped logs contain no recovered-retry/nonzero-flaky markers.
+No new failed code workflow followed the seven repair failures listed above.
+Two argument-based SSH attempts for the read-only post-release audit returned
+255 without an audit receipt. Streaming the identical compiled program over
+stdin succeeded; queries and acceptance checks were unchanged. These are
+operator transport failures, not additional live-test attempts or flakes.

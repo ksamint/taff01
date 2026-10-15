@@ -2545,3 +2545,121 @@ other-route budgets are not new release gates.
 After acceptance, record the checkpoint, push annotated `v0.2.2` on this exact
 SHA, release the native keeper and independently verify free flock and healthy
 runtime, then update the audit and milestone.
+
+### Frontend v2 v0.2.2 upgrade checkpoint — 2026-10-15
+
+Live pinned source `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`, tree
+`c499e1d112b43ea715e51b3053074db72c8f5344`. Annotated v0.2.2 is on this exact deployed
+SHA. The [v0.2.1 audit](reviews/2026-10-15-v0.2.1-audit.md) and [repair
+milestone](milestones/21-v0.2.2.md) record findings and disposition. Ten separate
+repairs address two P0 lost-update defects, one P1 proposer-parity defect and seven
+local P2s. An additional test-only PR synchronizes Calendar acceptance with save
+reconciliation and native view replacement, preserving every original assertion. Product
+and infrastructure decisions remain recommendations.
+
+**CI and local production smoke.** Exact-source main push
+[38752276276](https://github.com/ksamint/taff01/actions/runs/38752276276) and merged
+PR-head [38747282203](https://github.com/ksamint/taff01/actions/runs/38747282203)
+completed/success. Fresh ancestry/CI gates ran before build, migration, start and
+acceptance. Exact-main validation: 1002 tests; Today initial JS 194490 B gzipped against
+204800 B; Today LCP en 612 ms, zh-CN 660 ms, zh-HK 680 ms. Lighthouse
+performance/accessibility/best-practices: en 95/100/100; zh-CN 95/100/100; zh-HK
+95/100/100. Full visual/browser/MCP gates passed. Step 1 used these CI results, a clean
+detached local image build and bundled production API/worker MCP smoke; it did not rerun
+the full local suite/performance gates. Local smoke containers were removed.
+
+**Local image identities.**
+
+- api: `sha256:222d0a6e2f51c0bf202e2dc52c77735400c9ae8b598fcdea789ee65040c7e7b1`
+- worker: `sha256:96c3a3cf720cb2358b6a35bf483b10f2bf56b8dcf76de658d19c27e7ef474531`
+- web: `sha256:67b4112318cb21201b571d00ea42c832485ea5dfa4b0082c28a206bce1ee7536`
+
+**Lock, backups and source.** Native detached keeper PID `2288063` held
+/srv/taff/deploy.lock through acceptance, checkpoint and annotated-tag verification.
+Dedicated dump
+`/srv/taff/secrets/db.before-8d335ff7a9513bf35bcaf6b99c7f54935a0446e4.dump`, 2,148,534
+B, SHA-256 `8d6826c2530f71e7fae82685677c7fb64927626e0d348bfc06a711ab4b75c2c0`;
+pg_restore --list succeeded. Exclusive env backup
+`/srv/taff/secrets/.env.before-8d335ff7a9513bf35bcaf6b99c7f54935a0446e4` stayed 0600.
+Bundle 994,519 B, SHA-256
+`4fec292b38f36abf9e79377b3628b623c51e936513f1a38ed9e9ceee934d2a0c`; checksum, git bundle
+verify, exact detached SHA, clean source and GitHub origin verified. Production used
+--builder default and SHA/ASSET_VERSION stamping.
+
+**Migration and runtime.** Additive 0029_v022_relation_versions.sql adds seven non-null
+version columns default 1, positive constraints and BEFORE UPDATE revision/timestamp
+triggers; SHA-256 `72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72`. No
+DML, explicit backfill, drop, truncate, rename or overwrite of existing payload. The
+canonical one-shot migrator exited 0 and all seven 0023–0029 hashes were verified;
+earlier migration bytes remain unchanged. Only API, worker and web were recreated:
+
+- api: `sha256:7cc1008e5819a22f62a39c5f6832f48b6e460ae3d428c1a77877ad82d3646037`
+- worker: `sha256:b809d738db847f44018546f36159dca377b4aede19571c34bdd27622a31df74f`
+- web: `sha256:ae27965d80d060da1061e5bff86fefe8b4c66b2fdc6bb32709ef92b6538adf00`
+
+Caddy/Valkey and all 46 baseline neighbors retained identities, images, start times and
+health. No Taff-caused or unexplained neighbor change. Route hash unchanged; no
+host-layout, DNS, PostgreSQL host or role change. PostgreSQL postmaster start remains
+`2026-08-29 01:19:14.878015+00`. Private env changed only TAFF_TAG and stayed 0600;
+email/SMS unchanged and AI remains off.
+
+**Rollback retained.** Accepted prior source `1200f704fd8bb10af890c6761618291f8370e925`:
+
+- api: `sha256:7d0dcc6e52da89edff871e416a8d6d7a0041fc969e99a777210cad448516ef30`
+- worker: `sha256:20f8c328c86b7c8ba64490770710fff0a10c1be73b3f10395b3e64e919a5b824`
+- web: `sha256:11e4ff62f329fd784af5e8f2e3bc25b8cb7ef10296421546006b480e69fac3fa`
+
+**Fresh public acceptance.** All 146 applicable cases passed across 146 attempts, no
+skips, zero browser errors and zero cleanup failures; 146 per-attempt cleanup journals.
+All 20 critical/platform cases and four official-client MCP cases passed. Dedicated
+verification entities only: en/zh-HK phone and desktop, zh-CN spots; full plan §6.0 and
+CRM/timeline/relations/brief/Ask/mind/finance restrictions/realtime. Added live
+assertions exercise human proposal create/attribution/apply/Undo/dismiss and Calendar
+multi-day 44 px lower-edge/keyboard activation in day/week, with exact original schedule
+restored. Existing assertions remain intact.
+
+**Supplementary Step 4 route checks.** A separately journaled functional fixture created
+one verification project and three person-owned current-day tasks with one scheduled
+occurrence through supported public APIs. Twelve locale/route LCP and Lighthouse
+observations confirmed actual route content and a visible Calendar occurrence; this
+three-card fixture is distinct from the 20-card CI baseline. The schedule was cleared,
+all three tasks finished and the project archived with two fresh confirmations; original
+locale/timezone were restored and independently read twice, sessions signed out and
+owned browser profiles removed. Exact SHA, native keeper and all three image identities
+were attested before/after these operations. Supplemental cleanup passed with zero
+failures and is part of the accepted receipt; metrics and limitations are in the audit.
+
+Four official-client round trips exercised all 30 MCP tools, verified live changes and
+call logs, completed review, revoked tokens and confirmed fresh initialize 401; each
+verified taff/0.2.2. HTTPS/health, Secure/HttpOnly cookies, foreign-origin rejection and
+unchanged pre-upgrade authentication methods passed. No public flood, SMS OTP or model
+call.
+
+**Retries.** No public check required a retry.
+
+Owned verification tokens were revoked, grants closed, runs canceled,
+profile/agent/preferences restored, schedules cleared and supported entities archived.
+Audit history and entities without a supported archive path remain; the audit quantifies
+that defined verification scope. No production seed or direct data repair was used.
+
+**Acceptance, tag and unlock.** Full checkpoint was recorded before tag creation;
+annotated [v0.2.2](https://github.com/ksamint/taff01/tree/v0.2.2), object
+`a683a6daaf1da92fd7c0e8e3dd18fa57e3a29ebd`, remotely peels to
+`8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`. Receipt
+`/srv/taff/frontend-v2-v022-accepted-8d335ff7a9513bf35bcaf6b99c7f54935a0446e4.json`;
+deployment.done matches. Explicit reconciled unlock released the keeper. Independent
+flock acquired/released and exact healthy runtime, public health, neighboring
+containers, route and PostgreSQL preservation passed. No critical flow failed twice in
+this accepted attempt. An earlier unaccepted v0.2.2 candidate was rolled back after
+Calendar harness lifecycle failures; its attempts and cleanup evidence are retained in
+the audit.
+
+Clean local web image: all 16 CSS-declared font hashes match pinned source, verified
+read-only with networking disabled. Controlled local baseline route measurements and
+supplementary live route observations are separately qualified in the audit; Today CI
+budgets are not silently extended to other routes.
+
+Applied additive migration hash: -
+`packages/db/migrations/0029_v022_relation_versions.sql`:
+`72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72` (zero explicit row
+backfill; existing payload unchanged)

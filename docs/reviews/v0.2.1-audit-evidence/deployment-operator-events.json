@@ -26,5 +26,27 @@
       "proofSha256": "b86fb8f3197165bc90f1987e619a6c879da06dc327aaeb950a2e49960c2c84e8"
     }
   ],
-  "classification": "Operator events, separate from executed live-test attempts or application defects."
+  "classification": "Operator events, separate from executed live-test attempts or application defects.",
+  "followupSourceSha": "8d335ff7a9513bf35bcaf6b99c7f54935a0446e4",
+  "followupEvents": [
+    {
+      "event": "metrics-reader-assumption",
+      "status": "corrected-local-reader",
+      "publishedCiGateChanged": false,
+      "actualTodayBytes": 194490,
+      "actualLighthousePerformance": 95,
+      "productionWrites": 0,
+      "proofSha256": "da71ae2dd7a1e05f305d716b7a7d2758d86a975304458d2aabb000512957fb18"
+    },
+    {
+      "event": "read-only-post-health-transport",
+      "argumentTransportExitCode": 255,
+      "argumentTransportFailedAttempts": 2,
+      "remoteCommandBytes": 414598,
+      "stdinTransport": "passed",
+      "queryOrAuditLogicChanged": false,
+      "productionWrites": 0,
+      "proofSha256": "b76ded31912a6e41402ca6a37a2576239f7e2fe44207258e1a6b07bce0050560"
+    }
+  ]
 }
