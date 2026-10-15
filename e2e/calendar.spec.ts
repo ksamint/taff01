@@ -1179,6 +1179,13 @@ test("calendar multi-day events keep 44px targets and aligned stacked rows", asy
       boxes.push(box!);
     }
     expect(Math.abs(boxes[1].y - boxes[0].y)).toBeGreaterThanOrEqual(44);
+    await page.locator(".sx__view-container").evaluate(async (element) => {
+      await Promise.all(
+        element
+          .getAnimations({ subtree: true })
+          .map((animation) => animation.finished.catch(() => {})),
+      );
+    });
     await page.screenshot({
       path: info.outputPath(`calendar-${mode}-targets.png`),
     });
