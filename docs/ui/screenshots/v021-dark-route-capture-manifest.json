@@ -2791,5 +2791,16 @@
       "height": 800,
       "sha256": "ba77b062a4c74f6652a736f01378ac8d89a6c25434d1c23c7ba74de094f53219"
     }
-  ]
+  ],
+  "storage": {
+    "kind": "github-actions-artifact-only",
+    "repositoryPngsPresent": false,
+    "artifactUrl": "https://github.com/ksamint/taff01/actions/runs/38679409752/artifacts/11948110771",
+    "archiveDirectory": "docs/ui/screenshots/v021-dark/",
+    "fileResolution": "Each captures[].file is relative to archiveDirectory, not the repository index directory.",
+    "retentionDays": 14,
+    "committedDarkBaselineCount": 60,
+    "committedBaselineDirectory": "e2e/__screenshots__/ui-v2.spec.ts/",
+    "readme": "../README.md#v021-capture-evidence"
+  }
 }
