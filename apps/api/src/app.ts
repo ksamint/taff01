@@ -151,12 +151,8 @@ export function createApp(
       .hit(createHash("sha256").update(token).digest("hex"))
       .catch(() => ({ allowed: false, count: 0 }));
     if (!limit.allowed) {
-      // Log the first refusal of a window only; a flood must not fan out.
-      if (limit.count === rateLimiter.limit + 1) {
-        const principal = await core.authenticateAgentToken(token);
-        if (principal?.kind === "agent")
-          await record(principal, "rate_limited");
-      }
+      // Rejected requests must never authenticate or persist a call: both
+      // operations use Postgres, which the limiter protects from floods.
       return c.json({ error: "rate_limited" }, 429);
     }
     const principal = await core.authenticateAgentToken(token);
