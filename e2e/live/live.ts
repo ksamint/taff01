@@ -18,6 +18,8 @@ import {
 } from "../../packages/schemas/src/index";
 import { messages } from "../support/messages";
 
+import { ownsGrant } from "./safety.mjs";
+
 const execute = promisify(execFile);
 const origin = process.env.RELEASE_BASE_URL ?? "https://taff.apuch.cn";
 const workspaceName = "Taff verification";
@@ -694,10 +696,8 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
         await request.get(`/api/agents/${id}`),
         "cleanup agent current",
       );
-      for (const grant of currentProfile.grants.filter(
-        (g: any) =>
-          !profile.grants.some((prior: any) => prior.id === g.id) &&
-          ["allowed", "pending"].includes(g.status),
+      for (const grant of currentProfile.grants.filter((g: any) =>
+        ownsGrant(g, profile.grants, entries),
       ))
         await checked(
           await request.post(`/api/grants/${grant.id}/decision`, {
