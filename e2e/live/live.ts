@@ -17,9 +17,14 @@ import {
   memberListSchema,
   meSchema,
 } from "../../packages/schemas/src/index";
+import { notificationPreferencesSchema } from "../../packages/schemas/src/notification-preferences";
 import { messages } from "../support/messages";
 
 import { agentBaseline, cleanupAgentBaseline } from "./agent-cleanup";
+import {
+  cleanupNotificationBaseline,
+  notificationBaseline,
+} from "./notification-cleanup";
 import { failureCategory } from "./safety.mjs";
 
 const execute = promisify(execFile);
@@ -195,9 +200,11 @@ export async function liveSignIn(page: Page, locale: string) {
   await expect(page.getByTestId("today-heading")).toBeVisible();
   await captureProfileAndTheme(page);
   if (state && !state.preferences)
-    state.preferences = await checked(
-      await page.request.get("/api/me/notifications"),
-      "notification baseline",
+    state.preferences = notificationPreferencesSchema.parse(
+      await checked(
+        await page.request.get("/api/me/notifications"),
+        "notification baseline",
+      ),
     );
   const tz = await page.evaluate(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -786,15 +793,24 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
     });
   if (current.preferences)
     await perform("notification-preferences", "dedicated-account", async () => {
-      const latest = await cleanupHttp("notification current", () =>
-        request.get("/api/me/notifications"),
-      );
-      await checked(
-        await request.patch("/api/me/notifications", {
-          data: { ...current.preferences, version: latest.version },
-        }),
-        "restore notifications",
-      );
+      await cleanupNotificationBaseline(current.preferences, {
+        read: () =>
+          cleanupHttp("notification.read-current", () =>
+            request.get("/api/me/notifications"),
+          ),
+        write: (preferences) =>
+          cleanupHttp("notification.restore-baseline", () =>
+            request.patch("/api/me/notifications", { data: preferences }),
+          ),
+        fail: (step, code) => {
+          throw new SafeApiFailure(
+            step,
+            undefined,
+            code,
+            "e2e/live.ts#cleanUp",
+          );
+        },
+      });
     });
   if (current.primaryProfile)
     await perform("profile-preferences", "dedicated-account", async () => {
@@ -862,6 +878,9 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
                 ...agentBaseline(profile),
               })),
             }
+          : {}),
+        ...(failed && current.preferences
+          ? { notificationBaseline: notificationBaseline(current.preferences) }
           : {}),
         failed,
         pageErrors: current.pageErrors,
