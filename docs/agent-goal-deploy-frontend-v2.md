@@ -262,16 +262,7 @@ detached keeper so an SSH drop does not release it.
 
 **Step 5 — record and release the lock.**
 
-1. Append `### Frontend v2 <R1|…> upgrade checkpoint — <date>` to
-   `docs/deploy.md`, in the shape of the previous checkpoints:
-   - the SHA and tree, the CI links, the validation counts and performance
-     numbers;
-   - the backup and bundle identities;
-   - the migrations applied;
-   - what was replaced and what was retained;
-   - every public check, and the MCP round trip without the token;
-   - the neighbour and PostgreSQL preservation evidence;
-   - the rollback image identities.
+1. Write the checkpoint using the lean-delivery template (≤ 25 lines).
 2. Write the acceptance receipt, set `deployment.done` to the SHA, and
    release the lock with the keeper.
 3. Confirm with an independent flock probe that the lock is free and the
