@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       screens:
-        description: Optional space-separated v2 screens; empty captures all 26 screens and 126 PNGs
+        description: Optional space-separated v2 screens; empty captures all 26 light screens plus 60 dark PNGs (186 total)
         required: false
         type: string
         default: ""
