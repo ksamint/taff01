@@ -1,0 +1,80 @@
+{
+  "sourceSha": "2ca5b514bd3f7706f9f3b6f42fe91f18fa0f0b68",
+  "workflowRun": "https://github.com/ksamint/taff01/actions/runs/38674385255",
+  "scope": "Only Brief and Timeline light references; native phone/desktop en/zh-HK, including item 5 milestone controls. The complete CI visual gate is still required.",
+  "fixedReadDate": "2026-10-08",
+  "assertions": "Real Brief/Timeline API schema today and rendered Brief date are asserted; both Timeline today markers must align. Lazy stylesheet computed layouts are asserted.",
+  "nativeManifest": "v021-item5-date-fixed-capture-manifest.json",
+  "artifactManifestSha256": "c891f014d88ebb760fb78a12919e953d6b3ae4408ccf45183e1a838bee5777f0",
+  "verifiedCaseCount": 8,
+  "verifiedPngCount": 8,
+  "imported": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/brief.png",
+      "bytes": 79638,
+      "width": 1280,
+      "height": 800,
+      "sha256": "e6085c8cfcbcd35512c3ddcff140a58d19d79555f8892beabfe3a4328f35a4a0",
+      "before": "722c7b7b21cc3b37a44dcff46929958220cee15b188584604756936d3ace66ec"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/timeline.png",
+      "bytes": 128665,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f12af1af6cb5100f1dfc9529c482ae2473fdaeb24d4a2ef10505f96e39a16a83",
+      "before": "100cfb045de1d85ac929e4271e72d5ed9be4197663070e18044f5335d93fa07c"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/brief.png",
+      "bytes": 97122,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c95db5f11432abb60dd75b9c97ccdae12b1d998805bbe830993d599714f1e479",
+      "before": "1a6eaf30910e6685e34ecc7346c9fdf760691c9c11cbc5e04c91a1efa384f558"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/timeline.png",
+      "bytes": 132105,
+      "width": 1280,
+      "height": 800,
+      "sha256": "974b3f1162d7f80978e72e4158368d4eaa888286f5aefa05fc5dfddcd80f3d55",
+      "before": "ad0cf84abe7459159eaca2f5cbf5e8f7b816a9fccc92a043782482757bd21a93"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/brief.png",
+      "bytes": 56191,
+      "width": 390,
+      "height": 844,
+      "sha256": "193fa167a706dae5eb069e0e2535b9e369c3d68f0524c4326c01b63dc14b707e",
+      "before": "9a6b1753e92439eff326832c28a41a3389d660028a20b78844dc4dfddbcdf8e9"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/timeline.png",
+      "bytes": 67546,
+      "width": 390,
+      "height": 844,
+      "sha256": "1136ea33ec475bd4bcbf6c4877cc5db585ae293edeb8bdc7ce52e2456de52025",
+      "before": "34848668c635f95e17b9e1df77c447a4e5b76447822d50066190652b3ba37e2e"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/brief.png",
+      "bytes": 75158,
+      "width": 390,
+      "height": 844,
+      "sha256": "70ae4294e69cf3cca85061bea26c1ba483d3535b09654a1bad0c3d4bb97d84ef",
+      "before": "36f92a8f19875739e7ca96bc007b18929c79e41c4644210d3bcb9a9959c30947"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/timeline.png",
+      "bytes": 70529,
+      "width": 390,
+      "height": 844,
+      "sha256": "2c90663bf65b1d6319af1882dd2afea473f9b56ad5b6736a1d8a481f10f6d216",
+      "before": "60495ee70fa5261cefb2e96703c01f380e44e89f12cd2ef74f3fced457cc95fe"
+    }
+  ],
+  "policy": "Original native PNG bytes only. No tolerances changed. No unrelated paths imported. Brief PNG hashes equal independently inspected item 4 capture; four item 5 Timeline PNGs were inspected separately.",
+  "nativeManifestSha256": "cf2119c1c12777d68f01b46e9f3eb3828e7b3b323857b187c85660ac7aef09d5",
+  "manifestEncoding": "Repository JSON is formatter-normalized whitespace; parsed manifest equals the original artifact. Original artifact hash is retained separately and original bytes are retained in the verified local evidence archive."
+}
