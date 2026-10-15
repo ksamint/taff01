@@ -7,7 +7,7 @@ unchanged; the correction applies to new deployments.
 
 The new `scripts/deploy/neighbor_preservation.py` compares sanitized snapshots,
 including container identity, name, project/service, immutable image, reference,
-start time, running state and health. A Taff mutation journal match fails.
+creation/start/finish times, running state and health. A Taff mutation journal match fails.
 Unexplained drift blocks acceptance until attributed. Only an independently
 verified publisher receipt binding the exact before/after effects is
 informational. No project-name allowlist or blanket health exemption exists.
@@ -21,8 +21,12 @@ journal, immutable image and slot/result against Docker times before writing
 this receipt. `load_receipts` rehashes the original publisher source on every
 check. Docker labels or coincident timestamps alone do not establish causality.
 The publisher scopes Compose mutations to project `taff`; an unexpected mutation
-outside that scope must be recorded in `taff_effects` and fails even with a
-matching independent receipt. Runtime receipts and deployment journals stay
+outside that scope must be recorded in the private job's
+`taff-neighbor-effects.json` with `containerIds`, mutation log `source`, `sha256`
+and `verifiedAt`. Both probes rehash that log and pass these confirmed effects
+to the comparator; they fail even with a matching independent receipt. If the
+file is absent, an unexpected change stays blocked for investigation. Concurrent
+Docker transitions alone are never treated as proof that Taff caused them. Runtime receipts and deployment journals stay
 private; do not store container environments.
 
 The new-release controller and independent unlock probe are rendered by the

@@ -7,7 +7,7 @@ privately. No container environment is needed. Unknown drift blocks acceptance.
 import json
 import sys
 
-FIELDS = ('name', 'project', 'service', 'image', 'reference', 'startedAt', 'running', 'health')
+FIELDS = ('name', 'project', 'service', 'image', 'reference', 'created', 'startedAt', 'finishedAt', 'running', 'health')
 
 
 def identity(container_id, row):
@@ -71,12 +71,6 @@ def compare(before, current, receipts=(), taff_effects=()):
     return result
 
 
-if __name__ == '__main__':
-    with open(sys.argv[1]) as source:
-        inputs = json.load(source)
-    report = compare(**inputs)
-    print(json.dumps(report, indent=2))
-    sys.exit(0 if report['status'] == 'passed' else 1)
 
 
 def load_receipts(path):
@@ -93,3 +87,33 @@ def load_receipts(path):
         if hashlib.sha256(source.read_bytes()).hexdigest() != receipt['sha256']:
             raise ValueError('independent publisher receipt changed')
     return receipts
+
+
+def load_taff_effects(path):
+    """Read confirmed Taff effects, corroborated by a private mutation journal.
+
+    Simultaneous Docker changes alone are insufficient attribution. The operator
+    confirms the explicit command targets from the publisher log before writing
+    this file; unexplained changes block until that investigation is complete.
+    """
+    import hashlib
+    from pathlib import Path
+    if not Path(path).exists():
+        return []
+    receipt = json.loads(Path(path).read_text())
+    if hashlib.sha256(Path(receipt['source']).read_bytes()).hexdigest() != receipt['sha256']:
+        raise ValueError('Taff mutation journal changed')
+    if not receipt['verifiedAt'] or not receipt['containerIds']:
+        raise ValueError('confirmed Taff effects required')
+    return receipt['containerIds']
+
+
+if __name__ == '__main__':
+    with open(sys.argv[1]) as source:
+        inputs = json.load(source)
+    # CLI accepts receipt paths so an unverified JSON array cannot bypass hashes.
+    report = compare(inputs['before'], inputs['current'],
+                     load_receipts(inputs['independentReceipts']),
+                     load_taff_effects(inputs['taffEffects']))
+    print(json.dumps(report, indent=2))
+    sys.exit(0 if report['status'] == 'passed' else 1)
