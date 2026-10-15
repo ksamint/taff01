@@ -50,6 +50,15 @@ export async function seedDemo(options: {
             .limit(1);
         }
         if (!existing) throw new Error("Demo signup did not create a user");
+        // Seeded addresses are fixtures nobody can receive mail at, so they
+        // are marked verified (and can accept invitations). Only the flag
+        // changes, once; names, passwords and sessions stay untouched.
+        if (!existing.emailVerified)
+          [existing] = await tx
+            .update(user)
+            .set({ emailVerified: true, updatedAt: new Date() })
+            .where(eq(user.id, existing.id))
+            .returning();
         users.push(existing);
       }
       const actor = users[0];

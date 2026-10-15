@@ -15,6 +15,8 @@ import type {
 } from "@taff/schemas";
 import { QueryClient } from "@tanstack/react-query";
 import { describe, expect, it } from "vitest";
+import { patchTask, snapshotM3 } from "../optimistic-m3";
+import { restoreQueries } from "../query-snapshot";
 import {
   decidedGrantStatus,
   optimisticGrant,
@@ -38,6 +40,7 @@ import { replaceById } from "./replace";
 import { controlOutcome, reviewDraftKey, reviewOutcome } from "./review";
 import { withProfile } from "./session";
 import {
+  inversePatch,
   optimisticQuickAddTask,
   optimisticRun,
   optimisticSubtask,
@@ -595,5 +598,31 @@ describe("tasks", () => {
       durationMs: 0,
       costMicros: 0,
     });
+  });
+
+  it("shows a phone status change at once and rolls it back on failure", async () => {
+    const client = new QueryClient();
+    const sibling = { ...parent, id: "sibling", status: "todo" } as Task;
+    client.setQueryData(["tasks", "ws"], [parent, sibling]);
+    client.setQueryData(["task", parent.id], parent);
+    const patch = { status: "done" } as const;
+    // Undo sends the previous value with the version the save returned.
+    expect(inversePatch(parent, patch)).toEqual({ status: "in_progress" });
+    const snapshot = await snapshotM3(client);
+    patchTask(client, parent.id, { ...patch, version: parent.version + 1 });
+    expect(client.getQueryData<Task>(["task", parent.id])).toMatchObject({
+      status: "done",
+      version: 5,
+    });
+    expect(
+      client.getQueryData<Task[]>(["tasks", "ws"])?.map((item) => item.status),
+    ).toEqual(["done", "todo"]);
+    restoreQueries(client, snapshot);
+    expect(client.getQueryData<Task>(["task", parent.id])).toEqual(parent);
+    expect(client.getQueryData<Task[]>(["tasks", "ws"])).toEqual([
+      parent,
+      sibling,
+    ]);
+    client.clear();
   });
 });

@@ -43,9 +43,10 @@ export function NotificationsView({
         : Notification.permission,
     );
   }, [me.user.id]);
+  // Controls stay enabled while a save is in flight; later choices queue
+  // latest-wins behind it instead of being ignored (see createLatestWriter).
   const change = (patch: Partial<NotificationPreferences>) => {
-    if (preferences.data && !busy)
-      update.mutate({ ...preferences.data, ...patch });
+    if (preferences.data) void update.change(patch);
   };
   const row = (
     key: "review" | "block" | "mention" | "done" | "digest" | "quiet",
@@ -59,7 +60,7 @@ export function NotificationsView({
         data-testid={`notification-${key}`}
         checked={preferences.data?.[key] ?? false}
         aria-checked={preferences.data?.[key] ?? false}
-        disabled={busy || !preferences.data}
+        disabled={!preferences.data}
         onChange={(event) => change({ [key]: event.target.checked })}
       />
     </Label>
@@ -106,7 +107,6 @@ export function NotificationsView({
             {preferences.data?.digest && (
               <fieldset
                 className="notification-times"
-                disabled={busy}
                 aria-describedby="notification-time-zone"
               >
                 <legend className="sr-only">{t("notifications.time")}</legend>
