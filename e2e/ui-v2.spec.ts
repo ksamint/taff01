@@ -387,20 +387,6 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       }
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await page.evaluate(prepareFonts);
-      if (screen === "relations" && locale === "en") {
-        const downloads = await page.evaluate(() =>
-          performance.getEntriesByType("resource").map((entry) => entry.name),
-        );
-        expect(
-          downloads.some((url) => url.endsWith("/NotoSansTC-ui-symbols.woff2")),
-        ).toBe(true);
-        expect(
-          downloads.some((url) =>
-            url.endsWith("/NotoSansTC-ui-remaining.woff2"),
-          ),
-        ).toBe(false);
-      }
-
       if (desktop && (screen === "projects" || screen === "type"))
         await assertDesktopBoardActions();
       await page.mouse.move(0, 0);

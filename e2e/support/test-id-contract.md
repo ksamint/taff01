@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (316 distinct, 1239 uses)
+## Test ids (317 distinct, 1241 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -384,11 +384,12 @@ several do). “Also rendered by” lists the other files.
 | `relations-fit` | 1 |  | timeline.spec.ts |
 | `relations-inspector` | 1 |  | timeline.spec.ts |
 | `relations-inspector-title` | 3 |  | timeline.spec.ts |
+| `relations-layer-people` | 1 |  | font-loading.spec.ts |
 | `relations-layout-force` | 1 |  | timeline.spec.ts |
 | `relations-layout-layered` | 1 |  | timeline.spec.ts |
 | `relations-list-node` | 1 |  | timeline.spec.ts |
 | `relations-list-open-task` | 1 |  | timeline.spec.ts |
-| `relations-node` | 2 |  | timeline.spec.ts, ui-v2.spec.ts |
+| `relations-node` | 3 |  | font-loading.spec.ts, timeline.spec.ts, ui-v2.spec.ts |
 | `relations-node-hit` | 1 |  | timeline.spec.ts |
 | `relations-open-task` | 1 |  | timeline.spec.ts |
 | `relations-relation` | 1 |  | timeline.spec.ts |

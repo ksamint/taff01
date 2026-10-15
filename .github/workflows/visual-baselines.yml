@@ -105,6 +105,8 @@ jobs:
           done
       - name: Dark route captures in all three locales and both viewports
         run: UI_THEME=dark pnpm ui:app-shots docs/ui/screenshots/v021-dark
+      - name: English Relations font download regression
+        run: pnpm exec playwright test e2e/font-loading.spec.ts
       - name: Record native capture and runtime identities
         run: |
           node <<'JS'

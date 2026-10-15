@@ -281,9 +281,10 @@ uses the same CSS weight descriptor as its sibling Unicode faces; its outline
 stays constant across that range.
 
 English Relations previously downloaded the 224,900-byte CJK asset solely for
-`↔`. It now requests the 2,304-byte symbols face. The visual Relations test
-asserts that English requests this face and does not request the remaining CJK
-asset. `prepare-fonts.ts` checks all seven installed CSS faces and only prepares
+`↔`. It now requests the 2,304-byte symbols face. The isolated English-workspace Relations browser test
+asserts that the arrow requests this face and does not request the remaining CJK
+asset. The Northwind visual fixture retains Chinese user content in every UI
+language, so its CJK requests remain legitimate. `prepare-fonts.ts` checks all seven installed CSS faces and only prepares
 faces the browser actually selected, preserving this network check. User text
 containing Chinese can still legitimately request CJK assets.
 
