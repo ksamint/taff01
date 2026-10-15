@@ -11,6 +11,7 @@ const PHASE_B = [
   "0024_m17_suggestions_ai.sql",
   "0025_m18_mind_map.sql",
   "0026_m18_mind_edge_version.sql",
+  "0027_v021_suggestion_undo.sql",
 ];
 const ADDITIVE = [
   /^CREATE TABLE "[a-z_]+" \(/,

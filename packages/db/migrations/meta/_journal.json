@@ -190,6 +190,13 @@
       "when": 1791956916653,
       "tag": "0026_m18_mind_edge_version",
       "breakpoints": true
+    },
+    {
+      "idx": 27,
+      "version": "7",
+      "when": 1792030000000,
+      "tag": "0027_v021_suggestion_undo",
+      "breakpoints": true
     }
   ]
 }

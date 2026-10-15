@@ -182,7 +182,7 @@ export function createCrmOperations({
     return {
       workspaceId: row.workspaceId,
       title: row.title,
-      archived: false,
+      archived: !!row.archivedAt,
       projectId: row.projectId,
     };
   }
@@ -409,7 +409,7 @@ export function createCrmOperations({
     const columns = details
       ? [contacts.name, contacts.title, contacts.email, contacts.phone]
       : [contacts.name, contacts.title];
-    return (
+    const listed = (
       await db
         .select()
         .from(contacts)
@@ -428,6 +428,29 @@ export function createCrmOperations({
         )
         .orderBy(asc(contacts.name), asc(contacts.id))
     ).map((row) => dtoContact(row, details));
+    if (!listed.length) return listed;
+    const roles = await db
+      .select({ contactId: contactRoles.contactId, role: contactRoles.role })
+      .from(contactRoles)
+      .where(
+        and(
+          eq(contactRoles.workspaceId, w),
+          inArray(
+            contactRoles.contactId,
+            listed.map((contact) => contact.id),
+          ),
+        ),
+      );
+    const byContact = new Map<string, Set<ContactRole>>();
+    for (const { contactId, role } of roles) {
+      const values = byContact.get(contactId) ?? new Set<ContactRole>();
+      values.add(role as ContactRole);
+      byContact.set(contactId, values);
+    }
+    return listed.map((contact) => ({
+      ...contact,
+      roles: sortRoles([...(byContact.get(contact.id) ?? [])]),
+    }));
   }
   async function getContactDetail(
     p: Principal,

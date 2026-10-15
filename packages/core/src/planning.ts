@@ -224,7 +224,7 @@ export function createPlanningOperations({
   async function readTask(p: Principal, id: string) {
     parse(idSchema, id);
     const [task] = await db.select().from(tasks).where(eq(tasks.id, id));
-    if (!task) throw new CoreError("not_found", 404);
+    if (!task || task.archivedAt) throw new CoreError("not_found", 404);
     const actor = await requireMember(
       db,
       p,
@@ -262,7 +262,13 @@ export function createPlanningOperations({
         await db
           .select({ id: tasks.id })
           .from(tasks)
-          .where(and(eq(tasks.parentId, id), sql`${tasks.status}<>'done'`))
+          .where(
+            and(
+              isNull(tasks.archivedAt),
+              eq(tasks.parentId, id),
+              sql`${tasks.status}<>'done'`,
+            ),
+          )
           .limit(1)
       ).length > 0;
     return {
@@ -833,7 +839,10 @@ export function createPlanningOperations({
       ? memberships.map((m) => m.workspaceId)
       : [w];
     const filter = body.filters ?? {};
-    const conditions: SQL[] = [inArray(tasks.workspaceId, ids)];
+    const conditions: SQL[] = [
+      inArray(tasks.workspaceId, ids),
+      isNull(tasks.archivedAt),
+    ];
     let text = body.query;
     const statusMap: Record<string, Task["status"]> = {
       todo: "todo",

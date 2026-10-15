@@ -246,9 +246,18 @@ export function createTimelineOperations({
     const rows = await db
       .select({ task: tasks, plan: taskPlans, workerKind: members.kind })
       .from(tasks)
-      .leftJoin(taskPlans, eq(taskPlans.taskId, tasks.id))
+      .leftJoin(
+        taskPlans,
+        and(eq(taskPlans.taskId, tasks.id), isNull(taskPlans.archivedAt)),
+      )
       .leftJoin(members, eq(members.id, tasks.workerId))
-      .where(and(eq(tasks.workspaceId, w), eq(tasks.projectId, projectId)))
+      .where(
+        and(
+          eq(tasks.workspaceId, w),
+          eq(tasks.projectId, projectId),
+          isNull(tasks.archivedAt),
+        ),
+      )
       .orderBy(tasks.number);
     const ids = rows.map((row) => row.task.id);
     const blocked = new Set(
@@ -413,6 +422,7 @@ export function createTimelineOperations({
         .where(
           and(
             eq(tasks.workspaceId, root.workspaceId),
+            isNull(tasks.archivedAt),
             inArray(tasks.parentId, frontier),
           ),
         )
@@ -457,11 +467,12 @@ export function createTimelineOperations({
         await taskResource(tx, task),
       );
       const tz = await zoneOf(tx, p, actor);
-      const [existing] = await tx
+      const [stored] = await tx
         .select()
         .from(taskPlans)
         .where(eq(taskPlans.taskId, taskId))
         .for("update");
+      const existing = stored?.archivedAt ? undefined : stored;
       if (
         body.version === undefined
           ? existing
@@ -491,7 +502,8 @@ export function createTimelineOperations({
         const shown = buildPlanModel({
           today: body.startDate,
           tasks: [task, ...descendants].map((row) => {
-            const plan = plans.get(row.id);
+            const storedPlan = plans.get(row.id);
+            const plan = storedPlan?.archivedAt ? undefined : storedPlan;
             return {
               ...row,
               parentId: row.id === taskId ? null : row.parentId,
@@ -510,7 +522,8 @@ export function createTimelineOperations({
           : 0;
         if (delta)
           for (const row of descendants) {
-            const plan = plans.get(row.id);
+            const storedPlan = plans.get(row.id);
+            const plan = storedPlan?.archivedAt ? undefined : storedPlan;
             if (!plan && !row.dueAt) continue;
             // Moving someone else's work needs the same right as moving it alone.
             await requireMember(
@@ -550,11 +563,12 @@ export function createTimelineOperations({
         startDate: body.startDate,
         durationDays: body.durationDays,
         updatedAt: new Date(),
+        archivedAt: null,
       };
-      const [plan] = existing
+      const [plan] = stored
         ? await tx
             .update(taskPlans)
-            .set({ ...values, version: existing.version + 1 })
+            .set({ ...values, version: stored.version + 1 })
             .where(eq(taskPlans.taskId, taskId))
             .returning()
         : await tx
@@ -729,7 +743,7 @@ export function createTimelineOperations({
       const [predecessor] =
         from.kind === "task"
           ? await tx
-              .select({ archivedAt: sql<Date | null>`null` })
+              .select({ archivedAt: tasks.archivedAt })
               .from(tasks)
               .where(and(eq(tasks.id, from.id), eq(tasks.workspaceId, w)))
               .for("share")

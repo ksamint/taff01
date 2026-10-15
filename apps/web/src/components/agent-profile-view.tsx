@@ -155,6 +155,53 @@ function AgentEditor({
     setValidationError(!parsed.success);
     if (parsed.success) grant.mutate(parsed.data);
   }
+  const grantHistory = (
+    <section className="agent-profile-section agent-profile-grants">
+      <h2>{t("grants.history")}</h2>
+      {data.grants.length === 0 ? (
+        <p className="section-hint">{t("grants.none")}</p>
+      ) : (
+        <ul className="grant-list">
+          {data.grants.map((item) => (
+            <li key={item.id} data-testid="grant-card">
+              <div className="section-heading">
+                <strong>
+                  {t(`agentProfile.capability.${item.capability}`)}
+                </strong>
+                <span className="status">
+                  {t(`grants.status.${item.status}`)}
+                </span>
+              </div>
+              <p className="preserve-text">{item.reason}</p>
+              <p className="section-hint">
+                {item.taskId
+                  ? t("grants.taskScope", {
+                      task: tasks.data?.some((task) => task.id === item.taskId)
+                        ? taskTitle(item.taskId)
+                        : item.taskId,
+                    })
+                  : t("grants.workspaceScope")}
+              </p>
+              <p className="section-hint">
+                {item.expiresAt
+                  ? t("grants.expires", { date: when(item.expiresAt) })
+                  : t("grants.notGranted")}
+              </p>
+              <p className="section-hint">
+                {t("grants.recorded", {
+                  date: when(item.updatedAt),
+                  name: item.decidedBy
+                    ? name(item.decidedBy)
+                    : t("grants.pending"),
+                })}
+              </p>
+              <GrantActions grant={item} canDecide={data.canDecideGrants} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
   return (
     <div className={`agent-profile-parity${embedded ? " is-embedded" : ""}`}>
       {!embedded && (
@@ -166,282 +213,264 @@ function AgentEditor({
         </div>
       )}
       <div className="agent-profile-body">
-        <header className="agent-profile-heading">
-          <span className="agent-profile-avatar" aria-hidden="true">
-            <Sparkles size={24} />
-          </span>
-          <div>
-            <h1 data-testid="agent-profile-heading">
-              {displayName(data.member.id, data.member.name)}
-            </h1>
-            <p>
-              {t("agentProfile.supervisedBy", {
-                name: name(data.supervisorId),
-              })}
-            </p>
-          </div>
-        </header>
-        <ul
-          className="agent-profile-capabilities"
-          aria-label={t("agentProfile.permissions")}
-        >
-          {data.permissions
-            .filter((item) => item.decision !== "deny")
-            .map((item) => (
-              <li key={item.capability}>
-                {t(`agentProfile.capability.${item.capability}`)}
-              </li>
-            ))}
-        </ul>
-        {currentTasks.length > 0 && (
-          <section className="agent-profile-section">
-            <h2>{t("search.tasks")}</h2>
-            <ul className="agent-current-tasks">
-              {currentTasks.map((task) => {
-                const run = data.runs.find((item) => item.taskId === task.id);
-                const reference = taskReference(workspace.key, task.number);
-                return (
-                  <li key={task.id}>
-                    <Link href={`/tasks/${task.id}`} prefetch={false}>
-                      <StatusGlyph status={task.status} />
-                      {reference && (
-                        <span className="agent-task-reference">
-                          {reference}
-                        </span>
-                      )}
-                      <span className="agent-task-title">
-                        {taskTitle(task.id)}
-                      </span>
-                      <span className="agent-task-state">
-                        {run && (
-                          <span
-                            className={`agent-task-dot agent-task-dot-${run.status}`}
-                            aria-hidden="true"
-                          />
-                        )}
-                        {run
-                          ? t(`run.status.${run.status}`)
-                          : t(`status.${task.status}`)}
-                      </span>
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </section>
-        )}
-        <section className="agent-profile-section">
-          <h2>{t("agentProfile.permissions")}</h2>
-          <p className="section-hint">{t("agentProfile.permissionsHint")}</p>
-          <div className="permission-list">
-            {data.permissions.map((item) => (
-              <div className="permission-row" key={item.capability}>
-                <div>
-                  <strong>
-                    {t(`agentProfile.capability.${item.capability}`)}
-                  </strong>
-                  <code>{item.capability}</code>
-                </div>
-                <div
-                  className="segmented"
-                  role="group"
-                  aria-label={t(`agentProfile.capability.${item.capability}`)}
-                >
-                  {(["allow", "ask", "deny"] as const).map((decision) => (
-                    <button
-                      type="button"
-                      key={decision}
-                      data-testid={`permission-${item.capability}-${decision}`}
-                      disabled={!data.canManage || busy}
-                      aria-pressed={item.decision === decision}
-                      onClick={() =>
-                        permission.mutate({
-                          capability: item.capability,
-                          decision,
-                        })
-                      }
-                    >
-                      {t(`agentProfile.decision.${decision}`)}
-                    </button>
-                  ))}
-                </div>
+        <div className="agent-profile-layout">
+          <div className="agent-profile-overview">
+            <header className="agent-profile-heading">
+              <span className="agent-profile-avatar" aria-hidden="true">
+                <Sparkles size={24} />
+              </span>
+              <div>
+                <h1 data-testid="agent-profile-heading">
+                  {displayName(data.member.id, data.member.name)}
+                </h1>
+                <p>
+                  {t("agentProfile.supervisedBy", {
+                    name: name(data.supervisorId),
+                  })}
+                </p>
               </div>
-            ))}
-          </div>
-          {permission.isError && (
-            <p className="alert" role="alert">
-              {t(errorKey(permission.error))}
-            </p>
-          )}
-        </section>
-        <section className="agent-profile-section agent-policy-section">
-          <h2>{t("agentProfile.policy")}</h2>
-          <form onSubmit={submit} noValidate>
-            <fieldset
-              disabled={!data.canManage || busy}
-              className="plain-fieldset"
+            </header>
+            <ul
+              className="agent-profile-capabilities"
+              aria-label={t("agentProfile.permissions")}
             >
-              <div
-                className="segmented agent-policy-segmented"
-                role="group"
-                aria-label={t("agentProfile.policy")}
-              >
-                {(["always_review", "ask_only"] as const).map((value) => (
-                  <button
-                    key={value}
-                    type="button"
-                    aria-pressed={policy === value}
-                    onClick={() => setPolicy(value)}
-                  >
-                    {t(
-                      value === "always_review"
-                        ? "agentProfile.alwaysReview"
-                        : "agentProfile.askOnly",
-                    )}
-                  </button>
+              {data.permissions
+                .filter((item) => item.decision !== "deny")
+                .map((item) => (
+                  <li key={item.capability}>
+                    {t(`agentProfile.capability.${item.capability}`)}
+                  </li>
+                ))}
+            </ul>
+            {currentTasks.length > 0 && (
+              <section className="agent-profile-section">
+                <div className="agent-profile-work-heading">
+                  <h2>{t("search.tasks")}</h2>
+                  {embedded && (
+                    <Link
+                      className="text-link"
+                      href={`/projects?agent=${data.member.id}`}
+                      prefetch={false}
+                    >
+                      {t("me.showAgentOnBoard")}
+                    </Link>
+                  )}
+                </div>
+                <ul className="agent-current-tasks">
+                  {currentTasks.map((task) => {
+                    const run = data.runs.find(
+                      (item) => item.taskId === task.id,
+                    );
+                    const reference = taskReference(workspace.key, task.number);
+                    return (
+                      <li key={task.id}>
+                        <Link href={`/tasks/${task.id}`} prefetch={false}>
+                          <StatusGlyph status={task.status} />
+                          {reference && (
+                            <span className="agent-task-reference">
+                              {reference}
+                            </span>
+                          )}
+                          <span className="agent-task-title">
+                            {taskTitle(task.id)}
+                          </span>
+                          <span className="agent-task-state">
+                            {run && (
+                              <span
+                                className={`agent-task-dot agent-task-dot-${run.status}`}
+                                aria-hidden="true"
+                              />
+                            )}
+                            {run
+                              ? t(`run.status.${run.status}`)
+                              : t(`status.${task.status}`)}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            )}
+            {embedded && grantHistory}
+          </div>
+          <div className="agent-profile-controls">
+            <section className="agent-profile-section">
+              <h2>{t("agentProfile.permissions")}</h2>
+              <p className="section-hint">
+                {t("agentProfile.permissionsHint")}
+              </p>
+              <div className="permission-list">
+                {data.permissions.map((item) => (
+                  <div className="permission-row" key={item.capability}>
+                    <div>
+                      <strong>
+                        {t(`agentProfile.capability.${item.capability}`)}
+                      </strong>
+                      <code>{item.capability}</code>
+                    </div>
+                    <div
+                      className="segmented"
+                      role="group"
+                      aria-label={t(
+                        `agentProfile.capability.${item.capability}`,
+                      )}
+                    >
+                      {(["allow", "ask", "deny"] as const).map((decision) => (
+                        <button
+                          type="button"
+                          key={decision}
+                          data-testid={`permission-${item.capability}-${decision}`}
+                          disabled={!data.canManage || busy}
+                          aria-pressed={item.decision === decision}
+                          onClick={() =>
+                            permission.mutate({
+                              capability: item.capability,
+                              decision,
+                            })
+                          }
+                        >
+                          {t(`agentProfile.decision.${decision}`)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))}
               </div>
-              <p className="field-hint">{t("agentProfile.policyHint")}</p>
-              <details
-                className="agent-profile-disclosure"
-                data-testid="agent-settings-details"
-              >
-                <summary>{t("agentProfile.settings")}</summary>
-                <div className="field">
-                  <Label htmlFor="agent-supervisor">
-                    {t("agentProfile.supervisor")}
-                  </Label>
-                  <select
-                    id="agent-supervisor"
-                    data-testid="agent-supervisor"
-                    value={supervisorId}
-                    onChange={(event) => setSupervisorId(event.target.value)}
-                  >
-                    <option value="">{t("agentProfile.noSupervisor")}</option>
-                    {members.data
-                      ?.filter((member) => member.kind === "person")
-                      .map((member) => (
-                        <option key={member.id} value={member.id}>
-                          {displayName(member.id, member.name)}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-                <div className="field">
-                  <Label htmlFor="agent-policy">
-                    {t("agentProfile.policy")}
-                  </Label>
-                  <select
-                    id="agent-policy"
-                    data-testid="agent-policy"
-                    value={policy}
-                    onChange={(event) =>
-                      setPolicy(event.target.value as ReviewPolicy)
-                    }
-                  >
-                    <option value="always_review">
-                      {t("agentProfile.alwaysReview")}
-                    </option>
-                    <option value="ask_only">
-                      {t("agentProfile.askOnly")}
-                    </option>
-                  </select>
-                </div>
-                <div className="assignment-fields">
-                  <div className="field">
-                    <Label htmlFor="agent-duration">
-                      {t("agentProfile.maxDuration")}
-                    </Label>
-                    <Input
-                      id="agent-duration"
-                      type="number"
-                      min="0.001"
-                      step="0.001"
-                      value={duration}
-                      onChange={(event) => setDuration(event.target.value)}
-                      placeholder={t("agentProfile.unlimited")}
-                    />
-                  </div>
-                  <div className="field">
-                    <Label htmlFor="agent-cost">
-                      {t("agentProfile.maxCost")}
-                    </Label>
-                    <Input
-                      id="agent-cost"
-                      type="number"
-                      min="0.000001"
-                      step="0.000001"
-                      value={cost}
-                      onChange={(event) => setCost(event.target.value)}
-                      placeholder={t("agentProfile.unlimited")}
-                    />
-                  </div>
-                </div>
-              </details>
-              <div className="action-row">
-                <Button
-                  data-testid="agent-save"
-                  type="submit"
-                  className="button-primary"
+              {permission.isError && (
+                <p className="alert" role="alert">
+                  {t(errorKey(permission.error))}
+                </p>
+              )}
+            </section>
+            <section className="agent-profile-section agent-policy-section">
+              <h2>{t("agentProfile.policy")}</h2>
+              <form onSubmit={submit} noValidate>
+                <fieldset
+                  disabled={!data.canManage || busy}
+                  className="plain-fieldset"
                 >
-                  {t(save.isPending ? "working" : "agentProfile.save")}
-                </Button>
-              </div>
-            </fieldset>
-          </form>
-          {save.isSuccess && (
-            <p role="status" className="section-hint">
-              {t("agentProfile.saved")}
-            </p>
-          )}
-        </section>
-        <section className="agent-profile-section agent-profile-grants">
-          <h2>{t("grants.history")}</h2>
-          {data.grants.length === 0 ? (
-            <p className="section-hint">{t("grants.none")}</p>
-          ) : (
-            <ul className="grant-list">
-              {data.grants.map((item) => (
-                <li key={item.id} data-testid="grant-card">
-                  <div className="section-heading">
-                    <strong>
-                      {t(`agentProfile.capability.${item.capability}`)}
-                    </strong>
-                    <span className="status">
-                      {t(`grants.status.${item.status}`)}
-                    </span>
+                  <div
+                    className="segmented agent-policy-segmented"
+                    role="group"
+                    aria-label={t("agentProfile.policy")}
+                  >
+                    {(["always_review", "ask_only"] as const).map((value) => (
+                      <button
+                        key={value}
+                        type="button"
+                        aria-pressed={policy === value}
+                        onClick={() => setPolicy(value)}
+                      >
+                        {t(
+                          value === "always_review"
+                            ? "agentProfile.alwaysReview"
+                            : "agentProfile.askOnly",
+                        )}
+                      </button>
+                    ))}
                   </div>
-                  <p className="preserve-text">{item.reason}</p>
-                  <p className="section-hint">
-                    {item.taskId
-                      ? t("grants.taskScope", {
-                          task: tasks.data?.some(
-                            (task) => task.id === item.taskId,
-                          )
-                            ? taskTitle(item.taskId)
-                            : item.taskId,
-                        })
-                      : t("grants.workspaceScope")}
-                  </p>
-                  <p className="section-hint">
-                    {item.expiresAt
-                      ? t("grants.expires", { date: when(item.expiresAt) })
-                      : t("grants.notGranted")}
-                  </p>
-                  <p className="section-hint">
-                    {t("grants.recorded", {
-                      date: when(item.updatedAt),
-                      name: item.decidedBy
-                        ? name(item.decidedBy)
-                        : t("grants.pending"),
-                    })}
-                  </p>
-                  <GrantActions grant={item} canDecide={data.canDecideGrants} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+                  <p className="field-hint">{t("agentProfile.policyHint")}</p>
+                  <details
+                    className="agent-profile-disclosure"
+                    data-testid="agent-settings-details"
+                  >
+                    <summary>{t("agentProfile.settings")}</summary>
+                    <div className="field">
+                      <Label htmlFor="agent-supervisor">
+                        {t("agentProfile.supervisor")}
+                      </Label>
+                      <select
+                        id="agent-supervisor"
+                        data-testid="agent-supervisor"
+                        value={supervisorId}
+                        onChange={(event) =>
+                          setSupervisorId(event.target.value)
+                        }
+                      >
+                        <option value="">
+                          {t("agentProfile.noSupervisor")}
+                        </option>
+                        {members.data
+                          ?.filter((member) => member.kind === "person")
+                          .map((member) => (
+                            <option key={member.id} value={member.id}>
+                              {displayName(member.id, member.name)}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    <div className="field">
+                      <Label htmlFor="agent-policy">
+                        {t("agentProfile.policy")}
+                      </Label>
+                      <select
+                        id="agent-policy"
+                        data-testid="agent-policy"
+                        value={policy}
+                        onChange={(event) =>
+                          setPolicy(event.target.value as ReviewPolicy)
+                        }
+                      >
+                        <option value="always_review">
+                          {t("agentProfile.alwaysReview")}
+                        </option>
+                        <option value="ask_only">
+                          {t("agentProfile.askOnly")}
+                        </option>
+                      </select>
+                    </div>
+                    <div className="assignment-fields">
+                      <div className="field">
+                        <Label htmlFor="agent-duration">
+                          {t("agentProfile.maxDuration")}
+                        </Label>
+                        <Input
+                          id="agent-duration"
+                          type="number"
+                          min="0.001"
+                          step="0.001"
+                          value={duration}
+                          onChange={(event) => setDuration(event.target.value)}
+                          placeholder={t("agentProfile.unlimited")}
+                        />
+                      </div>
+                      <div className="field">
+                        <Label htmlFor="agent-cost">
+                          {t("agentProfile.maxCost")}
+                        </Label>
+                        <Input
+                          id="agent-cost"
+                          type="number"
+                          min="0.000001"
+                          step="0.000001"
+                          value={cost}
+                          onChange={(event) => setCost(event.target.value)}
+                          placeholder={t("agentProfile.unlimited")}
+                        />
+                      </div>
+                    </div>
+                  </details>
+                  <div className="action-row">
+                    <Button
+                      data-testid="agent-save"
+                      type="submit"
+                      className="button-primary"
+                    >
+                      {t(save.isPending ? "working" : "agentProfile.save")}
+                    </Button>
+                  </div>
+                </fieldset>
+              </form>
+              {save.isSuccess && (
+                <p role="status" className="section-hint">
+                  {t("agentProfile.saved")}
+                </p>
+              )}
+            </section>
+          </div>
+        </div>
+        {!embedded && grantHistory}
         <details
           className="agent-profile-disclosure"
           data-testid="agent-run-history"

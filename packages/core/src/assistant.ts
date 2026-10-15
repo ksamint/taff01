@@ -26,7 +26,7 @@ import {
   SchemaError,
   type SuggestionKind,
 } from "@taff/schemas";
-import { and, asc, eq, inArray, ne, or } from "drizzle-orm";
+import { and, asc, eq, inArray, ne, or, sql } from "drizzle-orm";
 import type { AiProvider } from "./ai-provider";
 import { answerAsk } from "./ask";
 import { type BriefSource, buildBrief } from "./brief";
@@ -233,6 +233,7 @@ export function createAssistantOperations({
           and(
             eq(tasks.workspaceId, w),
             ne(tasks.status, "done"),
+            sql`${tasks.archivedAt} IS NULL`,
             or(eq(tasks.ownerId, actor.id), eq(tasks.workerId, actor.id)),
           ),
         )

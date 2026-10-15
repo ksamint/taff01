@@ -129,6 +129,39 @@ describe.skipIf(!url)("M12 CRM invariants (DEPLOY.md rules 1–7)", () => {
     if (connection) await connection.close();
   });
 
+  it("lists distinct roles across company, project and task links without duplicates", async () => {
+    const company = await core.createCompany(alice, w, {
+      name: "Role summary client",
+    });
+    const contact = await core.createContact(alice, w, {
+      name: "Summary buyer",
+      companyId: company.id,
+    });
+    const project = await core.createProject(alice, w, {
+      name: "Role summary project",
+    });
+    const work = await task("Role summary task", project.id);
+    await core.setContactRoles(alice, "company", company.id, contact.id, {
+      roles: ["finance", "decider"],
+    });
+    await core.setContactRoles(alice, "project", project.id, contact.id, {
+      roles: ["decider", "tech"],
+    });
+    await core.setContactRoles(alice, "task", work.id, contact.id, {
+      roles: ["tech"],
+    });
+    expect(
+      (await core.listContacts(alice, w)).find((row) => row.id === contact.id)
+        ?.roles,
+    ).toEqual(["decider", "tech", "finance"]);
+    await core.unlinkContact(alice, "project", project.id, contact.id);
+    expect(
+      (await core.listContacts(alice, w)).find((row) => row.id === contact.id)
+        ?.roles,
+    ).toEqual(["decider", "finance"]);
+    await clean();
+  });
+
   it("creates, edits, archives and restores companies and contacts with versions and activity", async () => {
     let company!: Awaited<ReturnType<Core["createCompany"]>>;
     expect(

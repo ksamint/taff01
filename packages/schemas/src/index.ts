@@ -276,7 +276,7 @@ export const decideGrantSchema = strictObject({
   expiresAt: optional(iso.datetime({ offset: true })),
 });
 export const inboxFilterSchema = strictObject({
-  tab: _default(zodEnum(["all", "reviews", "blockers"]), "all"),
+  tab: _default(zodEnum(["all", "reviews", "blockers", "snoozed"]), "all"),
 });
 export const inboxItemInputSchema = strictObject({
   read: optional(boolean()),

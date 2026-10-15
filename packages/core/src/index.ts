@@ -489,7 +489,10 @@ export function createCore(options: {
     parse(idSchema, workspaceId);
     await requireMember(db, principal, workspaceId, "workspace:read");
     const body = parse(taskFilterSchema, filter);
-    const where = [eq(tasks.workspaceId, workspaceId)];
+    const where = [
+      eq(tasks.workspaceId, workspaceId),
+      isNull(tasks.archivedAt),
+    ];
     if (body.status) where.push(eq(tasks.status, body.status));
     for (const key of [
       "projectId",
@@ -623,7 +626,7 @@ export function createCore(options: {
       .where(eq(tasks.id, taskId))
       .limit(1)
       .for("update");
-    if (!task) throw new CoreError("not_found", 404);
+    if (!task || task.archivedAt) throw new CoreError("not_found", 404);
     return task;
   }
   /** Locks a task the principal belongs to; outsiders see not_found, never a version or 403. */

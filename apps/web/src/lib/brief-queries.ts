@@ -88,8 +88,7 @@ export function useAsk() {
 
 /**
  * A person applies or dismisses an agent's proposal with its version. The
- * server runs the normal create or plan path in one transaction; there is
- * no inverse operation, so the sheet confirms before sending.
+ * server runs the operation or its versioned inverse in one transaction.
  */
 export function useDecideSuggestion() {
   const client = useQueryClient();
@@ -100,7 +99,7 @@ export function useDecideSuggestion() {
       decision,
     }: {
       suggestion: Suggestion;
-      decision: "apply" | "dismiss";
+      decision: "apply" | "dismiss" | "undo";
     }) => {
       const body = await request(
         `/api/suggestions/${suggestion.id}/${decision}`,

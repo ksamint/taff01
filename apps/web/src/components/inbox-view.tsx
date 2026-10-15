@@ -37,7 +37,7 @@ const TaskDetailView = dynamic(
   () => import("./task-detail-view").then((module) => module.TaskDetailView),
   { ssr: false },
 );
-type Tab = "all" | "reviews" | "blockers";
+type Tab = "all" | "reviews" | "blockers" | "snoozed";
 type Selection = { workspaceId: string; taskId: string };
 const TABS: Tab[] = ["all", "reviews", "blockers"];
 
@@ -65,14 +65,15 @@ function InboxScreen({
 }) {
   const { me, workspace, openSearch } = useWorkspace();
   const { t, i18n } = useTranslation();
-  const inbox = useInbox(workspace.id);
+  const [tab, setTab] = useState<Tab>("all");
+  const snoozedView = desktop && embedded && tab === "snoozed";
+  const inbox = useInbox(workspace.id, snoozedView);
   const tasks = useTasks(workspace.id);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
   const pending = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const [markingAll, setMarkingAll] = useState(false);
   const busy = pending || markingAll;
-  const [tab, setTab] = useState<Tab>("all");
   const [snoozed, setSnoozed] = useState<InboxItem | null>(null);
   const activeSnoozed = snoozed?.workspaceId === workspace.id ? snoozed : null;
   const [selected, setSelected] = useState<Selection | null | undefined>();
@@ -99,7 +100,7 @@ function InboxScreen({
   const reviews = needsYou.filter((item) => item.kind === "review");
   const blockers = needsYou.filter((item) => item.kind === "blocker");
   const visible = new Set(
-    (tab === "all"
+    (tab === "all" || tab === "snoozed"
       ? (inbox.data?.items ?? [])
       : tab === "reviews"
         ? reviews
@@ -133,6 +134,7 @@ function InboxScreen({
     all: inbox.data?.items.length ?? 0,
     reviews: reviews.length,
     blockers: blockers.length,
+    snoozed: inbox.data?.items.length ?? 0,
   };
   const first = groups
     .flatMap((group) => group.items)
@@ -185,7 +187,7 @@ function InboxScreen({
       me.user.tz,
     );
   }
-  const markAllButton = !!inbox.data?.unreadCount && (
+  const markAllButton = !snoozedView && !!inbox.data?.unreadCount && (
     <Button
       className="button-quiet inbox-mark-all"
       data-testid="inbox-mark-all"
@@ -234,20 +236,24 @@ function InboxScreen({
             role="group"
             aria-label={t("inbox.title")}
           >
-            {TABS.map((item) => (
-              <Button
-                key={item}
-                className="inbox-tab"
-                aria-pressed={tab === item}
-                data-testid={`inbox-tab-${item}`}
-                onClick={() => setTab(item)}
-              >
-                {t(`inbox.${item}`)}
-                <span className="inbox-tab-count">
-                  {numbers.format(counts[item])}
-                </span>
-              </Button>
-            ))}
+            {(desktop && embedded ? [...TABS, "snoozed" as const] : TABS).map(
+              (item) => (
+                <Button
+                  key={item}
+                  className="inbox-tab"
+                  aria-pressed={tab === item}
+                  data-testid={`inbox-tab-${item}`}
+                  onClick={() => setTab(item)}
+                >
+                  {t(item === "snoozed" ? "me.snoozed" : `inbox.${item}`)}
+                  {(item === "snoozed") === snoozedView && (
+                    <span className="inbox-tab-count">
+                      {numbers.format(counts[item])}
+                    </span>
+                  )}
+                </Button>
+              ),
+            )}
           </div>
           {embedded && markAllButton}
         </div>
@@ -285,8 +291,8 @@ function InboxScreen({
                 <span />
               </span>
             </span>
-            <h2>{t("inbox.zero")}</h2>
-            <p>{t("inbox.zeroSub")}</p>
+            <h2>{t(snoozedView ? "me.noSnoozed" : "inbox.zero")}</h2>
+            {!snoozedView && <p>{t("inbox.zeroSub")}</p>}
           </div>
         ) : (
           <div className="inbox-groups">
@@ -406,6 +412,17 @@ function InboxScreen({
                           {excerpt && (
                             <p className="inbox-excerpt">{excerpt}</p>
                           )}
+                          {snoozedView && item.snoozedUntil && (
+                            <p className="inbox-excerpt">
+                              {t("me.snoozedUntil", {
+                                date: new Intl.DateTimeFormat(locale, {
+                                  timeZone: me.user.tz,
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                }).format(new Date(item.snoozedUntil)),
+                              })}
+                            </p>
+                          )}
                           <div className="inbox-actions">
                             {item.kind === "review" && href && (
                               <Link
@@ -497,20 +514,30 @@ function InboxScreen({
                               </Button>
                               <Button
                                 className="button-quiet"
-                                data-testid="inbox-snooze"
+                                data-testid={
+                                  snoozedView
+                                    ? "inbox-unsnooze"
+                                    : "inbox-snooze"
+                                }
                                 disabled={busy}
                                 onClick={() =>
                                   update.mutate({
                                     id: item.id,
                                     body: {
-                                      read: true,
-                                      snoozedUntil: tomorrow(),
+                                      ...(snoozedView ? {} : { read: true }),
+                                      snoozedUntil: snoozedView
+                                        ? null
+                                        : tomorrow(),
                                     },
-                                    snooze: item,
+                                    ...(snoozedView ? {} : { snooze: item }),
                                   })
                                 }
                               >
-                                {t("inbox.tomorrow")}
+                                {t(
+                                  snoozedView
+                                    ? "me.unsnooze"
+                                    : "inbox.tomorrow",
+                                )}
                               </Button>
                             </span>
                           </div>

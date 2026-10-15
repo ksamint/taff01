@@ -50,6 +50,7 @@ export type Action =
   | "crm:audit"
   | "suggestion:create"
   | "suggestion:decide"
+  | "suggestion:undo"
   | "mind:write"
   | "mind:archive";
 export type Resource =
@@ -139,7 +140,7 @@ export function can(
       !!actor.scopes?.includes("tasks:write") &&
       can(actor, "capability:use", { ...resource, capability: "tasks.write" })
     );
-  if (action === "suggestion:decide")
+  if (action === "suggestion:decide" || action === "suggestion:undo")
     // A person decides; applying also needs the normal operation's right.
     return (
       actor.kind === "person" &&

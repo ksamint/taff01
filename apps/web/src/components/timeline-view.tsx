@@ -11,7 +11,15 @@ import type {
   TimelineDependency,
   TimelineItem,
 } from "@taff/schemas/plan";
-import { ExternalLink, Network, Sparkles, X } from "lucide-react";
+import {
+  ExternalLink,
+  Network,
+  Pencil,
+  Plus,
+  Sparkles,
+  Trash2,
+  X,
+} from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -32,9 +40,10 @@ import {
   shiftsChildren,
   useAddDependency,
   useRemoveDependency,
+  useSaveMilestone,
   useSetPlan,
 } from "../lib/mutations/timeline";
-import { useMembers, useTasks } from "../lib/queries";
+import { useMembers, useTasks, useWorkspaceAccess } from "../lib/queries";
 import {
   addDays,
   arrowPath,
@@ -51,6 +60,7 @@ import { useTimeline } from "../lib/timeline-queries";
 import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
+import { SheetDialog } from "./ui/sheet-dialog";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 type Drag = {
@@ -85,6 +95,12 @@ function ProjectTimeline({ project }: { project: Project }) {
   const members = useMembers(workspace.id);
   const tasks = useTasks(workspace.id);
   const setPlan = useSetPlan(project.id);
+  const saveMilestone = useSaveMilestone(project.id);
+  const access = useWorkspaceAccess(workspace.id);
+  const [milestoneDialog, setMilestoneDialog] = useState<{
+    item: TimelineItem | null;
+    archive?: boolean;
+  } | null>(null);
   const addDependency = useAddDependency(project.id);
   const removeDependency = useRemoveDependency(project.id);
   const hintId = useId();
@@ -231,6 +247,30 @@ function ProjectTimeline({ project }: { project: Project }) {
     ].join(", ");
   };
   const moveSelection = (event: KeyboardEvent, item: TimelineItem) => {
+    if (
+      (event.key === "ArrowLeft" || event.key === "ArrowRight") &&
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey
+    ) {
+      event.preventDefault();
+      if (
+        canEdit &&
+        (item.kind !== "milestone" || access.data?.canManageProjects) &&
+        !setPlan.isPending &&
+        !saveMilestone.isPending
+      ) {
+        const days =
+          (event.key === "ArrowLeft" ? -1 : 1) * (event.shiftKey ? 7 : 1);
+        setPlan.mutate({
+          item,
+          startDate: addDays(item.start, days),
+          durationDays: Math.max(1, item.durationDays),
+          reason: "move",
+        });
+      }
+      return;
+    }
     const step =
       event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
     if (event.key === "Escape" && linkMode) {
@@ -268,7 +308,12 @@ function ProjectTimeline({ project }: { project: Project }) {
   ) => {
     if (event.button !== 0) return;
     event.stopPropagation();
-    if (!canEdit || setPlan.isPending) {
+    if (
+      !canEdit ||
+      (item.kind === "milestone" && !access.data?.canManageProjects) ||
+      setPlan.isPending ||
+      saveMilestone.isPending
+    ) {
       if (mode === "move") pick(item);
       return;
     }
@@ -359,6 +404,20 @@ function ProjectTimeline({ project }: { project: Project }) {
       aria-label={t("projects.timelineView")}
     >
       <div className="timeline-toolbar">
+        {access.data?.canManageProjects && (
+          <Button
+            type="button"
+            data-testid="timeline-new-milestone"
+            disabled={setPlan.isPending || saveMilestone.isPending}
+            onClick={() => {
+              saveMilestone.reset();
+              setMilestoneDialog({ item: null });
+            }}
+          >
+            <Plus size={16} aria-hidden="true" />
+            {t("timeline.newMilestone")}
+          </Button>
+        )}
         <div
           className="timeline-segment"
           role="group"
@@ -836,11 +895,23 @@ function ProjectTimeline({ project }: { project: Project }) {
           key={`${selected.id}:${selected.start}:${selected.durationDays}:${selected.version}`}
           item={selected}
           timeline={timeline}
-          canEdit={canEdit}
+          canEdit={
+            canEdit &&
+            (selected.kind !== "milestone" || !!access.data?.canManageProjects)
+          }
+          canManageMilestone={!!access.data?.canManageProjects}
+          onRename={() => {
+            saveMilestone.reset();
+            setMilestoneDialog({ item: selected });
+          }}
+          onArchive={() => {
+            saveMilestone.reset();
+            setMilestoneDialog({ item: selected, archive: true });
+          }}
           reference={reference(selected)}
           projectId={project.id}
           short={dates.short}
-          pending={setPlan.isPending}
+          pending={setPlan.isPending || saveMilestone.isPending}
           onClose={() => setSelectedId(null)}
           onSave={(startDate, durationDays) =>
             setPlan.mutate({
@@ -862,7 +933,122 @@ function ProjectTimeline({ project }: { project: Project }) {
           t={t}
         />
       )}
+      {milestoneDialog && (
+        <MilestoneDialog
+          item={milestoneDialog.item}
+          archive={!!milestoneDialog.archive}
+          today={timeline.today}
+          pending={saveMilestone.isPending}
+          error={saveMilestone.error}
+          onClose={() => setMilestoneDialog(null)}
+          onSave={(name, date) =>
+            saveMilestone.mutate(
+              {
+                item: milestoneDialog.item,
+                name,
+                date,
+                archived: milestoneDialog.archive,
+              },
+              {
+                onSuccess: () => {
+                  setMilestoneDialog(null);
+                  if (milestoneDialog.archive) setSelectedId(null);
+                },
+              },
+            )
+          }
+        />
+      )}
     </section>
+  );
+}
+
+function MilestoneDialog({
+  item,
+  archive,
+  today,
+  pending,
+  error,
+  onClose,
+  onSave,
+}: {
+  item: TimelineItem | null;
+  archive: boolean;
+  today: string;
+  pending: boolean;
+  error: Error | null;
+  onClose: () => void;
+  onSave: (name: string, date: string) => void;
+}) {
+  const { t } = useTranslation();
+  const id = useId();
+  const [name, setName] = useState(item?.title ?? "");
+  const [date, setDate] = useState(item?.start ?? today);
+  return (
+    <SheetDialog
+      title={t(
+        archive
+          ? "timeline.archiveMilestone"
+          : item
+            ? "timeline.renameMilestone"
+            : "timeline.newMilestone",
+      )}
+      onClose={onClose}
+    >
+      <form
+        className="timeline-footer-form"
+        onSubmit={(event) => {
+          event.preventDefault();
+          if (name.trim() && date && !pending) onSave(name.trim(), date);
+        }}
+      >
+        {archive ? (
+          <p>{t("timeline.archiveMilestoneConfirm", { name })}</p>
+        ) : (
+          <>
+            <div className="field">
+              <label htmlFor={`${id}-name`}>
+                {t("timeline.milestoneName")}
+              </label>
+              <input
+                className="input"
+                id={`${id}-name`}
+                data-testid="milestone-name"
+                value={name}
+                maxLength={200}
+                required
+                onChange={(event) => setName(event.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label htmlFor={`${id}-date`}>{t("timeline.date")}</label>
+              <input
+                className="input"
+                id={`${id}-date`}
+                data-testid="milestone-date"
+                type="date"
+                value={date}
+                required
+                onChange={(event) => setDate(event.target.value)}
+              />
+            </div>
+          </>
+        )}
+        {error && (
+          <p className="alert" role="alert">
+            {t(errorKey(error))}
+          </p>
+        )}
+        <Button
+          type="submit"
+          data-testid="milestone-save"
+          className="button-primary"
+          disabled={pending || !name.trim() || !date}
+        >
+          {t(archive ? "timeline.archiveMilestone" : "timeline.apply")}
+        </Button>
+      </form>
+    </SheetDialog>
   );
 }
 
@@ -1021,6 +1207,9 @@ function SelectionFooter({
   timeline,
   canEdit,
   reference,
+  canManageMilestone,
+  onRename,
+  onArchive,
   projectId,
   short,
   pending,
@@ -1035,6 +1224,9 @@ function SelectionFooter({
   timeline: Timeline;
   canEdit: boolean;
   reference: string | null;
+  canManageMilestone: boolean;
+  onRename: () => void;
+  onArchive: () => void;
   projectId: string;
   short: (date: string) => string;
   pending: boolean;
@@ -1231,6 +1423,28 @@ function SelectionFooter({
         )}
       </div>
       <div className="timeline-footer-links">
+        {milestone && canManageMilestone && (
+          <>
+            <Button
+              type="button"
+              data-testid="timeline-rename-milestone"
+              onClick={onRename}
+              disabled={pending}
+            >
+              <Pencil size={16} aria-hidden="true" />
+              {t("timeline.renameMilestone")}
+            </Button>
+            <Button
+              type="button"
+              data-testid="timeline-archive-milestone"
+              onClick={onArchive}
+              disabled={pending}
+            >
+              <Trash2 size={16} aria-hidden="true" />
+              {t("timeline.archiveMilestone")}
+            </Button>
+          </>
+        )}
         {item.kind === "task" && (
           <Link
             href={`/tasks/${item.id}`}

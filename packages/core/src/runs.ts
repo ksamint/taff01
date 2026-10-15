@@ -172,7 +172,7 @@ export function createRunOperations({
       .from(tasks)
       .where(eq(tasks.id, taskId))
       .limit(1);
-    if (!task) throw new CoreError("not_found", 404);
+    if (!task || task.archivedAt) throw new CoreError("not_found", 404);
     await requireMember(db, principal, task.workspaceId, "workspace:read", {
       workspaceId: task.workspaceId,
       taskId,
@@ -1226,7 +1226,7 @@ export function createRunOperations({
   async function listInbox(
     principal: Principal,
     workspaceId: string,
-    filter: { tab?: "all" | "reviews" | "blockers" } = {},
+    filter: { tab?: "all" | "reviews" | "blockers" | "snoozed" } = {},
   ): Promise<Inbox> {
     parse(idSchema, workspaceId);
     const body = parse(inboxFilterSchema, filter);
@@ -1240,10 +1240,12 @@ export function createRunOperations({
             eq(inboxItems.workspaceId, workspaceId),
             eq(inboxItems.memberId, actor.id),
             isNull(inboxItems.resolvedAt),
-            or(
-              isNull(inboxItems.snoozedUntil),
-              sql`${inboxItems.snoozedUntil} <= now()`,
-            ),
+            body.tab === "snoozed"
+              ? sql`${inboxItems.snoozedUntil} > now()`
+              : or(
+                  isNull(inboxItems.snoozedUntil),
+                  sql`${inboxItems.snoozedUntil} <= now()`,
+                ),
           ),
         )
         .orderBy(desc(inboxItems.createdAt))
@@ -1252,6 +1254,7 @@ export function createRunOperations({
     const items = visible.filter(
       (item) =>
         body.tab === "all" ||
+        body.tab === "snoozed" ||
         item.kind === (body.tab === "reviews" ? "review" : "blocker"),
     );
     const groups = [...new Set(items.map((item) => item.taskId))].map(

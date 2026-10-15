@@ -19,6 +19,7 @@ import { needsYouCount } from "../lib/needs-you";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useInbox, useMembers, useTasks } from "../lib/queries";
 import { showToast } from "../lib/toast";
+import { AiSettingsSection } from "./ai-settings";
 import { useWorkspace } from "./app-shell";
 import {
   AdvancedSheet,
@@ -446,6 +447,7 @@ function SettingsTab() {
           </Link>
         </div>
       </section>
+      <AiSettingsSection />
       <section aria-labelledby="preferences-heading">
         <h2 id="preferences-heading" className="me-settings-label">
           {t("me.preferences")}

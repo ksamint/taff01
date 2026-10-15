@@ -98,11 +98,13 @@ export function patchRun(client: QueryClient, id: string, patch: Partial<Run>) {
   );
 }
 // Counts and grouping describe the same visible, unread items as the server.
-export function inboxFromItems(items: InboxItem[]): Inbox {
+export function inboxFromItems(items: InboxItem[], snoozed = false): Inbox {
   const visible = items.filter(
     (item) =>
       !item.resolvedAt &&
-      (!item.snoozedUntil || Date.parse(item.snoozedUntil) <= Date.now()),
+      (snoozed
+        ? !!item.snoozedUntil && Date.parse(item.snoozedUntil) > Date.now()
+        : !item.snoozedUntil || Date.parse(item.snoozedUntil) <= Date.now()),
   );
   const groups: Inbox["groups"] = [];
   for (const item of visible) {
@@ -126,7 +128,14 @@ export function resolveInbox(
   client: QueryClient,
   predicate: (item: InboxItem) => boolean,
 ) {
-  client.setQueriesData<Inbox>({ queryKey: ["inbox"] }, (data) =>
-    data ? inboxFromItems(data.items.filter((item) => !predicate(item))) : data,
-  );
+  for (const query of client.getQueryCache().findAll({ queryKey: ["inbox"] })) {
+    client.setQueryData<Inbox>(query.queryKey, (data) =>
+      data
+        ? inboxFromItems(
+            data.items.filter((item) => !predicate(item)),
+            query.queryKey[2] === "snoozed",
+          )
+        : data,
+    );
+  }
 }

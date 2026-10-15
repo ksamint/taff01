@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { activity, agentProfiles, connectDatabase, members } from "@taff/db";
+import {
+  activity,
+  agentProfiles,
+  connectDatabase,
+  members,
+  taskPlans,
+  tasks,
+} from "@taff/db";
 import {
   askAnswerSchema,
   briefSchema,
@@ -321,6 +328,171 @@ describe.skipIf(!url)(
         expect(timeline.items.find((x) => x.id === task.id)?.start).toBe(
           "2026-10-20",
         );
+      });
+    });
+
+    describe("versioned suggestion undo", () => {
+      it("archives an untouched split atomically, retains history and rejects stale/repeated/agent undo", async () => {
+        const task = await create("Undo split");
+        const made = await core.createSuggestion(agent, split(task.id));
+        const applied = await core.applySuggestion(alice, made.id, {
+          version: 1,
+        });
+        await expect(
+          core.undoSuggestion(agent, made.id, { version: 2 }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+        // Alice is an admin; Bob owns one child but cannot undo its parent's proposal.
+        await expect(
+          core.undoSuggestion(bob, made.id, { version: 2 }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+        await expect(
+          core.undoSuggestion(outsider, made.id, { version: 2 }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+        await expect(
+          core.undoSuggestion(alice, made.id, { version: 1 }),
+        ).rejects.toMatchObject({ code: "conflict" });
+        const undone = await core.undoSuggestion(alice, made.id, {
+          version: applied.suggestion.version,
+        });
+        expect(undone).toMatchObject({
+          status: "applied",
+          version: 3,
+          decidedBy: owner,
+        });
+        expect(undone.undoneAt).toBeTruthy();
+        expect(await core.listTasks(alice, w, { parentId: task.id })).toEqual(
+          [],
+        );
+        const archived = await connection.db
+          .select()
+          .from(tasks)
+          .where(
+            inArray(
+              tasks.id,
+              applied.tasks.map((x) => x.id),
+            ),
+          );
+        expect(archived).toHaveLength(2);
+        expect(
+          archived.every(
+            (x) => x.archivedAt && x.status === "todo" && x.version === 2,
+          ),
+        ).toBe(true);
+        await expect(core.getTask(alice, archived[0].id)).rejects.toMatchObject(
+          { code: "not_found" },
+        );
+        expect(
+          (await core.getTimeline(alice, projectId)).items.some((x) =>
+            archived.some((a) => a.id === x.id),
+          ),
+        ).toBe(false);
+        expect(
+          (await core.relationGraph(alice, w)).nodes.some((x) =>
+            archived.some((a) => a.id === x.id),
+          ),
+        ).toBe(false);
+        await expect(
+          core.undoSuggestion(alice, made.id, { version: 3 }),
+        ).rejects.toMatchObject({ code: "conflict" });
+        const audited = await connection.db
+          .select()
+          .from(activity)
+          .where(
+            and(
+              eq(activity.resourceId, made.id),
+              eq(activity.action, "suggestions.update"),
+            ),
+          );
+        expect(audited).toHaveLength(2);
+        expect(
+          audited.every(
+            (x) => x.actorId === (alice.kind === "user" ? alice.userId : ""),
+          ),
+        ).toBe(true);
+      });
+      it("rejects edits and downstream use without archiving any of the split", async () => {
+        for (const change of ["title", "comment"] as const) {
+          const task = await create(`Conflict split ${change}`);
+          const made = await core.createSuggestion(agent, split(task.id));
+          const applied = await core.applySuggestion(alice, made.id, {
+            version: 1,
+          });
+          const child = applied.tasks[1];
+          if (change === "title")
+            await core.updateTask(alice, child.id, {
+              version: child.version,
+              title: "User work",
+            });
+          else
+            await core.addTaskComment(bob, child.id, {
+              body: "Keep this work",
+            });
+          await expect(
+            core.undoSuggestion(alice, made.id, { version: 2 }),
+          ).rejects.toMatchObject({ code: "conflict" });
+          expect(
+            await core.listTasks(alice, w, { parentId: task.id }),
+          ).toHaveLength(2);
+        }
+      });
+      it.each([false, true])(
+        "restores exact prior due date and plan (existing plan: %s), then allows a new plan",
+        async (withPlan) => {
+          const task = await create("Undo reschedule", {
+            dueAt: "2026-10-10T02:30:00.000Z",
+          });
+          if (withPlan)
+            await core.setTaskPlan(alice, task.id, {
+              startDate: "2026-10-08",
+              durationDays: 3,
+            });
+          const before = await core.getTask(alice, task.id);
+          const made = await core.createSuggestion(agent, {
+            taskId: task.id,
+            kind: "reschedule",
+            payload: { startDate: "2026-11-01", durationDays: 4 },
+          });
+          await core.applySuggestion(alice, made.id, { version: 1 });
+          await core.undoSuggestion(alice, made.id, { version: 2 });
+          expect((await core.getTask(alice, task.id)).dueAt).toBe(before.dueAt);
+          const [plan] = await connection.db
+            .select()
+            .from(taskPlans)
+            .where(eq(taskPlans.taskId, task.id));
+          expect(!!plan.archivedAt).toBe(!withPlan);
+          if (withPlan)
+            expect(plan).toMatchObject({
+              startDate: "2026-10-08",
+              durationDays: 3,
+            });
+          const next = await core.setTaskPlan(alice, task.id, {
+            startDate: "2026-12-01",
+            durationDays: 2,
+            ...(withPlan ? { version: plan.version } : {}),
+          });
+          expect(next.plans[0].version).toBe(plan.version + 1);
+        },
+      );
+      it("refuses reschedule undo after a concurrent plan change and preserves it", async () => {
+        const task = await create("Newer plan");
+        const made = await core.createSuggestion(agent, {
+          taskId: task.id,
+          kind: "reschedule",
+          payload: { startDate: "2026-11-01", durationDays: 4 },
+        });
+        const applied = await core.applySuggestion(alice, made.id, {
+          version: 1,
+        });
+        await core.setTaskPlan(alice, task.id, {
+          version: applied.plan!.plans[0].version,
+          startDate: "2026-12-10",
+          durationDays: 2,
+        });
+        const before = await core.getTask(alice, task.id);
+        await expect(
+          core.undoSuggestion(alice, made.id, { version: 2 }),
+        ).rejects.toMatchObject({ code: "conflict" });
+        expect((await core.getTask(alice, task.id)).dueAt).toBe(before.dueAt);
       });
     });
 

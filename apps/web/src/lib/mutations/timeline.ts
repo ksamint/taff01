@@ -317,3 +317,100 @@ export function useRemoveDependency(projectId: string) {
     onSettled: () => invalidateTimeline(client),
   });
 }
+
+/** Milestone management uses the existing admin-only, versioned API. */
+export function useSaveMilestone(projectId: string) {
+  const client = useQueryClient();
+  const { t } = useTranslation();
+  const key = timelineKey(projectId);
+  return useMutation({
+    mutationKey: timelineMutationKey,
+    mutationFn: async ({
+      item,
+      name,
+      date,
+      archived,
+    }: {
+      item: TimelineItem | null;
+      name: string;
+      date: string;
+      archived?: boolean;
+    }) =>
+      milestoneSchema.parse(
+        await request(
+          item
+            ? `/api/milestones/${item.id}`
+            : `/api/projects/${projectId}/milestones`,
+          {
+            method: item ? "PATCH" : "POST",
+            body: JSON.stringify(
+              item
+                ? {
+                    version: item.version,
+                    name,
+                    date,
+                    ...(archived === undefined ? {} : { archived }),
+                  }
+                : { name, date },
+            ),
+          },
+        ),
+      ),
+    onMutate: async ({ item, name, date, archived }) => {
+      const snapshot = await snapshotQueries(client, [key]);
+      if (item)
+        client.setQueryData<Timeline>(key, (current) => {
+          if (!current) return current;
+          if (archived)
+            return {
+              ...current,
+              items: current.items.filter((row) => row.id !== item.id),
+              dependencies: current.dependencies.filter(
+                (dep) => dep.from.id !== item.id && dep.to.id !== item.id,
+              ),
+            };
+          const moved = applyPlanChange(current, item.id, date, 1, false);
+          return {
+            ...moved,
+            items: moved.items.map((row) =>
+              row.id === item.id ? { ...row, title: name } : row,
+            ),
+          };
+        });
+      return snapshot;
+    },
+    onError: (error, _, snapshot) => {
+      restoreQueries(client, snapshot);
+      showToast(t(errorKey(error)));
+    },
+    onSuccess: (saved, { item, archived }) => {
+      showToast(
+        t(
+          archived
+            ? "timeline.milestoneArchived"
+            : item
+              ? "timeline.milestoneSaved"
+              : "timeline.milestoneCreated",
+        ),
+        undo(t, () =>
+          runInverse(client, t, () =>
+            request(`/api/milestones/${saved.id}`, {
+              method: "PATCH",
+              body: JSON.stringify(
+                item
+                  ? {
+                      version: saved.version,
+                      name: item.title,
+                      date: item.start,
+                      archived: false,
+                    }
+                  : { version: saved.version, archived: true },
+              ),
+            }),
+          ),
+        ),
+      );
+    },
+    onSettled: () => invalidateTimeline(client),
+  });
+}

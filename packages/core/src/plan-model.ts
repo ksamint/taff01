@@ -307,7 +307,8 @@ export function buildPlanModel(input: PlanModelInput): PlanModel {
       workerIsAgent: task?.workerIsAgent ?? false,
       blocked: node.blocked,
       hasChildren: node.children.length > 0,
-      behindDays: round2(behind(node)),
+      // Match civil-date rounding: floating-point noise must not add a day.
+      behindDays: Math.max(0, Math.ceil(behind(node) - 1e-9)),
       forecastEnd: lastDay(forecastEnd(node.key)),
       critical: critical.has(node.key),
       version: task
