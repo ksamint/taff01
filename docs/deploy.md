@@ -2114,8 +2114,20 @@ isolated local database. The correction will append a compatible guard-definitio
 migration with no existing-row rewrite, backfill, delete, rename or drop, retaining
 all active-child and parent invariants. Existing migrations remain immutable.
 
-The remaining checks continue as diagnostic evidence. The healthy runtime stays
-live under the detached keeper while a corrected candidate is prepared; no
-critical flow failed twice and no rollback is required. Supported cleanup must be
-resolved through the application and a fresh full checklist must pass on the
-corrected source before acceptance or the annotated v0.2.1 tag.
+The diagnostic checklist is now terminal: 146 unique cases, 137 passed, 156 attempts,
+20 failed attempts, 14 failed cleanup journals and zero browser/harness errors.
+Twelve cleanup failures are the Brief parent guard defect across six projects and
+two attempts. One owned pending grant incorrectly received a revoke request;
+its 409 skipped agent baseline restoration and blocked subsequent duplicate-grant
+checks. One notification cleanup transport failure passed its sole retry. PRs
+[35](https://github.com/ksamint/taff01/pull/35) and
+[36](https://github.com/ksamint/taff01/pull/36) address these defects with strict
+state confirmation. A separate native-selector font instability in PR 35 CI is
+being corrected without changing references or comparison tolerances.
+
+The healthy runtime stays live under the detached keeper while the corrected
+candidate is prepared. No critical flow failed twice and no rollback is required.
+Original failed journals and counters remain unchanged. Exact supported cleanup
+and audited baseline restoration must finish through the application, followed by
+a fresh full checklist on the corrected source before acceptance or the annotated
+v0.2.1 tag.
