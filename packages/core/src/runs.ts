@@ -172,7 +172,7 @@ export function createRunOperations({
       .from(tasks)
       .where(eq(tasks.id, taskId))
       .limit(1);
-    if (!task) throw new CoreError("not_found", 404);
+    if (!task || task.archivedAt) throw new CoreError("not_found", 404);
     await requireMember(db, principal, task.workspaceId, "workspace:read", {
       workspaceId: task.workspaceId,
       taskId,

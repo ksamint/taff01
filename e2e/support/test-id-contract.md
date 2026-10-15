@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (329 distinct, 1263 uses)
+## Test ids (329 distinct, 1265 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -75,10 +75,10 @@ several do). “Also rendered by” lists the other files.
 | `ask-try-atRisk` | 1 |  | brief.spec.ts |
 | `ask-try-blocked` | 1 |  | brief.spec.ts |
 | `brief-action` | 3 |  | brief.spec.ts |
-| `brief-action-open` | 2 |  | brief.spec.ts |
+| `brief-action-open` | 3 |  | brief.spec.ts |
 | `brief-close` | 2 |  | brief.spec.ts |
 | `brief-greeting` | 2 |  | brief.spec.ts |
-| `brief-proposal-apply` | 1 |  | brief.spec.ts |
+| `brief-proposal-apply` | 2 |  | brief.spec.ts |
 | `brief-proposal-dismiss` | 1 |  | brief.spec.ts |
 | `brief-proposal-subtasks` | 1 |  | brief.spec.ts |
 | `brief-risk` | 1 |  | brief.spec.ts |
@@ -573,6 +573,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: label` | 1 | release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
 | `button — name: locale === "en" ? m.en : locale === "zh-HK" ? m.me.languageHK : m.me.languageCN` | 1 | me.spec.ts |
+| `button — name: m.actions.undo` | 2 | brief.spec.ts |
 | `button — name: m.mcp.copyConfig` | 1 | release/checklist.spec.ts |
 | `button — name: m.mcp.dismiss` | 2 | release/checklist.spec.ts |
 | `button — name: m.organization.create` | 4 | planning.spec.ts, release/checklist.spec.ts |
@@ -717,7 +718,7 @@ read (`data-event-id`, `data-date`).
 | `.team-directory > h1` | 3 | agent-creation.spec.ts, planning.spec.ts, ui-v2.spec.ts |
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mjs |
 | `.team-directory-list li` | 1 | ui-v2.spec.ts |
-| `.toast-region` | 1 | brief.spec.ts |
+| `.toast-region` | 6 | brief.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
@@ -773,7 +774,7 @@ Keys read from `apps/web/locales/*/common.json` through
 
 | Key | Uses | Used in |
 | --- | ---: | --- |
-| `actions.undo` | 1 | task-contacts.spec.ts |
+| `actions.undo` | 7 | brief.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
@@ -784,7 +785,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `brief.nav` | 6 | brief.spec.ts |
 | `brief.proposal.title` | 3 | brief.spec.ts |
 | `brief.title` | 3 | brief.spec.ts |
-| `brief.toast.applied` | 3 | brief.spec.ts |
+| `brief.toast.applied` | 6 | brief.spec.ts |
+| `brief.toast.undone` | 6 | brief.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
 | `crm.companies.delete` | 5 | crm.spec.ts |
 | `crm.contacts.add` | 6 | crm.spec.ts, task-contacts.spec.ts |

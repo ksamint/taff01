@@ -1134,7 +1134,8 @@
     },
     "toast": {
       "applied": "Applied",
-      "dismissed": "Dismissed"
+      "dismissed": "Dismissed",
+      "undone": "Suggestion undone."
     }
   },
   "ask": {

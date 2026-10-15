@@ -470,6 +470,7 @@ function ActionsSection({
   Sub: "h2" | "h3";
 }) {
   const { t } = useTranslation();
+  const undo = useDecideSuggestion();
   const headingId = useId();
   const headingRef = useRef<HTMLHeadingElement>(null);
   const switchTo = useSwitchTo();
@@ -549,6 +550,19 @@ function ActionsSection({
           view={open}
           suggestion={suggestions.get(open.action.suggestionId) ?? null}
           labels={labels}
+          onApplied={(saved) =>
+            showToast(t("brief.toast.applied"), {
+              label: t("actions.undo"),
+              run: () =>
+                undo.mutate(
+                  { suggestion: saved, decision: "undo" },
+                  {
+                    onSuccess: () => showToast(t("brief.toast.undone")),
+                    onError: (error) => showToast(t(errorKey(error))),
+                  },
+                ),
+            })
+          }
           onClose={() => setOpen(null)}
           onDecided={() => {
             setOpen(null);
@@ -571,12 +585,14 @@ function ProposalSheet({
   labels,
   onClose,
   onDecided,
+  onApplied,
 }: {
   view: ActionView;
   suggestion: Suggestion | null;
   labels: LabelIndex;
   onClose: () => void;
   onDecided: () => void;
+  onApplied: (saved: Suggestion) => void;
 }) {
   const { t, say, date } = useSay();
   const decide = useDecideSuggestion();
@@ -588,14 +604,9 @@ function ProposalSheet({
     decide.mutate(
       { suggestion, decision },
       {
-        onSuccess: () => {
-          showToast(
-            t(
-              decision === "apply"
-                ? "brief.toast.applied"
-                : "brief.toast.dismissed",
-            ),
-          );
+        onSuccess: (saved) => {
+          if (decision === "apply") onApplied(saved);
+          else showToast(t("brief.toast.dismissed"));
           onDecided();
         },
       },

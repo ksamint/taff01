@@ -1134,7 +1134,8 @@
     },
     "toast": {
       "applied": "已应用",
-      "dismissed": "已跳过"
+      "dismissed": "已跳过",
+      "undone": "已撤销建议。"
     }
   },
   "ask": {

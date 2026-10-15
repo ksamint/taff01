@@ -71,6 +71,15 @@ export function registerAssistantRoutes(
       ),
     ),
   );
+  app.post("/api/suggestions/:id/undo", async (c) =>
+    c.json(
+      await core.undoSuggestion(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        suggestionDecisionSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
   app.post("/api/suggestions/:id/dismiss", async (c) =>
     c.json(
       await core.dismissSuggestion(

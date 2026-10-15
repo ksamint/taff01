@@ -182,7 +182,7 @@ export function createCrmOperations({
     return {
       workspaceId: row.workspaceId,
       title: row.title,
-      archived: false,
+      archived: !!row.archivedAt,
       projectId: row.projectId,
     };
   }

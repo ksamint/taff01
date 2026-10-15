@@ -108,7 +108,7 @@ export function createCalendarOperations({
       .from(tasks)
       .leftJoin(taskCalendar, eq(taskCalendar.taskId, tasks.id))
       .where(eq(tasks.id, id));
-    if (!row) throw new CoreError("not_found", 404);
+    if (!row || row.task.archivedAt) throw new CoreError("not_found", 404);
     const actor = await requireMember(
       db,
       p,
@@ -194,6 +194,7 @@ export function createCalendarOperations({
         and(
           eq(taskCalendar.workspaceId, w),
           sql`${tasks.status}<>'done'`,
+          isNull(tasks.archivedAt),
           sql`${taskCalendar.startAt}<${range.to}::timestamptz`,
           or(
             sql`${taskCalendar.rrule} IS NOT NULL`,
@@ -211,6 +212,7 @@ export function createCalendarOperations({
         and(
           eq(tasks.workspaceId, w),
           sql`${tasks.status}<>'done'`,
+          isNull(tasks.archivedAt),
           isNull(taskCalendar.taskId),
         ),
       )
