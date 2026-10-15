@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (318 distinct, 1644 uses)
+## Test ids (321 distinct, 1660 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -312,10 +312,12 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `notification-block` | 7 |  | me.spec.ts, notifications.spec.ts |
+| `notification-block` | 6 |  | me.spec.ts, notifications.spec.ts |
 | `notification-quiet` | 2 |  | notifications.spec.ts |
-| `notification-review` | 9 |  | live/release/checklist.spec.ts, me.spec.ts, notifications.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
-| `notification-time-18:00` | 6 |  | live/release/checklist.spec.ts, me.spec.ts, notifications.spec.ts, release/checklist.spec.ts |
+| `notification-review` | 12 |  | live/release/checklist.spec.ts, me.spec.ts, notifications.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
+| `notification-time-08:00` | 2 |  | notifications.spec.ts |
+| `notification-time-09:00` | 1 |  | notifications.spec.ts |
+| `notification-time-18:00` | 11 |  | live/release/checklist.spec.ts, me.spec.ts, notifications.spec.ts, release/checklist.spec.ts |
 
 ### organization-chooser.tsx
 
@@ -450,8 +452,8 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `toast` | 23 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
-| `toast-action` | 38 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
+| `toast` | 24 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
+| `toast-action` | 39 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
 
 ### sidebar.tsx
 
@@ -497,7 +499,7 @@ several do). “Also rendered by” lists the other files.
 | `edit-project` | 3 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts |
 | `edit-reload` | 1 |  | planning.spec.ts |
 | `edit-save` | 16 |  | calendar.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `edit-status` | 1 |  | support/task-fields.ts |
+| `edit-status` | 4 |  | optimistic-m4.spec.ts, support/task-fields.ts |
 | `edit-time` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `edit-title` | 19 |  | calendar.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, support/task-fields.ts |
 | `subtask-submit` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -506,6 +508,7 @@ several do). “Also rendered by” lists the other files.
 | `task-comment-submit` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `task-detail-heading` | 43 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
 | `task-field-due` | 2 |  | planning.spec.ts |
+| `task-field-status` | 1 |  | optimistic-m4.spec.ts |
 | `task-field-text` | 5 |  | planning.spec.ts |
 
 ### task-schedule-button.tsx
@@ -556,7 +559,7 @@ several do). “Also rendered by” lists the other files.
 
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
-| `alert` | 33 | agent-creation.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `alert` | 34 | agent-creation.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `button` | 9 | calendar.spec.ts, live/release/checklist.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -674,6 +677,7 @@ read (`data-event-id`, `data-date`).
 | `.mcp-state[data-state="active"]` | 6 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="revoked"]` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.me-profile-copy strong` | 1 | me.spec.ts |
+| `.notifications-body` | 1 | notifications.spec.ts |
 | `.organization-choices` | 1 | scripts/ui/app-shots.mjs |
 | `.organizations-view` | 1 | planning.spec.ts |
 | `.organizations-view > .page-heading` | 3 | me.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
@@ -865,11 +869,12 @@ Keys read from `apps/web/locales/*/common.json` through
 | `sms.sent` | 2 | sms-auth.spec.ts |
 | `sms.title` | 13 | sms-auth.spec.ts |
 | `sms.verify` | 4 | sms-auth.spec.ts |
-| `status.done` | 2 | optimistic-m4.spec.ts |
+| `status.done` | 5 | optimistic-m4.spec.ts |
 | `status.in_progress` | 2 | optimistic-m4.spec.ts |
 | `status.needs_review` | 2 | optimistic-m4.spec.ts |
-| `status.todo` | 1 | optimistic-m4.spec.ts |
+| `status.todo` | 4 | optimistic-m4.spec.ts |
 | `taskDetail.back` | 1 | calendar.spec.ts |
+| `taskDetail.statusChanged` | 1 | optimistic-m4.spec.ts |
 | `timeline.cycle` | 6 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depAdded` | 18 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depRemoved` | 12 | live/timeline.spec.ts, timeline.spec.ts |
