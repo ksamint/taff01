@@ -401,6 +401,18 @@ export function createCore(options: {
       .where(eq(user.id, userId))
       .limit(1);
     if (!person) throw new CoreError("unauthorized", 401);
+    // Account identity is independent of workspace membership (including a
+    // person with no workspaces), just like notification preferences.
+    const identity: Actor = {
+      id: person.id,
+      workspaceId: "",
+      userId: person.id,
+      name: person.name,
+      kind: "person",
+      role: "member",
+    };
+    if (!can(identity, "profile:read", { userId }))
+      throw new CoreError("forbidden", 403);
     const joined = await db
       .select({
         id: workspaces.id,

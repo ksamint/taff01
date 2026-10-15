@@ -1059,3 +1059,38 @@ describe("Phase B suggestion and mind-map permission decisions", () => {
     expect(can(actor, action, resource)).toBe(expected),
   );
 });
+
+describe("self profile read permission", () => {
+  it.each<[string, Actor | null, Resource, boolean]>([
+    ["person reads self", person, { userId: "user" }, true],
+    [
+      "guest reads self",
+      { ...person, role: "guest" },
+      { userId: "user" },
+      true,
+    ],
+    [
+      "identity needs no workspace",
+      { ...person, workspaceId: "" },
+      { userId: "user" },
+      true,
+    ],
+    ["person cannot read another identity", person, { userId: "other" }, false],
+    [
+      "admin cannot read another identity",
+      { ...person, role: "admin" },
+      { userId: "other" },
+      false,
+    ],
+    [
+      "agent cannot read a person identity",
+      { ...agent, userId: "user" },
+      { userId: "user" },
+      false,
+    ],
+    ["anonymous cannot read", null, { userId: "user" }, false],
+    ["workspace is not an identity", person, task, false],
+  ])("%s", (_, actor, resource, expected) =>
+    expect(can(actor, "profile:read", resource)).toBe(expected),
+  );
+});

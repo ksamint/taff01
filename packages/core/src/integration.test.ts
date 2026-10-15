@@ -109,6 +109,17 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       true,
     );
   });
+  it("reads only the requested account's memberships and refuses unknown identities", async () => {
+    const me = await core.getMe(userId);
+    const other = await core.getMe(outsiderId);
+    expect(me.user.id).toBe(userId);
+    expect(me.workspaces.map((row) => row.id)).toEqual([workspaceId]);
+    expect(other.user.id).toBe(outsiderId);
+    expect(other.workspaces.every((row) => row.id !== workspaceId)).toBe(true);
+    await expect(core.getMe(randomUUID())).rejects.toMatchObject({
+      code: "unauthorized",
+    });
+  });
   it("creates and assigns a task with activity and notifications", async () => {
     const created = await core.createTask(userPrincipal(userId), {
       workspaceId,
