@@ -118,3 +118,21 @@ token-based classes in one stylesheet per area under
 that sends `version` and rolls back. Visual baselines are replaced per screen
 through `.github/workflows/visual-baselines.yml` and committed beside the
 reference capture in the milestone report.
+
+### Visual API calendar clock
+
+Only `playwright.visual.config.ts` starts its dedicated API with
+`TAFF_VISUAL_API_CLOCK=ui-v2 node --import ./scripts/ui/visual-clock.mjs …`.
+The preload fails closed without that flag and refuses server reuse. Brief and
+project Timeline GET requests calculate their real seeded data at
+2026-10-08T11:20:00Z, matching the browser capture clock. AsyncLocalStorage keeps
+concurrent unrelated requests on real time. Auth middleware inside those two
+GET scopes shares the capture date; auth endpoints and write requests do not.
+Explicit Date arguments, SQL time, timers and the production source are unchanged.
+The capture helper checks both API civil dates and Brief's rendered localized date.
+Ordinary browser, MCP and production launches never enable this preload.
+
+`ui:app-shots` connects to an existing isolated stack; start only that stack's API
+with the same flag/preload when capturing Brief or Timeline. Never add this flag
+to a production environment or a general development API. The native dark-route
+workflow owns and cleans up its separate capture API/web process groups.
