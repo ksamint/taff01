@@ -134,6 +134,7 @@ export async function createDigestSnapshot(
   const duePredicate = and(
     eq(tasks.workspaceId, member.workspaceId),
     sql`${tasks.status}<>'done'`,
+    sql`${tasks.archivedAt} IS NULL`,
     sql`(${localSql(sql`${tasks.dueAt}`, zone)})::date=${day}::date`,
   );
   const dueRows = await tx

@@ -253,6 +253,7 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
       ["/api/ask", "POST"],
       [`/api/workspaces/${id}/suggestions`, "GET"],
       [`/api/suggestions/${id}/apply`, "POST"],
+      [`/api/suggestions/${id}/undo`, "POST"],
       [`/api/workspaces/${id}/ai`, "PATCH"],
     ])
       expect(
@@ -340,6 +341,17 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
         .status,
     ).toBe(403);
     expect(dismiss).toHaveBeenCalledWith(person, id, { version: 1 });
+    const undo = vi
+      .spyOn(core, "undoSuggestion")
+      .mockRejectedValue(new CoreError("conflict", 409));
+    expect((await send(`/api/suggestions/${id}/undo`, "POST", {})).status).toBe(
+      400,
+    );
+    expect(
+      (await send(`/api/suggestions/${id}/undo`, "POST", { version: 2 }))
+        .status,
+    ).toBe(409);
+    expect(undo).toHaveBeenCalledWith(person, id, { version: 2 });
     // Agents propose over MCP only; there is no REST create.
     expect((await send("/api/suggestions", "POST", {})).status).toBe(404);
   });

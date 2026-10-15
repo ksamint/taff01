@@ -30,10 +30,13 @@ export function withInboxUpdate(
   { id, body, undo }: Pick<InboxUpdate, "id" | "body" | "undo">,
   snoozed: InboxItem | null,
   now: string,
+  snoozedView = false,
 ) {
   if (!current) return current;
   const items =
-    undo && snoozed && !current.items.some((item) => item.id === id)
+    (undo || body.snoozedUntil !== undefined) &&
+    snoozed &&
+    !current.items.some((item) => item.id === id)
       ? [snoozed, ...current.items]
       : current.items;
   return inboxFromItems(
@@ -50,6 +53,7 @@ export function withInboxUpdate(
               : { snoozedUntil: body.snoozedUntil }),
           },
     ),
+    snoozedView,
   );
 }
 
@@ -77,9 +81,27 @@ export function useUpdateInboxItem(
       }),
     onMutate: async (input) => {
       const snapshot = await snapshotM3(client);
-      client.setQueryData<Inbox>(inboxKey(workspaceId), (current) =>
-        withInboxUpdate(current, input, snoozed, new Date().toISOString()),
-      );
+      const target =
+        input.snooze ??
+        (snoozed?.id === input.id ? snoozed : null) ??
+        client
+          .getQueriesData<Inbox>({ queryKey: inboxKey(workspaceId) })
+          .flatMap(([, inbox]) => inbox?.items ?? [])
+          .find((item) => item.id === input.id) ??
+        null;
+      for (const query of client
+        .getQueryCache()
+        .findAll({ queryKey: inboxKey(workspaceId) })) {
+        client.setQueryData<Inbox>(query.queryKey, (current) =>
+          withInboxUpdate(
+            current,
+            input,
+            target,
+            new Date().toISOString(),
+            query.queryKey[2] === "snoozed",
+          ),
+        );
+      }
       return snapshot;
     },
     onSuccess: (_, input, snapshot) => {

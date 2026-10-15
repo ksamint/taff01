@@ -86,6 +86,8 @@ const suggestionBase = object({
   status: suggestionStatusSchema,
   decidedBy: nullable(idSchema),
   decidedAt: nullable(iso.datetime()),
+  /** Absent only on older servers; applied history remains retained after undo. */
+  undoneAt: optional(nullable(iso.datetime())),
   version: versionSchema,
   createdAt: iso.datetime(),
   updatedAt: iso.datetime(),
@@ -114,6 +116,32 @@ export const suggestionApplyResultSchema = object({
   tasks: array(taskSchema),
   plan: nullable(taskPlanResultSchema),
 });
+/** Server-persisted inverse: exact inputs and optimistic concurrency guards. */
+const inverseTask = object({
+  id: idSchema,
+  version: versionSchema,
+  updatedAt: iso.datetime(),
+});
+export const suggestionInverseSchema = union([
+  object({
+    kind: literal("split"),
+    tasks: array(inverseTask).check(minLength(1), maxLength(10)),
+  }),
+  object({
+    kind: literal("reschedule"),
+    task: inverseTask,
+    dueAt: nullable(iso.datetime()),
+    planVersion: versionSchema,
+    plan: nullable(
+      object({
+        startDate: civilDateSchema,
+        durationDays: durationDaysSchema,
+        archivedAt: nullable(iso.datetime()),
+      }),
+    ),
+  }),
+]);
+export type SuggestionInverse = Infer<typeof suggestionInverseSchema>;
 export const mcpSuggestionsCreateArgs = suggestionInputSchema;
 
 // Brief ---------------------------------------------------------------------

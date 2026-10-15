@@ -13,6 +13,7 @@ const milestoneFiles = [
   "timeline.spec.ts",
   "brief.spec.ts",
   "mind.spec.ts",
+  "v021-feature-gaps.spec.ts",
 ];
 const phone = { ...devices["Pixel 7"], viewport: { width: 390, height: 844 } };
 const desktop = {
@@ -47,39 +48,45 @@ export default defineConfig({
       name: "phone-en",
       use: { ...phone, locale: "en-US" },
       metadata: { locale: "en", formFactor: "phone" },
-      grepInvert: /desktop shows the brief as the Me tab/,
+      grepInvert:
+        /desktop shows the brief as the Me tab|desktop Me lists snoozed items/,
     },
     {
       name: "phone-zh-HK",
       use: { ...phone, locale: "zh-HK" },
       metadata: { locale: "zh-HK", formFactor: "phone" },
-      grepInvert: /desktop shows the brief as the Me tab/,
+      grepInvert:
+        /desktop shows the brief as the Me tab|desktop Me lists snoozed items/,
     },
     {
       name: "desktop-en",
       use: { ...desktop, locale: "en-US" },
       metadata: { locale: "en", formFactor: "desktop" },
-      grepInvert: /phone brief overlay matches the API/,
+      grepInvert:
+        /phone brief overlay matches the API|phone selection scrolls the mind detail panel/,
     },
     {
       name: "desktop-zh-HK",
       use: { ...desktop, locale: "zh-HK" },
       metadata: { locale: "zh-HK", formFactor: "desktop" },
-      grepInvert: /phone brief overlay matches the API/,
+      grepInvert:
+        /phone brief overlay matches the API|phone selection scrolls the mind detail panel/,
     },
     {
       name: "phone-zh-CN",
       testMatch: milestoneFiles,
       use: { ...phone, locale: "zh-CN" },
       metadata: { locale: "zh-CN", formFactor: "phone" },
-      grepInvert: /desktop shows the brief as the Me tab/,
+      grepInvert:
+        /desktop shows the brief as the Me tab|desktop Me lists snoozed items/,
     },
     {
       name: "desktop-zh-CN",
       testMatch: milestoneFiles,
       use: { ...desktop, locale: "zh-CN" },
       metadata: { locale: "zh-CN", formFactor: "desktop" },
-      grepInvert: /phone brief overlay matches the API/,
+      grepInvert:
+        /phone brief overlay matches the API|phone selection scrolls the mind detail panel/,
     },
   ],
 });

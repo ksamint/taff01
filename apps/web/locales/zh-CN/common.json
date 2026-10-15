@@ -225,7 +225,15 @@
     "languageHK": "繁體中文",
     "languageCN": "简体",
     "noAgents": "暂无智能体",
-    "noActiveTasks": "暂无进行中任务"
+    "noActiveTasks": "暂无进行中任务",
+    "aiSettings": "AI 设置",
+    "aiEnabled": "AI 模型",
+    "aiDisabledHint": "此版本保持关闭。模型提供方和数据授权尚待决定；简报和 Ask taff 使用规则。",
+    "snoozed": "已稍后处理",
+    "noSnoozed": "暂无稍后处理的消息",
+    "snoozedUntil": "稍后处理至 {{date}}",
+    "unsnooze": "返回收件箱",
+    "showAgentOnBoard": "在看板中查看"
   },
   "mcp": {
     "title": "MCP 服务器",
@@ -790,7 +798,9 @@
       "empty": "暂无联系人",
       "pick": "选择一位联系人，查看关联和角色。",
       "delete": "删除联系人",
-      "deleteConfirm": "删除 {{name}}？联系人会被归档，关联会保留，并可撤销。"
+      "deleteConfirm": "删除 {{name}}？联系人会被归档，关联会保留，并可撤销。",
+      "addToProject": "添加到项目",
+      "chooseProject": "选择项目"
     },
     "stakeholders": {
       "fromProject": "项目相关方",
@@ -882,7 +892,7 @@
     "linkSelected": "已选“{{task}}”，请点选后续任务。",
     "cancel": "取消",
     "close": "关闭",
-    "keyboardHint": "用上下方向键在各行之间移动，并在图表下方的面板修改日期和前置任务。",
+    "keyboardHint": "上下方向键切换行，左右方向键移动计划一天，按住 Shift 移动一周。在下方面板编辑日期和前置项。",
     "colTask": "任务",
     "rowsLabel": "{{project}} 的任务和里程碑",
     "rowLabel": "{{title}}，{{start}} 至 {{end}}，{{duration}}，{{who}}，已完成 {{progress}}%",
@@ -938,7 +948,15 @@
     "depAdded": "已加入依赖",
     "depRemoved": "已移除依赖",
     "depExists": "依赖已存在",
-    "cycle": "会形成循环依赖，未加入"
+    "cycle": "会形成循环依赖，未加入",
+    "newMilestone": "新建里程碑",
+    "renameMilestone": "重命名里程碑",
+    "archiveMilestone": "归档里程碑",
+    "archiveMilestoneConfirm": "归档“{{name}}”？历史记录会保留。",
+    "milestoneName": "里程碑名称",
+    "milestoneCreated": "已创建里程碑",
+    "milestoneSaved": "已更新里程碑",
+    "milestoneArchived": "已归档里程碑"
   },
   "relations": {
     "layoutLabel": "布局",
@@ -1116,7 +1134,8 @@
     },
     "toast": {
       "applied": "已应用",
-      "dismissed": "已跳过"
+      "dismissed": "已跳过",
+      "undone": "已撤销建议。"
     }
   },
   "ask": {

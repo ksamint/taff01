@@ -87,7 +87,9 @@ export function createRelationOperations({ db, requireMember }: Dependencies) {
             workerId: tasks.workerId,
           })
           .from(tasks)
-          .where(eq(tasks.workspaceId, workspaceId)),
+          .where(
+            and(eq(tasks.workspaceId, workspaceId), isNull(tasks.archivedAt)),
+          ),
         db
           .select({
             id: members.id,

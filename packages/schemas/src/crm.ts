@@ -109,6 +109,8 @@ export const contactSchema = object({
   id: idSchema,
   workspaceId: idSchema,
   companyId: nullable(idSchema),
+  /** Distinct roles across this contact's links, included by workspace lists. */
+  roles: optional(array(contactRoleSchema)),
   name: string(),
   title: string(),
   phone: nullable(string()),

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (321 distinct, 1672 uses)
+## Test ids (334 distinct, 1748 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -24,7 +24,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `agent-change-history` | 2 |  | agent-review.spec.ts |
 | `agent-policy` | 7 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `agent-profile-heading` | 5 |  | agent-creation.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `agent-profile-heading` | 7 |  | agent-creation.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `agent-request-details` | 1 |  | optimistic-m4.spec.ts |
 | `agent-run-history` | 2 |  | optimistic-m4.spec.ts |
 | `agent-save` | 6 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
@@ -33,6 +33,12 @@ several do). “Also rendered by” lists the other files.
 | `grant-card` | 6 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `permission-web.search-*` | 7 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `permission-web.search-ask` | 4 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
+
+### ai-settings.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `ai-enabled` | 8 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 
 ### app-shell.tsx
 
@@ -69,10 +75,10 @@ several do). “Also rendered by” lists the other files.
 | `ask-try-atRisk` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `ask-try-blocked` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-action` | 6 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-action-open` | 4 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-action-open` | 6 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-close` | 4 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-greeting` | 4 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-proposal-apply` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-proposal-apply` | 4 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-dismiss` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-subtasks` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-risk` | 3 |  | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
@@ -136,6 +142,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `contact-link-roles` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
+| `contact-row-roles` | 2 | crm/contacts-view.tsx | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `mind-evidence-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-link-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-edit` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
@@ -152,11 +159,13 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
+| `contact-add-project` | 4 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `contact-add-project-submit` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `contact-archive` | 2 |  | crm.spec.ts, live/crm.spec.ts |
 | `contact-company-select` | 4 |  | crm.spec.ts, live/crm.spec.ts |
 | `contact-heading` | 5 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
-| `contact-link` | 4 |  | crm.spec.ts, live/crm.spec.ts |
-| `contact-row` | 9 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
+| `contact-link` | 6 |  | crm.spec.ts, live/crm.spec.ts, live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `contact-row` | 11 |  | crm.spec.ts, live/crm.spec.ts, live/v021-feature-gaps.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 
 ### crm/crm-forms.tsx
 
@@ -200,11 +209,14 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `inbox-approve` | 2 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `inbox-grant-access` | 3 |  | agent-review.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `inbox-item` | 13 |  | agent-review.spec.ts, live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `inbox-item` | 15 |  | agent-review.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `inbox-open-digest` | 1 |  | notifications.spec.ts |
 | `inbox-open-review` | 3 |  | agent-review.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `inbox-snooze` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
+| `inbox-snooze` | 4 |  | agent-review.spec.ts, live/v021-feature-gaps.spec.ts, optimistic-m4.spec.ts, v021-feature-gaps.spec.ts |
+| `inbox-tab-all` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `inbox-tab-blockers` | 3 |  | agent-review.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `inbox-tab-snoozed` | 4 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `inbox-unsnooze` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 
 ### landing.tsx
 
@@ -229,7 +241,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `me-advanced` | 2 | me-view.tsx | me.spec.ts |
+| `me-advanced` | 4 | me-view.tsx | live/v021-feature-gaps.spec.ts, me.spec.ts, v021-feature-gaps.spec.ts |
 | `me-organization` | 5 | me-view.tsx | me.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
 | `me-tab-brief` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `me-tab-inbox` | 4 |  | brief.spec.ts, live/brief.spec.ts |
@@ -262,7 +274,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-as-list` | 8 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-back` | 4 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-coverage` | 4 |  | live/mind.spec.ts, mind.spec.ts |
-| `mind-detail-title` | 12 |  | live/mind.spec.ts, mind.spec.ts |
+| `mind-detail-title` | 16 |  | live/mind.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts, v021-feature-gaps.spec.ts |
 | `mind-edit-node` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-empty` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-evidence-item` | 4 |  | live/mind.spec.ts, mind.spec.ts |
@@ -274,7 +286,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-new-node` | 4 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-new-source` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-no-evidence` | 4 |  | live/mind.spec.ts, mind.spec.ts |
-| `mind-node` | 5 |  | live/mind.spec.ts, mind.spec.ts, ui-v2.spec.ts |
+| `mind-node` | 7 |  | live/mind.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `mind-node-form` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-node-layer` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-node-momentum` | 2 |  | live/mind.spec.ts, mind.spec.ts |
@@ -453,7 +465,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `toast` | 24 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
-| `toast-action` | 39 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
+| `toast-action` | 41 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 
 ### sidebar.tsx
 
@@ -521,9 +533,13 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
+| `milestone-date` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `milestone-name` | 4 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `milestone-save` | 6 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-add-predecessor` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-add-predecessor-submit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline-bar` | 3 |  | live/timeline.spec.ts, timeline.spec.ts, ui-v2.spec.ts |
+| `timeline-archive-milestone` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `timeline-bar` | 7 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, timeline.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-bar-body` | 14 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-bar-link` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-bar-resize` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -534,8 +550,10 @@ several do). “Also rendered by” lists the other files.
 | `timeline-footer` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-hint` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-mode` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline-new-milestone` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-predecessor` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline-row` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline-rename-milestone` | 6 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `timeline-row` | 4 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-save` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-start` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-view` | 7 |  | finance-visibility.spec.ts, live/platform.spec.ts, live/timeline.spec.ts, timeline.spec.ts |
@@ -565,6 +583,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
 | `button — name: locale === "en" ? m.en : locale === "zh-HK" ? m.me.languageHK : m.me.languageCN` | 1 | me.spec.ts |
+| `button — name: m.actions.undo` | 4 | brief.spec.ts, live/brief.spec.ts |
 | `button — name: m.mcp.copyConfig` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.mcp.dismiss` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -584,7 +603,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].sms.title` | 1 | sms-auth.spec.ts |
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
-| `dialog` | 52 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts |
+| `dialog` | 54 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
@@ -662,7 +681,10 @@ read (`data-event-id`, `data-date`).
 
 | Selector | Uses | Used in |
 | --- | ---: | --- |
+| `.agent-profile-controls` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.agent-profile-heading p` | 1 | agent-creation.spec.ts |
+| `.agent-profile-overview` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `.agent-profile-parity.is-embedded` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.calendar-engine-month-grid` | 1 | ui-v2.spec.ts |
 | `.calendar-engine-week` | 1 | ui-v2.spec.ts |
 | `.calendar-list-item` | 5 | calendar.spec.ts, persistence.spec.ts |
@@ -678,6 +700,7 @@ read (`data-event-id`, `data-date`).
 | `.mcp-scopes label.mcp-scope` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="active"]` | 6 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="revoked"]` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `.me-agent-card` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.me-profile-copy strong` | 1 | me.spec.ts |
 | `.notifications-body` | 1 | notifications.spec.ts |
 | `.organization-choices` | 1 | scripts/ui/app-shots.mjs |
@@ -711,13 +734,15 @@ read (`data-event-id`, `data-date`).
 | `.team-directory > h1` | 3 | agent-creation.spec.ts, planning.spec.ts, ui-v2.spec.ts |
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mjs |
 | `.team-directory-list li` | 1 | ui-v2.spec.ts |
-| `.toast-region` | 2 | brief.spec.ts, live/brief.spec.ts |
+| `.toast-region` | 12 | brief.spec.ts, live/brief.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
 | `[data-source]` | 2 | brief.spec.ts, live/brief.spec.ts |
+| `[data-testid="contact-link"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `[data-testid="contact-row"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="desktop-new-task"]` | 1 | ui-v2.spec.ts |
-| `[data-testid="mind-node"][data-id="*"]` | 2 | live/mind.spec.ts, mind.spec.ts |
+| `[data-testid="mind-node"][data-id="*"]` | 3 | live/mind.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts |
 | `[data-testid="relations-node"][data-key="task:*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-bar"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-dependency"][data-from="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
@@ -755,7 +780,7 @@ read (`data-event-id`, `data-date`).
 | `main.loading` | 2 | i18n.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |
-| `option[value="*"]` | 4 | agent-creation.spec.ts, planning.spec.ts |
+| `option[value="*"]` | 6 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, planning.spec.ts, v021-feature-gaps.spec.ts |
 | `select[id="grant-expiry-*"]` | 1 | agent-review.spec.ts |
 
 ## Locale message lookups
@@ -766,7 +791,7 @@ Keys read from `apps/web/locales/*/common.json` through
 
 | Key | Uses | Used in |
 | --- | ---: | --- |
-| `actions.undo` | 1 | task-contacts.spec.ts |
+| `actions.undo` | 13 | brief.spec.ts, live/brief.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
@@ -777,7 +802,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `brief.nav` | 12 | brief.spec.ts, live/brief.spec.ts |
 | `brief.proposal.title` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `brief.title` | 6 | brief.spec.ts, live/brief.spec.ts |
-| `brief.toast.applied` | 6 | brief.spec.ts, live/brief.spec.ts |
+| `brief.toast.applied` | 12 | brief.spec.ts, live/brief.spec.ts |
+| `brief.toast.undone` | 12 | brief.spec.ts, live/brief.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
 | `crm.companies.delete` | 10 | crm.spec.ts, live/crm.spec.ts |
 | `crm.contacts.add` | 11 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
@@ -787,9 +813,10 @@ Keys read from `apps/web/locales/*/common.json` through
 | `crm.noRole` | 21 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `crm.role.chair` | 10 | crm.spec.ts, live/crm.spec.ts |
 | `crm.role.decider` | 20 | crm.spec.ts, live/crm.spec.ts |
-| `crm.role.finance` | 10 | crm.spec.ts, live/crm.spec.ts |
+| `crm.role.finance` | 12 | crm.spec.ts, live/crm.spec.ts, live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `crm.role.signoff` | 1 | task-contacts.spec.ts |
-| `crm.roleSeparator` | 10 | crm.spec.ts, live/crm.spec.ts |
+| `crm.role.tech` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `crm.roleSeparator` | 12 | crm.spec.ts, live/crm.spec.ts, live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `crm.toast.addedStakeholder` | 12 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `crm.toast.clientSet` | 10 | crm.spec.ts, live/crm.spec.ts |
 | `crm.toast.companyChanged` | 10 | crm.spec.ts, live/crm.spec.ts |

@@ -1,0 +1,283 @@
+{
+  "sourceSha": "1c41a5c5ef008100269e5a75227acb1b1475c0f3",
+  "runUrl": "https://github.com/ksamint/taff01/actions/runs/38668381441",
+  "sourceManifest": "docs/ui/screenshots/v021-item5-visual-capture-manifest.json",
+  "sourceManifestSha256": "0e6bc79146e008cf2f42f4765a6192a042742f5ab491eefaab38e1385d218630",
+  "nativeCasesPassed": 104,
+  "nativePngsVerified": 126,
+  "imported": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/contact-detail.png",
+      "before": "4e17f7e838f6eb3d675b33b8708ffed7dc72d24719d2c1a0838eaa2868fe010a",
+      "after": "acce2e454a8dcb9d2dbffe1174a73c4ccf7812b215f1c36518230da94d51aafc",
+      "bytes": 95244,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/contacts.png",
+      "before": "ff733f9cb9e0414409e673076f0d7673dc73a3651819b0bee302298a2bf0d6a2",
+      "after": "e9ae1f7a755b1d207a48b3ced17328c4893db3b425677b9c7a750055ea4dec5b",
+      "bytes": 64304,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/inbox.png",
+      "before": "8d54795203305c3f1afe44b349e09f660efc155c43d331f3dc73717b546329ec",
+      "after": "a745187a56bf4804f9a1b841f3899015db7dd1065197911c648fc685e6a57bf6",
+      "bytes": 133580,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/me.png",
+      "before": "8d54795203305c3f1afe44b349e09f660efc155c43d331f3dc73717b546329ec",
+      "after": "a745187a56bf4804f9a1b841f3899015db7dd1065197911c648fc685e6a57bf6",
+      "bytes": 133580,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/review-deliverable.png",
+      "before": "8a0dee4de90a043475e4692a316aea4be5320ce48dd2a70f36675b88ce07632c",
+      "after": "5395854737462a9b2d73c66bf2e067656d88c649147adec553aaca7346cb4d1a",
+      "bytes": 153821,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/review.png",
+      "before": "75467bd76e03be0a4bd2589f9d6da48c1c1dabc085dfd90fdb2e95a8e3d86974",
+      "after": "8168fcdd79e501dc3c6699ce1781d5ba7db19711b58ae88e318e989c405f429f",
+      "bytes": 143872,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/timeline.png",
+      "before": "2d9a99ce2a365a18ba2fd0ee52880654ec2cbe31cd5de77923c4abdaa91db950",
+      "after": "100cfb045de1d85ac929e4271e72d5ed9be4197663070e18044f5335d93fa07c",
+      "bytes": 138810,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/contact-detail.png",
+      "before": "24f2ead95f339f82bef5ed603b0e12c60ec0c815b8949e3571d09de779231a2d",
+      "after": "dc91c427e1acffe7aae85d7a6591095e92c82a97acfff3f427a38c6ef8f2272b",
+      "bytes": 95232,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/contacts.png",
+      "before": "a74a613073ed966c4b4d65c5d019ec411ae3e057a981cb862332f04779f405ec",
+      "after": "05a624a35196f2f06199a907517d17086f60751225c1a9796c7a3237d03689d4",
+      "bytes": 66978,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/inbox.png",
+      "before": "eb9e88006e7c8e27456f7982d36e1a38e3f7cd6ff906fa246fa445bdbddec52f",
+      "after": "4e0768d0700ef5c63ae77de16c98dea0ea18f4aeb14105e889241ffa4a8a4e92",
+      "bytes": 139059,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/me.png",
+      "before": "eb9e88006e7c8e27456f7982d36e1a38e3f7cd6ff906fa246fa445bdbddec52f",
+      "after": "4e0768d0700ef5c63ae77de16c98dea0ea18f4aeb14105e889241ffa4a8a4e92",
+      "bytes": 139059,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/review-deliverable.png",
+      "before": "cbc2ac2ba16a366f374de5fc19e95e7620aaeb02554cb32c8299a81d0b721a61",
+      "after": "a3e866fb6dfb857e00ebb3a16a871f3862f6f25b2adf847391fec009bd1bc91f",
+      "bytes": 159434,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/review.png",
+      "before": "bd9cfa725072a2506b4c089840655719483f88693d1ec2ca1ad783baf50a8a16",
+      "after": "5e3ee679e274e287c4fb366273071641ce05ca226489fe1e6f7d13bdc83fc7db",
+      "bytes": 149518,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/timeline.png",
+      "before": "3b5d1dd45e121ebd3e8198f34b1940c59d46424b8b5a1e437ebea8d7952c53f8",
+      "after": "ad0cf84abe7459159eaca2f5cbf5e8f7b816a9fccc92a043782482757bd21a93",
+      "bytes": 141345,
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/contact-detail.png",
+      "before": "499b3277300faef3de1b474c6c8c761c7db1675f1afd7809d9089faa7020a77e",
+      "after": "77f09b5db4d0b3a2ce45a4652789ed7cc3525b567548e26fdf8b4931815e5be2",
+      "bytes": 40675,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/contacts.png",
+      "before": "cc61fc42961b9a8121bf8fb74341b2b1527168679e36e506702a84f3d454e200",
+      "after": "3d6a31603200d84f4a28d3c19d07a3009317f77bc8db65acb0a40b6bab981c9e",
+      "bytes": 51543,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/timeline.png",
+      "before": "8697b5af5efc554050540c705354564befdefa772665c3b4d0664b216956e2fc",
+      "after": "34848668c635f95e17b9e1df77c447a4e5b76447822d50066190652b3ba37e2e",
+      "bytes": 70782,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/contact-detail.png",
+      "before": "e1f69c2e4c6e6534812933c566c2c979d9430800fb431837d13cc2ce3d660eb6",
+      "after": "4742dd47ffa6ce42e5f0f1aaaec64829076371f13c3b4ddfce85aadd9c51c522",
+      "bytes": 39898,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/contacts.png",
+      "before": "e72a8c80387c6ec7e6d507b79a4021aa0e877f21efb955dcb4dc696f026dfa8d",
+      "after": "9ce66e02e36a3c4f4ce1e52cc85123bc93a53314c1dfb2f7d7db742ba886481c",
+      "bytes": 52929,
+      "width": 390,
+      "height": 844
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/timeline.png",
+      "before": "ee8522e67b1a3acbd7ae18db9ef03bb7ae52b7e83f03c77368a004e2b670d678",
+      "after": "60495ee70fa5261cefb2e96703c01f380e44e89f12cd2ef74f3fced457cc95fe",
+      "bytes": 74361,
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "preserved": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/brief.png",
+      "pixelsOver16": 68932,
+      "reason": "Reject unstyled capture; preserve prior styled brief."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/mcp.png",
+      "pixelsOver16": 2,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/projects.png",
+      "pixelsOver16": 1,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/relations.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/type-dark.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/type.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/company-detail.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/home.png",
+      "pixelsOver16": 790,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/mcp.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/projects.png",
+      "pixelsOver16": 4,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/relations.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/search.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/type.png",
+      "pixelsOver16": 4,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/companies.png",
+      "pixelsOver16": 1,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/projects.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/stakeholders.png",
+      "pixelsOver16": 2,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/today.png",
+      "pixelsOver16": 1,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/type.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/companies.png",
+      "pixelsOver16": 1,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/projects-list.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/projects.png",
+      "pixelsOver16": 0,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/stakeholders.png",
+      "pixelsOver16": 2,
+      "reason": "Outside the item 5 UI change; preserve existing baseline."
+    }
+  ],
+  "review": "Inspected contacts, contact detail, timeline and desktop embedded inbox changes. Agent captures are byte-identical and retained. No comparison tolerance or assertion was weakened. Later branch changes before import were test tooling only."
+}

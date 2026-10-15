@@ -28,7 +28,11 @@ and `--repeat-each=3 --project=phone-en`. Failed deploy checks get one explicit
 retry under the deployment goal; the default here is zero automatic retries so
 first-attempt evidence is retained. Targeting flags are allowlisted; trace, reporter,
 config, worker and debug overrides are rejected. Viewport-specific brief flows are
-selected by project, giving 122 applicable cases without runtime skips.
+selected by project, giving 140 applicable cases without runtime skips. The v0.2.1
+feature checks add CRM membership/roles, milestone CRUD and keyboard movement,
+phone detail scrolling and AI-off settings, desktop snoozed items/agent profile,
+and versioned split/reschedule Undo. Created grants and milestones are journaled
+for cleanup; existing Verification agent settings are restored.
 
 Traces, screenshots, videos and raw error context are disabled. The mandatory
 preload and safe reporter suppress diagnostics that can contain displayed tokens,

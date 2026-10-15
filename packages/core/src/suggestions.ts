@@ -16,14 +16,16 @@ import {
   type SuggestionDecision,
   type SuggestionFilter,
   type SuggestionInput,
+  type SuggestionInverse,
   suggestionDecisionSchema,
   suggestionFilterSchema,
   suggestionInputSchema,
+  suggestionInverseSchema,
   type Task,
   type TaskPlanInput,
   type TaskPlanResult,
 } from "@taff/schemas";
-import { and, desc, eq, inArray, type SQL } from "drizzle-orm";
+import { and, desc, eq, inArray, type SQL, sql } from "drizzle-orm";
 import { CoreError, type Principal } from "./index";
 import type { Action, Actor, Resource } from "./permissions";
 
@@ -53,6 +55,7 @@ function dtoSuggestion(row: Row): Suggestion {
     status: row.status,
     decidedBy: row.decidedBy,
     decidedAt: row.decidedAt?.toISOString() ?? null,
+    undoneAt: row.undoneAt?.toISOString() ?? null,
     version: row.version,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
@@ -213,11 +216,13 @@ export function createSuggestionOperations({
     row: Row,
     actor: Actor,
     status: "applied" | "dismissed",
+    inverse?: SuggestionInverse,
   ) {
     const [updated] = await tx
       .update(suggestions)
       .set({
         status,
+        ...(inverse ? { inverse } : {}),
         decidedBy: actor.id,
         decidedAt: new Date(),
         version: row.version + 1,
@@ -238,8 +243,9 @@ export function createSuggestionOperations({
       const { row, task, actor } = await decide(tx, p, id, body.version);
       const created: Task[] = [];
       let plan: TaskPlanResult | null = null;
+      let inverse: SuggestionInverse;
       const payload = dtoSuggestion(row);
-      if (payload.kind === "split")
+      if (payload.kind === "split") {
         // The normal create path: the person needs task:create and the
         // parent must be open with no active run, as for any subtask.
         for (const subtask of payload.payload.subtasks)
@@ -257,24 +263,185 @@ export function createSuggestionOperations({
               }),
             ),
           );
-      else {
+        inverse = {
+          kind: "split",
+          tasks: created.map(({ id, version, updatedAt }) => ({
+            id,
+            version,
+            updatedAt,
+          })),
+        };
+      } else {
         // The normal plan path: task:schedule on the task, applied to the
         // plan as it is now.
         const [current] = await tx
-          .select({ version: taskPlans.version })
+          .select()
           .from(taskPlans)
           .where(eq(taskPlans.taskId, task.id));
         plan = await applyTaskPlan(tx, p, task.id, {
           startDate: payload.payload.startDate,
           durationDays: payload.payload.durationDays,
-          ...(current ? { version: current.version } : {}),
+          ...(current && !current.archivedAt
+            ? { version: current.version }
+            : {}),
         });
+        const after = await lockTask(tx, task.id);
+        inverse = {
+          kind: "reschedule",
+          task: {
+            id: after.id,
+            version: after.version,
+            updatedAt: after.updatedAt.toISOString(),
+          },
+          dueAt: task.dueAt?.toISOString() ?? null,
+          planVersion: plan.plans[0].version,
+          plan: current
+            ? {
+                startDate: current.startDate,
+                durationDays: current.durationDays,
+                archivedAt: current.archivedAt?.toISOString() ?? null,
+              }
+            : null,
+        };
       }
       return {
-        suggestion: await close(tx, row, actor, "applied"),
+        suggestion: await close(tx, row, actor, "applied", inverse),
         tasks: created,
         plan,
       };
+    });
+  }
+  /** Inverse of this apply only. Newer work is never overwritten or hidden. */
+  async function undoSuggestion(
+    p: Principal,
+    id: string,
+    input: SuggestionDecision,
+  ): Promise<Suggestion> {
+    parse(idSchema, id);
+    const body = parse(suggestionDecisionSchema, input);
+    return mutation(p, async (tx) => {
+      const [row] = await tx
+        .select()
+        .from(suggestions)
+        .where(eq(suggestions.id, id))
+        .for("update");
+      if (!row?.taskId) notFound();
+      const task = await lockTask(tx, row.taskId as string);
+      await requireMember(
+        tx,
+        p,
+        row.workspaceId,
+        "suggestion:undo",
+        await taskResource(tx, task),
+      );
+      if (
+        row.status !== "applied" ||
+        row.undoneAt ||
+        row.version !== body.version ||
+        !row.inverse
+      )
+        conflict();
+      const inverse = parse(suggestionInverseSchema, row.inverse);
+      const now = new Date();
+      if (inverse.kind === "split") {
+        // Deterministic locking and all checks precede writes: undo is atomic.
+        const children = [];
+        for (const expected of [...inverse.tasks].sort((a, b) =>
+          a.id.localeCompare(b.id),
+        )) {
+          const child = await lockTask(tx, expected.id);
+          if (
+            child.workspaceId !== task.workspaceId ||
+            child.parentId !== task.id ||
+            child.version !== expected.version ||
+            child.updatedAt.toISOString() !== expected.updatedAt
+          )
+            conflict();
+          // Child owners may differ: undo permission is scoped to the parent's
+          // generated records, and cannot archive an arbitrary person's task.
+          // Any downstream use makes a generated record ineligible, including
+          // read-independent links, completed runs, comments and schedules.
+          const [used] = await tx.execute<{ used: boolean }>(sql`select (
+            exists(select 1 from tasks where parent_id=${child.id}) or
+            exists(select 1 from runs where task_id=${child.id}) or
+            exists(select 1 from grants where task_id=${child.id}) or
+            exists(select 1 from inbox_items where task_id=${child.id}) or
+            exists(select 1 from task_comments where task_id=${child.id}) or
+            exists(select 1 from task_calendar where id=${child.id}) or
+            exists(select 1 from task_plans where id=${child.id}) or
+            exists(select 1 from task_contacts where task_id=${child.id}) or
+            exists(select 1 from task_dependencies where predecessor_task_id=${child.id} or successor_task_id=${child.id}) or
+            exists(select 1 from suggestions where task_id=${child.id}) or
+            exists(select 1 from mind_nodes where task_id=${child.id}) or
+            exists(select 1 from activity where resource_id=${child.id} and action <> 'tasks.insert')
+          ) as used`);
+          if (used?.used) conflict();
+          children.push(child);
+        }
+        for (const child of children)
+          await tx
+            .update(tasks)
+            .set({
+              archivedAt: now,
+              version: child.version + 1,
+              updatedAt: now,
+            })
+            .where(eq(tasks.id, child.id));
+      } else {
+        await requireMember(
+          tx,
+          p,
+          task.workspaceId,
+          "task:schedule",
+          await taskResource(tx, task),
+        );
+        const [current] = await tx
+          .select()
+          .from(taskPlans)
+          .where(eq(taskPlans.taskId, task.id))
+          .for("update");
+        if (
+          task.id !== inverse.task.id ||
+          task.version !== inverse.task.version ||
+          task.updatedAt.toISOString() !== inverse.task.updatedAt ||
+          !current ||
+          current.version !== inverse.planVersion ||
+          current.archivedAt
+        )
+          conflict();
+        await tx
+          .update(taskPlans)
+          .set({
+            ...(inverse.plan
+              ? {
+                  startDate: inverse.plan.startDate,
+                  durationDays: inverse.plan.durationDays,
+                }
+              : {}),
+            archivedAt: inverse.plan
+              ? inverse.plan.archivedAt
+                ? new Date(inverse.plan.archivedAt)
+                : null
+              : now,
+            version: current.version + 1,
+            updatedAt: now,
+          })
+          .where(eq(taskPlans.taskId, task.id));
+        await tx
+          .update(tasks)
+          .set({
+            dueAt: inverse.dueAt ? new Date(inverse.dueAt) : null,
+            version: task.version + 1,
+            updatedAt: now,
+          })
+          .where(eq(tasks.id, task.id));
+      }
+      const [undone] = await tx
+        .update(suggestions)
+        .set({ undoneAt: now, version: row.version + 1, updatedAt: now })
+        .where(eq(suggestions.id, row.id))
+        .returning();
+      return dtoSuggestion(undone);
     });
   }
   async function dismissSuggestion(
@@ -295,6 +462,7 @@ export function createSuggestionOperations({
       listSuggestions,
       applySuggestion,
       dismissSuggestion,
+      undoSuggestion,
     },
   };
 }

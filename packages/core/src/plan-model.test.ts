@@ -133,6 +133,29 @@ describe("plan model: Northwind on 2026-10-08", () => {
 });
 
 describe("plan model: scenarios", () => {
+  it("reports whole behind days without an extra day from floating-point noise", () => {
+    const model = buildPlanModel({
+      today: day(6),
+      tasks: [task("six-days", 6, 6, "todo")],
+      milestones: [],
+      dependencies: [],
+      finance: null,
+    });
+    expect(item(model, "six-days").behindDays).toBe(5);
+    expect(item(model, "six-days").forecastEnd).toBe(day(11));
+    expect(
+      item(
+        buildPlanModel({
+          today: day(1),
+          tasks: [task("future", 6, 6, "todo")],
+          milestones: [],
+          dependencies: [],
+          finance: null,
+        }),
+        "future",
+      ).behindDays,
+    ).toBe(0);
+  });
   it("a successor starting before its predecessor ends is a high-risk conflict", () => {
     const model = buildPlanModel(
       replan(northwind(), "NW-139", "2026-10-05", 3),
@@ -140,11 +163,11 @@ describe("plan model: scenarios", () => {
     expect(
       model.dependencies.filter((d) => d.conflict).map((d) => d.id),
     ).toEqual(["NW-133>NW-139"]);
-    // Started Oct 5, expected 100% on Oct 8, at 50%: 1.5 days behind.
+    // Started Oct 5, expected 100% on Oct 8, at 50%: 1.5 days, displayed as 2.
     expect(item(model, "NW-139")).toMatchObject({
       start: "2026-10-05",
       end: "2026-10-07",
-      behindDays: 1.5,
+      behindDays: 2,
       forecastEnd: "2026-10-09",
     });
     expect(item(model, "NW-140")).toMatchObject({
@@ -165,15 +188,15 @@ describe("plan model: scenarios", () => {
     expect(
       Object.fromEntries(model.items.map((x) => [x.id, x.behindDays])),
     ).toMatchObject({
-      "NW-141": 0.3,
-      "NW-142": 0.2,
-      "NW-138": 1.5,
+      "NW-141": 1,
+      "NW-142": 1,
+      "NW-138": 2,
       "NW-144": 2,
-      "NW-139": 1.5,
+      "NW-139": 2,
       "NW-145": 1,
       "NW-146": 0,
       "NW-147": 0,
-      "NW-140": 2.03,
+      "NW-140": 3,
       "NW-133": 0,
       "ms-v24": 0,
     });
