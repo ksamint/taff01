@@ -936,13 +936,16 @@ test("[item 5] Calendar", async ({ page }, info) => {
         .first();
       await expect(event).toBeVisible();
       await event.scrollIntoViewIfNeeded();
-      await page.locator(".sx__view-container").evaluate(async (element) => {
-        await Promise.all(
-          element
-            .getAnimations({ subtree: true })
-            .map((animation) => animation.finished.catch(() => {})),
-        );
-      });
+      await page
+        .locator(".sx__view-container")
+        .first()
+        .evaluate(async (element) => {
+          await Promise.all(
+            element
+              .getAnimations({ subtree: true })
+              .map((animation) => animation.finished.catch(() => {})),
+          );
+        });
       await expect
         .poll(() =>
           event.evaluate((element) => element.getBoundingClientRect().height),
