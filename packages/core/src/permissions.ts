@@ -23,6 +23,7 @@ export type Action =
   | "task:schedule"
   | "task:review"
   | "token:manage"
+  | "profile:read"
   | "profile:update"
   | "notification:read"
   | "notification:update"
@@ -99,6 +100,7 @@ export function can(
   if (
     action === "notification:read" ||
     action === "notification:update" ||
+    action === "profile:read" ||
     action === "profile:update" ||
     action === "workspace:create" ||
     action === "workspace:join"
