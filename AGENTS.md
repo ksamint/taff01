@@ -5,7 +5,7 @@ product, architecture, stack, security, performance, and checkpoint requirements
 The final line is the original repository creation request, not a recurring action.
 
 Before substantive work, read and apply
-`/Users/af/.codex/skills/orchestrate-development/SKILL.md` when available.
+`$HOME/.codex/skills/orchestrate-development/SKILL.md` when available.
 Keep trivial work single-agent and preserve explicit user model choices.
 
 At the start of local Codex work on the M1 Pro, run

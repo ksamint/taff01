@@ -1840,3 +1840,45 @@ The remote annotated [v0.2.0 tag](https://github.com/ksamint/taff01/tree/v0.2.0)
 `git ls-remote` to peel to exact source `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`. The
 final release remains live. The watcher already returned when it found this candidate
 and is not restarted; the deployment goal is complete.
+
+### Frontend v2 release candidate v0.2.1-a — 2026-10-15
+
+Pinned main source `5191671743d36b4d2719882514ba0d2ff44019a4`, tree `50a1dda138e779acaab9b9badb82015a9d8a15b0`.
+
+Items1–2 of plan §10.1, [PR27](https://github.com/ksamint/taff01/pull/27) and
+[PR28](https://github.com/ksamint/taff01/pull/28): the public acceptance harness,
+mind-map own-write/undo version races and evidence IDs, initial-socket role refresh,
+and MCP copy in en/zh-CN/zh-HK. MCP continues to report taff/0.2.0 at this checkpoint.
+Items3–6 wait until this upgrade checkpoint is accepted.
+
+**CI.** Exact-source main push [38670282333](https://github.com/ksamint/taff01/actions/runs/38670282333)
+and merged PR-head [38666948980](https://github.com/ksamint/taff01/actions/runs/38666948980)
+are completed/success. The PR head is an ancestor of the pinned source. The item1
+head CI [38668491277](https://github.com/ksamint/taff01/actions/runs/38668491277) is also green.
+
+Exact-main validation: 885/885 unit/integration tests;
+Today initial JS 194427 B gzipped against204800 B;
+Today LCP medians en 592 ms, zh-CN 660 ms,
+zh-HK 648 ms (three runs/locale, slow4G,4×CPU,2000 ms ceiling).
+Lighthouse13.5.0 performance/accessibility/best-practices: en 95/100/100; zh-CN 94/100/100; zh-HK 95/100/100.
+Full visual, browser-flow and bundled MCP smoke gates pass in that exact-source CI.
+
+**Migrations.** None since the live source. Last migration remains0026; no backfill (0 rows).
+
+**Environment and infrastructure.** No .env.production.example, Compose, Dockerfile or Caddy changes. No new variables. The private env changes only TAFF_TAG, stays0600, email/SMS unchanged, AI_* unset. Host layout, route, DNS, PostgreSQL role/host stay unchanged.
+
+**Acceptance checklist.** Run all122 applicable public cases in e2e/live, without runtime skips:
+plan §6.0 basic functions and all30 live official-client MCP read/write tools,
+CRM, timeline/relations, rules-based brief/Ask, mind-map keyboard/evidence/undo,
+validation tasks and restricted-member finance/role changes. Include held first-socket
+promotion plus demotion, and repeated mind-map operations. Platform HTTPS/health,
+Secure/HttpOnly cookies, foreign-origin rejection, unchanged auth methods, realtime,
+and independent neighbor/PostgreSQL preservation checks are required. en and zh-HK
+phone390×844 and desktop1280×800, plus zh-CN Today/Projects/Me and milestone spots.
+Use only the dedicated verification account/workspace, with runtime credential refs.
+Every failed check gets one retry; apply the deploy goal's critical rollback rules.
+No SMS OTP or rate-limit flood; AI model stays off.
+
+Deploy only this pinned SHA, with verified database/env backups, Git bundle,
+SHA-stamped images/service worker, native detached keeper, and fresh ancestry/CI gates.
+The [v0.2.1 milestone report](milestones/20-v0.2.1.md) records development evidence.
