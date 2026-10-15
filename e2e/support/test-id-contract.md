@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (336 distinct, 1758 uses)
+## Test ids (336 distinct, 1763 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -74,12 +74,12 @@ several do). “Also rendered by” lists the other files.
 | `ask-send` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `ask-try-atRisk` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `ask-try-blocked` | 2 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-action` | 6 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-action-open` | 6 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-action` | 7 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-action-open` | 8 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-close` | 4 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-greeting` | 4 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-proposal-apply` | 4 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-proposal-dismiss` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-proposal-apply` | 5 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-proposal-dismiss` | 3 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-subtasks` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-risk` | 3 |  | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
 | `brief-stat-agents` | 2 |  | brief.spec.ts, live/brief.spec.ts |
@@ -590,7 +590,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
 | `button — name: locale === "en" ? m.en : locale === "zh-HK" ? m.me.languageHK : m.me.languageCN` | 1 | me.spec.ts |
-| `button — name: m.actions.undo` | 4 | brief.spec.ts, live/brief.spec.ts |
+| `button — name: m.actions.undo` | 5 | brief.spec.ts, live/brief.spec.ts |
 | `button — name: m.mcp.copyConfig` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.mcp.dismiss` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -744,7 +744,7 @@ read (`data-event-id`, `data-date`).
 | `.team-directory > h1` | 3 | agent-creation.spec.ts, planning.spec.ts, ui-v2.spec.ts |
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mjs |
 | `.team-directory-list li` | 1 | ui-v2.spec.ts |
-| `.toast-region` | 12 | brief.spec.ts, live/brief.spec.ts |
+| `.toast-region` | 14 | brief.spec.ts, live/brief.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
@@ -804,19 +804,21 @@ Keys read from `apps/web/locales/*/common.json` through
 
 | Key | Uses | Used in |
 | --- | ---: | --- |
-| `actions.undo` | 13 | brief.spec.ts, live/brief.spec.ts, task-contacts.spec.ts |
+| `actions.undo` | 16 | brief.spec.ts, live/brief.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
 | `ask.answer.unknown` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `ask.rules` | 12 | brief.spec.ts, live/brief.spec.ts |
 | `ask.suggestion.blocked` | 6 | brief.spec.ts, live/brief.spec.ts |
+| `ask.suggestion.needsMe` | 3 | live/brief.spec.ts |
 | `brief.action.split_other` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `brief.nav` | 12 | brief.spec.ts, live/brief.spec.ts |
+| `brief.proposal.intro` | 6 | live/brief.spec.ts |
 | `brief.proposal.title` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `brief.title` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `brief.toast.applied` | 12 | brief.spec.ts, live/brief.spec.ts |
-| `brief.toast.undone` | 12 | brief.spec.ts, live/brief.spec.ts |
+| `brief.toast.undone` | 15 | brief.spec.ts, live/brief.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
 | `crm.companies.delete` | 10 | crm.spec.ts, live/crm.spec.ts |
 | `crm.contacts.add` | 11 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |

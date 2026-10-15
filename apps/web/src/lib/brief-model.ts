@@ -27,6 +27,7 @@ export type LabelIndex = {
   ): { title: string; ref: string; projectId: string | null } | undefined;
   milestone(id: string | null): string | undefined;
   agent(id: string | null | undefined): string | undefined;
+  member(id: string | null | undefined): string | undefined;
 };
 
 export function labelIndex(labels: BriefLabels | undefined): LabelIndex {
@@ -37,6 +38,7 @@ export function labelIndex(labels: BriefLabels | undefined): LabelIndex {
   const tasks = map(labels?.tasks);
   const milestones = map(labels?.milestones);
   const agents = map(labels?.agents);
+  const members = map(labels?.members ?? labels?.agents);
   return {
     workspace: (id) => workspaces.get(id),
     project: (id) => projects.get(id)?.name,
@@ -52,6 +54,7 @@ export function labelIndex(labels: BriefLabels | undefined): LabelIndex {
     },
     milestone: (id) => (id ? milestones.get(id)?.name : undefined),
     agent: (id) => (id ? agents.get(id)?.name : undefined),
+    member: (id) => (id ? members.get(id)?.name : undefined),
   };
 }
 
@@ -229,7 +232,12 @@ export function actionViews(
   suggestions: Map<string, Suggestion>,
 ): ActionView[] {
   return brief.actions.map((action): ActionView => {
-    const agent = labels.agent(action.agentId) ?? { key: "agent" };
+    const agent =
+      action.kind === "suggestion"
+        ? (labels.member(action.proposerId ?? action.agentId) ?? {
+            key: "brief.proposal.someone",
+          })
+        : (labels.agent(action.agentId) ?? { key: "agent" });
     const task = taskName(labels, action.taskId) ?? {
       key: "brief.someTask",
     };
@@ -313,7 +321,12 @@ export function answerView(answer: AskAnswer): {
         ? { key: `ask.answer.${answer.intent}`, values: { count } }
         : { key: `ask.answer.none.${answer.intent}` };
   const items = answer.items.map((item, index): AnswerItemView => {
-    const agent = labels.agent(item.agentId) ?? { key: "agent" };
+    const agent =
+      item.kind === "suggestion"
+        ? (labels.member(item.proposerId ?? item.agentId) ?? {
+            key: "brief.proposal.someone",
+          })
+        : (labels.agent(item.agentId) ?? { key: "agent" });
     const task = taskName(labels, item.taskId) ?? { key: "brief.someTask" };
     const key = `${item.kind}:${item.id}:${index}`;
     switch (item.kind) {

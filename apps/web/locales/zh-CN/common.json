@@ -1117,8 +1117,9 @@
     "someTask": "一项任务",
     "source": "根据你的计划、审核与权限请求按固定规则整理，没有使用 AI 模型。",
     "proposal": {
-      "title": "智能体建议",
-      "intro": "这是{{agent}}的建议。你应用之前不会有任何改动。",
+      "someone": "团队成员",
+      "title": "建议",
+      "intro": "这是{{proposer}}的建议。你应用之前不会有任何改动。",
       "subtasks": "将在“{{task}}”下创建的子任务",
       "newPlan": "“{{task}}”的新计划",
       "start": "开始",
