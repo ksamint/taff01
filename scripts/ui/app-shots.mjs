@@ -7,7 +7,8 @@ import { tsImport } from "tsx/esm/api";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
 import { prepareFonts } from "./prepare-fonts.ts";
 import { prepareTime } from "./prepare-time.mjs";
-import { prepareView } from "./prepare-view.ts";
+
+const { prepareView } = await tsImport("./prepare-view.ts", import.meta.url);
 
 const { inboxSchema } = await tsImport(
   "../../packages/schemas/src/inbox-read.ts",
@@ -15,6 +16,8 @@ const { inboxSchema } = await tsImport(
 );
 
 const out = path.resolve(process.argv[2] ?? "docs/ui/screenshots/ui-parity");
+const theme = process.env.UI_THEME ?? "light";
+assert(["light", "dark"].includes(theme), "UI_THEME must be light or dark");
 const base = process.env.AUTH_URL ?? "http://localhost:3000";
 const screen = process.env.UI_SCREEN ?? "all";
 assert(
@@ -60,6 +63,7 @@ try {
       const context = await browser.newContext({
         viewport,
         deviceScaleFactor: 1,
+        colorScheme: theme,
         locale: locale === "en" ? "en-US" : locale,
         timezoneId: "UTC",
         isMobile: device === "phone",
@@ -94,13 +98,13 @@ try {
           200,
         );
         await page.addInitScript(
-          ({ userId, workspaceId, locale }) => {
+          ({ userId, workspaceId, locale, theme }) => {
             sessionStorage.setItem(`taff:workspace:${userId}`, workspaceId);
             localStorage.setItem("taff:last-workspace", workspaceId);
             localStorage.setItem("taff-locale", locale);
-            localStorage.setItem("taff-theme", "light");
+            localStorage.setItem("taff-theme", theme);
           },
-          { userId: me.user.id, workspaceId: workspace.id, locale },
+          { userId: me.user.id, workspaceId: workspace.id, locale, theme },
         );
         const tasksResponse = await page.request.get(
           `${base}/api/tasks?workspaceId=${workspace.id}`,
@@ -322,6 +326,10 @@ try {
               await expect(page.getByTestId("quick-title")).toBeEnabled();
             }
             await page.waitForLoadState("networkidle");
+            await expect(page.locator("html")).toHaveAttribute(
+              "data-theme",
+              theme,
+            );
             await prepareView(page, view);
             await page.evaluate(prepareFonts);
             await page.mouse.move(0, 0);
@@ -418,7 +426,7 @@ try {
   );
   await writeFile(
     path.join(out, "manifest.json"),
-    `${JSON.stringify({ captures }, null, 2)}\n`,
+    `${JSON.stringify({ theme, captures }, null, 2)}\n`,
   );
   console.log(`Captured ${captures.length} seeded app screens in ${out}`);
 } finally {

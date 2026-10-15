@@ -33,6 +33,8 @@ if (
 )
   throw new Error("Set UI_SCREEN to an implemented v2 screen.");
 
+const dark = process.env.UI_THEME === "dark";
+
 export default defineConfig({
   ...behavior,
   webServer: (Array.isArray(behavior.webServer) ? behavior.webServer : []).map(
@@ -60,35 +62,51 @@ export default defineConfig({
     ...behavior.use,
     browserName: "chromium",
     deviceScaleFactor: 1,
-    colorScheme: "light",
+    colorScheme: dark ? "dark" : "light",
     timezoneId: process.env.UI_SCREEN === "shell" ? "Asia/Shanghai" : "UTC",
   },
-  projects: [
-    {
-      name: "phone-zh-HK",
-      use: {
-        locale: "zh-HK",
-        viewport: { width: 390, height: 844 },
-        isMobile: true,
-        hasTouch: true,
-      },
-    },
-    {
-      name: "phone-en",
-      use: {
-        locale: "en-US",
-        viewport: { width: 390, height: 844 },
-        isMobile: true,
-        hasTouch: true,
-      },
-    },
-    {
-      name: "desktop-zh-HK",
-      use: { locale: "zh-HK", viewport: { width: 1280, height: 800 } },
-    },
-    {
-      name: "desktop-en",
-      use: { locale: "en-US", viewport: { width: 1280, height: 800 } },
-    },
-  ],
+  projects: dark
+    ? (["phone", "desktop"] as const).flatMap((device) =>
+        (["en", "zh-CN", "zh-HK"] as const).map((locale) => ({
+          name: `${device}-${locale}-dark`,
+          use: {
+            locale: locale === "en" ? "en-US" : locale,
+            colorScheme: "dark" as const,
+            viewport:
+              device === "phone"
+                ? { width: 390, height: 844 }
+                : { width: 1280, height: 800 },
+            isMobile: device === "phone",
+            hasTouch: device === "phone",
+          },
+        })),
+      )
+    : [
+        {
+          name: "phone-zh-HK",
+          use: {
+            locale: "zh-HK",
+            viewport: { width: 390, height: 844 },
+            isMobile: true,
+            hasTouch: true,
+          },
+        },
+        {
+          name: "phone-en",
+          use: {
+            locale: "en-US",
+            viewport: { width: 390, height: 844 },
+            isMobile: true,
+            hasTouch: true,
+          },
+        },
+        {
+          name: "desktop-zh-HK",
+          use: { locale: "zh-HK", viewport: { width: 1280, height: 800 } },
+        },
+        {
+          name: "desktop-en",
+          use: { locale: "en-US", viewport: { width: 1280, height: 800 } },
+        },
+      ],
 });

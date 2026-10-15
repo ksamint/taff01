@@ -1,0 +1,2807 @@
+{
+  "theme": "dark",
+  "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+  "runId": "38684943841",
+  "artifact": {
+    "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+    "runId": "38684943841",
+    "artifactId": 11950930754,
+    "artifactDigest": "sha256:d38d6a11c563b52a6315e00e4fe6c2858ec8c107aec6abe033232b5e0442550a",
+    "archiveSha256": "d38d6a11c563b52a6315e00e4fe6c2858ec8c107aec6abe033232b5e0442550a",
+    "archiveBytes": 27693842,
+    "artifactName": "visual-baselines-db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+    "artifactUrl": "https://github.com/ksamint/taff01/actions/runs/38684943841/artifacts/11950930754"
+  },
+  "rawManifestSha256": "2e37c7f917878f53665e0db368864b5d1dbd93d7cf6e7fcb30fa1640bcb0d6c0",
+  "captures": [
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "today",
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-today.png",
+      "bytes": 73897,
+      "width": 390,
+      "height": 844,
+      "sha256": "c5e122374872337c34ced1f3e23994ddf888f5f0bd52d74a5acc9ae18bbe8d62"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "organization-directory",
+      "route": "/orgs",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-organization-directory.png",
+      "bytes": 54863,
+      "width": 390,
+      "height": 844,
+      "sha256": "d39bab6246c7921093a4687d72efd91352487f18d7666158130c07b45800d12d"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "project-detail",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-project-detail.png",
+      "bytes": 51365,
+      "width": 390,
+      "height": 844,
+      "sha256": "4dab86ab1f1a0ac5b09c5d2ffb844b9100d64e4122adcb13415be0244389202f"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "task-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-task-page.png",
+      "bytes": 46656,
+      "width": 390,
+      "height": 844,
+      "sha256": "28e172cbd4de790bf0cef98407c0b227dae4f08792f43daf7f0c0d78301e4376"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "review-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd/review",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-review-page.png",
+      "bytes": 72952,
+      "width": 390,
+      "height": 844,
+      "sha256": "a17e64b5572fb8460095841068d80f721ac1229f60694a0d77abf77fb89c12c7"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "digests",
+      "route": "/digests",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-digests.png",
+      "bytes": 19069,
+      "width": 390,
+      "height": 844,
+      "sha256": "8b7a6a62a944a6482d42e603e871c496b068753a46946e2523fb546100d94eaa"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "digest-detail",
+      "route": "/digests/98b5ad17-8fe3-4fab-8673-00004d8baf41",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-digest-detail.png",
+      "bytes": 48696,
+      "width": 390,
+      "height": 844,
+      "sha256": "493f3804dddc594b5e5afa530da95ed41d6434c70859b02e85be1fa215afe2cb"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "calendar",
+      "route": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-calendar.png",
+      "bytes": 45870,
+      "width": 390,
+      "height": 844,
+      "sha256": "e6b6f1a249532ef61d4b152a6955f67ebb13af38076994b2a378da905740a6e1"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "projects",
+      "route": "/projects",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-projects.png",
+      "bytes": 51365,
+      "width": 390,
+      "height": 844,
+      "sha256": "4dab86ab1f1a0ac5b09c5d2ffb844b9100d64e4122adcb13415be0244389202f"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "inbox",
+      "route": "/inbox",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-inbox.png",
+      "bytes": 86706,
+      "width": 390,
+      "height": 844,
+      "sha256": "3a604f45425f334d8dbe075c2a48479531c2f2182b4c393504e83e031f438801"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "me",
+      "route": "/me",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-me.png",
+      "bytes": 45980,
+      "width": 390,
+      "height": 844,
+      "sha256": "42294db6f492bb2011eff97a8c9c786a8d99a67593f2e318acbbc308b2c87152"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "mcp",
+      "route": "/me/mcp",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-mcp.png",
+      "bytes": 61492,
+      "width": 390,
+      "height": 844,
+      "sha256": "74364cc04793c2eef9cb551f436a971f3c0d34e558088a0c30e0f7856fade805"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "organizations",
+      "route": "/me",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-organizations.png",
+      "bytes": 38810,
+      "width": 390,
+      "height": 844,
+      "sha256": "3de8e822a9ad2cfae0b21e2c26b11d5428f020a813fd0d384cfb92d23cee2b8b"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "notifications",
+      "route": "/me/notifications",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-notifications.png",
+      "bytes": 51259,
+      "width": 390,
+      "height": 844,
+      "sha256": "97178673952d5a702d4e5a6d82443b760137e2ab15b58f05e8648da46d21a839"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "team",
+      "route": "/orgs#team",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-team.png",
+      "bytes": 71986,
+      "width": 390,
+      "height": 844,
+      "sha256": "5b733c5dc22b12fe1b037691bd8773551c15e0a750c664c0249d1b7d080160fb"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "quick-add",
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-quick-add.png",
+      "bytes": 43881,
+      "width": 390,
+      "height": 844,
+      "sha256": "0d5a4aced0d83031f50ab0c21a532fadc0361c190929eda6c308581b4bfcd3bf"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "task-detail",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-task-detail.png",
+      "bytes": 45103,
+      "width": 390,
+      "height": 844,
+      "sha256": "f35f50a0ce0f888e754a169e1e0de390b51de44fc9a15112fd5f2fc270fe6cef"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "agent",
+      "route": "/agents/98b5ad17-8fe3-4fab-8673-000011f0e54b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-agent.png",
+      "bytes": 62084,
+      "width": 390,
+      "height": 844,
+      "sha256": "49a40f064403c8d53d4d38aa304c9f888d2a8717e976026446d8f355d8edfc14"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "review-deliverable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-review-deliverable.png",
+      "bytes": 63691,
+      "width": 390,
+      "height": 844,
+      "sha256": "fe4432cf10fde8830085ad804c7239e433e18b6d8ec73ce1be2a5ac4f4e46ed4"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "review",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-review.png",
+      "bytes": 59216,
+      "width": 390,
+      "height": 844,
+      "sha256": "e4e06e912130eaf25fb4821143b08dcede4f00c0c017ba587710a25aead3e374"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "project-list",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-project-list.png",
+      "bytes": 75095,
+      "width": 390,
+      "height": 844,
+      "sha256": "6e41a00f4ae7bd76f07f784dd22d48274dac90dff816d0d758cc1475e230d653"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "project-timeline",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-project-timeline.png",
+      "bytes": 71236,
+      "width": 390,
+      "height": 844,
+      "sha256": "74f0f45c4c511c66430b33894a24a7383758b38bad84f00fb6006e081b6abbf0"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "project-stakeholders",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-project-stakeholders.png",
+      "bytes": 67110,
+      "width": 390,
+      "height": 844,
+      "sha256": "0b0757939b6680a7bea69e6d22807400eadd916a34b0d9d77c366d512ad60cb8"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "project-relations",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-project-relations.png",
+      "bytes": 53881,
+      "width": 390,
+      "height": 844,
+      "sha256": "4cd0f46fb1f0bf0c4cb546ef5225ef2dda8db07af2f9235ac5ef68fa8a207e9c"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "project-mind",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-project-mind.png",
+      "bytes": 67277,
+      "width": 390,
+      "height": 844,
+      "sha256": "46ca7f247beb3b776f76a84c90ca4891d4940b6b95cf066e7e61c6c6ce77d86a"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "companies",
+      "route": "/companies",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-companies.png",
+      "bytes": 28839,
+      "width": 390,
+      "height": 844,
+      "sha256": "92450f97c372c5dd51bd3925e7daea47dd0e9dbc1fb110bcc2381167a281a8cf"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "company-detail",
+      "route": "/companies/98b5ad17-8fe3-4fab-8673-000053819041",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-company-detail.png",
+      "bytes": 46109,
+      "width": 390,
+      "height": 844,
+      "sha256": "f6307eb677770ed14560c2a5787836d38412be81266a77c71a3637c839797b51"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "contacts",
+      "route": "/contacts",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-contacts.png",
+      "bytes": 53554,
+      "width": 390,
+      "height": 844,
+      "sha256": "cfe80e410a2e54d4d6dc6e5e5f046951df70c2204d6c98119cad4391d4650707"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "contact-detail",
+      "route": "/contacts/98b5ad17-8fe3-4fab-8673-000059777145",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-contact-detail.png",
+      "bytes": 34288,
+      "width": 390,
+      "height": 844,
+      "sha256": "7ab8661cb21ab4d86ab52211bfdc54b7e86eb75fda109c3a4668a198ad064d1b"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "brief",
+      "route": "/brief",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-brief.png",
+      "bytes": 77191,
+      "width": 390,
+      "height": 844,
+      "sha256": "ecd22a591535aa78486548b1387d640b57600d6d8985e97db87ba9c440ef6b31"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-HK",
+      "screen": "search",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-HK-search.png",
+      "bytes": 31914,
+      "width": 390,
+      "height": 844,
+      "sha256": "9822fd574336b4000f624969ef88c52d9e8a1f242915f1dd76539e164b174f16"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "today",
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-today.png",
+      "bytes": 73290,
+      "width": 390,
+      "height": 844,
+      "sha256": "65e4a6a8bf0298790fbb410b030ba3869f804f0bdcaaa3f70ac085b0981d6ba3"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "organization-directory",
+      "route": "/orgs",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-organization-directory.png",
+      "bytes": 52730,
+      "width": 390,
+      "height": 844,
+      "sha256": "b6b8f216d7386a872b861f7395fe66c6ea3057b87f7593e22801a3a8b705cf64"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "project-detail",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-project-detail.png",
+      "bytes": 51057,
+      "width": 390,
+      "height": 844,
+      "sha256": "e660b1b599ebf68567d1c2cc82fb81100c0bdbd34aa4963d50029a0ccba1d5df"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "task-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-task-page.png",
+      "bytes": 45764,
+      "width": 390,
+      "height": 844,
+      "sha256": "4c65854833be552037457b7f11d144cfb2fe1fe7911f1b7e5b91347d7ec18ba5"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "review-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd/review",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-review-page.png",
+      "bytes": 72754,
+      "width": 390,
+      "height": 844,
+      "sha256": "5fbbd671ad42225ef96fa2c5a181cffc7b83243ab0e9d2b7ea8a7ffd538b9241"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "digests",
+      "route": "/digests",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-digests.png",
+      "bytes": 18907,
+      "width": 390,
+      "height": 844,
+      "sha256": "080de6e9d4acd2959a5a8dbb9f9edf324d49e9fe0ce662e4e786dc2cc633eb0b"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "digest-detail",
+      "route": "/digests/98b5ad17-8fe3-4fab-8673-00004d8baf41",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-digest-detail.png",
+      "bytes": 48131,
+      "width": 390,
+      "height": 844,
+      "sha256": "52343df50fa4a39e13adda8afd6b25bd1c7f8c783de787f2fff663eb3f900532"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "calendar",
+      "route": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-calendar.png",
+      "bytes": 45008,
+      "width": 390,
+      "height": 844,
+      "sha256": "22e40d2ff2e700c874bdee06b09f654de0e2729fee5a85ffe33809890c2edcff"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "projects",
+      "route": "/projects",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-projects.png",
+      "bytes": 51057,
+      "width": 390,
+      "height": 844,
+      "sha256": "e660b1b599ebf68567d1c2cc82fb81100c0bdbd34aa4963d50029a0ccba1d5df"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "inbox",
+      "route": "/inbox",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-inbox.png",
+      "bytes": 85704,
+      "width": 390,
+      "height": 844,
+      "sha256": "035e5e005bd8d7a923b48e2bd5490dceca8b387813f5f0cc2ef1c2ee73f404ba"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "me",
+      "route": "/me",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-me.png",
+      "bytes": 45094,
+      "width": 390,
+      "height": 844,
+      "sha256": "a6ca85c23e074522195d5bdc5499ac1645157ced54fda41db3ee9e8db5641cd7"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "mcp",
+      "route": "/me/mcp",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-mcp.png",
+      "bytes": 60743,
+      "width": 390,
+      "height": 844,
+      "sha256": "d6b568f6506b34697057d62de43d177063a08637d6562b80d90dfe74eb74732c"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "organizations",
+      "route": "/me",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-organizations.png",
+      "bytes": 38078,
+      "width": 390,
+      "height": 844,
+      "sha256": "ef42e239827843cba356baa9f01ece4e96c2a2c2e187a19c26b0c6259f6b46ee"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "notifications",
+      "route": "/me/notifications",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-notifications.png",
+      "bytes": 52126,
+      "width": 390,
+      "height": 844,
+      "sha256": "8eac34ca06987d5dcaff493c62d21a39e458c736f93e05e0a1d466c6205335d3"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "team",
+      "route": "/orgs#team",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-team.png",
+      "bytes": 69120,
+      "width": 390,
+      "height": 844,
+      "sha256": "1db5633c2b56cddfbc0df7e5b5fb3e9e62d2d2666ff24fd4f9808d88c1f15dd3"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "quick-add",
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-quick-add.png",
+      "bytes": 43089,
+      "width": 390,
+      "height": 844,
+      "sha256": "9cf59bfb8623eec13e2ae0ea23b8971878ca4e55b7aed5fa9a3bc782808ce716"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "task-detail",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-task-detail.png",
+      "bytes": 44333,
+      "width": 390,
+      "height": 844,
+      "sha256": "676b5cdb1215a33f5aa9c4739b27b2cb44ca462ce6fdd326589cf8112312fd27"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "agent",
+      "route": "/agents/98b5ad17-8fe3-4fab-8673-000011f0e54b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-agent.png",
+      "bytes": 60050,
+      "width": 390,
+      "height": 844,
+      "sha256": "281457ae2c0749dfe1e0bd4fd8ea84479435fb9542ea26fe67c119e934cdaf91"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "review-deliverable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-review-deliverable.png",
+      "bytes": 63600,
+      "width": 390,
+      "height": 844,
+      "sha256": "bed35e551a4ecee64de4e0d1d4b3ccacac810b60ca665eab6e00d7c65a87a196"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "review",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-review.png",
+      "bytes": 58334,
+      "width": 390,
+      "height": 844,
+      "sha256": "7768c312fb67d087577f5ce4d4bcf84e7b62dc842d6d411922b42fb479778194"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "project-list",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-project-list.png",
+      "bytes": 75350,
+      "width": 390,
+      "height": 844,
+      "sha256": "43227bfef31a09fc27f9fc3d9bb0dd85bd7bd18702d5885346806e484dd36662"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "project-timeline",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-project-timeline.png",
+      "bytes": 70825,
+      "width": 390,
+      "height": 844,
+      "sha256": "bd7926493cf7dac4df2da879577e5bc92612058a8c5215ae41eba5c23ec99ffc"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "project-stakeholders",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-project-stakeholders.png",
+      "bytes": 66693,
+      "width": 390,
+      "height": 844,
+      "sha256": "862d84d4d350869053b6a10bcd3ae81aa289bf1ae7423582a4f81d2fb5e567b8"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "project-relations",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-project-relations.png",
+      "bytes": 53585,
+      "width": 390,
+      "height": 844,
+      "sha256": "56ada96f1d719f8782b09b13e37a7d8c9fe27adbb5c18f90723d299400c8cd95"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "project-mind",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-project-mind.png",
+      "bytes": 66559,
+      "width": 390,
+      "height": 844,
+      "sha256": "8640e04b6bd13fa1a9de7cef8ba8951b4a8571a8a2960820c002f527cad7a59e"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "companies",
+      "route": "/companies",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-companies.png",
+      "bytes": 28536,
+      "width": 390,
+      "height": 844,
+      "sha256": "f5487ed9ee1837b12cdf5061a199951b83c975bb88f324550a3f95c9476aac09"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "company-detail",
+      "route": "/companies/98b5ad17-8fe3-4fab-8673-000053819041",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-company-detail.png",
+      "bytes": 45702,
+      "width": 390,
+      "height": 844,
+      "sha256": "0ec5279bc5cab424c8a9e12e88cf9f2111fb166a44d314c2640b114c892f9d23"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "contacts",
+      "route": "/contacts",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-contacts.png",
+      "bytes": 53087,
+      "width": 390,
+      "height": 844,
+      "sha256": "704be9d279afcc6ca42ea7c017f64506dddc3e214cf095faf763765d26d93423"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "contact-detail",
+      "route": "/contacts/98b5ad17-8fe3-4fab-8673-000059777145",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-contact-detail.png",
+      "bytes": 33767,
+      "width": 390,
+      "height": 844,
+      "sha256": "3b9ead1ddd6978e65f6542350489ddd964e08d24eb8bd6803b7a360c201838be"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "brief",
+      "route": "/brief",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-brief.png",
+      "bytes": 74986,
+      "width": 390,
+      "height": 844,
+      "sha256": "21a207a9490bc6b1b99a834dd3c793e8485617d52ffcfa4978b40b55ec08d894"
+    },
+    {
+      "device": "phone",
+      "locale": "zh-CN",
+      "screen": "search",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-zh-CN-search.png",
+      "bytes": 31122,
+      "width": 390,
+      "height": 844,
+      "sha256": "837a1bb6b98d3a8465b18ba8318e0f1f9708c123a81ef4a0c90100fb674f9ce6"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "today",
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-today.png",
+      "bytes": 74981,
+      "width": 390,
+      "height": 844,
+      "sha256": "835d2dbccc4445d3edde909fcc119132e746acf632078c66c392f651da5d5aa9"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "organization-directory",
+      "route": "/orgs",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-organization-directory.png",
+      "bytes": 52774,
+      "width": 390,
+      "height": 844,
+      "sha256": "c478162b47439298875c9d8fa1ac064c27db45545e4e54372815d7bbb17279c2"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "project-detail",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-project-detail.png",
+      "bytes": 51124,
+      "width": 390,
+      "height": 844,
+      "sha256": "7704026c164d53aff6936d61b845c67fb7bd9e3d28e56ebbca8256b0d286fc69"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "task-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-task-page.png",
+      "bytes": 44960,
+      "width": 390,
+      "height": 844,
+      "sha256": "f43dbc1d6da9a4f56a83bf6c9bfb3f11012fbf1330fe416d9105ebcc8f383be4"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "review-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd/review",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-review-page.png",
+      "bytes": 71850,
+      "width": 390,
+      "height": 844,
+      "sha256": "79d9a12bb3696bab79506a8a3cc3bd290f2790ec51d076e5ec1865659df4cffa"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "digests",
+      "route": "/digests",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-digests.png",
+      "bytes": 19616,
+      "width": 390,
+      "height": 844,
+      "sha256": "2343a9ba1c90930fac1b758370d89890c16424c9c09d2aebee44b7aa6de57037"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "digest-detail",
+      "route": "/digests/98b5ad17-8fe3-4fab-8673-00004d8baf41",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-digest-detail.png",
+      "bytes": 48776,
+      "width": 390,
+      "height": 844,
+      "sha256": "6e5eefe875ff34de426f12b9702c06b70a0984753f9e6085d4f39425205c5a11"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "calendar",
+      "route": "/calendar",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-calendar.png",
+      "bytes": 46080,
+      "width": 390,
+      "height": 844,
+      "sha256": "dc96c3796c356c6157acd343bd9f62b2792e607b4b99973368ff5b2534c17936"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "projects",
+      "route": "/projects",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-projects.png",
+      "bytes": 51124,
+      "width": 390,
+      "height": 844,
+      "sha256": "7704026c164d53aff6936d61b845c67fb7bd9e3d28e56ebbca8256b0d286fc69"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "inbox",
+      "route": "/inbox",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-inbox.png",
+      "bytes": 82512,
+      "width": 390,
+      "height": 844,
+      "sha256": "78993a2e1ad7e7a5e398549a60e00e34d55b81745aa00092511919dc5ddc06ca"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "me",
+      "route": "/me",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-me.png",
+      "bytes": 44214,
+      "width": 390,
+      "height": 844,
+      "sha256": "0b9f156eb7d8c374e4e0152a9190a579e0d6e808e92b07253d050c514076918c"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "mcp",
+      "route": "/me/mcp",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-mcp.png",
+      "bytes": 46537,
+      "width": 390,
+      "height": 844,
+      "sha256": "0cc7c428bd792913747260b0fdc658eb7b92589f56448063050f35cfcbc6557a"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "organizations",
+      "route": "/me",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-organizations.png",
+      "bytes": 33227,
+      "width": 390,
+      "height": 844,
+      "sha256": "7e2ac3a5d6597dfeac6152eca1ff8e2088ea7780c19e06a990bf9a6217766479"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "notifications",
+      "route": "/me/notifications",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-notifications.png",
+      "bytes": 41686,
+      "width": 390,
+      "height": 844,
+      "sha256": "5d2545e8800dc8e0c403bb1d1e0c832d63051592c402f518a4aa38d9c743dae2"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "team",
+      "route": "/orgs#team",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-team.png",
+      "bytes": 55608,
+      "width": 390,
+      "height": 844,
+      "sha256": "ad5aa80b7acaca5698c5af8c3f6fde9cd7ba675a921ca5e1bf21567a4a59ce50"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "quick-add",
+      "route": "/",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-quick-add.png",
+      "bytes": 41524,
+      "width": 390,
+      "height": 844,
+      "sha256": "4333f65bfe3a184253b65907a2beec9ed986cec3b640b7ed2c37a17d402d7cde"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "task-detail",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-task-detail.png",
+      "bytes": 43208,
+      "width": 390,
+      "height": 844,
+      "sha256": "346eb0849f4772ada310dac9c7751dc236289251047597a4fc7d78c3e1306c00"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "agent",
+      "route": "/agents/98b5ad17-8fe3-4fab-8673-000011f0e54b",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-agent.png",
+      "bytes": 50345,
+      "width": 390,
+      "height": 844,
+      "sha256": "8eaabeca4b98c8eb51e3ca08a6c86cc0ad6e791f26b8f4f509d648ba8a30faf0"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "review-deliverable",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-review-deliverable.png",
+      "bytes": 62988,
+      "width": 390,
+      "height": 844,
+      "sha256": "e70af9942eb9da6eff9519e7ee2599952a65ec2da8070e37ecd89f64c2c490ed"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "review",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-review.png",
+      "bytes": 54530,
+      "width": 390,
+      "height": 844,
+      "sha256": "0de1dd2076bcd23ab5da734932e96e1409216898221e7c2bcc32cbc3004d0c9c"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "project-list",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-project-list.png",
+      "bytes": 76588,
+      "width": 390,
+      "height": 844,
+      "sha256": "a65c93cfe0983765100f95ab17c776dcc371db649f70ec722db4fa636ba06ad0"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "project-timeline",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-project-timeline.png",
+      "bytes": 68322,
+      "width": 390,
+      "height": 844,
+      "sha256": "4842abb18cb91ff4894387b0d93f48b634f4ea10c79ace79d68a100becdb3ded"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "project-stakeholders",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-project-stakeholders.png",
+      "bytes": 67292,
+      "width": 390,
+      "height": 844,
+      "sha256": "3e33dfb0ee53d8f4dc2e996ef9d690f9d55c1624248bb0bd280ee3306db03598"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "project-relations",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-project-relations.png",
+      "bytes": 54405,
+      "width": 390,
+      "height": 844,
+      "sha256": "9ad2fbb02bf1b0562df9c36592f1ba23ed260b345c782d9b5e47df2b3411e923"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "project-mind",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-project-mind.png",
+      "bytes": 65656,
+      "width": 390,
+      "height": 844,
+      "sha256": "f22fd94d2aa3755f6edcf6d5edeb74397e4cecb5deb1a4ded2b70eb4d3663756"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "companies",
+      "route": "/companies",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-companies.png",
+      "bytes": 31997,
+      "width": 390,
+      "height": 844,
+      "sha256": "e491857bc3be06466ffb3206395a0b660d918f8199cd1540414f88d528fee4c2"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "company-detail",
+      "route": "/companies/98b5ad17-8fe3-4fab-8673-000053819041",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-company-detail.png",
+      "bytes": 43089,
+      "width": 390,
+      "height": 844,
+      "sha256": "f2164cb5da02751f5e9c24b51d0e25ce3fba97bd8fe4a632707213a893aff6ab"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "contacts",
+      "route": "/contacts",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-contacts.png",
+      "bytes": 52253,
+      "width": 390,
+      "height": 844,
+      "sha256": "a4ad9a175f35dc386166fcffe7c35c0f1190566c64e7cdf7e06599e61298e68d"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "contact-detail",
+      "route": "/contacts/98b5ad17-8fe3-4fab-8673-000059777145",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-contact-detail.png",
+      "bytes": 34743,
+      "width": 390,
+      "height": 844,
+      "sha256": "9b4281b21f483af016e2fbeed08e94527f8b6495fe00cf5cf07cb698ec7a615b"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "brief",
+      "route": "/brief",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-brief.png",
+      "bytes": 59076,
+      "width": 390,
+      "height": 844,
+      "sha256": "9b33ccfb437dd101f6a7c365c5a1d6fd982e78b2b386ee8dc0284b791cce3a7f"
+    },
+    {
+      "device": "phone",
+      "locale": "en",
+      "screen": "search",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "file": "phone-en-search.png",
+      "bytes": 26691,
+      "width": 390,
+      "height": 844,
+      "sha256": "d15fe58f457fb802702a6491182f03b24948a550c6b67348da9434bed55778c4"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "today",
+      "route": "/",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-today.png",
+      "bytes": 87181,
+      "width": 1280,
+      "height": 800,
+      "sha256": "916d96e0235918987dd560dbaa648089760436f2bc22e906b60f5b9a0aa50bb5"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "organization-directory",
+      "route": "/orgs",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-organization-directory.png",
+      "bytes": 69683,
+      "width": 1280,
+      "height": 800,
+      "sha256": "4425483171e02fb93e7782c1356d172ed3666e0d068099a1b8938ecff06a6878"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "project-detail",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-project-detail.png",
+      "bytes": 109043,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c638975520e3d9eb54138ea08a256e9977ed706c87c9119334698733c2e239fb"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "task-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-task-page.png",
+      "bytes": 123495,
+      "width": 1280,
+      "height": 800,
+      "sha256": "1dbef63c37553ce8a3700e34c1ac57c2b7cbeff41bfed3e489e2c0a978369106"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "review-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd/review",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-review-page.png",
+      "bytes": 116850,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f49e8bfbd9c18945f3ff4aafcb45d5a7ac079088b0a3d15d6d1637bfd3185f75"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "digests",
+      "route": "/digests",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-digests.png",
+      "bytes": 29966,
+      "width": 1280,
+      "height": 800,
+      "sha256": "d1a4b6b7e9e09d0c910e00e42339e4419953335e2cb900070c1c59d748a28983"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "digest-detail",
+      "route": "/digests/98b5ad17-8fe3-4fab-8673-00004d8baf41",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-digest-detail.png",
+      "bytes": 77920,
+      "width": 1280,
+      "height": 800,
+      "sha256": "286be5a40f41a101a02cf34b7b4938402f09460af5b2c2146c438076fb30586d"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "calendar",
+      "route": "/calendar",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-calendar.png",
+      "bytes": 92730,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ca24f1796cdd0537e001425d46ee9e87fe76a70c31acab24678130fa2ca65a37"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "projects",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-projects.png",
+      "bytes": 159175,
+      "width": 1280,
+      "height": 800,
+      "sha256": "05fadbd972ed8c0d1b5dd424260f5579310e2b9b10b73dd59db00e6f4cc6962e"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "inbox",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-inbox.png",
+      "bytes": 141797,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b5b5bff7da321f96edcd93958d5c9294203603b328438c76abfb4df43d7c7faa"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "me",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-me.png",
+      "bytes": 141797,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b5b5bff7da321f96edcd93958d5c9294203603b328438c76abfb4df43d7c7faa"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "mcp",
+      "route": "/me/mcp",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-mcp.png",
+      "bytes": 82759,
+      "width": 1280,
+      "height": 800,
+      "sha256": "0f725464934552c6f8b8197de73c02bb053c583f032a1ea09a25c71c9ff1801f"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "organizations",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-organizations.png",
+      "bytes": 60078,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c93f11ec28e8335b6f22aa8e7210c46c12b23bed397bd59b1e901a0490d6029b"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "notifications",
+      "route": "/me/notifications",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-notifications.png",
+      "bytes": 62714,
+      "width": 1280,
+      "height": 800,
+      "sha256": "648ad83405694ea9228ece132cfe6ea0b80119a6f31d2ef479114445ddaf5bf8"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "team",
+      "route": "/orgs#team",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-team.png",
+      "bytes": 76730,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a2a2cf5c1876a1f382d15f1dd7a021910ca97728f01e8c9e82f8302f9a28f1e8"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "quick-add",
+      "route": "/",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-quick-add.png",
+      "bytes": 92916,
+      "width": 1280,
+      "height": 800,
+      "sha256": "4848b2975f886f39e6fc06291cd859fd5fadd2f34ae1ed57f34d2b4881f960b4"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "task-detail",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-task-detail.png",
+      "bytes": 144794,
+      "width": 1280,
+      "height": 800,
+      "sha256": "d9141adb7b8f5603fe890af3feb404eb704740df0d736a24f37bb58ffe6cefd5"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "agent",
+      "route": "/agents/98b5ad17-8fe3-4fab-8673-000011f0e54b",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-agent.png",
+      "bytes": 77778,
+      "width": 1280,
+      "height": 800,
+      "sha256": "43c836fc36f66ff0c28955ef674393fbccc45b96ced77a082d65e1ebef64b3be"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "review-deliverable",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-review-deliverable.png",
+      "bytes": 164512,
+      "width": 1280,
+      "height": 800,
+      "sha256": "570604e4d8b9103d78e27b55dd3b56f99578eccfc4c73adc8fe29c9273b7fdb4"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "review",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-review.png",
+      "bytes": 152607,
+      "width": 1280,
+      "height": 800,
+      "sha256": "72de8ee92542a506c970d8813fa75264dfa5be5774043cb834e06c4fb0bb08a3"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "project-list",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-project-list.png",
+      "bytes": 102460,
+      "width": 1280,
+      "height": 800,
+      "sha256": "eecfed39bf54479b650c678f46d213aecdd598577a9f6fc4435ea98ecd985571"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "project-timeline",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-project-timeline.png",
+      "bytes": 133029,
+      "width": 1280,
+      "height": 800,
+      "sha256": "57f8cecea194602bc98240d779d6dfb404bfc2ecee23a2ee3703ca42e1ceae27"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "project-stakeholders",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-project-stakeholders.png",
+      "bytes": 83265,
+      "width": 1280,
+      "height": 800,
+      "sha256": "7d15864d3827476ddf6d1850406e308c7c2936770b8771f45eb0df95497afa12"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "project-relations",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-project-relations.png",
+      "bytes": 191784,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a5915f73466198212e3071c8f161b49fa64cfed895611694a8e49f1faf05691e"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "project-mind",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-project-mind.png",
+      "bytes": 166836,
+      "width": 1280,
+      "height": 800,
+      "sha256": "7a031b2ed496f45ba898d8b3b6c693b2b5689ac8aabd99531e4ccb0259662757"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "companies",
+      "route": "/companies",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-companies.png",
+      "bytes": 41771,
+      "width": 1280,
+      "height": 800,
+      "sha256": "6ab08384ce55d2277b3a7ccbb40eb744e69075133fe5ee44bdb8b7c3bb17b599"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "company-detail",
+      "route": "/companies/98b5ad17-8fe3-4fab-8673-000053819041",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-company-detail.png",
+      "bytes": 77048,
+      "width": 1280,
+      "height": 800,
+      "sha256": "733fc1f7ae7fe3a9b982e039e57a91ee7b93d8ea63853dd09c04a4aaff5dbcb9"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "contacts",
+      "route": "/contacts",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-contacts.png",
+      "bytes": 67840,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8fc6d843313b98262bba449bcc3c617ba8cda3183a392783ed5a4cad06df6535"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "contact-detail",
+      "route": "/contacts/98b5ad17-8fe3-4fab-8673-000059777145",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-contact-detail.png",
+      "bytes": 90029,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9ed9f3c618064cab0818ba574cc9827162f04d03e70c209682e661cc05987edc"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "brief",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-brief.png",
+      "bytes": 99500,
+      "width": 1280,
+      "height": 800,
+      "sha256": "518d85243a63625b7403168adecaf5e523058b1fd5d29a4353dc1c36a85a3d1b"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-HK",
+      "screen": "search",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-HK-search.png",
+      "bytes": 99172,
+      "width": 1280,
+      "height": 800,
+      "sha256": "591e5d5472c1304850011d55d1d1795c0e8fa3fe881b4e5016a283559654ef8b"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "today",
+      "route": "/",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-today.png",
+      "bytes": 86428,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b2a27024e63e2fb4cec681f9aaee9c66e8929f4cded893f50d9c6a5a211b9079"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "organization-directory",
+      "route": "/orgs",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-organization-directory.png",
+      "bytes": 68198,
+      "width": 1280,
+      "height": 800,
+      "sha256": "aeaecad2ca48633ae248fd38a8a656f1b90515bcf6a667f88e7c88e13fb40474"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "project-detail",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-project-detail.png",
+      "bytes": 109465,
+      "width": 1280,
+      "height": 800,
+      "sha256": "2c9c8c6bc088169ed1bf6c557cea9686fe575dacc31d04745a1b3feea2359c10"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "task-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-task-page.png",
+      "bytes": 122045,
+      "width": 1280,
+      "height": 800,
+      "sha256": "fcef0bb1bd737933befddf40e8d5957e9e9e5095b03ab53c5f8ec54802cc9270"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "review-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd/review",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-review-page.png",
+      "bytes": 116171,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f5b6c173e811f6b3a0e4aafc3d9e48830455baa9822b34415b1283ae158867d7"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "digests",
+      "route": "/digests",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-digests.png",
+      "bytes": 29895,
+      "width": 1280,
+      "height": 800,
+      "sha256": "bb5302b76714ff482cb3e3e29d38d85ad359963e2aefb3755eb5eacd164f7a2b"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "digest-detail",
+      "route": "/digests/98b5ad17-8fe3-4fab-8673-00004d8baf41",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-digest-detail.png",
+      "bytes": 76328,
+      "width": 1280,
+      "height": 800,
+      "sha256": "92b6e42ab9fe66b0b4b4179584fdb39a4222d15d809b6172d198e66c9368bf5d"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "calendar",
+      "route": "/calendar",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-calendar.png",
+      "bytes": 91432,
+      "width": 1280,
+      "height": 800,
+      "sha256": "3409997a02fe36e760f001795ef7fc4cfa299d65a94ead1f440f3da120b5b06a"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "projects",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-projects.png",
+      "bytes": 159774,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ca5831c7530082801be2d8de6940040f3f4a704734ad2ae3a9b3e508301bf7f4"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "inbox",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-inbox.png",
+      "bytes": 138912,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a52398b4bc3bf675c363462222a8cb88657cd6836396b7d751709f71e54de2d4"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "me",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-me.png",
+      "bytes": 138912,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a52398b4bc3bf675c363462222a8cb88657cd6836396b7d751709f71e54de2d4"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "mcp",
+      "route": "/me/mcp",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-mcp.png",
+      "bytes": 82072,
+      "width": 1280,
+      "height": 800,
+      "sha256": "4e10bb9e6aa922bca91fd29264a9e0cae0bfe29d7a91752724919c620a0901b1"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "organizations",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-organizations.png",
+      "bytes": 58810,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9322038543bad0529f243cb06f9f2fb16b656306cd3c0d9eb73ba8c05aa6a365"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "notifications",
+      "route": "/me/notifications",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-notifications.png",
+      "bytes": 62998,
+      "width": 1280,
+      "height": 800,
+      "sha256": "4a201b1c749af4c62695cf6f71833646ab934c75f555c7369e0d8cc7ebe586d1"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "team",
+      "route": "/orgs#team",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-team.png",
+      "bytes": 77783,
+      "width": 1280,
+      "height": 800,
+      "sha256": "099af8eda90527ff6c9d87b75125aa633d9f585f3645c6ce6a30cd1541a64be4"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "quick-add",
+      "route": "/",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-quick-add.png",
+      "bytes": 91495,
+      "width": 1280,
+      "height": 800,
+      "sha256": "24eac10f3aaecb097b927e43d714cd7e82e27540fb0987642bf52ba53a130f42"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "task-detail",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-task-detail.png",
+      "bytes": 145083,
+      "width": 1280,
+      "height": 800,
+      "sha256": "358362db1e7e314cc41f0520988c4ddc7916156c4289def6fed689605aca7273"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "agent",
+      "route": "/agents/98b5ad17-8fe3-4fab-8673-000011f0e54b",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-agent.png",
+      "bytes": 75428,
+      "width": 1280,
+      "height": 800,
+      "sha256": "7fbaeb7988484f125aad7a07562316aa948c8898b70ca3a0042344cc0620a31c"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "review-deliverable",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-review-deliverable.png",
+      "bytes": 162863,
+      "width": 1280,
+      "height": 800,
+      "sha256": "e0969d9bd8c628cd1b2c0f6eb2be9cf8650638b2f3ab9118e93bd943aa966bfc"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "review",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-review.png",
+      "bytes": 150633,
+      "width": 1280,
+      "height": 800,
+      "sha256": "fa81d8b77b080bb6ed42d6d678f4deba620fff55eb3f8cb25ca1663d956e3741"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "project-list",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-project-list.png",
+      "bytes": 103400,
+      "width": 1280,
+      "height": 800,
+      "sha256": "1f1bf5fe52ae20f1a7f4d2a6e85643e06c2b01ae00fed18cd9b31e759baec71e"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "project-timeline",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-project-timeline.png",
+      "bytes": 132335,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5dc901dcbcf165c090938f1f1dc70f4795522c60c4cb75a322f206cf2d1e381f"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "project-stakeholders",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-project-stakeholders.png",
+      "bytes": 82548,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f3d28cb4041e74de1fe6bcdd97f871a44190a9014d8591d415e4dff851fc49fc"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "project-relations",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-project-relations.png",
+      "bytes": 190477,
+      "width": 1280,
+      "height": 800,
+      "sha256": "7ed92d329afe7a12f73777fb6976158fded2b99588d3a8636bd9457bfd7142e9"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "project-mind",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-project-mind.png",
+      "bytes": 163924,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8a5f5460d498ed7950959ee2665776e569fd093637f23a986cc012baa0baebba"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "companies",
+      "route": "/companies",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-companies.png",
+      "bytes": 41906,
+      "width": 1280,
+      "height": 800,
+      "sha256": "3a3a0adbff8084906a448756044b5aa2adcba2c96a53c1b0c8c13b88c127a87c"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "company-detail",
+      "route": "/companies/98b5ad17-8fe3-4fab-8673-000053819041",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-company-detail.png",
+      "bytes": 76598,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8b5ea62741f90c7b5ae2734e7d258122fb088d3ea2d85b159c7ac7df14a82242"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "contacts",
+      "route": "/contacts",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-contacts.png",
+      "bytes": 67224,
+      "width": 1280,
+      "height": 800,
+      "sha256": "6210ad6ebb41211692dc638a078be30c9acb5cf8ece71c1a7e99bef00f4b384d"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "contact-detail",
+      "route": "/contacts/98b5ad17-8fe3-4fab-8673-000059777145",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-contact-detail.png",
+      "bytes": 89014,
+      "width": 1280,
+      "height": 800,
+      "sha256": "1ba4ccd64b89ac0e09bdd7a847e9e369670a6aceeec4c3440a7142b76a3a2c09"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "brief",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-brief.png",
+      "bytes": 97757,
+      "width": 1280,
+      "height": 800,
+      "sha256": "86b499db49e40173bf45a847c320844f0ba8bca3b96e70bc3db7d33aad55d49e"
+    },
+    {
+      "device": "desktop",
+      "locale": "zh-CN",
+      "screen": "search",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-zh-CN-search.png",
+      "bytes": 97453,
+      "width": 1280,
+      "height": 800,
+      "sha256": "2ced70328e44b1ef63541dfef8fd5752f4944842b6272f7e9b68a747d4b35bb9"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "today",
+      "route": "/",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-today.png",
+      "bytes": 88979,
+      "width": 1280,
+      "height": 800,
+      "sha256": "e5eec86b542eac95bebca513b05daa43135048f266712df8a2735d6a8a478276"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "organization-directory",
+      "route": "/orgs",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-organization-directory.png",
+      "bytes": 72177,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b94da34e1801845d696b79943ca8f1ead329515096cbefe83e3029c75b0eb2fb"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "project-detail",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-project-detail.png",
+      "bytes": 111143,
+      "width": 1280,
+      "height": 800,
+      "sha256": "591d38e7da3cfbd22b3f7d4c21c1bced6110e60e6cecb5bc9ef95c204094fd1e"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "task-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-task-page.png",
+      "bytes": 124267,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5a9cf526da29cb0467dd7c071c2d714ff85a3f0af3dd1f440ce9f3ba30393492"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "review-page",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd/review",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-review-page.png",
+      "bytes": 114038,
+      "width": 1280,
+      "height": 800,
+      "sha256": "01c50553cf2cb9ca84ed5929eeb2f707b5e7b6513bb7c010470a86e15ac87616"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "digests",
+      "route": "/digests",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-digests.png",
+      "bytes": 32320,
+      "width": 1280,
+      "height": 800,
+      "sha256": "abae0d48ab3681357bd11610ae53abbf75977c162a4f13f483baf11d12714ae8"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "digest-detail",
+      "route": "/digests/98b5ad17-8fe3-4fab-8673-00004d8baf41",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-digest-detail.png",
+      "bytes": 76692,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9f282e1c3352d2884016eeeacba905538c0028391ed41133c77f291de3c479e0"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "calendar",
+      "route": "/calendar",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-calendar.png",
+      "bytes": 93288,
+      "width": 1280,
+      "height": 800,
+      "sha256": "eb384b039e4d75f9a80ea47b29146f558682647ae3eea289892a6cacac2234a7"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "projects",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6cd",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-projects.png",
+      "bytes": 157817,
+      "width": 1280,
+      "height": 800,
+      "sha256": "a759323a5554e852d3acf583a36e56c8f5efde22d6b62a193df64a3fa46b784e"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "inbox",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-inbox.png",
+      "bytes": 136830,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5f75b1f5c08d194491d523b5d42e19becaf9a2b094d1a330380b56a85ebe06c5"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "me",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-me.png",
+      "bytes": 136830,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5f75b1f5c08d194491d523b5d42e19becaf9a2b094d1a330380b56a85ebe06c5"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "mcp",
+      "route": "/me/mcp",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-mcp.png",
+      "bytes": 69498,
+      "width": 1280,
+      "height": 800,
+      "sha256": "0e2c279701d740a8fd4573ea908cd98f1ecebac3182fa9dcbcb28470975438c2"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "organizations",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-organizations.png",
+      "bytes": 54703,
+      "width": 1280,
+      "height": 800,
+      "sha256": "317e8720a202c5e922b213a942d831baeddaf2b4f8a8eef2d43aaa4f401f1626"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "notifications",
+      "route": "/me/notifications",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-notifications.png",
+      "bytes": 60802,
+      "width": 1280,
+      "height": 800,
+      "sha256": "e8b78234ad00c43a37d3ff822c523bea8888caac61e55e6128344d157ca47fb2"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "team",
+      "route": "/orgs#team",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-team.png",
+      "bytes": 70395,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ac605100266e0fbec58e9a9a1dcb8a17143d505c40ad121be2cd91f2713ceaee"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "quick-add",
+      "route": "/",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-quick-add.png",
+      "bytes": 87338,
+      "width": 1280,
+      "height": 800,
+      "sha256": "6a56a7ba2c1b004d1519762e25a62ab36e13b9a3b6eaf282d6ad82fd35bb06b4"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "task-detail",
+      "route": "/tasks/98b5ad17-8fe3-4fab-8673-000017e6c6d1",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-task-detail.png",
+      "bytes": 145843,
+      "width": 1280,
+      "height": 800,
+      "sha256": "b2faf3ff2d8b9e33ab5350572cd670fca3b2c811e729eabab79d6a982eb605f0"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "agent",
+      "route": "/agents/98b5ad17-8fe3-4fab-8673-000011f0e54b",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-agent.png",
+      "bytes": 68264,
+      "width": 1280,
+      "height": 800,
+      "sha256": "38db1aff3bc79e722fc11028ed399a25aec2030b5f9ab78bf0089938f5401a24"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "review-deliverable",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-review-deliverable.png",
+      "bytes": 159498,
+      "width": 1280,
+      "height": 800,
+      "sha256": "bb150e62d973ad3f9ebdf96261189c4c82ffc2df4f45ca6ca04adb214923f3e2"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "review",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-review.png",
+      "bytes": 147453,
+      "width": 1280,
+      "height": 800,
+      "sha256": "20a30e3696fe57ee1470d26470fdc7be4768e44c67ce314c9beb77c04917a7f3"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "project-list",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-project-list.png",
+      "bytes": 107680,
+      "width": 1280,
+      "height": 800,
+      "sha256": "03a86310b94c7dca314761a83a566d6a22054848cbf54644ff78e58a4414cc3f"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "project-timeline",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-project-timeline.png",
+      "bytes": 130117,
+      "width": 1280,
+      "height": 800,
+      "sha256": "cfbba2ecb8bb6ac4c8f483be64a6665d46f1b7695f05156804fede3466b374b0"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "project-stakeholders",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-project-stakeholders.png",
+      "bytes": 82544,
+      "width": 1280,
+      "height": 800,
+      "sha256": "8962cc3a43ebb2901e35d6d582ad47767ebeb5fdf81f9c2b1100f95ab4253d19"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "project-relations",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-project-relations.png",
+      "bytes": 191649,
+      "width": 1280,
+      "height": 800,
+      "sha256": "babcb1493a92e99c584afd38a89bf490e08641f94d5240df59f3204aad840a4c"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "project-mind",
+      "route": "/projects/98b5ad17-8fe3-4fab-8673-00000bfb0440",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-project-mind.png",
+      "bytes": 160198,
+      "width": 1280,
+      "height": 800,
+      "sha256": "911d52a0515573ebf1aa09fc90bc745b5ff86553194dc68e3cd7a0bb68198fd7"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "companies",
+      "route": "/companies",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-companies.png",
+      "bytes": 43807,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f6a3fc8ae0d11ab2bfacb99324fe6459a88c5815389e28a828c01b3afb016ca8"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "company-detail",
+      "route": "/companies/98b5ad17-8fe3-4fab-8673-000053819041",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-company-detail.png",
+      "bytes": 77621,
+      "width": 1280,
+      "height": 800,
+      "sha256": "7b1171854aa627d605af9ecc78c2e93b7ac4a437177e66e413f4cf801594dd7b"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "contacts",
+      "route": "/contacts",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-contacts.png",
+      "bytes": 65226,
+      "width": 1280,
+      "height": 800,
+      "sha256": "0ad69b93bab7531b33c8194bedc1817200e6b40cbab7fc42c431914a7c261489"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "contact-detail",
+      "route": "/contacts/98b5ad17-8fe3-4fab-8673-000059777145",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-contact-detail.png",
+      "bytes": 89648,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5174cc21aff0a3d56c5d8bc1f29e966d8d12aec0c728f57ed1ae63827fcb2624"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "brief",
+      "route": "/me",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-brief.png",
+      "bytes": 82199,
+      "width": 1280,
+      "height": 800,
+      "sha256": "f37df0d8e27a4cfd39869b979730ef68890078d12afd9a01cd0fd9aa8c0ec73a"
+    },
+    {
+      "device": "desktop",
+      "locale": "en",
+      "screen": "search",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "file": "desktop-en-search.png",
+      "bytes": 95070,
+      "width": 1280,
+      "height": 800,
+      "sha256": "ba77b062a4c74f6652a736f01378ac8d89a6c25434d1c23c7ba74de094f53219"
+    }
+  ],
+  "storage": {
+    "kind": "github-actions-artifact-only",
+    "repositoryPngsPresent": false,
+    "artifactUrl": "https://github.com/ksamint/taff01/actions/runs/38684943841/artifacts/11950930754",
+    "archiveDirectory": "docs/ui/screenshots/v021-dark/",
+    "fileResolution": "Each captures[].file is relative to archiveDirectory, not the repository index directory.",
+    "retentionDays": 14,
+    "committedDarkBaselineCount": 60,
+    "committedBaselineDirectory": "e2e/__screenshots__/ui-v2.spec.ts/",
+    "readme": "../README.md#v021-capture-evidence"
+  }
+}

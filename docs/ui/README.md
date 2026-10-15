@@ -139,14 +139,56 @@ workflow owns and cleans up its separate capture API/web process groups.
 
 Native capture supports an explicit partial matrix through the optional
 `visual-baselines.yml` `screens` input (space-separated allowlisted screen names,
-for example `brief timeline`). An empty input still requires all 26 screens,
-104 cases and 126 native PNGs. A partial manifest declares its selected screens,
-case count and exact expected PNG paths; every selected screen still runs all four
-light viewport/locale cases. Partial artifacts must only replace their declared
-paths and do not substitute for the complete CI visual comparison.
+for example `brief timeline`). An empty input requires 26 light screen groups
+(104 cases, 126 PNGs) plus ten v2 dark groups across three locales and both
+viewports (60 cases, 60 PNGs): 164 cases and 186 committed references in total.
+A partial manifest declares its selected screens, case count and exact expected
+PNG paths. Every selected screen runs all four light viewport/locale cases;
+selected v2 screens also run six dark cases. Partial artifacts must only replace
+their declared paths and do not substitute for the complete CI visual comparison.
 
 The v0.2.1 visual review found that the global desktop shell sidebar column also
 constrained the signed-out landing to 240px. Desktop sidebar columns now apply
 only to `.app-shell.signed-in`; guests and loading states retain the full viewport.
 The shared Home capture readiness check requires the landing width to equal its
 phone or desktop viewport within one pixel before approving a reference.
+
+
+### v0.2.1 capture evidence
+
+The 186 approved baseline PNGs, including 60 dark v2 references, are committed in
+[`e2e/__screenshots__/ui-v2.spec.ts`](../../e2e/__screenshots__/ui-v2.spec.ts).
+The [import ledger](screenshots/v021-fonts-baseline-import.json) records captured
+and repository hashes separately: approved raster-only references were retained.
+
+The additional **186 authenticated dark route PNGs are artifact-only**, covering
+31 routes × three locales × two viewports. They are not stored under this
+repository's `docs/ui/screenshots/v021-dark/`. Their original archive directory is
+`docs/ui/screenshots/v021-dark/`, indexed by the committed
+[source/hash manifest](screenshots/v021-dark-route-capture-manifest.json).
+Download the [source-pinned GitHub artifact](https://github.com/ksamint/taff01/actions/runs/38684943841/artifacts/11950930754)
+from the [successful native run](https://github.com/ksamint/taff01/actions/runs/38684943841).
+GitHub Actions retention is 14 days; access can require GitHub sign-in. The index
+retains the exact source, archive digest, PNG dimensions and per-file hashes after
+artifact expiry. For an available artifact:
+
+```sh
+gh run download 38684943841 --repo ksamint/taff01 \
+  --name visual-baselines-db925ff283bea72f6522b97ef4b1b1e9d2eedbe0 \
+  --dir /tmp/taff-v021-native-review
+```
+
+The archive SHA-256 is
+`d38d6a11c563b52a6315e00e4fe6c2858ec8c107aec6abe033232b5e0442550a`.
+The [native network receipts](screenshots/v021-font-native-network.json),
+[cold-transfer comparison](screenshots/v021-font-network-comparison.json), and
+[font typography A/B](screenshots/v021-font-shaping-comparison.json) explain the
+font coverage, transfer and deterministic capture readiness.
+
+The [font readiness evidence](screenshots/v021-font-readiness-evidence.json)
+records the rejected old helper, all three native loading-order/late-text
+matrices, and the independent CI Brief comparison. The capture helper loads
+rendered text using its computed font stack, reuses faces, and swaps fully loaded
+faces in CSS order. It changes no product CSS or font-display setting. The
+corrected A/B supersedes the earlier race-affected paragraph-wrap interpretation: 
+all twelve parent/current-font captures have identical geometry and PNG bytes.

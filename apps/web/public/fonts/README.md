@@ -252,3 +252,76 @@ for name, points in (("common", common), ("remaining", coverage - common)):
     print("unicode-range:", ranges(points))
 PYFONT
 ```
+
+**v0.2.1 supplements (2026-10-15).** The reported 173 missing mappings are
+172 Simplified CJK characters and U+21B3 (`↳`). The CJK supplement uses official
+Google Fonts Noto Sans SC; the single arrow uses official Noto Sans Math because
+neither Noto Sans TC, SC, Symbols nor Symbols 2 contains it. Both retain their
+upstream SIL Open Font License 1.1 beside the assets. No runtime dependency or
+external font request is added.
+
+`v021-subsets.json` records pinned upstream URLs, full-source SHA-256 values,
+asset SHA-256 values, exact Unicode ranges and sizes. Rebuild with FontTools
+4.66.1 and Brotli 1.2.0 (MIT), in a temporary Python environment:
+
+```sh
+python scripts/ui/subset-fonts.py /path/to/NotoSansSC.ttf /path/to/NotoSansMath.ttf
+pnpm exec biome check --write apps/web/src/styles/tokens.css
+pnpm test scripts/ui/fonts.test.ts
+```
+
+Download the sources from the manifest's pinned URLs; the script rejects a
+source with a different hash. The original 247-glyph TC common asset stays
+byte-for-byte unchanged. The other 728 TC mappings retain their coverage across
+the CJK and symbols assets. Adding the newly used `左` from the same approved TC
+source brings the CJK remainder to 724 mappings. It is split into ten static,
+disjoint fonts with at most 80 glyphs and 31,936 bytes each (48 KiB enforced
+budget). Seven content fonts cover the vocabulary of **all** fixture/business
+strings, across all workspaces and locales; three detail fonts cover the rest.
+Within each vocabulary, deterministic character co-occurrence packing keeps
+related strings together. There is no workspace, route, locale or runtime
+special case. The partition ships 262,464 bytes instead of the approved parent's
+224,900-byte monolith, a 16.7% remainder-storage overhead in exchange for selective
+requests. The intermediate monolith after moving symbols and adding `左` was
+224,236 bytes; it was not the approved parent asset. The five-glyph symbols
+asset is 2,304 bytes. All 728 original outlines
+and horizontal/vertical advances match the earlier asset at weights 100, 300,
+400, 500, 600 and 900 (4,368 comparisons). The 172-glyph SC supplement is 54,036
+bytes; the one-glyph Math supplement is 2,852 bytes. CSS ranges remain disjoint.
+The static Math arrow uses the same CSS weight descriptor as its sibling faces;
+its outline stays constant across that range.
+
+Cold real Northwind measurements are recorded in
+[`v021-font-network-comparison.json`](../../../../docs/ui/screenshots/v021-font-network-comparison.json).
+The comparison substitutes only font declarations/assets into the same real app,
+using fresh browser contexts without HTTP cache or service workers. Totals count
+unique requested font body bytes. A Unicode-page partition was also measured and
+rejected: 0x100/0x400/0x800 pages increased English Relations to 356–371 KB.
+
+| Screen/locale | Previous total / requests | Current total / requests |
+| --- | ---: | ---: |
+| Northwind Relations, English | 323,348 B / 3 | 230,120 B / 8 |
+| Relations, zh-HK | 323,348 B / 3 | 334,532 B / 12 |
+| Relations, zh-CN | 323,348 B / 3 | 403,932 B / 13 |
+
+English Relations' remainder falls from 224,900 to 129,368 bytes (42.5% less);
+its total falls 28.8%. This is not a uniform improvement:
+zh-HK Relations grows 3.5%, and zh-CN grows 24.9%, including the new 54,036-byte
+SC coverage absent before (8.2% growth when excluding that added coverage).
+Chinese business names remain Chinese in the English Northwind fixture.
+The optional Today transfer probe did not satisfy the native two-task readiness
+guard on its stricter repeat, despite fixed Date and Temporal. Its preliminary
+rows are explicitly marked unverified in the JSON and support no performance
+claim. Existing native Today data assertions and performance gates stay intact.
+The browser regression requires actual nonzero bounded CJK page requests and a
+remainder total below the old monolith, with a JSON network receipt. Its separate
+pure-English workspace regression preserves the arrow request and absence of the
+large remainder. Both run in all three browser projects (six cases).
+`prepare-fonts.ts` checks all 16 installed faces and prepares only faces the browser
+selected, so the helper cannot manufacture unrelated CJK downloads.
+
+For dark locale route captures, run `UI_THEME=dark pnpm ui:app-shots <output>`.
+The same 186-view route matrix covers all three locales and both viewports;
+the manifest records the theme. The native visual capture workflow also records
+60 dark baselines for the ten v2-only screens, in addition to the 126 light
+baselines, without changing existing comparison tolerances.

@@ -1,0 +1,456 @@
+{
+  "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+  "runId": "38684943841",
+  "helperSha256": "101c36984cfa6516673103ed4530737d3a5e98088ed37254c6eda3cab61fcf4c",
+  "nativeStats": {
+    "startTime": "2026-10-15T05:20:52.698Z",
+    "duration": 50743.707,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "rawNativeReportSha256": "b2a26170b3b65b959484776aa59ca4e8282e1e963d6657f73b308e4eb62dc3cf",
+  "nativeMatrices": [
+    {
+      "title": "capture fonts keep late text and punctuation stable across load orders",
+      "project": "en",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "scenarios": [
+        {
+          "late": false,
+          "order": "immediate",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": false,
+          "order": "ascending",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": false,
+          "order": "descending",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "immediate",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "ascending",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "descending",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        }
+      ]
+    },
+    {
+      "title": "capture fonts keep late text and punctuation stable across load orders",
+      "project": "zh-CN",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "scenarios": [
+        {
+          "late": false,
+          "order": "immediate",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": false,
+          "order": "ascending",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": false,
+          "order": "descending",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "immediate",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "ascending",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "descending",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        }
+      ]
+    },
+    {
+      "title": "capture fonts keep late text and punctuation stable across load orders",
+      "project": "zh-HK",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "scenarios": [
+        {
+          "late": false,
+          "order": "immediate",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": false,
+          "order": "ascending",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": false,
+          "order": "descending",
+          "faceCount": 25,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "immediate",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "ascending",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        },
+        {
+          "late": true,
+          "order": "descending",
+          "faceCount": 26,
+          "fonts": [
+            {
+              "familyName": "Noto Sans TC Thin",
+              "postScriptName": "NotoSansTC-Thin",
+              "isCustomFont": true,
+              "glyphCount": 66
+            },
+            {
+              "familyName": "Manrope ExtraLight",
+              "postScriptName": "Manrope-ExtraLight",
+              "isCustomFont": true,
+              "glyphCount": 9
+            }
+          ],
+          "geometrySha256": "060df9df244ff8d854e387df08c234681e529c6dad8fd7693bf707b6ca4af887"
+        }
+      ]
+    }
+  ],
+  "geometryHashEncoding": "SHA256 of JSON.stringify-equivalent compact geometry objects sorted by key; compared within each matrix.",
+  "oldHelperNegativeControl": {
+    "sourceSha": "c9b6173c2b5debfc575b4061d674f2230eb968fa",
+    "expectedFailure": "Repeated preparation grows font set34\u219243; new regression rejects old helper.",
+    "stats": {
+      "startTime": "2026-10-15T04:57:36.981Z",
+      "duration": 679.447,
+      "expected": 0,
+      "skipped": 0,
+      "unexpected": 1,
+      "flaky": 0
+    },
+    "rawResultSha256": "dcada2dbb1761fa7eafef89da07a2ee1b3edbc1838b17ffb6fcfd4e845a210d7",
+    "intentionalExpectedFailure": true,
+    "helperSha256": "fd5765a462841f9b8606496fb3727ebed722a0e8256c055f7c4e8080726d4885"
+  },
+  "independentNativeCiActuals": {
+    "runId": "38684938074",
+    "artifactId": 11950445376,
+    "archiveSha256": "2ca7e792c2499215c01e33f03a6275923ccc7d1e7ac46289e4a11d71002657c5",
+    "cases": [
+      {
+        "project": "desktop-zh-HK",
+        "nativeSha256": "c95db5f11432abb60dd75b9c97ccdae12b1d998805bbe830993d599714f1e479",
+        "ciActualSha256": "c95db5f11432abb60dd75b9c97ccdae12b1d998805bbe830993d599714f1e479",
+        "originalApprovedSha256": "c95db5f11432abb60dd75b9c97ccdae12b1d998805bbe830993d599714f1e479",
+        "byteIdentical": true
+      },
+      {
+        "project": "phone-zh-HK",
+        "nativeSha256": "70ae4294e69cf3cca85061bea26c1ba483d3535b09654a1bad0c3d4bb97d84ef",
+        "ciActualSha256": "d6734affb6491aa8cc38b9fb7ed3b77eed52737bf951b6b5a462c179eeb42e07",
+        "originalApprovedSha256": "70ae4294e69cf3cca85061bea26c1ba483d3535b09654a1bad0c3d4bb97d84ef",
+        "byteIdentical": false,
+        "rawPixelDifference": 30,
+        "maxChannelDelta": 2,
+        "bounds": [20, 362, 264, 505],
+        "interpretation": "Paragraph/layout identical; antialiasing only in question buttons. Unchanged default comparator passes; new native matches original approved bytes."
+      }
+    ]
+  }
+}

@@ -1,5 +1,23 @@
 # Changelog
 
+## v0.2.1
+
+- Reproducible public acceptance harness; mind-map write/undo and initial-socket
+  membership races fixed. Runtime-only credentials and sanitized per-run reports.
+- Correct MCP bearer-token copy, verified demo email, queued digest choices and
+  optimistic phone status with rollback and Undo. Late reads preserve pending choices.
+- Contact-to-project links and role labels; editable/archivable milestones, keyboard
+  timeline nudges and whole-day behind values; audited proposal Undo; phone mind
+  detail scrolling; desktop snoozed Inbox and embedded agent profile.
+- Admin Settings exposes the workspace AI switch in its off state. No model is enabled.
+- V2-only visual baselines, Simplified glyph coverage, a small symbols face for
+  English Relations and dark locale captures. No dependency is added.
+
+Migration `0027` adds nullable archive/inverse metadata for versioned suggestion
+undo, with zero backfill. Generated tasks retain history; concurrent work rejects
+undo. Production source, CI, backups and acceptance are recorded in `docs/deploy.md`;
+the release tag is created on the exact deployed SHA after acceptance.
+
 ## v0.2.0
 
 The frontend v2 release. Prototype v2 (ADR 0014) replaces the v1 UI on phone

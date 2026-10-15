@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       screens:
-        description: Optional space-separated v2 screens; empty captures all 26 screens and 126 PNGs
+        description: Optional space-separated v2 screens; empty captures all 26 light screens plus 60 dark PNGs (186 total)
         required: false
         type: string
         default: ""
@@ -115,6 +115,55 @@ jobs:
           for screen in $CAPTURE_SELECTED_SCREENS; do
             UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
           done
+          for screen in $CAPTURE_SELECTED_SCREENS; do
+            case "$screen" in companies|company-detail|contacts|contact-detail|stakeholders|timeline|relations|brief|mind|home) ;; *) continue ;; esac
+            UI_THEME=dark UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen-dark.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
+          done
+      - name: Dark route captures in all three locales and both viewports
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Playwright stops its owned servers after each baseline group.
+          # This standalone capture owns fresh process groups and cleans both.
+          TAFF_VISUAL_API_CLOCK=ui-v2 setsid node --import ./scripts/ui/visual-clock.mjs dist/runtime/api/api.mjs > dark-api.log 2>&1 &
+          api_pid=$!
+          setsid pnpm --filter @taff/web start > dark-web.log 2>&1 &
+          web_pid=$!
+          cleanup() {
+            capture_status=$?
+            trap - EXIT
+            kill -- "-$api_pid" "-$web_pid" 2>/dev/null || true
+            wait "$api_pid" "$web_pid" 2>/dev/null || true
+            for attempt in $(seq 1 20); do
+              if ! kill -0 -- "-$api_pid" 2>/dev/null && ! kill -0 -- "-$web_pid" 2>/dev/null; then break; fi
+              sleep 0.2
+            done
+            if kill -0 -- "-$api_pid" 2>/dev/null || kill -0 -- "-$web_pid" 2>/dev/null; then
+              echo "Dark capture left an owned server process group running" >&2
+              exit 1
+            fi
+            if curl --max-time 1 -fs "$AUTH_URL/api/health" >/dev/null || curl --max-time 1 -fs "$API_INTERNAL_URL/api/health" >/dev/null; then
+              echo "Dark capture server health endpoints remain open after cleanup" >&2
+              exit 1
+            fi
+            echo "Dark capture cleanup verified: both owned process groups stopped and both health endpoints closed"
+            exit "$capture_status"
+          }
+          trap cleanup EXIT
+          for attempt in $(seq 1 30); do
+            kill -0 "$api_pid"
+            kill -0 "$web_pid"
+            if curl --max-time 1 -fs "$API_INTERNAL_URL/api/health" >/dev/null && curl --max-time 1 -fs "$AUTH_URL/api/health" >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --max-time 1 -fs "$API_INTERNAL_URL/api/health"
+          curl --max-time 1 -fs "$AUTH_URL/api/health"
+          echo "Dark capture startup verified: both owned server processes alive and both health endpoints ready"
+          UI_THEME=dark pnpm ui:app-shots docs/ui/screenshots/v021-dark
+      - name: English Relations font download regression
+        run: PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/font-network.json" pnpm exec playwright test e2e/font-loading.spec.ts --reporter=line,json
+      - name: Font readiness under delayed subsets and late text
+        run: PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/font-readiness.json" pnpm exec playwright test e2e/font-readiness.spec.ts --reporter=line,json
       - name: Record native capture and runtime identities
         run: |
           node --input-type=module <<'JS'
@@ -127,12 +176,13 @@ jobs:
           const require = createRequire(import.meta.url);
           const selection = resolveCaptureSelection(process.env.CAPTURE_SCREENS);
           const {screens} = selection;
-          const screenResults = screens.map(screen => {
+          const darkScreens = "companies company-detail contacts contact-detail stakeholders timeline relations brief mind home".split(" ").filter(screen => screens.includes(screen)).map(screen => `${screen}-dark`);
+          const screenResults = [...screens, ...darkScreens].map(screen => {
             const file = `capture-results/${screen}.json`;
             const raw = fs.readFileSync(file);
             const stats = JSON.parse(raw).stats;
-            if (stats.expected !== 4 || stats.unexpected || stats.skipped || stats.flaky)
-              throw new Error(`Capture did not pass all four cases: ${screen}`);
+            if (stats.expected !== (screen.endsWith("-dark") ? 6 : 4) || stats.unexpected || stats.skipped || stats.flaky)
+              throw new Error(`Capture did not pass all viewport/locale cases: ${screen}`);
             return {screen, stats, sha256: crypto.createHash('sha256').update(raw).digest('hex')};
           });
           function files(dir) {
@@ -148,8 +198,17 @@ jobs:
             return {file, bytes: raw.length, width: raw.readUInt32BE(16), height: raw.readUInt32BE(20),
               sha256: crypto.createHash('sha256').update(raw).digest('hex')};
           });
-          assertCapturePaths(selection, captures.map(capture => capture.file));
-          if (selection.mode === 'all' && captures.length !== 126) throw new Error('Expected all 126 native PNGs');
+          assertCapturePaths(selection, captures.filter(capture => !capture.file.includes('-dark/')).map(capture => capture.file));
+          const darkPaths = darkScreens.flatMap(screen => ['phone','desktop'].flatMap(device => ['en','zh-CN','zh-HK'].map(locale => `e2e/__screenshots__/ui-v2.spec.ts/${device}-${locale}-dark/${screen.replace(/-dark$/, '')}.png`))).sort();
+          if (JSON.stringify(captures.filter(capture => capture.file.includes('-dark/')).map(capture => capture.file).sort()) !== JSON.stringify(darkPaths))
+            throw new Error('Expected every selected dark viewport/locale PNG');
+          if (selection.mode === 'all' && captures.length !== 186) throw new Error('Expected all 186 native PNGs');
+          const fontNetwork = JSON.parse(fs.readFileSync('capture-results/font-network.json')).stats;
+          if (fontNetwork.expected !== 6 || fontNetwork.unexpected || fontNetwork.skipped || fontNetwork.flaky)
+            throw new Error('Expected all six English/real-Northwind font network cases');
+          const fontReadiness = JSON.parse(fs.readFileSync('capture-results/font-readiness.json')).stats;
+          if (fontReadiness.expected !== 3 || fontReadiness.unexpected || fontReadiness.skipped || fontReadiness.flaky)
+            throw new Error('Expected all three locale font-readiness matrices');
           fs.writeFileSync('visual-capture-manifest.json', JSON.stringify({
             sourceSha: process.env.CAPTURE_SOURCE_SHA,
             repository: process.env.GITHUB_REPOSITORY,
@@ -161,7 +220,7 @@ jobs:
             playwright: require('@playwright/test/package.json').version,
             monospace: cp.execFileSync('fc-match', ['monospace'], {encoding: 'utf8'}).trim(),
             fontRuntime: cp.execFileSync('dpkg-query', ['-W', 'fontconfig', 'libfreetype6'], {encoding: 'utf8'}).trim(),
-            captureScope: selection, screenResults, captures,
+            captureScope: {...selection, darkScreens, expectedTotalPngCount: selection.expectedPngCount + darkPaths.length}, screenResults, fontNetwork, fontReadiness, captures,
           }, null, 2) + '\n');
           JS
       - uses: actions/upload-artifact@v4
@@ -172,6 +231,7 @@ jobs:
             visual-capture-manifest.json
             visual-browser.log
             capture-results
+            docs/ui/screenshots/v021-dark
           retention-days: 14
       - uses: actions/upload-artifact@v4
         if: failure()
@@ -180,6 +240,8 @@ jobs:
           path: |
             test-results
             visual-browser.log
+            dark-api.log
+            dark-web.log
           retention-days: 7
       - name: Publish the captures to a review branch
         if: ${{ inputs.publish }}

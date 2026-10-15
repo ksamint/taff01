@@ -1,0 +1,2047 @@
+{
+  "method": "Real Northwind DOM and requests; only static font-face declarations/assets substituted for historical/alternative font partitions; fresh contexts, no service worker or HTTP cache",
+  "matrix": [
+    {
+      "variant": "old",
+      "locale": "en",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "NotoSansTC-ui-remaining.woff2",
+          "bytes": 224900
+        }
+      ],
+      "fontBytes": 323348,
+      "fontRequests": 3,
+      "remainderBytes": 224900,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "old",
+      "locale": "en",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "NotoSansTC-ui-remaining.woff2",
+          "bytes": 224900
+        }
+      ],
+      "fontBytes": 323348,
+      "fontRequests": 3,
+      "remainderBytes": 224900,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "old",
+      "locale": "zh-CN",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-remaining.woff2",
+          "bytes": 224900
+        }
+      ],
+      "fontBytes": 323348,
+      "fontRequests": 3,
+      "remainderBytes": 224900,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "old",
+      "locale": "zh-CN",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-remaining.woff2",
+          "bytes": 224900
+        }
+      ],
+      "fontBytes": 323348,
+      "fontRequests": 3,
+      "remainderBytes": 224900,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "old",
+      "locale": "zh-HK",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "NotoSansTC-ui-remaining.woff2",
+          "bytes": 224900
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        }
+      ],
+      "fontBytes": 323348,
+      "fontRequests": 3,
+      "remainderBytes": 224900,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "old",
+      "locale": "zh-HK",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-remaining.woff2",
+          "bytes": 224900
+        }
+      ],
+      "fontBytes": 323348,
+      "fontRequests": 3,
+      "remainderBytes": 224900,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-256",
+      "locale": "en",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "variant-8-52.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "variant-8-78.woff2",
+          "bytes": 2872
+        },
+        {
+          "file": "variant-8-67.woff2",
+          "bytes": 8028
+        },
+        {
+          "file": "variant-8-6c.woff2",
+          "bytes": 2820
+        },
+        {
+          "file": "variant-8-54.woff2",
+          "bytes": 6284
+        },
+        {
+          "file": "variant-8-83.woff2",
+          "bytes": 2292
+        },
+        {
+          "file": "variant-8-7a.woff2",
+          "bytes": 5832
+        },
+        {
+          "file": "variant-8-60.woff2",
+          "bytes": 5308
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        }
+      ],
+      "fontBytes": 192688,
+      "fontRequests": 11,
+      "remainderBytes": 40204,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-256",
+      "locale": "en",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-8-62.woff2",
+          "bytes": 6752
+        },
+        {
+          "file": "variant-8-98.woff2",
+          "bytes": 8064
+        },
+        {
+          "file": "variant-8-79.woff2",
+          "bytes": 4740
+        },
+        {
+          "file": "variant-8-53.woff2",
+          "bytes": 9468
+        },
+        {
+          "file": "variant-8-72.woff2",
+          "bytes": 4508
+        },
+        {
+          "file": "variant-8-8c.woff2",
+          "bytes": 5332
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-8-5b.woff2",
+          "bytes": 7944
+        },
+        {
+          "file": "variant-8-6a.woff2",
+          "bytes": 5004
+        },
+        {
+          "file": "variant-8-7a.woff2",
+          "bytes": 5832
+        },
+        {
+          "file": "variant-8-54.woff2",
+          "bytes": 6284
+        },
+        {
+          "file": "variant-8-6b.woff2",
+          "bytes": 5432
+        },
+        {
+          "file": "variant-8-4f.woff2",
+          "bytes": 7700
+        },
+        {
+          "file": "variant-8-5f.woff2",
+          "bytes": 8404
+        },
+        {
+          "file": "variant-8-56.woff2",
+          "bytes": 3188
+        },
+        {
+          "file": "variant-8-67.woff2",
+          "bytes": 8028
+        },
+        {
+          "file": "variant-8-96.woff2",
+          "bytes": 9580
+        },
+        {
+          "file": "variant-8-9e.woff2",
+          "bytes": 3428
+        },
+        {
+          "file": "variant-8-66.woff2",
+          "bytes": 4696
+        },
+        {
+          "file": "variant-8-55.woff2",
+          "bytes": 3624
+        },
+        {
+          "file": "variant-8-4e.woff2",
+          "bytes": 6448
+        },
+        {
+          "file": "variant-8-65.woff2",
+          "bytes": 5868
+        },
+        {
+          "file": "variant-8-97.woff2",
+          "bytes": 3468
+        },
+        {
+          "file": "variant-8-85.woff2",
+          "bytes": 1820
+        },
+        {
+          "file": "variant-8-8a.woff2",
+          "bytes": 7340
+        },
+        {
+          "file": "variant-8-7d.woff2",
+          "bytes": 10996
+        },
+        {
+          "file": "variant-8-52.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "variant-8-60.woff2",
+          "bytes": 5308
+        },
+        {
+          "file": "variant-8-51.woff2",
+          "bytes": 7520
+        },
+        {
+          "file": "variant-8-6e.woff2",
+          "bytes": 5852
+        },
+        {
+          "file": "variant-8-57.woff2",
+          "bytes": 3328
+        },
+        {
+          "file": "variant-8-76.woff2",
+          "bytes": 5680
+        },
+        {
+          "file": "variant-8-61.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "variant-8-8d.woff2",
+          "bytes": 5320
+        },
+        {
+          "file": "variant-8-74.woff2",
+          "bytes": 2040
+        },
+        {
+          "file": "variant-8-90.woff2",
+          "bytes": 6972
+        },
+        {
+          "file": "variant-8-68.woff2",
+          "bytes": 4220
+        },
+        {
+          "file": "variant-8-5e.woff2",
+          "bytes": 7516
+        },
+        {
+          "file": "variant-8-58.woff2",
+          "bytes": 3344
+        },
+        {
+          "file": "variant-8-78.woff2",
+          "bytes": 2872
+        },
+        {
+          "file": "variant-8-64.woff2",
+          "bytes": 6584
+        },
+        {
+          "file": "variant-8-71.woff2",
+          "bytes": 5060
+        },
+        {
+          "file": "variant-8-88.woff2",
+          "bytes": 5980
+        },
+        {
+          "file": "variant-8-6d.woff2",
+          "bytes": 3932
+        },
+        {
+          "file": "variant-8-73.woff2",
+          "bytes": 3608
+        },
+        {
+          "file": "variant-8-86.woff2",
+          "bytes": 3412
+        }
+      ],
+      "fontBytes": 356784,
+      "fontRequests": 48,
+      "remainderBytes": 256032,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-256",
+      "locale": "zh-CN",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-8-67.woff2",
+          "bytes": 8028
+        },
+        {
+          "file": "variant-8-52.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "variant-8-54.woff2",
+          "bytes": 6284
+        },
+        {
+          "file": "variant-8-83.woff2",
+          "bytes": 2292
+        },
+        {
+          "file": "variant-8-7a.woff2",
+          "bytes": 5832
+        },
+        {
+          "file": "variant-8-60.woff2",
+          "bytes": 5308
+        },
+        {
+          "file": "variant-8-78.woff2",
+          "bytes": 2872
+        },
+        {
+          "file": "variant-8-6c.woff2",
+          "bytes": 2820
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 192688,
+      "fontRequests": 11,
+      "remainderBytes": 40204,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-256",
+      "locale": "zh-CN",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "variant-8-67.woff2",
+          "bytes": 8028
+        },
+        {
+          "file": "variant-8-88.woff2",
+          "bytes": 5980
+        },
+        {
+          "file": "variant-8-7c.woff2",
+          "bytes": 3696
+        },
+        {
+          "file": "variant-8-7b.woff2",
+          "bytes": 6080
+        },
+        {
+          "file": "variant-8-79.woff2",
+          "bytes": 4740
+        },
+        {
+          "file": "variant-8-62.woff2",
+          "bytes": 6752
+        },
+        {
+          "file": "variant-8-56.woff2",
+          "bytes": 3188
+        },
+        {
+          "file": "variant-8-52.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "variant-8-81.woff2",
+          "bytes": 2268
+        },
+        {
+          "file": "variant-8-53.woff2",
+          "bytes": 9468
+        },
+        {
+          "file": "variant-8-4f.woff2",
+          "bytes": 7700
+        },
+        {
+          "file": "variant-8-65.woff2",
+          "bytes": 5868
+        },
+        {
+          "file": "variant-8-51.woff2",
+          "bytes": 7520
+        },
+        {
+          "file": "variant-8-98.woff2",
+          "bytes": 8064
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-8-80.woff2",
+          "bytes": 5080
+        },
+        {
+          "file": "variant-8-8c.woff2",
+          "bytes": 5332
+        },
+        {
+          "file": "variant-8-72.woff2",
+          "bytes": 4508
+        },
+        {
+          "file": "variant-8-75.woff2",
+          "bytes": 3748
+        },
+        {
+          "file": "variant-8-5e.woff2",
+          "bytes": 7516
+        },
+        {
+          "file": "variant-8-70.woff2",
+          "bytes": 3208
+        },
+        {
+          "file": "variant-8-5b.woff2",
+          "bytes": 7944
+        },
+        {
+          "file": "variant-8-7a.woff2",
+          "bytes": 5832
+        },
+        {
+          "file": "variant-8-54.woff2",
+          "bytes": 6284
+        },
+        {
+          "file": "variant-8-6a.woff2",
+          "bytes": 5004
+        },
+        {
+          "file": "variant-8-5f.woff2",
+          "bytes": 8404
+        },
+        {
+          "file": "variant-8-9e.woff2",
+          "bytes": 3428
+        },
+        {
+          "file": "variant-8-96.woff2",
+          "bytes": 9580
+        },
+        {
+          "file": "variant-8-6b.woff2",
+          "bytes": 5432
+        },
+        {
+          "file": "variant-8-66.woff2",
+          "bytes": 4696
+        },
+        {
+          "file": "variant-8-55.woff2",
+          "bytes": 3624
+        },
+        {
+          "file": "variant-8-97.woff2",
+          "bytes": 3468
+        },
+        {
+          "file": "variant-8-60.woff2",
+          "bytes": 5308
+        },
+        {
+          "file": "variant-8-8a.woff2",
+          "bytes": 7340
+        },
+        {
+          "file": "variant-8-6e.woff2",
+          "bytes": 5852
+        },
+        {
+          "file": "variant-8-4e.woff2",
+          "bytes": 6448
+        },
+        {
+          "file": "variant-8-7d.woff2",
+          "bytes": 10996
+        },
+        {
+          "file": "variant-8-57.woff2",
+          "bytes": 3328
+        },
+        {
+          "file": "variant-8-85.woff2",
+          "bytes": 1820
+        },
+        {
+          "file": "variant-8-76.woff2",
+          "bytes": 5680
+        },
+        {
+          "file": "variant-8-8d.woff2",
+          "bytes": 5320
+        },
+        {
+          "file": "variant-8-68.woff2",
+          "bytes": 4220
+        },
+        {
+          "file": "variant-8-58.woff2",
+          "bytes": 3344
+        },
+        {
+          "file": "variant-8-90.woff2",
+          "bytes": 6972
+        },
+        {
+          "file": "variant-8-64.woff2",
+          "bytes": 6584
+        },
+        {
+          "file": "variant-8-78.woff2",
+          "bytes": 2872
+        },
+        {
+          "file": "variant-8-74.woff2",
+          "bytes": 2040
+        },
+        {
+          "file": "variant-8-6d.woff2",
+          "bytes": 3932
+        },
+        {
+          "file": "variant-8-71.woff2",
+          "bytes": 5060
+        },
+        {
+          "file": "variant-8-73.woff2",
+          "bytes": 3608
+        },
+        {
+          "file": "variant-8-86.woff2",
+          "bytes": 3412
+        },
+        {
+          "file": "variant-8-61.woff2",
+          "bytes": 6768
+        }
+      ],
+      "fontBytes": 434900,
+      "fontRequests": 55,
+      "remainderBytes": 280112,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-256",
+      "locale": "zh-HK",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-8-52.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "variant-8-60.woff2",
+          "bytes": 5308
+        },
+        {
+          "file": "variant-8-54.woff2",
+          "bytes": 6284
+        },
+        {
+          "file": "variant-8-67.woff2",
+          "bytes": 8028
+        },
+        {
+          "file": "variant-8-83.woff2",
+          "bytes": 2292
+        },
+        {
+          "file": "variant-8-7a.woff2",
+          "bytes": 5832
+        },
+        {
+          "file": "variant-8-6c.woff2",
+          "bytes": 2820
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "variant-8-78.woff2",
+          "bytes": 2872
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 192688,
+      "fontRequests": 11,
+      "remainderBytes": 40204,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-256",
+      "locale": "zh-HK",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "variant-8-7d.woff2",
+          "bytes": 10996
+        },
+        {
+          "file": "variant-8-88.woff2",
+          "bytes": 5980
+        },
+        {
+          "file": "variant-8-57.woff2",
+          "bytes": 3328
+        },
+        {
+          "file": "variant-8-4f.woff2",
+          "bytes": 7700
+        },
+        {
+          "file": "variant-8-79.woff2",
+          "bytes": 4740
+        },
+        {
+          "file": "variant-8-67.woff2",
+          "bytes": 8028
+        },
+        {
+          "file": "variant-8-63.woff2",
+          "bytes": 5528
+        },
+        {
+          "file": "variant-8-95.woff2",
+          "bytes": 3692
+        },
+        {
+          "file": "variant-8-7b.woff2",
+          "bytes": 6080
+        },
+        {
+          "file": "variant-8-52.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "variant-8-72.woff2",
+          "bytes": 4508
+        },
+        {
+          "file": "variant-8-64.woff2",
+          "bytes": 6584
+        },
+        {
+          "file": "variant-8-56.woff2",
+          "bytes": 3188
+        },
+        {
+          "file": "variant-8-62.woff2",
+          "bytes": 6752
+        },
+        {
+          "file": "variant-8-61.woff2",
+          "bytes": 6768
+        },
+        {
+          "file": "variant-8-69.woff2",
+          "bytes": 3028
+        },
+        {
+          "file": "variant-8-53.woff2",
+          "bytes": 9468
+        },
+        {
+          "file": "variant-8-98.woff2",
+          "bytes": 8064
+        },
+        {
+          "file": "variant-8-81.woff2",
+          "bytes": 2268
+        },
+        {
+          "file": "variant-8-8c.woff2",
+          "bytes": 5332
+        },
+        {
+          "file": "variant-8-51.woff2",
+          "bytes": 7520
+        },
+        {
+          "file": "variant-8-65.woff2",
+          "bytes": 5868
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-8-80.woff2",
+          "bytes": 5080
+        },
+        {
+          "file": "variant-8-7e.woff2",
+          "bytes": 7092
+        },
+        {
+          "file": "variant-8-5e.woff2",
+          "bytes": 7516
+        },
+        {
+          "file": "variant-8-75.woff2",
+          "bytes": 3748
+        },
+        {
+          "file": "variant-8-9e.woff2",
+          "bytes": 3428
+        },
+        {
+          "file": "variant-8-6a.woff2",
+          "bytes": 5004
+        },
+        {
+          "file": "variant-8-5b.woff2",
+          "bytes": 7944
+        },
+        {
+          "file": "variant-8-7a.woff2",
+          "bytes": 5832
+        },
+        {
+          "file": "variant-8-5f.woff2",
+          "bytes": 8404
+        },
+        {
+          "file": "variant-8-55.woff2",
+          "bytes": 3624
+        },
+        {
+          "file": "variant-8-6b.woff2",
+          "bytes": 5432
+        },
+        {
+          "file": "variant-8-54.woff2",
+          "bytes": 6284
+        },
+        {
+          "file": "variant-8-97.woff2",
+          "bytes": 3468
+        },
+        {
+          "file": "variant-8-85.woff2",
+          "bytes": 1820
+        },
+        {
+          "file": "variant-8-60.woff2",
+          "bytes": 5308
+        },
+        {
+          "file": "variant-8-6e.woff2",
+          "bytes": 5852
+        },
+        {
+          "file": "variant-8-76.woff2",
+          "bytes": 5680
+        },
+        {
+          "file": "variant-8-8a.woff2",
+          "bytes": 7340
+        },
+        {
+          "file": "variant-8-68.woff2",
+          "bytes": 4220
+        },
+        {
+          "file": "variant-8-90.woff2",
+          "bytes": 6972
+        },
+        {
+          "file": "variant-8-8d.woff2",
+          "bytes": 5320
+        },
+        {
+          "file": "variant-8-74.woff2",
+          "bytes": 2040
+        },
+        {
+          "file": "variant-8-66.woff2",
+          "bytes": 4696
+        },
+        {
+          "file": "variant-8-58.woff2",
+          "bytes": 3344
+        },
+        {
+          "file": "variant-8-78.woff2",
+          "bytes": 2872
+        },
+        {
+          "file": "variant-8-96.woff2",
+          "bytes": 9580
+        },
+        {
+          "file": "variant-8-6d.woff2",
+          "bytes": 3932
+        },
+        {
+          "file": "variant-8-71.woff2",
+          "bytes": 5060
+        },
+        {
+          "file": "variant-8-86.woff2",
+          "bytes": 3412
+        },
+        {
+          "file": "variant-8-73.woff2",
+          "bytes": 3608
+        },
+        {
+          "file": "variant-8-4e.woff2",
+          "bytes": 6448
+        }
+      ],
+      "fontBytes": 393300,
+      "fontRequests": 56,
+      "remainderBytes": 292548,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-1024",
+      "locale": "en",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "variant-10-19.woff2",
+          "bytes": 19192
+        },
+        {
+          "file": "variant-10-14.woff2",
+          "bytes": 21912
+        },
+        {
+          "file": "variant-10-15.woff2",
+          "bytes": 10976
+        },
+        {
+          "file": "variant-10-20.woff2",
+          "bytes": 7684
+        },
+        {
+          "file": "variant-10-1b.woff2",
+          "bytes": 11132
+        },
+        {
+          "file": "variant-10-1e.woff2",
+          "bytes": 13632
+        },
+        {
+          "file": "variant-10-18.woff2",
+          "bytes": 18248
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        }
+      ],
+      "fontBytes": 255260,
+      "fontRequests": 10,
+      "remainderBytes": 102776,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-1024",
+      "locale": "en",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-10-1e.woff2",
+          "bytes": 13632
+        },
+        {
+          "file": "variant-10-14.woff2",
+          "bytes": 21912
+        },
+        {
+          "file": "variant-10-26.woff2",
+          "bytes": 11564
+        },
+        {
+          "file": "variant-10-18.woff2",
+          "bytes": 18248
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-10-23.woff2",
+          "bytes": 14300
+        },
+        {
+          "file": "variant-10-1c.woff2",
+          "bytes": 10812
+        },
+        {
+          "file": "variant-10-16.woff2",
+          "bytes": 11988
+        },
+        {
+          "file": "variant-10-1a.woff2",
+          "bytes": 12080
+        },
+        {
+          "file": "variant-10-17.woff2",
+          "bytes": 18512
+        },
+        {
+          "file": "variant-10-19.woff2",
+          "bytes": 19192
+        },
+        {
+          "file": "variant-10-27.woff2",
+          "bytes": 3428
+        },
+        {
+          "file": "variant-10-21.woff2",
+          "bytes": 4600
+        },
+        {
+          "file": "variant-10-25.woff2",
+          "bytes": 13964
+        },
+        {
+          "file": "variant-10-13.woff2",
+          "bytes": 12100
+        },
+        {
+          "file": "variant-10-15.woff2",
+          "bytes": 10976
+        },
+        {
+          "file": "variant-10-1b.woff2",
+          "bytes": 11132
+        },
+        {
+          "file": "variant-10-22.woff2",
+          "bytes": 19260
+        },
+        {
+          "file": "variant-10-1f.woff2",
+          "bytes": 18892
+        },
+        {
+          "file": "variant-10-1d.woff2",
+          "bytes": 9840
+        },
+        {
+          "file": "variant-10-24.woff2",
+          "bytes": 13636
+        }
+      ],
+      "fontBytes": 370820,
+      "fontRequests": 23,
+      "remainderBytes": 270068,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-1024",
+      "locale": "zh-CN",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-10-1b.woff2",
+          "bytes": 11132
+        },
+        {
+          "file": "variant-10-19.woff2",
+          "bytes": 19192
+        },
+        {
+          "file": "variant-10-1e.woff2",
+          "bytes": 13632
+        },
+        {
+          "file": "variant-10-18.woff2",
+          "bytes": 18248
+        },
+        {
+          "file": "variant-10-20.woff2",
+          "bytes": 7684
+        },
+        {
+          "file": "variant-10-15.woff2",
+          "bytes": 10976
+        },
+        {
+          "file": "variant-10-14.woff2",
+          "bytes": 21912
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 255260,
+      "fontRequests": 10,
+      "remainderBytes": 102776,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-1024",
+      "locale": "zh-CN",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "variant-10-19.woff2",
+          "bytes": 19192
+        },
+        {
+          "file": "variant-10-14.woff2",
+          "bytes": 21912
+        },
+        {
+          "file": "variant-10-18.woff2",
+          "bytes": 18248
+        },
+        {
+          "file": "variant-10-15.woff2",
+          "bytes": 10976
+        },
+        {
+          "file": "variant-10-22.woff2",
+          "bytes": 19260
+        },
+        {
+          "file": "variant-10-1e.woff2",
+          "bytes": 13632
+        },
+        {
+          "file": "variant-10-1f.woff2",
+          "bytes": 18892
+        },
+        {
+          "file": "variant-10-20.woff2",
+          "bytes": 7684
+        },
+        {
+          "file": "variant-10-26.woff2",
+          "bytes": 11564
+        },
+        {
+          "file": "variant-10-13.woff2",
+          "bytes": 12100
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-10-1c.woff2",
+          "bytes": 10812
+        },
+        {
+          "file": "variant-10-23.woff2",
+          "bytes": 14300
+        },
+        {
+          "file": "variant-10-1d.woff2",
+          "bytes": 9840
+        },
+        {
+          "file": "variant-10-16.woff2",
+          "bytes": 11988
+        },
+        {
+          "file": "variant-10-1a.woff2",
+          "bytes": 12080
+        },
+        {
+          "file": "variant-10-17.woff2",
+          "bytes": 18512
+        },
+        {
+          "file": "variant-10-27.woff2",
+          "bytes": 3428
+        },
+        {
+          "file": "variant-10-21.woff2",
+          "bytes": 4600
+        },
+        {
+          "file": "variant-10-25.woff2",
+          "bytes": 13964
+        },
+        {
+          "file": "variant-10-24.woff2",
+          "bytes": 13636
+        },
+        {
+          "file": "variant-10-1b.woff2",
+          "bytes": 11132
+        }
+      ],
+      "fontBytes": 432540,
+      "fontRequests": 25,
+      "remainderBytes": 277752,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-1024",
+      "locale": "zh-HK",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-10-19.woff2",
+          "bytes": 19192
+        },
+        {
+          "file": "variant-10-14.woff2",
+          "bytes": 21912
+        },
+        {
+          "file": "variant-10-1e.woff2",
+          "bytes": 13632
+        },
+        {
+          "file": "variant-10-1b.woff2",
+          "bytes": 11132
+        },
+        {
+          "file": "variant-10-18.woff2",
+          "bytes": 18248
+        },
+        {
+          "file": "variant-10-20.woff2",
+          "bytes": 7684
+        },
+        {
+          "file": "variant-10-15.woff2",
+          "bytes": 10976
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 255260,
+      "fontRequests": 10,
+      "remainderBytes": 102776,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-1024",
+      "locale": "zh-HK",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "variant-10-22.woff2",
+          "bytes": 19260
+        },
+        {
+          "file": "variant-10-15.woff2",
+          "bytes": 10976
+        },
+        {
+          "file": "variant-10-14.woff2",
+          "bytes": 21912
+        },
+        {
+          "file": "variant-10-19.woff2",
+          "bytes": 19192
+        },
+        {
+          "file": "variant-10-13.woff2",
+          "bytes": 12100
+        },
+        {
+          "file": "variant-10-1e.woff2",
+          "bytes": 13632
+        },
+        {
+          "file": "variant-10-18.woff2",
+          "bytes": 18248
+        },
+        {
+          "file": "variant-10-25.woff2",
+          "bytes": 13964
+        },
+        {
+          "file": "variant-10-1c.woff2",
+          "bytes": 10812
+        },
+        {
+          "file": "variant-10-1f.woff2",
+          "bytes": 18892
+        },
+        {
+          "file": "variant-10-20.woff2",
+          "bytes": 7684
+        },
+        {
+          "file": "variant-10-1a.woff2",
+          "bytes": 12080
+        },
+        {
+          "file": "variant-10-23.woff2",
+          "bytes": 14300
+        },
+        {
+          "file": "variant-10-26.woff2",
+          "bytes": 11564
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-10-27.woff2",
+          "bytes": 3428
+        },
+        {
+          "file": "variant-10-1d.woff2",
+          "bytes": 9840
+        },
+        {
+          "file": "variant-10-16.woff2",
+          "bytes": 11988
+        },
+        {
+          "file": "variant-10-21.woff2",
+          "bytes": 4600
+        },
+        {
+          "file": "variant-10-17.woff2",
+          "bytes": 18512
+        },
+        {
+          "file": "variant-10-1b.woff2",
+          "bytes": 11132
+        },
+        {
+          "file": "variant-10-24.woff2",
+          "bytes": 13636
+        }
+      ],
+      "fontBytes": 378504,
+      "fontRequests": 24,
+      "remainderBytes": 277752,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-2048",
+      "locale": "en",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "variant-11-10.woff2",
+          "bytes": 10404
+        },
+        {
+          "file": "variant-11-c.woff2",
+          "bytes": 34840
+        },
+        {
+          "file": "variant-11-d.woff2",
+          "bytes": 20972
+        },
+        {
+          "file": "variant-11-a.woff2",
+          "bytes": 30524
+        },
+        {
+          "file": "variant-11-f.woff2",
+          "bytes": 30272
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        }
+      ],
+      "fontBytes": 279496,
+      "fontRequests": 8,
+      "remainderBytes": 127012,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-2048",
+      "locale": "en",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "variant-11-13.woff2",
+          "bytes": 13156
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-11-f.woff2",
+          "bytes": 30272
+        },
+        {
+          "file": "variant-11-a.woff2",
+          "bytes": 30524
+        },
+        {
+          "file": "variant-11-c.woff2",
+          "bytes": 34840
+        },
+        {
+          "file": "variant-11-11.woff2",
+          "bytes": 31160
+        },
+        {
+          "file": "variant-11-e.woff2",
+          "bytes": 18576
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-11-d.woff2",
+          "bytes": 20972
+        },
+        {
+          "file": "variant-11-9.woff2",
+          "bytes": 12100
+        },
+        {
+          "file": "variant-11-b.woff2",
+          "bytes": 28172
+        },
+        {
+          "file": "variant-11-10.woff2",
+          "bytes": 10404
+        },
+        {
+          "file": "variant-11-12.woff2",
+          "bytes": 25148
+        }
+      ],
+      "fontBytes": 356076,
+      "fontRequests": 14,
+      "remainderBytes": 255324,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-2048",
+      "locale": "zh-CN",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-11-a.woff2",
+          "bytes": 30524
+        },
+        {
+          "file": "variant-11-f.woff2",
+          "bytes": 30272
+        },
+        {
+          "file": "variant-11-d.woff2",
+          "bytes": 20972
+        },
+        {
+          "file": "variant-11-10.woff2",
+          "bytes": 10404
+        },
+        {
+          "file": "variant-11-c.woff2",
+          "bytes": 34840
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 279496,
+      "fontRequests": 8,
+      "remainderBytes": 127012,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-2048",
+      "locale": "zh-CN",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "variant-11-c.woff2",
+          "bytes": 34840
+        },
+        {
+          "file": "variant-11-11.woff2",
+          "bytes": 31160
+        },
+        {
+          "file": "variant-11-a.woff2",
+          "bytes": 30524
+        },
+        {
+          "file": "variant-11-f.woff2",
+          "bytes": 30272
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-11-13.woff2",
+          "bytes": 13156
+        },
+        {
+          "file": "variant-11-9.woff2",
+          "bytes": 12100
+        },
+        {
+          "file": "variant-11-10.woff2",
+          "bytes": 10404
+        },
+        {
+          "file": "variant-11-e.woff2",
+          "bytes": 18576
+        },
+        {
+          "file": "variant-11-b.woff2",
+          "bytes": 28172
+        },
+        {
+          "file": "variant-11-12.woff2",
+          "bytes": 25148
+        },
+        {
+          "file": "variant-11-d.woff2",
+          "bytes": 20972
+        }
+      ],
+      "fontBytes": 410112,
+      "fontRequests": 15,
+      "remainderBytes": 255324,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "unicode-2048",
+      "locale": "zh-HK",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "variant-11-c.woff2",
+          "bytes": 34840
+        },
+        {
+          "file": "variant-11-a.woff2",
+          "bytes": 30524
+        },
+        {
+          "file": "variant-11-10.woff2",
+          "bytes": 10404
+        },
+        {
+          "file": "variant-11-d.woff2",
+          "bytes": 20972
+        },
+        {
+          "file": "variant-11-f.woff2",
+          "bytes": 30272
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 279496,
+      "fontRequests": 8,
+      "remainderBytes": 127012,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "unicode-2048",
+      "locale": "zh-HK",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "variant-11-c.woff2",
+          "bytes": 34840
+        },
+        {
+          "file": "variant-11-a.woff2",
+          "bytes": 30524
+        },
+        {
+          "file": "variant-11-f.woff2",
+          "bytes": 30272
+        },
+        {
+          "file": "variant-11-12.woff2",
+          "bytes": 25148
+        },
+        {
+          "file": "variant-11-11.woff2",
+          "bytes": 31160
+        },
+        {
+          "file": "variant-11-9.woff2",
+          "bytes": 12100
+        },
+        {
+          "file": "variant-11-e.woff2",
+          "bytes": 18576
+        },
+        {
+          "file": "variant-11-d.woff2",
+          "bytes": 20972
+        },
+        {
+          "file": "variant-11-13.woff2",
+          "bytes": 13156
+        },
+        {
+          "file": "variant-11-10.woff2",
+          "bytes": 10404
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "variant-11-b.woff2",
+          "bytes": 28172
+        }
+      ],
+      "fontBytes": 356076,
+      "fontRequests": 14,
+      "remainderBytes": 255324,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "current",
+      "locale": "en",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-content-06.woff2",
+          "bytes": 19352
+        },
+        {
+          "file": "NotoSansTC-ui-content-00.woff2",
+          "bytes": 27744
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        }
+      ],
+      "fontBytes": 199580,
+      "fontRequests": 5,
+      "remainderBytes": 47096,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "current",
+      "locale": "en",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "NotoSansTC-ui-content-03.woff2",
+          "bytes": 27964
+        },
+        {
+          "file": "NotoSansTC-ui-content-00.woff2",
+          "bytes": 27744
+        },
+        {
+          "file": "NotoSansTC-ui-content-06.woff2",
+          "bytes": 19352
+        },
+        {
+          "file": "NotoSansTC-ui-content-01.woff2",
+          "bytes": 25708
+        },
+        {
+          "file": "NotoSansTC-ui-content-02.woff2",
+          "bytes": 28600
+        }
+      ],
+      "fontBytes": 230120,
+      "fontRequests": 8,
+      "remainderBytes": 129368,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "current",
+      "locale": "zh-CN",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-content-06.woff2",
+          "bytes": 19352
+        },
+        {
+          "file": "NotoSansTC-ui-content-00.woff2",
+          "bytes": 27744
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 199580,
+      "fontRequests": 5,
+      "remainderBytes": 47096,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "current",
+      "locale": "zh-CN",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-details-00.woff2",
+          "bytes": 29112
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        },
+        {
+          "file": "NotoSansTC-ui-content-01.woff2",
+          "bytes": 25708
+        },
+        {
+          "file": "NotoSansTC-ui-content-05.woff2",
+          "bytes": 31936
+        },
+        {
+          "file": "NotoSansTC-ui-content-04.woff2",
+          "bytes": 30044
+        },
+        {
+          "file": "NotoSansTC-ui-content-00.woff2",
+          "bytes": 27744
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "NotoSansTC-ui-content-03.woff2",
+          "bytes": 27964
+        },
+        {
+          "file": "NotoSansTC-ui-content-06.woff2",
+          "bytes": 19352
+        },
+        {
+          "file": "NotoSansTC-ui-content-02.woff2",
+          "bytes": 28600
+        },
+        {
+          "file": "NotoSansTC-ui-details-01.woff2",
+          "bytes": 28684
+        }
+      ],
+      "fontBytes": 403932,
+      "fontRequests": 13,
+      "remainderBytes": 249144,
+      "acceptedComparison": true
+    },
+    {
+      "variant": "current",
+      "locale": "zh-HK",
+      "view": "today",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-content-06.woff2",
+          "bytes": 19352
+        },
+        {
+          "file": "NotoSansTC-ui-content-00.woff2",
+          "bytes": 27744
+        },
+        {
+          "file": "NotoSansSC-ui.woff2",
+          "bytes": 54036
+        }
+      ],
+      "fontBytes": 199580,
+      "fontRequests": 5,
+      "remainderBytes": 47096,
+      "acceptedComparison": false
+    },
+    {
+      "variant": "current",
+      "locale": "zh-HK",
+      "view": "relations",
+      "fonts": [
+        {
+          "file": "NotoSansTC-ui-common.woff2",
+          "bytes": 70716
+        },
+        {
+          "file": "Manrope-latin.woff2",
+          "bytes": 27732
+        },
+        {
+          "file": "NotoSansTC-ui-details-00.woff2",
+          "bytes": 29112
+        },
+        {
+          "file": "NotoSansTC-ui-content-01.woff2",
+          "bytes": 25708
+        },
+        {
+          "file": "NotoSansTC-ui-content-06.woff2",
+          "bytes": 19352
+        },
+        {
+          "file": "NotoSansTC-ui-content-00.woff2",
+          "bytes": 27744
+        },
+        {
+          "file": "NotoSansTC-ui-content-02.woff2",
+          "bytes": 28600
+        },
+        {
+          "file": "NotoSansTC-ui-content-04.woff2",
+          "bytes": 30044
+        },
+        {
+          "file": "NotoSansTC-ui-symbols.woff2",
+          "bytes": 2304
+        },
+        {
+          "file": "NotoSansTC-ui-content-03.woff2",
+          "bytes": 27964
+        },
+        {
+          "file": "NotoSansTC-ui-details-02.woff2",
+          "bytes": 13320
+        },
+        {
+          "file": "NotoSansTC-ui-content-05.woff2",
+          "bytes": 31936
+        }
+      ],
+      "fontBytes": 334532,
+      "fontRequests": 12,
+      "remainderBytes": 233780,
+      "acceptedComparison": true
+    }
+  ],
+  "applicationSourceSha": "9ae4737f49d9af9b0e0bbd30f6ee6866e49f2d61",
+  "fontPartitionManifestSha256": "942c6aa5dc2d94302c52bbe05a2b6dd33548f1fb0cd89555f33645fad893c205",
+  "interpretation": "The old rows substitute only the historical font rules/assets into the current real seeded app. They compare font partitions, not historical application behavior. SC supplement adds previously missing glyph coverage; totals include every requested font. Font bodies are measured once per URL in fresh contexts with HTTP cache/service workers disabled.",
+  "todayComparisonStatus": "Unverified: a later stricter real-fixture readiness check did not reach the existing native two-task-card assertion, despite fixed browser Date and Temporal. The earlier heading-only Today rows below are retained as rejected observations and must not be used as performance evidence. Native visual Today assertions are unchanged."
+}

@@ -1,0 +1,200 @@
+{
+  "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+  "runId": "38684943841",
+  "stats": {
+    "startTime": "2026-10-15T05:20:41.998Z",
+    "duration": 10121.936,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "cases": [
+    {
+      "title": "English Relations loads its arrow without the remaining CJK font",
+      "project": "en",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "Northwind English Relations downloads bounded CJK pages for its real business names",
+      "project": "en",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "receipts": [
+        {
+          "fonts": [
+            {
+              "file": "Manrope-latin.woff2",
+              "bytes": 27732
+            },
+            {
+              "file": "NotoSansTC-ui-common.woff2",
+              "bytes": 70716
+            },
+            {
+              "file": "NotoSansTC-ui-content-03.woff2",
+              "bytes": 27964
+            },
+            {
+              "file": "NotoSansTC-ui-symbols.woff2",
+              "bytes": 2304
+            },
+            {
+              "file": "NotoSansTC-ui-content-00.woff2",
+              "bytes": 27744
+            },
+            {
+              "file": "NotoSansTC-ui-content-06.woff2",
+              "bytes": 19352
+            },
+            {
+              "file": "NotoSansTC-ui-content-02.woff2",
+              "bytes": 28600
+            },
+            {
+              "file": "NotoSansTC-ui-content-01.woff2",
+              "bytes": 25708
+            }
+          ],
+          "remainderBytes": 129368,
+          "priorMonolithicRemainderBytes": 224900
+        }
+      ]
+    },
+    {
+      "title": "English Relations loads its arrow without the remaining CJK font",
+      "project": "zh-CN",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "Northwind English Relations downloads bounded CJK pages for its real business names",
+      "project": "zh-CN",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "receipts": [
+        {
+          "fonts": [
+            {
+              "file": "Manrope-latin.woff2",
+              "bytes": 27732
+            },
+            {
+              "file": "NotoSansTC-ui-common.woff2",
+              "bytes": 70716
+            },
+            {
+              "file": "NotoSansTC-ui-content-03.woff2",
+              "bytes": 27964
+            },
+            {
+              "file": "NotoSansTC-ui-symbols.woff2",
+              "bytes": 2304
+            },
+            {
+              "file": "NotoSansTC-ui-content-00.woff2",
+              "bytes": 27744
+            },
+            {
+              "file": "NotoSansTC-ui-content-06.woff2",
+              "bytes": 19352
+            },
+            {
+              "file": "NotoSansTC-ui-content-02.woff2",
+              "bytes": 28600
+            },
+            {
+              "file": "NotoSansTC-ui-content-01.woff2",
+              "bytes": 25708
+            }
+          ],
+          "remainderBytes": 129368,
+          "priorMonolithicRemainderBytes": 224900
+        }
+      ]
+    },
+    {
+      "title": "English Relations loads its arrow without the remaining CJK font",
+      "project": "zh-HK",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ]
+    },
+    {
+      "title": "Northwind English Relations downloads bounded CJK pages for its real business names",
+      "project": "zh-HK",
+      "status": "expected",
+      "results": [
+        {
+          "status": "passed",
+          "retry": 0
+        }
+      ],
+      "receipts": [
+        {
+          "fonts": [
+            {
+              "file": "Manrope-latin.woff2",
+              "bytes": 27732
+            },
+            {
+              "file": "NotoSansTC-ui-common.woff2",
+              "bytes": 70716
+            },
+            {
+              "file": "NotoSansTC-ui-content-03.woff2",
+              "bytes": 27964
+            },
+            {
+              "file": "NotoSansTC-ui-symbols.woff2",
+              "bytes": 2304
+            },
+            {
+              "file": "NotoSansTC-ui-content-00.woff2",
+              "bytes": 27744
+            },
+            {
+              "file": "NotoSansTC-ui-content-06.woff2",
+              "bytes": 19352
+            },
+            {
+              "file": "NotoSansTC-ui-content-02.woff2",
+              "bytes": 28600
+            },
+            {
+              "file": "NotoSansTC-ui-content-01.woff2",
+              "bytes": 25708
+            }
+          ],
+          "remainderBytes": 129368,
+          "priorMonolithicRemainderBytes": 224900
+        }
+      ]
+    }
+  ]
+}

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 // R1 release checklist: plan §6.0, one self-contained test per item. Every
 // test signs up its own fresh account on RELEASE_BASE_URL, so it never touches
 // other people's data, and asserts nothing that depends on the clock or on
@@ -55,6 +56,13 @@ import {
   unique,
   waitForApi,
 } from "./support";
+
+const expectedMcpVersion: string = JSON.parse(
+  readFileSync(
+    new URL("../../../apps/api/package.json", import.meta.url),
+    "utf8",
+  ),
+).version;
 
 /** Submits the sign-in form, waiting out Better Auth's per-client limit. */
 async function submitAuth(page: Page, endpoint: string) {
@@ -361,7 +369,7 @@ async function agentClient(page: Page, workspaceId: string, agentId: string) {
   );
   expect(client.getServerVersion()).toMatchObject({
     name: "taff",
-    version: "0.2.0",
+    version: expectedMcpVersion,
   });
   return { client, tokenId: issued.id };
 }
@@ -408,8 +416,7 @@ test("[item 3] Agents and review", async ({ page }, info) => {
   const { client, tokenId } = await agentClient(page, workspace.id, agent.id);
   info.annotations.push({
     type: "check",
-    description:
-      "ok|live official MCP client reports taff server version 0.2.0",
+    description: `ok|live official MCP client reports taff server version ${expectedMcpVersion}`,
   });
   try {
     const get = async () =>
