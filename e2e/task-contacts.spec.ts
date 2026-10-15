@@ -1,11 +1,13 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 import {
   type ContactLink,
+  type CrmUndo,
   contactLinkListSchema,
   contactSchema,
   projectSchema,
   setContactRolesResultSchema,
   taskSchema,
+  unlinkContactResultSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
 
@@ -36,6 +38,25 @@ async function contact(page: Page, workspaceId: string, name: string) {
 async function putRoles(page: Page, path: string, body: { roles: string[] }) {
   const response = await page.request.put(path, { data: body });
   expect(response.status()).toBe(200);
+}
+
+/** Undo must acknowledge the single atomic inverse and send its captured guard. */
+async function undoCrm(
+  page: Page,
+  button: Locator,
+  expected: CrmUndo | undefined,
+) {
+  expect(expected).toBeDefined();
+  const undone = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      new URL(response.url()).pathname === "/api/crm/undo",
+  );
+  await button.click();
+  const response = await undone;
+  expect(response.request().postDataJSON()).toEqual(expected);
+  expect(response.status()).toBe(200);
+  expect(await response.json()).toEqual({ restored: true });
 }
 
 test("task contacts: add with a role, exclusive sign-off moves, auto stakeholder and undo", async ({
@@ -133,15 +154,8 @@ test("task contacts: add with a role, exclusive sign-off moves, auto stakeholder
       .getByTestId("task-contact-roles"),
   ).toHaveText(m.crm.noRole);
 
-  // Undo calls the inverse operations: remove her task and project links and
-  // give Wong the sign-off back.
-  const undone = page.waitForResponse(
-    (response) =>
-      response.request().method() === "PUT" &&
-      new URL(response.url()).pathname === `${taskLinks}/${holder.id}`,
-  );
-  await toast.getByTestId("toast-action").click();
-  expect((await undone).status()).toBe(200);
+  // One atomic inverse removes her task/project links and returns Wong's role.
+  await undoCrm(page, toast.getByTestId("toast-action"), result.undo);
   await expect
     .poll(async () => roles(await links(page, taskLinks)))
     .toEqual({ [holder.name]: ["signoff"], [colleague.name]: [] });
@@ -175,8 +189,10 @@ test("task contacts: add with a role, exclusive sign-off moves, auto stakeholder
       new URL(response.url()).pathname === `${taskLinks}/${colleague.id}`,
   );
   await chan.getByTestId("task-contact-role-signoff").click();
+  const movedResponse = await moved;
+  expect(movedResponse.status()).toBe(200);
   const movedResult = setContactRolesResultSchema.parse(
-    await (await moved).json(),
+    await movedResponse.json(),
   );
   expect(movedResult.previousRoles).toEqual([]);
   expect(movedResult.addedProjectStakeholder).toBe(false);
@@ -193,7 +209,7 @@ test("task contacts: add with a role, exclusive sign-off moves, auto stakeholder
       project: project.name,
     }),
   );
-  await toast.getByTestId("toast-action").click();
+  await undoCrm(page, toast.getByTestId("toast-action"), movedResult.undo);
   await expect
     .poll(async () => roles(await links(page, taskLinks)))
     .toEqual({ [holder.name]: ["signoff"], [colleague.name]: [] });
@@ -203,12 +219,22 @@ test("task contacts: add with a role, exclusive sign-off moves, auto stakeholder
     .getByTestId("task-contact")
     .filter({ hasText: holder.name });
   await wong.getByTestId("task-contact-edit").click();
+  const removed = page.waitForResponse(
+    (response) =>
+      response.request().method() === "DELETE" &&
+      new URL(response.url()).pathname === `${taskLinks}/${holder.id}`,
+  );
   await wong.getByTestId("task-contact-remove").click();
+  const removedResponse = await removed;
+  expect(removedResponse.status()).toBe(200);
+  const removedResult = unlinkContactResultSchema.parse(
+    await removedResponse.json(),
+  );
   await expect(toast).toContainText(
     fill(m.crm.toast.removed, { name: holder.name }),
   );
   await expect(section.getByTestId("task-contact")).toHaveCount(1);
-  await toast.getByTestId("toast-action").click();
+  await undoCrm(page, toast.getByTestId("toast-action"), removedResult.undo);
   await expect
     .poll(async () => roles(await links(page, taskLinks)))
     .toEqual({ [holder.name]: ["signoff"], [colleague.name]: [] });
