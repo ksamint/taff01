@@ -604,6 +604,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].sms.title` | 1 | sms-auth.spec.ts |
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
+| `combobox` | 1 | cold-font-layout.spec.ts |
 | `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
 | `dialog` | 54 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |

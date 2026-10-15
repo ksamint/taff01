@@ -15,9 +15,14 @@ export async function navigateColdFonts(
     release = resolve;
   });
   const pattern = "**/fonts/*.woff2";
-  const hold = async (route: Route) => {
-    await layout;
-    await route.continue();
+  const active = new Set<Promise<void>>();
+  const hold = (route: Route) => {
+    const handled = (async () => {
+      await layout;
+      await route.continue();
+    })();
+    active.add(handled);
+    return handled.finally(() => active.delete(handled));
   };
   await page.route(pattern, hold);
   try {
@@ -30,6 +35,10 @@ export async function navigateColdFonts(
     return response;
   } finally {
     release();
-    await page.unroute(pattern, hold);
+    try {
+      await Promise.all(active);
+    } finally {
+      await page.unroute(pattern, hold);
+    }
   }
 }
