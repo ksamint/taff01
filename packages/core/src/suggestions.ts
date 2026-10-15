@@ -117,11 +117,10 @@ export function createSuggestionOperations({
     input: SuggestionInput,
   ): Promise<Suggestion> {
     const body = parse(suggestionInputSchema, input);
-    if (p.kind !== "agent") throw new CoreError("forbidden", 403);
     return mutation(p, async (tx) => {
       const task = await lockTask(tx, body.taskId);
       // Another workspace's task stays private.
-      if (task.workspaceId !== p.workspaceId) notFound();
+      if (p.kind === "agent" && task.workspaceId !== p.workspaceId) notFound();
       const actor = await requireMember(
         tx,
         p,

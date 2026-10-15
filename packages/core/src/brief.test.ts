@@ -201,6 +201,7 @@ describe("brief: Northwind on 2026-10-08", () => {
         suggestionId: id(50),
         suggestionKind: "split",
         taskId: id(51),
+        proposerId: id(41),
         agentId: id(41),
       },
     ]);

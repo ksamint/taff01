@@ -7,6 +7,7 @@ import {
   idSchema,
   suggestionDecisionSchema,
   suggestionFilterSchema,
+  suggestionInputSchema,
 } from "@taff/schemas";
 import type { Hono } from "hono";
 import type { RateLimiter } from "../rate-limit";
@@ -18,8 +19,8 @@ type Env = {
 
 /**
  * Brief, Ask taff, suggestions and the model-path switch (M17). Mounted
- * after the session middleware. Suggestions are created by agents only, over
- * MCP (`suggestions.create`); people list, apply and dismiss them here.
+ * after the session middleware. People and agents propose through the same
+ * core operation; people also list, apply and dismiss proposals here.
  */
 export function registerAssistantRoutes(
   app: Hono<Env>,
@@ -53,6 +54,15 @@ export function registerAssistantRoutes(
       await core.ask(userPrincipal(c.get("userId")), body, { labels: true }),
     );
   });
+  app.post("/api/suggestions", async (c) =>
+    c.json(
+      await core.createSuggestion(
+        userPrincipal(c.get("userId")),
+        suggestionInputSchema.parse(await c.req.json()),
+      ),
+      201,
+    ),
+  );
   app.get("/api/workspaces/:id/suggestions", async (c) =>
     c.json(
       await core.listSuggestions(

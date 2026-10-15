@@ -26,6 +26,7 @@ import {
   notificationBaseline,
 } from "./notification-cleanup";
 import { failureCategory } from "./safety.mjs";
+import { cleanupSuggestion } from "./suggestion-cleanup";
 
 const execute = promisify(execFile);
 const origin = process.env.RELEASE_BASE_URL ?? "https://taff.apuch.cn";
@@ -46,6 +47,7 @@ type Entry = {
   id: string;
   workspaceId?: string;
   projectId?: string;
+  taskId?: string;
   retained?: boolean;
 };
 type State = {
@@ -63,6 +65,24 @@ let state: State | undefined;
 export function trackTask(id: string) {
   if (state && id)
     state.entries.push({ kind: "tasks", id, workspaceId: state.workspaceId });
+}
+/** Undo archives these rows, so retain their ownership evidence separately.
+ * If apply fails before Undo, normal parent hierarchy cleanup finds active children. */
+export function trackSuggestionSubtask(id: string, parentId: string) {
+  if (
+    !state ||
+    !state.entries.some(
+      (entry) => entry.kind === "tasks" && entry.id === parentId,
+    )
+  )
+    throw new Error("BLOCKED: suggestion parent was not journaled by this run");
+  state.entries.push({
+    kind: "suggestion-subtask",
+    id,
+    taskId: parentId,
+    workspaceId: state.workspaceId,
+    retained: true,
+  });
 }
 export function credentialAccount() {
   const username = process.env.TAFF_VERIFY_USERNAME,
@@ -256,6 +276,7 @@ async function captureResponse(method: string, url: string, response: any) {
   let kind: string | undefined;
   if (path === "/api/tasks") kind = "tasks";
   else if (path === "/api/projects") kind = "projects";
+  else if (path === "/api/suggestions") kind = "suggestions";
   else if (path === "/api/companies") kind = "companies";
   else if (path === "/api/contacts") kind = "contacts";
   else if (path === "/api/workspaces") kind = "workspaces";
@@ -296,6 +317,9 @@ async function captureResponse(method: string, url: string, response: any) {
       kind,
       id: value.id,
       workspaceId: value.workspaceId ?? state.workspaceId,
+      ...(kind === "suggestions"
+        ? { taskId: value.taskId, retained: true }
+        : {}),
       ...(kind === "milestones"
         ? { projectId: path.split("/")[3], retained: true }
         : {}),
@@ -387,6 +411,36 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
       const response = await request.delete(`/api/agent-tokens/${e.id}`);
       if (![200, 404].includes(response.status())) throw new Error("cleanup");
     });
+  for (const entry of entries.filter((e) => e.kind === "suggestions"))
+    await perform(entry.kind, entry.id, () =>
+      cleanupSuggestion(
+        entry,
+        current.workspaceId,
+        new Set(entries.filter((e) => e.kind === "tasks").map((e) => e.id)),
+        {
+          list: (taskId) =>
+            cleanupHttp("suggestion.read-owned-task-proposals", () =>
+              request.get(
+                `/api/workspaces/${current.workspaceId}/suggestions?taskId=${taskId}`,
+              ),
+            ),
+          dismiss: (id, version) =>
+            cleanupHttp("suggestion.dismiss-owned-pending", () =>
+              request.post(`/api/suggestions/${id}/dismiss`, {
+                data: { version },
+              }),
+            ),
+          fail: () => {
+            throw new SafeApiFailure(
+              "suggestion.check-current-run-ownership",
+              undefined,
+              "unverified_proposal_ownership",
+              "e2e/live.ts#cleanUp",
+            );
+          },
+        },
+      ),
+    );
   const taskEntries = entries.filter((e) => e.kind === "tasks");
   const taskParents = new Map<string, string | null>();
   // The production subtask guard requires every descendant to finish first.

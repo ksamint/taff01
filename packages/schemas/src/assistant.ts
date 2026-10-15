@@ -68,7 +68,7 @@ export const reschedulePayloadSchema = strictObject({
   durationDays: durationDaysSchema,
   reason,
 });
-/** POST /api/suggestions (agents only) and the suggestions.create tool. */
+/** POST /api/suggestions (task owner/admin) and the suggestions.create tool. */
 export const suggestionInputSchema = strictObject({
   taskId: idSchema,
   kind: suggestionKindSchema,
@@ -177,14 +177,16 @@ export const briefActionSchema = union([
     taskId: nullable(idSchema),
     capability: string(),
   }),
-  /** An agent proposal a person applies or dismisses. */
+  /** A person or agent proposal a person applies or dismisses. */
   object({
     kind: literal("suggestion"),
     workspaceId: idSchema,
     suggestionId: idSchema,
     suggestionKind: suggestionKindSchema,
     taskId: nullable(idSchema),
-    agentId: idSchema,
+    proposerId: optional(idSchema),
+    /** Legacy servers identify agent proposals with this field. */
+    agentId: optional(idSchema),
   }),
 ]);
 export const briefCountsSchema = object({
@@ -219,6 +221,9 @@ export const briefLabelsSchema = object({
   ),
   milestones: array(
     object({ id: idSchema, projectId: idSchema, name: string() }),
+  ),
+  members: optional(
+    array(object({ id: idSchema, workspaceId: idSchema, name: string() })),
   ),
   agents: array(
     object({ id: idSchema, workspaceId: idSchema, name: string() }),
@@ -259,6 +264,7 @@ export const askItemSchema = object({
   taskId: optional(nullable(idSchema)),
   runId: optional(idSchema),
   agentId: optional(idSchema),
+  proposerId: optional(idSchema),
   level: optional(riskLevelSchema),
   reasons: optional(array(riskReasonSchema)),
   slipDays: optional(nonnegativeInteger),

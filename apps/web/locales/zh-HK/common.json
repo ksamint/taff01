@@ -1117,8 +1117,9 @@
     "someTask": "一項任務",
     "source": "根據你的計劃、審核與權限請求按固定規則整理，沒有使用 AI 模型。",
     "proposal": {
-      "title": "智能體建議",
-      "intro": "這是{{agent}}的建議。你套用之前不會有任何改動。",
+      "someone": "團隊成員",
+      "title": "建議",
+      "intro": "這是{{proposer}}的建議。你套用之前不會有任何改動。",
       "subtasks": "將在「{{task}}」下建立的子任務",
       "newPlan": "「{{task}}」的新計劃",
       "start": "開始",
