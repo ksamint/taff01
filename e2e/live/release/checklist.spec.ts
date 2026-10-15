@@ -899,6 +899,99 @@ test("[item 5] Calendar", async ({ page }, info) => {
       .filter({ hasText: task.title })
       .first(),
   ).toBeAttached();
+  // Keep the original drag/resize/Undo and all three view checks above. This
+  // current-run task also exercises the v0.2.2 multi-day target repair through
+  // the supported API; the existing task journal clears its schedule on failure.
+  const beforeMultiDay = (await stored()).schedule;
+  if (!beforeMultiDay) throw new Error("Owned calendar baseline unavailable");
+  const nextDay = new Date(`${date}T12:00:00Z`);
+  nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+  try {
+    const current = await stored();
+    const multiDay = await page.request.patch(
+      `/api/tasks/${task.id}/calendar`,
+      {
+        data: {
+          version: current.task.version,
+          schedule: {
+            startAt: calendarWallToInstant(`${date}T09:00`, tz),
+            endAt: calendarWallToInstant(
+              `${nextDay.toISOString().slice(0, 10)}T10:00`,
+              tz,
+            ),
+            timeZone: tz,
+            rrule: null,
+          },
+        },
+      },
+    );
+    expect(multiDay.status()).toBe(200);
+    // A fresh read observes the saved API schedule before measuring SDK boxes.
+    await page.reload();
+    for (const mode of ["day", "week"] as const) {
+      await page.getByTestId(`calendar-${mode}`).click();
+      const event = page
+        .locator(".sx__date-grid-event")
+        .filter({ hasText: task.title })
+        .first();
+      await expect(event).toBeVisible();
+      await event.scrollIntoViewIfNeeded();
+      await page
+        .locator(".sx__view-container")
+        .first()
+        .evaluate(async (element) => {
+          await Promise.all(
+            element
+              .getAnimations({ subtree: true })
+              .map((animation) => animation.finished.catch(() => {})),
+          );
+        });
+      await expect
+        .poll(() =>
+          event.evaluate((element) => element.getBoundingClientRect().height),
+        )
+        .toBeGreaterThanOrEqual(44);
+      const target = await event.boundingBox();
+      if (!target) throw new Error("Multi-day target geometry unavailable");
+      // Hit the real lower edge, away from the right-hand resize handle.
+      await event.click({
+        position: { x: Math.min(12, target.width / 2), y: target.height - 4 },
+      });
+      await expect(page.getByRole("dialog")).toContainText(task.title);
+      await expect(page.getByTestId("schedule-save")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await event.focus();
+      await page.keyboard.press("Enter");
+      await expect(page.getByRole("dialog")).toContainText(task.title);
+      await expect(page.getByTestId("schedule-save")).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+    }
+    recordCheck(
+      info,
+      "Calendar multi-day targets >=44px, lower-edge pointer and keyboard activation in day/week",
+      true,
+    );
+  } finally {
+    const current = await stored();
+    const restored = await page.request.patch(
+      `/api/tasks/${task.id}/calendar`,
+      {
+        data: {
+          version: current.task.version,
+          schedule: {
+            startAt: beforeMultiDay.startAt,
+            endAt: beforeMultiDay.endAt,
+            timeZone: beforeMultiDay.timeZone,
+            rrule: beforeMultiDay.rrule,
+          },
+        },
+      },
+    );
+    expect(restored.status()).toBe(200);
+    expect((await stored()).schedule).toEqual(beforeMultiDay);
+  }
 });
 
 test("[item 6] Search and organizations", async ({ page, browser }, info) => {

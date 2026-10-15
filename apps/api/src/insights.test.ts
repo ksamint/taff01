@@ -251,6 +251,7 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
     for (const [path, method] of [
       ["/api/brief", "GET"],
       ["/api/ask", "POST"],
+      ["/api/suggestions", "POST"],
       [`/api/workspaces/${id}/suggestions`, "GET"],
       [`/api/suggestions/${id}/apply`, "POST"],
       [`/api/suggestions/${id}/undo`, "POST"],
@@ -259,6 +260,28 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
       expect(
         (await send(path, method, method === "GET" ? undefined : {})).status,
       ).toBe(401);
+  });
+  it("validates human proposal input before forwarding the session principal", async () => {
+    signedIn();
+    const create = vi
+      .spyOn(core, "createSuggestion")
+      .mockResolvedValue({} as never);
+    const input = {
+      taskId: id,
+      kind: "split",
+      payload: { subtasks: [{ title: "First" }] },
+    };
+    expect((await send("/api/suggestions", "POST", input)).status).toBe(201);
+    expect(create).toHaveBeenCalledWith(person, input);
+    for (const invalid of [
+      { ...input, createdBy: other },
+      { ...input, taskId: "bad" },
+      { ...input, kind: "reschedule" },
+    ])
+      expect((await send("/api/suggestions", "POST", invalid)).status).toBe(
+        400,
+      );
+    expect(create).toHaveBeenCalledTimes(1);
   });
   it("validates the brief scope", async () => {
     signedIn();
@@ -352,8 +375,8 @@ describe("brief, Ask taff, suggestions and AI settings REST", () => {
         .status,
     ).toBe(409);
     expect(undo).toHaveBeenCalledWith(person, id, { version: 2 });
-    // Agents propose over MCP only; there is no REST create.
-    expect((await send("/api/suggestions", "POST", {})).status).toBe(404);
+    // Human proposals share the strict MCP input schema.
+    expect((await send("/api/suggestions", "POST", {})).status).toBe(400);
   });
   it("reads and toggles the model path", async () => {
     signedIn();

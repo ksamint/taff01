@@ -45,6 +45,7 @@ describe.skipIf(!url)(
     let alice: Principal;
     let bob: Principal;
     let outsider: Principal;
+    let guest: Principal;
     let agent: Principal;
     let otherAgent: Principal;
     let w: string;
@@ -94,6 +95,8 @@ describe.skipIf(!url)(
       owner = me.workspaces[0].memberId;
       const b = await signup("Bob Lee");
       bob = userPrincipal(b.user.id);
+      const g = await signup("Guest");
+      guest = userPrincipal(g.user.id);
       const o = await signup("Outsider");
       outsider = userPrincipal(o.user.id);
       outsiderW = (await core.getMe(o.user.id)).workspaces[0].id;
@@ -101,6 +104,13 @@ describe.skipIf(!url)(
         await tx.execute(
           sql`select set_config('taff.actor_id',${a.user.id},true)`,
         );
+        await tx.insert(members).values({
+          workspaceId: w,
+          userId: g.user.id,
+          name: "Guest",
+          kind: "person",
+          role: "guest",
+        });
         const [bm] = await tx
           .insert(members)
           .values({
@@ -175,10 +185,10 @@ describe.skipIf(!url)(
     });
 
     describe("suggestions", () => {
-      it("lets only the task's agent worker propose", async () => {
+      it("preserves assigned agent restrictions and denies unrelated people", async () => {
         const task = await create("Card migration");
         await expect(
-          core.createSuggestion(alice, split(task.id)),
+          core.createSuggestion(bob, split(task.id)),
         ).rejects.toMatchObject({ code: "forbidden" });
         await expect(
           core.createSuggestion(otherAgent, split(task.id)),
@@ -225,6 +235,77 @@ describe.skipIf(!url)(
         await expect(core.listSuggestions(outsider, w)).rejects.toMatchObject({
           code: "forbidden",
         });
+      });
+      it("lets an owner and admin propose, without granting creation to guests or outsiders", async () => {
+        const task = await create("Human proposal", { ownerId: bobMember });
+        for (const p of [guest, outsider])
+          await expect(
+            core.createSuggestion(p, split(task.id)),
+          ).rejects.toMatchObject({ code: "forbidden" });
+        const made = await core.createSuggestion(bob, split(task.id));
+        expect(made).toMatchObject({
+          createdBy: bobMember,
+          status: "pending",
+          version: 1,
+        });
+        expect(
+          await core.listTasks(alice, w, { parentId: task.id }),
+        ).toHaveLength(0);
+        const brief = briefSchema.parse(
+          await core.getBrief(
+            bob,
+            { scope: "workspace", workspaceId: w },
+            { labels: true },
+          ),
+        );
+        const action = brief.actions.find(
+          (a) => a.kind === "suggestion" && a.suggestionId === made.id,
+        );
+        expect(action).toMatchObject({ proposerId: bobMember });
+        expect(action).not.toHaveProperty("agentId", expect.any(String));
+        expect(brief.labels?.members).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({ id: bobMember, name: "Bob Lee" }),
+          ]),
+        );
+        const answer = askAnswerSchema.parse(
+          await core.ask(
+            bob,
+            { question: "What needs me?", workspaceId: w },
+            { labels: true },
+          ),
+        );
+        expect(answer.items).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              kind: "suggestion",
+              id: made.id,
+              proposerId: bobMember,
+            }),
+          ]),
+        );
+        const applied = await core.applySuggestion(bob, made.id, {
+          version: made.version,
+        });
+        expect(applied.tasks).toHaveLength(2);
+        await core.undoSuggestion(bob, made.id, {
+          version: applied.suggestion.version,
+        });
+        expect(
+          await core.listTasks(alice, w, { parentId: task.id }),
+        ).toHaveLength(0);
+        const adminProposal = await core.createSuggestion(
+          alice,
+          split(task.id),
+        );
+        expect(adminProposal.createdBy).toBe(owner);
+        await expect(
+          core.dismissSuggestion(guest, adminProposal.id, { version: 1 }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+        const dismissed = await core.dismissSuggestion(bob, adminProposal.id, {
+          version: 1,
+        });
+        expect(dismissed.status).toBe("dismissed");
       });
       it("applies a split through the normal create path in one transaction", async () => {
         const task = await create("Payments split");
