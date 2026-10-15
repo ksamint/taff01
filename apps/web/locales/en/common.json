@@ -1118,7 +1118,7 @@
     "source": "Built from your plans, reviews and permission requests by fixed rules. No AI model is used.",
     "proposal": {
       "someone": "A teammate",
-      "title": "Agent proposal",
+      "title": "Proposal",
       "intro": "{{proposer}} proposed this. Nothing changes until you apply it.",
       "subtasks": "Subtasks to create under {{task}}",
       "newPlan": "New plan for {{task}}",
