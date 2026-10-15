@@ -5,6 +5,7 @@ import {
   workspaceSchema,
 } from "../packages/schemas/src/index";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
+import { prepareView } from "../scripts/ui/prepare-view";
 
 // UI language does not determine user-content language. The Northwind visual
 // fixture has Chinese task/contact names even in English, so its CJK requests
@@ -58,6 +59,7 @@ test("English Relations loads its arrow without the remaining CJK font", async (
     "People ↔ tasks",
   );
   await expect(page.getByTestId("relations-node").first()).toBeVisible();
+  await prepareView(page, "relations");
   await page.evaluate(prepareFonts);
   const resources = await page.evaluate(() => ({
     text: document.body.innerText,
