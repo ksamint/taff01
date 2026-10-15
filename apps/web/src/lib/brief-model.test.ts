@@ -408,3 +408,58 @@ describe("Ask taff answers", () => {
     });
   });
 });
+
+describe("human proposal attribution", () => {
+  const proposerId = id(90);
+  const humanLabels = {
+    ...labels,
+    members: [{ id: proposerId, workspaceId: W, name: "Bob Lee" }],
+  };
+  const humanBrief = buildBrief(
+    source({
+      reviews: [],
+      pendingGrants: [],
+      suggestions: [
+        {
+          workspaceId: W,
+          suggestionId: id(91),
+          kind: "split",
+          taskId: id(30),
+          proposerId,
+        },
+      ],
+    }),
+  );
+  it("renders a person by member name without inventing an agent identity", () => {
+    const views = actionViews(humanBrief, labelIndex(humanLabels), new Map());
+    expect(views[0].title).toEqual({
+      key: "brief.action.proposal",
+      values: { agent: "Bob Lee", task: "Payment form" },
+    });
+    expect(humanBrief.actions[0]).not.toHaveProperty(
+      "agentId",
+      expect.any(String),
+    );
+    const answer = answerView({
+      intent: "needs_me",
+      source: "rules",
+      text: null,
+      labels: humanLabels,
+      items: [
+        {
+          kind: "suggestion",
+          workspaceId: W,
+          id: id(91),
+          taskId: id(30),
+          proposerId,
+        },
+      ],
+    });
+    expect(answer.items[0].title.values?.agent).toBe("Bob Lee");
+    expect(answer.items[0].href).toBe(`/tasks/${id(30)}`);
+  });
+  it("uses a neutral translated fallback when a proposer label is unavailable", () => {
+    const view = actionViews(humanBrief, labelIndex(undefined), new Map())[0];
+    expect(view.title.values?.agent).toEqual({ key: "brief.proposal.someone" });
+  });
+});

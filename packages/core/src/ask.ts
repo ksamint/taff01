@@ -97,7 +97,7 @@ export function answerAsk(
             workspaceId: action.workspaceId,
             id: action.suggestionId,
             taskId: action.taskId,
-            agentId: action.agentId,
+            proposerId: action.proposerId ?? action.agentId,
           };
         }),
       };

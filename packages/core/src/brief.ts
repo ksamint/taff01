@@ -42,13 +42,15 @@ export type BriefSource = {
     capability: string;
     canDecide: boolean;
   }[];
-  /** Pending agent proposals the reader may apply or dismiss. */
+  /** Pending person or agent proposals the reader may apply or dismiss. */
   suggestions: {
     workspaceId: string;
     suggestionId: string;
     kind: SuggestionKind;
     taskId: string | null;
-    agentId: string;
+    proposerId?: string;
+    /** Legacy source fixtures. */
+    agentId?: string;
   }[];
   /** Open tasks the reader owns or works on, with their civil due date. */
   myTasks: {
@@ -114,6 +116,7 @@ export function buildBrief(source: BriefSource): Brief {
         suggestionId: suggestion.suggestionId,
         suggestionKind: suggestion.kind,
         taskId: suggestion.taskId,
+        proposerId: suggestion.proposerId ?? suggestion.agentId,
         agentId: suggestion.agentId,
       }),
     ),

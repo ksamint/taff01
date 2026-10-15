@@ -194,10 +194,12 @@ export function createAssistantOperations({
           id: suggestions.id,
           kind: suggestions.kind,
           taskId: suggestions.taskId,
-          agentId: suggestions.createdBy,
+          proposerId: suggestions.createdBy,
+          proposerKind: members.kind,
           ownerId: tasks.ownerId,
         })
         .from(suggestions)
+        .innerJoin(members, eq(members.id, suggestions.createdBy))
         .leftJoin(tasks, eq(tasks.id, suggestions.taskId))
         .where(
           and(
@@ -219,7 +221,8 @@ export function createAssistantOperations({
             suggestionId: row.id,
             kind: row.kind as SuggestionKind,
             taskId: row.taskId,
-            agentId: row.agentId,
+            proposerId: row.proposerId,
+            agentId: row.proposerKind === "agent" ? row.proposerId : undefined,
           });
       const mine = await db
         .select({
@@ -317,6 +320,7 @@ export function createAssistantOperations({
               id: members.id,
               workspaceId: members.workspaceId,
               name: members.name,
+              kind: members.kind,
             })
             .from(members)
             .where(
@@ -346,7 +350,11 @@ export function createAssistantOperations({
           name: milestone.name,
         })),
       ),
-      agents: agentRows.sort(byId),
+      members: agentRows.map(({ kind: _kind, ...row }) => row).sort(byId),
+      agents: agentRows
+        .filter((row) => row.kind === "agent")
+        .map(({ kind: _kind, ...row }) => row)
+        .sort(byId),
     };
   }
 
@@ -370,7 +378,11 @@ export function createAssistantOperations({
           ]),
           ...brief.actions.map((action) => action.taskId),
         ],
-        agentIds: brief.actions.map((action) => action.agentId),
+        agentIds: brief.actions.map((action) =>
+          action.kind === "suggestion"
+            ? (action.proposerId ?? action.agentId)
+            : action.agentId,
+        ),
       }),
     };
   }
@@ -386,7 +398,9 @@ export function createAssistantOperations({
       ...answer,
       labels: await loadLabels(source, {
         taskIds: answer.items.map((item: AskItem) => item.taskId),
-        agentIds: answer.items.map((item: AskItem) => item.agentId),
+        agentIds: answer.items.map(
+          (item: AskItem) => item.proposerId ?? item.agentId,
+        ),
       }),
     };
   }
