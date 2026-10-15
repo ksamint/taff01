@@ -101,7 +101,7 @@ export type McpHumanActions = {
     input: CreateAgentToken,
   ): Promise<{ id: string; token: string }>;
   revokeAgentToken(tokenId: string): Promise<unknown>;
-  listMcpCalls(): Promise<Pick<McpCall, "tool" | "status">[]>;
+  listMcpCalls(): Promise<Pick<McpCall, "method" | "tool" | "status">[]>;
   getTimeline(projectId: string): Promise<Pick<Timeline, "items">>;
   dismissSuggestion(
     suggestionId: string,
@@ -858,19 +858,50 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
     check(`rate limit probe skipped: ${options.skipRateLimit}`, true);
   } else {
     let limited = false;
-    for (let i = 0; i < limit + 2 && !limited; i++) {
-      const response = await fetch(apiUrl, {
+    let beforeRefusal: Awaited<ReturnType<McpHumanActions["listMcpCalls"]>> =
+      [];
+    const probe = (id: number) =>
+      fetch(apiUrl, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${options.token}`,
           "Content-Type": "application/json",
           Accept: "application/json, text/event-stream",
         },
-        body: JSON.stringify({ jsonrpc: "2.0", id: i, method: "tools/list" }),
+        body: JSON.stringify({ jsonrpc: "2.0", id, method: "tools/list" }),
       });
+    for (let i = 0; i < limit + 2 && !limited; i++) {
+      // Snapshot immediately before each request: the first 429 must not add
+      // a database log either, even when preceding probes were accepted.
+      beforeRefusal = await human.listMcpCalls();
+      const response = await probe(i);
+      check(
+        "rate-limit probe returns only success or 429",
+        response.status === 200 || response.status === 429,
+      );
       limited = response.status === 429;
     }
     check(`rate limit of ${limit}/minute triggers 429`, limited);
+    if (limited) {
+      check(
+        "first rejected call adds no database log",
+        JSON.stringify(await human.listMcpCalls()) ===
+          JSON.stringify(beforeRefusal),
+      );
+      // A few local-only refusals verify sustained rejection; the live harness
+      // explicitly skips this limiter probe, so production is never flooded.
+      for (let i = 0; i < 3; i++) {
+        check(
+          "subsequent rejected call remains 429",
+          (await probe(limit + 2 + i)).status === 429,
+        );
+        check(
+          "subsequent rejected call adds no database log",
+          JSON.stringify(await human.listMcpCalls()) ===
+            JSON.stringify(beforeRefusal),
+        );
+      }
+    }
   }
   await client.close();
   await options.revokeToken();
@@ -898,12 +929,12 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
   const calls = await human.listMcpCalls();
   check(
     "calls are logged with method and tool",
-    calls.some((call) => call.tool === "tasks.create" && call.status === "ok"),
+    calls.some(
+      (call) =>
+        call.method === "tools/call" &&
+        call.tool === "tasks.create" &&
+        call.status === "ok",
+    ),
   );
-  if (!options.skipRateLimit)
-    check(
-      "rate-limited calls are logged",
-      calls.some((call) => call.status === "rate_limited"),
-    );
   return { taskId, followerId: follower.id };
 }
