@@ -1,0 +1,30 @@
+{
+  "readOnly": true,
+  "newFailedRuns": 2,
+  "newFailedCases": 3,
+  "newTrueFlakesEstablished": 0,
+  "runs": [
+    {
+      "runId": "38723613845",
+      "headSha": "08b5f1e9811f819fee0b472a7eab541b9d05af0a",
+      "createdAt": "2026-10-15T10:54:52Z",
+      "url": "https://github.com/ksamint/taff01/actions/runs/38723613845",
+      "classification": "deterministic-generated-contract",
+      "failedCases": 1,
+      "logSha256": "664ba15a710ffa21fb6279fc64bc52a3d899add74df68957849c2b8f6f993f6c",
+      "logBytes": 166276,
+      "logLines": 1574
+    },
+    {
+      "runId": "38725689664",
+      "headSha": "366b1a31e15af3183feb17276e90a4039196b680",
+      "createdAt": "2026-10-15T11:12:31Z",
+      "url": "https://github.com/ksamint/taff01/actions/runs/38725689664",
+      "classification": "deterministic-intended-visual-expectation",
+      "failedCases": 2,
+      "logSha256": "5162d15c48c35046e1c71193491c1561d8af6b80b5a90fad23aead1cdb6a1a80",
+      "logBytes": 237242,
+      "logLines": 2230
+    }
+  ]
+}
