@@ -52,11 +52,14 @@ export async function prepareFonts() {
   await Promise.all(faces.map((face) => face.load()));
   if (faces.some((face) => face.status !== "loaded"))
     throw new Error("UI font did not load");
-  // Swap only after every face loads, in CSS order, without an await between
-  // removals/additions. Repeated preparation must not accumulate competing faces.
-  for (const face of state.__taffActiveCaptureFaces ?? [])
-    document.fonts.delete(face);
-  for (const face of faces) document.fonts.add(face);
+  // Keep already-installed faces alive. Removing and immediately re-adding a
+  // face used by a native control needlessly invalidates its cached text font.
+  // New late-text faces still enter in CSS order after all downloads finish.
+  const installed = new Set(state.__taffActiveCaptureFaces ?? []);
+  const wanted = new Set(faces);
+  for (const face of installed)
+    if (!wanted.has(face)) document.fonts.delete(face);
+  for (const face of faces) if (!installed.has(face)) document.fonts.add(face);
   state.__taffActiveCaptureFaces = faces;
   document.body.getBoundingClientRect();
   await document.fonts.ready;
