@@ -63,4 +63,18 @@ export async function prepareFonts() {
   state.__taffActiveCaptureFaces = faces;
   document.body.getBoundingClientRect();
   await document.fonts.ready;
+  // Chromium's native select inner line-height can retain fallback metrics
+  // after its glyphs switch to the loaded web font. Recalculate its font style
+  // without detaching controls, changing inline attributes or dispatching events.
+  if (document.querySelector("select")) {
+    const refresh = document.createElement("style");
+    refresh.textContent = "select { font-size: 0 !important; }";
+    try {
+      document.head.append(refresh);
+      document.body.getBoundingClientRect();
+    } finally {
+      refresh.remove();
+      document.body.getBoundingClientRect();
+    }
+  }
 }
