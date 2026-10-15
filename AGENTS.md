@@ -4,9 +4,8 @@ Read `instruction_v0.md` before changing this repository. It contains the origin
 product, architecture, stack, security, performance, and checkpoint requirements.
 The final line is the original repository creation request, not a recurring action.
 
-Before substantive work, read and apply
-`$HOME/.codex/skills/orchestrate-development/SKILL.md` when available.
-Keep trivial work single-agent and preserve explicit user model choices.
+Use the lean-delivery skill for every task. Use orchestrate-development only for
+multi-day features.
 
 At the start of local Codex work on the M1 Pro, run
 `python3 /Users/gf-m1pro/.codex/skills/op-automation/scripts/check_access.py`.
@@ -20,6 +19,6 @@ For a requested brand treatment, resolve its latest guide, tokens, and official
 assets through https://apuch.art/ before styling.
 
 There are no blocking review gates. At each milestone, push, record working
-behavior, missing work, open decisions and validation evidence in
+behavior, missing work, open decisions and validation numbers (≤ 40 lines) in
 `docs/milestones/`, then continue. The user reviews asynchronously.
 The agent goal command lives in `docs/agent-goal.md`.
