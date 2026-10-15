@@ -79,6 +79,11 @@ test("English Relations loads its arrow without the remaining CJK font", async (
       url.endsWith("/NotoSansTC-ui-remaining.woff2"),
     ),
   ).toBe(false);
+  expect(
+    resources.fonts.filter((url) =>
+      /\/NotoSansTC-ui-(?:content|details)-|\/NotoSansSC-ui\.woff2/.test(url),
+    ),
+  ).toEqual([]);
 });
 
 test("Northwind English Relations downloads bounded CJK pages for its real business names", async ({
