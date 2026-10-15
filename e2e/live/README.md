@@ -31,7 +31,11 @@ config, worker and debug overrides are rejected. Viewport-specific brief flows a
 selected by project, giving 146 applicable cases without runtime skips. The v0.2.1
 feature checks add CRM membership/roles, milestone CRUD and keyboard movement,
 phone detail scrolling and AI-off settings, desktop snoozed items/agent profile,
-and versioned split/reschedule Undo. Six delayed-font Timeline setup regressions
+and versioned split/reschedule Undo. The existing proposal case also verifies
+human-owner REST creation, member attribution in Brief/Ask and the proposal sheet,
+then apply/Undo/dismiss. Human proposals and generated children are journaled;
+cleanup dismisses only pending proposals on tasks owned by the current run.
+Six delayed-font Timeline setup regressions
 are included. Created grants and milestones are journaled
 for cleanup; existing Verification agent settings are restored.
 

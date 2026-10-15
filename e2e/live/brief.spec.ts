@@ -4,18 +4,28 @@ import {
 } from "@modelcontextprotocol/client";
 import { expect, type Page } from "@playwright/test";
 import {
+  askAnswerSchema,
   type Brief,
   briefSchema,
   issuedAgentTokenSchema,
   memberListSchema,
   meSchema,
+  suggestionApplyResultSchema,
+  suggestionListSchema,
+  suggestionSchema,
   type Task,
   taskListSchema,
   taskSchema,
 } from "../../packages/schemas/src/index";
 import { messages, type TestLocale } from "../support/messages";
 import { selectLocale } from "../support/preferences";
-import { liveSignIn, runLabel, test, verificationAgent } from "./live";
+import {
+  liveSignIn,
+  runLabel,
+  test,
+  trackSuggestionSubtask,
+  verificationAgent,
+} from "./live";
 
 // M18 brief and Ask taff: the overlay (phone) and the Me tab (desktop) show
 // the server's deterministic brief, Ask answers by rules with no AI env, and
@@ -176,10 +186,10 @@ test("phone brief overlay matches the API, answers by rules and restores focus",
 test("a person reviews an agent's proposal in the brief before anything changes", async ({
   page,
 }, info) => {
-  test.setTimeout(120000);
+  test.setTimeout(180000);
   const locale = info.project.metadata.locale as TestLocale;
   const m = messages[locale];
-  const { workspace } = await signIn(page, locale);
+  const { me, workspace } = await signIn(page, locale);
   const agent = await verificationAgent(page, workspace.id);
   const create = async (title: string): Promise<Task> => {
     const response = await page.request.post("/api/tasks", {
@@ -297,6 +307,138 @@ test("a person reviews an agent's proposal in the brief before anything changes"
     await (await page.request.get(`/api/tasks/${moveTask.id}`)).json(),
   );
   expect(after.dueAt).toBe(moveTask.dueAt);
+
+  // Human owners use the same proposal path without becoming agents. These
+  // POSTs and their parent task enter this run's normal ownership journal.
+  await test.step("owner proposes, applies, undoes and dismisses with person attribution", async () => {
+    const humanTask = await create(`Brief human ${runLabel()} ${locale}`);
+    const response = await page.request.post("/api/suggestions", {
+      data: {
+        taskId: humanTask.id,
+        kind: "split",
+        payload: {
+          subtasks: [{ title: "Human draft" }, { title: "Human check" }],
+        },
+      },
+    });
+    expect(response.status()).toBe(201);
+    const proposal = suggestionSchema.parse(await response.json());
+    expect(proposal).toMatchObject({
+      createdBy: workspace.memberId,
+      taskId: humanTask.id,
+      status: "pending",
+    });
+    const brief = await readBrief(page);
+    const humanAction = brief.actions.find(
+      (action) =>
+        action.kind === "suggestion" && action.suggestionId === proposal.id,
+    );
+    expect(humanAction).toMatchObject({ proposerId: workspace.memberId });
+    expect(humanAction?.agentId).toBeUndefined();
+    expect(
+      brief.labels?.members?.find((member) => member.id === workspace.memberId)
+        ?.name,
+    ).toBe(me.user.name);
+    const askResponse = await page.request.post("/api/ask", {
+      data: { question: m.ask.suggestion.needsMe },
+    });
+    expect(askResponse.status()).toBe(200);
+    const ask = askAnswerSchema.parse(await askResponse.json());
+    expect(
+      ask.items.find(
+        (item) => item.kind === "suggestion" && item.id === proposal.id,
+      ),
+    ).toMatchObject({ proposerId: workspace.memberId });
+    expect(
+      ask.labels?.members?.find((member) => member.id === workspace.memberId)
+        ?.name,
+    ).toBe(me.user.name);
+    // Reload is deterministic for a proposal created through the REST adapter.
+    await page.reload();
+    const action = page
+      .getByTestId("brief-action")
+      .filter({ hasText: humanTask.title });
+    await expect(action).toContainText(me.user.name);
+    await action.getByTestId("brief-action-open").click();
+    await expect(sheet).toContainText(
+      fill(m.brief.proposal.intro, { proposer: me.user.name }),
+    );
+    const humanChildren = async () =>
+      taskListSchema.parse(
+        await (
+          await page.request.get(
+            `/api/tasks?workspaceId=${workspace.id}&parentId=${humanTask.id}`,
+          )
+        ).json(),
+      );
+    expect(await humanChildren()).toHaveLength(0);
+    const appliedResponse = page.waitForResponse(
+      (response) =>
+        new URL(response.url()).pathname ===
+          `/api/suggestions/${proposal.id}/apply` &&
+        response.request().method() === "POST",
+    );
+    await sheet.getByTestId("brief-proposal-apply").click();
+    const appliedHttp = await appliedResponse;
+    expect(appliedHttp.status()).toBe(200);
+    const applied = suggestionApplyResultSchema.parse(await appliedHttp.json());
+    for (const task of applied.tasks) {
+      expect(task.parentId).toBe(humanTask.id);
+      trackSuggestionSubtask(task.id, humanTask.id);
+    }
+    await expect(sheet).toHaveCount(0);
+    await expect
+      .poll(async () =>
+        (await humanChildren()).map((task) => task.title).sort(),
+      )
+      .toEqual(["Human check", "Human draft"]);
+    await page
+      .locator(".toast-region")
+      .getByRole("button", { name: m.actions.undo, exact: true })
+      .click();
+    await expect(page.locator(".toast-region")).toContainText(
+      m.brief.toast.undone,
+    );
+    await expect.poll(async () => (await humanChildren()).length).toBe(0);
+    const historyHttp = await page.request.get(
+      `/api/workspaces/${workspace.id}/suggestions?taskId=${humanTask.id}`,
+    );
+    expect(historyHttp.status()).toBe(200);
+    const restored = suggestionListSchema
+      .parse(await historyHttp.json())
+      .find((row) => row.id === proposal.id);
+    expect(restored?.undoneAt).toBeTruthy();
+    const next = await page.request.post("/api/suggestions", {
+      data: {
+        taskId: humanTask.id,
+        kind: "reschedule",
+        payload: { startDate: "2026-11-03", durationDays: 2 },
+      },
+    });
+    expect(next.status()).toBe(201);
+    const pending = suggestionSchema.parse(await next.json());
+    await page.reload();
+    await action.getByTestId("brief-action-open").click();
+    await expect(sheet).toContainText(
+      fill(m.brief.proposal.intro, { proposer: me.user.name }),
+    );
+    await sheet.getByTestId("brief-proposal-dismiss").click();
+    await expect(sheet).toHaveCount(0);
+    await expect(action).toHaveCount(0);
+    const proposalsResponse = await page.request.get(
+      `/api/workspaces/${workspace.id}/suggestions?taskId=${humanTask.id}`,
+    );
+    expect(proposalsResponse.status()).toBe(200);
+    const proposals = await proposalsResponse.json();
+    expect(
+      proposals.find((row: { id: string }) => row.id === pending.id),
+    ).toMatchObject({ status: "dismissed", createdBy: workspace.memberId });
+    expect(
+      taskSchema.parse(
+        await (await page.request.get(`/api/tasks/${humanTask.id}`)).json(),
+      ).dueAt,
+    ).toBe(humanTask.dueAt);
+  });
 });
 
 test("desktop shows the brief as the Me tab and /brief moves there", async ({
