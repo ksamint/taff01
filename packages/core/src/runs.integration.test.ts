@@ -18,6 +18,10 @@ import type {
 } from "@taff/schemas";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import {
+  agentBaseline,
+  cleanupAgentBaseline,
+} from "../../../e2e/live/agent-cleanup";
 import { migrateDatabase } from "../../db/src/migrate";
 import { type Core, createCore, type Principal, userPrincipal } from "./index";
 
@@ -480,6 +484,84 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     ).toBe(false);
     inbox = await core.listInbox(person, workspaceId);
     expect(inbox.unreadCount).toBe(before);
+  });
+  it("public cleanup denies a pending null-task grant and restores its baseline without enabling access", async () => {
+    const original = await core.getAgentProfile(person, agentId);
+    await core.setAgentPermission(person, agentId, {
+      capability: "files.attach",
+      decision: "ask",
+    });
+    const baseline = await core.getAgentProfile(person, agentId);
+    const pending = await core.requestGrant(person, agentId, {
+      capability: "files.attach",
+      reason: "Public cleanup regression",
+    });
+    expect(pending).toMatchObject({ status: "pending", taskId: null });
+    // This is the old public cleanup request: pending grants cannot be revoked.
+    await expect(
+      core.decideGrant(person, pending.id, { decision: "revoke" }),
+    ).rejects.toMatchObject({ code: "conflict", status: 409 });
+    await expect(
+      core.requestGrant(person, agentId, {
+        capability: "files.attach",
+        reason: "A retry must not reuse the pending request",
+      }),
+    ).rejects.toMatchObject({ code: "conflict", status: 409 });
+    await core.updateAgentProfile(person, agentId, {
+      supervisorId: ownerId,
+      reviewPolicy: "always_review",
+      maxDurationMs: 123,
+      maxCostMicros: 456,
+    });
+    const failures: unknown[] = [];
+    const decisions: string[] = [];
+    await cleanupAgentBaseline(
+      agentId,
+      baseline,
+      [{ kind: "grants", id: pending.id }],
+      {
+        perform: async (_kind, _id, operation) => {
+          try {
+            await operation();
+          } catch (error) {
+            failures.push(error);
+          }
+        },
+        read: () => core.getAgentProfile(person, agentId),
+        decide: (id, decision) => {
+          decisions.push(decision);
+          return core.decideGrant(person, id, { decision });
+        },
+        permission: (permission) =>
+          core.setAgentPermission(person, agentId, permission),
+        settings: (settings) =>
+          core.updateAgentProfile(person, agentId, settings),
+        fail: (step, code) => {
+          throw new Error(`${step}:${code}`);
+        },
+      },
+    );
+    expect(failures).toEqual([]);
+    expect(decisions).toEqual(["deny"]);
+    const restored = await core.getAgentProfile(person, agentId);
+    expect(
+      restored.grants.find((grant) => grant.id === pending.id)?.status,
+    ).toBe("denied");
+    expect(agentBaseline(restored)).toEqual(agentBaseline(baseline));
+    const next = await core.requestGrant(person, agentId, {
+      capability: "files.attach",
+      reason: "Fresh request after terminal cleanup",
+    });
+    expect(next.status).toBe("pending");
+    expect(next.id).not.toBe(pending.id);
+    await core.decideGrant(person, next.id, { decision: "deny" });
+    await core.setAgentPermission(
+      person,
+      agentId,
+      original.permissions.find(
+        (permission) => permission.capability === "files.attach",
+      )!,
+    );
   });
   it("requires scoped expiring grants, blocks pending requests and preserves decision history", async () => {
     let run = await start();

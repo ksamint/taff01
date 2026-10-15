@@ -13,12 +13,19 @@ import {
 } from "@playwright/test";
 import {
   agentProfileSchema,
+  grantSchema,
   memberListSchema,
   meSchema,
 } from "../../packages/schemas/src/index";
+import { notificationPreferencesSchema } from "../../packages/schemas/src/notification-preferences";
 import { messages } from "../support/messages";
 
-import { failureCategory, ownsGrant } from "./safety.mjs";
+import { agentBaseline, cleanupAgentBaseline } from "./agent-cleanup";
+import {
+  cleanupNotificationBaseline,
+  notificationBaseline,
+} from "./notification-cleanup";
+import { failureCategory } from "./safety.mjs";
 
 const execute = promisify(execFile);
 const origin = process.env.RELEASE_BASE_URL ?? "https://taff.apuch.cn";
@@ -193,9 +200,11 @@ export async function liveSignIn(page: Page, locale: string) {
   await expect(page.getByTestId("today-heading")).toBeVisible();
   await captureProfileAndTheme(page);
   if (state && !state.preferences)
-    state.preferences = await checked(
-      await page.request.get("/api/me/notifications"),
-      "notification baseline",
+    state.preferences = notificationPreferencesSchema.parse(
+      await checked(
+        await page.request.get("/api/me/notifications"),
+        "notification baseline",
+      ),
     );
   const tz = await page.evaluate(
     () => Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -754,53 +763,54 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
       );
     });
   for (const [id, profile] of current.profiles)
-    await perform("agent-settings", id, async () => {
-      const currentProfile = await checked(
-        await request.get(`/api/agents/${id}`),
-        "cleanup agent current",
-      );
-      for (const grant of currentProfile.grants.filter((g: any) =>
-        ownsGrant(g, profile.grants, entries),
-      ))
-        await checked(
-          await request.post(`/api/grants/${grant.id}/decision`, {
-            data: { decision: "revoke" },
-          }),
-          "cleanup new grant",
-        );
-      for (const permission of profile.permissions)
-        await checked(
-          await request.put(`/api/agents/${id}/permissions`, {
-            data: {
-              capability: permission.capability,
-              decision: permission.decision,
-            },
-          }),
-          "restore permission",
-        );
-      await checked(
-        await request.patch(`/api/agents/${id}`, {
-          data: {
-            supervisorId: profile.supervisorId,
-            reviewPolicy: profile.reviewPolicy,
-            maxDurationMs: profile.maxDurationMs,
-            maxCostMicros: profile.maxCostMicros,
-          },
-        }),
-        "restore review policy",
-      );
+    await cleanupAgentBaseline(id, profile, entries, {
+      perform,
+      read: async () =>
+        agentProfileSchema.parse(
+          await cleanupHttp("agent.read-current", () =>
+            request.get(`/api/agents/${id}`),
+          ),
+        ),
+      decide: async (grantId, decision) =>
+        grantSchema.parse(
+          await cleanupHttp("grant.close-owned", () =>
+            request.post(`/api/grants/${grantId}/decision`, {
+              data: { decision },
+            }),
+          ),
+        ),
+      permission: (permission) =>
+        cleanupHttp("agent.restore-permission", () =>
+          request.put(`/api/agents/${id}/permissions`, { data: permission }),
+        ),
+      settings: (settings) =>
+        cleanupHttp("agent.restore-settings", () =>
+          request.patch(`/api/agents/${id}`, { data: settings }),
+        ),
+      fail: (step, code) => {
+        throw new SafeApiFailure(step, undefined, code, "e2e/live.ts#cleanUp");
+      },
     });
   if (current.preferences)
     await perform("notification-preferences", "dedicated-account", async () => {
-      const latest = await cleanupHttp("notification current", () =>
-        request.get("/api/me/notifications"),
-      );
-      await checked(
-        await request.patch("/api/me/notifications", {
-          data: { ...current.preferences, version: latest.version },
-        }),
-        "restore notifications",
-      );
+      await cleanupNotificationBaseline(current.preferences, {
+        read: () =>
+          cleanupHttp("notification.read-current", () =>
+            request.get("/api/me/notifications"),
+          ),
+        write: (preferences) =>
+          cleanupHttp("notification.restore-baseline", () =>
+            request.patch("/api/me/notifications", { data: preferences }),
+          ),
+        fail: (step, code) => {
+          throw new SafeApiFailure(
+            step,
+            undefined,
+            code,
+            "e2e/live.ts#cleanUp",
+          );
+        },
+      });
     });
   if (current.primaryProfile)
     await perform("profile-preferences", "dedicated-account", async () => {
@@ -861,6 +871,17 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
             ].includes(e.kind),
         })),
         cleanup: notes,
+        ...(failed
+          ? {
+              agentBaselines: [...current.profiles].map(([id, profile]) => ({
+                id,
+                ...agentBaseline(profile),
+              })),
+            }
+          : {}),
+        ...(failed && current.preferences
+          ? { notificationBaseline: notificationBaseline(current.preferences) }
+          : {}),
         failed,
         pageErrors: current.pageErrors,
         httpFailures: current.httpFailures,
