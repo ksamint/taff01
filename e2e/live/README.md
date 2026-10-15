@@ -19,13 +19,16 @@ Also supply these runtime inputs:
 - `TAFF_VERIFY_SSH_TARGET` and `TAFF_VERIFY_API_ID`: the authorized SSH alias and
   current API container ID for the scoped recipient email-proof helper. The
   helper reads only a freshly generated verification recipient's mail proof.
-- `RELEASE_REPORT_DIR`: optional private output directory (ignored default here).
+- `RELEASE_REPORT_DIR`: optional private parent directory; each invocation creates
+  a fresh `run-*` child, including discovery and startup failures.
 
 Discovery without credentials: `RELEASE_BASE_URL=https://taff.apuch.cn node
  e2e/live/run.mjs --list`. Target regressions with `--grep 'keyboard|evidence|Restricted'`
 and `--repeat-each=3 --project=phone-en`. Failed deploy checks get one explicit
 retry under the deployment goal; the default here is zero automatic retries so
-first-attempt evidence is retained.
+first-attempt evidence is retained. Targeting flags are allowlisted; trace, reporter,
+config, worker and debug overrides are rejected. Viewport-specific brief flows are
+selected by project, giving 122 applicable cases without runtime skips.
 
 Traces, screenshots, videos and raw error context are disabled. The mandatory
 preload and safe reporter suppress diagnostics that can contain displayed tokens,

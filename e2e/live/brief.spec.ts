@@ -119,10 +119,6 @@ async function propose(
 test("phone brief overlay matches the API, answers by rules and restores focus", async ({
   page,
 }, info) => {
-  test.skip(
-    info.project.metadata.formFactor !== "phone",
-    "Phone-only overlay flow; desktop covered separately",
-  );
   test.setTimeout(90000);
   const locale = info.project.metadata.locale as TestLocale;
   const m = messages[locale];
@@ -271,10 +267,6 @@ test("a person reviews an agent's proposal in the brief before anything changes"
 test("desktop shows the brief as the Me tab and /brief moves there", async ({
   page,
 }, info) => {
-  test.skip(
-    info.project.metadata.formFactor !== "desktop",
-    "Desktop-only tab flow; phone covered separately",
-  );
   test.setTimeout(60000);
   const locale = info.project.metadata.locale as TestLocale;
   const m = messages[locale];
