@@ -597,7 +597,11 @@ function ProposalSheet({
   const { t, say, date } = useSay();
   const decide = useDecideSuggestion();
   const action = view.action;
-  const agent = labels.agent(action.agentId) ?? t("agent");
+  const proposer =
+    action.kind === "suggestion"
+      ? (labels.member(action.proposerId ?? action.agentId) ??
+        t("brief.proposal.someone"))
+      : (labels.agent(action.agentId) ?? t("agent"));
   const task = labels.task(action.taskId)?.title ?? t("brief.someTask");
   const run = (decision: "apply" | "dismiss") => {
     if (!suggestion) return;
@@ -620,7 +624,7 @@ function ProposalSheet({
     >
       <p className="brief-proposal-title">{say(view.title)}</p>
       <p className="brief-note-inline">
-        {t("brief.proposal.intro", { agent })}
+        {t("brief.proposal.intro", { proposer })}
       </p>
       {!suggestion ? (
         <p aria-live="polite">{t("brief.proposal.loading")}</p>

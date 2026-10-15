@@ -134,14 +134,17 @@ export function can(
     return actor.kind === "person" && actor.role === "admin";
   if (action === "contact:manage" || action === "mind:write")
     return actor.kind === "person";
-  if (action === "suggestion:create")
-    // Agents only propose, and only on work they hold (M17).
+  if (action === "suggestion:create") {
+    if (actor.kind === "person")
+      return actor.role === "admin" || actor.id === resource.ownerId;
+    // Agents only propose on work they hold; token limits still apply.
     return (
       actor.kind === "agent" &&
       actor.id === resource.workerId &&
       !!actor.scopes?.includes("tasks:write") &&
       can(actor, "capability:use", { ...resource, capability: "tasks.write" })
     );
+  }
   if (action === "suggestion:decide" || action === "suggestion:undo")
     // A person decides; applying also needs the normal operation's right.
     return (
