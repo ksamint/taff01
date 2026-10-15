@@ -93,6 +93,11 @@
 .calendar-engine .sx__time-grid-event {
   min-height: 44px;
 }
+/* All-day/multi-day buttons and blocked cells share row tracks. Enlarge both
+   so overlapping events remain aligned and every date-grid target is tappable. */
+.calendar-engine .sx__date-grid-cell {
+  min-height: 44px;
+}
 .calendar-engine .sx__time-grid-event-inner {
   position: static;
   display: flex;

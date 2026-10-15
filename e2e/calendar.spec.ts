@@ -1135,3 +1135,74 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
     fullPage: true,
   });
 });
+
+test("calendar multi-day events keep 44px targets and aligned stacked rows", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as Locale;
+  const { me, workspace, date } = await setup(page, locale);
+  const tasks = [];
+  for (const label of ["first", "second"]) {
+    const response = await page.request.post("/api/tasks", {
+      data: {
+        workspaceId: workspace.id,
+        ownerId: workspace.memberId,
+        workerId: null,
+        title: `Multi-day target ${label} ${locale}`,
+        calendar: {
+          startAt: calendarWallToInstant(`${date}T09:00`, me.user.tz),
+          endAt: calendarWallToInstant(
+            `${offsetDay(date, 1)}T10:00`,
+            me.user.tz,
+          ),
+          timeZone: me.user.tz,
+          rrule: null,
+        },
+      },
+    });
+    expect(response.status()).toBe(201);
+    tasks.push(taskSchema.parse(await response.json()));
+  }
+  await page.goto("/calendar");
+  for (const mode of ["day", "week"] as const) {
+    await page.getByTestId(`calendar-${mode}`).click();
+    const boxes = [];
+    for (const task of tasks) {
+      const event = page
+        .locator(".sx__date-grid-event")
+        .filter({ hasText: task.title })
+        .first();
+      await expect(event).toBeVisible();
+      const box = await event.boundingBox();
+      expect(box).not.toBeNull();
+      expect(box!.height).toBeGreaterThanOrEqual(44);
+      boxes.push(box!);
+    }
+    expect(Math.abs(boxes[1].y - boxes[0].y)).toBeGreaterThanOrEqual(44);
+    await page.locator(".sx__view-container").evaluate(async (element) => {
+      await Promise.all(
+        element
+          .getAnimations({ subtree: true })
+          .map((animation) => animation.finished.catch(() => {})),
+      );
+    });
+    await page.screenshot({
+      path: info.outputPath(`calendar-${mode}-targets.png`),
+    });
+    // The newly enlarged lower edge is an actual tappable button, not just a visual box.
+    const first = page
+      .locator(".sx__date-grid-event")
+      .filter({ hasText: tasks[0].title })
+      .first();
+    await first.click({ position: { x: 12, y: 40 } });
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await expect(page.getByTestId("schedule-save")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    await first.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("dialog")).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+  }
+});
