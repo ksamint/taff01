@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   companies,
   companyContacts,
@@ -30,6 +31,8 @@ import {
   type ContactUpdate,
   type CrmAuditIssue,
   type CrmSearchResult,
+  type CrmUndo,
+  type CrmUndoStep,
   companyFilterSchema,
   companyInputSchema,
   companyUpdateSchema,
@@ -40,6 +43,7 @@ import {
   contactScopeSchema,
   contactUpdateSchema,
   crmSearchInputSchema,
+  crmUndoInputSchema,
   idSchema,
   roleAllowed,
   roleExclusive,
@@ -48,7 +52,17 @@ import {
   type SetContactRolesResult,
   type UnlinkContactResult,
 } from "@taff/schemas";
-import { and, asc, eq, inArray, isNull, ne, type SQL, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  eq,
+  inArray,
+  isNull,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import { CoreError, type Principal } from "./index";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { dtoProject } from "./planning";
@@ -552,6 +566,7 @@ export function createCrmOperations({
     parse(idSchema, w);
     const body = parse(contactInputSchema, input);
     return mutation(p, async (tx) => {
+      await lockWorkspace(tx, w);
       const actor = await requireMember(tx, p, w, "contact:manage");
       await validCompany(tx, w, body.companyId);
       const [row] = await tx
@@ -576,6 +591,12 @@ export function createCrmOperations({
     parse(idSchema, id);
     const body = parse(contactUpdateSchema, input);
     return mutation(p, async (tx) => {
+      const [first] = await tx
+        .select({ workspaceId: contacts.workspaceId })
+        .from(contacts)
+        .where(eq(contacts.id, id));
+      if (!first) notFound();
+      await lockWorkspace(tx, first.workspaceId);
       const [row] = await tx
         .select()
         .from(contacts)
@@ -612,6 +633,231 @@ export function createCrmOperations({
       );
     });
   }
+  /**
+   * Freeze entities whose inverse may recreate/cascade links. Task project moves
+   * take a task UPDATE lock and a destination-project SHARE lock. NOWAIT avoids
+   * waiting cycles with those task-first paths while we hold the workspace lock.
+   */
+  async function lockInverseEntities(
+    tx: Transaction,
+    w: string,
+    steps: CrmUndoStep[],
+  ) {
+    const ids = (scope: ContactScope) =>
+      [
+        ...new Set(
+          steps.flatMap((step) =>
+            step.method === "COMPANY"
+              ? scope === "company" && step.companyId
+                ? [step.companyId]
+                : []
+              : step.scope === scope
+                ? [step.entityId]
+                : [],
+          ),
+        ),
+      ].sort();
+    const state: unknown[] = [];
+    try {
+      for (const scope of ["company", "project", "task"] as const) {
+        let entityIds = ids(scope);
+        if (scope === "task") {
+          const cascades = steps.flatMap((step) =>
+            step.method === "DELETE" && step.scope === "project"
+              ? [
+                  and(
+                    eq(taskContacts.projectId, step.entityId),
+                    eq(taskContacts.contactId, step.contactId),
+                  ),
+                ]
+              : [],
+          );
+          if (cascades.length) {
+            const linked = await tx
+              .select({ taskId: taskContacts.taskId })
+              .from(taskContacts)
+              .where(and(eq(taskContacts.workspaceId, w), or(...cascades)));
+            entityIds = [
+              ...new Set([...entityIds, ...linked.map((row) => row.taskId)]),
+            ].sort();
+          }
+        }
+        if (!entityIds.length) continue;
+        if (scope === "company") {
+          const rows = await tx
+            .select()
+            .from(companies)
+            .where(inArray(companies.id, entityIds))
+            .orderBy(companies.id)
+            .for("update", { noWait: true });
+          if (rows.length !== entityIds.length) notFound();
+          if (rows.some((row) => row.workspaceId !== w)) invalid();
+          state.push(
+            ...rows.map((row) => [scope, row.id, row.version, row.archivedAt]),
+          );
+        } else if (scope === "project") {
+          const rows = await tx
+            .select()
+            .from(projects)
+            .where(inArray(projects.id, entityIds))
+            .orderBy(projects.id)
+            .for("update", { noWait: true });
+          if (rows.length !== entityIds.length) notFound();
+          if (rows.some((row) => row.workspaceId !== w)) invalid();
+          state.push(
+            ...rows.map((row) => [scope, row.id, row.version, row.archived]),
+          );
+        } else {
+          const rows = await tx
+            .select()
+            .from(tasks)
+            .where(inArray(tasks.id, entityIds))
+            .orderBy(tasks.id)
+            .for("update", { noWait: true });
+          if (rows.length !== entityIds.length) notFound();
+          if (rows.some((row) => row.workspaceId !== w)) invalid();
+          state.push(
+            ...rows.map((row) => [
+              scope,
+              row.id,
+              row.version,
+              row.projectId,
+              row.archivedAt,
+            ]),
+          );
+        }
+      }
+    } catch (error) {
+      const cause =
+        error instanceof Error && "cause" in error ? error.cause : error;
+      if (
+        cause &&
+        typeof cause === "object" &&
+        "code" in cause &&
+        cause.code === "55P03"
+      )
+        conflict();
+      throw error;
+    }
+    return state;
+  }
+  async function crmState(tx: Transaction, w: string, entities: unknown[]) {
+    const people = await tx
+      .select({
+        id: contacts.id,
+        version: contacts.version,
+        companyId: contacts.companyId,
+      })
+      .from(contacts)
+      .where(eq(contacts.workspaceId, w))
+      .orderBy(contacts.id);
+    const companyLinks = await tx
+      .select()
+      .from(companyContacts)
+      .where(eq(companyContacts.workspaceId, w))
+      .orderBy(companyContacts.id);
+    const projectLinks = await tx
+      .select()
+      .from(projectContacts)
+      .where(eq(projectContacts.workspaceId, w))
+      .orderBy(projectContacts.id);
+    const taskLinks = await tx
+      .select()
+      .from(taskContacts)
+      .where(eq(taskContacts.workspaceId, w))
+      .orderBy(taskContacts.id);
+    const roles = await tx
+      .select()
+      .from(contactRoles)
+      .where(eq(contactRoles.workspaceId, w))
+      .orderBy(contactRoles.id);
+    return createHash("sha256")
+      .update(
+        JSON.stringify({
+          entities,
+          people,
+          companyLinks,
+          projectLinks,
+          taskLinks,
+          roles,
+        }),
+      )
+      .digest("hex");
+  }
+  async function inverse(
+    tx: Transaction,
+    workspaceId: string,
+    steps: CrmUndoStep[],
+  ): Promise<CrmUndo> {
+    return {
+      workspaceId,
+      expectedState: await crmState(
+        tx,
+        workspaceId,
+        await lockInverseEntities(tx, workspaceId, steps),
+      ),
+      steps,
+    };
+  }
+  async function undoCrm(p: Principal, input: CrmUndo) {
+    const body = parse(crmUndoInputSchema, input);
+    return mutation(p, async (tx) => {
+      await lockWorkspace(tx, body.workspaceId);
+      await requireMember(tx, p, body.workspaceId, "contact:manage");
+      const entities = await lockInverseEntities(
+        tx,
+        body.workspaceId,
+        body.steps,
+      );
+      if (
+        body.expectedState !== (await crmState(tx, body.workspaceId, entities))
+      )
+        conflict();
+      for (const step of body.steps) {
+        // Do not let a valid guard for one workspace authorize writes in another.
+        if (step.method === "COMPANY") {
+          const [row] = await tx
+            .select({ workspaceId: contacts.workspaceId })
+            .from(contacts)
+            .where(eq(contacts.id, step.contactId));
+          if (!row || row.workspaceId !== body.workspaceId) invalid();
+          await applySetContactCompany(
+            tx,
+            p,
+            step.contactId,
+            {
+              version: step.version,
+              companyId: step.companyId,
+            },
+            false,
+          );
+        } else {
+          const entity = await findEntity(tx, step.scope, step.entityId);
+          if (entity.workspaceId !== body.workspaceId) invalid();
+          if (step.method === "PUT")
+            await applySetContactRoles(
+              tx,
+              p,
+              step.scope,
+              step.entityId,
+              step.contactId,
+              { roles: step.roles },
+              false,
+            );
+          else
+            await applyUnlinkContact(
+              tx,
+              p,
+              step.scope,
+              step.entityId,
+              step.contactId,
+              false,
+            );
+        }
+      }
+      return { restored: true as const };
+    });
+  }
   async function setContactCompany(
     p: Principal,
     id: string,
@@ -619,65 +865,90 @@ export function createCrmOperations({
   ): Promise<SetContactCompanyResult> {
     parse(idSchema, id);
     const body = parse(contactCompanyInputSchema, input);
-    return mutation(p, async (tx) => {
-      const [first] = await tx
-        .select({ workspaceId: contacts.workspaceId })
-        .from(contacts)
-        .where(eq(contacts.id, id));
-      if (!first) notFound();
-      await lockWorkspace(tx, first.workspaceId);
-      const [row] = await tx
-        .select()
-        .from(contacts)
-        .where(eq(contacts.id, id))
-        .for("update");
-      const actor = await requireMember(
-        tx,
-        p,
-        row.workspaceId,
-        "contact:manage",
-      );
-      const details = can(actor, "contact:details", {
-        workspaceId: row.workspaceId,
-      });
-      if (row.version !== body.version) conflict();
-      const previousCompanyId = row.companyId;
-      if (body.companyId === previousCompanyId)
-        return {
-          contact: dtoContact(row, details),
-          dropped: 0,
-          previousCompanyId,
-        };
-      await validCompany(tx, row.workspaceId, body.companyId);
-      // company_contacts references contacts(workspace_id, id, company_id), so
-      // the links at the old employer (and their roles, by cascade) go first.
-      const dropped = previousCompanyId
-        ? await tx
-            .delete(companyContacts)
-            .where(
-              and(
-                eq(companyContacts.workspaceId, row.workspaceId),
-                eq(companyContacts.contactId, id),
-                eq(companyContacts.companyId, previousCompanyId),
-              ),
-            )
-            .returning({ id: companyContacts.id })
-        : [];
-      const [updated] = await tx
-        .update(contacts)
-        .set({
-          companyId: body.companyId,
-          version: row.version + 1,
-          updatedAt: new Date(),
-        })
-        .where(eq(contacts.id, id))
-        .returning();
+    return mutation(p, (tx) => applySetContactCompany(tx, p, id, body));
+  }
+  async function applySetContactCompany(
+    tx: Transaction,
+    p: Principal,
+    id: string,
+    body: ContactCompanyInput,
+    captureUndo = true,
+  ) {
+    const [first] = await tx
+      .select({ workspaceId: contacts.workspaceId })
+      .from(contacts)
+      .where(eq(contacts.id, id));
+    if (!first) notFound();
+    await lockWorkspace(tx, first.workspaceId);
+    const [row] = await tx
+      .select()
+      .from(contacts)
+      .where(eq(contacts.id, id))
+      .for("update");
+    const actor = await requireMember(tx, p, row.workspaceId, "contact:manage");
+    const details = can(actor, "contact:details", {
+      workspaceId: row.workspaceId,
+    });
+    if (row.version !== body.version) conflict();
+    const previousCompanyId = row.companyId;
+    if (body.companyId === previousCompanyId)
       return {
-        contact: dtoContact(updated, details),
-        dropped: dropped.length,
+        contact: dtoContact(row, details),
+        dropped: 0,
         previousCompanyId,
       };
-    });
+    await validCompany(tx, row.workspaceId, body.companyId);
+    const oldLinks =
+      captureUndo && previousCompanyId
+        ? await links(tx, "company", previousCompanyId, false, id)
+        : [];
+    // company_contacts references contacts(workspace_id, id, company_id), so
+    // the links at the old employer (and their roles, by cascade) go first.
+    const dropped = previousCompanyId
+      ? await tx
+          .delete(companyContacts)
+          .where(
+            and(
+              eq(companyContacts.workspaceId, row.workspaceId),
+              eq(companyContacts.contactId, id),
+              eq(companyContacts.companyId, previousCompanyId),
+            ),
+          )
+          .returning({ id: companyContacts.id })
+      : [];
+    const [updated] = await tx
+      .update(contacts)
+      .set({
+        companyId: body.companyId,
+        version: row.version + 1,
+        updatedAt: new Date(),
+      })
+      .where(eq(contacts.id, id))
+      .returning();
+    return {
+      undo: captureUndo
+        ? await inverse(tx, row.workspaceId, [
+            {
+              method: "COMPANY",
+              contactId: id,
+              version: updated.version,
+              companyId: previousCompanyId,
+            },
+            ...oldLinks.map(
+              (link): CrmUndoStep => ({
+                method: "PUT",
+                scope: "company",
+                entityId: previousCompanyId!,
+                contactId: id,
+                roles: link.roles,
+              }),
+            ),
+          ])
+        : undefined,
+      contact: dtoContact(updated, details),
+      dropped: dropped.length,
+      previousCompanyId,
+    };
   }
 
   // Links ---------------------------------------------------------------------
@@ -703,114 +974,155 @@ export function createCrmOperations({
     parse(idSchema, entityId);
     parse(idSchema, contactId);
     const body = parse(contactLinkInputSchema, input);
+    return mutation(p, (tx) =>
+      applySetContactRoles(tx, p, scope, entityId, contactId, body),
+    );
+  }
+  async function applySetContactRoles(
+    tx: Transaction,
+    p: Principal,
+    scope: ContactScope,
+    entityId: string,
+    contactId: string,
+    body: ContactLinkInput,
+    captureUndo = true,
+  ) {
     if (body.roles.some((role) => !roleAllowed(role, scope))) invalid();
     const roles = sortRoles(body.roles);
-    return mutation(p, async (tx) => {
-      const { workspaceId } = await findEntity(tx, scope, entityId);
-      // Every link mutation locks the workspace first, which serializes
-      // exclusive-role moves and keeps one lock order.
-      await lockWorkspace(tx, workspaceId);
-      const entity = await findEntity(tx, scope, entityId, true);
-      const actor = await requireMember(tx, p, workspaceId, "contact:manage");
-      const details = can(actor, "contact:details", { workspaceId });
-      const [contact] = await tx
-        .select()
-        .from(contacts)
+    const { workspaceId } = await findEntity(tx, scope, entityId);
+    // Every link mutation locks the workspace first, which serializes
+    // exclusive-role moves and keeps one lock order.
+    await lockWorkspace(tx, workspaceId);
+    await lockInverseEntities(tx, workspaceId, [
+      { method: "PUT", scope, entityId, contactId, roles },
+    ]);
+    const entity = await findEntity(tx, scope, entityId, true);
+    const actor = await requireMember(tx, p, workspaceId, "contact:manage");
+    const details = can(actor, "contact:details", { workspaceId });
+    const [contact] = await tx
+      .select()
+      .from(contacts)
+      .where(
+        and(eq(contacts.id, contactId), eq(contacts.workspaceId, workspaceId)),
+      )
+      .for("share");
+    if (!contact) invalid();
+    const beforeLinks = captureUndo
+      ? await links(tx, scope, entityId, false)
+      : [];
+    const existing = await linkRows(tx, scope, entityId, contactId);
+    let previousRoles: ContactRole[] | null = null;
+    let addedProjectStakeholder = false;
+    if (existing.length) {
+      previousRoles = sortRoles(
+        (await rolesFor(tx, scope, entityId, [contactId])).get(contactId) ?? [],
+      );
+    } else {
+      if (contact.archivedAt || entity.archived) invalid();
+      if (scope === "company") {
+        // Only the employer can be linked (company_contacts_employer_fk).
+        if (contact.companyId !== entityId) invalid();
+        await tx
+          .insert(companyContacts)
+          .values({ workspaceId, companyId: entityId, contactId });
+      } else if (scope === "project") {
+        await tx
+          .insert(projectContacts)
+          .values({ workspaceId, projectId: entityId, contactId });
+      } else {
+        if (!entity.projectId) invalid();
+        // A task contact is always a stakeholder of the task's project.
+        addedProjectStakeholder =
+          (
+            await tx
+              .insert(projectContacts)
+              .values({ workspaceId, projectId: entity.projectId, contactId })
+              .onConflictDoNothing()
+              .returning({ id: projectContacts.id })
+          ).length > 0;
+        await tx.insert(taskContacts).values({
+          workspaceId,
+          taskId: entityId,
+          projectId: entity.projectId,
+          contactId,
+        });
+      }
+    }
+    const replaced: SetContactRolesResult["replaced"] = [];
+    for (const role of roles.filter(roleExclusive)) {
+      const moved = await tx
+        .delete(contactRoles)
         .where(
           and(
-            eq(contacts.id, contactId),
-            eq(contacts.workspaceId, workspaceId),
+            eq(contactRoles.workspaceId, workspaceId),
+            eq(contactRoles.scope, scope),
+            eq(roleColumn(scope), entityId),
+            eq(contactRoles.role, role),
+            ne(contactRoles.contactId, contactId),
           ),
         )
-        .for("share");
-      if (!contact) invalid();
-      const existing = await linkRows(tx, scope, entityId, contactId);
-      let previousRoles: ContactRole[] | null = null;
-      let addedProjectStakeholder = false;
-      if (existing.length) {
-        previousRoles = sortRoles(
-          (await rolesFor(tx, scope, entityId, [contactId])).get(contactId) ??
-            [],
+        .returning({ contactId: contactRoles.contactId });
+      for (const holder of moved)
+        replaced.push({ role, contactId: holder.contactId });
+    }
+    const before = previousRoles ?? [];
+    const removed = before.filter((role) => !roles.includes(role));
+    if (removed.length)
+      await tx
+        .delete(contactRoles)
+        .where(
+          and(
+            eq(contactRoles.workspaceId, workspaceId),
+            eq(contactRoles.scope, scope),
+            eq(roleColumn(scope), entityId),
+            eq(contactRoles.contactId, contactId),
+            inArray(contactRoles.role, removed),
+          ),
         );
-      } else {
-        if (contact.archivedAt || entity.archived) invalid();
-        if (scope === "company") {
-          // Only the employer can be linked (company_contacts_employer_fk).
-          if (contact.companyId !== entityId) invalid();
-          await tx
-            .insert(companyContacts)
-            .values({ workspaceId, companyId: entityId, contactId });
-        } else if (scope === "project") {
-          await tx
-            .insert(projectContacts)
-            .values({ workspaceId, projectId: entityId, contactId });
-        } else {
-          if (!entity.projectId) invalid();
-          // A task contact is always a stakeholder of the task's project.
-          addedProjectStakeholder =
-            (
-              await tx
-                .insert(projectContacts)
-                .values({ workspaceId, projectId: entity.projectId, contactId })
-                .onConflictDoNothing()
-                .returning({ id: projectContacts.id })
-            ).length > 0;
-          await tx.insert(taskContacts).values({
-            workspaceId,
-            taskId: entityId,
-            projectId: entity.projectId,
-            contactId,
-          });
-        }
-      }
-      const replaced: SetContactRolesResult["replaced"] = [];
-      for (const role of roles.filter(roleExclusive)) {
-        const moved = await tx
-          .delete(contactRoles)
-          .where(
-            and(
-              eq(contactRoles.workspaceId, workspaceId),
-              eq(contactRoles.scope, scope),
-              eq(roleColumn(scope), entityId),
-              eq(contactRoles.role, role),
-              ne(contactRoles.contactId, contactId),
-            ),
-          )
-          .returning({ contactId: contactRoles.contactId });
-        for (const holder of moved)
-          replaced.push({ role, contactId: holder.contactId });
-      }
-      const before = previousRoles ?? [];
-      const removed = before.filter((role) => !roles.includes(role));
-      if (removed.length)
-        await tx
-          .delete(contactRoles)
-          .where(
-            and(
-              eq(contactRoles.workspaceId, workspaceId),
-              eq(contactRoles.scope, scope),
-              eq(roleColumn(scope), entityId),
-              eq(contactRoles.contactId, contactId),
-              inArray(contactRoles.role, removed),
-            ),
-          );
-      const added = roles.filter((role) => !before.includes(role));
-      if (added.length)
-        await tx.insert(contactRoles).values(
-          added.map((role) => ({
-            workspaceId,
-            contactId,
-            scope,
-            role,
-            companyId: scope === "company" ? entityId : null,
-            projectId: scope === "project" ? entityId : null,
-            taskId: scope === "task" ? entityId : null,
-          })),
-        );
-      const [link] = await links(tx, scope, entityId, details, contactId);
-      return { link, replaced, addedProjectStakeholder, previousRoles };
-    });
+    const added = roles.filter((role) => !before.includes(role));
+    if (added.length)
+      await tx.insert(contactRoles).values(
+        added.map((role) => ({
+          workspaceId,
+          contactId,
+          scope,
+          role,
+          companyId: scope === "company" ? entityId : null,
+          projectId: scope === "project" ? entityId : null,
+          taskId: scope === "task" ? entityId : null,
+        })),
+      );
+    const [link] = await links(tx, scope, entityId, details, contactId);
+    const steps: CrmUndoStep[] = [
+      previousRoles === null
+        ? { method: "DELETE", scope, entityId, contactId }
+        : { method: "PUT", scope, entityId, contactId, roles: previousRoles },
+    ];
+    if (addedProjectStakeholder && entity.projectId)
+      steps.push({
+        method: "DELETE",
+        scope: "project",
+        entityId: entity.projectId,
+        contactId,
+      });
+    for (const holder of beforeLinks)
+      if (replaced.some((row) => row.contactId === holder.contactId))
+        steps.push({
+          method: "PUT",
+          scope,
+          entityId,
+          contactId: holder.contactId,
+          roles: holder.roles,
+        });
+    return {
+      link,
+      replaced,
+      addedProjectStakeholder,
+      previousRoles,
+      undo: captureUndo ? await inverse(tx, workspaceId, steps) : undefined,
+    };
   }
+
   async function unlinkContact(
     p: Principal,
     scope: ContactScope,
@@ -820,63 +1132,124 @@ export function createCrmOperations({
     parse(contactScopeSchema, scope);
     parse(idSchema, entityId);
     parse(idSchema, contactId);
-    return mutation(p, async (tx) => {
-      const { workspaceId } = await findEntity(tx, scope, entityId);
-      await lockWorkspace(tx, workspaceId);
-      await requireMember(tx, p, workspaceId, "contact:manage");
-      let cascadedTaskLinks = 0;
-      let deleted: { id: string }[];
-      if (scope === "company")
-        deleted = await tx
-          .delete(companyContacts)
-          .where(
-            and(
-              eq(companyContacts.workspaceId, workspaceId),
-              eq(companyContacts.companyId, entityId),
-              eq(companyContacts.contactId, contactId),
-            ),
-          )
-          .returning({ id: companyContacts.id });
-      else if (scope === "task")
-        deleted = await tx
-          .delete(taskContacts)
+    return mutation(p, (tx) =>
+      applyUnlinkContact(tx, p, scope, entityId, contactId),
+    );
+  }
+  async function applyUnlinkContact(
+    tx: Transaction,
+    p: Principal,
+    scope: ContactScope,
+    entityId: string,
+    contactId: string,
+    captureUndo = true,
+  ) {
+    const { workspaceId } = await findEntity(tx, scope, entityId);
+    await lockWorkspace(tx, workspaceId);
+    await lockInverseEntities(tx, workspaceId, [
+      { method: "DELETE", scope, entityId, contactId },
+    ]);
+    await requireMember(tx, p, workspaceId, "contact:manage");
+    const previous = captureUndo
+      ? await links(tx, scope, entityId, false, contactId)
+      : [];
+    const steps: CrmUndoStep[] = previous.map((link) => ({
+      method: "PUT",
+      scope,
+      entityId,
+      contactId,
+      roles: link.roles,
+    }));
+    if (captureUndo && scope === "project") {
+      const removedTasks = await tx
+        .select({ taskId: taskContacts.taskId })
+        .from(taskContacts)
+        .where(
+          and(
+            eq(taskContacts.workspaceId, workspaceId),
+            eq(taskContacts.projectId, entityId),
+            eq(taskContacts.contactId, contactId),
+          ),
+        )
+        .orderBy(taskContacts.taskId);
+      await lockInverseEntities(
+        tx,
+        workspaceId,
+        removedTasks.map((row) => ({
+          method: "PUT",
+          scope: "task",
+          entityId: row.taskId,
+          contactId,
+          roles: [],
+        })),
+      );
+      for (const row of removedTasks) {
+        const [link] = await links(tx, "task", row.taskId, false, contactId);
+        if (link)
+          steps.push({
+            method: "PUT",
+            scope: "task",
+            entityId: row.taskId,
+            contactId,
+            roles: link.roles,
+          });
+      }
+    }
+    let cascadedTaskLinks = 0;
+    let deleted: { id: string }[];
+    if (scope === "company")
+      deleted = await tx
+        .delete(companyContacts)
+        .where(
+          and(
+            eq(companyContacts.workspaceId, workspaceId),
+            eq(companyContacts.companyId, entityId),
+            eq(companyContacts.contactId, contactId),
+          ),
+        )
+        .returning({ id: companyContacts.id });
+    else if (scope === "task")
+      deleted = await tx
+        .delete(taskContacts)
+        .where(
+          and(
+            eq(taskContacts.workspaceId, workspaceId),
+            eq(taskContacts.taskId, entityId),
+            eq(taskContacts.contactId, contactId),
+          ),
+        )
+        .returning({ id: taskContacts.id });
+    else {
+      // Removing a stakeholder removes its task links on this project
+      // (task_contacts_stakeholder_fk cascades); report how many.
+      cascadedTaskLinks = (
+        await tx
+          .select({ id: taskContacts.id })
+          .from(taskContacts)
           .where(
             and(
               eq(taskContacts.workspaceId, workspaceId),
-              eq(taskContacts.taskId, entityId),
+              eq(taskContacts.projectId, entityId),
               eq(taskContacts.contactId, contactId),
             ),
           )
-          .returning({ id: taskContacts.id });
-      else {
-        // Removing a stakeholder removes its task links on this project
-        // (task_contacts_stakeholder_fk cascades); report how many.
-        cascadedTaskLinks = (
-          await tx
-            .select({ id: taskContacts.id })
-            .from(taskContacts)
-            .where(
-              and(
-                eq(taskContacts.workspaceId, workspaceId),
-                eq(taskContacts.projectId, entityId),
-                eq(taskContacts.contactId, contactId),
-              ),
-            )
-        ).length;
-        deleted = await tx
-          .delete(projectContacts)
-          .where(
-            and(
-              eq(projectContacts.workspaceId, workspaceId),
-              eq(projectContacts.projectId, entityId),
-              eq(projectContacts.contactId, contactId),
-            ),
-          )
-          .returning({ id: projectContacts.id });
-      }
-      if (!deleted.length) notFound();
-      return { cascadedTaskLinks };
-    });
+      ).length;
+      deleted = await tx
+        .delete(projectContacts)
+        .where(
+          and(
+            eq(projectContacts.workspaceId, workspaceId),
+            eq(projectContacts.projectId, entityId),
+            eq(projectContacts.contactId, contactId),
+          ),
+        )
+        .returning({ id: projectContacts.id });
+    }
+    if (!deleted.length) notFound();
+    return {
+      cascadedTaskLinks,
+      undo: captureUndo ? await inverse(tx, workspaceId, steps) : undefined,
+    };
   }
 
   // Audit and search ----------------------------------------------------------
@@ -1012,6 +1385,7 @@ export function createCrmOperations({
       listContactLinks,
       setContactRoles,
       unlinkContact,
+      undoCrm,
       auditCrm,
       searchCrm,
     },

@@ -1,5 +1,12 @@
 import { randomUUID } from "node:crypto";
-import { activity, connectDatabase, members } from "@taff/db";
+import {
+  activity,
+  connectDatabase,
+  members,
+  projects,
+  tasks,
+  workspaces,
+} from "@taff/db";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
@@ -413,7 +420,31 @@ describe.skipIf(!url)("M12 CRM invariants (DEPLOY.md rules 1–7)", () => {
         contact.id,
       );
     });
-    expect(result).toEqual({ cascadedTaskLinks: 2 });
+    expect(result).toEqual({
+      cascadedTaskLinks: 2,
+      undo: {
+        workspaceId: w,
+        expectedState: expect.stringMatching(/^[a-f0-9]{64}$/),
+        steps: [
+          {
+            method: "PUT",
+            scope: "project",
+            entityId: project.id,
+            contactId: contact.id,
+            roles: [],
+          },
+          ...[t1, t2]
+            .sort((a, b) => a.id.localeCompare(b.id))
+            .map((t) => ({
+              method: "PUT",
+              scope: "task",
+              entityId: t.id,
+              contactId: contact.id,
+              roles: t.id === t1.id ? ["tech"] : [],
+            })),
+        ],
+      },
+    });
     expect(changes).toEqual({
       "project_contacts.delete": 1,
       "task_contacts.delete": 2,
@@ -429,6 +460,19 @@ describe.skipIf(!url)("M12 CRM invariants (DEPLOY.md rules 1–7)", () => {
     await core.setContactRoles(alice, "task", t1.id, contact.id, { roles: [] });
     expect(await core.unlinkContact(alice, "task", t1.id, contact.id)).toEqual({
       cascadedTaskLinks: 0,
+      undo: {
+        workspaceId: w,
+        expectedState: expect.stringMatching(/^[a-f0-9]{64}$/),
+        steps: [
+          {
+            method: "PUT",
+            scope: "task",
+            entityId: t1.id,
+            contactId: contact.id,
+            roles: [],
+          },
+        ],
+      },
     });
     expect(
       await core.listContactLinks(alice, "project", project.id),
@@ -589,6 +633,19 @@ describe.skipIf(!url)("M12 CRM invariants (DEPLOY.md rules 1–7)", () => {
     await core.setContactRoles(alice, "project", p1.id, a.id, { roles: [] });
     expect(await core.unlinkContact(alice, "project", p1.id, a.id)).toEqual({
       cascadedTaskLinks: 0,
+      undo: {
+        workspaceId: w,
+        expectedState: expect.stringMatching(/^[a-f0-9]{64}$/),
+        steps: [
+          {
+            method: "PUT",
+            scope: "project",
+            entityId: p1.id,
+            contactId: a.id,
+            roles: [],
+          },
+        ],
+      },
     });
     await clean();
     const cleared = await core.updateTask(alice, t.id, {
@@ -791,6 +848,366 @@ describe.skipIf(!url)("M12 CRM invariants (DEPLOY.md rules 1–7)", () => {
     );
     await clean();
   });
+  it("rejects Undo after a task moved while its removed contact links were absent", async () => {
+    const source = await core.createProject(alice, w, {
+      name: "Absent-link source",
+    });
+    const destination = await core.createProject(alice, w, {
+      name: "Absent-link destination",
+    });
+    const work = await task("Absent-link task", source.id);
+    const contact = await core.createContact(alice, w, {
+      name: "Absent-link contact",
+    });
+    await core.setContactRoles(alice, "task", work.id, contact.id, {
+      roles: ["tech"],
+    });
+    const removed = await core.unlinkContact(
+      alice,
+      "project",
+      source.id,
+      contact.id,
+    );
+    await core.updateTask(alice, work.id, {
+      version: work.version,
+      projectId: destination.id,
+    });
+    expect(await status(core.undoCrm(alice, removed.undo!))).toBe(409);
+    expect(await core.listContactLinks(alice, "task", work.id)).toEqual([]);
+    expect(await core.listContactLinks(alice, "project", source.id)).toEqual(
+      [],
+    );
+    expect(
+      await core.listContactLinks(alice, "project", destination.id),
+    ).toEqual([]);
+    await clean();
+  });
+
+  it.each(["project", "task"] as const)(
+    "rejects a busy inverse %s immediately instead of waiting in a workspace lock cycle",
+    async (scope) => {
+      const project = await core.createProject(alice, w, {
+        name: `Busy inverse ${scope}`,
+      });
+      const work = await task(`Busy inverse ${scope}`, project.id);
+      const contact = await core.createContact(alice, w, {
+        name: `Busy inverse ${scope}`,
+      });
+      await core.setContactRoles(alice, "task", work.id, contact.id, {
+        roles: ["tech"],
+      });
+      const removed = await core.unlinkContact(
+        alice,
+        "project",
+        project.id,
+        contact.id,
+      );
+      let pending: Promise<number> | undefined;
+      try {
+        await connection.db.transaction(async (tx) => {
+          if (scope === "project")
+            await tx
+              .select()
+              .from(projects)
+              .where(eq(projects.id, project.id))
+              .for("share");
+          else
+            await tx
+              .select()
+              .from(tasks)
+              .where(eq(tasks.id, work.id))
+              .for("update");
+          pending = status(core.undoCrm(alice, removed.undo!));
+          let timer: ReturnType<typeof setTimeout> | undefined;
+          const result = await Promise.race([
+            pending,
+            new Promise<string>((resolve) => {
+              timer = setTimeout(() => resolve("waited"), 5000);
+            }),
+          ]);
+          clearTimeout(timer);
+          expect(result).toBe(409);
+          // A task-first creator can now obtain the workspace; Undo released it.
+          await tx
+            .select()
+            .from(workspaces)
+            .where(eq(workspaces.id, w))
+            .for("update", { noWait: true });
+        });
+      } finally {
+        if (pending) await pending;
+      }
+      expect(await core.listContactLinks(alice, "task", work.id)).toEqual([]);
+      await core.undoCrm(alice, removed.undo!);
+      expect(
+        (await core.listContactLinks(alice, "task", work.id))[0].roles,
+      ).toEqual(["tech"]);
+      await clean();
+    },
+  );
+
+  it.each(["create", "update"] as const)(
+    "serializes contact %s before row writes when a CRM inverse holds the workspace",
+    async (action) => {
+      const contact = await core.createContact(alice, w, {
+        name: `Serialized ${action}`,
+      });
+      let pending: Promise<unknown> | undefined;
+      try {
+        await connection.db.transaction(async (tx) => {
+          await tx
+            .select()
+            .from(workspaces)
+            .where(eq(workspaces.id, w))
+            .for("update");
+          const [blocker] = await tx.execute<{ pid: number }>(
+            sql`select pg_backend_pid()::int as pid`,
+          );
+          pending =
+            action === "create"
+              ? core.createContact(alice, w, { name: "Waited creation" })
+              : core.updateContact(alice, contact.id, {
+                  version: contact.version,
+                  name: "Waited update",
+                });
+          let blocked = false;
+          for (let attempt = 0; attempt < 100; attempt++) {
+            const [row] = await connection.db.execute<{ blocked: boolean }>(
+              sql`select exists (select 1 from pg_stat_activity where ${blocker.pid} = any(pg_blocking_pids(pid))) as blocked`,
+            );
+            if (row.blocked) {
+              blocked = true;
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 10));
+          }
+          expect(blocked).toBe(true);
+        });
+      } finally {
+        if (pending) await pending;
+      }
+      await clean();
+    },
+  );
+
+  it("rejects stale exclusive-role Undo without taking back a newer holder's role", async () => {
+    const project = await core.createProject(alice, w, {
+      name: "Guarded role undo",
+    });
+    const [a, b, c] = await Promise.all(
+      ["Holder A", "Holder B", "Holder C"].map((name) =>
+        core.createContact(alice, w, { name }),
+      ),
+    );
+    await core.setContactRoles(alice, "project", project.id, a.id, {
+      roles: ["signoff", "tech"],
+    });
+    const moved = await core.setContactRoles(
+      alice,
+      "project",
+      project.id,
+      b.id,
+      { roles: ["signoff"] },
+    );
+    // Capture is authoritative, including A's nonexclusive role, not a client cache.
+    expect(moved.undo!.steps).toEqual([
+      {
+        method: "DELETE",
+        scope: "project",
+        entityId: project.id,
+        contactId: b.id,
+      },
+      {
+        method: "PUT",
+        scope: "project",
+        entityId: project.id,
+        contactId: a.id,
+        roles: ["tech", "signoff"],
+      },
+    ]);
+    await core.setContactRoles(bob, "project", project.id, c.id, {
+      roles: ["signoff"],
+    });
+    const before = await core.listContactLinks(alice, "project", project.id);
+    expect(await status(core.undoCrm(alice, moved.undo!))).toBe(409);
+    expect(await core.listContactLinks(alice, "project", project.id)).toEqual(
+      before,
+    );
+    await clean();
+  });
+
+  it("restores stakeholder cascades atomically and rolls back the first step if a later step fails", async () => {
+    const project = await core.createProject(alice, w, {
+      name: "Atomic cascade undo",
+    });
+    const work = await task("Cascade undo work", project.id);
+    const contact = await core.createContact(alice, w, {
+      name: "Cascade undo contact",
+    });
+    await core.setContactRoles(alice, "task", work.id, contact.id, {
+      roles: ["tech"],
+    });
+    const removed = await core.unlinkContact(
+      alice,
+      "project",
+      project.id,
+      contact.id,
+    );
+    const undo = removed.undo!;
+    expect(undo.steps).toHaveLength(2);
+    const bad = {
+      ...undo,
+      steps: [
+        undo.steps[0],
+        {
+          method: "PUT" as const,
+          scope: "task" as const,
+          entityId: work.id,
+          contactId: contact.id,
+          roles: ["chair" as const],
+        },
+      ],
+    };
+    const activityBefore = await connection.db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(activity)
+      .where(eq(activity.workspaceId, w));
+    expect(await status(core.undoCrm(alice, bad))).toBe(400);
+    expect(await core.listContactLinks(alice, "project", project.id)).toEqual(
+      [],
+    );
+    expect(await core.listContactLinks(alice, "task", work.id)).toEqual([]);
+    expect(
+      await connection.db
+        .select({ n: sql<number>`count(*)::int` })
+        .from(activity)
+        .where(eq(activity.workspaceId, w)),
+    ).toEqual(activityBefore);
+    expect(await core.undoCrm(alice, undo)).toEqual({ restored: true });
+    expect(
+      (await core.listContactLinks(alice, "task", work.id))[0].roles,
+    ).toEqual(["tech"]);
+    expect(
+      await core.listContactLinks(alice, "project", project.id),
+    ).toHaveLength(1);
+    await clean();
+  });
+
+  it("restores company and company roles atomically, preserving the move on inverse failure", async () => {
+    const old = await core.createCompany(alice, w, {
+      name: "Old guarded employer",
+    });
+    const next = await core.createCompany(alice, w, {
+      name: "New guarded employer",
+    });
+    const contact = await core.createContact(alice, w, {
+      name: "Guarded employee",
+      companyId: old.id,
+    });
+    await core.setContactRoles(alice, "company", old.id, contact.id, {
+      roles: ["chair"],
+    });
+    const moved = await core.setContactCompany(alice, contact.id, {
+      version: contact.version,
+      companyId: next.id,
+    });
+    const undo = moved.undo!;
+    expect(
+      await status(
+        core.undoCrm(alice, {
+          ...undo,
+          steps: [
+            ...undo.steps,
+            {
+              method: "PUT",
+              scope: "company",
+              entityId: old.id,
+              contactId: contact.id,
+              roles: ["signoff"],
+            },
+          ],
+        }),
+      ),
+    ).toBe(400);
+    expect(
+      (await core.getContactDetail(alice, contact.id)).contact.companyId,
+    ).toBe(next.id);
+    expect(await core.listContactLinks(alice, "company", old.id)).toEqual([]);
+    await core.undoCrm(alice, undo);
+    expect(
+      (await core.getContactDetail(alice, contact.id)).contact.companyId,
+    ).toBe(old.id);
+    expect(
+      (await core.listContactLinks(alice, "company", old.id))[0].roles,
+    ).toEqual(["chair"]);
+    await clean();
+  });
+
+  it.each(["member", "guest", "outsider", "agent", "plain-agent"] as const)(
+    "CRM Undo applies contact:manage for %s",
+    async (kind) => {
+      const project = await core.createProject(alice, w, {
+        name: `Undo permission ${kind}`,
+      });
+      const contact = await core.createContact(alice, w, {
+        name: `Undo permission ${kind}`,
+      });
+      const changed = await core.setContactRoles(
+        alice,
+        "project",
+        project.id,
+        contact.id,
+        { roles: [] },
+      );
+      const principal = {
+        member: bob,
+        guest,
+        outsider,
+        agent: crmAgent,
+        "plain-agent": plainAgent,
+      }[kind];
+      expect(await status(core.undoCrm(principal, changed.undo!))).toBe(
+        kind === "member" ? 200 : 403,
+      );
+    },
+  );
+
+  it("rejects foreign-workspace inverse steps even with a valid local guard", async () => {
+    const local = await core.createProject(alice, w, { name: "Local inverse" });
+    const contact = await core.createContact(alice, w, {
+      name: "Local inverse",
+    });
+    const changed = await core.setContactRoles(
+      alice,
+      "project",
+      local.id,
+      contact.id,
+      { roles: [] },
+    );
+    const foreign = await core.createProject(outsider, otherW, {
+      name: "Foreign inverse",
+    });
+    expect(
+      await status(
+        core.undoCrm(alice, {
+          ...changed.undo!,
+          steps: [
+            {
+              method: "PUT",
+              scope: "project",
+              entityId: foreign.id,
+              contactId: contact.id,
+              roles: [],
+            },
+          ],
+        }),
+      ),
+    ).toBe(400);
+    expect(
+      await core.listContactLinks(alice, "project", local.id),
+    ).toHaveLength(1);
+  });
+
   it("auditCrm reports rows that bypassed the constraints", async () => {
     const co1 = await core.createCompany(alice, w, { name: "Audit One" });
     const co2 = await core.createCompany(alice, w, { name: "Audit Two" });

@@ -14,6 +14,7 @@ import {
   type ContactRole,
   type ContactScope,
   type ContactUpdate,
+  type CrmUndo,
   companySchema,
   contactDetailSchema,
   contactSchema,
@@ -296,42 +297,51 @@ async function send(step: ContactStep) {
     : request(path, { method: "DELETE" });
 }
 
-/**
- * Runs inverse link steps in order as one tracked mutation: the lists change
- * at once and return to the server's state if a step fails.
- */
-function runUndo(client: QueryClient, t: TFunction, steps: ContactStep[]) {
+/** Apply the server-captured inverse atomically, rejecting intervening CRM writes. */
+function runUndo(
+  client: QueryClient,
+  t: TFunction,
+  undo: CrmUndo,
+  original: Contact,
+) {
   const mutation = client.getMutationCache().build(client, {
     mutationKey: crmMutationKey,
-    mutationFn: async () => {
-      for (const step of steps) await send(step);
-    },
+    mutationFn: () =>
+      request("/api/crm/undo", {
+        method: "POST",
+        body: JSON.stringify(undo),
+      }),
     onMutate: async () => {
-      const keys = [
-        ...new Set(
-          steps.map((step) => JSON.stringify([step.scope, step.entityId])),
-        ),
-      ].map((key) => {
-        const [scope, entityId] = JSON.parse(key) as [ContactScope, string];
-        return contactLinksKey(scope, entityId);
-      });
+      const keys = undo.steps.flatMap((step) =>
+        step.method === "COMPANY"
+          ? []
+          : [contactLinksKey(step.scope, step.entityId)],
+      );
       const snapshot = await snapshotQueries(client, keys);
-      for (const step of steps)
+      for (const step of undo.steps) {
+        if (step.method === "COMPANY") continue;
         client.setQueryData<ContactLink[]>(
           contactLinksKey(step.scope, step.entityId),
-          (links) =>
-            links === undefined
-              ? links
-              : step.method === "PUT"
-                ? withContactRoles(
-                    links,
-                    step.scope,
-                    step.entityId,
-                    step.contact,
-                    step.roles,
-                  )
-                : withoutContact(links, step.contact.id),
+          (links) => {
+            if (!links) return links;
+            if (step.method === "DELETE")
+              return withoutContact(links, step.contactId);
+            const contact =
+              links.find((link) => link.contactId === step.contactId)
+                ?.contact ??
+              (original.id === step.contactId ? original : undefined);
+            return contact
+              ? withContactRoles(
+                  links,
+                  step.scope,
+                  step.entityId,
+                  contact,
+                  step.roles,
+                )
+              : links;
+          },
         );
+      }
       return snapshot;
     },
     onError: (error, _, snapshot) => {
@@ -429,10 +439,11 @@ export function useSetContactRoles() {
             link.contactId === contact.id ? result.link : link,
           ),
       );
-      const steps = undoRolesSteps(context.before, target, contact, result);
       showToast(
         rolesToastText(t, context.before, contact, result, projectName ?? ""),
-        undoAction(t, () => runUndo(client, t, steps)),
+        result.undo
+          ? undoAction(t, () => runUndo(client, t, result.undo!, contact))
+          : undefined,
       );
     },
     onSettled: () => invalidateCrm(client),
@@ -456,16 +467,6 @@ export function useRemoveContactLink() {
       target: LinkTarget;
       contact: Contact;
     }) => {
-      const cascaded =
-        target.scope === "project"
-          ? contactDetailSchema
-              .parse(await request(`/api/contacts/${contact.id}`))
-              .links.filter(
-                (link) =>
-                  link.scope === "task" && link.projectId === target.entityId,
-              )
-              .map((link) => ({ entityId: link.entityId, roles: link.roles }))
-          : [];
       const result = unlinkContactResultSchema.parse(
         await send({
           method: "DELETE",
@@ -474,7 +475,7 @@ export function useRemoveContactLink() {
           contact,
         }),
       );
-      return { result, cascaded };
+      return result;
     },
     onMutate: async ({ target, contact }) => {
       const key = contactLinksKey(target.scope, target.entityId);
@@ -505,12 +506,13 @@ export function useRemoveContactLink() {
       restoreQueries(client, context?.snapshot);
       showToast(t(errorKey(error)));
     },
-    onSuccess: ({ result, cascaded }, { target, contact }, context) => {
+    onSuccess: (result, { contact }, context) => {
       if (!isCurrentSnapshot(client, context.snapshot)) return;
-      const steps = undoRemoveSteps(target, contact, context.roles, cascaded);
       showToast(
         removeToastText(t, contact.name, result.cascadedTaskLinks),
-        undoAction(t, () => runUndo(client, t, steps)),
+        result.undo
+          ? undoAction(t, () => runUndo(client, t, result.undo!, contact))
+          : undefined,
       );
     },
     onSettled: () => invalidateCrm(client),
@@ -785,32 +787,13 @@ export function useSetContactCompany() {
         }),
       ),
     onError: (error) => showToast(t(errorKey(error))),
-    onSuccess: (result, { companyName, dropped }) => {
+    onSuccess: (result, { companyName }) => {
       const moved = result.contact;
       showToast(
         companyChangeToastText(t, moved.name, companyName, result.dropped),
-        undoAction(t, () =>
-          runInverse(client, t, async () => {
-            const back = setContactCompanyResultSchema.parse(
-              await request(`/api/contacts/${moved.id}/company`, {
-                method: "PATCH",
-                body: JSON.stringify({
-                  version: moved.version,
-                  companyId: result.previousCompanyId,
-                }),
-              }),
-            );
-            if (result.dropped > 0)
-              for (const link of dropped)
-                await send({
-                  method: "PUT",
-                  scope: "company",
-                  entityId: link.entityId,
-                  contact: back.contact,
-                  roles: link.roles,
-                });
-          }),
-        ),
+        result.undo
+          ? undoAction(t, () => runUndo(client, t, result.undo!, moved))
+          : undefined,
       );
     },
     onSettled: () => invalidateCrm(client),
