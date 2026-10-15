@@ -13,13 +13,14 @@ test("capture fonts keep late text and punctuation stable across load orders", a
 }, info) => {
   test.setTimeout(60_000);
   const css = await readFile("apps/web/src/styles/tokens.css", "utf8");
+  const locale = info.project.use.locale ?? "en-US";
   const results = [];
   let canonical: unknown;
   for (const late of [false, true]) {
     for (const order of ["immediate", "ascending", "descending"]) {
       const context = await browser.newContext({
         viewport: { width: 390, height: 844 },
-        locale: "zh-HK",
+        locale,
       });
       try {
         const page = await context.newPage();
@@ -43,7 +44,7 @@ test("capture fonts keep late text and punctuation stable across load orders", a
           });
         });
         await page.setContent(
-          `<html lang="zh-HK"><head><base href="https://font.test/"><style>${css}body{margin:20px;font-family:var(--font-sans)}p{width:350px;font-size:14px;line-height:1.6;text-wrap:pretty}</style></head><body><p id="paragraph">${late ? "載入中" : text}</p></body></html>`,
+          `<html lang="${locale}"><head><base href="https://font.test/"><style>${css}body{margin:20px;font-family:var(--font-sans)}p{width:350px;font-size:14px;line-height:1.6;text-wrap:pretty}</style></head><body><p id="paragraph">${late ? "載入中" : text}</p></body></html>`,
         );
         await page.evaluate(prepareFonts);
         if (late)
