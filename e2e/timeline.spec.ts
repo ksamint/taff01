@@ -334,6 +334,32 @@ test("open a task from the relations graph and via the list", async ({
   await expect(
     inspector.getByTestId("relations-inspector-title"),
   ).toContainText(second.title);
+  // A selected label remains above overlapping nodes at the supported minimum zoom.
+  const selectedPosition = await node.getAttribute("transform");
+  for (let i = 0; i < 8; i++)
+    await page.getByTestId("relations-zoom-out").click();
+  await expect(page.locator(".relations-svg > g")).toHaveAttribute(
+    "transform",
+    /scale\(0\.25\)/,
+  );
+  await expect(page.getByTestId("relations-node").last()).toHaveAttribute(
+    "data-key",
+    `task:${second.id}`,
+  );
+  await expect(node).toHaveAttribute("transform", selectedPosition!);
+  const selectedLabel = node.locator(".relations-label");
+  await expect(selectedLabel).toBeVisible();
+  const screenStroke = await selectedLabel.evaluate((element) => {
+    const label = element as SVGTextElement;
+    const matrix = label.getScreenCTM();
+    if (!matrix) throw new Error("Selected label screen matrix unavailable");
+    return (
+      Number.parseFloat(getComputedStyle(label).strokeWidth) *
+      Math.hypot(matrix.a, matrix.b)
+    );
+  });
+  expect(screenStroke).toBeCloseTo(3, 1);
+  await page.getByTestId("relations-fit").click();
   // The relations list reaches the predecessor by keyboard.
   const relation = inspector
     .getByTestId("relations-relation")
