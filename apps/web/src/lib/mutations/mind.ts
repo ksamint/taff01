@@ -6,6 +6,17 @@
 // fields with the new version, an archive restores, a link removal re-adds
 // the link. A validation task is a real task and tasks are never deleted,
 // so that toast opens the task instead (see docs/milestones/18-mind-map.md).
+//
+// Version-checked follow-ups must not trip over this tab's own writes (each
+// of these used to fail as "changed elsewhere", 409, or as an invalid id):
+// - every success (and every undo) writes the row the server returned into
+//   both maps before the refetch, since the optimistic row still carries the
+//   old version or an optimistic id;
+// - mind writes run one at a time (one mutation scope), and a write sends
+//   the version the person acted on moved past this tab's own later writes
+//   to that row (`sendVersion`), so Archive clicked while its Undo is still
+//   in flight follows the Undo instead of racing it. A version changed by
+//   anyone else is never skipped, so real conflicts still answer 409.
 import {
   type MindEdge,
   type MindEdgeInput,
@@ -47,6 +58,31 @@ import { restoreQueries, snapshotQueries } from "../query-snapshot";
 import { showToast, type ToastAction } from "../toast";
 
 export const mindMutationKey = ["mind-write"] as const;
+/** Mind writes run in order, so a write follows the one clicked before it. */
+const scope = { id: "mind-write" };
+
+/** This tab's own successful writes: `${row id}@${version sent}` → saved. */
+const ownWrites = new Map<string, number>();
+const OWN_WRITES_KEPT = 500;
+/** Records that this tab moved `id` from version `sent` to `saved`. */
+export function recordOwnWrite(id: string, sent: number, saved: number) {
+  ownWrites.delete(`${id}@${sent}`);
+  ownWrites.set(`${id}@${sent}`, saved);
+  if (ownWrites.size > OWN_WRITES_KEPT)
+    ownWrites.delete(ownWrites.keys().next().value!);
+}
+/**
+ * The version to send for a write the person made on `version`: moved past
+ * the writes this tab itself made to the row since, and no further.
+ */
+export function sendVersion(id: string, version: number) {
+  let current = version;
+  for (;;) {
+    const next = ownWrites.get(`${id}@${current}`);
+    if (next === undefined || next <= current) return current;
+    current = next;
+  }
+}
 const MIND = ["mind-map"];
 /** A validation task also changes task lists, the timeline and the brief. */
 const TASK_FAMILIES = [
@@ -79,21 +115,48 @@ async function applyEdit(client: QueryClient, workspaceId: string, edit: Edit) {
   return snapshot;
 }
 
-/** Runs an inverse call (undo) as a tracked mutation, then refreshes. */
-function runInverse(
+/**
+ * Writes the rows the server returned into both cached maps at once, so the
+ * next version-checked write uses the server's version, not the optimistic
+ * row's, even before the refetch lands.
+ */
+function applySaved(client: QueryClient, workspaceId: string, edit: Edit) {
+  for (const archived of [false, true])
+    client.setQueryData<MindMap>(mindKey(workspaceId, archived), (map) =>
+      map ? edit(map, archived) : map,
+    );
+}
+
+/** Drops an optimistic source and its optimistic evidence links. */
+const withoutSource = (map: MindMap, id: string): MindMap => ({
+  ...map,
+  sources: map.sources.filter((item) => item.id !== id),
+  nodeSources: map.nodeSources.filter((link) => link.sourceId !== id),
+});
+
+/**
+ * Runs an inverse call (undo) as a tracked mutation, writes the row it
+ * returns (`saved`), then refreshes.
+ */
+function runInverse<T>(
   client: QueryClient,
   t: TFunction,
   workspaceId: string,
-  call: () => Promise<unknown>,
+  call: () => Promise<T>,
   edit?: Edit,
+  saved?: (result: T) => Edit,
 ) {
   const mutation = client.getMutationCache().build(client, {
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: call,
     onMutate: () => (edit ? applyEdit(client, workspaceId, edit) : undefined),
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot as Parameters<typeof restoreQueries>[1]);
       showToast(t(errorKey(error)));
+    },
+    onSuccess: (result) => {
+      if (saved) applySaved(client, workspaceId, saved(result));
     },
     onSettled: () => invalidate(client, MIND),
   });
@@ -108,19 +171,34 @@ let optimisticSequence = 0;
 const optimisticId = () => `optimistic:${++optimisticSequence}`;
 const now = () => new Date().toISOString();
 
-const patchNode = async (id: string, body: MindNodeUpdate) =>
-  mindNodeSchema.parse(
-    await request(`/api/mind/nodes/${id}`, {
+/** PATCHes a versioned row and records the write as this tab's own. */
+async function patchVersioned<T extends { version: number }>(
+  path: string,
+  id: string,
+  body: { version: number },
+  parse: (value: unknown) => T,
+) {
+  const version = sendVersion(id, body.version);
+  const saved = parse(
+    await request(path, {
       method: "PATCH",
-      body: JSON.stringify(body),
+      body: JSON.stringify({ ...body, version }),
     }),
   );
-const patchSource = async (id: string, body: MindSourceUpdate) =>
-  mindSourceSchema.parse(
-    await request(`/api/mind/sources/${id}`, {
-      method: "PATCH",
-      body: JSON.stringify(body),
-    }),
+  recordOwnWrite(id, version, saved.version);
+  return saved;
+}
+const patchNode = (id: string, body: MindNodeUpdate) =>
+  patchVersioned(`/api/mind/nodes/${id}`, id, body, (value) =>
+    mindNodeSchema.parse(value),
+  );
+const patchSource = (id: string, body: MindSourceUpdate) =>
+  patchVersioned(`/api/mind/sources/${id}`, id, body, (value) =>
+    mindSourceSchema.parse(value),
+  );
+const patchEdge = (id: string, body: MindEdgeUpdate) =>
+  patchVersioned(`/api/mind/edges/${id}`, id, body, (value) =>
+    mindEdgeSchema.parse(value),
   );
 const postEdge = async (workspaceId: string, body: MindEdgeInput) =>
   mindEdgeSchema.parse(
@@ -143,6 +221,7 @@ export function useSaveMindNode(workspaceId: string, canArchive: boolean) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: async ({
       node,
       fields,
@@ -187,19 +266,16 @@ export function useSaveMindNode(workspaceId: string, canArchive: boolean) {
     },
     onSuccess: (saved, { node, onSaved }, context) => {
       // The saved row replaces the optimistic one so it can be selected now.
-      for (const archived of [false, true])
-        client.setQueryData<MindMap>(mindKey(workspaceId, archived), (map) =>
-          map
-            ? withNode(
-                {
-                  ...map,
-                  nodes: map.nodes.filter((item) => item.id !== context.tempId),
-                },
-                saved,
-                archived,
-              )
-            : map,
-        );
+      applySaved(client, workspaceId, (map, all) =>
+        withNode(
+          {
+            ...map,
+            nodes: map.nodes.filter((item) => item.id !== context.tempId),
+          },
+          saved,
+          all,
+        ),
+      );
       onSaved?.(saved);
       if (!node)
         showToast(
@@ -217,6 +293,7 @@ export function useSaveMindNode(workspaceId: string, canArchive: boolean) {
                     }),
                   (map, all) =>
                     withNode(map, { ...saved, archivedAt: now() }, all),
+                  (row) => (map, all) => withNode(map, row, all),
                 ),
               )
             : undefined,
@@ -240,6 +317,7 @@ export function useSaveMindNode(workspaceId: string, canArchive: boolean) {
               () =>
                 patchNode(saved.id, { version: saved.version, ...previous }),
               (map, all) => withNode(map, { ...saved, ...previous }, all),
+              (row) => (map, all) => withNode(map, row, all),
             ),
           ),
         );
@@ -255,6 +333,7 @@ export function useArchiveMindNode(workspaceId: string) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: ({ node, archived }: { node: MindNode; archived: boolean }) =>
       patchNode(node.id, { version: node.version, archived }),
     onMutate: ({ node, archived }) =>
@@ -265,7 +344,8 @@ export function useArchiveMindNode(workspaceId: string) {
       restoreQueries(client, snapshot);
       showToast(t(errorKey(error)));
     },
-    onSuccess: (saved, { archived }) =>
+    onSuccess: (saved, { archived }) => {
+      applySaved(client, workspaceId, (map, all) => withNode(map, saved, all));
       showToast(
         t(archived ? "mind.toast.nodeArchived" : "mind.toast.nodeRestored", {
           title: saved.title,
@@ -286,9 +366,11 @@ export function useArchiveMindNode(workspaceId: string) {
                 { ...saved, archivedAt: archived ? null : now() },
                 all,
               ),
+            (row) => (map, all) => withNode(map, row, all),
           ),
         ),
-      ),
+      );
+    },
     onSettled: () => invalidate(client, MIND),
   });
 }
@@ -299,11 +381,13 @@ export function useAddMindEdge(workspaceId: string) {
   const { t } = useTranslation();
   const mutation = useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: (body: MindEdgeInput) => postEdge(workspaceId, body),
-    onMutate: (body) =>
-      applyEdit(client, workspaceId, (map) =>
+    onMutate: async (body) => {
+      const tempId = optimisticId();
+      const snapshot = await applyEdit(client, workspaceId, (map) =>
         withEdge(map, {
-          id: optimisticId(),
+          id: tempId,
           workspaceId,
           fromNodeId: body.fromNodeId,
           toNodeId: body.toNodeId,
@@ -311,16 +395,21 @@ export function useAddMindEdge(workspaceId: string) {
           version: 1,
           createdAt: now(),
         }),
-      ),
-    onError: (error, _, snapshot) => {
-      restoreQueries(client, snapshot);
+      );
+      return { snapshot, tempId };
+    },
+    onError: (error, _, context) => {
+      restoreQueries(client, context?.snapshot);
       showToast(
         error instanceof ApiError && error.status === 409
           ? t("mind.toast.edgeExists")
           : t(errorKey(error)),
       );
     },
-    onSuccess: (edge) =>
+    onSuccess: (edge, _, context) => {
+      applySaved(client, workspaceId, (map) =>
+        withEdge(withoutEdge(map, context.tempId), edge),
+      );
       showToast(
         t("mind.toast.edgeAdded"),
         undo(t, () =>
@@ -332,7 +421,8 @@ export function useAddMindEdge(workspaceId: string) {
             (map) => withoutEdge(map, edge.id),
           ),
         ),
-      ),
+      );
+    },
     onSettled: () => invalidate(client, MIND),
   });
   const add = (body: MindEdgeInput) => {
@@ -354,29 +444,22 @@ export function useUpdateMindEdge(workspaceId: string) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: async ({
       edge,
       kind,
     }: {
       edge: MindEdge;
       kind: MindEdge["kind"];
-    }) =>
-      mindEdgeSchema.parse(
-        await request(`/api/mind/edges/${edge.id}`, {
-          method: "PATCH",
-          body: JSON.stringify({
-            version: edge.version,
-            kind,
-          } satisfies MindEdgeUpdate),
-        }),
-      ),
+    }) => patchEdge(edge.id, { version: edge.version, kind }),
     onMutate: ({ edge, kind }) =>
       applyEdit(client, workspaceId, (map) => withEdge(map, { ...edge, kind })),
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);
       showToast(t(errorKey(error)));
     },
-    onSuccess: (saved, { edge }) =>
+    onSuccess: (saved, { edge }) => {
+      applySaved(client, workspaceId, (map) => withEdge(map, saved));
       showToast(
         t("mind.toast.edgeChanged", { kind: t(`mind.edgeKind.${saved.kind}`) }),
         undo(t, () =>
@@ -385,17 +468,13 @@ export function useUpdateMindEdge(workspaceId: string) {
             t,
             workspaceId,
             () =>
-              request(`/api/mind/edges/${saved.id}`, {
-                method: "PATCH",
-                body: JSON.stringify({
-                  version: saved.version,
-                  kind: edge.kind,
-                } satisfies MindEdgeUpdate),
-              }),
+              patchEdge(saved.id, { version: saved.version, kind: edge.kind }),
             (map) => withEdge(map, { ...saved, kind: edge.kind }),
+            (row) => (map) => withEdge(map, row),
           ),
         ),
-      ),
+      );
+    },
     onSettled: () => invalidate(client, MIND),
   });
 }
@@ -406,6 +485,7 @@ export function useRemoveMindEdge(workspaceId: string) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: async (edge: MindEdge) =>
       mindEdgeSchema.parse(
         await request(`/api/mind/edges/${edge.id}`, { method: "DELETE" }),
@@ -431,6 +511,8 @@ export function useRemoveMindEdge(workspaceId: string) {
                 kind: row.kind,
               }),
             (map) => withEdge(map, row),
+            // The re-created link has a new id; the removed id is gone.
+            (created) => (map) => withEdge(withoutEdge(map, row.id), created),
           ),
         ),
       ),
@@ -450,6 +532,7 @@ export function useSaveMindSource(workspaceId: string, canArchive: boolean) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: async ({
       source,
       fields,
@@ -460,22 +543,29 @@ export function useSaveMindSource(workspaceId: string, canArchive: boolean) {
       linkTo?: string | null;
     }) => {
       if (source)
-        return patchSource(source.id, { version: source.version, ...fields });
+        return {
+          saved: await patchSource(source.id, {
+            version: source.version,
+            ...fields,
+          }),
+          link: null,
+        };
       const created = mindSourceSchema.parse(
         await request(`/api/workspaces/${workspaceId}/mind/sources`, {
           method: "POST",
           body: JSON.stringify(fields satisfies MindSourceInput),
         }),
       );
-      if (linkTo)
-        mindNodeSourceSchema.parse(
-          await request(linkPath(linkTo, created.id), { method: "PUT" }),
-        );
-      return created;
+      const link = linkTo
+        ? mindNodeSourceSchema.parse(
+            await request(linkPath(linkTo, created.id), { method: "PUT" }),
+          )
+        : null;
+      return { saved: created, link };
     },
-    onMutate: ({ source, fields, linkTo }) => {
+    onMutate: async ({ source, fields, linkTo }) => {
       const id = source?.id ?? optimisticId();
-      return applyEdit(client, workspaceId, (map, all) => {
+      const snapshot = await applyEdit(client, workspaceId, (map, all) => {
         const next = withSource(
           map,
           source
@@ -501,12 +591,22 @@ export function useSaveMindSource(workspaceId: string, canArchive: boolean) {
             })
           : next;
       });
+      return { snapshot, tempId: id };
     },
-    onError: (error, _, snapshot) => {
-      restoreQueries(client, snapshot);
+    onError: (error, _, context) => {
+      restoreQueries(client, context?.snapshot);
       showToast(t(errorKey(error)));
     },
-    onSuccess: (saved, { source }) => {
+    onSuccess: ({ saved, link }, { source }, context) => {
+      // The saved row (and its new evidence link) replaces the optimistic one.
+      applySaved(client, workspaceId, (map, all) => {
+        const next = withSource(
+          source ? map : withoutSource(map, context.tempId),
+          saved,
+          all,
+        );
+        return link ? withLink(next, link) : next;
+      });
       if (!source)
         showToast(
           t("mind.toast.sourceCreated", { title: saved.title }),
@@ -523,6 +623,7 @@ export function useSaveMindSource(workspaceId: string, canArchive: boolean) {
                     }),
                   (map, all) =>
                     withSource(map, { ...saved, archivedAt: now() }, all),
+                  (row) => (map, all) => withSource(map, row, all),
                 ),
               )
             : undefined,
@@ -543,6 +644,7 @@ export function useSaveMindSource(workspaceId: string, canArchive: boolean) {
               () =>
                 patchSource(saved.id, { version: saved.version, ...previous }),
               (map, all) => withSource(map, { ...saved, ...previous }, all),
+              (row) => (map, all) => withSource(map, row, all),
             ),
           ),
         );
@@ -558,6 +660,7 @@ export function useArchiveMindSource(workspaceId: string) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: ({
       source,
       archived,
@@ -577,7 +680,10 @@ export function useArchiveMindSource(workspaceId: string) {
       restoreQueries(client, snapshot);
       showToast(t(errorKey(error)));
     },
-    onSuccess: (saved, { archived }) =>
+    onSuccess: (saved, { archived }) => {
+      applySaved(client, workspaceId, (map, all) =>
+        withSource(map, saved, all),
+      );
       showToast(
         t(
           archived ? "mind.toast.sourceArchived" : "mind.toast.sourceRestored",
@@ -599,9 +705,11 @@ export function useArchiveMindSource(workspaceId: string) {
                 { ...saved, archivedAt: archived ? null : now() },
                 all,
               ),
+            (row) => (map, all) => withSource(map, row, all),
           ),
         ),
-      ),
+      );
+    },
     onSettled: () => invalidate(client, MIND),
   });
 }
@@ -614,6 +722,7 @@ export function useLinkMindSource(workspaceId: string) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: async ({ node, source }: LinkVariables) =>
       mindNodeSourceSchema.parse(
         await request(linkPath(node.id, source.id), { method: "PUT" }),
@@ -658,6 +767,7 @@ export function useUnlinkMindSource(workspaceId: string) {
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: async ({ node, source }: LinkVariables) =>
       mindNodeSourceSchema.parse(
         await request(linkPath(node.id, source.id), { method: "DELETE" }),
@@ -703,6 +813,7 @@ export function useCreateValidationTask(
   const { t } = useTranslation();
   return useMutation({
     mutationKey: mindMutationKey,
+    scope,
     mutationFn: async ({
       node,
       body,
@@ -710,16 +821,20 @@ export function useCreateValidationTask(
       node: MindNode;
       body: Omit<MindValidationTaskInput, "version">;
       reference: (result: MindValidationTaskResult) => string;
-    }) =>
-      mindValidationTaskResultSchema.parse(
+    }) => {
+      const version = sendVersion(node.id, node.version);
+      const result = mindValidationTaskResultSchema.parse(
         await request(`/api/mind/nodes/${node.id}/task`, {
           method: "POST",
           body: JSON.stringify({
-            version: node.version,
+            version,
             ...body,
           } satisfies MindValidationTaskInput),
         }),
-      ),
+      );
+      recordOwnWrite(node.id, version, result.node.version);
+      return result;
+    },
     onMutate: ({ node }) =>
       applyEdit(client, workspaceId, (map, all) =>
         withNode(map, { ...node, taskId: optimisticId() }, all),
@@ -729,10 +844,9 @@ export function useCreateValidationTask(
       showToast(t(errorKey(error)));
     },
     onSuccess: (result, { reference }) => {
-      for (const archived of [false, true])
-        client.setQueryData<MindMap>(mindKey(workspaceId, archived), (map) =>
-          map ? withNode(map, result.node, archived) : map,
-        );
+      applySaved(client, workspaceId, (map, all) =>
+        withNode(map, result.node, all),
+      );
       showToast(
         t("mind.toast.taskMade", {
           ref: reference(result),
