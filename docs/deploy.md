@@ -2332,3 +2332,97 @@ Final public counts above cover only the corrected source and include no cleanup
 Applied additive migration hashes: -
 `packages/db/migrations/0028_v021_archived_subtask_guard.sql`:
 `a4a2ff1c2eaf58f0ccd9c7c776c5cd4628c7984733b00d74a1b4a5ece9361a61` (no backfill)
+
+### Frontend v2 release candidate v0.2.2 — 2026-10-15
+
+Pinned main source `271bdbd694cbec233673814332d1666c7b2c1e8d`, tree `1f4e428712efb645ba3bd452ddd49fc85df68849`.
+
+Audit repair release following accepted v0.2.1 `1200f704fd8bb10af890c6761618291f8370e925`.
+Workspace packages and official MCP server identity are 0.2.2. The v0.2.1 audit
+identifies two P0 silent lost-update defects, one P1 human proposal-path defect,
+13 P2s and one P3; ten separate repair PRs address all P0/P1s and seven local P2s:
+
+- PR40: version/membership guard for Timeline subtree Undo.
+- PR44: one server-captured, atomic CRM inverse; reference locks and state guard
+  reject concurrent task moves, role changes and partial cascades safely.
+- PR42: human task owners/admins share proposal creation, attribution, review,
+  apply and Undo; agent assignment, scopes and grants remain enforced.
+- PR38: every rate-limited MCP request avoids authentication and database logs,
+  including the first 429 and limiter failure; accepted calls remain logged.
+- PR39: scoped patched transitive esbuild with compatible migration tooling.
+- PR41: additive 0029 versions, positive constraints and revision triggers for
+  the seven relationship/ledger tables that lacked them.
+- PR43: self identity reads pass explicit can() rule/table tests.
+- PR45: 44 px Calendar all-day/multi-day row targets with real lower-edge and
+  keyboard activation, stacked alignment and exact schedule restoration.
+- PR46: valid semantic groups on localized SDK Calendar containers across view
+  changes; whole-document isolated axe checks in all locales/viewports.
+- PR47: opaque font-scaled Relations label halos and selected-node paint order,
+  with pixel-backed default/minimum-zoom/selection contrast and unchanged graph geometry. Relations references are regenerated only through the source-pinned native workflow for this intended accessibility correction, retaining original prototype captures and all comparison tolerances.
+
+The larger endpoint authorization matrix, overlapping optimistic rollback,
+non-Today performance, remaining historical timing, headers and retention/restore
+policy remain follow-ups. Product §10.2 and infrastructure recommendations are
+not implemented by this release.
+
+**CI.** Exact-source main push [38734441916](https://github.com/ksamint/taff01/actions/runs/38734441916)
+and merged PR-head [38725948847](https://github.com/ksamint/taff01/actions/runs/38725948847)
+are completed/success. The PR head is an ancestor of the pinned source.
+
+Exact-main validation: 1002 unit/integration tests; Today initial JS 194491 B
+gzipped against 204800 B; Today LCP en 628 ms, zh-CN 676 ms, zh-HK 696 ms
+(three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling). Lighthouse 13.5.0
+performance/accessibility/best-practices: en 100/100/100; zh-CN 100/100/100; zh-HK 100/100/100. Full committed visual,
+all browser flows and bundled MCP smoke gates pass. pnpm audit: zero reported
+vulnerabilities; licence:check passes with documented ADR exceptions.
+
+**Migration.** `packages/db/migrations/0029_v022_relation_versions.sql`,
+SHA-256 `72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72`, is additive: seven non-null version columns default 1,
+positive constraints and new BEFORE UPDATE revision/timestamp triggers. Existing
+IDs and payload are preserved. No DML, explicit backfill, drop, truncate, rename,
+type narrowing or rewrite of existing user values. Existing 0023–0028 bytes
+remain unchanged and every journal hash must match. The canonical one-shot
+migrator must finish before application replacement.
+
+**Environment and infrastructure.** No new production variables or changes to
+.env.production.example, Compose, Dockerfiles, Caddy or route files. Only TAFF_TAG
+changes in the private 0600 env; email/SMS unchanged, AI_* unset and every
+workspace AI flag remains disabled. No host layout, DNS, database host/role,
+runner, retention or proxy change. Retain accepted v0.2.1 rollback images and the
+verified predeploy database/env backups. Deploy only the pinned source with
+SHA/ASSET_VERSION stamping and the native detached keeper.
+
+**Acceptance.** All 146 applicable public cases must execute with no runtime
+skips, zero page errors and zero unresolved cleanup failures. Retain full plan
+§6.0, CRM/timeline/relations/rules brief/Ask/mind, restricted-member finance,
+platform, three-locale spots, en/zh-HK phone and desktop, and four official-client
+MCP round trips exercising all 30 tools with taff/0.2.2 and revoked-token 401.
+Existing live cases additionally exercise human proposal attribution/apply/Undo/
+dismiss and day/week multi-day targets at their lower edge/by Enter, restoring
+the exact original schedule through supported application operations. One retry
+per failure; twice-failing critical flows restore recorded accepted images/env
+while retaining additive migration 0029. No production seed, direct repair SQL,
+public rate-limit flood, SMS send or AI call.
+
+Supplementary route LCP/Lighthouse runs only as normal Step 4 under the same
+verified keeper and exact runtime. Accepted cleanup leaves no active verification
+project, so a separately journaled functional route check may create exactly one
+project and three owned tasks through supported public APIs, give them current-day
+due dates and schedule one current-day occurrence. This is a dedicated normal
+verification fixture, not a production seed. Confirm create/read behavior, then
+measure existing fixture routes with read-only page loads. Record actual card and
+occurrence counts; do not call three tasks the 20-card CI baseline.
+
+The measurement driver permits only its normal sign-in/sign-out and locale-only
+profile changes; restore the original profile and confirm twice. The fixture
+lifecycle helper must clear its schedule, finish its three tasks, archive its
+project and confirm terminal state twice through application APIs, with every ID
+journaled and workspace/ownership/version checked. It never touches unrelated
+entities. Fresh acceptance requires this supplemental cleanup and profile/session
+cleanup as well as the original 146 cases. Clearly distinguish these live-network
+observations from the audit's populated controlled-local v0.2.1 measurements;
+other-route budgets are not new release gates.
+
+After acceptance, record the checkpoint, push annotated `v0.2.2` on this exact
+SHA, release the native keeper and independently verify free flock and healthy
+runtime, then update the audit and milestone.
