@@ -41,7 +41,10 @@ Private reports are under `~/.local/state/taff-v021/timeline-investigation/`:
   move/resize/form/undo 5/5, retries 0, ten cleanup journals with zero failures
   and browser page errors; summary SHA-256
   `50b962c36198eb3b8ed08c8a60550a7467db484d3e4ed08d664bddafd6a60a4a`.
-- Corrected six-project locale/viewport matrix: pending final run receipt.
+- `run-Q28BWQ`: corrected held-font setup and unchanged move/resize/form/undo
+  passed 12/12 across phone/desktop × en/zh-CN/zh-HK, retries 0; twelve cleanup
+  journals report zero failures and browser page errors. Summary SHA-256
+  `417f58bd27dbc7459484bd4884b649e5d22c9942a5f2e37d208e1b8cdcdf29eb`.
 - Fast checks: lint, typecheck and 8 harness/contract unit tests passed.
 
 The new setup regression adds six applicable cases to full public acceptance
