@@ -68,7 +68,8 @@ async function sendPlan(
   version: number | null,
   startDate: string,
   durationDays: number,
-): Promise<number> {
+  expectedState?: string,
+): Promise<{ version: number; undoState?: string }> {
   if (item.kind === "milestone") {
     const saved = milestoneSchema.parse(
       await request(`/api/milestones/${item.id}`, {
@@ -76,13 +77,14 @@ async function sendPlan(
         body: JSON.stringify({ version, date: startDate }),
       }),
     );
-    return saved.version;
+    return { version: saved.version };
   }
   const body: TaskPlanInput = {
     ...(version === null ? {} : { version }),
     startDate,
     durationDays,
     ...(shiftsChildren(item) ? { shiftChildren: true } : {}),
+    ...(expectedState ? { expectedState } : {}),
   };
   const result = taskPlanResultSchema.parse(
     await request(`/api/tasks/${item.id}/plan`, {
@@ -92,7 +94,7 @@ async function sendPlan(
   );
   const plan = result.plans[0];
   if (!plan) throw new ApiError("internal_error");
-  return plan.version;
+  return { version: plan.version, undoState: result.undoState };
 }
 /** The plan version a write must send: absent before the first plan. */
 const planVersion = (item: TimelineItem) =>
@@ -184,14 +186,20 @@ export function useSetPlan(projectId: string) {
       restoreQueries(client, snapshot);
       showToast(t(errorKey(error)));
     },
-    onSuccess: (version, { item, reason }) => {
+    onSuccess: ({ version, undoState }, { item, reason }) => {
       showToast(
         t(reason === "resize" ? "timeline.resized" : "timeline.rescheduled", {
           title: item.title,
         }),
         undo(t, () =>
           runInverse(client, t, () =>
-            sendPlan(item, version, item.start, Math.max(1, item.durationDays)),
+            sendPlan(
+              item,
+              version,
+              item.start,
+              Math.max(1, item.durationDays),
+              undoState,
+            ),
           ),
         ),
       );

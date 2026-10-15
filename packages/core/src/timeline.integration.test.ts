@@ -266,6 +266,71 @@ describe.skipIf(!url)(
       });
     });
 
+    it("rejects a subtree inverse after a newer child edit, without changing any row", async () => {
+      const parent = await create("Guarded parent");
+      const child = await create("Guarded child", { parentId: parent.id });
+      await core.setTaskPlan(alice, child.id, {
+        startDate: "2026-11-02",
+        durationDays: 2,
+      });
+      const moved = await core.setTaskPlan(alice, parent.id, {
+        startDate: "2026-11-06",
+        durationDays: 2,
+        shiftChildren: true,
+      });
+      expect(moved.undoState).toMatch(/^[a-f0-9]{64}$/);
+      await core.setTaskPlan(alice, child.id, {
+        version: moved.plans.find((row) => row.taskId === child.id)!.version,
+        startDate: "2026-11-10",
+        durationDays: 2,
+      });
+      const before = await core.getTimeline(alice, projectId);
+      await expect(
+        core.setTaskPlan(alice, parent.id, {
+          version: moved.plans[0].version,
+          startDate: "2026-11-02",
+          durationDays: 2,
+          shiftChildren: true,
+          expectedState: moved.undoState,
+        }),
+      ).rejects.toMatchObject({ code: "conflict", status: 409 });
+      expect(await core.getTimeline(alice, projectId)).toEqual(before);
+    });
+
+    it("accepts an unchanged subtree inverse and rejects a newly added child", async () => {
+      const parent = await create("Guarded membership parent");
+      const child = await create("Guarded membership child", {
+        parentId: parent.id,
+      });
+      await core.setTaskPlan(alice, child.id, {
+        startDate: "2026-11-02",
+        durationDays: 2,
+      });
+      const moved = await core.setTaskPlan(alice, parent.id, {
+        startDate: "2026-11-06",
+        durationDays: 2,
+        shiftChildren: true,
+      });
+      const inverse = await core.setTaskPlan(alice, parent.id, {
+        version: moved.plans[0].version,
+        startDate: "2026-11-02",
+        durationDays: 2,
+        shiftChildren: true,
+        expectedState: moved.undoState,
+      });
+      expect((await item(alice, child.id))!.start).toBe("2026-11-02");
+      await create("New descendant", { parentId: parent.id });
+      await expect(
+        core.setTaskPlan(alice, parent.id, {
+          version: inverse.plans[0].version,
+          startDate: "2026-11-06",
+          durationDays: 2,
+          shiftChildren: true,
+          expectedState: inverse.undoState,
+        }),
+      ).rejects.toMatchObject({ code: "conflict" });
+    });
+
     it("gates plans by task:schedule for people and agents", async () => {
       const alices = await create("Alice's task", { dueAt: null });
       await expect(
