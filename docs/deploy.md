@@ -2337,6 +2337,16 @@ Applied additive migration hashes: -
 
 Pinned main source `271bdbd694cbec233673814332d1666c7b2c1e8d`, tree `1f4e428712efb645ba3bd452ddd49fc85df68849`.
 
+**Blocked:** This first candidate was not accepted or tagged. Its fresh checklist
+passed 144/146 cases across 149 attempts; two desktop Calendar lifecycle checks
+failed. All 149 cleanup journals and three separate diagnostics had zero cleanup
+failures and zero browser errors. Normal rollback restored accepted v0.2.1
+`1200f704fd8bb10af890c6761618291f8370e925`, retained additive 0029, restored the
+private env at 0600 and independently confirmed the deploy lock free. The
+Calendar readiness test-only repair is PR49. A later pinned candidate must run
+an entirely fresh checklist; no passing case from this attempt is reused.
+
+
 Audit repair release following accepted v0.2.1 `1200f704fd8bb10af890c6761618291f8370e925`.
 Workspace packages and official MCP server identity are 0.2.2. The v0.2.1 audit
 identifies two P0 silent lost-update defects, one P1 human proposal-path defect,
