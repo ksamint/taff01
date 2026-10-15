@@ -334,6 +334,59 @@ test("open a task from the relations graph and via the list", async ({
   await expect(
     inspector.getByTestId("relations-inspector-title"),
   ).toContainText(second.title);
+  // A selected label remains above overlapping nodes at the supported minimum zoom.
+  const selectedPosition = await node.getAttribute("transform");
+  for (let i = 0; i < 8; i++)
+    await page.getByTestId("relations-zoom-out").click();
+  await expect(page.locator(".relations-svg > g")).toHaveAttribute(
+    "transform",
+    /scale\(0\.25\)/,
+  );
+  await expect(page.getByTestId("relations-node").last()).toHaveAttribute(
+    "data-key",
+    `task:${second.id}`,
+  );
+  await expect(node).toHaveAttribute("transform", selectedPosition!);
+  const selectedLabel = node.locator(".relations-label");
+  await expect(selectedLabel).toBeVisible();
+  const screenStroke = await selectedLabel.evaluate((element) => {
+    const label = element as SVGTextElement;
+    const matrix = label.getScreenCTM();
+    if (!matrix) throw new Error("Selected label screen matrix unavailable");
+    return (
+      Number.parseFloat(getComputedStyle(label).strokeWidth) *
+      Math.hypot(matrix.a, matrix.b)
+    );
+  });
+  expect(screenStroke).toBeCloseTo(3, 1);
+  // Zoom back above the label threshold: dimming marks relationships without
+  // fading still-interactive text or its opaque halo.
+  for (let i = 0; i < 4; i++)
+    await page.getByTestId("relations-zoom-in").click();
+  await expect(page.locator(".relations-svg > g")).toHaveAttribute(
+    "transform",
+    /scale\(0\.61035/,
+  );
+  const dimmed = page.locator(".relations-node.is-dim");
+  await expect(dimmed.first()).toBeVisible();
+  await expect(dimmed.first()).toHaveCSS("opacity", "1");
+  await expect(dimmed.first().locator(".relations-marker")).toHaveCSS(
+    "opacity",
+    "0.3",
+  );
+  const dimmedLabels = dimmed.locator(".relations-label");
+  await expect(dimmedLabels.first()).toBeVisible();
+  expect(
+    await dimmedLabels.evaluateAll((labels) =>
+      labels.every((label) => {
+        let opacity = 1;
+        for (let node: Element | null = label; node; node = node.parentElement)
+          opacity *= Number(getComputedStyle(node).opacity);
+        return opacity === 1 && getComputedStyle(label).fillOpacity === "1";
+      }),
+    ),
+  ).toBe(true);
+  await page.getByTestId("relations-fit").click();
   // The relations list reaches the predecessor by keyboard.
   const relation = inspector
     .getByTestId("relations-relation")

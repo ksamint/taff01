@@ -447,6 +447,10 @@ function GraphCanvas({
   const k = view?.k ?? 1;
   const fontSize = 12 / k;
   const showLabels = k >= 0.55;
+  // Keep the selected label above nodes that overlap it when zoomed out.
+  const paintedNodes = [...nodes].sort(
+    (a, b) => Number(a.key === selectedKey) - Number(b.key === selectedKey),
+  );
 
   return (
     <div className="relations-canvas" ref={box}>
@@ -483,7 +487,7 @@ function GraphCanvas({
                 />
               );
             })}
-            {nodes.map((node) => {
+            {paintedNodes.map((node) => {
               const p = positions[node.key];
               if (!p) return null;
               const dim =
@@ -505,7 +509,9 @@ function GraphCanvas({
                     className="relations-hit"
                     data-testid="relations-node-hit"
                   />
-                  <NodeShape node={node} />
+                  <g className="relations-marker">
+                    <NodeShape node={node} />
+                  </g>
                   {(showLabels || node.key === selectedKey) && (
                     <text
                       x={12}

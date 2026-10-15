@@ -116,7 +116,7 @@
 .relations-node {
   cursor: pointer;
 }
-.relations-node.is-dim {
+.relations-node.is-dim .relations-marker {
   opacity: 0.3;
 }
 .relations-hit {
@@ -169,6 +169,12 @@
   stroke-width: 3;
 }
 .relations-label {
+  /* Keep crossing graph edges behind an opaque halo at the glyph boundary. */
+  paint-order: stroke;
+  stroke: var(--bg);
+  /* Label font-size is 12 / zoom, so em keeps the halo 3 CSS px at any zoom. */
+  stroke-width: 0.25em;
+  stroke-linejoin: round;
   fill: var(--text-body);
   pointer-events: none;
 }
