@@ -100,6 +100,11 @@ jobs:
           for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add companies company-detail contacts contact-detail stakeholders timeline relations brief mind home; do
             UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
           done
+          for screen in companies company-detail contacts contact-detail stakeholders timeline relations brief mind home; do
+            UI_THEME=dark UI_SCREEN="$screen" DEBUG=pw:browser PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/$screen-dark.json" pnpm exec playwright test --config playwright.visual.config.ts --update-snapshots --reporter=line,json 2>&1 | tee -a visual-browser.log
+          done
+      - name: Dark route captures in all three locales and both viewports
+        run: UI_THEME=dark pnpm ui:app-shots docs/ui/screenshots/v021-dark
       - name: Record native capture and runtime identities
         run: |
           node <<'JS'
@@ -108,12 +113,13 @@ jobs:
           const crypto = require('node:crypto');
           const cp = require('node:child_process');
           const screens = 'shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add companies company-detail contacts contact-detail stakeholders timeline relations brief mind home'.split(' ');
-          const screenResults = screens.map(screen => {
+          const darkScreens = "companies company-detail contacts contact-detail stakeholders timeline relations brief mind home".split(" ").map(screen => `${screen}-dark`);
+          const screenResults = [...screens, ...darkScreens].map(screen => {
             const file = `capture-results/${screen}.json`;
             const raw = fs.readFileSync(file);
             const stats = JSON.parse(raw).stats;
-            if (stats.expected !== 4 || stats.unexpected || stats.skipped || stats.flaky)
-              throw new Error(`Capture did not pass all four cases: ${screen}`);
+            if (stats.expected !== (screen.endsWith("-dark") ? 6 : 4) || stats.unexpected || stats.skipped || stats.flaky)
+              throw new Error(`Capture did not pass all viewport/locale cases: ${screen}`);
             return {screen, stats, sha256: crypto.createHash('sha256').update(raw).digest('hex')};
           });
           function files(dir) {
@@ -129,7 +135,7 @@ jobs:
             return {file, bytes: raw.length, width: raw.readUInt32BE(16), height: raw.readUInt32BE(20),
               sha256: crypto.createHash('sha256').update(raw).digest('hex')};
           });
-          if (captures.length !== 126) throw new Error('Expected all 126 native PNGs');
+          if (captures.length !== 186) throw new Error('Expected all 186 native PNGs');
           fs.writeFileSync('visual-capture-manifest.json', JSON.stringify({
             sourceSha: process.env.CAPTURE_SOURCE_SHA,
             repository: process.env.GITHUB_REPOSITORY,
@@ -152,6 +158,7 @@ jobs:
             visual-capture-manifest.json
             visual-browser.log
             capture-results
+            docs/ui/screenshots/v021-dark
           retention-days: 14
       - uses: actions/upload-artifact@v4
         if: failure()

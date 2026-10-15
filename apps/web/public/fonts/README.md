@@ -252,3 +252,41 @@ for name, points in (("common", common), ("remaining", coverage - common)):
     print("unicode-range:", ranges(points))
 PYFONT
 ```
+
+**v0.2.1 supplements (2026-10-15).** The reported 173 missing mappings are
+172 Simplified CJK characters and U+21B3 (`↳`). The CJK supplement uses official
+Google Fonts Noto Sans SC; the single arrow uses official Noto Sans Math because
+neither Noto Sans TC, SC, Symbols nor Symbols 2 contains it. Both retain their
+upstream SIL Open Font License 1.1 beside the assets. No runtime dependency or
+external font request is added.
+
+`v021-subsets.json` records pinned upstream URLs, full-source SHA-256 values,
+asset SHA-256 values, exact Unicode ranges and sizes. Rebuild with FontTools
+4.66.1 and Brotli 1.2.0 (MIT), in a temporary Python environment:
+
+```sh
+python scripts/ui/subset-fonts.py /path/to/NotoSansSC.ttf /path/to/NotoSansMath.ttf
+pnpm exec biome check --write apps/web/src/styles/tokens.css
+pnpm test scripts/ui/fonts.test.ts
+```
+
+Download the sources from the manifest's pinned URLs; the script rejects a
+source with a different hash. The original 247-glyph TC common asset stays
+byte-for-byte unchanged. The other 728 TC mappings split into a 723-glyph
+224,236-byte CJK asset and a five-glyph 2,304-byte symbols asset. All 728 original
+outlines and advances match the earlier asset at weights 100, 300, 400, 500, 600
+and 900. The 172-glyph SC supplement is 54,036 bytes; the one-glyph Math supplement
+is 2,852 bytes. CSS ranges are disjoint across these TC-family faces.
+
+English Relations previously downloaded the 224,900-byte CJK asset solely for
+`↔`. It now requests the 2,304-byte symbols face. The visual Relations test
+asserts that English requests this face and does not request the remaining CJK
+asset. `prepare-fonts.ts` checks all seven installed CSS faces and only prepares
+faces the browser actually selected, preserving this network check. User text
+containing Chinese can still legitimately request CJK assets.
+
+For dark locale route captures, run `UI_THEME=dark pnpm ui:app-shots <output>`.
+The same 186-view route matrix covers all three locales and both viewports;
+the manifest records the theme. The native visual capture workflow also records
+60 dark baselines for the ten v2-only screens, in addition to the 126 light
+baselines, without changing existing comparison tolerances.

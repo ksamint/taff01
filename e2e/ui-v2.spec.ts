@@ -16,13 +16,21 @@ import { prepareTime } from "../scripts/ui/prepare-time.mjs";
 import { messages } from "./support/messages";
 
 const screen = process.env.UI_SCREEN ?? "shell";
+const theme = process.env.UI_THEME === "dark" ? "dark" : "light";
 test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   if (screen === "home") {
-    const locale = info.project.name.endsWith("zh-HK") ? "zh-HK" : "en";
-    await page.addInitScript((locale) => {
-      localStorage.setItem("taff-locale", locale);
-      localStorage.setItem("taff-theme", "light");
-    }, locale);
+    const locale = info.project.name.includes("zh-HK")
+      ? "zh-HK"
+      : info.project.name.includes("zh-CN")
+        ? "zh-CN"
+        : "en";
+    await page.addInitScript(
+      ({ locale, theme }) => {
+        localStorage.setItem("taff-locale", locale);
+        localStorage.setItem("taff-theme", theme);
+      },
+      { locale, theme },
+    );
     const loaded = await page.goto("/");
     expect(loaded?.status()).toBe(200);
     await expect(page.locator(".landing-hero > h1")).toHaveText(
@@ -35,7 +43,11 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     return;
   }
   if (!process.env.DEMO_PASSWORD) throw new Error("DEMO_PASSWORD is required");
-  const locale = info.project.name.endsWith("zh-HK") ? "zh-HK" : "en";
+  const locale = info.project.name.includes("zh-HK")
+    ? "zh-HK"
+    : info.project.name.includes("zh-CN")
+      ? "zh-CN"
+      : "en";
   const desktop = info.project.name.startsWith("desktop-");
   const signedIn = await page.request.post("/api/auth/sign-in/email", {
     headers: { Origin: process.env.AUTH_URL! },
@@ -100,12 +112,12 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       .sort(),
   );
   await page.addInitScript(
-    ({ userId, workspaceId }) => {
+    ({ userId, workspaceId, theme }) => {
       sessionStorage.setItem(`taff:workspace:${userId}`, workspaceId);
       localStorage.setItem("taff:last-workspace", workspaceId);
-      localStorage.setItem("taff-theme", "light");
+      localStorage.setItem("taff-theme", theme);
     },
-    { userId: me.user.id, workspaceId },
+    { userId: me.user.id, workspaceId, theme },
   );
   if (screen !== "shell") {
     await page.clock.setFixedTime(new Date("2026-10-08T11:20:00Z"));
@@ -362,6 +374,19 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         await expect(page.getByTestId("stakeholder").first()).toBeVisible();
       if (screen === "timeline")
         await expect(page.getByTestId("timeline-bar").first()).toBeVisible();
+      if (screen === "relations" && locale === "en") {
+        const downloads = await page.evaluate(() =>
+          performance.getEntriesByType("resource").map((entry) => entry.name),
+        );
+        expect(
+          downloads.some((url) => url.endsWith("/NotoSansTC-ui-symbols.woff2")),
+        ).toBe(true);
+        expect(
+          downloads.some((url) =>
+            url.endsWith("/NotoSansTC-ui-remaining.woff2"),
+          ),
+        ).toBe(false);
+      }
       if (screen === "relations")
         await expect(page.getByTestId("relations-node").first()).toBeVisible();
       if (screen === "brief") {
