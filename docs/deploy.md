@@ -2184,3 +2184,151 @@ No SMS OTP or public rate-limit flood; AI stays off.
 Deploy only this pinned SHA, with verified database/env backups, Git bundle,
 SHA-stamped images/service worker, native detached keeper, and fresh ancestry/CI gates.
 The [v0.2.1 milestone report](milestones/20-v0.2.1.md) records development evidence.
+
+### Frontend v2 v0.2.1b upgrade checkpoint — 2026-10-15
+
+Live pinned source `1200f704fd8bb10af890c6761618291f8370e925`, tree
+`0bd4f3a1f0d1ef48c05d5527aaf85fa8aa14ddd6`. The [v0.2.1 report](milestones/20-v0.2.1.md)
+records scope and development evidence. All six items in plan §10.1 are delivered. §10.2
+stays deferred.
+
+**CI and local production smoke.** Exact-source main push
+[38714791084](https://github.com/ksamint/taff01/actions/runs/38714791084) and merged
+PR-head [38711738274](https://github.com/ksamint/taff01/actions/runs/38711738274)
+completed/success. Ancestry, exact CI identity and newest-candidate eligibility were
+refreshed before build, migration, start and acceptance. Exact-main measurements:
+952/952 tests; Today initial JS 194490 B gzipped against 204800 B; Today LCP en 632 ms,
+zh-CN 696 ms, zh-HK 700 ms (three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 100/100/100; zh-CN
+100/100/100; zh-HK 100/100/100. CI includes visual/browser/MCP gates. All three images
+built on a clean detached Mac checkout and production-mode API/worker MCP smoke passed
+on the first attempt. Local smoke containers were removed. Full local suite, LCP and
+Lighthouse were not rerun.
+
+**Local image identities.**
+
+- api: `sha256:31b897e52639d8373907a6fbd7b34af3e8d2c394cda76336e4a97aed1f0ed69f`
+- worker: `sha256:345ce2d39884c60aac38336847d6a4015f10bc900b6f2ce0de485177c38e4273`
+- web: `sha256:f1172c37bffdafe7e1800b802e9b3d5cb6cb03c56aa48e9d5618b6031e1d1556`
+
+**Lock, backup and source relay.** Detached keeper PID `970825` held the existing native
+/srv/taff/deploy.lock. Dedicated dump
+`/srv/taff/secrets/db.before-1200f704fd8bb10af890c6761618291f8370e925.dump`, 1,645,833
+B, SHA-256 `1973ec9919c39aecdc520052986be634fa94fc245c34470718b0417315eee347`;
+pg_restore --list verified the catalog. Exclusive env backup
+`/srv/taff/secrets/.env.before-1200f704fd8bb10af890c6761618291f8370e925`, mode 0600.
+Bundle 51,455 B, SHA-256
+`b635783a556331516489ef2a1902ce94ef93ac8ba6d626514e57b7ee1cc39bc1`; checksum, git bundle
+verify, exact detached SHA, clean tree and GitHub origin verified. Production used
+--builder default and SHA/ASSET_VERSION stamping. Only tracked public source modes were
+normalized.
+
+**Migrations and runtime.** The approved function-definition-only migration 0028 ignores
+archived children while preserving active-child guards; SHA-256
+`a4a2ff1c2eaf58f0ccd9c7c776c5cd4628c7984733b00d74a1b4a5ece9361a61`. No DML, backfill,
+row rewrite, drop or rename. The canonical one-shot migrator exited 0 and all six
+0023–0028 hashes were verified. Existing 0027 remains applied. Only API, worker and web
+were recreated:
+
+- api: `sha256:7d0dcc6e52da89edff871e416a8d6d7a0041fc969e99a777210cad448516ef30`
+- worker: `sha256:20f8c328c86b7c8ba64490770710fff0a10c1be73b3f10395b3e64e919a5b824`
+- web: `sha256:11e4ff62f329fd784af5e8f2e3bc25b8cb7ef10296421546006b480e69fac3fa`
+
+Caddy and Valkey retained identity, images, start times and health. 46 baseline
+neighbors remained unchanged. No Taff-caused or unexplained neighbor changes. Route hash
+unchanged; no DNS, host-layout, PostgreSQL host or role change. Private env changed only
+TAFF_TAG and remained 0600; email/SMS unchanged, AI_* unset and all workspace AI flags
+disabled. PostgreSQL postmaster start remains `2026-08-29 01:19:14.878015+00` with
+dedicated role and TLS.
+
+**Rollback identities.** Preceding running, unaccepted source
+`e9bfa7727e57171f032712e1a222e36b50cb3f81`:
+
+- api: `sha256:09ef0b7e75cb215148eabb90cadbe8047cded00062435f008c9cd57b68c4f731`
+- worker: `sha256:2004f74097e0443bafb8e3cf2cdb4be2b12c78766b6ea9d4861d7437ee4541b5`
+- web: `sha256:97dd7bf0c537eecde8da7d3c7da8bcdd6b93c23b81fd7b9c87e943f7b3f53f5a`
+
+**Fresh public acceptance.** 146 applicable cases executed; 146 passed, 0 failed
+test-case follow-ups and 0 platform follow-ups, no skips, across 146 attempts. All 20
+critical/platform cases passed. 146 scoped cleanup journals report zero browser page
+errors, 0 initial cleanup failures and 0 unresolved cleanup failures. en/zh-HK phone
+390×844 and desktop 1280×800, with zh-CN Today/Projects/Me and milestone spots, used the
+dedicated verification workspace. Checks covered sign-in/out/re-sign-in; navigation,
+Today, task create/edit/person+agent assignment; run start/pause/resume/cancel; review
+approve/request changes; grants; board/status/list filters; calendar day/week/month
+schedule/drag/resize/undo; command search; organization switch/create/invite in a fresh
+browser; notification preferences, agent permissions, locale/theme; CRM
+roles/stakeholders/cascade/archive/undo; timeline/relations; rules-based brief/Ask; mind
+keyboard/evidence/undo/validation; restricted-member finance/role refresh; and
+cross-browser realtime. HTTPS/health, Secure/HttpOnly cookies, foreign-origin rejection
+and pre-upgrade auth methods passed.
+
+Four official-client MCP cases exercised every one of the 30 read/write tools on
+current-run verification entities, observed call logs and live UI changes, submitted and
+approved review, revoked tokens and confirmed a fresh initialize 401. All four
+separately verified server identity taff/0.2.1. No public flood or real SMS OTP was
+requested. Final item 5 cases additionally covered contact→project/roles, timeline
+milestone lifecycle and keyboard nudging, suggestion split/reschedule undo, off AI
+settings, phone mind-panel visibility and desktop snoozed/v2-agent views.
+
+**Retries and follow-ups.**
+
+No public check required a retry.
+
+Real SMS OTP sign-in remains unverified. Public rate-limit flood is omitted under the
+runbook; CI MCP smoke covers rate limiting. AI model/OAuth/hard delete/value chain/Neo4j
+remain out of scope. Performance claims apply to Today. Earlier manual gradient/image
+text contrast notes remain documented.
+
+Verification tokens were revoked and owned grants closed with denial or revocation as
+appropriate; runs were canceled and profile/agent/preferences restored, schedules
+cleared and current-run archiveable entities archived. Auditable tasks,
+recipients/members, accepted invitations and workspaces remain where no supported
+archive API exists. No demo seed or real-user workspace was used.
+
+**Acceptance and unlock.** Receipt
+`/srv/taff/frontend-v2-v021b-accepted-1200f704fd8bb10af890c6761618291f8370e925.json`;
+deployment.done is `1200f704fd8bb10af890c6761618291f8370e925`. Keeper released the
+reconciled lock. Independent flock probe acquired/released it and confirmed exact
+healthy runtime, public health 200, Caddy/Valkey, route hash and unchanged PostgreSQL.
+Neighbor preservation is reported above, including any independently observed drift. No
+twice-failing critical flow required rollback.
+
+Annotated [v0.2.1 tag](https://github.com/ksamint/taff01/tree/v0.2.1), object
+`6e71708d760395871d9e5806c8ff6001b78f49b7`, remotely verified to peel to this exact
+deployed SHA. Final release accepted.
+
+The clean local web image passed a read-only, network-disabled hash check of all 16
+CSS-declared font assets against pinned source. Fresh source-bound [native capture
+38708013406](https://github.com/ksamint/taff01/actions/runs/38708013406), source
+`737c2d72c98a600334cd5af974aaa9785926841e` (an ancestor of this release), passes all 186
+frozen references with unchanged default comparisons: 155 pixel-identical and 31 with
+only accepted antialias differences under the existing comparator. It also supplies 186
+additional authenticated dark-route PNGs, six native network checks, three locale
+font-readiness checks and all three locale native-control matrices in both capture
+modes. Retained font faces, localized controlled cold home navigation and authenticated
+native metric refresh remove font lifecycle races without changing production styling.
+Artifact `11960196960`, archive SHA-256
+`bc78c3cdcec5061fed1e0e51f6b499ec1a15d75ee013234c691064dd57baa662`, manifest SHA-256
+`6da0ab04760d5b5456aa5d2c64b5e6597f7d2ca76ab60c4ea8d03c86b246b2ba`. No references were
+imported or changed. This fresh validation is separate from the historical
+baseline-import ledger linked by the UI guide; the verified archive is retained in
+operator evidence.
+
+This corrected candidate supersedes the unaccepted
+e9bfa7727e57171f032712e1a222e36b50cb3f81 runtime. Its original public failures and
+cleanup journals remain unchanged. After migration 0028, supported REST operations
+completed 12 exact journaled verification parents; fresh reads confirmed completion,
+with no child-history rewrite. Its exact journaled grant was closed and its four audited
+agent-profile fields were restored using supported REST, with terminal and baseline
+state confirmed twice; unrelated grants and permissions stayed unchanged. Two read-only
+reads confirmed seven notification preference fields after the sole clean retry; the
+original ambiguous transport failure remains recorded. The old candidate was never
+accepted or tagged. The old keeper released only through an explicit reconciled handoff;
+the new keeper held the lock before fresh backup and deployment. Last accepted source
+5191671743d36b4d2719882514ba0d2ff44019a4 and its rollback evidence remain retained.
+Final public counts above cover only the corrected source and include no cleanup waiver.
+
+Applied additive migration hashes: -
+`packages/db/migrations/0028_v021_archived_subtask_guard.sql`:
+`a4a2ff1c2eaf58f0ccd9c7c776c5cd4628c7984733b00d74a1b4a5ece9361a61` (no backfill)
