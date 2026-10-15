@@ -272,20 +272,21 @@ pnpm test scripts/ui/fonts.test.ts
 
 Download the sources from the manifest's pinned URLs; the script rejects a
 source with a different hash. The original 247-glyph TC common asset stays
-byte-for-byte unchanged. The other 728 TC mappings split into a 723-glyph
-224,236-byte CJK asset and a five-glyph 2,304-byte symbols asset. All 728 original
-outlines and advances match the earlier asset at weights 100, 300, 400, 500, 600
+byte-for-byte unchanged. The other 728 TC mappings retain their coverage across
+the CJK and symbols assets. Adding the newly used `左` from the same approved TC
+source brings the CJK asset to 724 mappings and 224,236 bytes; the five-glyph
+symbols asset is 2,304 bytes. All 728 original outlines and advances match the earlier asset at weights 100, 300, 400, 500, 600
 and 900. The 172-glyph SC supplement is 54,036 bytes; the one-glyph Math supplement
-is 2,852 bytes. CSS ranges are disjoint across these TC-family faces. The static Math arrow
-uses the same CSS weight descriptor as its sibling Unicode faces; its outline
+is 2,852 bytes. CSS ranges are disjoint across these TC-family faces. The static
+Math arrow uses the same CSS weight descriptor as its sibling Unicode faces; its outline
 stays constant across that range.
 
 English Relations previously downloaded the 224,900-byte CJK asset solely for
-`↔`. It now requests the 2,304-byte symbols face. The isolated English-workspace Relations browser test
-asserts that the arrow requests this face and does not request the remaining CJK
+`↔`. It now requests the 2,304-byte symbols face. The isolated English-workspace
+Relations browser test asserts that the arrow requests this face and does not request the remaining CJK
 asset. The Northwind visual fixture retains Chinese user content in every UI
-language, so its CJK requests remain legitimate. `prepare-fonts.ts` checks all seven installed CSS faces and only prepares
-faces the browser actually selected, preserving this network check. User text
+language, so its CJK requests remain legitimate. `prepare-fonts.ts` checks all
+seven installed CSS faces and only prepares faces the browser actually selected, preserving this network check. User text
 containing Chinese can still legitimately request CJK assets.
 
 For dark locale route captures, run `UI_THEME=dark pnpm ui:app-shots <output>`.
