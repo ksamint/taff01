@@ -280,9 +280,11 @@ budget). Seven content fonts cover the vocabulary of **all** fixture/business
 strings, across all workspaces and locales; three detail fonts cover the rest.
 Within each vocabulary, deterministic character co-occurrence packing keeps
 related strings together. There is no workspace, route, locale or runtime
-special case. The partition ships 262,464 bytes instead of the preceding
-224,236-byte monolith, a 17% installed-size overhead in exchange for selective
-requests. The five-glyph symbols asset is 2,304 bytes. All 728 original outlines
+special case. The partition ships 262,464 bytes instead of the approved parent's
+224,900-byte monolith, a 16.7% remainder-storage overhead in exchange for selective
+requests. The intermediate monolith after moving symbols and adding `左` was
+224,236 bytes; it was not the approved parent asset. The five-glyph symbols
+asset is 2,304 bytes. All 728 original outlines
 and horizontal/vertical advances match the earlier asset at weights 100, 300,
 400, 500, 600 and 900 (4,368 comparisons). The 172-glyph SC supplement is 54,036
 bytes; the one-glyph Math supplement is 2,852 bytes. CSS ranges remain disjoint.
