@@ -47,6 +47,10 @@ test("all three locales' CJK strings have a bundled glyph range", () => {
     .split("@font-face")
     .filter((rule) => rule.includes('font-family: "Noto Sans TC"'));
   for (const rule of cjkRules) expect(rule).toMatch(/font-weight:\s*300 600;/);
+  const allPoints = cjkRules.flatMap((rule) =>
+    points(rule.match(/unicode-range:\s*([^;]+);/)![1]),
+  );
+  expect(new Set(allPoints).size).toBe(allPoints.length);
   const covered = new Set(
     cjkRules.flatMap((rule) =>
       points(rule.match(/unicode-range:\s*([^;]+);/)![1]),
@@ -71,9 +75,15 @@ test("all three locales' CJK strings have a bundled glyph range", () => {
 });
 
 test("English relations symbols stay in tiny disjoint assets", () => {
-  const remaining = manifest.subsets.find(
-    (asset) => asset.file === "NotoSansTC-ui-remaining.woff2",
-  )!;
+  const remaining = manifest.subsets.filter((asset) =>
+    /^NotoSansTC-ui-(content|details)-/.test(asset.file),
+  );
+  expect(remaining).toHaveLength(10);
+  expect(remaining.reduce((sum, asset) => sum + asset.mappings, 0)).toBe(724);
+  for (const asset of remaining) {
+    expect(asset.bytes).toBeLessThanOrEqual(48 * 1024);
+    expect(asset.mappings).toBeLessThanOrEqual(80);
+  }
   const symbols = manifest.subsets.find(
     (asset) => asset.file === "NotoSansTC-ui-symbols.woff2",
   )!;
@@ -81,7 +91,9 @@ test("English relations symbols stay in tiny disjoint assets", () => {
     (asset) => asset.file === "NotoSansMath-ui.woff2",
   )!;
   expect(points(symbols.unicodeRange)).toContain(0x2194);
-  expect(points(remaining.unicodeRange)).not.toContain(0x2194);
+  expect(
+    remaining.flatMap((asset) => points(asset.unicodeRange)),
+  ).not.toContain(0x2194);
   expect(symbols.bytes + math.bytes).toBeLessThan(6000);
   expect(points(math.unicodeRange)).toEqual([0x21b3]);
   expect(

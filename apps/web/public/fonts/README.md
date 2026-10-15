@@ -274,20 +274,49 @@ Download the sources from the manifest's pinned URLs; the script rejects a
 source with a different hash. The original 247-glyph TC common asset stays
 byte-for-byte unchanged. The other 728 TC mappings retain their coverage across
 the CJK and symbols assets. Adding the newly used `左` from the same approved TC
-source brings the CJK asset to 724 mappings and 224,236 bytes; the five-glyph
-symbols asset is 2,304 bytes. All 728 original outlines and advances match the earlier asset at weights 100, 300, 400, 500, 600
-and 900. The 172-glyph SC supplement is 54,036 bytes; the one-glyph Math supplement
-is 2,852 bytes. CSS ranges are disjoint across these TC-family faces. The static
-Math arrow uses the same CSS weight descriptor as its sibling Unicode faces; its outline
-stays constant across that range.
+source brings the CJK remainder to 724 mappings. It is split into ten static,
+disjoint fonts with at most 80 glyphs and 31,936 bytes each (48 KiB enforced
+budget). Seven content fonts cover the vocabulary of **all** fixture/business
+strings, across all workspaces and locales; three detail fonts cover the rest.
+Within each vocabulary, deterministic character co-occurrence packing keeps
+related strings together. There is no workspace, route, locale or runtime
+special case. The partition ships 262,464 bytes instead of the preceding
+224,236-byte monolith, a 17% installed-size overhead in exchange for selective
+requests. The five-glyph symbols asset is 2,304 bytes. All 728 original outlines
+and horizontal/vertical advances match the earlier asset at weights 100, 300,
+400, 500, 600 and 900 (4,368 comparisons). The 172-glyph SC supplement is 54,036
+bytes; the one-glyph Math supplement is 2,852 bytes. CSS ranges remain disjoint.
+The static Math arrow uses the same CSS weight descriptor as its sibling faces;
+its outline stays constant across that range.
 
-English Relations previously downloaded the 224,900-byte CJK asset solely for
-`↔`. It now requests the 2,304-byte symbols face. The isolated English-workspace
-Relations browser test asserts that the arrow requests this face and does not request the remaining CJK
-asset. The Northwind visual fixture retains Chinese user content in every UI
-language, so its CJK requests remain legitimate. `prepare-fonts.ts` checks all
-seven installed CSS faces and only prepares faces the browser actually selected, preserving this network check. User text
-containing Chinese can still legitimately request CJK assets.
+Cold real Northwind measurements are recorded in
+[`v021-font-network-comparison.json`](../../../../docs/ui/screenshots/v021-font-network-comparison.json).
+The comparison substitutes only font declarations/assets into the same real app,
+using fresh browser contexts without HTTP cache or service workers. Totals count
+unique requested font body bytes. A Unicode-page partition was also measured and
+rejected: 0x100/0x400/0x800 pages increased English Relations to 356–371 KB.
+
+| Screen/locale | Previous total / requests | Current total / requests |
+| --- | ---: | ---: |
+| Northwind Relations, English | 323,348 B / 3 | 230,120 B / 8 |
+| Relations, zh-HK | 323,348 B / 3 | 334,532 B / 12 |
+| Relations, zh-CN | 323,348 B / 3 | 403,932 B / 13 |
+
+English Relations' remainder falls from 224,900 to 129,368 bytes (42.5% less);
+its total falls 28.8%. This is not a uniform improvement:
+zh-HK Relations grows 3.5%, and zh-CN grows 24.9%, including the new 54,036-byte
+SC coverage absent before (8.2% growth when excluding that added coverage).
+Chinese business names remain Chinese in the English Northwind fixture.
+The optional Today transfer probe did not satisfy the native two-task readiness
+guard on its stricter repeat, despite fixed Date and Temporal. Its preliminary
+rows are explicitly marked unverified in the JSON and support no performance
+claim. Existing native Today data assertions and performance gates stay intact.
+The browser regression requires actual nonzero bounded CJK page requests and a
+remainder total below the old monolith, with a JSON network receipt. Its separate
+pure-English workspace regression preserves the arrow request and absence of the
+large remainder. Both run in all three browser projects (six cases).
+`prepare-fonts.ts` checks all 16 installed faces and prepares only faces the browser
+selected, so the helper cannot manufacture unrelated CJK downloads.
 
 For dark locale route captures, run `UI_THEME=dark pnpm ui:app-shots <output>`.
 The same 186-view route matrix covers all three locales and both viewports;

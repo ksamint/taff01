@@ -6,8 +6,8 @@ export async function prepareFonts() {
       (rule): rule is CSSFontFaceRule => rule.type === CSSRule.FONT_FACE_RULE,
     )
     .filter((rule) => /Manrope|Noto Sans TC/.test(rule.style.fontFamily));
-  if (rules.length !== 7)
-    throw new Error("Expected the seven installed UI font faces");
+  if (rules.length !== 16)
+    throw new Error("Expected the 16 installed UI font faces");
   // Let the browser select the applicable Unicode faces first. Eagerly loading
   // every rule made an English screen fetch all CJK subsets during capture.
   await document.fonts.ready;
