@@ -85,6 +85,40 @@ describe.skipIf(!url)("real prototype seed PostgreSQL", () => {
     if (core) await core.close();
     if (connection) await connection.close();
   });
+  it("marks seeded demo emails verified without touching credentials or other accounts", async () => {
+    const emails = prototypePeople.map((row) => row.email);
+    const seeded = () =>
+      connection.db.select().from(user).where(inArray(user.email, emails));
+    expect((await seeded()).every((row) => row.emailVerified)).toBe(true);
+    // A database seeded before this rule still holds an unverified Alex.
+    await connection.db
+      .update(user)
+      .set({ emailVerified: false })
+      .where(eq(user.id, alexId));
+    const credentials = await connection.db
+      .select()
+      .from(account)
+      .where(eq(account.userId, alexId));
+    await seedDemo({
+      ...options,
+      password: `changed-${randomUUID()}`,
+      seedDate: "2026-10-08",
+    });
+    const after = await seeded();
+    expect(after).toHaveLength(emails.length);
+    expect(after.every((row) => row.emailVerified)).toBe(true);
+    expect(
+      await connection.db
+        .select()
+        .from(account)
+        .where(eq(account.userId, alexId)),
+    ).toEqual(credentials);
+    const [unrelated] = await connection.db
+      .select()
+      .from(user)
+      .where(eq(user.id, unrelatedId));
+    expect(unrelated.emailVerified).toBe(false);
+  }, 30000);
   it("seeds the prototype timeline, finance and CRM links once per workspace", async () => {
     const count = async (table: string, workspace: string) =>
       Number(
