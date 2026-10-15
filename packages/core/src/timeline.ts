@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import {
   agentProfiles,
   type Database,
@@ -438,6 +439,33 @@ export function createTimelineOperations({
     }
     return out;
   }
+  /** Caller holds the root and descendant task locks (creation locks parents). */
+  async function planState(tx: Transaction, ids: string[]) {
+    const rows = await tx
+      .select()
+      .from(tasks)
+      .where(inArray(tasks.id, ids))
+      .orderBy(tasks.id);
+    const plans = await tx
+      .select()
+      .from(taskPlans)
+      .where(inArray(taskPlans.taskId, ids))
+      .orderBy(taskPlans.taskId);
+    return createHash("sha256")
+      .update(
+        JSON.stringify({
+          tasks: rows.map((row) => [
+            row.id,
+            row.version,
+            row.parentId,
+            row.dueAt,
+            row.archivedAt,
+          ]),
+          plans: plans.map((row) => [row.taskId, row.version, row.archivedAt]),
+        }),
+      )
+      .digest("hex");
+  }
   async function setTaskPlan(
     p: Principal,
     taskId: string,
@@ -481,6 +509,12 @@ export function createTimelineOperations({
         conflict();
       const result: TaskPlanResult = { plans: [], tasks: [] };
       const descendants = body.shiftChildren ? await lockSubtree(tx, task) : [];
+      const stateIds = [taskId, ...descendants.map((row) => row.id)];
+      if (
+        body.expectedState &&
+        body.expectedState !== (await planState(tx, stateIds))
+      )
+        conflict();
       if (descendants.length) {
         // The day delta is measured from the start the timeline showed: a
         // parent's span comes from its children (D10).
@@ -590,6 +624,7 @@ export function createTimelineOperations({
           .returning();
         result.tasks.unshift(dtoTask(updated));
       }
+      result.undoState = await planState(tx, stateIds);
       return result;
     }
   }

@@ -61,6 +61,8 @@ export const taskPlanInputSchema = strictObject({
   durationDays: durationDaysSchema,
   /** Move the whole subtree by the same number of days (D10). */
   shiftChildren: optional(boolean()),
+  /** Guard an inverse against edits to any task/plan or subtree membership. */
+  expectedState: optional(string().check(regex(/^[a-f0-9]{64}$/))),
 });
 export const milestoneSchema = object({
   id: idSchema,
@@ -82,6 +84,8 @@ export const milestoneListSchema = array(milestoneSchema);
 export const taskPlanResultSchema = object({
   plans: array(taskPlanSchema),
   tasks: array(taskSchema),
+  /** State after this operation, to guard its inverse atomically. */
+  undoState: optional(string().check(regex(/^[a-f0-9]{64}$/))),
 });
 export const milestoneInputSchema = strictObject({
   name: boundedText(200),
@@ -228,6 +232,7 @@ export const mcpTasksPlanArgs = strictObject({
   startDate: civilDateSchema,
   durationDays: durationDaysSchema,
   shiftChildren: optional(boolean()),
+  expectedState: optional(string().check(regex(/^[a-f0-9]{64}$/))),
 });
 export const mcpDependenciesAddArgs = dependencyInputSchema;
 export const mcpDependenciesRemoveArgs = strictObject({
