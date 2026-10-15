@@ -11,7 +11,11 @@ import {
   taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
-import { openCalendarTools } from "./support/calendar";
+import {
+  openCalendarTools,
+  waitForCalendarSave,
+  waitForCalendarView,
+} from "./support/calendar";
 import { selectLocale } from "./support/preferences";
 import {
   closeFieldSheet,
@@ -1206,3 +1210,141 @@ test("calendar multi-day events keep 44px targets and aligned stacked rows", asy
     await expect(page.getByRole("dialog")).toHaveCount(0);
   }
 });
+
+for (const desktop of [false, true]) {
+  test(`calendar acceptance waits for cache reconciliation and native view (${desktop ? "desktop" : "phone"})`, async ({
+    page,
+  }, info) => {
+    test.setTimeout(90_000);
+    const locale = info.project.name as Locale;
+    const { me, workspace, date } = await setup(page, locale);
+    if (desktop) await page.setViewportSize({ width: 1280, height: 800 });
+    const response = await page.request.post("/api/tasks", {
+      data: {
+        workspaceId: workspace.id,
+        ownerId: workspace.memberId,
+        title: `Readiness ${locale} ${Date.now()}`,
+      },
+    });
+    expect(response.status()).toBe(201);
+    const task = taskSchema.parse(await response.json());
+    await page.goto("/calendar");
+    await waitForCalendarView(page, "day");
+    await page.getByTestId(`schedule-task-${task.id}`).click();
+    await page.getByTestId("schedule-start").fill(`${date}T09:00`);
+    await page.getByTestId("schedule-end").fill(`${date}T10:00`);
+    let release!: () => void;
+    let arrived!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const seen = new Promise<void>((resolve) => {
+      arrived = resolve;
+    });
+    let held = false;
+    await page.route("**/api/calendar?**", async (route) => {
+      if (!held) {
+        held = true;
+        arrived();
+        await gate;
+      }
+      await route.continue();
+    });
+    let writes = 0;
+    page.on("request", (request) => {
+      if (
+        request.method() === "PATCH" &&
+        new URL(request.url()).pathname === `/api/tasks/${task.id}/calendar`
+      )
+        writes++;
+    });
+    try {
+      const saved = patchAck(page, task.id);
+      await page.getByTestId("schedule-save").click();
+      expect((await saved).status()).toBe(200);
+      await seen;
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expect(page.getByTestId("calendar-undo")).toBeDisabled();
+      const baseline = await stored(page, task.id);
+      const event = page
+        .locator(".sx__time-grid-event:not(.is-event-copy)")
+        .filter({ hasText: task.title });
+      await expect(event).toBeVisible();
+      await event.evaluate((node) =>
+        node.scrollIntoView({ block: "center", behavior: "instant" }),
+      );
+      const box = await event.boundingBox();
+      if (!box) throw new Error("Calendar readiness target unavailable");
+      // The old acknowledgement-only sequence attempts a real drag while the
+      // app deliberately disables DND during held reconciliation. It cannot save.
+      await page.mouse.move(box.x + box.width / 2, box.y + 18);
+      await page.mouse.down();
+      await page.waitForTimeout(350);
+      await expect(
+        page.locator(".sx__time-grid-event.is-event-copy"),
+      ).toHaveCount(0);
+      await page.mouse.move(box.x + box.width / 2, box.y + 78, { steps: 8 });
+      await page.mouse.up();
+      expect(writes).toBe(1);
+      expect((await stored(page, task.id)).schedule).toEqual(baseline.schedule);
+      if (await page.getByRole("dialog").count())
+        await page.keyboard.press("Escape");
+      let ready = false;
+      const waiting = waitForCalendarSave(page).then(() => {
+        ready = true;
+      });
+      expect(ready).toBe(false);
+      release();
+      await waiting;
+      // The same native gesture must now produce its real PATCH and DB change.
+      const fresh = await event.boundingBox();
+      if (!fresh) throw new Error("Reconciled calendar target unavailable");
+      const moved = patchAck(page, task.id);
+      await page.mouse.move(fresh.x + fresh.width / 2, fresh.y + 18);
+      await page.mouse.down();
+      await page.waitForTimeout(350);
+      await expect(
+        page.locator(".sx__time-grid-event.is-event-copy"),
+      ).toBeVisible();
+      await page.mouse.move(fresh.x + fresh.width / 2, fresh.y + 78, {
+        steps: 8,
+      });
+      await page.mouse.up();
+      expect((await moved).status()).toBe(200);
+      await waitForCalendarSave(page);
+      expect(
+        Date.parse((await stored(page, task.id)).schedule!.startAt),
+      ).toBeGreaterThan(Date.parse(baseline.schedule!.startAt));
+      expect(writes).toBe(2);
+      // Exercise real SDK replacement, including month -> day -> week, before
+      // resolving the event used for viewport and activation operations.
+      for (const mode of [
+        "month-grid",
+        "day",
+        "week",
+        "day",
+        "week",
+      ] as const) {
+        await page.getByTestId(`calendar-${mode}`).click();
+        const native = await waitForCalendarView(page, mode);
+        const rendered = native
+          .locator(
+            mode === "month-grid"
+              ? ".sx__month-grid-event"
+              : ".sx__time-grid-event",
+          )
+          .filter({ hasText: task.title })
+          .first();
+        await expect(rendered).toBeVisible();
+        await rendered.scrollIntoViewIfNeeded();
+        await rendered.click();
+        await expect(page.getByRole("dialog")).toContainText(task.title);
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+      }
+    } finally {
+      release();
+      await page.unroute("**/api/calendar?**");
+    }
+  });
+}
