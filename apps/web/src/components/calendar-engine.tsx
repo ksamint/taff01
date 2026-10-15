@@ -135,6 +135,30 @@ export function CalendarEngine(props: CalendarEngineProps) {
     [plugins.controls, plugins.events, plugins.drag, plugins.resize],
   );
   useEffect(() => {
+    if (!ready || !root.current) return;
+    const element = root.current;
+    // Schedule-X 4.9 labels these containers but leaves their divs generic.
+    // A group permits each SDK-localized name without adding grid keyboard
+    // semantics. Views replace the nodes, so repair new children too.
+    const nameGroups = () => {
+      for (const grid of element.querySelectorAll(
+        [
+          ".sx__date-grid",
+          ".sx__time-grid-day",
+          ".sx__month-grid-day",
+          ".sx__forward-backward-navigation",
+        ]
+          .map((selector) => `${selector}[aria-label]:not([role])`)
+          .join(","),
+      ))
+        grid.setAttribute("role", "group");
+    };
+    const observer = new MutationObserver(nameGroups);
+    observer.observe(element, { childList: true, subtree: true });
+    nameGroups();
+    return () => observer.disconnect();
+  }, [ready]);
+  useEffect(() => {
     if (ready) plugins.events.set(props.events);
   }, [ready, plugins.events, props.events]);
   useEffect(() => {
