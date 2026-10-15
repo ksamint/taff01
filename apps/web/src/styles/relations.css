@@ -169,6 +169,11 @@
   stroke-width: 3;
 }
 .relations-label {
+  /* Keep crossing graph edges behind an opaque halo at the glyph boundary. */
+  paint-order: stroke;
+  stroke: var(--bg);
+  stroke-width: 3px;
+  stroke-linejoin: round;
   fill: var(--text-body);
   pointer-events: none;
 }
