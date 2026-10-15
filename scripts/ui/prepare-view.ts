@@ -31,6 +31,18 @@ export async function prepareView(page: Page, screen: string) {
   if (!probe) return;
   await expect(page.locator(probe[0]).first()).toBeVisible();
   await expect(page.locator(probe[0]).first()).toHaveCSS("display", probe[1]);
+  if (view === "home") {
+    // Signed-out landing must not inherit the authenticated sidebar column.
+    await expect
+      .poll(() =>
+        page
+          .locator(".landing")
+          .evaluate((element) =>
+            Math.abs(element.getBoundingClientRect().width - window.innerWidth),
+          ),
+      )
+      .toBeLessThanOrEqual(1);
+  }
   if (view === "brief") {
     const response = await captureRead(page, "/api/brief?scope=all");
     expect(response.status()).toBe(200);
