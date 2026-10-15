@@ -897,6 +897,9 @@ function Overview({
                       aria-label={t("mind.editSourceNamed", {
                         title: source.title,
                       })}
+                      // The form keeps the row it opened with; an optimistic
+                      // row has no server id or version to PATCH yet.
+                      disabled={isOptimistic(source.id)}
                       onClick={() =>
                         onDialog({ kind: "source", source, linkTo: null })
                       }

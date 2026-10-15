@@ -18,3 +18,5 @@ lighthouse-reports/
 
 .taff-mail/
 release-reports/
+
+e2e/live/reports/
