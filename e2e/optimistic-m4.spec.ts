@@ -814,3 +814,77 @@ test("remote session revocation clears private caches and an old write cannot re
     await remote.close();
   }
 });
+
+test("phone status change shows at once, rolls back on failure and undoes after the save", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as Locale;
+  const m = messages[locale];
+  const { workspace } = await signIn(page, locale);
+  const created = await page.request.post("/api/tasks", {
+    data: {
+      workspaceId: workspace.id,
+      ownerId: workspace.memberId,
+      title: `Phone status ${locale} ${Date.now()}`,
+    },
+  });
+  expect(created.status()).toBe(201);
+  const task = taskSchema.parse(await created.json());
+  const field = page.getByTestId("task-field-status");
+  const changed = m.taskDetail.statusChanged.replace(
+    "{{status}}",
+    m.status.done,
+  );
+  await page.goto(`/tasks/${task.id}`);
+  await expect(field).toContainText(m.status.todo);
+  // Rejected: the row shows done before the API answers, then rolls back.
+  const denied = await rejectLater(page, `/api/tasks/${task.id}`, "PATCH");
+  await openTaskField(page, "status");
+  await page.getByTestId("edit-status").selectOption("done");
+  await denied.seen;
+  await expect(page.getByTestId("edit-status")).toHaveCount(0);
+  await expect(field).toContainText(m.status.done);
+  await denied.reject();
+  await failure(page, locale);
+  await expect(field).toContainText(m.status.todo);
+  expect(
+    taskSchema.parse(
+      await (await page.request.get(`/api/tasks/${task.id}`)).json(),
+    ),
+  ).toMatchObject({ status: "todo", version: task.version });
+  // Accepted: the save sends the version, then a toast offers 撤銷.
+  const saved = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === `/api/tasks/${task.id}` &&
+      response.request().method() === "PATCH",
+  );
+  await openTaskField(page, "status");
+  await page.getByTestId("edit-status").selectOption("done");
+  const save = await saved;
+  expect(save.status()).toBe(200);
+  expect(save.request().postDataJSON()).toEqual({
+    status: "done",
+    version: task.version,
+  });
+  const toast = page.getByTestId("toast");
+  await expect(toast).toContainText(changed);
+  await expect(field).toContainText(m.status.done);
+  const undone = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === `/api/tasks/${task.id}` &&
+      response.request().method() === "PATCH",
+  );
+  await toast.getByTestId("toast-action").click();
+  const undo = await undone;
+  expect(undo.status()).toBe(200);
+  expect(undo.request().postDataJSON()).toEqual({
+    status: "todo",
+    version: taskSchema.parse(await save.json()).version,
+  });
+  await expect(field).toContainText(m.status.todo);
+  expect(
+    taskSchema.parse(
+      await (await page.request.get(`/api/tasks/${task.id}`)).json(),
+    ).status,
+  ).toBe("todo");
+});
