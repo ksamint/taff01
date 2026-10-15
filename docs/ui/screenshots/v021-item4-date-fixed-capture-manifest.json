@@ -1,0 +1,115 @@
+{
+  "sourceSha": "4433d0db98c8c9298ee9b44da065b108a82ba064",
+  "repository": "ksamint/taff01",
+  "workflowSha": "4433d0db98c8c9298ee9b44da065b108a82ba064",
+  "runId": "38674372791",
+  "runAttempt": "1",
+  "sourceTree": "61dc0674f005eaa7570c7ac3af8f2177ca10d680",
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261004.327.1",
+  "os": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "node": "v24.21.0",
+  "playwright": "1.64.0",
+  "monospace": "DejaVuSansMono.ttf: \"DejaVu Sans Mono\" \"Book\"",
+  "fontRuntime": "fontconfig\t2.15.0-1.1ubuntu2\nlibfreetype6:amd64\t2.13.2+dfsg-1ubuntu0.2",
+  "captureScope": {
+    "mode": "selected",
+    "screens": ["brief", "timeline"],
+    "expectedCases": 8,
+    "expectedPngCount": 8,
+    "expectedPaths": [
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/brief.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/timeline.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/brief.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/timeline.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-en/brief.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-en/timeline.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/brief.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/timeline.png"
+    ]
+  },
+  "screenResults": [
+    {
+      "screen": "brief",
+      "stats": {
+        "startTime": "2026-10-15T03:08:56.912Z",
+        "duration": 9720.821,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "711536c80cd5bf9b80f99975a2c82e11a80986206c1c129d39a665135a686074"
+    },
+    {
+      "screen": "timeline",
+      "stats": {
+        "startTime": "2026-10-15T03:09:07.129Z",
+        "duration": 8744.382,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "460a2244ab7913741aa896d90e98ce0abec158bcf9d2b4488758a8d620b2409e"
+    }
+  ],
+  "captures": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/brief.png",
+      "bytes": 79638,
+      "width": 1280,
+      "height": 800,
+      "sha256": "e6085c8cfcbcd35512c3ddcff140a58d19d79555f8892beabfe3a4328f35a4a0"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/timeline.png",
+      "bytes": 126671,
+      "width": 1280,
+      "height": 800,
+      "sha256": "5a737d1b226cc6c7d6ec42bcbf95423fdc69aca18aa170ac7cb6357ae0b02b70"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/brief.png",
+      "bytes": 97122,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c95db5f11432abb60dd75b9c97ccdae12b1d998805bbe830993d599714f1e479"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/timeline.png",
+      "bytes": 129412,
+      "width": 1280,
+      "height": 800,
+      "sha256": "9d81d11ba22946b9a2a2601dfac2261cced1a5336dd0fc2f1b45be418f751bfc"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/brief.png",
+      "bytes": 56191,
+      "width": 390,
+      "height": 844,
+      "sha256": "193fa167a706dae5eb069e0e2535b9e369c3d68f0524c4326c01b63dc14b707e"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/timeline.png",
+      "bytes": 71467,
+      "width": 390,
+      "height": 844,
+      "sha256": "aa3c8f79edcc50ee555c3d993e3d025ff5b12671271508dab535a87efa5b2399"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/brief.png",
+      "bytes": 75158,
+      "width": 390,
+      "height": 844,
+      "sha256": "70ae4294e69cf3cca85061bea26c1ba483d3535b09654a1bad0c3d4bb97d84ef"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/timeline.png",
+      "bytes": 73864,
+      "width": 390,
+      "height": 844,
+      "sha256": "f9bd76034829f37693b0ee27153f34787193979670df1b1ddbdc75f8524f44c1"
+    }
+  ]
+}
