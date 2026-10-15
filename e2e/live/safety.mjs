@@ -61,3 +61,14 @@ export function ownsGrant(grant, baseline, entries) {
     ["allowed", "pending"].includes(grant.status)
   );
 }
+
+/** Fixed categories only: never copy request URLs, errors, DOM, or credentials. */
+export function failureCategory(error) {
+  const message = String(error?.message ?? "");
+  if (error?.name === "TimeoutError" || /Timeout \d+ms exceeded/.test(message))
+    return "timeout";
+  for (const code of ["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND"])
+    if (message.includes(code)) return code.toLowerCase();
+  if (/net::ERR_[A-Z_]+/.test(message)) return "browser_network_error";
+  return "transport_or_local_error";
+}
