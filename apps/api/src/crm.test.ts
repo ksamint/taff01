@@ -70,6 +70,46 @@ afterEach(() => vi.restoreAllMocks());
 afterAll(() => core.close());
 
 describe("CRM REST adapter", () => {
+  it("validates and forwards one atomic guarded CRM inverse", async () => {
+    signIn();
+    const undo = {
+      workspaceId: id,
+      expectedState: "a".repeat(64),
+      steps: [
+        {
+          method: "PUT",
+          scope: "project",
+          entityId: id,
+          contactId: other,
+          roles: ["tech"],
+        },
+      ],
+    };
+    const call = vi
+      .spyOn(core, "undoCrm")
+      .mockResolvedValue({ restored: true });
+    expect(
+      (await send("/api/crm/undo", "POST", { ...undo, expectedState: "bad" }))
+        .status,
+    ).toBe(400);
+    expect(call).not.toHaveBeenCalled();
+    expect((await send("/api/crm/undo", "POST", undo)).status).toBe(200);
+    expect(call).toHaveBeenCalledExactlyOnceWith(person, undo);
+  });
+  it("requires a session and preserves core denials for CRM Undo", async () => {
+    const undo = { workspaceId: id, expectedState: "a".repeat(64), steps: [] };
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const call = vi.spyOn(core, "undoCrm");
+    expect((await send("/api/crm/undo", "POST", undo)).status).toBe(401);
+    expect(call).not.toHaveBeenCalled();
+    signIn();
+    call.mockRejectedValue(new CoreError("forbidden", 403));
+    expect((await send("/api/crm/undo", "POST", undo)).status).toBe(403);
+  });
+
   it("requires a session before any CRM read", async () => {
     vi.spyOn(core, "getSession").mockResolvedValue({
       response: null,

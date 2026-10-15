@@ -10,6 +10,7 @@ import {
   contactUpdateSchema,
   crmArchiveInputSchema,
   crmSearchInputSchema,
+  crmUndoInputSchema,
   idSchema,
   workspaceQuerySchema,
 } from "@taff/schemas";
@@ -47,6 +48,12 @@ export function registerCrmRoutes(app: Hono<AppEnv>, core: Core) {
   const me = (c: Context<AppEnv>) => userPrincipal(c.get("userId"));
   const id = (c: Context<AppEnv>, name = "id") =>
     idSchema.parse(c.req.param(name));
+
+  app.post("/api/crm/undo", async (c) =>
+    c.json(
+      await core.undoCrm(me(c), crmUndoInputSchema.parse(await c.req.json())),
+    ),
+  );
 
   app.get("/api/companies", async (c) => {
     const { workspaceId, includeArchived, ...rest } = c.req.query();

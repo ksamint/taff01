@@ -13,6 +13,7 @@ import {
   object,
   optional,
   refine,
+  regex,
   strictObject,
   string,
   trim,
@@ -166,19 +167,54 @@ export const contactLinkSchema = object({
   contact: contactSchema,
 });
 export const contactLinkListSchema = array(contactLinkSchema);
+/** Server-generated inverse steps; all execute in one permission-checked transaction. */
+export const crmUndoStepSchema = union([
+  strictObject({
+    method: literal("PUT"),
+    scope: contactScopeSchema,
+    entityId: idSchema,
+    contactId: idSchema,
+    roles: array(contactRoleSchema).check(
+      maxLength(7),
+      refine((roles) => new Set(roles).size === roles.length),
+    ),
+  }),
+  strictObject({
+    method: literal("DELETE"),
+    scope: contactScopeSchema,
+    entityId: idSchema,
+    contactId: idSchema,
+  }),
+  strictObject({
+    method: literal("COMPANY"),
+    contactId: idSchema,
+    version: versionSchema,
+    companyId: nullable(idSchema),
+  }),
+]);
+export const crmUndoInputSchema = strictObject({
+  workspaceId: idSchema,
+  expectedState: string().check(regex(/^[a-f0-9]{64}$/)),
+  steps: array(crmUndoStepSchema),
+});
+export type CrmUndo = Infer<typeof crmUndoInputSchema>;
+export type CrmUndoStep = Infer<typeof crmUndoStepSchema>;
 export const setContactRolesResultSchema = object({
+  undo: optional(crmUndoInputSchema),
   link: contactLinkSchema,
   /** Exclusive roles moved away from their previous holders. */
   replaced: array(object({ role: contactRoleSchema, contactId: idSchema })),
   /** A task link added the contact as a stakeholder of the task's project. */
   addedProjectStakeholder: boolean(),
-  /** The previous role set, so the client can undo with another PUT. */
+  /** Previous roles for the result summary; undo uses the guarded inverse. */
   previousRoles: nullable(array(contactRoleSchema)),
 });
 export const unlinkContactResultSchema = object({
+  undo: optional(crmUndoInputSchema),
   cascadedTaskLinks: number(),
 });
 export const setContactCompanyResultSchema = object({
+  undo: optional(crmUndoInputSchema),
   contact: contactSchema,
   /** Company links (and their roles) dropped at the previous employer. */
   dropped: number(),
