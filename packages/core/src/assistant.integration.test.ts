@@ -410,6 +410,108 @@ describe.skipIf(!url)(
           ),
         ).toBe(true);
       });
+      it("completes an unassigned parent after undoing its split without rewriting archived children", async () => {
+        const task = await create("Complete undone split");
+        const made = await core.createSuggestion(agent, split(task.id));
+        const applied = await core.applySuggestion(alice, made.id, {
+          version: 1,
+        });
+        await core.undoSuggestion(alice, made.id, {
+          version: applied.suggestion.version,
+        });
+        const archivedRows = () =>
+          connection.db
+            .select()
+            .from(tasks)
+            .where(
+              inArray(
+                tasks.id,
+                applied.tasks.map((child) => child.id),
+              ),
+            )
+            .orderBy(tasks.id);
+        const before = await archivedRows();
+        const archivedHistory = () =>
+          connection.db
+            .select()
+            .from(activity)
+            .where(
+              inArray(
+                activity.resourceId,
+                applied.tasks.map((child) => child.id),
+              ),
+            )
+            .orderBy(activity.id);
+        const historyBefore = await archivedHistory();
+        expect(before).toHaveLength(2);
+        expect(historyBefore).toHaveLength(4);
+        expect(
+          before.every((child) => child.archivedAt && child.status === "todo"),
+        ).toBe(true);
+        expect(await core.listTasks(alice, w, { parentId: task.id })).toEqual(
+          [],
+        );
+        const unassigned = await core.assignTask(alice, task.id, {
+          workerId: null,
+        });
+        expect(
+          (await core.getTaskAccess(alice, task.id)).allowedStatuses,
+        ).toContain("done");
+        const done = await core.updateTask(alice, task.id, {
+          version: unassigned.version,
+          status: "done",
+        });
+        expect(done.status).toBe("done");
+        expect(await archivedRows()).toEqual(before);
+        expect(await archivedHistory()).toEqual(historyBefore);
+      });
+      it("still blocks active incomplete children and their reopening alongside archived split history", async () => {
+        const task = await create("Active and archived children");
+        const made = await core.createSuggestion(agent, split(task.id));
+        const applied = await core.applySuggestion(alice, made.id, {
+          version: 1,
+        });
+        await core.undoSuggestion(alice, made.id, {
+          version: applied.suggestion.version,
+        });
+        const unassigned = await core.assignTask(alice, task.id, {
+          workerId: null,
+        });
+        const child = await create("Still active", {
+          parentId: task.id,
+          workerId: null,
+        });
+        expect(
+          (await core.getTaskAccess(alice, task.id)).allowedStatuses,
+        ).not.toContain("done");
+        await expect(
+          core.updateTask(alice, task.id, {
+            version: unassigned.version,
+            status: "done",
+          }),
+        ).rejects.toMatchObject({ code: "conflict" });
+        const completedChild = await core.updateTaskStatus(alice, child.id, {
+          status: "done",
+        });
+        await core.updateTask(alice, task.id, {
+          version: unassigned.version,
+          status: "done",
+        });
+        await expect(
+          core.updateTask(alice, child.id, {
+            version: completedChild.version,
+            status: "todo",
+          }),
+        ).rejects.toMatchObject({ code: "conflict" });
+        await expect(
+          core.updateTaskStatus(alice, child.id, {
+            status: "in_progress",
+          }),
+        ).rejects.toMatchObject({ code: "conflict" });
+        await expect(
+          create("Late active child", { parentId: task.id, workerId: null }),
+        ).rejects.toMatchObject({ code: "conflict" });
+      });
       it("rejects edits and downstream use without archiving any of the split", async () => {
         for (const change of ["title", "comment"] as const) {
           const task = await create(`Conflict split ${change}`);

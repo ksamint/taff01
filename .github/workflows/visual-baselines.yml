@@ -164,6 +164,8 @@ jobs:
         run: PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/font-network.json" pnpm exec playwright test e2e/font-loading.spec.ts --reporter=line,json
       - name: Font readiness under delayed subsets and late text
         run: PLAYWRIGHT_JSON_OUTPUT_FILE="capture-results/font-readiness.json" pnpm exec playwright test e2e/font-readiness.spec.ts --reporter=line,json
+      - name: Native select metrics across fallback and loaded fonts
+        run: PLAYWRIGHT_JSON_OUTPUT_FILE=capture-results/native-select-fonts.json pnpm exec playwright test e2e/native-select-fonts.spec.ts --reporter=line,json
       - name: Record native capture and runtime identities
         run: |
           node --input-type=module <<'JS'
@@ -209,6 +211,9 @@ jobs:
           const fontReadiness = JSON.parse(fs.readFileSync('capture-results/font-readiness.json')).stats;
           if (fontReadiness.expected !== 3 || fontReadiness.unexpected || fontReadiness.skipped || fontReadiness.flaky)
             throw new Error('Expected all three locale font-readiness matrices');
+          const nativeSelectFonts = JSON.parse(fs.readFileSync('capture-results/native-select-fonts.json')).stats;
+          if (nativeSelectFonts.expected !== 3 || nativeSelectFonts.unexpected || nativeSelectFonts.skipped || nativeSelectFonts.flaky)
+            throw new Error('Expected all three native-select font/metrics matrices');
           fs.writeFileSync('visual-capture-manifest.json', JSON.stringify({
             sourceSha: process.env.CAPTURE_SOURCE_SHA,
             repository: process.env.GITHUB_REPOSITORY,
@@ -220,7 +225,7 @@ jobs:
             playwright: require('@playwright/test/package.json').version,
             monospace: cp.execFileSync('fc-match', ['monospace'], {encoding: 'utf8'}).trim(),
             fontRuntime: cp.execFileSync('dpkg-query', ['-W', 'fontconfig', 'libfreetype6'], {encoding: 'utf8'}).trim(),
-            captureScope: {...selection, darkScreens, expectedTotalPngCount: selection.expectedPngCount + darkPaths.length}, screenResults, fontNetwork, fontReadiness, captures,
+            captureScope: {...selection, darkScreens, expectedTotalPngCount: selection.expectedPngCount + darkPaths.length}, screenResults, fontNetwork, fontReadiness, nativeSelectFonts, captures,
           }, null, 2) + '\n');
           JS
       - uses: actions/upload-artifact@v4
