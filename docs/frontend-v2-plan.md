@@ -1,6 +1,7 @@
 # Frontend v2 — review and implementation plan
 
-Status: plan, 2026-10-14. Nothing in `apps/` has changed yet.
+Status: delivered. All of M11–M19 is merged, and v0.2.0 (`191243d`) is live
+on `https://taff.apuch.cn` and tagged (2026-10-15). §10 lists what is open.
 
 **User directive, 2026-10-14:** do not stop for decisions. The agent builds
 every default in §5 and develops through to a live, working frontend on
@@ -900,3 +901,82 @@ CI (`ci.yml`) stays green on every merged PR.
 | Schema drift from `db/schema.sql` | Treat it as concept input only (§2.5). Every new table follows the audit, tenancy and version pattern. |
 | Data leaving the system (Ask taff) | Off by default, env-gated, per-workspace opt-in, with an ADR; production ships with it unset (D6). |
 | Fake agent output from the prototype | Never port: suggestions are proposals a person applies, and the review policy still holds. |
+
+## 10. After v0.2.0: open items and next release
+
+Review of 2026-10-15, based on the M11–M19 reports, the `docs/deploy.md`
+checkpoints and the route tree.
+
+**Verdict.** Every screen and route in §7 exists and is live. All six project
+views are wired. The core flows and the live MCP round trip passed public
+acceptance on v0.2.0. Some secondary features are deferred, so the frontend is
+functionally complete with the gaps listed below.
+
+### 10.1 v0.2.1 scope: fix and finish
+
+For the build agent, in this order:
+
+1. **Flaky live checks.**
+   - **Mind-map keyboard and evidence tests.** These failed once and passed on
+     retry on v0.2.0 and on M19a (`docs/deploy.md`, v0.2.0 checkpoint). Find
+     the cause and fix it.
+   - **Restricted-member check.** It failed once on M18b. Find the cause.
+   - **Public acceptance harness.** Move the harness the deploy agent uses
+     (`platform.spec.ts` and the live mind/CRM specs) into the repo, so
+     failures can be reproduced.
+2. **Stale copy.** The MCP page still says "OAuth 2.1 arrives with the
+   release milestone". Replace the text in all three locales. The integrations
+   stay labelled "Not connected" until they are real.
+3. **M14 checklist notes.**
+   - The demo email is unverified.
+   - The digest radio needed a retry.
+   - Phone status shows "done" before the API confirms. Make it optimistic
+     with rollback, like the other mutations.
+4. **Visual baselines for the v2-only screens.** Add baselines for CRM lists
+   and detail, stakeholders, timeline, relations, the brief, the mind map and
+   the signed-out home.
+5. **Small feature gaps from the milestone reports.**
+   - **CRM:** add a contact to a project from the contact's page; show roles
+     in list rows.
+   - **Timeline:** create, rename and archive milestones; arrow-key nudging;
+     whole-day "behind" values.
+   - **Brief:** undo for an applied suggestion; an admin `ai_enabled` switch
+     in Settings (it stays off).
+   - **Mind map:** on phone, scroll the selected node's panel into view.
+   - **Desktop Me:** list snoozed items; give the embedded agent profile the
+     v2 layout.
+6. **Fonts and visuals.**
+   - Subset the 173 Simplified characters that fall back to the system font.
+   - Avoid the 225 KB font download on the English Relations view.
+   - Add dark-theme locale captures.
+
+Release it as `v0.2.1` through the usual candidate handoff.
+
+### 10.2 Intentionally off, each needing a decision first
+
+| Item | Needs |
+| --- | --- |
+| AI model for Ask taff and notes | Provider and data-consent decision (D6); `AI_*` in env and `compose.prod.yaml`; per-workspace opt-in |
+| OAuth 2.1 for MCP | Authorization-server decision; bearer tokens remain until then |
+| Hard delete of CRM records | Product decision (D4); delete archives today |
+| Value-chain layer (relations, D8) | Tables, migration, graph layer |
+| Neo4j graph scope | Open since M9 |
+| Badge colour (deep blue on gold, not the prototype's white) | Design call |
+
+### 10.3 Never exercised live
+
+- A real SMS OTP sign-in.
+- The rate limit, which CI covers.
+- The AI path.
+- Lighthouse and LCP on screens other than Today.
+
+### 10.4 Scheduled upgrades (`docs/upgrade-plan.md`)
+
+- Node 26 after 2026-10-28.
+- PostgreSQL 19 at general availability.
+- TypeScript 7.1 in November.
+- Drizzle 1.0 when final.
+- ioredis 6 for the worker.
+- An ADR on a BullMQ PostgreSQL backend.
+
+Each ships as its own release candidate.

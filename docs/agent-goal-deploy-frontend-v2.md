@@ -23,8 +23,8 @@ The build agent appends one section per candidate to `docs/deploy.md` on
 - the exact 40-character source SHA (a `main` commit) and two CI run links:
   - the `main` push run on that exact SHA;
   - the merged PR's run on its PR head, whose tree the merge carries;
-- the validation numbers: the nine commands, Lighthouse, three-locale LCP and
-  `perf:budget`;
+- the CI numbers from the exact-source `main` run: tests, `perf:budget`,
+  three-locale LCP and Lighthouse;
 - the migrations added since the live SHA, each marked additive, with
   backfills and their expected row counts;
 - new or changed variables in `.env.production.example`, with the production
@@ -32,15 +32,16 @@ The build agent appends one section per candidate to `docs/deploy.md` on
 - changes to Compose, Dockerfiles or Caddy, if any;
 - the acceptance checklist for this release: plan §6.0 for R1, plus that
   milestone's new flows;
-- a local production-mode result of that checklist, including a real MCP
-  client round trip.
+- optionally, a local production-mode result of that checklist. CI and the
+  deploy agent's live checks are the required evidence.
 
 The local agent deploys only SHAs that have such a section.
 
 ## Command for the local agent
 
-Paste everything below the rule into the local agent. The file is on `main`
-once PR #5 merges; until then it is on branch `claude/quirky-fermi-z3z30a`.
+Paste everything below the rule into the local agent. It applies to every
+release after v0.2.0 too, so read `v0.2.0` below as "the release the user
+names".
 
 ---
 
@@ -114,8 +115,8 @@ every public check and the live MCP round trip.
 1. `git fetch origin` and find the newest candidate section that has no
    matching upgrade checkpoint yet.
 2. If there is none, record "no candidate newer than <live SHA>" and wait
-   30 minutes before checking again. Keep watching until v0.2.0 is deployed
-   and recorded.
+   30 minutes before checking again. Keep watching until the release the user
+   named is deployed and recorded, or the user says to stop.
 3. Otherwise check all of the following:
    - the candidate SHA is an ancestor of `origin/main`;
    - the linked `main` push CI run is green for that exact SHA;
@@ -284,5 +285,9 @@ detached keeper so an SSH drop does not release it.
 - anything blocked.
 
 Then check for the next candidate (Step 0) every 30 minutes. Deploy each
-new candidate using these rules. Repeat until
-`v0.2.0` is deployed, and tag it in the M19 release.
+new candidate using these rules, until the release the user named is deployed
+and recorded.
+
+When a candidate section names a release tag (`vX.Y.Z`), create and push the
+annotated tag on the exact source after acceptance, as v0.2.0 was. The build
+environment cannot push tags.
