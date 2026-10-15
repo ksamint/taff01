@@ -16,8 +16,31 @@ const PHASE_B = [
   "0026_m18_mind_edge_version.sql",
   "0027_v021_suggestion_undo.sql",
   "0028_v021_archived_subtask_guard.sql",
+  "0029_v022_relation_versions.sql",
 ];
 const ARCHIVED_SUBTASK_GUARD = "0028_v021_archived_subtask_guard.sql";
+const RELATION_VERSION = "0029_v022_relation_versions.sql";
+const RELATION_TRIGGERS = [
+  "company_contacts",
+  "contact_roles",
+  "mind_node_sources",
+  "project_contacts",
+  "project_payments",
+  "task_contacts",
+  "task_dependencies",
+].map(
+  (table) =>
+    `CREATE TRIGGER ${table}_version BEFORE UPDATE ON ${table} FOR EACH ROW EXECUTE FUNCTION taff_relation_version();`,
+);
+const RELATION_GUARD = `CREATE FUNCTION taff_relation_version() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  NEW.version := OLD.version + 1;
+  NEW.updated_at := now();
+  RETURN NEW;
+END;
+$$;`;
+const relationStatement = (statement: string) =>
+  statement.replace(/^--[^\n]*(?:\n--[^\n]*)*\n/, "");
 const ADDITIVE = [
   /^CREATE TABLE "[a-z_]+" \(/,
   /^ALTER TABLE "[a-z_]+" ADD COLUMN "[a-z_]+" [^;]+;$/,
@@ -44,6 +67,9 @@ describe("Phase B migrations are additive", () => {
     for (const statement of list) {
       expect(
         (file === ARCHIVED_SUBTASK_GUARD && statement === compatibleGuard) ||
+          (file === RELATION_VERSION &&
+            (relationStatement(statement) === RELATION_GUARD ||
+              RELATION_TRIGGERS.includes(statement))) ||
           ADDITIVE.some((pattern) => pattern.test(statement)),
         statement,
       ).toBe(true);
@@ -60,6 +86,15 @@ describe("Phase B migrations are additive", () => {
     expect(statements(ARCHIVED_SUBTASK_GUARD)).toEqual([compatibleGuard]);
     expect(compatibleGuard).toMatch(
       /^CREATE OR REPLACE FUNCTION taff_task_planning_guard\(\)/,
+    );
+  });
+  it("adds the relation revision function without replacing existing definitions", () => {
+    const list = statements(RELATION_VERSION).map(relationStatement);
+    expect(list.filter((s) => s.startsWith("CREATE FUNCTION"))).toEqual([
+      RELATION_GUARD,
+    ]);
+    expect(list.filter((s) => s.startsWith("CREATE TRIGGER"))).toEqual(
+      RELATION_TRIGGERS,
     );
   });
   it("adds a column only with a default when it is NOT NULL", () => {
