@@ -1,9 +1,9 @@
 {
-  "sourceSha": "faf22e04a78622997c5ac21bf95b84ff01640fee",
-  "runId": "38679409752",
+  "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+  "runId": "38684943841",
   "stats": {
-    "startTime": "2026-10-15T04:19:13.672Z",
-    "duration": 10277.630000000001,
+    "startTime": "2026-10-15T05:20:41.998Z",
+    "duration": 10121.936,
     "expected": 6,
     "skipped": 0,
     "unexpected": 0,
@@ -31,7 +31,7 @@
           "retry": 0
         }
       ],
-      "networkReceipts": [
+      "receipts": [
         {
           "fonts": [
             {
@@ -93,7 +93,7 @@
           "retry": 0
         }
       ],
-      "networkReceipts": [
+      "receipts": [
         {
           "fonts": [
             {
@@ -155,7 +155,7 @@
           "retry": 0
         }
       ],
-      "networkReceipts": [
+      "receipts": [
         {
           "fonts": [
             {

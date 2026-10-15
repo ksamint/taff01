@@ -1,15 +1,16 @@
 {
   "theme": "dark",
-  "sourceSha": "faf22e04a78622997c5ac21bf95b84ff01640fee",
-  "runId": "38679409752",
+  "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+  "runId": "38684943841",
   "artifact": {
-    "sourceSha": "faf22e04a78622997c5ac21bf95b84ff01640fee",
-    "runId": "38679409752",
-    "artifactId": 11948110771,
-    "artifactDigest": "sha256:b7497ffc9bc81ed73f3095fa8e6f5433f73c04ab260fc69836f45f69fc29f7e2",
-    "archiveSha256": "b7497ffc9bc81ed73f3095fa8e6f5433f73c04ab260fc69836f45f69fc29f7e2",
-    "archiveBytes": 27689273,
-    "artifactName": "visual-baselines-faf22e04a78622997c5ac21bf95b84ff01640fee"
+    "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+    "runId": "38684943841",
+    "artifactId": 11950930754,
+    "artifactDigest": "sha256:d38d6a11c563b52a6315e00e4fe6c2858ec8c107aec6abe033232b5e0442550a",
+    "archiveSha256": "d38d6a11c563b52a6315e00e4fe6c2858ec8c107aec6abe033232b5e0442550a",
+    "archiveBytes": 27693842,
+    "artifactName": "visual-baselines-db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+    "artifactUrl": "https://github.com/ksamint/taff01/actions/runs/38684943841/artifacts/11950930754"
   },
   "rawManifestSha256": "2e37c7f917878f53665e0db368864b5d1dbd93d7cf6e7fcb30fa1640bcb0d6c0",
   "captures": [
@@ -218,10 +219,10 @@
         "height": 844
       },
       "file": "phone-zh-HK-notifications.png",
-      "bytes": 51361,
+      "bytes": 51259,
       "width": 390,
       "height": 844,
-      "sha256": "8b2f222ed894dbaad80b661249c3d7f06e1126256f21a668391f5429e40739ec"
+      "sha256": "97178673952d5a702d4e5a6d82443b760137e2ab15b58f05e8648da46d21a839"
     },
     {
       "device": "phone",
@@ -442,10 +443,10 @@
         "height": 844
       },
       "file": "phone-zh-HK-contact-detail.png",
-      "bytes": 34321,
+      "bytes": 34288,
       "width": 390,
       "height": 844,
-      "sha256": "8cc7b2f93446ddf948ff24e867e03c751778b6f59f9d14c44eec2dc02e8bf98e"
+      "sha256": "7ab8661cb21ab4d86ab52211bfdc54b7e86eb75fda109c3a4668a198ad064d1b"
     },
     {
       "device": "phone",
@@ -681,10 +682,10 @@
         "height": 844
       },
       "file": "phone-zh-CN-notifications.png",
-      "bytes": 52128,
+      "bytes": 52126,
       "width": 390,
       "height": 844,
-      "sha256": "a84afe67664625808389de4f4a1b9f2f1b2504a3960c84ef8fe9a27d23ace9ff"
+      "sha256": "8eac34ca06987d5dcaff493c62d21a39e458c736f93e05e0a1d466c6205335d3"
     },
     {
       "device": "phone",
@@ -696,10 +697,10 @@
         "height": 844
       },
       "file": "phone-zh-CN-team.png",
-      "bytes": 69417,
+      "bytes": 69120,
       "width": 390,
       "height": 844,
-      "sha256": "eeea80ccb90ce1a5d9aaa3018804ef50e819de37c965b7304fecdcc184852cf6"
+      "sha256": "1db5633c2b56cddfbc0df7e5b5fb3e9e62d2d2666ff24fd4f9808d88c1f15dd3"
     },
     {
       "device": "phone",
@@ -1472,10 +1473,10 @@
         "height": 800
       },
       "file": "desktop-zh-HK-review-page.png",
-      "bytes": 116847,
+      "bytes": 116850,
       "width": 1280,
       "height": 800,
-      "sha256": "5c49f8af72432f11a94c45bb2802ffdcc0eecfaa746f7f83bdb1c46e9a878689"
+      "sha256": "f49e8bfbd9c18945f3ff4aafcb45d5a7ac079088b0a3d15d6d1637bfd3185f75"
     },
     {
       "device": "desktop",
@@ -1532,10 +1533,10 @@
         "height": 800
       },
       "file": "desktop-zh-HK-projects.png",
-      "bytes": 159173,
+      "bytes": 159175,
       "width": 1280,
       "height": 800,
-      "sha256": "4b6e1d07ff5084d1b76d077322fa5d460c5f6a02778232da4136fdf6cf64b38b"
+      "sha256": "05fadbd972ed8c0d1b5dd424260f5579310e2b9b10b73dd59db00e6f4cc6962e"
     },
     {
       "device": "desktop",
@@ -1580,7 +1581,7 @@
       "bytes": 82759,
       "width": 1280,
       "height": 800,
-      "sha256": "c21568327f9073a2c8660ff26b4de4d52808b4259b811d4d30bca238812daec1"
+      "sha256": "0f725464934552c6f8b8197de73c02bb053c583f032a1ea09a25c71c9ff1801f"
     },
     {
       "device": "desktop",
@@ -1741,10 +1742,10 @@
         "height": 800
       },
       "file": "desktop-zh-HK-project-stakeholders.png",
-      "bytes": 83300,
+      "bytes": 83265,
       "width": 1280,
       "height": 800,
-      "sha256": "ef41ffffb8d91b43249c30532da8329d751574e40ad51ac8172f0ef92c7636e7"
+      "sha256": "7d15864d3827476ddf6d1850406e308c7c2936770b8771f45eb0df95497afa12"
     },
     {
       "device": "desktop",
@@ -1756,10 +1757,10 @@
         "height": 800
       },
       "file": "desktop-zh-HK-project-relations.png",
-      "bytes": 191732,
+      "bytes": 191784,
       "width": 1280,
       "height": 800,
-      "sha256": "2743ff4ac746a17acd2f36e0d24b960af3f63490c314f9b4fec07d6debed696b"
+      "sha256": "a5915f73466198212e3071c8f161b49fa64cfed895611694a8e49f1faf05691e"
     },
     {
       "device": "desktop",
@@ -1995,10 +1996,10 @@
         "height": 800
       },
       "file": "desktop-zh-CN-projects.png",
-      "bytes": 159757,
+      "bytes": 159774,
       "width": 1280,
       "height": 800,
-      "sha256": "076f1604eeaa61e0ca099d50026ffd147a2e0e8ed090378981879e77475d5f44"
+      "sha256": "ca5831c7530082801be2d8de6940040f3f4a704734ad2ae3a9b3e508301bf7f4"
     },
     {
       "device": "desktop",
@@ -2204,10 +2205,10 @@
         "height": 800
       },
       "file": "desktop-zh-CN-project-stakeholders.png",
-      "bytes": 82582,
+      "bytes": 82548,
       "width": 1280,
       "height": 800,
-      "sha256": "76f6badbb531be3c88885c92a3638bd51291a511ee1557d1550c59c7dc889f38"
+      "sha256": "f3d28cb4041e74de1fe6bcdd97f871a44190a9014d8591d415e4dff851fc49fc"
     },
     {
       "device": "desktop",
@@ -2383,10 +2384,10 @@
         "height": 800
       },
       "file": "desktop-en-task-page.png",
-      "bytes": 124275,
+      "bytes": 124267,
       "width": 1280,
       "height": 800,
-      "sha256": "144650783c34d9a55d27d9fd255d6079c98afdc0986f6b0c07c72120ea66254a"
+      "sha256": "5a9cf526da29cb0467dd7c071c2d714ff85a3f0af3dd1f440ce9f3ba30393492"
     },
     {
       "device": "desktop",
@@ -2610,7 +2611,7 @@
       "bytes": 159498,
       "width": 1280,
       "height": 800,
-      "sha256": "8c0b9d1628ba09af47f41c692e6ca44e319f1eb2a18bdc5ee8496168d3a8957c"
+      "sha256": "bb150e62d973ad3f9ebdf96261189c4c82ffc2df4f45ca6ca04adb214923f3e2"
     },
     {
       "device": "desktop",
@@ -2622,10 +2623,10 @@
         "height": 800
       },
       "file": "desktop-en-review.png",
-      "bytes": 147452,
+      "bytes": 147453,
       "width": 1280,
       "height": 800,
-      "sha256": "5502f52c897e6430af67be5be9df7948f0560ef4ef33a27f0fd730a1847ded46"
+      "sha256": "20a30e3696fe57ee1470d26470fdc7be4768e44c67ce314c9beb77c04917a7f3"
     },
     {
       "device": "desktop",
@@ -2795,7 +2796,7 @@
   "storage": {
     "kind": "github-actions-artifact-only",
     "repositoryPngsPresent": false,
-    "artifactUrl": "https://github.com/ksamint/taff01/actions/runs/38679409752/artifacts/11948110771",
+    "artifactUrl": "https://github.com/ksamint/taff01/actions/runs/38684943841/artifacts/11950930754",
     "archiveDirectory": "docs/ui/screenshots/v021-dark/",
     "fileResolution": "Each captures[].file is relative to archiveDirectory, not the repository index directory.",
     "retentionDays": 14,

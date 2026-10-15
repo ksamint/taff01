@@ -166,21 +166,29 @@ The additional **186 authenticated dark route PNGs are artifact-only**, covering
 repository's `docs/ui/screenshots/v021-dark/`. Their original archive directory is
 `docs/ui/screenshots/v021-dark/`, indexed by the committed
 [source/hash manifest](screenshots/v021-dark-route-capture-manifest.json).
-Download the [source-pinned GitHub artifact](https://github.com/ksamint/taff01/actions/runs/38679409752/artifacts/11948110771)
-from the [successful native run](https://github.com/ksamint/taff01/actions/runs/38679409752).
+Download the [source-pinned GitHub artifact](https://github.com/ksamint/taff01/actions/runs/38684943841/artifacts/11950930754)
+from the [successful native run](https://github.com/ksamint/taff01/actions/runs/38684943841).
 GitHub Actions retention is 14 days; access can require GitHub sign-in. The index
 retains the exact source, archive digest, PNG dimensions and per-file hashes after
 artifact expiry. For an available artifact:
 
 ```sh
-gh run download 38679409752 --repo ksamint/taff01 \
-  --name visual-baselines-faf22e04a78622997c5ac21bf95b84ff01640fee \
+gh run download 38684943841 --repo ksamint/taff01 \
+  --name visual-baselines-db925ff283bea72f6522b97ef4b1b1e9d2eedbe0 \
   --dir /tmp/taff-v021-native-review
 ```
 
 The archive SHA-256 is
-`b7497ffc9bc81ed73f3095fa8e6f5433f73c04ab260fc69836f45f69fc29f7e2`.
+`d38d6a11c563b52a6315e00e4fe6c2858ec8c107aec6abe033232b5e0442550a`.
 The [native network receipts](screenshots/v021-font-native-network.json),
 [cold-transfer comparison](screenshots/v021-font-network-comparison.json), and
 [font typography A/B](screenshots/v021-font-shaping-comparison.json) explain the
-font coverage, transfer and wrapping tradeoffs.
+font coverage, transfer and deterministic capture readiness.
+
+The [font readiness evidence](screenshots/v021-font-readiness-evidence.json)
+records the rejected old helper, all three native loading-order/late-text
+matrices, and the independent CI Brief comparison. The capture helper loads
+rendered text using its computed font stack, reuses faces, and swaps fully loaded
+faces in CSS order. It changes no product CSS or font-display setting. The
+corrected A/B supersedes the earlier race-affected paragraph-wrap interpretation: 
+all twelve parent/current-font captures have identical geometry and PNG bytes.

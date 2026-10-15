@@ -1,10 +1,10 @@
 {
-  "sourceSha": "faf22e04a78622997c5ac21bf95b84ff01640fee",
+  "sourceSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
   "repository": "ksamint/taff01",
-  "workflowSha": "faf22e04a78622997c5ac21bf95b84ff01640fee",
-  "runId": "38679409752",
+  "workflowSha": "db925ff283bea72f6522b97ef4b1b1e9d2eedbe0",
+  "runId": "38684943841",
   "runAttempt": "1",
-  "sourceTree": "66cfc5d2e437bf64c4dece0bd3b22d404230365a",
+  "sourceTree": "df54c35cd1bf6f694576e7607de922e39e45fb21",
   "runnerImage": "ubuntu24",
   "runnerImageVersion": "20261004.327.1",
   "os": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
@@ -190,440 +190,448 @@
     {
       "screen": "shell",
       "stats": {
-        "startTime": "2026-10-15T04:08:43.840Z",
-        "duration": 14233.019,
+        "startTime": "2026-10-15T05:10:17.289Z",
+        "duration": 13841.491999999998,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "acfee2454033d47f6b8d98538307adc2380f37daa8c031b37995f38af2f27dd9"
+      "sha256": "2ca7d7d6478e1424479e690a283b67e265bb8dc3736ec9ba652fea9e550b0d7e"
     },
     {
       "screen": "today",
       "stats": {
-        "startTime": "2026-10-15T04:08:58.648Z",
-        "duration": 10346.795,
+        "startTime": "2026-10-15T05:10:31.685Z",
+        "duration": 10098.287999999999,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "0500ec7b84f05b20cbc86896570e21eca4bfd44c9c3559e18fa4adb5266e6589"
+      "sha256": "a3cb9ee4879ccbfefc7face5ec246dfbd13f172d758891b682a134b25f042898"
     },
     {
       "screen": "projects",
       "stats": {
-        "startTime": "2026-10-15T04:09:09.547Z",
-        "duration": 14084.962,
+        "startTime": "2026-10-15T05:10:42.329Z",
+        "duration": 13899.02,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "f28b2070d70725a0a71261c53fc09078e036d50f9061b5eebe45c66c351dc6a7"
+      "sha256": "17f983ab0ae9dc8b76ce5aaa7bd92b88204a6435baa6c34e14c335cfb3b6de88"
     },
     {
       "screen": "task-detail",
       "stats": {
-        "startTime": "2026-10-15T04:09:24.187Z",
-        "duration": 12794.422,
+        "startTime": "2026-10-15T05:10:56.786Z",
+        "duration": 12643.416,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "95c1462b4d30dac1394346af56f56a4c8b29e28c5d229220fc763407c871c43c"
+      "sha256": "3da7f32e736cf4ce6fe5a834fcd941a0cd095d4084e697d36ed21cab4b8506bf"
     },
     {
       "screen": "review",
       "stats": {
-        "startTime": "2026-10-15T04:09:37.541Z",
-        "duration": 14712.325,
+        "startTime": "2026-10-15T05:11:09.980Z",
+        "duration": 14602.319,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "cfaabceb4ce841204cec71d218cc1cf0be22b06bdfffc50ee26ed83453cbd5d4"
+      "sha256": "253bfd4802a432d2e41545ce8599fdbe5a707952a4c0fe6c1c61e1ee698d420d"
     },
     {
       "screen": "inbox",
       "stats": {
-        "startTime": "2026-10-15T04:09:52.821Z",
-        "duration": 11177.478,
+        "startTime": "2026-10-15T05:11:25.134Z",
+        "duration": 10916.947,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "4eb06972803a4cadc875802d15fc664065ca28a1523309e81e962a9f462c792a"
+      "sha256": "9ae19446e351b520132b10366c3cb0778d3c3de1c35f30e77099b6141e7e5877"
     },
     {
       "screen": "calendar",
       "stats": {
-        "startTime": "2026-10-15T04:10:04.568Z",
-        "duration": 14092.091,
+        "startTime": "2026-10-15T05:11:36.607Z",
+        "duration": 13779.280999999999,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "185604d61e8e6ce8493301c476f3c1fe0b516e558ce85b584cfaf94601b1ce88"
+      "sha256": "6b21f7fa173399fd654def776d4e4eda39be2e4f902c945237e3477beb21bb0d"
     },
     {
       "screen": "me",
       "stats": {
-        "startTime": "2026-10-15T04:10:19.212Z",
-        "duration": 11323.511,
+        "startTime": "2026-10-15T05:11:50.940Z",
+        "duration": 11268.386,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "f882189704394cecd0b5f90dd9cf1ea0d6ce2ed5762b0ff3500c194cf28f21b0"
+      "sha256": "0caba36dc2de41cfa5544880cd3a8adde846043a14db44dcdc02353a673fda2e"
     },
     {
       "screen": "type",
       "stats": {
-        "startTime": "2026-10-15T04:10:31.094Z",
-        "duration": 14509.399000000001,
+        "startTime": "2026-10-15T05:12:02.758Z",
+        "duration": 14250.413999999999,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "3ac06ec3b5882415d368f38b1b415f4be3e9208d9c88222ebf5bb18dccede3b2"
+      "sha256": "b9c40b70636e0ea05ca0c0f0a0f1029abc03806debf359d91be82fac32f994be"
     },
     {
       "screen": "search",
       "stats": {
-        "startTime": "2026-10-15T04:10:46.163Z",
-        "duration": 12617.253999999999,
+        "startTime": "2026-10-15T05:12:17.561Z",
+        "duration": 12586.233,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "2e96a4355c913af072a0fbe479b14fec68b382ea501582bd8e74c40968fd5f9d"
+      "sha256": "4ef119ca92e9c41f85f2ee24b58492e2190d4772bee4516553db5ea4f8cd949b"
     },
     {
       "screen": "notifications",
       "stats": {
-        "startTime": "2026-10-15T04:10:59.337Z",
-        "duration": 10115.131,
+        "startTime": "2026-10-15T05:12:30.704Z",
+        "duration": 9925.763,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "7c9cc837d787d3c47cf0e09893e730f5e4a0f25d59bee7ce3629ad86812764db"
+      "sha256": "7336479c3a9148a60609e9ae0726ecc7903683f27e1d31f85af9455daeba0798"
     },
     {
       "screen": "agent",
       "stats": {
-        "startTime": "2026-10-15T04:11:10.006Z",
-        "duration": 10161.279,
+        "startTime": "2026-10-15T05:12:41.179Z",
+        "duration": 10123.698,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "aafb01be1082a7779e8c4585fb6d5b7cd1cd11e4475554bdf01803bd9d0be433"
+      "sha256": "bdca5cadb878b5fee1d87a456736abd87542789e6e906032d4b5747d640ec84f"
     },
     {
       "screen": "team",
       "stats": {
-        "startTime": "2026-10-15T04:11:20.726Z",
-        "duration": 10413.582,
+        "startTime": "2026-10-15T05:12:51.853Z",
+        "duration": 10357.497000000001,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "090ecb88496bfb77b499e012cc9554fdc098cc9f58a06a48cf1a0f07149d1a2e"
+      "sha256": "0d2af468d7d555b7042751cb75c97fa668c6800672a5d8ffb8f79151f9dab554"
     },
     {
       "screen": "mcp",
       "stats": {
-        "startTime": "2026-10-15T04:11:31.710Z",
-        "duration": 10151.561000000002,
+        "startTime": "2026-10-15T05:13:02.757Z",
+        "duration": 10121.572,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "c98d675b3a65e4b5f4622da03e0cb4c622817cc71de2b41ce4d1923e3eaba5d8"
+      "sha256": "b400d882bd0e967961d1f9dc409fb5d4e8580e0e8c223b93fc6a818f3b0c2193"
     },
     {
       "screen": "organizations",
       "stats": {
-        "startTime": "2026-10-15T04:11:42.421Z",
-        "duration": 11094.331,
+        "startTime": "2026-10-15T05:13:13.426Z",
+        "duration": 10989.645,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "30a4646ceacdadcaf28b1514c667b5551b96bf6aa9a58387a5023a51920c7b65"
+      "sha256": "2de9f7c343553f562225e9191b14c0584fb56504e199ec02f1d1d69bf92a3237"
     },
     {
       "screen": "quick-add",
       "stats": {
-        "startTime": "2026-10-15T04:11:54.066Z",
-        "duration": 12134.801,
+        "startTime": "2026-10-15T05:13:24.979Z",
+        "duration": 11817.283,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "8988f765a033b4b0a80dfb93d1ee84ba0aaf88133483d65b11824b240ab44a1c"
+      "sha256": "7b3b5f2bf35919a8494e0c8386275d7c9ef216a1eed8d34ed0c43f3678457599"
     },
     {
       "screen": "companies",
       "stats": {
-        "startTime": "2026-10-15T04:12:06.763Z",
-        "duration": 9893.368,
+        "startTime": "2026-10-15T05:13:37.349Z",
+        "duration": 9767.698,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "ce95d35104b0ad14e0a03ee4d60d90a92181153fbf75aaeb1c893431d2461b96"
+      "sha256": "a450ba1c2bb9831e8e932af86f19f2ca21dfda7d0abfac6eddeecd18d77398a3"
     },
     {
       "screen": "company-detail",
       "stats": {
-        "startTime": "2026-10-15T04:12:17.217Z",
-        "duration": 10083.094,
+        "startTime": "2026-10-15T05:13:47.671Z",
+        "duration": 10005.842,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "152c6568ffb36d2935b790beab3e16dea867716cbb5b844ebeca277b9b991043"
+      "sha256": "4f7721e236364827c679138797beb8a7ff5eae7caf509c9eb25121eeb9df731e"
     },
     {
       "screen": "contacts",
       "stats": {
-        "startTime": "2026-10-15T04:12:27.858Z",
-        "duration": 10007.6,
+        "startTime": "2026-10-15T05:13:58.239Z",
+        "duration": 9865.184,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "26ca26e7a01e6d02271c1c0753079216a77b9081315411fdfc6edb6669fe6cba"
+      "sha256": "e130567e3840263e877349d7d38d6802e575a6ebe64a6ed9b1b12afbcdefeb29"
     },
     {
       "screen": "contact-detail",
       "stats": {
-        "startTime": "2026-10-15T04:12:38.430Z",
-        "duration": 10122.402,
+        "startTime": "2026-10-15T05:14:08.649Z",
+        "duration": 10005.69,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "e90a3be90dae5617bb32eae02ee0ec955037966cfea3901adaab8e9b9f570da6"
+      "sha256": "edbabf50fc3dbc6e56fa310bcb868a91090ed694e0f8759c8e39761a2d1acf05"
     },
     {
       "screen": "stakeholders",
       "stats": {
-        "startTime": "2026-10-15T04:12:49.114Z",
-        "duration": 10316.854000000001,
+        "startTime": "2026-10-15T05:14:19.207Z",
+        "duration": 10174.188,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "e464b6c6c9679a808fa177cd175b28e8f62db2244b24974eb400ae6379ec4ba6"
+      "sha256": "4e2f89738b72833b9d4940444b6cc6e7ba8dc9d155776be51008e6df4899372c"
     },
     {
       "screen": "timeline",
       "stats": {
-        "startTime": "2026-10-15T04:12:59.984Z",
-        "duration": 10821.704,
+        "startTime": "2026-10-15T05:14:29.928Z",
+        "duration": 10597.5,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "c3548d979d1c41e2724c03520e0714dfcd1765cb6caa75c4d1788c3319b25c28"
+      "sha256": "07efc533b19e671e23c363bff52799792467ab3732a382ed9b7e867fb48ce4bd"
     },
     {
       "screen": "relations",
       "stats": {
-        "startTime": "2026-10-15T04:13:11.372Z",
-        "duration": 10619.698999999999,
+        "startTime": "2026-10-15T05:14:41.074Z",
+        "duration": 10452.261999999999,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "9b68c91798440f4b231e435582f745577ec9e067016286b71100133aaf948de3"
+      "sha256": "7e427348025b8cb6fc56bb029c5b5dbcefc331a8ef60621d9ebeed0182fb26c2"
     },
     {
       "screen": "brief",
       "stats": {
-        "startTime": "2026-10-15T04:13:22.552Z",
-        "duration": 11458.669999999998,
+        "startTime": "2026-10-15T05:14:52.084Z",
+        "duration": 11265.71,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "2d3774c8b31f52950d430e89537ea0621274d163018b5eb04320a0cd7c915611"
+      "sha256": "fbe603bd2c40ef07f1336045842fb9292ba58a10aa6fc678bcb9d19224724ae7"
     },
     {
       "screen": "mind",
       "stats": {
-        "startTime": "2026-10-15T04:13:34.569Z",
-        "duration": 10702.403,
+        "startTime": "2026-10-15T05:15:03.903Z",
+        "duration": 10570.259,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "be680b6aa32ce9be02ce21b6f15834b2ba11de25c4ec4a0e4d8677b65897679e"
+      "sha256": "c9ef3e4a0ad010782ef29c7f5f5bedf10d8c59886ae698743ef4ad3996b3c315"
     },
     {
       "screen": "home",
       "stats": {
-        "startTime": "2026-10-15T04:13:45.825Z",
-        "duration": 9515.490000000002,
+        "startTime": "2026-10-15T05:15:15.027Z",
+        "duration": 9791.742,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "2a50e6bd1d6e2096f08b316adbf4cbe237e40b3756ffbd65fde8a7e61ec1c460"
+      "sha256": "2b34b12da493736c8341c4b8bca8a73df796b9d5e8f315800dedd6b0e4cf1aee"
     },
     {
       "screen": "companies-dark",
       "stats": {
-        "startTime": "2026-10-15T04:13:55.894Z",
-        "duration": 13573.072,
+        "startTime": "2026-10-15T05:15:25.371Z",
+        "duration": 13317.268,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "75fb4bf4c7535fc6b69832741ebf34f16d537cbc11037bb3b241330a6cbfcba0"
+      "sha256": "d2c52e82c9c76f850ec6dbe20edaa04233d693c3c331069e0a65babf42297c89"
     },
     {
       "screen": "company-detail-dark",
       "stats": {
-        "startTime": "2026-10-15T04:14:10.030Z",
-        "duration": 13821.454,
+        "startTime": "2026-10-15T05:15:39.244Z",
+        "duration": 13542.818,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "242cec4b9ce0cce17e1007c34d0cf090ec642c750247484730975d6c16cccfc0"
+      "sha256": "160d74537caa753da9d902dda7799d8178d5883cda671699087132b4b800ec02"
     },
     {
       "screen": "contacts-dark",
       "stats": {
-        "startTime": "2026-10-15T04:14:24.423Z",
-        "duration": 13509.67,
+        "startTime": "2026-10-15T05:15:53.341Z",
+        "duration": 13428.604,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "6b78fcac9e32cc49702684912ac592910028c51b74b86cf61380bd1e10f44dc1"
+      "sha256": "a9f5edcc603f15a87f7b8acea68c6e644fa4f5f0722b48574eaed4062f2dbdf2"
     },
     {
       "screen": "contact-detail-dark",
       "stats": {
-        "startTime": "2026-10-15T04:14:38.497Z",
-        "duration": 13763.154,
+        "startTime": "2026-10-15T05:16:07.335Z",
+        "duration": 13630.404999999999,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "f3d8923c594c68481f3c56a3b9975288612b193df1e1715e0358d405a71aeeec"
+      "sha256": "39aeab8cffbcfb71ae9316d077ce2535afbc3166117521224005436ed2427d7a"
     },
     {
       "screen": "stakeholders-dark",
       "stats": {
-        "startTime": "2026-10-15T04:14:52.834Z",
-        "duration": 13861.878999999999,
+        "startTime": "2026-10-15T05:16:21.527Z",
+        "duration": 13767.785,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "7a5778b52e7ffc705336aeb389a92b4b1c4f00f942bcc11ee15386a8336035fc"
+      "sha256": "8d53605504e294ccc5ba7dfe30a06f303d02a7059b4a46a40ba7add47780c9aa"
     },
     {
       "screen": "timeline-dark",
       "stats": {
-        "startTime": "2026-10-15T04:15:07.258Z",
-        "duration": 14909.047,
+        "startTime": "2026-10-15T05:16:35.846Z",
+        "duration": 14506.474,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "42aabe7e2917f36273ddd67a62ee8ca164dd748fae5d0f2e2d78ff3cc6f168c7"
+      "sha256": "c0e9f535d67bd51790313b2fdd13dabc502b6b66acf51b412a77ee98aecd296c"
     },
     {
       "screen": "relations-dark",
       "stats": {
-        "startTime": "2026-10-15T04:15:22.728Z",
-        "duration": 14549.007000000001,
+        "startTime": "2026-10-15T05:16:50.900Z",
+        "duration": 14184.629,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "569a8cff9bff6c14aa4e452778aa3a90de82b3d514cfa10caaf28fa045d22862"
+      "sha256": "dcab255a156e8b5ef9e61cf4320c0e997bf6af9b12631e75309efa36223ad0ca"
     },
     {
       "screen": "brief-dark",
       "stats": {
-        "startTime": "2026-10-15T04:15:37.840Z",
-        "duration": 15774.625,
+        "startTime": "2026-10-15T05:17:05.635Z",
+        "duration": 15505.585000000001,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "34690aea174186bba46389a7f6022736f2e26c4e5b299d3f24cb7f1b13238bf5"
+      "sha256": "4ce6e00d5929904c19fdade67708884d459ff21ddece72a5ad640ab26f7ee76d"
     },
     {
       "screen": "mind-dark",
       "stats": {
-        "startTime": "2026-10-15T04:15:54.190Z",
-        "duration": 14612.951000000001,
+        "startTime": "2026-10-15T05:17:21.687Z",
+        "duration": 14366.713,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "3926af188a79244af3f189298835db17c5fd2460b1ef4d4325a591b9db8d400e"
+      "sha256": "59b857ac44ccac7b6a6b4938a47658fd41e323ea68f4ceea04cd3fa37c1ac6d5"
     },
     {
       "screen": "home-dark",
       "stats": {
-        "startTime": "2026-10-15T04:16:09.377Z",
-        "duration": 13908.857,
+        "startTime": "2026-10-15T05:17:36.602Z",
+        "duration": 14050.089,
         "expected": 6,
         "skipped": 0,
         "unexpected": 0,
         "flaky": 0
       },
-      "sha256": "a4516fab15d269db42d625f0554e39e28c6de59ab7554cb90ed53dd3081b591a"
+      "sha256": "dd0286117eb7fe0b0f3dfe285db3856a613691b81fccd040481e7150d7d27151"
     }
   ],
   "fontNetwork": {
-    "startTime": "2026-10-15T04:19:13.672Z",
-    "duration": 10277.630000000001,
+    "startTime": "2026-10-15T05:20:41.998Z",
+    "duration": 10121.936,
     "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "fontReadiness": {
+    "startTime": "2026-10-15T05:20:52.698Z",
+    "duration": 50743.707,
+    "expected": 3,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
@@ -820,10 +828,10 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/projects.png",
-      "bytes": 155089,
+      "bytes": 155083,
       "width": 1280,
       "height": 800,
-      "sha256": "327831098e448ce2c6b1cd0fba705d8f1338438266da1ca9679ed1d48b64e74f"
+      "sha256": "7e734f1db3470d5cd89eb77f61efb7ac6ccf63a030476da282b8c1ddbad81ac3"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/quick-add.png",
@@ -904,17 +912,17 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/type-dark.png",
-      "bytes": 157800,
+      "bytes": 157801,
       "width": 1280,
       "height": 800,
-      "sha256": "ab012618ca5d27b2a41427172017c186126a77b5a945b33f286eccd411359592"
+      "sha256": "e9463dfd6345123a42c0e2082a533f4e56026a75927ba6f74d59e5793e07629e"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/type.png",
-      "bytes": 155083,
+      "bytes": 155093,
       "width": 1280,
       "height": 800,
-      "sha256": "7e734f1db3470d5cd89eb77f61efb7ac6ccf63a030476da282b8c1ddbad81ac3"
+      "sha256": "a622eeb374f01dc6df87b2107db53a019844e4b97975d0cfa2b2cd3f0c3ec852"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-CN-dark/brief.png",
@@ -988,10 +996,10 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK-dark/brief.png",
-      "bytes": 99230,
+      "bytes": 99500,
       "width": 1280,
       "height": 800,
-      "sha256": "046b6e33e1c28d6faa5e356ef6d43a7ff8a6671d4c46e00cef726fac6760599d"
+      "sha256": "518d85243a63625b7403168adecaf5e523058b1fd5d29a4353dc1c36a85a3d1b"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK-dark/companies.png",
@@ -1065,10 +1073,10 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/brief.png",
-      "bytes": 96852,
+      "bytes": 97122,
       "width": 1280,
       "height": 800,
-      "sha256": "7117c7ca03438343b233c115e8e9ee673dc9fc01fec58e99ddc1431abb3f764d"
+      "sha256": "c95db5f11432abb60dd75b9c97ccdae12b1d998805bbe830993d599714f1e479"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/calendar-month.png",
@@ -1198,17 +1206,17 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/review-deliverable.png",
-      "bytes": 159434,
+      "bytes": 159442,
       "width": 1280,
       "height": 800,
-      "sha256": "a3e866fb6dfb857e00ebb3a16a871f3862f6f25b2adf847391fec009bd1bc91f"
+      "sha256": "0a2e3bf2d6d6a5a6b0f4a7a0462491d3b6a0aa27c4c324c78a4d1e27099484cb"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/review.png",
-      "bytes": 149518,
+      "bytes": 149524,
       "width": 1280,
       "height": 800,
-      "sha256": "5e3ee679e274e287c4fb366273071641ce05ca226489fe1e6f7d13bdc83fc7db"
+      "sha256": "21cd72d3e7c491113e3b5625b17e4219ba3068cc441ab7114ce6175a124633dc"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/search.png",
@@ -1275,10 +1283,10 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en-dark/brief.png",
-      "bytes": 59076,
+      "bytes": 59162,
       "width": 390,
       "height": 844,
-      "sha256": "9b33ccfb437dd101f6a7c365c5a1d6fd982e78b2b386ee8dc0284b791cce3a7f"
+      "sha256": "8e864fddb7a1aaca567ce9ffb39e077b811190b40cac05133a4d00df0307e79d"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en-dark/companies.png",
@@ -1506,10 +1514,10 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/search.png",
-      "bytes": 25096,
+      "bytes": 25122,
       "width": 390,
       "height": 844,
-      "sha256": "691ed66064cf7d79a508e8ab8a09169ddc33e6f1e39e2c246c52b9fa1672cbc6"
+      "sha256": "f7fb34b36082007e598a27c3b37a5295ee325dc7f22602f9ad30c77742afdcc0"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/stakeholders.png",
@@ -1639,10 +1647,10 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK-dark/brief.png",
-      "bytes": 77191,
+      "bytes": 77101,
       "width": 390,
       "height": 844,
-      "sha256": "ecd22a591535aa78486548b1387d640b57600d6d8985e97db87ba9c440ef6b31"
+      "sha256": "5ef6c53a248c0a79d06ebf9adadcdd285113ec97c3f055e98412c438bc07b595"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK-dark/companies.png",
@@ -1716,10 +1724,10 @@
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/brief.png",
-      "bytes": 75249,
+      "bytes": 75158,
       "width": 390,
       "height": 844,
-      "sha256": "0a5ca441958d0a161a9df67fb48b4cc6c3900ceea0d2acc0ac2c4697b8a63a5f"
+      "sha256": "70ae4294e69cf3cca85061bea26c1ba483d3535b09654a1bad0c3d4bb97d84ef"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/calendar-month.png",
@@ -1831,7 +1839,7 @@
       "bytes": 73654,
       "width": 390,
       "height": 844,
-      "sha256": "4b0b128d53d72ca489683f33e31c0a9e546b95f553f9e0610110ab9d1cb0ef09"
+      "sha256": "03b0bd2c626fd6f8bc2719e491ddded86fb647d2c54e4d1e0ee0d58024e18200"
     },
     {
       "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/projects.png",
