@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (336 distinct, 1763 uses)
+## Test ids (337 distinct, 1773 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -51,9 +51,9 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `auth-email` | 37 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-password` | 31 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-submit` | 39 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
+| `auth-email` | 38 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-password` | 32 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-submit` | 40 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 7 |  | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-username` | 5 |  | release/checklist.spec.ts, username-auth.spec.ts |
 
@@ -92,7 +92,8 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `calendar-*` | 2 | calendar-scene.tsx, crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar.spec.ts, live/release/checklist.spec.ts |
+| `calendar-*` | 4 | calendar-scene.tsx, crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar-accessibility.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts |
+| `calendar-engine` | 1 | calendar-scene.tsx | calendar-accessibility.spec.ts |
 
 ### calendar-scene.tsx
 
@@ -101,8 +102,8 @@ several do). “Also rendered by” lists the other files.
 | `calendar-day` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `calendar-list` | 5 |  | calendar.spec.ts, persistence.spec.ts, support/calendar.ts |
 | `calendar-month-grid` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `calendar-next` | 1 |  | calendar.spec.ts |
-| `calendar-previous` | 1 |  | calendar.spec.ts |
+| `calendar-next` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
+| `calendar-previous` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
 | `calendar-tools` | 1 |  | support/calendar.ts |
 | `calendar-undo` | 14 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `calendar-week` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
@@ -228,7 +229,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `locale-select` | 14 | me-view.tsx | live/release/checklist.spec.ts, live/release/support.ts, me.spec.ts, release/checklist.spec.ts, release/support.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
+| `locale-select` | 15 | me-view.tsx | calendar-accessibility.spec.ts, live/release/checklist.spec.ts, live/release/support.ts, me.spec.ts, release/checklist.spec.ts, release/support.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 
 ### mcp-view.tsx
 
@@ -571,7 +572,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-v2.spec.ts |
-| `today-heading` | 66 |  | agent-review.spec.ts, brief.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 67 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
 
 ## Role and name locators
@@ -670,6 +671,7 @@ read (`data-event-id`, `data-date`).
 | Selector | Uses | Used in |
 | --- | ---: | --- |
 | `.sx__calendar` | 2 | calendar.spec.ts, ui-v2.spec.ts |
+| `.sx__date-grid` | 1 | calendar-accessibility.spec.ts |
 | `.sx__date-grid-event` | 3 | calendar.spec.ts, live/release/checklist.spec.ts |
 | `.sx__event` | 6 | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `.sx__is-resizing` | 1 | calendar.spec.ts |
@@ -677,6 +679,7 @@ read (`data-event-id`, `data-date`).
 | `.sx__month-grid-day[data-date=…]` | 3 | calendar.spec.ts |
 | `.sx__month-grid-event` | 4 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.sx__month-grid-event[data-event-id=…]` | 2 | calendar.spec.ts, ui-v2.spec.ts |
+| `.sx__month-grid-wrapper` | 1 | calendar-accessibility.spec.ts |
 | `.sx__time-grid-day` | 4 | calendar.spec.ts |
 | `.sx__time-grid-event` | 17 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `.sx__time-grid-event-resize-handle` | 5 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -758,6 +761,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="timeline-dependency"][data-from="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-dependency"][data-from="*"][data-to="*"]` | 4 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-row"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
+| `[data-time-grid-date]` | 1 | calendar-accessibility.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#grant-reason` | 1 | optimistic-m4.spec.ts |
 | `#grant-task` | 1 | optimistic-m4.spec.ts |
