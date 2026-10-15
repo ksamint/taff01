@@ -2,6 +2,8 @@
 
 ## v0.2.2
 
+Merged corrective source; live acceptance and release tag are pending.
+
 - Guard Timeline subtree Undo and commit CRM Undo atomically, protecting newer
   edits and rejecting stale inverses without partial writes.
 - Give human task owners/admins the shared reviewable proposal path and person
