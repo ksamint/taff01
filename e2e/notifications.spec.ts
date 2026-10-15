@@ -63,10 +63,16 @@ test("notification preferences save optimistically roll back failure and muted b
   });
   await page.getByTestId("notification-block").click();
   await expect(page.getByTestId("notification-block")).not.toBeChecked();
-  await expect(page.getByTestId("notification-block")).not.toBeChecked();
-  await expect(page.getByTestId("notification-review")).toBeDisabled();
+  await denied.seen;
+  // The other controls stay usable while the save is held; the later choice
+  // shows at once and queues behind it (plan §10.1 item 3, digest radio).
+  await expect(page.getByTestId("notification-review")).toBeEnabled();
+  await page.getByTestId("notification-review").click();
+  await expect(page.getByTestId("notification-review")).toBeChecked();
   denied.release();
+  // The rejection restores the last confirmed value of both choices.
   await expect(page.getByTestId("notification-block")).toBeChecked();
+  await expect(page.getByTestId("notification-review")).not.toBeChecked();
   await expect(
     page
       .getByRole("alert")
@@ -151,6 +157,63 @@ test("notification preferences save optimistically roll back failure and muted b
     path: `/tmp/taff-m7-${locale}-notifications.png`,
     fullPage: true,
   });
+});
+
+test("a digest time chosen while a save is in flight is kept and saved last", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  await freshAccount(page, locale);
+  await page.goto("/me/notifications");
+  await expect(page.getByTestId("notification-time-09:00")).toBeChecked();
+  const initial = notificationPreferencesSchema.parse(
+    await (await page.request.get("/api/me/notifications")).json(),
+  );
+  const sent: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.method() === "PATCH" &&
+      new URL(request.url()).pathname === "/api/me/notifications"
+    )
+      sent.push(
+        notificationPreferencesSchema.parse(request.postDataJSON()).digestAt,
+      );
+  });
+  const held = await holdRequest(page, "/api/me/notifications", {
+    method: "PATCH",
+    reply: "continue",
+  });
+  await page.getByTestId("notification-time-08:00").click();
+  await held.seen;
+  await expect(page.getByTestId("notification-time-08:00")).toBeChecked();
+  // The second click lands while the first PATCH is still held.
+  await expect(page.getByTestId("notification-time-18:00")).toBeEnabled();
+  await page.getByTestId("notification-time-18:00").click();
+  await expect(page.getByTestId("notification-time-18:00")).toBeChecked();
+  const last = page.waitForResponse(
+    (response) =>
+      new URL(response.url()).pathname === "/api/me/notifications" &&
+      response.request().method() === "PATCH" &&
+      response.request().postDataJSON().digestAt === "18:00",
+  );
+  held.release();
+  await held.done;
+  expect((await last).status()).toBe(200);
+  await expect(page.getByTestId("notification-time-18:00")).toBeChecked();
+  expect(sent).toEqual(["08:00", "18:00"]);
+  const saved = notificationPreferencesSchema.parse(
+    await (await page.request.get("/api/me/notifications")).json(),
+  );
+  // Two sequential saves, the second sent with the version the first returned.
+  expect(saved).toMatchObject({
+    digestAt: "18:00",
+    version: initial.version + 2,
+  });
+  await expect(
+    page.locator(".notifications-body").getByRole("alert"),
+  ).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByTestId("notification-time-18:00")).toBeChecked();
 });
 
 test("real worker digest opens from Inbox with immutable due review and measured agent snapshot", async ({
