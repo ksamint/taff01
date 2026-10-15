@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "candidateSha": "271bdbd694cbec233673814332d1666c7b2c1e8d",
-  "repairs": 10,
+  "candidateSha": "8d335ff7a9513bf35bcaf6b99c7f54935a0446e4",
+  "repairs": 11,
   "versionPr": 48,
   "prs": [
     {
@@ -157,6 +157,22 @@
         "images"
       ],
       "ancestorOfCandidate": true
+    },
+    {
+      "pr": 49,
+      "title": "test: wait for Calendar reconciliation and native view readiness",
+      "headSha": "9654d342ba72fb022f65cc935f506bebcd8f50aa",
+      "mergeSha": "8d335ff7a9513bf35bcaf6b99c7f54935a0446e4",
+      "mergedAt": "2026-10-15T14:32:10Z",
+      "ciRun": 38747282203,
+      "ciConclusion": "success",
+      "checks": [
+        "checks",
+        "images"
+      ],
+      "ancestorOfCandidate": true
     }
-  ]
+  ],
+  "closedFindings": 10,
+  "testOnlyRepairPr": 49
 }
