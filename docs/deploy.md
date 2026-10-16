@@ -2789,3 +2789,16 @@ system administrator. Setup adds password hashes atomically, preserves phone
 verification and organization membership, and creates no accounts or workspaces.
 Re-running the same setup is idempotent; a different existing password fails
 with conflict. Phone login offers "Use password instead" after a mobile number.
+
+### Frontend v2 release candidate v0.2.7 — 2026-10-16 UTC
+- Source `e6928f066616b400ad2f2740c5e3e388beae5eb3`; annotated tag after acceptance: `v0.2.7`; [PR #56](https://github.com/ksamint/taff01/pull/56) merged by fast-forward to the tested head.
+- Exact-source [main CI 38930534663](https://github.com/ksamint/taff01/actions/runs/38930534663) and [PR-head CI 38929288044](https://github.com/ksamint/taff01/actions/runs/38929288044) green.
+- Validation: 1662 unit/integration, 264 browser and 166 visual cases. All 12 home references reviewed; other baselines and tolerances retained.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 624/676/680 ms; Lighthouse P/A/BP en 98/100/100; zh-CN 99/100/100; zh-HK 99/100/100.
+- Changes: existing phone identities can use a provisioned password, including when SMS is unavailable; SMS remains the default where configured, with an explicit translated password toggle. ADR 0019 records this addition.
+- Private stdin-only setup adds salted credentials only for existing system admins; no accounts/workspaces, privilege changes, phone verification or existing-password resets.
+- Local production checklist 32/32, all-31-tool MCP smoke and two synthetic phone/password logins passed; three clean pinned images built. No SMS sent.
+- Migrations: none. Env template, Compose, Dockerfiles and host layout unchanged; AI_* remain unset. Preserve native lock, exclusive verified DB/env backups and scoped API/worker/web replacement.
+- Acceptance: 22 critical/platform/realtime/MCP live cases; two authorized admin phone/password logins; fresh en-HK defaults to Traditional Chinese, saved English persists and code/password toggle works without SMS.
+- ADR 0018 remains closed: HK/Macau, including en-HK, default to Traditional Chinese; saved picker choice overrides detection.
+- Rollback: `69434acc66851c766f43834131a449382b461ce7`; previous images and all data retained.
