@@ -784,11 +784,12 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                   <ul className="projects-cards">
                     {items.map((task) => (
                       <BoardCard
+                        confirmed={confirmed}
                         key={task.id}
                         task={task}
                         t={t}
                         {...cardProps}
-                        busy={busy}
+                        busy={busy || !confirmed}
                         move={move}
                         dragStart={dragStart}
                         dragging={drag?.id === task.id}
@@ -1041,6 +1042,7 @@ const BoardCard = memo(function BoardCard({
   latestRun,
   selectedPath,
   busy,
+  confirmed,
   move,
   dragStart,
   dragging,
@@ -1048,6 +1050,7 @@ const BoardCard = memo(function BoardCard({
 }: CardData & {
   task: Task;
   busy: boolean;
+  confirmed: boolean;
   move: (task: Task, status: Task["status"]) => void;
   dragStart: (
     event: React.PointerEvent<HTMLButtonElement>,
@@ -1058,7 +1061,7 @@ const BoardCard = memo(function BoardCard({
   dragHintId: string;
 }) {
   const access = useTaskAccess(task.id);
-  const allowed = access.data?.allowedStatuses ?? [];
+  const allowed = confirmed ? (access.data?.allowedStatuses ?? []) : [];
   const owner = member(task.ownerId);
   const worker = member(task.workerId);
   const ownerName = owner ? owner.name : t("unknownMember");
