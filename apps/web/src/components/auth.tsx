@@ -11,6 +11,7 @@ import { type FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError, request } from "../lib/api";
 import { useCredentialAuth } from "../lib/mutations/auth";
+import { mainlandPhone } from "../lib/phone";
 import { SmsAuth } from "./sms-auth";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -20,6 +21,7 @@ export function Auth() {
   const { t } = useTranslation();
   const [signup, setSignup] = useState(false);
   const [sms, setSms] = useState(false);
+  const [identifier, setIdentifier] = useState("");
   const [validationError, setValidationError] = useState(false);
   const methods = useQuery({
     queryKey: ["auth-methods"],
@@ -29,8 +31,18 @@ export function Auth() {
     staleTime: 60_000,
   });
   const auth = useCredentialAuth();
+  const smsEnabled = methods.data?.smsEnabled === true;
+  // A mainland mobile number signs in with a texted code; phone accounts
+  // have no password.
+  const phone = !signup && smsEnabled ? mainlandPhone(identifier) : null;
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (phone) {
+      setValidationError(false);
+      auth.reset();
+      setSms(true);
+      return;
+    }
     const form = new FormData(event.currentTarget);
     const identifier = String(form.get("email") ?? "").trim();
     const username = String(form.get("username") ?? "").trim();
@@ -56,11 +68,17 @@ export function Auth() {
   return (
     <div className="auth-layout">
       <section className="panel auth-panel" aria-labelledby="auth-heading">
-        <h2 id="auth-heading">
+        <h2 id="auth-heading" className={sms || signup ? undefined : "sr-only"}>
           {t(sms ? "sms.title" : signup ? "signUp" : "signIn")}
         </h2>
         {sms ? (
-          <SmsAuth onBack={() => setSms(false)} />
+          <SmsAuth
+            initialPhone={phone ?? undefined}
+            onBack={() => {
+              setSms(false);
+              setIdentifier("");
+            }}
+          />
         ) : (
           <>
             <form onSubmit={submit} noValidate>
@@ -78,7 +96,13 @@ export function Auth() {
               )}
               <div className="field">
                 <Label htmlFor="auth-email">
-                  {t(signup ? "email" : "emailOrUsername")}
+                  {t(
+                    signup
+                      ? "email"
+                      : smsEnabled
+                        ? "accountIdentifier"
+                        : "emailOrUsername",
+                  )}
                 </Label>
                 <Input
                   id="auth-email"
@@ -86,6 +110,8 @@ export function Auth() {
                   name="email"
                   type={signup ? "email" : "text"}
                   autoComplete={signup ? "email" : "username"}
+                  value={identifier}
+                  onChange={(event) => setIdentifier(event.target.value)}
                   required
                 />
               </div>
@@ -107,23 +133,25 @@ export function Auth() {
                   </p>
                 </div>
               )}
-              <div className="field">
-                <Label htmlFor="auth-password">{t("password")}</Label>
-                <Input
-                  id="auth-password"
-                  data-testid="auth-password"
-                  name="password"
-                  type="password"
-                  autoComplete={signup ? "new-password" : "current-password"}
-                  minLength={signup ? 8 : 6}
-                  maxLength={128}
-                  required
-                  aria-describedby="password-hint"
-                />
-                <p id="password-hint" className="field-hint">
-                  {t(signup ? "passwordHint" : "signInPasswordHint")}
-                </p>
-              </div>
+              {!phone && (
+                <div className="field">
+                  <Label htmlFor="auth-password">{t("password")}</Label>
+                  <Input
+                    id="auth-password"
+                    data-testid="auth-password"
+                    name="password"
+                    type="password"
+                    autoComplete={signup ? "new-password" : "current-password"}
+                    minLength={signup ? 8 : 6}
+                    maxLength={128}
+                    required
+                    aria-describedby="password-hint"
+                  />
+                  <p id="password-hint" className="field-hint">
+                    {t(signup ? "passwordHint" : "signInPasswordHint")}
+                  </p>
+                </div>
+              )}
               {(validationError || auth.isError) && (
                 <p className="alert" role="alert">
                   {t(
@@ -144,7 +172,15 @@ export function Auth() {
                 type="submit"
                 disabled={auth.isPending}
               >
-                {t(auth.isPending ? "working" : signup ? "signUp" : "signIn")}
+                {t(
+                  auth.isPending
+                    ? "working"
+                    : signup
+                      ? "signUp"
+                      : phone
+                        ? "sms.send"
+                        : "signIn",
+                )}
               </Button>
             </form>
             <Button
@@ -159,19 +195,6 @@ export function Auth() {
             >
               {t(signup ? "haveAccount" : "needAccount")}
             </Button>
-            {methods.data?.smsEnabled && (
-              <Button
-                className="button-link"
-                disabled={auth.isPending}
-                onClick={() => {
-                  setSms(true);
-                  setValidationError(false);
-                  auth.reset();
-                }}
-              >
-                {t("sms.title")}
-              </Button>
-            )}
           </>
         )}
       </section>

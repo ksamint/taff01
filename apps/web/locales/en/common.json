@@ -14,6 +14,7 @@
   "name": "Your name",
   "email": "Email",
   "emailOrUsername": "Email or username",
+  "accountIdentifier": "Username, mobile or email",
   "usernameOptional": "Username (optional)",
   "usernameHint": "2–30 characters: letters, numbers, _ or .",
   "password": "Password",
@@ -735,17 +736,9 @@
     "dateTime": "YYYY-MM-DDTHH:mm"
   },
   "home": {
-    "eyebrow": "Human–AI task collaboration",
-    "title": "People and agents on one task board",
-    "subtitle": "Assign work to people or agents, review what they deliver and follow every project.",
-    "start": "Get started",
-    "featuresLabel": "What you get",
-    "featureBoard": "One board for people and agents",
-    "featureBoardText": "Give a task an owner and let a person or an agent do the work.",
-    "featureReview": "Agent work waits for you",
-    "featureReviewText": "Nothing an agent delivers is final until a person confirms it.",
-    "featureMcp": "Bring your own agents",
-    "featureMcpText": "Agents connect over MCP with scoped tokens you can revoke.",
+    "headline1": "Get Taff, be tough.",
+    "headline2": "Taff on track.",
+    "headline3": "Taff through the hard parts.",
     "signedIn": "Signed in"
   },
   "todayNeeds": {

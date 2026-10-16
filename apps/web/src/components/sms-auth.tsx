@@ -1,17 +1,24 @@
 "use client";
 
-import { sendPhoneOtpSchema, verifyPhoneOtpSchema } from "@taff/schemas/base";
-import { type FormEvent, useEffect, useState } from "react";
+import { verifyPhoneOtpSchema } from "@taff/schemas/base";
+import { type FormEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../lib/api";
 import { useSendPhoneOtp, useVerifyPhoneOtp } from "../lib/mutations/auth";
+import { mainlandPhone } from "../lib/phone";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
-export function SmsAuth({ onBack }: { onBack: () => void }) {
+export function SmsAuth({
+  initialPhone,
+  onBack,
+}: {
+  initialPhone?: string;
+  onBack: () => void;
+}) {
   const { t } = useTranslation();
-  const [phone, setPhone] = useState("");
+  const [phone, setPhone] = useState(initialPhone ?? "");
   const [destination, setDestination] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -43,16 +50,21 @@ export function SmsAuth({ onBack }: { onBack: () => void }) {
   const pending = send.isPending || verify.isPending;
   function sendCode(event?: FormEvent<HTMLFormElement>) {
     event?.preventDefault();
-    const compact = phone.replace(/[\s()-]/g, "");
-    const parsed = sendPhoneOtpSchema.safeParse({
-      phoneNumber: /^1\d{10}$/.test(compact) ? `+86${compact}` : compact,
-    });
-    setInvalid(!parsed.success);
-    if (parsed.success && !pending && cooldown === 0) {
+    const phoneNumber = mainlandPhone(phone);
+    setInvalid(phoneNumber === null);
+    if (phoneNumber && !pending && cooldown === 0) {
       verify.reset();
-      send.mutate(parsed.data.phoneNumber);
+      send.mutate(phoneNumber);
     }
   }
+  // A number typed on the sign-in form gets its code straight away; the ref
+  // keeps development double effects from sending twice.
+  const autoSent = useRef(false);
+  useEffect(() => {
+    if (!initialPhone || autoSent.current) return;
+    autoSent.current = true;
+    sendCode();
+  }, []);
   function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const parsed = verifyPhoneOtpSchema.safeParse({

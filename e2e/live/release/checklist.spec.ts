@@ -141,11 +141,14 @@ test("[item 1] Sign-in and preferences", async ({ page, browser }, info) => {
     try {
       const sms = await signedOut.newPage();
       await sms.goto("/");
-      await sms.getByRole("button", { name: m.sms.title, exact: true }).click();
-      await expect(sms.locator("#sms-phone")).toBeVisible();
+      // A mobile number switches the form to a texted code. The checklist
+      // never submits it, so no real code is requested.
+      await sms.getByTestId("auth-email").fill("13800138000");
+      await expect(sms.getByTestId("auth-password")).toHaveCount(0);
+      await expect(sms.getByTestId("auth-submit")).toHaveText(m.sms.send);
       skipStep(
         info,
-        "SMS sign-in: the method is offered and its form opens; completing it needs a real phone and code, which the checklist never sends",
+        "SMS sign-in: a mobile number switches the form to a texted code; completing it needs a real phone and code, which the checklist never sends",
       );
     } finally {
       await signedOut.close();

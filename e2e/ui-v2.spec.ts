@@ -26,6 +26,8 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       : info.project.name.includes("zh-CN")
         ? "zh-CN"
         : "en";
+    // Reduced motion holds the rotating headline on its first line.
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.addInitScript(
       ({ locale, theme }) => {
         localStorage.setItem("taff-locale", locale);
@@ -35,12 +37,11 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     );
     const loaded = await navigateColdFonts(page, "/", async () => {
       await prepareView(page, screen);
-      await expect(page.locator(".landing-hero > h1")).toHaveText(
-        messages[locale].home.title,
+      await expect(page.locator(".landing-title")).toHaveText(
+        messages[locale].home.headline1,
       );
       await expect(page.getByTestId("auth-submit")).toBeEnabled();
       await expect(page.getByTestId("locale-select")).toHaveValue(locale);
-      await expect(page.locator(".landing-features li")).toHaveCount(3);
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     });
     expect(loaded?.status()).toBe(200);

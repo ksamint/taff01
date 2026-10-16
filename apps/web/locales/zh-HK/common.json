@@ -15,6 +15,7 @@
   "name": "你的姓名",
   "email": "電郵",
   "emailOrUsername": "電郵或用戶名稱",
+  "accountIdentifier": "用戶名稱、手機號碼或電郵",
   "usernameOptional": "用戶名稱（選填）",
   "usernameHint": "2–30 個字元：英文字母、數字、_ 或 .",
   "password": "密碼",
@@ -735,17 +736,9 @@
     "dateTime": "YYYY-MM-DDTHH:mm"
   },
   "home": {
-    "eyebrow": "人機協作任務",
-    "title": "成員與智能體，在同一張任務表上協作",
-    "subtitle": "把任務分配給成員或智能體，審核交付，掌握每個項目的進度。",
-    "start": "開始",
-    "featuresLabel": "功能",
-    "featureBoard": "成員與智能體共用一張任務表",
-    "featureBoardText": "每項任務都有負責人，由成員或智能體執行。",
-    "featureReview": "智能體交付等你確認",
-    "featureReviewText": "智能體的交付，經成員確認後才算完成。",
-    "featureMcp": "接入你的智能體",
-    "featureMcpText": "智能體經 MCP 接入，權杖有範圍，隨時可撤銷。",
+    "headline1": "做事，要 Taff 實。",
+    "headline2": "Taff 上正軌。",
+    "headline3": "Taff 平難關。",
     "signedIn": "已登入"
   },
   "todayNeeds": {

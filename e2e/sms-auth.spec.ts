@@ -22,8 +22,14 @@ test("unconfigured SMS keeps email login available", async ({ page }, info) => {
   await page.goto("/");
   await expect(page.getByTestId("auth-email")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: messages[locale].sms.title }),
-  ).toHaveCount(0);
+    page.getByLabel(messages[locale].emailOrUsername, { exact: true }),
+  ).toBeVisible();
+  // Without SMS a number is a username and keeps the password.
+  await page.getByTestId("auth-email").fill("13800138000");
+  await expect(page.getByTestId("auth-password")).toBeVisible();
+  await expect(page.getByTestId("auth-submit")).toHaveText(
+    messages[locale].signIn,
+  );
 });
 
 test("SMS validates input, limits resend and signs in only after verification", async ({
@@ -71,16 +77,13 @@ test("SMS validates input, limits resend and signs in only after verification", 
     await route.fulfill({ json: { status: true } });
   });
   await page.goto("/");
-  await page.getByRole("button", { name: m.sms.title }).click();
-  await page.getByLabel(m.sms.phone, { exact: true }).fill("invalid");
-  await page.getByRole("button", { name: m.sms.send, exact: true }).click();
+  // The one sign-in field takes a username, mobile or email; a mobile number
+  // drops the password and texts a code instead.
   await expect(
-    page
-      .getByRole("region", { name: m.sms.title, exact: true })
-      .getByRole("alert"),
-  ).toHaveText(m.errors.invalid_input);
-  expect(sends).toBe(0);
-  await page.getByLabel(m.sms.phone, { exact: true }).fill("138 0013 8000");
+    page.getByLabel(m.accountIdentifier, { exact: true }),
+  ).toHaveAttribute("data-testid", "auth-email");
+  await page.getByTestId("auth-email").fill("138 0013 8000");
+  await expect(page.getByTestId("auth-password")).toHaveCount(0);
   await page.getByRole("button", { name: m.sms.send, exact: true }).click();
   await expect(page.getByRole("status")).toHaveText(m.sms.sent);
   await expect(page.getByTestId("sms-resend")).toBeDisabled();
@@ -98,6 +101,20 @@ test("SMS validates input, limits resend and signs in only after verification", 
   await page.getByTestId("sms-resend").click();
   await expect(page.getByTestId("sms-resend")).toBeDisabled();
   await expect.poll(() => sends).toBe(2);
+  await page.getByRole("button", { name: m.sms.changePhone }).click();
+  await page.clock.fastForward(61_000);
+  await page.getByLabel(m.sms.phone, { exact: true }).fill("invalid");
+  await page.getByRole("button", { name: m.sms.send, exact: true }).click();
+  await expect(
+    page
+      .getByRole("region", { name: m.sms.title, exact: true })
+      .getByRole("alert"),
+  ).toHaveText(m.errors.invalid_input);
+  expect(sends).toBe(2);
+  await page.getByLabel(m.sms.phone, { exact: true }).fill("13800138000");
+  await page.getByRole("button", { name: m.sms.send, exact: true }).click();
+  await expect(page.getByRole("status")).toHaveText(m.sms.sent);
+  await expect.poll(() => sends).toBe(3);
   await page.getByLabel(m.sms.code, { exact: true }).fill("123456");
   await page.getByRole("button", { name: m.sms.verify, exact: true }).click();
   await expect(page.getByTestId("today-heading")).toHaveText(m.today);
@@ -124,10 +141,9 @@ test("SMS respects server Retry-After and recovers from provider failure", async
     );
   });
   await page.goto("/");
-  await page.getByRole("button", { name: m.sms.title }).click();
-  await page.getByLabel(m.sms.phone, { exact: true }).fill("13800138000");
+  await page.getByTestId("auth-email").fill("13800138000");
+  await page.getByTestId("auth-submit").click();
   const send = page.getByRole("button", { name: m.sms.send, exact: true });
-  await send.click();
   await expect(
     page
       .getByRole("region", { name: m.sms.title, exact: true })

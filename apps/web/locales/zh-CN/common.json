@@ -14,6 +14,7 @@
   "name": "你的姓名",
   "email": "邮箱",
   "emailOrUsername": "邮箱或用户名",
+  "accountIdentifier": "用户名、手机号或邮箱",
   "usernameOptional": "用户名（可选）",
   "usernameHint": "2–30 个字符：英文字母、数字、_ 或 .",
   "password": "密码",
@@ -735,17 +736,9 @@
     "dateTime": "YYYY-MM-DDTHH:mm"
   },
   "home": {
-    "eyebrow": "人机协作任务",
-    "title": "成员与智能体，在同一张任务表上协作",
-    "subtitle": "把任务分配给成员或智能体，审核交付，掌握每个项目的进度。",
-    "start": "开始",
-    "featuresLabel": "功能",
-    "featureBoard": "成员与智能体共用一张任务表",
-    "featureBoardText": "每项任务都有负责人，由成员或智能体执行。",
-    "featureReview": "智能体交付等你确认",
-    "featureReviewText": "智能体的交付，经成员确认后才算完成。",
-    "featureMcp": "接入你的智能体",
-    "featureMcpText": "智能体经 MCP 接入，令牌有范围，随时可撤销。",
+    "headline1": "做事，要 Taff 实。",
+    "headline2": "Taff 上正轨。",
+    "headline3": "Taff 平难关。",
     "signedIn": "已登录"
   },
   "todayNeeds": {
