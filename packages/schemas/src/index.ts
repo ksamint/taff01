@@ -555,6 +555,29 @@ export const mcpTaskCommentsListArgs = strictObject({ taskId: idSchema });
 export const mcpTaskCommentsAddArgs = extend(taskCommentInputSchema, {
   taskId: idSchema,
 });
+export const mcpContextGetArgs = strictObject({});
+export const mcpContextSchema = object({
+  now: calendarInstantSchema,
+  workspace: object({
+    id: idSchema,
+    name: string(),
+    key: string(),
+    timeZone: string().check(refine(timeZone)),
+    timeZoneSource: zodEnum(["user_profile"]),
+  }),
+  memberId: idSchema,
+  ownerId: nullable(idSchema),
+  members: array(
+    object({
+      id: idSchema,
+      name: string(),
+      kind: zodEnum(["person", "agent"]),
+      role: memberRoleSchema,
+    }),
+  ),
+  projects: array(object({ id: idSchema, name: string() })),
+});
+export type McpContext = Infer<typeof mcpContextSchema>;
 export const mcpProjectsListArgs = strictObject({});
 export const mcpSearchArgs = searchInputSchema;
 export const mcpQuickAddArgs = quickAddInputSchema;

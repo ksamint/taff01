@@ -217,7 +217,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     !confirmed &&
     identityReady &&
     !!me.data &&
-    (pathname === "/" || pathname.startsWith("/projects"));
+    (pathname === "/" ||
+      pathname.startsWith("/projects") ||
+      pathname === "/calendar");
   const selectionUser = useRef<string | null>(null);
   useEffect(() => {
     if (!me.data || !identityReady || !confirmed) return;

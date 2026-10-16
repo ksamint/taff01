@@ -666,6 +666,51 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
       true,
     );
   });
+  it("chat context uses the issuing person's zone without leaking another workspace or writing activity", async () => {
+    await core.updateProfile(aliceId, { locale: "en", tz: "America/New_York" });
+    const before = await connection.db
+      .select()
+      .from(activity)
+      .where(eq(activity.workspaceId, w));
+    const context = await core.getContext(agent, w);
+    expect(context).toMatchObject({
+      workspace: {
+        id: w,
+        timeZone: "America/New_York",
+        timeZoneSource: "user_profile",
+      },
+      memberId: agentId,
+      ownerId: owner,
+    });
+    expect(Math.abs(Date.parse(context.now) - Date.now())).toBeLessThan(1000);
+    expect(context.members).toContainEqual(
+      expect.objectContaining({ id: bobMember, name: "Bob Lee" }),
+    );
+    expect(context.members.every((member) => !("userId" in member))).toBe(true);
+    await expect(core.getContext(agent, otherW)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    expect(
+      await connection.db
+        .select()
+        .from(activity)
+        .where(eq(activity.workspaceId, w)),
+    ).toEqual(before);
+    const writeOnly = await core.createAgentToken(alice, {
+      workspaceId: w,
+      memberId: agentId,
+      name: "Write-only context denial",
+      scopes: ["tasks:write"],
+    });
+    const writeOnlyAgent = (await core.authenticateAgentToken(
+      writeOnly.token,
+    ))!;
+    await expect(core.getContext(writeOnlyAgent, w)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    await core.revokeAgentToken(alice, writeOnly.id);
+    await core.updateProfile(aliceId, { locale: "en", tz: "UTC" });
+  });
   it("core quick add resolves only current workspace and uses user time zone", async () => {
     await core.updateProfile(aliceId, {
       locale: "zh-HK",

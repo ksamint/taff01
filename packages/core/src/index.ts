@@ -29,6 +29,7 @@ import {
   type IssuedAgentToken,
   idSchema,
   type McpCall,
+  type McpContext,
   type Me,
   type Member,
   mcpCallEntrySchema,
@@ -461,6 +462,73 @@ export function createCore(options: {
         // share createdAt: list people first, then break ties by id.
         .orderBy(members.createdAt, members.kind, members.id)
     );
+  }
+  /** Read-only chat context; agents use the issuing person's saved display zone. */
+  async function getContext(
+    principal: Principal,
+    workspaceId: string,
+  ): Promise<McpContext> {
+    parse(idSchema, workspaceId);
+    const actor = await requireMember(
+      db,
+      principal,
+      workspaceId,
+      "workspace:read",
+    );
+    const [workspace] = await db
+      .select({ id: workspaces.id, name: workspaces.name, key: workspaces.key })
+      .from(workspaces)
+      .where(eq(workspaces.id, workspaceId));
+    if (!workspace) throw new CoreError("not_found", 404);
+    const personId =
+      principal.kind === "user"
+        ? principal.userId
+        : (
+            await db
+              .select({ userId: members.userId })
+              .from(agentTokens)
+              .innerJoin(
+                members,
+                and(
+                  eq(members.id, agentTokens.createdBy),
+                  eq(members.workspaceId, workspaceId),
+                ),
+              )
+              .where(
+                and(
+                  eq(agentTokens.id, principal.tokenId),
+                  eq(agentTokens.workspaceId, workspaceId),
+                  eq(agentTokens.memberId, actor.id),
+                ),
+              )
+          )[0]?.userId;
+    if (!personId) throw new CoreError("unauthorized", 401);
+    const [person] = await db
+      .select({ tz: user.tz })
+      .from(user)
+      .where(eq(user.id, personId));
+    if (!person) throw new CoreError("unauthorized", 401);
+    const [roster, projectRows] = await Promise.all([
+      listMembers(principal, workspaceId),
+      planning.operations.listProjects(principal, workspaceId),
+    ]);
+    return {
+      now: new Date().toISOString(),
+      workspace: {
+        ...workspace,
+        timeZone: person.tz,
+        timeZoneSource: "user_profile" as const,
+      },
+      memberId: actor.id,
+      ownerId: roster.find((member) => member.userId === personId)?.id ?? null,
+      members: roster.map(({ id, name, kind, role }) => ({
+        id,
+        name,
+        kind,
+        role,
+      })),
+      projects: projectRows.map(({ id, name }) => ({ id, name })),
+    };
   }
   async function createWorkspaceAgent(
     principal: Principal,
@@ -1183,6 +1251,7 @@ export function createCore(options: {
     ...mind.operations,
     ...runOperations,
     getTodayBootstrap,
+    getContext,
     auth,
     getAuthMethods: () => ({ smsEnabled: Boolean(sms) }),
     handlePhoneAuth: async (request: Request, peerAddress: string) => {

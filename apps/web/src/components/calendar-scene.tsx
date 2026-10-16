@@ -1,6 +1,5 @@
 "use client";
 import "temporal-polyfill/global";
-import "@schedule-x/theme-default/dist/index.css";
 import "../styles/calendar.css";
 import type { CalendarEvent } from "@schedule-x/calendar";
 import {
@@ -21,7 +20,13 @@ import {
   Sparkles,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { useCalendar, useSetCalendar } from "../lib/calendar-queries";
@@ -32,11 +37,9 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useRuns } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
-import {
-  CalendarEngine,
-  type CalendarEngineProps,
-  type CalendarMode,
-} from "./calendar-engine";
+import type { CalendarEngineProps, CalendarMode } from "./calendar-engine";
+import { DeferredCalendarEngine as CalendarEngine } from "./deferred-calendar-engine";
+import { useInitialTodayTime } from "./providers";
 import { RouteLoading } from "./route-loading";
 
 const ScheduleEditor = dynamic(
@@ -79,7 +82,16 @@ export function CalendarScene() {
   const access = useWorkspaceAccess(workspace.id);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
-  const today = Temporal.Now.zonedDateTimeISO(me.user.tz).toPlainDate();
+  const initialNow = useInitialTodayTime();
+  const [mountedAt, setMountedAt] = useState(() => initialNow ?? Date.now());
+  useEffect(() => {
+    setMountedAt(Date.now());
+    const timer = window.setInterval(() => setMountedAt(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+  const today = Temporal.Instant.fromEpochMilliseconds(mountedAt)
+    .toZonedDateTimeISO(me.user.tz)
+    .toPlainDate();
   const [date, setDate] = useState(today.toString());
   const [view, setView] = useState<CalendarMode>("day");
   const [list, setList] = useState(false);

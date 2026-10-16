@@ -308,7 +308,7 @@ for (const signedIn of [false, true]) {
   });
 }
 
-for (const route of ["/projects"]) {
+for (const route of ["/projects", "/calendar"]) {
   test(`authenticated ${route} paints read-only while browser confirmation is pending`, async ({
     page,
   }, info) => {

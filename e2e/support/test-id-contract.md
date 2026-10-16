@@ -92,7 +92,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `calendar-*` | 5 | calendar-scene.tsx, crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar-accessibility.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts |
+| `calendar-*` | 5 | calendar-scene.tsx, crm/contact-links.tsx, crm/contact-role-row.tsx, deferred-calendar-engine.tsx, relations-view.tsx | calendar-accessibility.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts |
 | `calendar-engine` | 1 | calendar-scene.tsx | calendar-accessibility.spec.ts |
 
 ### calendar-scene.tsx

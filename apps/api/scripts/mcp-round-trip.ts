@@ -22,6 +22,7 @@ import {
   dependencySchema,
   grantSchema,
   type McpCall,
+  mcpContextSchema,
   quickAddResultSchema,
   type ReviewRun,
   type ReviewWorkspace,
@@ -49,6 +50,7 @@ export const MCP_TOOLS = [
   "companies.list",
   "contacts.get",
   "contacts.list",
+  "context.get",
   "dependencies.add",
   "dependencies.remove",
   "files.attach",
@@ -176,6 +178,18 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
     "lists every task, calendar, timeline, project, search, draft, run, grant, file, CRM, relations, brief and suggestion tool",
     JSON.stringify(tools) === JSON.stringify(MCP_TOOLS),
     tools,
+  );
+  const context = mcpContextSchema.parse(
+    text(await client.callTool({ name: "context.get", arguments: {} })),
+  );
+  check(
+    "context.get returns current time and only the token workspace's members and projects",
+    context.workspace.id === workspace.id &&
+      context.memberId === agentId &&
+      context.ownerId === workspace.memberId &&
+      Math.abs(Date.parse(context.now) - Date.now()) < 60_000 &&
+      context.members.some((member) => member.id === agentId) &&
+      context.projects.some((item) => item.id === project.id),
   );
   const calendarStart = new Date(Date.now() + 3_600_000).toISOString();
   const calendarEnd = new Date(Date.now() + 7_200_000).toISOString();

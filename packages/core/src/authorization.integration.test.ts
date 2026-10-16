@@ -884,6 +884,7 @@ describe.skipIf(!databaseUrl)(
     });
 
     const implicitWorkspaceTools = new Set([
+      "context.get",
       "tasks.list",
       "projects.list",
       "search.query",
@@ -923,6 +924,7 @@ describe.skipIf(!databaseUrl)(
         f.run = (await core.getRun(owner(), f.run!.id)).run;
       }
       const args: Record<string, Record<string, unknown>> = {
+        "context.get": {},
         "tasks.list": {},
         "tasks.create": {
           ownerId,

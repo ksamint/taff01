@@ -39,6 +39,7 @@ import {
   mcpCalendarListArgs,
   mcpCalendarScheduleArgs,
   mcpCalendarSetArgs,
+  mcpContextGetArgs,
   mcpFilesAttachArgs,
   mcpGrantsRequestArgs,
   mcpInboxRequestReviewArgs,
@@ -93,7 +94,7 @@ export function createMcpServer(
   state: CallState,
   logger?: ErrorLogger,
 ) {
-  const server = new McpServer({ name: "taff", version: "0.2.4" });
+  const server = new McpServer({ name: "taff", version: "0.2.5" });
   const run = async (fn: () => Promise<unknown>) => {
     try {
       return ok(await fn());
@@ -101,6 +102,22 @@ export function createMcpServer(
       return failure(error, state, logger);
     }
   };
+  server.registerTool(
+    "context.get",
+    {
+      title: "Read workspace context",
+      description:
+        "Read the current instant, workspace display time zone (the token creator's saved user profile), calling member, default human owner, members and projects. Call before resolving relative dates such as today, tomorrow 3pm, Friday or next Monday, or names such as Alice. Resolve wall times in workspace.timeZone, then send ISO instants; never assume the client clock or UTC is the workspace zone. No data is changed.",
+      inputSchema: toolSchema(mcpContextGetArgs),
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+      },
+    },
+    () => run(() => core.getContext(principal, principal.workspaceId)),
+  );
   server.registerTool(
     "tasks.list",
     {
@@ -312,7 +329,7 @@ export function createMcpServer(
     {
       title: "Submit agent run",
       description:
-        "Submit actual artifacts for human review. Only the configured review policy can allow completion without review.",
+        "Submit this run for human review using its current version. Requires at least one artifact already attached with files.attach; a runs.event progress message is not an artifact. When the user only reports progress, attach an accurately attributed text progress note, never invented report content, then submit with the updated run version. Only the configured review policy can allow completion without review.",
       inputSchema: toolSchema(mcpRunsSubmitArgs),
     },
     ({ runId, ...input }) => run(() => core.submitRun(principal, runId, input)),

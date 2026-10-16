@@ -741,3 +741,65 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* The native hour grid is visible while the gesture engine downloads. */
+.calendar-grid-shell {
+  position: relative;
+  height: calc(100dvh - 300px);
+  min-height: 360px;
+  overflow: hidden;
+  display: flex;
+  background: var(--bg);
+}
+.calendar-grid-shell-hours {
+  width: 56px;
+  flex-shrink: 0;
+  color: var(--text-subtle);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.calendar-grid-shell-hours > div {
+  height: 56px;
+  padding: 4px;
+}
+.calendar-grid-shell-columns {
+  display: grid;
+  flex: 1;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--border-line) 0 1px,
+    transparent 1px 56px
+  );
+}
+.calendar-grid-shell-columns > div {
+  border-left: 1px solid var(--border-line);
+}
+
+.calendar-grid-shell-events {
+  position: absolute;
+  inset: 0 4px 0 56px;
+  overflow: auto;
+}
+.calendar-grid-shell-event {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  overflow: hidden;
+  display: block;
+  padding: 3px 8px;
+  text-align: start;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.calendar-grid-shell-titles {
+  margin: 0;
+  max-height: 48px;
+  overflow: hidden;
+  white-space: pre-line;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 16px;
+}
