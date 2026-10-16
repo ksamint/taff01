@@ -49,17 +49,24 @@ export async function performanceFixture(
         projectId: project.id,
         title: `Today audit task ${index + 1}`,
         priority: (index % 4) + 1,
-        dueAt: startAt,
-        calendar: { startAt, endAt, timeZone: "UTC", rrule: null },
+        dueAt: new Date().toISOString(),
+        ...(route === "calendar"
+          ? { calendar: { startAt, endAt, timeZone: "UTC", rrule: null } }
+          : {}),
       },
     });
     assert(created.ok(), "Audit task creation failed");
     const task = taskSchema.parse(await created.json());
-    const planned = await request.patch(`${origin}/api/tasks/${task.id}/plan`, {
-      headers,
-      data: { startDate: date, durationDays: 2 },
-    });
-    assert(planned.ok(), "Audit timeline planning failed");
+    if (route === "timeline") {
+      const planned = await request.patch(
+        `${origin}/api/tasks/${task.id}/plan`,
+        {
+          headers,
+          data: { startDate: date, durationDays: 2 },
+        },
+      );
+      assert(planned.ok(), "Audit timeline planning failed");
+    }
   }
   return route === "today"
     ? "/"

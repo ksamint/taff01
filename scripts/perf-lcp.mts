@@ -4,6 +4,7 @@
 // must stay at or below 2000 ms (instruction_v0.md). No Lighthouse needed.
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { createServer } from "node:net";
 import { chromium } from "@playwright/test";
 import {
   type PerformanceRoute,
@@ -37,6 +38,11 @@ if (!Number.isInteger(runs) || runs < 1)
 if (!["en", "zh-CN", "zh-HK"].includes(locale))
   throw new Error("LCP_LOCALE must be en, zh-CN or zh-HK");
 
+const probe = createServer();
+await new Promise<void>((resolve, reject) => {
+  probe.once("error", () => reject(new Error(`Free audit port ${port}`)));
+  probe.listen(port, "127.0.0.1", () => probe.close(() => resolve()));
+});
 const server = spawn(
   "node",
   ["node_modules/next/dist/bin/next", "start", "-p", String(port)],
@@ -44,6 +50,8 @@ const server = spawn(
 );
 async function waitForServer() {
   for (let attempt = 0; attempt < 60; attempt++) {
+    if (server.exitCode !== null)
+      throw new Error("Production measurement server exited");
     try {
       if ((await fetch(`${origin}/api/health`)).ok) return;
     } catch {
@@ -360,5 +368,17 @@ try {
     process.exitCode = 1;
   }
 } finally {
-  server.kill();
+  if (server.exitCode === null) {
+    server.kill();
+    await new Promise<void>((resolve) => {
+      const timeout = setTimeout(() => {
+        server.kill("SIGKILL");
+        resolve();
+      }, 5000);
+      server.once("exit", () => {
+        clearTimeout(timeout);
+        resolve();
+      });
+    });
+  }
 }

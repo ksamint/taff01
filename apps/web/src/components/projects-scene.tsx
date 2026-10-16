@@ -49,6 +49,7 @@ import {
 } from "../lib/project-board";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
+import { useInitialTodayTime } from "./providers";
 import { TimelineView } from "./timeline-view";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -82,7 +83,7 @@ const VIEW_LABEL: Record<ProjectView, string> = {
   mind: "projects.mindView",
 };
 
-function projectDueLabels(locale: string, timeZone: string) {
+function projectDueLabels(locale: string, timeZone: string, now: number) {
   const dayFormat = new Intl.DateTimeFormat("en", {
     timeZone,
     year: "numeric",
@@ -103,14 +104,20 @@ function projectDueLabels(locale: string, timeZone: string) {
       Number(parts.find((item) => item.type === kind)?.value);
     return Date.UTC(part("year"), part("month") - 1, part("day"));
   };
+  const today = civilDay(new Date(now));
+  const labels = new Map<string, string>();
   return (dueAt: string): string => {
+    const cached = labels.get(dueAt);
+    if (cached !== undefined) return cached;
     const due = new Date(dueAt);
-    const delta = (civilDay(due) - civilDay(new Date())) / 86_400_000;
+    const delta = (civilDay(due) - today) / 86_400_000;
     const label =
       Math.abs(delta) <= 1
         ? relativeFormat.format(delta, "day")
         : dateFormat.format(due);
-    return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1);
+    const value = label.charAt(0).toLocaleUpperCase(locale) + label.slice(1);
+    labels.set(dueAt, value);
+    return value;
   };
 }
 
@@ -151,7 +158,7 @@ function StatusIcon({ status }: { status: Task["status"] }) {
 }
 
 export function ProjectsView({ projectId = "" }: { projectId?: string }) {
-  const { workspace, me, openSearch, openQuick } = useWorkspace();
+  const { workspace, me, openSearch, openQuick, confirmed } = useWorkspace();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -190,9 +197,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
   const selectedProjectId = selected?.id ?? projectId;
   const locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
+  const serverNow = useInitialTodayTime();
+  const minute = Math.floor(
+    (confirmed ? Date.now() : (serverNow ?? Date.now())) / 60_000,
+  );
   const dueLabel = useMemo(
-    () => projectDueLabels(locale, me.user.tz),
-    [locale, me.user.tz],
+    () => projectDueLabels(locale, me.user.tz, minute * 60_000),
+    [locale, me.user.tz, minute],
   );
   const projectName = selected ? selected.name : t("projects.allProjects");
   const admin = workspaceAccess.data?.canManageProjects;

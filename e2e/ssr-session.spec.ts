@@ -387,3 +387,53 @@ test("calendar loads its Temporal fallback when the browser has no native implem
   await expect(page.getByTestId("calendar-previous")).toBeEnabled();
   expect(await page.evaluate(() => typeof globalThis.Temporal)).toBe("object");
 });
+
+test("cold calendar renders its authenticated schedule before app scripts load", async ({
+  page,
+}, info) => {
+  const me = await account(
+    page.request,
+    info.project.name as TestLocale,
+    "Calendar first paint",
+    "UTC",
+  );
+  const date = new Date().toISOString().slice(0, 10);
+  const title = `Calendar first paint ${crypto.randomUUID()}`;
+  expect(
+    (
+      await page.request.post("/api/tasks", {
+        data: {
+          workspaceId: me.workspaces[0].id,
+          ownerId: me.workspaces[0].memberId,
+          title,
+          calendar: {
+            startAt: `${date}T09:00:00Z`,
+            endAt: `${date}T10:00:00Z`,
+            timeZone: "UTC",
+            rrule: null,
+          },
+        },
+      })
+    ).status(),
+  ).toBe(201);
+  let release!: () => void;
+  const scripts = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route("**/_next/static/**/*.js", async (route) => {
+    await scripts;
+    await route.continue();
+  });
+  try {
+    const response = await page.goto("/calendar", { waitUntil: "commit" });
+    expect(await response!.text()).toContain(title);
+    await expect(page.getByTestId("calendar-bootstrap")).toContainText(title);
+    await expect(page.getByTestId("calendar-bootstrap")).toBeVisible();
+    await expect(page.locator("main.content")).toHaveAttribute("inert", "");
+    release();
+    await expect(page.locator(".sx__calendar")).toBeVisible();
+    await expect(page.getByTestId("calendar-bootstrap")).toHaveCount(0);
+  } finally {
+    release();
+  }
+});

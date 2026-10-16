@@ -1000,7 +1000,9 @@
 }
 
 /* Keep long boards in the DOM while deferring offscreen layout and paint. */
-.board-card {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 144px;
+@media (max-width: 1023px) {
+  .board-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 144px;
+  }
 }
