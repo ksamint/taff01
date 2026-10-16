@@ -76,13 +76,14 @@ export function useManageProject(
         },
       ).then(projectSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id =
         mode === "edit" ? baseline!.id : `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Project[]>(projectsKey(workspaceId), (current = []) =>
         withProjectSave(current, mode, workspaceId, id, body, now),
       );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),

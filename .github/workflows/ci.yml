@@ -88,17 +88,6 @@ jobs:
           name: lighthouse-reports
           path: lighthouse-reports/*.report.json
           retention-days: 7
-      # Behavioral flows edit the seeded fixture; reseeding preserves those edits.
-      - name: Approved visual baselines before fixture mutations
-        run: |
-          for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add companies company-detail contacts contact-detail stakeholders timeline relations brief mind home; do
-            UI_SCREEN="$screen" pnpm exec playwright test --config playwright.visual.config.ts
-          done
-          for screen in companies company-detail contacts contact-detail stakeholders timeline relations brief mind home; do
-            UI_THEME=dark UI_SCREEN="$screen" pnpm exec playwright test --config playwright.visual.config.ts
-          done
-      - name: Browser flows in en, zh-CN and zh-HK
-        run: pnpm e2e
       - name: MCP smoke against the bundled API
         run: |
           node dist/runtime/api/api.mjs > api.log 2>&1 &
@@ -120,32 +109,84 @@ jobs:
             api.log
             api-lcp.log
           retention-days: 7
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: taff
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: taff
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U taff -d taff" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+      valkey:
+        image: valkey/valkey:9-alpine
+        ports: ["56379:6379"]
+        options: >-
+          --health-cmd "valkey-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: printf 'CI=1\n' > .env
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: pnpm build
+      - run: pnpm build:server
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      # Behavioral flows edit the seeded fixture; reseeding preserves those edits.
+      - name: Approved visual baselines before fixture mutations
+        run: |
+          index=0
+          for screen in shell today projects task-detail review inbox calendar me type search notifications agent team mcp organizations quick-add companies company-detail contacts contact-detail stakeholders timeline relations brief mind home; do
+            index=$((index + 1))
+            if [ $(((index - 1) % 4 + 1)) -ne "${{ matrix.shard }}" ]; then continue; fi
+            UI_SCREEN="$screen" pnpm exec playwright test --config playwright.visual.config.ts
+          done
+          for screen in companies company-detail contacts contact-detail stakeholders timeline relations brief mind home; do
+            index=$((index + 1))
+            if [ $(((index - 1) % 4 + 1)) -ne "${{ matrix.shard }}" ]; then continue; fi
+            UI_THEME=dark UI_SCREEN="$screen" pnpm exec playwright test --config playwright.visual.config.ts
+          done
+      - name: Browser flows in en, zh-CN and zh-HK
+        run: pnpm e2e --shard=${{ matrix.shard }}/4
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report-${{ matrix.shard }}
+          path: test-results
+          retention-days: 7
   images:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [api, worker, web]
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
-      - name: Build the API image
+      - name: Build the ${{ matrix.target }} image
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: deploy/Dockerfile.server
-          build-args: TARGET=api
+          file: ${{ matrix.target == 'web' && 'deploy/Dockerfile.web' || 'deploy/Dockerfile.server' }}
+          build-args: TARGET=${{ matrix.target }}
           push: false
-          tags: taff-api:ci
-      - name: Build the worker image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: deploy/Dockerfile.server
-          build-args: TARGET=worker
-          push: false
-          tags: taff-worker:ci
-      - name: Build the web image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: deploy/Dockerfile.web
-          push: false
-          tags: taff-web:ci
+          tags: taff-${{ matrix.target }}:ci

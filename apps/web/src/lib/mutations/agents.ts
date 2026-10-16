@@ -116,11 +116,11 @@ export function useSaveAgentProfile(agentId: string) {
         body: JSON.stringify(agentProfileInputSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<AgentProfile>(agentKey(agentId), (current) =>
         withAgentProfileInput(current, body),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -138,11 +138,11 @@ export function useSetAgentPermission(agentId: string) {
         body: JSON.stringify(agentPermissionInputSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<AgentProfile>(agentKey(agentId), (current) =>
         withAgentPermission(current, body),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -163,7 +163,7 @@ export function useRequestGrant(
         body: JSON.stringify(requestGrantSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const now = new Date().toISOString();
       client.setQueryData<AgentProfile>(agentKey(agent.id), (current) =>
         current
@@ -178,7 +178,7 @@ export function useRequestGrant(
             )
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: () => onRequested?.(),
@@ -221,7 +221,7 @@ export function useAlwaysAllowGrant(
       });
     },
     onMutate: async () => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<AgentProfile>(agentKey(grant.agentId), (current) =>
         withGrantDecision(
           withAgentPermission(current, {
@@ -234,7 +234,7 @@ export function useAlwaysAllowGrant(
         ),
       );
       resolveInbox(client, (item) => item.grantId === grant.id);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -255,12 +255,12 @@ export function useDecideGrant(
         body: JSON.stringify(decideGrantSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<AgentProfile>(agentKey(grant.agentId), (current) =>
         withGrantDecision(current, grant.id, body, actorId),
       );
       resolveInbox(client, (item) => item.grantId === grant.id);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),

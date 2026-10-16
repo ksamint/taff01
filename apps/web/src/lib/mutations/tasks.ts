@@ -136,13 +136,14 @@ export function useCreateTask(
         body: JSON.stringify(createTaskSchema.parse(body)),
       }).then(taskSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(tasksKey(workspaceId), (current = []) => [
         optimisticQuickAddTask(body, id, now),
         ...current,
       ]);
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -170,9 +171,9 @@ export function useAssignTask(taskId: string) {
         }),
       ),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       patchTask(client, taskId, { workerId: body.workerId });
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -197,7 +198,7 @@ export function useStartRun(
         body: JSON.stringify(startRunSchema.parse({})),
       }).then(runSchema.parse),
     onMutate: async () => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       const run = optimisticRun(
@@ -221,6 +222,7 @@ export function useStartRun(
         canSubmit: false,
       });
       patchTask(client, taskId, { status: "in_progress" });
+      snapshot.capture();
       return { snapshot, id };
     },
     onSuccess: (run, _, context) => {
@@ -259,13 +261,14 @@ export function useAddSubtask(
         ),
       }).then(taskSchema.parse),
     onMutate: async (title) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(
         tasksKey(task.workspaceId),
         (current = []) => [optimisticSubtask(task, title, id, now), ...current],
       );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -298,7 +301,7 @@ export function useAddTaskComment(
         body: JSON.stringify(taskCommentInputSchema.parse({ body })),
       }).then(taskCommentSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       if (authorId)
         client.setQueryData<TaskComment[]>(
@@ -315,6 +318,7 @@ export function useAddTaskComment(
             },
           ],
         );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -355,9 +359,9 @@ export function useUndoableTaskEdit() {
         body: JSON.stringify(updateTaskSchema.parse(body)),
       }).then(taskSchema.parse),
     onMutate: async ({ id, body }) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       patchTask(client, id, { ...body, version: body.version + 1 });
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (task, _, snapshot) => {

@@ -115,9 +115,9 @@ export function useCreateWorkspace(
         body: JSON.stringify(workspaceCreateSchema.parse(body)),
       }).then(workspaceSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotQueries(client, [drafts]);
+      const snapshot = (await snapshotQueries(client, [drafts])).start();
       client.setQueryData(drafts, body.name);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (value, _, snapshot) => {
@@ -143,12 +143,13 @@ export function useAddWorkspaceAgent(
         body: JSON.stringify(workspaceAgentInputSchema.parse(body)),
       }).then(memberSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       client.setQueryData<Member[]>(membersKey(workspaceId), (current) => [
         ...(current ?? []),
         optimisticAgentMember(workspaceId, body.name, id),
       ]);
+      snapshot.capture();
       return { id, snapshot };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -196,11 +197,11 @@ export function useChangeMemberRole(workspaceId: string) {
         body: JSON.stringify(memberRoleInputSchema.parse({ role: next })),
       }),
     onMutate: async ({ id, next }) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<Member[]>(membersKey(workspaceId), (current) =>
         withMemberRole(current, id, next),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateWorkspaces(client),
@@ -243,13 +244,14 @@ export function useIssueWorkspaceInvite(
       return metadata;
     },
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       client.setQueryData<WorkspaceInvite[]>(key, (current) => [
         optimisticInvite(workspaceId, body, id, Date.now()),
         ...(current ?? []),
       ]);
       onStart?.();
+      snapshot.capture();
       return { id, snapshot };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -272,11 +274,11 @@ export function useRevokeWorkspaceInvite(workspaceId: string) {
     mutationFn: (id: string) =>
       request(`/api/workspace-invites/${id}`, { method: "DELETE" }),
     onMutate: async (id) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<WorkspaceInvite[]>(key, (current) =>
         withRevokedInvite(current, id),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateWorkspaces(client),

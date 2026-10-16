@@ -37,11 +37,11 @@ export function AiSettingsSection() {
         }),
       ),
     onMutate: async () => {
-      const snapshot = await snapshotQueries(client, [key]);
+      const snapshot = (await snapshotQueries(client, [key])).start();
       client.setQueryData<AiSettings>(key, (current) =>
         current ? { ...current, enabled: false } : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (saved) => client.setQueryData(key, saved),

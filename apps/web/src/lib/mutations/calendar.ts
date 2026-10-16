@@ -79,7 +79,9 @@ export function useCreateCalendarTask(
         }),
       ),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client, [tasksKey(workspaceId)]);
+      const snapshot = (
+        await snapshotM3(client, [tasksKey(workspaceId)])
+      ).start();
       const task = optimisticCalendarTask(
         body,
         `optimistic:${crypto.randomUUID()}`,
@@ -94,7 +96,7 @@ export function useCreateCalendarTask(
         (current) =>
           withCreatedOccurrence(current, task, body.calendar, workspaceId),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (_, __, snapshot) => {

@@ -50,13 +50,14 @@ export function useUpdateProfile({
         body: JSON.stringify(profileSchema.parse({ locale, tz })),
       }),
     onMutate: async ({ locale, tz }) => {
-      const snapshot = await snapshotQueries(client, [meKey]);
+      const snapshot = (await snapshotQueries(client, [meKey])).start();
       const previous = i18n.language;
       client.setQueryData<Me | null>(meKey, (current) =>
         withProfile(current, locale, tz),
       );
       onStart?.();
       void i18n.changeLanguage(locale);
+      snapshot.capture();
       return { previous, snapshot };
     },
     onSuccess: (_, { locale, tz }, context) => {

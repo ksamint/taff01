@@ -70,7 +70,7 @@ export function useReviewRun({ run, task }: ReviewTarget) {
         body: JSON.stringify(reviewRunSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const outcome = reviewOutcome(body.decision);
       patchRun(client, run.id, { status: outcome.run });
       patchTask(client, task.id, { status: outcome.task });
@@ -81,7 +81,7 @@ export function useReviewRun({ run, task }: ReviewTarget) {
         client,
         (item) => item.runId === run.id && item.kind === "review",
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -106,7 +106,7 @@ export function useAddReviewComment(
         body: JSON.stringify(reviewCommentSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       if (authorId)
         client.setQueryData<ReviewWorkspace>(reviewKey(task.id), (current) =>
           current
@@ -129,7 +129,7 @@ export function useAddReviewComment(
               }
             : current,
         );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (_, body) => onAdded?.(body),
@@ -151,13 +151,13 @@ export function useControlRun(
         body: JSON.stringify(controlRunSchema.parse(body)),
       }).then(runSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const outcome = controlOutcome(body.action);
       patchRun(client, run.id, { status: outcome.run });
       patchTask(client, run.taskId, { status: outcome.task });
       if (body.action === "cancel")
         resolveInbox(client, (item) => item.runId === run.id);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: () => onControlled?.(),

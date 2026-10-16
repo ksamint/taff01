@@ -21,4 +21,4 @@ assets through https://apuch.art/ before styling.
 There are no blocking review gates. At each milestone, push, record working
 behavior, missing work, open decisions and validation numbers (≤ 40 lines) in
 `docs/milestones/`, then continue. The user reviews asynchronously.
-The agent goal command lives in `docs/agent-goal.md`.
+The current goal is the user's latest command.

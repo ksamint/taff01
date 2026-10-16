@@ -40,7 +40,6 @@ import {
   MORE_VIEWS,
   memberInitials,
   nestByParent,
-  PLANNED_VIEWS,
   PROJECT_STATUSES,
   type ProjectSort,
   type ProjectView,
@@ -667,23 +666,6 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         <RelationsView project={selected} />
       ) : view === "mind" ? (
         <MindView project={selected} />
-      ) : PLANNED_VIEWS.includes(view) ? (
-        <section
-          className="projects-placeholder"
-          data-testid="project-view-placeholder"
-          aria-labelledby="projects-placeholder-heading"
-        >
-          <h2 id="projects-placeholder-heading">{t(VIEW_LABEL[view])}</h2>
-          <p>{t("projects.buildingNote")}</p>
-          <div className="projects-placeholder-links">
-            <Link href={viewHref("board")} replace scroll={false}>
-              {t("projects.openBoard")}
-            </Link>
-            <Link href={viewHref("list")} replace scroll={false}>
-              {t("projects.openList")}
-            </Link>
-          </div>
-        </section>
       ) : tasks.isPending ? (
         <p className="loading projects-loading">{t("loading")}</p>
       ) : view === "list" ? (

@@ -107,12 +107,12 @@ function invalidate(client: QueryClient, families: string[]) {
 /** Applies an edit to both cached maps; resolves to the rollback snapshot. */
 async function applyEdit(client: QueryClient, workspaceId: string, edit: Edit) {
   const keys = [mindKey(workspaceId, false), mindKey(workspaceId, true)];
-  const snapshot = await snapshotQueries(client, keys);
+  const snapshot = (await snapshotQueries(client, keys)).start();
   for (const key of keys)
     client.setQueryData<MindMap>(key, (map) =>
       map ? edit(map, key[2] === "include") : map,
     );
-  return snapshot;
+  return snapshot.capture();
 }
 
 /**
@@ -258,6 +258,7 @@ export function useSaveMindNode(workspaceId: string, canArchive: boolean) {
           all,
         ),
       );
+      snapshot.capture();
       return { snapshot, tempId };
     },
     onError: (error, _, context) => {
@@ -396,6 +397,7 @@ export function useAddMindEdge(workspaceId: string) {
           createdAt: now(),
         }),
       );
+      snapshot.capture();
       return { snapshot, tempId };
     },
     onError: (error, _, context) => {
@@ -591,6 +593,7 @@ export function useSaveMindSource(workspaceId: string, canArchive: boolean) {
             })
           : next;
       });
+      snapshot.capture();
       return { snapshot, tempId: id };
     },
     onError: (error, _, context) => {

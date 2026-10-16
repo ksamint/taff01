@@ -168,7 +168,7 @@ export function useSetPlan(projectId: string) {
     mutationFn: ({ item, startDate, durationDays }: PlanChange) =>
       sendPlan(item, planVersion(item), startDate, durationDays),
     onMutate: async ({ item, startDate, durationDays }) => {
-      const snapshot = await snapshotQueries(client, [key]);
+      const snapshot = (await snapshotQueries(client, [key])).start();
       client.setQueryData<Timeline>(key, (current) =>
         current
           ? applyPlanChange(
@@ -180,7 +180,7 @@ export function useSetPlan(projectId: string) {
             )
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);
@@ -225,7 +225,7 @@ export function useAddDependency(projectId: string) {
         }),
       ),
     onMutate: async ({ from, to }) => {
-      const snapshot = await snapshotQueries(client, [key]);
+      const snapshot = (await snapshotQueries(client, [key])).start();
       client.setQueryData<Timeline>(key, (current) =>
         current
           ? {
@@ -242,7 +242,7 @@ export function useAddDependency(projectId: string) {
             }
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);
@@ -291,7 +291,7 @@ export function useRemoveDependency(projectId: string) {
         }),
       ),
     onMutate: async (dependency) => {
-      const snapshot = await snapshotQueries(client, [key]);
+      const snapshot = (await snapshotQueries(client, [key])).start();
       client.setQueryData<Timeline>(key, (current) =>
         current
           ? {
@@ -302,7 +302,7 @@ export function useRemoveDependency(projectId: string) {
             }
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);
@@ -365,7 +365,7 @@ export function useSaveMilestone(projectId: string) {
         ),
       ),
     onMutate: async ({ item, name, date, archived }) => {
-      const snapshot = await snapshotQueries(client, [key]);
+      const snapshot = (await snapshotQueries(client, [key])).start();
       if (item)
         client.setQueryData<Timeline>(key, (current) => {
           if (!current) return current;
@@ -385,7 +385,7 @@ export function useSaveMilestone(projectId: string) {
             ),
           };
         });
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);

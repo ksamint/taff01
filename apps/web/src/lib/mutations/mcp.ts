@@ -68,7 +68,7 @@ export function useCreateAgentToken(
         }),
       ),
     onMutate: async (body) => {
-      const snapshot = await snapshotQueries(client, [tokensKey]);
+      const snapshot = (await snapshotQueries(client, [tokensKey])).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       client.setQueryData<AgentToken[]>(tokensKey, (current = []) => [
         optimisticAgentToken(
@@ -79,6 +79,7 @@ export function useCreateAgentToken(
         ),
         ...current,
       ]);
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -164,7 +165,7 @@ export function useRegenerateAgentToken(
     mutationKey: m3MutationKey,
     mutationFn: regenerateAgentToken,
     onMutate: async (old) => {
-      const snapshot = await snapshotQueries(client, [tokensKey]);
+      const snapshot = (await snapshotQueries(client, [tokensKey])).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<AgentToken[]>(tokensKey, (current) =>
@@ -185,6 +186,7 @@ export function useRegenerateAgentToken(
           now,
         ),
       );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (error, _, context) => {
@@ -222,12 +224,12 @@ export function useRevokeAgentToken(
     mutationFn: async (id: string) =>
       request<AgentToken>(`/api/agent-tokens/${id}`, { method: "DELETE" }),
     onMutate: async (id) => {
-      const snapshot = await snapshotQueries(client, [tokensKey]);
+      const snapshot = (await snapshotQueries(client, [tokensKey])).start();
       client.setQueryData<AgentToken[]>(tokensKey, (current = []) =>
         withRevokedToken(current, id, new Date().toISOString()),
       );
       onStart?.();
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, context) => {
       restoreQueries(client, context);
@@ -248,11 +250,11 @@ export function useRestoreAgentToken(workspaceId: string) {
         method: "POST",
       }),
     onMutate: async (id) => {
-      const snapshot = await snapshotQueries(client, [tokensKey]);
+      const snapshot = (await snapshotQueries(client, [tokensKey])).start();
       client.setQueryData<AgentToken[]>(tokensKey, (current = []) =>
         withRestoredToken(current, id),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, context) => {
       restoreQueries(client, context);
