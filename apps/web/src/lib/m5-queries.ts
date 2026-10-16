@@ -60,9 +60,9 @@ export function useEditTask() {
         body: JSON.stringify(updateTaskSchema.parse(body)),
       }).then(taskSchema.parse),
     onMutate: async ({ id, body }) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       patchTask(client, id, { ...body, version: body.version + 1 });
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (task, _, snapshot) => {

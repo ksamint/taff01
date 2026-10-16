@@ -51,9 +51,9 @@ export function useSetCalendar() {
         }),
       ),
     onMutate: async ({ current, input }) => {
-      const snapshot = await snapshotM3(client, [
-        taskCalendarKey(current.task.id),
-      ]);
+      const snapshot = (
+        await snapshotM3(client, [taskCalendarKey(current.task.id)])
+      ).start();
       const task = { ...current.task, version: input.version + 1 };
       const schedule = input.schedule
         ? { ...input.schedule, taskId: task.id, workspaceId: task.workspaceId }
@@ -128,7 +128,7 @@ export function useSetCalendar() {
           };
         },
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (data, variables, snapshot) => {
