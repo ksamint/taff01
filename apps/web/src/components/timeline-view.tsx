@@ -1,4 +1,5 @@
 "use client";
+import "../styles/timeline.css";
 import type { Project } from "@taff/schemas";
 import dynamic from "next/dynamic";
 import { useTranslation } from "react-i18next";

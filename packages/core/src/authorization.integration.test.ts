@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createCore, userPrincipal } from "@taff/core";
-import { connectDatabase, members } from "@taff/db";
-import { sql } from "drizzle-orm";
+import { connectDatabase, members, notificationPreferences } from "@taff/db";
+import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   MCP_TOOLS,
@@ -25,6 +25,7 @@ type RequestCase = {
   path: string;
   body?: (f: Fixture) => unknown;
   member?: "deny";
+  allowedStatus?: number[];
   foreign?: "own-workspace";
   prepare?: (f: Fixture) => Promise<void>;
 };
@@ -38,6 +39,7 @@ let memberId: string;
 let agentId: string;
 let agentToken: string;
 let foreignAgentToken: string;
+let digestId: string;
 let cookies: Record<Exclude<Actor, "agent">, string>;
 const owner = () => userPrincipal(ownerUserId);
 
@@ -159,6 +161,12 @@ async function review(f: Fixture) {
 }
 
 const routes: RequestCase[] = [
+  { method: "GET", path: "/api/digests/:digest", member: "deny" },
+  {
+    method: "GET",
+    path: "/api/realtime?workspaceId=:workspace",
+    allowedStatus: [503],
+  },
   {
     method: "POST",
     path: "/api/ask",
@@ -651,6 +659,7 @@ const routes: RequestCase[] = [
 function pathFor(path: string, f: Fixture) {
   const ids: Record<string, string> = {
     workspace: workspaceId,
+    digest: digestId,
     owner: ownerId,
     member: memberId,
     agent: agentId,
@@ -768,6 +777,29 @@ describe.skipIf(!databaseUrl)(
           scopes: [...ROUND_TRIP_SCOPES],
         })
       ).token;
+      // Put this isolated account after its daily slot without mocking clocks.
+      const offset = new Date().getUTCHours() - 12;
+      const tz =
+        offset === 0 ? "Etc/GMT" : `Etc/GMT${offset > 0 ? "+" : ""}${offset}`;
+      await core.updateProfile(ownerUserId, { locale: "en", tz });
+      const scheduledAt = new Date(Date.now() - 60_000).toISOString();
+      await connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id', ${ownerUserId}, true)`,
+        );
+        await tx
+          .update(notificationPreferences)
+          .set({ nextDigestAt: new Date(scheduledAt) })
+          .where(eq(notificationPreferences.id, ownerUserId));
+      });
+      const preferences = await core.getNotificationPreferences(owner());
+      const generated = await core.generateDailyDigest(
+        ownerUserId,
+        scheduledAt,
+        preferences.version,
+      );
+      expect(generated.status).toBe("generated");
+      digestId = generated.digestIds[0];
     }, 30000);
     afterAll(async () => {
       await core?.close();
@@ -807,7 +839,9 @@ describe.skipIf(!databaseUrl)(
         expect([403, 404], JSON.stringify(body)).toContain(response.status);
         expect(["forbidden", "not_found"]).toContain(body.error);
       } else {
-        expect([200, 201], JSON.stringify(body)).toContain(response.status);
+        expect(row.allowedStatus ?? [200, 201], JSON.stringify(body)).toContain(
+          response.status,
+        );
       }
     });
 
@@ -837,6 +871,8 @@ describe.skipIf(!databaseUrl)(
         ].includes(name)
       )
         await running(f);
+      if (name === "dependencies.add")
+        await core.removeDependency(owner(), f.dependency.id);
       if (name === "runs.submit" || name === "inbox.request_review") {
         await core.attachRunArtifact(owner(), f.run!.id, {
           version: f.run!.version,
@@ -1041,6 +1077,56 @@ describe.skipIf(!databaseUrl)(
         ).toBe(true);
       }
     });
+    const personalWrites = [
+      {
+        method: "PATCH",
+        path: "/api/profile",
+        body: { locale: "en", tz: "UTC" },
+      },
+      {
+        method: "POST",
+        path: "/api/workspaces",
+        body: { name: "Matrix personal workspace" },
+      },
+      {
+        method: "PATCH",
+        path: "/api/me/notifications",
+        body: {
+          version: 1,
+          review: true,
+          block: true,
+          mention: true,
+          done: true,
+          digest: true,
+          digestAt: "09:00",
+          quiet: false,
+        },
+      },
+    ];
+    it.each(
+      personalWrites.flatMap((row) =>
+        actors.map((actor) => ({ ...row, actor })),
+      ),
+    )(
+      "self-scoped $method $path × $actor",
+      async ({ path, method, body, actor }) => {
+        const response = await app.request(path, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            origin,
+            ...(actor === "agent"
+              ? { Authorization: `Bearer ${agentToken}` }
+              : { cookie: cookies[actor] }),
+          },
+          body: JSON.stringify(body),
+        });
+        expect(response.status).toBe(
+          actor === "agent" ? 401 : method === "POST" ? 201 : 200,
+        );
+      },
+    );
+
     // These endpoints have account/public lifecycles rather than a workspace
     // authorization gate. Existing auth, delivery and invite integration suites
     // exercise those lifecycles; keep the exceptions explicit and fail on new routes.
@@ -1050,6 +1136,7 @@ describe.skipIf(!databaseUrl)(
       const covered = new Set([
         ...routes.map((row) => `${row.method} ${normalize(row.path)}`),
         ...personal.map((path) => `GET ${path}`),
+        ...personalWrites.map((row) => `${row.method} ${row.path}`),
       ]);
       const exceptions = [
         "GET /api/health",
@@ -1060,13 +1147,8 @@ describe.skipIf(!databaseUrl)(
         "POST /api/auth/sign-in/username",
         "POST /api/auth/sign-up/email",
         "POST /api/auth/sign-out",
-        "GET /api/realtime",
-        "GET /api/digests/:id",
         "POST /api/me/email-verification/request",
         "POST /api/me/email-verification/verify",
-        "PATCH /api/me/notifications",
-        "PATCH /api/profile",
-        "POST /api/workspaces",
         "POST /api/workspace-invites/accept",
       ];
       const uncovered = [

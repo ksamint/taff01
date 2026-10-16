@@ -49,6 +49,7 @@ import {
 } from "../lib/project-board";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
+import { TimelineView } from "./timeline-view";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -62,10 +63,6 @@ const StakeholdersView = dynamic(
   { ssr: false },
 );
 // Timeline and relations (M16) are their own lazy chunks, like 相關方.
-const TimelineView = dynamic(
-  () => import("./timeline-view").then((module) => module.TimelineView),
-  { ssr: false },
-);
 const RelationsView = dynamic(
   () => import("./relations-view").then((module) => module.RelationsView),
   { ssr: false },
