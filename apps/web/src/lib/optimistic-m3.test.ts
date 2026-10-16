@@ -274,3 +274,70 @@ it("removes only its own insertion into a previously absent query", async () => 
   expect(client.getQueryData(key)).toBeUndefined();
   client.clear();
 });
+
+it("restores moved recurrence dates without erasing a later task edit", async () => {
+  const client = new QueryClient();
+  const key = ["calendar", "workspace"];
+  const before = {
+    occurrences: [1, 2].map((day) => ({
+      id: `task:day-${day}`,
+      task: { id: "task", title: "before" },
+      startAt: `day-${day}`,
+    })),
+    unscheduled: [],
+  };
+  client.setQueryData(key, before);
+  const a = (await snapshotM3(client)).start();
+  client.setQueryData(key, {
+    ...before,
+    occurrences: before.occurrences.map((row) => ({
+      ...row,
+      id: `${row.id}-moved`,
+      startAt: `${row.startAt}-moved`,
+    })),
+  });
+  a.capture();
+  const b = (await snapshotM3(client)).start();
+  patchTask(client, "task", { title: "B" });
+  b.capture();
+  restoreQueries(client, a);
+  expect(client.getQueryData(key)).toEqual({
+    ...before,
+    occurrences: before.occurrences.map((row) => ({
+      ...row,
+      task: { ...row.task, title: "B" },
+    })),
+  });
+  restoreQueries(client, b);
+  expect(client.getQueryData(key)).toEqual(before);
+  client.clear();
+});
+
+it("rolls back CRM link roles independently for rows identified by contact", async () => {
+  const client = new QueryClient();
+  const key = ["contact-links", "project"];
+  const before = ["a", "b"].map((contactId) => ({
+    scope: "project",
+    entityId: "project",
+    contactId,
+    roles: [] as string[],
+  }));
+  client.setQueryData(key, before);
+  const a = (await snapshotQueries(client, [key])).start();
+  client.setQueryData(key, [{ ...before[0], roles: ["ops"] }, before[1]]);
+  a.capture();
+  const b = (await snapshotQueries(client, [key])).start();
+  client.setQueryData(key, [
+    { ...before[0], roles: ["ops"] },
+    { ...before[1], roles: ["tech"] },
+  ]);
+  b.capture();
+  restoreQueries(client, a);
+  expect(client.getQueryData(key)).toEqual([
+    before[0],
+    { ...before[1], roles: ["tech"] },
+  ]);
+  restoreQueries(client, b);
+  expect(client.getQueryData(key)).toEqual(before);
+  client.clear();
+});

@@ -23,17 +23,30 @@ const equal = (a: unknown, b: unknown) =>
   a === b || JSON.stringify(a) === JSON.stringify(b);
 function rowKey(value: unknown): unknown {
   if (!record(value)) return undefined;
-  if ("id" in value) return value.id;
+  // A schedule move changes an occurrence's display id, while task identity
+  // and occurrence order remain stable throughout the optimistic edit.
   if (record(value.task)) return value.task.id;
+  if ("id" in value) return value.id;
+  if ("contactId" in value)
+    return `${value.scope}:${value.entityId}:${value.contactId}`;
+  if ("capability" in value) return value.capability;
   if ("nodeId" in value && "sourceId" in value)
     return `${value.nodeId}:${value.sourceId}`;
   if ("taskId" in value) return value.taskId;
   return undefined;
 }
 const rows = (value: unknown): value is Record<string, unknown>[] =>
-  Array.isArray(value) &&
-  value.every((row) => rowKey(row) !== undefined) &&
-  new Set(value.map(rowKey)).size === value.length;
+  Array.isArray(value) && value.every((row) => rowKey(row) !== undefined);
+
+function keyed(items: Record<string, unknown>[]) {
+  const counts = new Map<unknown, number>();
+  return items.map((row) => {
+    const identity = rowKey(row);
+    const ordinal = counts.get(identity) ?? 0;
+    counts.set(identity, ordinal + 1);
+    return [JSON.stringify([identity, ordinal]), row] as const;
+  });
+}
 
 /** Invert only changed fields still carrying this mutation's value. */
 function inverse(before: unknown, after: unknown, current: unknown): unknown {
@@ -43,22 +56,19 @@ function inverse(before: unknown, after: unknown, current: unknown): unknown {
   if (before === undefined && rows(after) && rows(current))
     return inverse([], after, current);
   if (rows(before) && rows(after) && rows(current)) {
-    const old = new Map(before.map((row) => [rowKey(row), row]));
-    const next = new Map(after.map((row) => [rowKey(row), row]));
-    const result = current.flatMap((row) => {
-      if (!old.has(rowKey(row)) && next.has(rowKey(row))) return [];
+    const oldRows = keyed(before);
+    const old = new Map(oldRows);
+    const next = new Map(keyed(after));
+    const present = keyed(current);
+    const result = present.flatMap(([key, row]) => {
+      if (!old.has(key) && next.has(key)) return [];
       return [
-        inverse(old.get(rowKey(row)), next.get(rowKey(row)), row) as Record<
-          string,
-          unknown
-        >,
+        inverse(old.get(key), next.get(key), row) as Record<string, unknown>,
       ];
     });
-    for (const [index, row] of before.entries()) {
-      if (
-        !next.has(rowKey(row)) &&
-        !result.some((item) => rowKey(item) === rowKey(row))
-      )
+    const presentKeys = new Set(present.map(([key]) => key));
+    for (const [index, [key, row]] of oldRows.entries()) {
+      if (!next.has(key) && !presentKeys.has(key))
         result.splice(Math.min(index, result.length), 0, row);
     }
     return result;
