@@ -2802,3 +2802,14 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Acceptance: 22 critical/platform/realtime/MCP live cases; two authorized admin phone/password logins; fresh en-HK defaults to Traditional Chinese, saved English persists and code/password toggle works without SMS.
 - ADR 0018 remains closed: HK/Macau, including en-HK, default to Traditional Chinese; saved picker choice overrides detection.
 - Rollback: `69434acc66851c766f43834131a449382b461ce7`; previous images and all data retained.
+
+### Frontend v2 v0.2.7 upgrade checkpoint — 2026-10-16 UTC
+- Source `e6928f066616b400ad2f2740c5e3e388beae5eb3`, annotated tag `v0.2.7`; [PR #56](https://github.com/ksamint/taff01/pull/56) merged at its tested head. Exact-source [main CI 38930534663](https://github.com/ksamint/taff01/actions/runs/38930534663) and [PR CI 38929288044](https://github.com/ksamint/taff01/actions/runs/38929288044) green.
+- Validation: 1662 unit/integration, 264 browser and 166 visual cases; all 12 final-SHA home captures match approved references. Local production checklist 32/32; three clean pinned images and all-31-tool MCP smoke passed.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 624/676/680 ms; Lighthouse P/A/BP 98/100/100, 99/100/100, 99/100/100.
+- Added native phone/password login and the translated SMS/password toggle (ADR 0019). Existing SMS flow and ADR 0018 HK/Macau language decision retained.
+- Private stdin-only setup configured two existing system admins with salted password hashes. Both distinct live phone/password logins passed; admin memberships retained, zero SMS requests and browser errors; no users/workspaces created by setup.
+- Live: 22/22 critical/platform/realtime/all-31-tool MCP cases; retries 0; 22 cleanup journals, zero cleanup failures and browser errors. Fresh en-HK Traditional, saved English override and code/password toggle passed without SMS.
+- Migrations: none. Native lock, exclusive private env backup and verified database dump; only API/worker/web replaced. AI_* unset; Caddy, Valkey, neighbors and PostgreSQL start preserved. Original host build completed after slow dependency downloads.
+- Workspace inventory before this verification: 3 business organizations, 167 test workspaces and 3 admin personal workspaces. Signup automatically creates personal workspaces; verification history retained under supported cleanup, no hard deletes.
+- Follow-up: retained verification-account personal workspaces explain the crowded picker; no cleanup change in this release. Rollback: `69434acc66851c766f43834131a449382b461ce7`; previous images and data retained. Acceptance receipt/deployment.done, tag verification and independent lock-release probe complete before docs push.
