@@ -862,12 +862,11 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.invalid_input` | 13 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
-| `headline1` | 5 | landing.spec.ts |
-| `headline2` | 1 | landing.spec.ts |
-| `headline3` | 1 | landing.spec.ts |
-| `home` | 1 | landing.spec.ts |
-| `home.headline1` | 2 | landing.spec.ts, ui-v2.spec.ts |
+| `home.headline1` | 6 | landing.spec.ts, ui-v2.spec.ts |
+| `home.headline2` | 1 | landing.spec.ts |
+| `home.headline3` | 1 | landing.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
+| `m.home.headline1` | 1 | landing.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |
 | `me.languageCN` | 1 | me.spec.ts |

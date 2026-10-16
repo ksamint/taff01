@@ -22,7 +22,7 @@ test("fresh browser language agrees between server HTML and hydrated home", asyn
       const response = await page.goto("/");
       expect(await response!.text()).toContain(`<html lang="${lang}"`);
       await expect(page.locator(".landing-title")).toHaveText(
-        messages[locale].home.headline1,
+        messages[locale].m.home.headline1,
       );
       await expect(page.getByTestId("locale-select")).toHaveValue(locale);
       await expect(page.locator("html")).toHaveAttribute("lang", lang);
@@ -45,17 +45,17 @@ test("headline rotates every four seconds and holds under reduced motion", async
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.goto("/");
   const headline = page.locator(".landing-title");
-  const home = messages[locale].home;
-  await expect(headline).toHaveText(home.headline1);
+  const m = messages[locale];
+  await expect(headline).toHaveText(m.home.headline1);
   await page.clock.fastForward(4000);
-  await expect(headline).toHaveText(home.headline2);
+  await expect(headline).toHaveText(m.home.headline2);
   await page.clock.fastForward(4000);
-  await expect(headline).toHaveText(home.headline3);
+  await expect(headline).toHaveText(m.home.headline3);
   await page.clock.fastForward(4000);
-  await expect(headline).toHaveText(home.headline1);
+  await expect(headline).toHaveText(m.home.headline1);
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
-  await expect(headline).toHaveText(home.headline1);
+  await expect(headline).toHaveText(m.home.headline1);
   await page.clock.fastForward(12_000);
-  await expect(headline).toHaveText(home.headline1);
+  await expect(headline).toHaveText(m.home.headline1);
 });
