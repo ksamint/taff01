@@ -2675,3 +2675,13 @@ backfill; existing payload unchanged)
 - Local production: all three exact-source image builds and the API/worker/web all-tool MCP smoke passed. A temporary build-only proxy bypass cleared a slow dependency fetch. Steps 0–6 retain the native lock, exclusive DB/env backups and scoped replacement.
 - Follow-up: controlled non-Today cold LCP/Lighthouse measurements and further optimization; those budgets are not claimed passed.
 - Rollback source: `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; preserve additive migrations and data.
+
+### Frontend v2 v0.2.3 upgrade checkpoint — 2026-10-16
+- Source `66534378d81ac57aed31683f2a0a32248c7a6e9b`, tag `v0.2.3`; exact-source [CI 38834383104](https://github.com/ksamint/taff01/actions/runs/38834383104) passed in 9m 7s.
+- Validation: 1582 unit/integration tests, 164 visual cases, 237 browser cases; all three image builds and the all-tool local MCP smoke passed. Both implementation PRs (#51, #52) merged green within the code time box.
+- Today JS 191.2 KiB; LCP en/zh-CN/zh-HK 628/688/684 ms; Lighthouse performance/accessibility/best practices 96/100/100, 97/100/100, 97/100/100.
+- Migrations: none. Native deploy lock and exclusive verified DB/env backups; scoped API/worker/web replacement; AI_* unset; Caddy, neighboring workloads and PostgreSQL preserved.
+- Host relay initially preserved restrictive directory permissions; normalized tracked checkout permissions and rebuilt unchanged source before the successful migrator retry; isolated migrator stdin before service replacement.
+- Live: 22/22 passed, including independent realtime and official-client all-30-tool MCP round trip; retries 0; zero browser page errors.
+- Follow-ups: extend the new actor matrix to 11 public/auth/email/invite lifecycle routes (existing integration coverage retained); measure non-Today cold LCP/Lighthouse budgets.
+- Rollback: `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; preserve additive data.
