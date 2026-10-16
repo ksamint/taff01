@@ -79,7 +79,7 @@ test("English relations symbols stay in tiny disjoint assets", () => {
     /^NotoSansTC-ui-(content|details)-/.test(asset.file),
   );
   expect(remaining).toHaveLength(10);
-  expect(remaining.reduce((sum, asset) => sum + asset.mappings, 0)).toBe(724);
+  expect(remaining.reduce((sum, asset) => sum + asset.mappings, 0)).toBe(726);
   for (const asset of remaining) {
     expect(asset.bytes).toBeLessThanOrEqual(48 * 1024);
     expect(asset.mappings).toBeLessThanOrEqual(80);

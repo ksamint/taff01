@@ -79,10 +79,10 @@
     },
     {
       "file": "NotoSansTC-ui-details-02.woff2",
-      "mappings": 35,
-      "unicodeRange": "U+5C40, U+5C64, U+5F15, U+5F80, U+624D, U+627E, U+62C9, U+63A1, U+64CA, U+6628, U+665A, U+696D, U+6A94, U+6DFA, U+6E29, U+6EAB, U+7533, U+756B, U+7763, U+77ED, U+79BB, U+7A69, U+8017, U+843D, U+8853, U+8A62, U+8A72-8A73, U+8BE2, U+8DF3, U+8F66, U+8FBE, U+8FD4, U+91D1, U+9396",
-      "bytes": 13320,
-      "sha256": "d4d4223e1ba756b361c4489d163245de5377dceae5438e55e6780eb7a903ed4a"
+      "mappings": 37,
+      "unicodeRange": "U+5C40, U+5C64, U+5F15, U+5F80, U+624D, U+627E, U+62C9, U+63A1, U+64CA, U+6628, U+665A, U+696D, U+6A94, U+6DFA, U+6E29, U+6EAB, U+7533, U+756B, U+7763, U+77ED, U+79BB, U+7A69, U+8017, U+843D, U+8853, U+8A62, U+8A72-8A73, U+8BE2, U+8DF3, U+8ECC, U+8F66, U+8FBE, U+8FD4, U+91D1, U+9396, U+96E3",
+      "bytes": 13968,
+      "sha256": "664dfadfa9f952fad57eb785735e072c6afba3723ff8e0bbcd731f109b9c5682"
     },
     {
       "file": "NotoSansTC-ui-symbols.woff2",
