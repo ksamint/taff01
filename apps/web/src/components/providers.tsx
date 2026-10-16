@@ -42,12 +42,15 @@ export function useWorkspaceSelection() {
 export function Providers({
   children,
   initialLocale,
+  messagesLocale,
   messages,
   initialMe,
   initialToday,
 }: {
   children: ReactNode;
   initialLocale: Locale | null;
+  /** The locale the server rendered, whose messages are supplied. */
+  messagesLocale: Locale;
   messages: ResourceLanguage;
   initialMe: Me | null | undefined;
   initialToday?: TodayBootstrap["today"];
@@ -92,9 +95,9 @@ export function Providers({
     const instance = createInstance();
     void instance.use(initReactI18next).init({
       resources: {
-        [initialLocale ?? "en"]: { translation: messages },
+        [messagesLocale]: { translation: messages },
       },
-      lng: initialLocale ?? "en",
+      lng: messagesLocale,
       fallbackLng: "en",
       supportedLngs: ["en", "zh-CN", "zh-HK"],
       initAsync: false,

@@ -13,24 +13,38 @@ export function isLocale(value: unknown): value is Locale {
   return typeof value === "string" && locales.includes(value as Locale);
 }
 
-/** Picks a locale from a browser language list. */
+/**
+ * Picks a locale from a browser language list. Traditional Chinese is the
+ * default: Hong Kong and Macau browsers get it in any language, and so does a
+ * browser that asks for neither English nor Chinese.
+ */
 export function detectLocale(languages: readonly string[]): Locale {
   for (const language of languages) {
-    const tag = language.toLowerCase();
-    if (!tag.startsWith("zh")) {
-      if (tag.startsWith("en")) return "en";
-      continue;
-    }
-    if (
-      tag.includes("hant") ||
-      tag.includes("-hk") ||
-      tag.includes("-tw") ||
-      tag.includes("-mo")
-    )
-      return "zh-HK";
+    const tag = language.trim().toLowerCase();
+    if (/-(hk|mo)\b/.test(tag)) return "zh-HK";
+    if (tag.startsWith("en")) return "en";
+    if (!tag.startsWith("zh")) continue;
+    if (tag.includes("hant") || tag.includes("-tw")) return "zh-HK";
     return "zh-CN";
   }
-  return "en";
+  return "zh-HK";
+}
+
+/** Browser languages from an Accept-Language header, best first. */
+export function acceptedLanguages(header: string | null | undefined): string[] {
+  return (header ?? "")
+    .split(",")
+    .map((part) => {
+      const [tag = "", ...params] = part.trim().split(";");
+      const q = params
+        .map((param) => param.trim())
+        .find((param) => param.startsWith("q="));
+      const weight = q ? Number(q.slice(2)) : 1;
+      return { tag: tag.trim(), weight: Number.isFinite(weight) ? weight : 0 };
+    })
+    .filter(({ tag, weight }) => tag && tag !== "*" && weight > 0)
+    .sort((a, b) => b.weight - a.weight)
+    .map(({ tag }) => tag);
 }
 
 /** Keep a chosen zone; detect the browser zone for a new UTC account. */
@@ -71,7 +85,7 @@ export function preloadBootScript(
   loadedLocale: Locale = "en",
 ) {
   // Server-supplied resources need no competing JSON download.
-  return `try{var p=function(h,q){var k=document.createElement("link");k.rel="preload";k.as="fetch";k.crossOrigin="anonymous";k.fetchPriority=q||"low";k.href=h;document.head.appendChild(k)};var l=localStorage.getItem("taff-locale");if((l==="zh-CN"||l==="zh-HK")&&l!==${JSON.stringify(loadedLocale)})p("/locales/"+l+"?v=${version}","high");var w=localStorage.getItem("${LAST_WORKSPACE_KEY}");if(w&&/^[0-9a-f-]{36}$/.test(w)){p("/api/tasks?workspaceId="+w);p("/api/members?workspaceId="+w);p("/api/runs?workspaceId="+w)}}catch(e){}`;
+  return `try{var p=function(h,q){var k=document.createElement("link");k.rel="preload";k.as="fetch";k.crossOrigin="anonymous";k.fetchPriority=q||"low";k.href=h;document.head.appendChild(k)};var l=localStorage.getItem("taff-locale");if((l==="en"||l==="zh-CN"||l==="zh-HK")&&l!==${JSON.stringify(loadedLocale)})p("/locales/"+l+"?v=${version}","high");var w=localStorage.getItem("${LAST_WORKSPACE_KEY}");if(w&&/^[0-9a-f-]{36}$/.test(w)){p("/api/tasks?workspaceId="+w);p("/api/members?workspaceId="+w);p("/api/runs?workspaceId="+w)}}catch(e){}`;
 }
 
 export function readPreference(): Locale | null {

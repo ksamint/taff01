@@ -1,12 +1,18 @@
 import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import type { ReactNode } from "react";
 import english from "../locales/en/common.json";
 import simplified from "../locales/zh-CN/common.json";
 import traditional from "../locales/zh-HK/common.json";
 import { AppShell } from "../src/components/app-shell";
 import { Providers } from "../src/components/providers";
-import { htmlLang, isLocale, preloadBootScript } from "../src/lib/i18n";
+import {
+  acceptedLanguages,
+  detectLocale,
+  htmlLang,
+  isLocale,
+  preloadBootScript,
+} from "../src/lib/i18n";
 import { inviteBootScript } from "../src/lib/invite";
 import {
   readServerToday,
@@ -60,7 +66,10 @@ export default async function RootLayout({
   const preference =
     initialMe?.user.locale ?? cookieStore.get("taff-locale")?.value;
   const initialLocale = isLocale(preference) ? preference : null;
-  const locale = initialLocale ?? "en";
+  // Without a saved choice, render the language the browser will pick.
+  const locale =
+    initialLocale ??
+    detectLocale(acceptedLanguages((await headers()).get("accept-language")));
   const messages = { en: english, "zh-CN": simplified, "zh-HK": traditional };
   return (
     <html lang={htmlLang(locale)} suppressHydrationWarning>
@@ -103,6 +112,7 @@ export default async function RootLayout({
         />
         <Providers
           initialLocale={initialLocale}
+          messagesLocale={locale}
           messages={messages[locale]}
           initialMe={initialMe}
           initialToday={initialToday}

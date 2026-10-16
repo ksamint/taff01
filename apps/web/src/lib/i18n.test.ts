@@ -4,7 +4,9 @@ import english from "../../locales/en/common.json";
 import simplified from "../../locales/zh-CN/common.json";
 import traditional from "../../locales/zh-HK/common.json";
 import {
+  acceptedLanguages,
   browserTimeZone,
+  detectLocale,
   LAST_WORKSPACE_KEY,
   preloadBootScript,
   readPreference,
@@ -110,4 +112,31 @@ it("retains local preference when cookies are blocked", () => {
   vi.stubGlobal("localStorage", { setItem });
   expect(() => savePreference("zh-CN")).not.toThrow();
   expect(setItem).toHaveBeenCalledWith("taff-locale", "zh-CN");
+});
+
+it("defaults to Traditional Chinese unless the browser asks for English or Simplified Chinese", () => {
+  expect(detectLocale([])).toBe("zh-HK");
+  expect(detectLocale(["ja-JP", "fr"])).toBe("zh-HK");
+  expect(detectLocale(["en-HK", "en"])).toBe("zh-HK");
+  expect(detectLocale(["zh-MO"])).toBe("zh-HK");
+  expect(detectLocale(["zh-Hant-TW"])).toBe("zh-HK");
+  expect(detectLocale(["en-US", "zh-HK"])).toBe("en");
+  expect(detectLocale(["de", "en-GB"])).toBe("en");
+  expect(detectLocale(["zh-CN", "en"])).toBe("zh-CN");
+  expect(detectLocale(["zh"])).toBe("zh-CN");
+});
+
+it("reads browser languages from Accept-Language by preference", () => {
+  expect(acceptedLanguages("en-US,en;q=0.9,zh-HK;q=0.8")).toEqual([
+    "en-US",
+    "en",
+    "zh-HK",
+  ]);
+  expect(acceptedLanguages("zh-CN;q=0.5, en-GB;q=0.7, *;q=0.1")).toEqual([
+    "en-GB",
+    "zh-CN",
+  ]);
+  expect(acceptedLanguages("fr;q=0, ja")).toEqual(["ja"]);
+  expect(acceptedLanguages(null)).toEqual([]);
+  expect(detectLocale(acceptedLanguages(undefined))).toBe("zh-HK");
 });
