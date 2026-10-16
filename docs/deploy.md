@@ -2685,3 +2685,17 @@ backfill; existing payload unchanged)
 - Live: 22/22 passed, including independent realtime and official-client all-30-tool MCP round trip; retries 0; zero browser page errors.
 - Follow-ups: extend the new actor matrix to 11 public/auth/email/invite lifecycle routes (existing integration coverage retained); measure non-Today cold LCP/Lighthouse budgets.
 - Rollback: `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; preserve additive data.
+
+### Frontend v2 release candidate v0.2.4 — 2026-10-16 UTC
+- Source `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; annotated tag after acceptance: `v0.2.4`.
+- Main was fast-forwarded to the tested PR head; source and PR head are identical, with separate main/PR CI events.
+- Exact-source main [CI 38850556326](https://github.com/ksamint/taff01/actions/runs/38850556326) green in 8m 51s; merged [PR #53 head CI 38849782535](https://github.com/ksamint/taff01/actions/runs/38849782535) green.
+- Validation: 1641 unit/integration tests (628 actor-matrix cases), 164 visual cases, 243 browser cases; all original tests, baselines and tolerances retained. Three pinned local production images and the official all-30-tool MCP smoke passed on Node 24.
+- Changes: all 11 lifecycle routes in the actor matrix; authorized project bootstrap and read-only first paint; card/timeline/date/event memoization with explicit permission activation after confirmation.
+- Today: JS 190.7 KiB; LCP en/zh-CN/zh-HK 608/668/668 ms; Lighthouse P/A/BP en 99/100/100; zh-CN 99/100/100; zh-HK 99/100/100.
+- Migrations: none. Environment template, Compose, Dockerfiles, Caddy and host layout unchanged. Production changes only TAFF_TAG; AI_* stay unset; keep the native lock and exclusive verified DB/env backups.
+- Time-box diagnostics on pre-permission-repair `fb31f91` (local Chromium/M1, Node 26 services): cold LCP P 680/736/752, C 2848/3280/3132, T 628/716/728 ms (en/CN/HK, three-run medians, slow 4G/4x CPU).
+- Diagnostic Lighthouse P 99/91/99; C 77/76/79; T en 96, zh-CN failed the loading/locale guard and HK was not reached. Node 24 control failed setup before measurement. These are not final-source Node 24 budget passes.
+- Remaining after the 60-minute box: Calendar LCP/Lighthouse; final-source Node 24 Projects/Timeline Lighthouse revalidation, including Timeline zh-CN/HK. Unproven Calendar startup UI and experimental route CI jobs were removed; strict route measurement commands remain.
+- Patch acceptance: 20 critical live cases with en/zh-HK phone/desktop and zh-CN spot checks, independent realtime, official-client all-30-tool MCP round trip; zero browser page errors, one retry at most.
+- Rollback source: `66534378d81ac57aed31683f2a0a32248c7a6e9b`; preserve data.
