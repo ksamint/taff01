@@ -429,6 +429,9 @@ test("cold calendar renders its authenticated schedule before app scripts load",
     expect(await response!.text()).toContain(title);
     await expect(page.getByTestId("calendar-bootstrap")).toContainText(title);
     await expect(page.getByTestId("calendar-bootstrap")).toBeVisible();
+    expect(
+      (await page.locator(".calendar-engine").boundingBox())?.height,
+    ).toBeGreaterThanOrEqual(360);
     await expect(page.locator("main.content")).toHaveAttribute("inert", "");
     release();
     await expect(page.locator(".sx__calendar")).toBeVisible();

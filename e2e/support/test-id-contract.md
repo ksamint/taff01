@@ -702,6 +702,7 @@ read (`data-event-id`, `data-date`).
 | `.agent-profile-heading p` | 1 | agent-creation.spec.ts |
 | `.agent-profile-overview` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.agent-profile-parity.is-embedded` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `.calendar-engine` | 1 | ssr-session.spec.ts |
 | `.calendar-engine-month-grid` | 1 | ui-v2.spec.ts |
 | `.calendar-engine-week` | 1 | ui-v2.spec.ts |
 | `.calendar-list-item` | 5 | calendar.spec.ts, persistence.spec.ts |

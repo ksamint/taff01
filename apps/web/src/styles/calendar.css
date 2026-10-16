@@ -6,6 +6,7 @@
 /* Schedule-X theme mapped onto the design tokens. */
 .calendar-engine {
   position: relative;
+  min-height: max(360px, calc(100dvh - 300px));
   min-width: 0;
   width: 100%;
   overflow-x: auto;
