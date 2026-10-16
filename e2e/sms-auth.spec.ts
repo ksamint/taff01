@@ -22,9 +22,9 @@ test("unconfigured SMS keeps email login available", async ({ page }, info) => {
   await page.goto("/");
   await expect(page.getByTestId("auth-email")).toBeVisible();
   await expect(
-    page.getByLabel(messages[locale].emailOrUsername, { exact: true }),
+    page.getByLabel(messages[locale].accountIdentifier, { exact: true }),
   ).toBeVisible();
-  // Without SMS a number is a username and keeps the password.
+  // Without SMS a phone number keeps the password and never requests a code.
   await page.getByTestId("auth-email").fill("13800138000");
   await expect(page.getByTestId("auth-password")).toBeVisible();
   await expect(page.getByTestId("auth-submit")).toHaveText(
@@ -166,3 +166,80 @@ test("SMS respects server Retry-After and recovers from provider failure", async
   await page.getByRole("button", { name: m.sms.emailInstead }).click();
   await expect(page.getByTestId("auth-email")).toBeVisible();
 });
+
+for (const enabled of [true, false]) {
+  test(`phone password signs in without requesting SMS (SMS ${enabled ? "on" : "off"})`, async ({
+    page,
+  }, info) => {
+    const locale = info.project.name as TestLocale;
+    const m = messages[locale];
+    await setup(page, locale, enabled);
+    let smsRequests = 0;
+    let passwords = 0;
+    const password = `local-${crypto.randomUUID()}`;
+    await page.route("**/api/auth/phone-number/**", async (route) => {
+      smsRequests++;
+      await route.fulfill({ status: 503, json: { error: "sms_unavailable" } });
+    });
+    await page.route("**/api/auth/sign-in/phone-number", async (route) => {
+      passwords++;
+      const body = route.request().postDataJSON();
+      expect(body.phoneNumber).toBe("+8613800138000");
+      expect(Object.keys(body).sort()).toEqual(["password", "phoneNumber"]);
+      if (body.password !== password) {
+        await route.fulfill({
+          status: 401,
+          json: { error: "invalid_credentials" },
+        });
+        return;
+      }
+      const account = await page.request.post("/api/auth/sign-up/email", {
+        headers: { Origin: process.env.AUTH_URL! },
+        data: {
+          name: "Local phone password fixture",
+          email: `phone-password-${crypto.randomUUID()}@example.test`,
+          password,
+        },
+      });
+      expect(account.status()).toBe(200);
+      expect(
+        (
+          await page.request.patch("/api/profile", {
+            headers: { Origin: process.env.AUTH_URL! },
+            data: { locale, tz: "UTC" },
+          })
+        ).status(),
+      ).toBe(200);
+      await route.fulfill({ json: { status: true } });
+    });
+    await page.goto("/");
+    await page.getByTestId("auth-email").fill("138 0013 8000");
+    if (enabled) {
+      await expect(page.getByTestId("auth-password")).toHaveCount(0);
+      await expect(page.getByTestId("phone-auth-toggle")).toHaveText(
+        m.sms.usePassword,
+      );
+      await page.getByTestId("phone-auth-toggle").click();
+      await expect(page.getByTestId("auth-password")).toBeVisible();
+      await page.getByTestId("phone-auth-toggle").click();
+      await expect(page.getByTestId("auth-password")).toHaveCount(0);
+      await expect(page.getByTestId("auth-submit")).toHaveText(m.sms.send);
+      await page.getByTestId("phone-auth-toggle").click();
+    } else await expect(page.getByTestId("phone-auth-toggle")).toHaveCount(0);
+    await expect(page.getByTestId("auth-submit")).toHaveText(m.signIn);
+    await page.getByTestId("auth-password").fill("incorrect-password");
+    await page.getByTestId("auth-submit").click();
+    await expect(
+      page
+        .getByRole("region", { name: m.signIn, exact: true })
+        .getByRole("alert"),
+    ).toHaveText(m.errors.auth);
+    expect(passwords).toBe(1);
+    expect(smsRequests).toBe(0);
+    await page.getByTestId("auth-password").fill(password);
+    await page.getByTestId("auth-submit").click();
+    await expect(page.getByTestId("today-heading")).toHaveText(m.today);
+    expect(passwords).toBe(2);
+    expect(smsRequests).toBe(0);
+  });
+}

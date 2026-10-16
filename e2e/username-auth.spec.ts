@@ -15,7 +15,9 @@ async function setup(page: Page, locale: TestLocale) {
   );
   await page.goto("/");
   await expect(page.getByTestId("auth-email")).toBeVisible();
-  await expect(page.getByLabel(messages[locale].emailOrUsername)).toBeVisible();
+  await expect(
+    page.getByLabel(messages[locale].accountIdentifier),
+  ).toBeVisible();
 }
 
 async function signOut(page: Page, locale: TestLocale) {

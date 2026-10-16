@@ -2,6 +2,7 @@
 
 import {
   authMethodsSchema,
+  phonePasswordSignInSchema,
   signInSchema,
   signUpSchema,
   usernameSignInSchema,
@@ -22,6 +23,7 @@ export function Auth() {
   const [signup, setSignup] = useState(false);
   const [sms, setSms] = useState(false);
   const [identifier, setIdentifier] = useState("");
+  const [phonePassword, setPhonePassword] = useState(false);
   const [validationError, setValidationError] = useState(false);
   const methods = useQuery({
     queryKey: ["auth-methods"],
@@ -32,12 +34,11 @@ export function Auth() {
   });
   const auth = useCredentialAuth();
   const smsEnabled = methods.data?.smsEnabled === true;
-  // A mainland mobile number signs in with a texted code; phone accounts
-  // have no password.
-  const phone = !signup && smsEnabled ? mainlandPhone(identifier) : null;
+  const phone = !signup ? mainlandPhone(identifier) : null;
+  const phoneCode = Boolean(phone && smsEnabled && !phonePassword);
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (phone) {
+    if (phoneCode) {
       setValidationError(false);
       auth.reset();
       setSms(true);
@@ -49,9 +50,11 @@ export function Auth() {
     const password = form.get("password");
     const endpoint = signup
       ? "sign-up/email"
-      : identifier.includes("@")
-        ? "sign-in/email"
-        : "sign-in/username";
+      : phone
+        ? "sign-in/phone-number"
+        : identifier.includes("@")
+          ? "sign-in/email"
+          : "sign-in/username";
     const parsed = signup
       ? signUpSchema.safeParse({
           email: identifier,
@@ -59,9 +62,11 @@ export function Auth() {
           password,
           ...(username ? { username } : {}),
         })
-      : identifier.includes("@")
-        ? signInSchema.safeParse({ email: identifier, password })
-        : usernameSignInSchema.safeParse({ username: identifier, password });
+      : phone
+        ? phonePasswordSignInSchema.safeParse({ phoneNumber: phone, password })
+        : identifier.includes("@")
+          ? signInSchema.safeParse({ email: identifier, password })
+          : usernameSignInSchema.safeParse({ username: identifier, password });
     setValidationError(!parsed.success);
     if (parsed.success) auth.mutate({ endpoint, body: parsed.data });
   }
@@ -96,13 +101,7 @@ export function Auth() {
               )}
               <div className="field">
                 <Label htmlFor="auth-email">
-                  {t(
-                    signup
-                      ? "email"
-                      : smsEnabled
-                        ? "accountIdentifier"
-                        : "emailOrUsername",
-                  )}
+                  {t(signup ? "email" : "accountIdentifier")}
                 </Label>
                 <Input
                   id="auth-email"
@@ -133,7 +132,7 @@ export function Auth() {
                   </p>
                 </div>
               )}
-              {!phone && (
+              {!phoneCode && (
                 <div className="field">
                   <Label htmlFor="auth-password">{t("password")}</Label>
                   <Input
@@ -177,12 +176,26 @@ export function Auth() {
                     ? "working"
                     : signup
                       ? "signUp"
-                      : phone
+                      : phoneCode
                         ? "sms.send"
                         : "signIn",
                 )}
               </Button>
             </form>
+            {phone && smsEnabled && (
+              <Button
+                data-testid="phone-auth-toggle"
+                className="button-link"
+                disabled={auth.isPending}
+                onClick={() => {
+                  setPhonePassword(!phonePassword);
+                  setValidationError(false);
+                  auth.reset();
+                }}
+              >
+                {t(phonePassword ? "sms.useCode" : "sms.usePassword")}
+              </Button>
+            )}
             <Button
               data-testid="auth-toggle"
               className="button-link"

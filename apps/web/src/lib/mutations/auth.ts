@@ -1,5 +1,6 @@
 // Sign-in and sign-up mutations (email, username and SMS one-time codes).
 import type {
+  phonePasswordSignInSchema,
   signInSchema,
   signUpSchema,
   usernameSignInSchema,
@@ -10,11 +11,16 @@ import { ApiError, request } from "../api";
 import { meKey } from "../queries";
 
 export type CredentialAuth = {
-  endpoint: "sign-up/email" | "sign-in/email" | "sign-in/username";
+  endpoint:
+    | "sign-up/email"
+    | "sign-in/email"
+    | "sign-in/username"
+    | "sign-in/phone-number";
   body:
     | ReturnType<typeof signUpSchema.parse>
     | ReturnType<typeof signInSchema.parse>
-    | ReturnType<typeof usernameSignInSchema.parse>;
+    | ReturnType<typeof usernameSignInSchema.parse>
+    | ReturnType<typeof phonePasswordSignInSchema.parse>;
 };
 
 /** Signs up or in with a password, then refreshes the session. */

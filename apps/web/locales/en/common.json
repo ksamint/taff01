@@ -62,7 +62,7 @@
     "conflict": "This changed elsewhere. Refresh and try again.",
     "internal_error": "Something went wrong. Please try again.",
     "network": "Couldn’t connect. Check your connection and try again.",
-    "auth": "Couldn’t sign in. Check your email or username and password, then try again.",
+    "auth": "Can't sign in. Check your username, mobile or email and password, then try again.",
     "signup": "Couldn’t create an account. Check your details or try signing in.",
     "profile": "Couldn’t save your language preference. Please try again.",
     "email_verification_required": "Verify your email address before accepting this invitation.",
@@ -688,6 +688,8 @@
     "historyLimit": "Showing the newest 31 digests."
   },
   "sms": {
+    "usePassword": "Use password instead",
+    "useCode": "Use SMS code instead",
     "title": "Sign in with SMS",
     "accountHint": "Your first verification creates a new phone account. For an existing email account, use email sign-in.",
     "phone": "Mobile number",
