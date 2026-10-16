@@ -46,7 +46,10 @@ export function resolveCaptureSelection(input = "") {
     throw new Error("Capture screens must not contain duplicates");
   const expectedPaths = screens
     .flatMap((screen) =>
-      projects.flatMap((project) => {
+      (screen === "home"
+        ? [...projects, "phone-zh-CN", "desktop-zh-CN"]
+        : projects
+      ).flatMap((project) => {
         const names =
           screen === "shell"
             ? project.startsWith("phone")
@@ -59,12 +62,15 @@ export function resolveCaptureSelection(input = "") {
       }),
     )
     .sort();
-  if (!selected && expectedPaths.length !== 126)
-    throw new Error("Full capture must contain all 126 native PNGs");
+  if (!selected && expectedPaths.length !== 128)
+    throw new Error("Full capture must contain all 128 native PNGs");
   return {
     mode: selected ? "selected" : "all",
     screens,
-    expectedCases: screens.length * 4,
+    expectedCases: screens.reduce(
+      (count, screen) => count + (screen === "home" ? 6 : 4),
+      0,
+    ),
     expectedPngCount: expectedPaths.length,
     expectedPaths,
   };

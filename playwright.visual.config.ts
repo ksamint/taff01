@@ -81,32 +81,47 @@ export default defineConfig({
           },
         })),
       )
-    : [
-        {
-          name: "phone-zh-HK",
-          use: {
-            locale: "zh-HK",
-            viewport: { width: 390, height: 844 },
-            isMobile: true,
-            hasTouch: true,
+    : process.env.UI_SCREEN === "home"
+      ? (["phone", "desktop"] as const).flatMap((device) =>
+          (["en", "zh-CN", "zh-HK"] as const).map((locale) => ({
+            name: `${device}-${locale}`,
+            use: {
+              locale: locale === "en" ? "en-US" : locale,
+              viewport:
+                device === "phone"
+                  ? { width: 390, height: 844 }
+                  : { width: 1280, height: 800 },
+              isMobile: device === "phone",
+              hasTouch: device === "phone",
+            },
+          })),
+        )
+      : [
+          {
+            name: "phone-zh-HK",
+            use: {
+              locale: "zh-HK",
+              viewport: { width: 390, height: 844 },
+              isMobile: true,
+              hasTouch: true,
+            },
           },
-        },
-        {
-          name: "phone-en",
-          use: {
-            locale: "en-US",
-            viewport: { width: 390, height: 844 },
-            isMobile: true,
-            hasTouch: true,
+          {
+            name: "phone-en",
+            use: {
+              locale: "en-US",
+              viewport: { width: 390, height: 844 },
+              isMobile: true,
+              hasTouch: true,
+            },
           },
-        },
-        {
-          name: "desktop-zh-HK",
-          use: { locale: "zh-HK", viewport: { width: 1280, height: 800 } },
-        },
-        {
-          name: "desktop-en",
-          use: { locale: "en-US", viewport: { width: 1280, height: 800 } },
-        },
-      ],
+          {
+            name: "desktop-zh-HK",
+            use: { locale: "zh-HK", viewport: { width: 1280, height: 800 } },
+          },
+          {
+            name: "desktop-en",
+            use: { locale: "en-US", viewport: { width: 1280, height: 800 } },
+          },
+        ],
 });

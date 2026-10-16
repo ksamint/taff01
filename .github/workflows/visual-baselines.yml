@@ -7,7 +7,7 @@ on:
         required: true
         type: string
       screens:
-        description: Optional space-separated v2 screens; empty captures all 26 light screens plus 60 dark PNGs (186 total)
+        description: Optional space-separated v2 screens; empty captures all 26 light screens plus 60 dark PNGs (188 total)
         required: false
         type: string
         default: ""
@@ -183,7 +183,7 @@ jobs:
             const file = `capture-results/${screen}.json`;
             const raw = fs.readFileSync(file);
             const stats = JSON.parse(raw).stats;
-            if (stats.expected !== (screen.endsWith("-dark") ? 6 : 4) || stats.unexpected || stats.skipped || stats.flaky)
+            if (stats.expected !== (screen.endsWith("-dark") || screen === "home" ? 6 : 4) || stats.unexpected || stats.skipped || stats.flaky)
               throw new Error(`Capture did not pass all viewport/locale cases: ${screen}`);
             return {screen, stats, sha256: crypto.createHash('sha256').update(raw).digest('hex')};
           });
@@ -204,7 +204,7 @@ jobs:
           const darkPaths = darkScreens.flatMap(screen => ['phone','desktop'].flatMap(device => ['en','zh-CN','zh-HK'].map(locale => `e2e/__screenshots__/ui-v2.spec.ts/${device}-${locale}-dark/${screen.replace(/-dark$/, '')}.png`))).sort();
           if (JSON.stringify(captures.filter(capture => capture.file.includes('-dark/')).map(capture => capture.file).sort()) !== JSON.stringify(darkPaths))
             throw new Error('Expected every selected dark viewport/locale PNG');
-          if (selection.mode === 'all' && captures.length !== 186) throw new Error('Expected all 186 native PNGs');
+          if (selection.mode === 'all' && captures.length !== 188) throw new Error('Expected all 188 native PNGs');
           const fontNetwork = JSON.parse(fs.readFileSync('capture-results/font-network.json')).stats;
           if (fontNetwork.expected !== 6 || fontNetwork.unexpected || fontNetwork.skipped || fontNetwork.flaky)
             throw new Error('Expected all six English/real-Northwind font network cases');
