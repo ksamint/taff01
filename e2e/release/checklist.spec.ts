@@ -1241,10 +1241,12 @@ test("[item 8] MCP", async ({ page, context }, info) => {
       await expect(
         calls.filter({ hasText: roundTripName }).first(),
       ).toBeVisible();
+      // The limiter rejects before authentication or any database access.
+      // The round trip still probes 429; rejected traffic must not be logged.
       if (!process.env.RELEASE_SKIP_RATE_LIMIT)
         await expect(
-          calls.locator('dd[data-status="rate_limited"]').first(),
-        ).toBeVisible();
+          calls.locator('dd[data-status="rate_limited"]'),
+        ).toHaveCount(0);
       check("the call log UI lists the round trip's calls", true);
     },
   });
