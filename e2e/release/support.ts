@@ -147,10 +147,11 @@ export async function freshSignedIn(
     password: account.password,
   });
   expect(response.status(), "fresh sign-up").toBe(200);
+  // Save before the first authenticated render, so its session confirmation
+  // cannot restore the signup locale while this fixture changes preferences.
+  await saveLocale(page, locale);
   await page.goto("/");
   await expect(page.getByTestId("today-heading")).toBeVisible();
-  await saveLocale(page, locale);
-  await page.reload();
   await expect(page.getByTestId("today-heading")).toHaveText(m.today);
   const me = await readMe(page.request);
   return { account, me, workspace: me.workspaces[0] };
