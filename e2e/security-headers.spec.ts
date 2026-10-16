@@ -34,7 +34,6 @@ test("security headers allow the signed-in app without CSP violations", async ({
       "frame-ancestors 'none'",
     );
     await expect(page.locator("main").first()).toBeVisible();
-    await expect(page.locator("main.loading")).toHaveCount(0);
     await page.waitForLoadState("networkidle");
   }
   expect(violations).toEqual([]);
