@@ -29,13 +29,14 @@ globalThis.Date = CaptureDate;
 const emit = Server.prototype.emit;
 Server.prototype.emit = function (event, ...args) {
   const request = args[0];
-  // These real read handlers calculate relative dates. Their middleware shares
+  // These real read handlers calculate relative dates, including the server
+  // Calendar first-paint snapshot. Their middleware shares
   // this scope too. Login, auth endpoints, write requests, timers, SQL and other
   // requests retain real time; no response or business calculation is mocked.
   if (
     event === "request" &&
     request.method === "GET" &&
-    /^\/api\/(brief|projects\/[0-9a-f-]{36}\/timeline)(?:\?|$)/i.test(
+    /^\/api\/(bootstrap\/today|brief|projects\/[0-9a-f-]{36}\/timeline)(?:\?|$)/i.test(
       request.url,
     )
   )
