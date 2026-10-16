@@ -2752,3 +2752,16 @@ backfill; existing payload unchanged)
 - Ops: a local preflight sequencing error interrupted client tracking; the original successful build was reconciled before replacement. Runtime-only database connection injection verified.
 - Verification credentials read from 1Password; short-lived chat token revoked and initialize returned 401. Completed Q4 verification task retained as history.
 - Follow-ups: none. Rollback: `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; preserve data. Acceptance receipt, deployment.done and independent lock-release probe precede docs push.
+
+### Frontend v2 release candidate v0.2.6 — 2026-10-16 UTC
+- Source `69434acc66851c766f43834131a449382b461ce7`; annotated tag after acceptance: `v0.2.6`.
+- [PR #55](https://github.com/ksamint/taff01/pull/55) merged by fast-forward to its tested head. Exact-source [main CI 38920627000](https://github.com/ksamint/taff01/actions/runs/38920627000) and [PR CI 38919155166](https://github.com/ksamint/taff01/actions/runs/38919155166) green without retries.
+- Validation: 1652 unit/integration tests, 258 browser cases in en/zh-CN/zh-HK, 166 visuals. Final-source home capture matches all 12 approved light/dark phone/desktop references; other baselines and tolerances unchanged.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 608/668/664 ms; Lighthouse P/A/BP 98/100/100 in every locale.
+- Changes: simple signed-out home, four-second headlines and reduced-motion support, one sign-in identifier, browser-language default; fixes for missing headline glyphs, form movement and live motion preferences.
+- Test-only repairs retain all assertions: rate limiting precedes audit writes; fresh-account locale is saved before its first authenticated render. Only the two failed local cases were rerun after the helper repair: 2/2 passed; combined production checklist coverage 32/32 across the original run and targeted retries.
+- Three clean detached local production images and official all-31-tool MCP smoke passed on Node 24. Package and MCP versions are 0.2.6.
+- Decision closed: ADR 0018 stands; HK/Macau, including en-HK, default to Traditional Chinese. A saved language-picker choice overrides detection.
+- Migrations: none. Env template, Compose, Dockerfiles, Caddy and host layout unchanged; production changes only TAFF_TAG, with AI_* unset.
+- Acceptance: Steps 0–6, native lock and exclusive verified DB/env backups, scoped API/worker/web replacement; 22 critical/realtime/MCP public cases, plus fresh en-HK, persisted English override, rotating headlines, email/username login and phone-code form. Never submit a mobile number or flood public MCP.
+- Rollback: `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; retain its images and all data.
