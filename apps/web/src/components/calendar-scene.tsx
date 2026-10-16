@@ -70,7 +70,7 @@ type Undo = {
 // Prototype v2 Calendar: phone 141–247 (Schedule-X keeps the gestures),
 // desktop header 1221–1238 and grid 1405–1442 with the tray on the side.
 export function CalendarScene() {
-  const { me, workspace, openQuick } = useWorkspace();
+  const { me, workspace, openQuick, confirmed } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const desktop = useSyncExternalStore(
