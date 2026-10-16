@@ -115,7 +115,7 @@ export function useCreateWorkspace(
         body: JSON.stringify(workspaceCreateSchema.parse(body)),
       }).then(workspaceSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotQueries(client, [drafts]);
+      const snapshot = (await snapshotQueries(client, [drafts])).start();
       client.setQueryData(drafts, body.name);
       return snapshot.capture();
     },
@@ -143,7 +143,7 @@ export function useAddWorkspaceAgent(
         body: JSON.stringify(workspaceAgentInputSchema.parse(body)),
       }).then(memberSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       client.setQueryData<Member[]>(membersKey(workspaceId), (current) => [
         ...(current ?? []),
@@ -197,7 +197,7 @@ export function useChangeMemberRole(workspaceId: string) {
         body: JSON.stringify(memberRoleInputSchema.parse({ role: next })),
       }),
     onMutate: async ({ id, next }) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<Member[]>(membersKey(workspaceId), (current) =>
         withMemberRole(current, id, next),
       );
@@ -244,7 +244,7 @@ export function useIssueWorkspaceInvite(
       return metadata;
     },
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       client.setQueryData<WorkspaceInvite[]>(key, (current) => [
         optimisticInvite(workspaceId, body, id, Date.now()),
@@ -274,7 +274,7 @@ export function useRevokeWorkspaceInvite(workspaceId: string) {
     mutationFn: (id: string) =>
       request(`/api/workspace-invites/${id}`, { method: "DELETE" }),
     onMutate: async (id) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       client.setQueryData<WorkspaceInvite[]>(key, (current) =>
         withRevokedInvite(current, id),
       );

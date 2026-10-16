@@ -317,7 +317,7 @@ function runUndo(
           ? []
           : [contactLinksKey(step.scope, step.entityId)],
       );
-      const snapshot = await snapshotQueries(client, keys);
+      const snapshot = (await snapshotQueries(client, keys)).start();
       for (const step of undo.steps) {
         if (step.method === "COMPANY") continue;
         client.setQueryData<ContactLink[]>(
@@ -414,10 +414,9 @@ export function useSetContactRoles() {
       const before = await client
         .ensureQueryData(contactLinksQuery(target.scope, target.entityId))
         .catch(() => undefined);
-      const snapshot = await snapshotQueries(client, [
-        key,
-        contactKey(contact.id),
-      ]);
+      const snapshot = (
+        await snapshotQueries(client, [key, contactKey(contact.id)])
+      ).start();
       client.setQueryData<ContactLink[]>(key, (links) =>
         withContactRoles(links, target.scope, target.entityId, contact, roles),
       );
@@ -480,10 +479,9 @@ export function useRemoveContactLink() {
     },
     onMutate: async ({ target, contact }) => {
       const key = contactLinksKey(target.scope, target.entityId);
-      const snapshot = await snapshotQueries(client, [
-        key,
-        contactKey(contact.id),
-      ]);
+      const snapshot = (
+        await snapshotQueries(client, [key, contactKey(contact.id)])
+      ).start();
       const roles =
         client
           .getQueryData<ContactLink[]>(key)
@@ -830,7 +828,7 @@ export function useSetClientCompany(workspaceId: string) {
         }),
       ),
     onMutate: async ({ project, companyId }) => {
-      const snapshot = await snapshotQueries(client, [key]);
+      const snapshot = (await snapshotQueries(client, [key])).start();
       client.setQueryData<Project[]>(key, (projects) =>
         projects?.map((item) =>
           item.id === project.id

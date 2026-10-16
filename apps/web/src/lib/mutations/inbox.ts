@@ -80,7 +80,7 @@ export function useUpdateInboxItem(
         body: JSON.stringify(inboxItemInputSchema.parse(body)),
       }),
     onMutate: async (input) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const target =
         input.snooze ??
         (snoozed?.id === input.id ? snoozed : null) ??

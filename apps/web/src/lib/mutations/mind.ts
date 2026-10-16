@@ -107,7 +107,7 @@ function invalidate(client: QueryClient, families: string[]) {
 /** Applies an edit to both cached maps; resolves to the rollback snapshot. */
 async function applyEdit(client: QueryClient, workspaceId: string, edit: Edit) {
   const keys = [mindKey(workspaceId, false), mindKey(workspaceId, true)];
-  const snapshot = await snapshotQueries(client, keys);
+  const snapshot = (await snapshotQueries(client, keys)).start();
   for (const key of keys)
     client.setQueryData<MindMap>(key, (map) =>
       map ? edit(map, key[2] === "include") : map,

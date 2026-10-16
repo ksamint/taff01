@@ -211,3 +211,23 @@ it("rolls back only its inserted/deleted rows while preserving concurrent row ed
   expect(client.getQueryData(key)).toEqual(before);
   client.clear();
 });
+
+it("takes ownership after concurrent cancellation promises resolve, preserving a successful A when B fails", async () => {
+  const client = new QueryClient();
+  const key = ["task", "a"];
+  client.setQueryData(key, { id: "a", title: "before", status: "todo" });
+  const [a, b] = await Promise.all([snapshotM3(client), snapshotM3(client)]);
+  a.start();
+  patchTask(client, "a", { title: "A" });
+  a.capture();
+  b.start();
+  patchTask(client, "a", { status: "done" });
+  b.capture();
+  restoreQueries(client, b);
+  expect(client.getQueryData(key)).toEqual({
+    id: "a",
+    title: "A",
+    status: "todo",
+  });
+  client.clear();
+});

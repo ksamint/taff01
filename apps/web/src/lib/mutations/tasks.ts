@@ -136,7 +136,7 @@ export function useCreateTask(
         body: JSON.stringify(createTaskSchema.parse(body)),
       }).then(taskSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(tasksKey(workspaceId), (current = []) => [
@@ -171,7 +171,7 @@ export function useAssignTask(taskId: string) {
         }),
       ),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       patchTask(client, taskId, { workerId: body.workerId });
       return snapshot.capture();
     },
@@ -198,7 +198,7 @@ export function useStartRun(
         body: JSON.stringify(startRunSchema.parse({})),
       }).then(runSchema.parse),
     onMutate: async () => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       const run = optimisticRun(
@@ -261,7 +261,7 @@ export function useAddSubtask(
         ),
       }).then(taskSchema.parse),
     onMutate: async (title) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
       client.setQueryData<Task[]>(
@@ -301,7 +301,7 @@ export function useAddTaskComment(
         body: JSON.stringify(taskCommentInputSchema.parse({ body })),
       }).then(taskCommentSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id = `optimistic:${crypto.randomUUID()}`;
       if (authorId)
         client.setQueryData<TaskComment[]>(
@@ -359,7 +359,7 @@ export function useUndoableTaskEdit() {
         body: JSON.stringify(updateTaskSchema.parse(body)),
       }).then(taskSchema.parse),
     onMutate: async ({ id, body }) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       patchTask(client, id, { ...body, version: body.version + 1 });
       return snapshot.capture();
     },

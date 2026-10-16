@@ -70,7 +70,7 @@ export function useReviewRun({ run, task }: ReviewTarget) {
         body: JSON.stringify(reviewRunSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const outcome = reviewOutcome(body.decision);
       patchRun(client, run.id, { status: outcome.run });
       patchTask(client, task.id, { status: outcome.task });
@@ -106,7 +106,7 @@ export function useAddReviewComment(
         body: JSON.stringify(reviewCommentSchema.parse(body)),
       }),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       if (authorId)
         client.setQueryData<ReviewWorkspace>(reviewKey(task.id), (current) =>
           current
@@ -151,7 +151,7 @@ export function useControlRun(
         body: JSON.stringify(controlRunSchema.parse(body)),
       }).then(runSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const outcome = controlOutcome(body.action);
       patchRun(client, run.id, { status: outcome.run });
       patchTask(client, run.taskId, { status: outcome.task });

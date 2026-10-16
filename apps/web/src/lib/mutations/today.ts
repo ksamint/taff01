@@ -34,7 +34,7 @@ export function useAssignTodayTask() {
         }),
       ),
     onMutate: async (input) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       patchTask(client, input.id, { workerId: input.body.workerId });
       snapshot.capture();
       return { snapshot };

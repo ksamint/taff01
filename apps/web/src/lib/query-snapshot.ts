@@ -12,6 +12,7 @@ type Snapshot = Entry[] & {
   version: number;
   after?: Entry[];
   capture: () => Snapshot;
+  start: () => Snapshot;
 };
 // Weak references keep successful mutations from retaining cached session data.
 const snapshots = new WeakMap<QueryClient, Set<WeakRef<Snapshot>>>();
@@ -77,6 +78,14 @@ export async function snapshotQueries(
   ].map((key) => [key, client.getQueryData(key)]);
   const snapshot: Snapshot = Object.assign(entries, {
     version,
+    start: () => {
+      if (version !== sessionVersion(client))
+        throw new ApiError("unauthorized", 401);
+      // Multiple cancellations can resolve together. Read the baseline at the
+      // actual start of this synchronous optimistic edit, after all awaits.
+      for (const entry of snapshot) entry[1] = client.getQueryData(entry[0]);
+      return snapshot;
+    },
     capture: () => {
       // Call at the end of onMutate, before another mutation can patch the cache.
       snapshot.after ??= snapshot.map(([key]) => [

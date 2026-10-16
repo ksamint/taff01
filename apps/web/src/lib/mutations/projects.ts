@@ -76,7 +76,7 @@ export function useManageProject(
         },
       ).then(projectSchema.parse),
     onMutate: async (body) => {
-      const snapshot = await snapshotM3(client);
+      const snapshot = (await snapshotM3(client)).start();
       const id =
         mode === "edit" ? baseline!.id : `optimistic:${crypto.randomUUID()}`;
       const now = new Date().toISOString();
