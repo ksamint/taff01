@@ -19,7 +19,7 @@ test("security headers allow the signed-in app without CSP violations", async ({
   });
   await freshAccount(page, info.project.name as TestLocale);
   for (const path of [
-    "/today",
+    "/",
     "/projects",
     "/calendar",
     "/projects?view=timeline",
