@@ -655,7 +655,9 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           {t(errorKey(tasks.error ?? projects.error ?? edit.error))}
         </p>
       ) : null}
-      {view === "stakeholders" ? (
+      {projects.isPending && view !== "board" && view !== "list" ? (
+        <p className="loading projects-loading">{t("loading")}</p>
+      ) : view === "stakeholders" ? (
         <StakeholdersView workspaceId={workspace.id} project={selected} />
       ) : view === "timeline" ? (
         <TimelineView project={selected} />

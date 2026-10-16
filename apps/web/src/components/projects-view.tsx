@@ -1,4 +1,5 @@
 "use client";
+import "../styles/projects.css";
 import dynamic from "next/dynamic";
 import { RouteLoading } from "./route-loading";
 
