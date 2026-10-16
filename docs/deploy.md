@@ -2711,3 +2711,44 @@ backfill; existing payload unchanged)
 - Performance time box closed: pre-repair Node 26 diagnostics are qualified in the candidate, not final-source Node 24 budget passes.
 - Remaining: Calendar LCP/Lighthouse; final-source Node 24 cold LCP/Lighthouse validation for Projects/Timeline, including Timeline zh-CN/HK. No further optimization in this release.
 - Rollback source: `66534378d81ac57aed31683f2a0a32248c7a6e9b`; preserve data. Acceptance receipt/deployment.done and independent lock-release probe complete before docs push.
+
+### Frontend v2 release candidate v0.2.5 — 2026-10-16 UTC
+- Source `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; annotated tag after acceptance: `v0.2.5`; [PR #54](https://github.com/ksamint/taff01/pull/54).
+- Exact-source [main CI 38878948411](https://github.com/ksamint/taff01/actions/runs/38878948411) and [PR-head CI 38877858880](https://github.com/ksamint/taff01/actions/runs/38877858880) green; main fast-forwarded to the tested head.
+- Validation: 1647 unit/integration tests (632 actor-matrix cases), 164 visual and 246 browser cases. Approved baselines and tolerances retained; visual clock covers the server Calendar bootstrap.
+- MCP: read-only `context.get` returns the server instant, token creator's saved display zone, members/projects and human owner. Only existing description changed: `runs.submit`, to explain required artifacts and current versions.
+- Five local Codex chats passed with a non-UTC saved zone, including an attributed progress-note submission; public five-chat and Inbox approval acceptance remain.
+- Calendar paints an authenticated inert grid with real task previews, then imports Schedule-X after first paint; protected requests/interactions still wait for browser confirmation.
+- Same application code, local production Node 24, three-sample phone cold LCP medians (en/zh-CN/zh-HK): Calendar 632/704/716 ms; Projects 676/748/748; Timeline 644/708/708.
+- Calendar Lighthouse P/A/BP: 96/100/100, 98/100/100, 97/100/100; Projects P 92/92/93; Timeline P 96/95/95, all A/BP 100.
+- Today: JS 190.7 KiB; LCP 624/660/672 ms; all three CI Lighthouse categories >=90.
+- Migrations: none; env template, Compose, Dockerfiles and host layout unchanged. AI_* remain unset; native deploy lock, exclusive DB/env backups and API/worker/web-only replacement required.
+- Acceptance: Steps 0–6, three pinned production images and official all-31-tool smoke, 22 critical/realtime/MCP public cases, five actual Codex chats and Inbox approval; verification workspace only.
+- Verification credentials are read from the existing 1Password item; no stored token exists, so the chat token is issued in memory and revoked after use.
+- Rollback: `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; preserve additive data.
+
+### Frontend v2 v0.2.5 upgrade checkpoint — 2026-10-16 UTC
+- Source `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`, tag `v0.2.5`, [PR #54](https://github.com/ksamint/taff01/pull/54); exact-source [main CI 38878948411](https://github.com/ksamint/taff01/actions/runs/38878948411) and PR-head CI green.
+- Validation: 1647 unit/integration (632 actor cases), 164 visual, 246 browser; Today JS 190.7 KiB; three clean local production images and official all-31-tool MCP smoke passed.
+- Live: 22/22 incl. realtime and official MCP; five Codex chats 5/5, changes visible, Inbox approved; live retries 0, zero browser page errors.
+
+| Chat | Selected tools | Verified result (UTC) |
+| --- | --- | --- |
+| What's on my plate today? | context.get, tasks.list, calendar.list | Workspace local day and human owner resolved correctly. |
+| Create Q4 report due Friday; tomorrow 3pm | context.get, tasks.create | Friday deadline 10-16 15:59Z; schedule 10-17 07:00Z. |
+| Start, log outline drafted, submit | runs.start/event, files.attach, runs.submit | Attributed progress note; needs_review, then human Inbox approval. |
+| 今日有咩要做？ | context.get, tasks.list, calendar.list | Correct workspace-local Today and current task/review state. |
+| 将任务改到下周一 | tasks.edit, calendar.set | Schedule 10-19 07:00Z; deadline 10-19 15:59Z, visible in task detail. |
+
+| Cold route LCP median, ms | en | zh-CN | zh-HK |
+| --- | ---: | ---: | ---: |
+| Today (exact-source CI) | 624 | 660 | 672 |
+| Calendar | 632 | 704 | 716 |
+| Projects | 676 | 748 | 748 |
+| Timeline | 644 | 708 | 708 |
+
+- Other route rows: same application code, local production Node 24, slow 4G/4x CPU, three samples. Calendar Lighthouse P 96/98/97; Projects 92/92/93; Timeline 96/95/95; all A/BP 100.
+- Migrations: none. Native lock, exclusive verified DB/env backups; only API/worker/web replaced; AI_* unset, neighbors and PostgreSQL start preserved.
+- Ops: a local preflight sequencing error interrupted client tracking; the original successful build was reconciled before replacement. Runtime-only database connection injection verified.
+- Verification credentials read from 1Password; short-lived chat token revoked and initialize returned 401. Completed Q4 verification task retained as history.
+- Follow-ups: none. Rollback: `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; preserve data. Acceptance receipt, deployment.done and independent lock-release probe precede docs push.
