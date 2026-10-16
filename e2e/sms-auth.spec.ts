@@ -84,6 +84,7 @@ test("SMS validates input, limits resend and signs in only after verification", 
   ).toHaveAttribute("data-testid", "auth-email");
   await page.getByTestId("auth-email").fill("138 0013 8000");
   await expect(page.getByTestId("auth-password")).toHaveCount(0);
+  expect(sends).toBe(0);
   await page.getByRole("button", { name: m.sms.send, exact: true }).click();
   await expect(page.getByRole("status")).toHaveText(m.sms.sent);
   await expect(page.getByTestId("sms-resend")).toBeDisabled();

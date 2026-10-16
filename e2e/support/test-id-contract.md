@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (340 distinct, 1788 uses)
+## Test ids (340 distinct, 1802 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -51,9 +51,9 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `auth-email` | 38 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-password` | 32 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-submit` | 40 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
+| `auth-email` | 43 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-password` | 36 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-submit` | 44 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 7 |  | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-username` | 5 |  | release/checklist.spec.ts, username-auth.spec.ts |
 
@@ -230,7 +230,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `locale-select` | 15 | me-view.tsx | calendar-accessibility.spec.ts, live/release/checklist.spec.ts, live/release/support.ts, me.spec.ts, release/checklist.spec.ts, release/support.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
+| `locale-select` | 16 | me-view.tsx | calendar-accessibility.spec.ts, landing.spec.ts, live/release/checklist.spec.ts, live/release/support.ts, me.spec.ts, release/checklist.spec.ts, release/support.ts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 
 ### mcp-view.tsx
 
@@ -601,9 +601,9 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.organization.invite` | 9 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.planning.close` | 6 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.run.cancel` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `button — name: m.sms.changePhone` | 1 | sms-auth.spec.ts |
 | `button — name: m.sms.emailInstead` | 1 | sms-auth.spec.ts |
-| `button — name: m.sms.send` | 3 | sms-auth.spec.ts |
-| `button — name: m.sms.title` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts, sms-auth.spec.ts |
+| `button — name: m.sms.send` | 4 | sms-auth.spec.ts |
 | `button — name: m.sms.verify` | 2 | sms-auth.spec.ts |
 | `button — name: messages[locale].grants.request` | 1 | optimistic-m4.spec.ts |
 | `button — name: messages[locale].planning.close` | 5 | notifications.spec.ts, persistence.spec.ts, today.spec.ts |
@@ -611,7 +611,6 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].run.cancel` | 2 | optimistic-m4.spec.ts |
 | `button — name: messages[locale].run.keep` | 1 | optimistic-m4.spec.ts |
 | `button — name: messages[locale].signOut` | 1 | support/preferences.ts |
-| `button — name: messages[locale].sms.title` | 1 | sms-auth.spec.ts |
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `combobox` | 1 | cold-font-layout.spec.ts |
@@ -650,7 +649,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
-| `status` | 1 | sms-auth.spec.ts |
+| `status` | 2 | sms-auth.spec.ts |
 | `switch` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `tabpanel` | 2 | brief.spec.ts, live/brief.spec.ts |
 
@@ -660,10 +659,11 @@ several do). “Also rendered by” lists the other files.
 
 | Label | Uses | Used in |
 | --- | ---: | --- |
+| `m.accountIdentifier` | 1 | sms-auth.spec.ts |
 | `m.sms.code` | 3 | sms-auth.spec.ts |
-| `m.sms.phone` | 3 | sms-auth.spec.ts |
+| `m.sms.phone` | 2 | sms-auth.spec.ts |
 | `m.usernameOptional` | 1 | username-auth.spec.ts |
-| `messages[locale].emailOrUsername` | 1 | username-auth.spec.ts |
+| `messages[locale].emailOrUsername` | 2 | sms-auth.spec.ts, username-auth.spec.ts |
 
 ## Schedule-X internals
 
@@ -708,8 +708,7 @@ read (`data-event-id`, `data-date`).
 | `.history-list > li` | 1 | agent-review.spec.ts |
 | `.invite-banner a[href="/orgs"]` | 1 | live/live.ts |
 | `.is-event-copy` | 2 | calendar.spec.ts |
-| `.landing-features li` | 1 | ui-v2.spec.ts |
-| `.landing-hero > h1` | 1 | ui-v2.spec.ts |
+| `.landing-title` | 3 | landing.spec.ts, ui-v2.spec.ts |
 | `.loading` | 2 | ui-v2.spec.ts |
 | `.mcp-call` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-config` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -782,7 +781,6 @@ read (`data-event-id`, `data-date`).
 | `#paragraph` | 2 | font-readiness.spec.ts |
 | `#password-hint` | 1 | username-auth.spec.ts |
 | `#scroll` | 1 | native-select-fonts.spec.ts |
-| `#sms-phone` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `#team` | 1 | scripts/ui/app-shots.mjs |
 | `a.inbox-source-title[href="/tasks/*/review"]` | 2 | scripts/ui/app-shots.mjs, ui-v2.spec.ts |
 | `a.task-title-link` | 2 | ui-v2.spec.ts |
@@ -816,6 +814,7 @@ Keys read from `apps/web/locales/*/common.json` through
 
 | Key | Uses | Used in |
 | --- | ---: | --- |
+| `accountIdentifier` | 2 | sms-auth.spec.ts |
 | `actions.undo` | 16 | brief.spec.ts, live/brief.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
@@ -852,7 +851,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `crm.toast.removedWithLinks_other` | 10 | crm.spec.ts, live/crm.spec.ts |
 | `crm.toast.roleReplaced` | 12 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `crm.toast.rolesCleared` | 10 | crm.spec.ts, live/crm.spec.ts |
-| `emailOrUsername` | 1 | username-auth.spec.ts |
+| `emailOrUsername` | 2 | sms-auth.spec.ts, username-auth.spec.ts |
 | `emailVerification.delivery.logged` | 5 | planning.spec.ts |
 | `en` | 1 | me.spec.ts |
 | `errors.auth` | 3 | username-auth.spec.ts |
@@ -863,7 +862,11 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.invalid_input` | 13 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
-| `home.title` | 1 | ui-v2.spec.ts |
+| `headline1` | 5 | landing.spec.ts |
+| `headline2` | 1 | landing.spec.ts |
+| `headline3` | 1 | landing.spec.ts |
+| `home` | 1 | landing.spec.ts |
+| `home.headline1` | 2 | landing.spec.ts, ui-v2.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |
@@ -914,17 +917,19 @@ Keys read from `apps/web/locales/*/common.json` through
 | `run.status.needs_review` | 1 | optimistic-m4.spec.ts |
 | `run.status.paused` | 6 | optimistic-m4.spec.ts, planning.spec.ts |
 | `run.status.running` | 4 | accessibility.spec.ts, optimistic-m4.spec.ts |
+| `signIn` | 1 | sms-auth.spec.ts |
 | `signInPasswordHint` | 3 | username-auth.spec.ts |
 | `signOut` | 1 | support/preferences.ts |
+| `sms.changePhone` | 2 | sms-auth.spec.ts |
 | `sms.code` | 6 | sms-auth.spec.ts |
 | `sms.emailInstead` | 2 | sms-auth.spec.ts |
 | `sms.invalidCode` | 2 | sms-auth.spec.ts |
-| `sms.phone` | 6 | sms-auth.spec.ts |
+| `sms.phone` | 4 | sms-auth.spec.ts |
 | `sms.rateLimited` | 2 | sms-auth.spec.ts |
-| `sms.send` | 6 | sms-auth.spec.ts |
+| `sms.send` | 8 | sms-auth.spec.ts |
 | `sms.sendFailed` | 2 | sms-auth.spec.ts |
-| `sms.sent` | 2 | sms-auth.spec.ts |
-| `sms.title` | 13 | sms-auth.spec.ts |
+| `sms.sent` | 4 | sms-auth.spec.ts |
+| `sms.title` | 8 | sms-auth.spec.ts |
 | `sms.verify` | 4 | sms-auth.spec.ts |
 | `status.done` | 5 | optimistic-m4.spec.ts |
 | `status.in_progress` | 2 | optimistic-m4.spec.ts |
