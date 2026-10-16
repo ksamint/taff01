@@ -22,7 +22,15 @@ import {
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
@@ -215,9 +223,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       router.push(`/projects/${project.id}`);
     },
   });
-  const { move: moveStatus, edit } = useMoveTaskStatus({
-    describe: (status) =>
+  const describeMove = useCallback(
+    (status: Task["status"]) =>
       t("projects.moved", { status: t(`status.${status}`) }),
+    [t],
+  );
+  const { move: moveStatus, edit } = useMoveTaskStatus({
+    describe: describeMove,
     undoLabel: t("actions.undo"),
   });
   const agents = (members.data ?? []).filter((item) => item.kind === "agent");
@@ -236,10 +248,6 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     sort,
     locale,
   );
-  const latestRun = (taskId: string) =>
-    runs.data
-      ?.filter((run) => run.taskId === taskId)
-      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
   /** The current URL with some query parameters set or removed. */
   const hrefWith = (changes: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -262,10 +270,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     setFilter(next as TaskFilter);
     if (agentId) router.replace(hrefWith({ agent: null }), { scroll: false });
   };
-  const move = (task: Task, status: Task["status"]) => {
-    if (task.status === status || busy) return;
-    moveStatus(task, status);
-  };
+  const move = useCallback(
+    (task: Task, status: Task["status"]) => {
+      if (task.status === status || busy) return;
+      moveStatus(task, status);
+    },
+    [busy, moveStatus],
+  );
   const columns = useRef<HTMLDivElement>(null);
   const [drag, setDrag] = useState<{
     id: string;
@@ -278,124 +289,133 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   } | null>(null);
   const dragCleanup = useRef<(() => void) | null>(null);
   useEffect(() => () => dragCleanup.current?.(), []);
-  const dragStart = (
-    event: React.PointerEvent<HTMLButtonElement>,
-    task: Task,
-    allowed: Task["status"][],
-  ) => {
-    if (busy || event.button !== 0 || !allowed.length) return;
-    event.preventDefault();
-    dragCleanup.current?.();
-    const board = columns.current;
-    const handle = event.currentTarget;
-    const pointerId = event.pointerId;
-    const startX = event.clientX,
-      startY = event.clientY;
-    const sourceRect = handle.closest("li")!.getBoundingClientRect();
-    let x = startX,
-      y = startY,
-      moved = false,
-      frame = 0;
-    const targetAt = (pointX: number, pointY: number) =>
-      Array.from(
-        board?.querySelectorAll<HTMLElement>("[data-board-status]") ?? [],
-      ).find((column) => {
-        const rect = column.getBoundingClientRect();
-        return (
-          pointX >= rect.left &&
-          pointX <= rect.right &&
-          pointY >= rect.top &&
-          pointY <= rect.bottom
-        );
-      })?.dataset.boardStatus as Task["status"] | undefined;
-    const update = () => {
-      const target = targetAt(x, y);
-      setDrag({
-        id: task.id,
-        x: x - startX,
-        left: sourceRect.left + x - startX,
-        top: sourceRect.top + y - startY,
-        width: sourceRect.width,
-        y: y - startY,
-        target: target && allowed.includes(target) ? target : null,
-      });
-    };
-    const scroll = () => {
-      if (moved && board) {
-        const rect = board.getBoundingClientRect();
-        if (y >= rect.top && y <= rect.bottom) {
-          const left = Math.max(0, rect.left),
-            right = Math.min(window.innerWidth, rect.right);
-          const delta =
-            x < left + 44
-              ? -Math.min(12, (left + 44 - x) / 3)
-              : x > right - 44
-                ? Math.min(12, (x - right + 44) / 3)
-                : 0;
-          if (delta) {
-            board.scrollLeft += delta;
-            update();
+  const dragStart = useCallback(
+    (
+      event: React.PointerEvent<HTMLButtonElement>,
+      task: Task,
+      allowed: Task["status"][],
+    ) => {
+      if (busy || event.button !== 0 || !allowed.length) return;
+      event.preventDefault();
+      dragCleanup.current?.();
+      const board = columns.current;
+      const handle = event.currentTarget;
+      const pointerId = event.pointerId;
+      const startX = event.clientX,
+        startY = event.clientY;
+      const sourceRect = handle.closest("li")!.getBoundingClientRect();
+      let x = startX,
+        y = startY,
+        moved = false,
+        frame = 0;
+      const targetAt = (pointX: number, pointY: number) =>
+        Array.from(
+          board?.querySelectorAll<HTMLElement>("[data-board-status]") ?? [],
+        ).find((column) => {
+          const rect = column.getBoundingClientRect();
+          return (
+            pointX >= rect.left &&
+            pointX <= rect.right &&
+            pointY >= rect.top &&
+            pointY <= rect.bottom
+          );
+        })?.dataset.boardStatus as Task["status"] | undefined;
+      const update = () => {
+        const target = targetAt(x, y);
+        setDrag({
+          id: task.id,
+          x: x - startX,
+          left: sourceRect.left + x - startX,
+          top: sourceRect.top + y - startY,
+          width: sourceRect.width,
+          y: y - startY,
+          target: target && allowed.includes(target) ? target : null,
+        });
+      };
+      const scroll = () => {
+        if (moved && board) {
+          const rect = board.getBoundingClientRect();
+          if (y >= rect.top && y <= rect.bottom) {
+            const left = Math.max(0, rect.left),
+              right = Math.min(window.innerWidth, rect.right);
+            const delta =
+              x < left + 44
+                ? -Math.min(12, (left + 44 - x) / 3)
+                : x > right - 44
+                  ? Math.min(12, (x - right + 44) / 3)
+                  : 0;
+            if (delta) {
+              board.scrollLeft += delta;
+              update();
+            }
           }
         }
-      }
+        frame = requestAnimationFrame(scroll);
+      };
+      const pointerMove = (current: PointerEvent) => {
+        if (current.pointerId !== pointerId) return;
+        x = current.clientX;
+        y = current.clientY;
+        moved = true;
+        update();
+      };
+      const cleanup = () => {
+        cancelAnimationFrame(frame);
+        handle.removeEventListener("pointermove", pointerMove);
+        handle.removeEventListener("pointerup", finish);
+        handle.removeEventListener("pointercancel", finish);
+        handle.removeEventListener("lostpointercapture", cancel);
+        window.removeEventListener("blur", cancel);
+        if (handle.hasPointerCapture(pointerId))
+          handle.releasePointerCapture(pointerId);
+      };
+      const cancel = () => {
+        cleanup();
+        dragCleanup.current = null;
+        setDrag(null);
+      };
+      const finish = (current: PointerEvent) => {
+        if (current.pointerId !== pointerId) return;
+        cleanup();
+        dragCleanup.current = null;
+        setDrag(null);
+        if (moved && current.type === "pointerup") {
+          const target = targetAt(current.clientX, current.clientY);
+          if (target && allowed.includes(target)) move(task, target);
+        }
+      };
+      dragCleanup.current = cleanup;
+      handle.setPointerCapture(pointerId);
+      handle.addEventListener("pointermove", pointerMove);
+      handle.addEventListener("pointerup", finish);
+      handle.addEventListener("pointercancel", finish);
+      handle.addEventListener("lostpointercapture", cancel);
+      window.addEventListener("blur", cancel);
       frame = requestAnimationFrame(scroll);
-    };
-    const pointerMove = (current: PointerEvent) => {
-      if (current.pointerId !== pointerId) return;
-      x = current.clientX;
-      y = current.clientY;
-      moved = true;
-      update();
-    };
-    const cleanup = () => {
-      cancelAnimationFrame(frame);
-      handle.removeEventListener("pointermove", pointerMove);
-      handle.removeEventListener("pointerup", finish);
-      handle.removeEventListener("pointercancel", finish);
-      handle.removeEventListener("lostpointercapture", cancel);
-      window.removeEventListener("blur", cancel);
-      if (handle.hasPointerCapture(pointerId))
-        handle.releasePointerCapture(pointerId);
-    };
-    const cancel = () => {
-      cleanup();
-      dragCleanup.current = null;
-      setDrag(null);
-    };
-    const finish = (current: PointerEvent) => {
-      if (current.pointerId !== pointerId) return;
-      cleanup();
-      dragCleanup.current = null;
-      setDrag(null);
-      if (moved && current.type === "pointerup") {
-        const target = targetAt(current.clientX, current.clientY);
-        if (target && allowed.includes(target)) move(task, target);
-      }
-    };
-    dragCleanup.current = cleanup;
-    handle.setPointerCapture(pointerId);
-    handle.addEventListener("pointermove", pointerMove);
-    handle.addEventListener("pointerup", finish);
-    handle.addEventListener("pointercancel", finish);
-    handle.addEventListener("lostpointercapture", cancel);
-    window.addEventListener("blur", cancel);
-    frame = requestAnimationFrame(scroll);
-  };
+    },
+    [busy, move],
+  );
   const filterValue = agentId ? `agent:${agentId}` : filter;
-  const cardProps = {
-    reference: (task: Task) => taskReference(workspace.key, task.number),
-    due: (task: Task) => (task.dueAt ? dueLabel(task.dueAt) : ""),
-    member: (id: string | null) =>
-      id ? members.data?.find((item) => item.id === id) : undefined,
-    parent: (task: Task) =>
-      task.parentId
-        ? tasks.data?.find((item) => item.id === task.parentId)
-        : undefined,
-    children: (task: Task) =>
-      tasks.data?.filter((item) => item.parentId === task.id) ?? [],
-    latestRun,
-    selectedPath: pathname,
-  };
+  const cardProps = useMemo(
+    () => ({
+      reference: (task: Task) => taskReference(workspace.key, task.number),
+      due: (task: Task) => (task.dueAt ? dueLabel(task.dueAt) : ""),
+      member: (id: string | null) =>
+        id ? members.data?.find((item) => item.id === id) : undefined,
+      parent: (task: Task) =>
+        task.parentId
+          ? tasks.data?.find((item) => item.id === task.parentId)
+          : undefined,
+      children: (task: Task) =>
+        tasks.data?.filter((item) => item.parentId === task.id) ?? [],
+      latestRun: (taskId: string) =>
+        runs.data
+          ?.filter((run) => run.taskId === taskId)
+          .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0],
+      selectedPath: pathname,
+    }),
+    [workspace.key, dueLabel, members.data, tasks.data, runs.data, pathname],
+  );
   const showFilters = view === "board" || view === "list";
   return (
     <div className={`projects-view projects-view-${view}`}>
@@ -1010,7 +1030,7 @@ function Avatar({ name, t }: { name: string; t: Translate }) {
   );
 }
 
-function BoardCard({
+const BoardCard = memo(function BoardCard({
   task,
   t,
   reference,
@@ -1148,7 +1168,7 @@ function BoardCard({
       </div>
     </li>
   );
-}
+});
 
 /** Phone list row (prototype 297–304). */
 function ListRow({

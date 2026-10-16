@@ -2,6 +2,7 @@
 import "../styles/timeline.css";
 import type { Project } from "@taff/schemas";
 import dynamic from "next/dynamic";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { RouteLoading } from "./route-loading";
 
@@ -10,7 +11,11 @@ const Scene = dynamic(
   { ssr: false, loading: RouteLoading },
 );
 
-export function TimelineView({ project }: { project: Project | undefined }) {
+export const TimelineView = memo(function TimelineView({
+  project,
+}: {
+  project: Project | undefined;
+}) {
   const { t } = useTranslation();
   if (!project)
     return (
@@ -19,4 +24,4 @@ export function TimelineView({ project }: { project: Project | undefined }) {
       </p>
     );
   return <Scene project={project} />;
-}
+});

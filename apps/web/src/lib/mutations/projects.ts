@@ -9,6 +9,7 @@ import {
   type TaskStatus,
 } from "@taff/schemas";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { request } from "../api";
 import { invalidateM3 } from "../m3-queries";
 import { projectsKey, useEditTask } from "../m5-queries";
@@ -111,26 +112,30 @@ export function useMoveTaskStatus({
   undoLabel: string;
 }) {
   const edit = useEditTask();
-  const move = (task: Task, status: TaskStatus) => {
-    if (task.status === status) return;
-    const previous = task.status;
-    edit.mutate(
-      { id: task.id, body: { version: task.version, status } },
-      {
-        onSuccess: (saved) =>
-          showToast(describe(status), {
-            label: undoLabel,
-            run: () =>
-              edit.mutate(
-                {
-                  id: saved.id,
-                  body: { version: saved.version, status: previous },
-                },
-                { onSuccess: () => showToast(describe(previous)) },
-              ),
-          }),
-      },
-    );
-  };
+  const mutate = edit.mutate;
+  const move = useCallback(
+    (task: Task, status: TaskStatus) => {
+      if (task.status === status) return;
+      const previous = task.status;
+      mutate(
+        { id: task.id, body: { version: task.version, status } },
+        {
+          onSuccess: (saved) =>
+            showToast(describe(status), {
+              label: undoLabel,
+              run: () =>
+                mutate(
+                  {
+                    id: saved.id,
+                    body: { version: saved.version, status: previous },
+                  },
+                  { onSuccess: () => showToast(describe(previous)) },
+                ),
+            }),
+        },
+      );
+    },
+    [mutate, describe, undoLabel],
+  );
   return { move, edit };
 }

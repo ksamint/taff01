@@ -745,6 +745,10 @@
 
 /* Authenticated agenda first paint while the interactive grid hydrates. */
 .calendar-bootstrap {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 4px;
   position: absolute;
   inset: 0;
   z-index: 1;
@@ -760,5 +764,5 @@
   min-height: 44px;
   padding: 3px 8px;
   border: 1px solid var(--border);
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }

@@ -1,4 +1,5 @@
 "use client";
+import "temporal-polyfill/global";
 import "@schedule-x/theme-default/dist/index.css";
 import {
   type CalendarEvent,
@@ -445,8 +446,6 @@ function CalendarPreview({
       className="calendar-bootstrap"
       data-testid="calendar-bootstrap"
       aria-label={t("calendar.title")}
-      aria-busy="true"
-      inert
     >
       {events.map((event) => (
         <li key={String(event.id)}>
