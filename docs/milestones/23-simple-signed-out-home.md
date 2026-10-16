@@ -1,41 +1,38 @@
 # 23 — Simple signed-out home
 
-Date: 2026-10-16. Decision record: ADR 0018.
+Date: 2026-10-16 UTC. Decision record: ADR 0018. Released as v0.2.6.
 
 ## Working
+- Signed-out home: wordmark, saved language picker, one headline and sign-in.
+- Headlines rotate every four seconds; reduced motion holds the first line,
+  including when the preference changes while the page is open.
+- One identifier accepts username, mobile or email. A mainland mobile hides
+  the password; only the send-code action sends SMS, once under dev effect replay.
+- Unsaved HK/Macau browsers, including en-HK, select Traditional Chinese.
+  The picker overrides detection and persists; English/Simplified preferences work.
 
-- The signed-out home shows the wordmark, the language picker, one headline
-  and the sign-in form. Feature cards, eyebrow, subtitle and extra buttons
-  are gone.
-- The headline rotates every 4 seconds: 做事，要 Taff 實。, Taff 上正軌。,
-  Taff 平難關。 (zh-CN and en have matching lines). Reduced motion holds the
-  first line.
-- Visitors without a saved choice get Traditional Chinese unless the browser
-  prefers English or Simplified Chinese. Hong Kong and Macau browsers get it
-  in any language. The server reads Accept-Language, so the first paint
-  matches.
-- With SMS on, the field reads "username, mobile or email". A mainland mobile
-  number drops the password and texts a code straight away. The separate SMS
-  button is gone.
+## Review and fixes
+- Bundled the missing simplified/traditional headline glyphs and kept the
+  form still while longer English headlines rotate. All 12 home baselines approved.
+- Removed hero/feature keys have no remaining application/test consumers.
+- Cloud finance/native-select/SSR failures passed main controls with Chromium
+  1248; production SSR cache headers passed on main and candidate in all locales.
+- Corrected two pre-existing checklist fixtures without removing assertions:
+  rate limiting precedes audit writes; save locale before first account render.
+- Owner closed the en-HK decision: retain ADR 0018. No open product decision.
 
-## Missing
-
-- The `home` visual baselines (light and dark, all six projects) need a fresh
-  capture through the Capture visual baselines workflow, then approval.
-- Production is not redeployed.
-
-## Open decisions
-
-- `en-HK` browsers now get Traditional Chinese. Say if they should get English.
-- A numeric username that is also a valid mainland mobile number goes to the
-  code flow while SMS is on.
-
-## Validation
-
-- Biome and the web typecheck pass. Web unit tests: 202/202, including new
-  locale-detection, Accept-Language and mobile-number cases.
-- Browser flows for SMS, username sign-in and saved locale: 21/21 across en,
-  zh-CN and zh-HK, on a local stack (Postgres 16, Redis).
-- Full browser suite: running; result to follow.
-- Screenshots checked by eye: phone zh-HK, phone with a mobile number typed,
-  desktop with a Japanese browser (Traditional Chinese), phone en.
+## Validation and deployment
+- Source `69434acc66851c766f43834131a449382b461ce7`; annotated tag `v0.2.6`.
+- [PR #55](https://github.com/ksamint/taff01/pull/55) merged; [main CI](https://github.com/ksamint/taff01/actions/runs/38920627000) and [PR CI](https://github.com/ksamint/taff01/actions/runs/38919155166) green without retries.
+- 1652 unit/integration tests, 258 browser cases in three locales, 166 visuals;
+  final-source home capture matches all 12 approved references byte-for-byte.
+- Local production checklist coverage 32/32 across original run/targeted retries;
+  only the two failed cases rerun after the locale helper fix: 2/2 passed.
+- Three clean local images and official all-31-tool MCP production smoke passed.
+- Today JS 190.7 KiB; LCP en/CN/HK 608/668/664 ms; Lighthouse 98/100/100 each.
+- Live Steps 0–6: 22/22 incl. realtime/MCP; retries 0; no browser/cleanup failures.
+- Extra home checks passed: en-HK Traditional, saved English override, phone-code
+  presentation, rotation, en-US English, email and username login; zero SMS requests.
+- Native lock, private verified DB/env backups, scoped replacement; no migrations.
+  Prior images/data retained; source checkpoint is in docs/deploy.md.
+- Missing work/follow-ups: none. Production: https://taff.apuch.cn.

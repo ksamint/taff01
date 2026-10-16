@@ -2765,3 +2765,14 @@ backfill; existing payload unchanged)
 - Migrations: none. Env template, Compose, Dockerfiles, Caddy and host layout unchanged; production changes only TAFF_TAG, with AI_* unset.
 - Acceptance: Steps 0–6, native lock and exclusive verified DB/env backups, scoped API/worker/web replacement; 22 critical/realtime/MCP public cases, plus fresh en-HK, persisted English override, rotating headlines, email/username login and phone-code form. Never submit a mobile number or flood public MCP.
 - Rollback: `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; retain its images and all data.
+
+### Frontend v2 v0.2.6 upgrade checkpoint — 2026-10-16 UTC
+- Source `69434acc66851c766f43834131a449382b461ce7`, annotated tag `v0.2.6`; [PR #55](https://github.com/ksamint/taff01/pull/55) merged green. Exact-source [main CI 38920627000](https://github.com/ksamint/taff01/actions/runs/38920627000) and [PR CI 38919155166](https://github.com/ksamint/taff01/actions/runs/38919155166) passed without retries.
+- Validation: 1652 unit/integration, 258 browser and 166 visual cases; Today JS 190.7 KiB, LCP en/zh-CN/zh-HK 608/668/664 ms, Lighthouse P/A/BP 98/100/100 in all three locales. All 12 final home captures match the approved baselines.
+- Fixes: missing Chinese headline glyphs, form movement during rotation, live reduced-motion changes; test-only rate-limit audit and fresh-account locale setup corrections retain all assertions. The two previously failed local cases passed 2/2 after the helper fix; combined local checklist coverage 32/32 across the original run and targeted retries.
+- Three pinned clean local images and official all-31-tool production MCP smoke passed on Node 24. The original host build completed despite slow npm metadata requests; no duplicate build was started.
+- Migrations: none. Native deploy lock, exclusive private env backup and verified Taff database dump; only API/worker/web replaced. AI_* remain unset; Caddy, Valkey, neighbors and PostgreSQL start preserved.
+- Live: 22/22 critical/platform/realtime/MCP cases passed, retries 0, zero browser page errors. All 22 cleanup journals completed without a cleanup failure; accepted invitation/history records remain through supported cleanup rules.
+- Additional live home checks passed: fresh en-HK → Traditional Chinese, English picker override survives reload, en-US → English, headline rotation, email/username sign-in and phone-code form. Zero SMS requests; no mobile number submitted or public MCP flood.
+- Decision closed: retain ADR 0018 for HK/Macau, including en-HK; saved picker choice overrides detection.
+- Follow-ups: none. Rollback: `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; previous images and data retained. Acceptance receipt, deployment.done, annotated tag verification and independent lock-release probe complete before this docs push.
