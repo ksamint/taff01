@@ -231,3 +231,46 @@ it("takes ownership after concurrent cancellation promises resolve, preserving a
   });
   client.clear();
 });
+
+it("isolates nested calendar rows without top-level ids", async () => {
+  const client = new QueryClient();
+  const key = ["calendar", "workspace"];
+  const before = {
+    occurrences: [],
+    unscheduled: [
+      { task: { id: "a", title: "before" } },
+      { task: { id: "b", title: "before" } },
+    ],
+  };
+  client.setQueryData(key, before);
+  const a = (await snapshotM3(client)).start();
+  patchTask(client, "a", { title: "A" });
+  a.capture();
+  const b = (await snapshotM3(client)).start();
+  patchTask(client, "b", { title: "B" });
+  b.capture();
+  restoreQueries(client, a);
+  expect(client.getQueryData(key)).toEqual({
+    ...before,
+    unscheduled: [before.unscheduled[0], { task: { id: "b", title: "B" } }],
+  });
+  restoreQueries(client, b);
+  expect(client.getQueryData(key)).toEqual(before);
+  client.clear();
+});
+
+it("removes only its own insertion into a previously absent query", async () => {
+  const client = new QueryClient();
+  const key = ["tasks", "new"];
+  const a = (await snapshotQueries(client, [key])).start();
+  client.setQueryData(key, [{ id: "a" }]);
+  a.capture();
+  const b = (await snapshotQueries(client, [key])).start();
+  client.setQueryData(key, [{ id: "a" }, { id: "b" }]);
+  b.capture();
+  restoreQueries(client, a);
+  expect(client.getQueryData(key)).toEqual([{ id: "b" }]);
+  restoreQueries(client, b);
+  expect(client.getQueryData(key)).toEqual([]);
+  client.clear();
+});

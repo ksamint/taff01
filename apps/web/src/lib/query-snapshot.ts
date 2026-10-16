@@ -21,27 +21,44 @@ const record = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value);
 const equal = (a: unknown, b: unknown) =>
   a === b || JSON.stringify(a) === JSON.stringify(b);
+function rowKey(value: unknown): unknown {
+  if (!record(value)) return undefined;
+  if ("id" in value) return value.id;
+  if (record(value.task)) return value.task.id;
+  if ("nodeId" in value && "sourceId" in value)
+    return `${value.nodeId}:${value.sourceId}`;
+  if ("taskId" in value) return value.taskId;
+  return undefined;
+}
 const rows = (value: unknown): value is Record<string, unknown>[] =>
-  Array.isArray(value) && value.every((row) => record(row) && "id" in row);
+  Array.isArray(value) &&
+  value.every((row) => rowKey(row) !== undefined) &&
+  new Set(value.map(rowKey)).size === value.length;
 
 /** Invert only changed fields still carrying this mutation's value. */
 function inverse(before: unknown, after: unknown, current: unknown): unknown {
   if (equal(before, after)) return current;
   if (equal(current, after)) return before;
+  // A cache entry can be created by A and then extended by B before A fails.
+  if (before === undefined && rows(after) && rows(current))
+    return inverse([], after, current);
   if (rows(before) && rows(after) && rows(current)) {
-    const old = new Map(before.map((row) => [row.id, row]));
-    const next = new Map(after.map((row) => [row.id, row]));
+    const old = new Map(before.map((row) => [rowKey(row), row]));
+    const next = new Map(after.map((row) => [rowKey(row), row]));
     const result = current.flatMap((row) => {
-      if (!old.has(row.id) && next.has(row.id)) return [];
+      if (!old.has(rowKey(row)) && next.has(rowKey(row))) return [];
       return [
-        inverse(old.get(row.id), next.get(row.id), row) as Record<
+        inverse(old.get(rowKey(row)), next.get(rowKey(row)), row) as Record<
           string,
           unknown
         >,
       ];
     });
     for (const [index, row] of before.entries()) {
-      if (!next.has(row.id) && !result.some((item) => item.id === row.id))
+      if (
+        !next.has(rowKey(row)) &&
+        !result.some((item) => rowKey(item) === rowKey(row))
+      )
         result.splice(Math.min(index, result.length), 0, row);
     }
     return result;
