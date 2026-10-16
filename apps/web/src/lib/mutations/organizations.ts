@@ -117,7 +117,7 @@ export function useCreateWorkspace(
     onMutate: async (body) => {
       const snapshot = await snapshotQueries(client, [drafts]);
       client.setQueryData(drafts, body.name);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (value, _, snapshot) => {
@@ -149,6 +149,7 @@ export function useAddWorkspaceAgent(
         ...(current ?? []),
         optimisticAgentMember(workspaceId, body.name, id),
       ]);
+      snapshot.capture();
       return { id, snapshot };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -200,7 +201,7 @@ export function useChangeMemberRole(workspaceId: string) {
       client.setQueryData<Member[]>(membersKey(workspaceId), (current) =>
         withMemberRole(current, id, next),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateWorkspaces(client),
@@ -250,6 +251,7 @@ export function useIssueWorkspaceInvite(
         ...(current ?? []),
       ]);
       onStart?.();
+      snapshot.capture();
       return { id, snapshot };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -276,7 +278,7 @@ export function useRevokeWorkspaceInvite(workspaceId: string) {
       client.setQueryData<WorkspaceInvite[]>(key, (current) =>
         withRevokedInvite(current, id),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateWorkspaces(client),

@@ -79,6 +79,7 @@ export function useCreateAgentToken(
         ),
         ...current,
       ]);
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -185,6 +186,7 @@ export function useRegenerateAgentToken(
           now,
         ),
       );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (error, _, context) => {
@@ -227,7 +229,7 @@ export function useRevokeAgentToken(
         withRevokedToken(current, id, new Date().toISOString()),
       );
       onStart?.();
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, context) => {
       restoreQueries(client, context);
@@ -252,7 +254,7 @@ export function useRestoreAgentToken(workspaceId: string) {
       client.setQueryData<AgentToken[]>(tokensKey, (current = []) =>
         withRestoredToken(current, id),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, context) => {
       restoreQueries(client, context);

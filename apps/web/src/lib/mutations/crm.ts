@@ -342,7 +342,7 @@ function runUndo(
           },
         );
       }
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot as Parameters<typeof restoreQueries>[1]);
@@ -424,6 +424,7 @@ export function useSetContactRoles() {
       client.setQueryData<ContactDetail>(contactKey(contact.id), (detail) =>
         withDetailRoles(detail, target.scope, target.entityId, roles),
       );
+      snapshot.capture();
       return { snapshot, before };
     },
     onError: (error, _, context) => {
@@ -500,6 +501,7 @@ export function useRemoveContactLink() {
       client.setQueryData<ContactDetail>(contactKey(contact.id), (detail) =>
         withDetailRoles(detail, target.scope, target.entityId, null),
       );
+      snapshot.capture();
       return { snapshot, roles };
     },
     onError: (error, _, context) => {
@@ -836,6 +838,7 @@ export function useSetClientCompany(workspaceId: string) {
             : item,
         ),
       );
+      snapshot.capture();
       return { snapshot };
     },
     onError: (error, _, context) => {

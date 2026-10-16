@@ -143,6 +143,7 @@ export function useCreateTask(
         optimisticQuickAddTask(body, id, now),
         ...current,
       ]);
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -172,7 +173,7 @@ export function useAssignTask(taskId: string) {
     onMutate: async (body) => {
       const snapshot = await snapshotM3(client);
       patchTask(client, taskId, { workerId: body.workerId });
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -221,6 +222,7 @@ export function useStartRun(
         canSubmit: false,
       });
       patchTask(client, taskId, { status: "in_progress" });
+      snapshot.capture();
       return { snapshot, id };
     },
     onSuccess: (run, _, context) => {
@@ -266,6 +268,7 @@ export function useAddSubtask(
         tasksKey(task.workspaceId),
         (current = []) => [optimisticSubtask(task, title, id, now), ...current],
       );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -315,6 +318,7 @@ export function useAddTaskComment(
             },
           ],
         );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
@@ -357,7 +361,7 @@ export function useUndoableTaskEdit() {
     onMutate: async ({ id, body }) => {
       const snapshot = await snapshotM3(client);
       patchTask(client, id, { ...body, version: body.version + 1 });
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (task, _, snapshot) => {

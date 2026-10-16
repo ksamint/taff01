@@ -120,7 +120,7 @@ export function useSaveAgentProfile(agentId: string) {
       client.setQueryData<AgentProfile>(agentKey(agentId), (current) =>
         withAgentProfileInput(current, body),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -142,7 +142,7 @@ export function useSetAgentPermission(agentId: string) {
       client.setQueryData<AgentProfile>(agentKey(agentId), (current) =>
         withAgentPermission(current, body),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -178,7 +178,7 @@ export function useRequestGrant(
             )
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: () => onRequested?.(),
@@ -234,7 +234,7 @@ export function useAlwaysAllowGrant(
         ),
       );
       resolveInbox(client, (item) => item.grantId === grant.id);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -260,7 +260,7 @@ export function useDecideGrant(
         withGrantDecision(current, grant.id, body, actorId),
       );
       resolveInbox(client, (item) => item.grantId === grant.id);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),

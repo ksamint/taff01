@@ -195,6 +195,10 @@ detached keeper so an SSH drop does not release it.
 
 **Step 4 — public acceptance** through `https://taff.apuch.cn`:
 
+Patch releases (`x.y.Z`) run the approximately 20 critical live cases plus the
+MCP round trip. The full 146-case checklist is required for minor releases only.
+The viewport/locale coverage and failure-handling rules below still apply.
+
 - en and zh-HK on a phone viewport (390×844) and on desktop (1280×800);
 - a zh-CN spot check of Today, Projects and Me;
 - the dedicated verification account and workspace (see "Verification
@@ -209,7 +213,8 @@ detached keeper so an SSH drop does not release it.
    - realtime between two browsers;
    - neighbouring containers keep their IDs, start times and health;
    - PostgreSQL is not restarted.
-2. **Basic functions:** the plan §6.0 checklist in full. That includes:
+2. **Basic functions:** for minor releases, the plan §6.0 checklist in full.
+   Patch releases use the critical live cases described above. Coverage includes:
    - signed-out landing and sign-in, sign-out and sign-in again;
    - the 4-tab navigation and the desktop sidebar;
    - Today;

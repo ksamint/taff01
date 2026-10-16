@@ -128,3 +128,86 @@ it("keeps Inbox counts, groups and unread state consistent during snooze/read up
   expect(inbox.reviewCount).toBe(1);
   expect(inbox.blockerCount).toBe(1);
 });
+
+it.each([false, true])(
+  "A fails without erasing B; both failures restore the baseline (reverse=%s)",
+  async (reverse) => {
+    const client = new QueryClient();
+    const key = ["tasks", "workspace"];
+    const tasks = [
+      { id: "a", title: "before", status: "todo" },
+      { id: "b", title: "before" },
+    ];
+    client.setQueryData(key, tasks);
+    const a = await snapshotM3(client);
+    patchTask(client, "a", { title: "A" });
+    a.capture();
+    const b = await snapshotM3(client);
+    patchTask(client, "a", { status: "done" });
+    patchTask(client, "b", { title: "B" });
+    b.capture();
+    if (reverse) {
+      restoreQueries(client, b);
+      expect(client.getQueryData<Task[]>(key)?.[0].title).toBe("A");
+      restoreQueries(client, a);
+    } else {
+      restoreQueries(client, a);
+      expect(client.getQueryData(key)).toEqual([
+        { ...tasks[0], status: "done" },
+        { ...tasks[1], title: "B" },
+      ]);
+      restoreQueries(client, b);
+    }
+    expect(client.getQueryData(key)).toEqual(tasks);
+    client.clear();
+  },
+);
+
+it.each([false, true])(
+  "overlapping writes to one field never resurrect a failed layer (reverse=%s)",
+  async (reverse) => {
+    const client = new QueryClient();
+    const key = ["task", "a"];
+    client.setQueryData(key, { id: "a", title: "before" });
+    const a = await snapshotM3(client);
+    patchTask(client, "a", { title: "A" });
+    a.capture();
+    const b = await snapshotM3(client);
+    patchTask(client, "a", { title: "B" });
+    b.capture();
+    restoreQueries(client, reverse ? b : a);
+    expect(client.getQueryData<Task>(key)?.title).toBe(reverse ? "A" : "B");
+    restoreQueries(client, reverse ? a : b);
+    expect(client.getQueryData<Task>(key)?.title).toBe("before");
+    client.clear();
+  },
+);
+
+it("rolls back only its inserted/deleted rows while preserving concurrent row edits", async () => {
+  const client = new QueryClient();
+  const key = ["tasks", "workspace"];
+  const before = [
+    { id: "a", title: "a" },
+    { id: "b", title: "b" },
+  ];
+  client.setQueryData(key, before);
+  const a = await snapshotM3(client);
+  client.setQueryData(key, [before[1], { id: "new-a", title: "A" }]);
+  a.capture();
+  const b = await snapshotM3(client);
+  client.setQueryData(key, [
+    { ...before[1], title: "B" },
+    { id: "new-a", title: "A" },
+    { id: "new-b", title: "B" },
+  ]);
+  b.capture();
+  restoreQueries(client, a);
+  expect(client.getQueryData(key)).toEqual([
+    before[0],
+    { ...before[1], title: "B" },
+    { id: "new-b", title: "B" },
+  ]);
+  restoreQueries(client, b);
+  expect(client.getQueryData(key)).toEqual(before);
+  client.clear();
+});

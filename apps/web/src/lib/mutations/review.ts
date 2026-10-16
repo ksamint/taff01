@@ -81,7 +81,7 @@ export function useReviewRun({ run, task }: ReviewTarget) {
         client,
         (item) => item.runId === run.id && item.kind === "review",
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateM3(client),
@@ -129,7 +129,7 @@ export function useAddReviewComment(
               }
             : current,
         );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (_, body) => onAdded?.(body),
@@ -157,7 +157,7 @@ export function useControlRun(
       patchTask(client, run.taskId, { status: outcome.task });
       if (body.action === "cancel")
         resolveInbox(client, (item) => item.runId === run.id);
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: () => onControlled?.(),

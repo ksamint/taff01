@@ -94,7 +94,7 @@ export function useCreateCalendarTask(
         (current) =>
           withCreatedOccurrence(current, task, body.calendar, workspaceId),
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSuccess: (_, __, snapshot) => {

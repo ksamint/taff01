@@ -102,7 +102,7 @@ export function useUpdateInboxItem(
           ),
         );
       }
-      return snapshot;
+      return snapshot.capture();
     },
     onSuccess: (_, input, snapshot) => {
       if (!isCurrentSnapshot(client, snapshot)) return;

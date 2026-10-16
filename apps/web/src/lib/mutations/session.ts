@@ -57,6 +57,7 @@ export function useUpdateProfile({
       );
       onStart?.();
       void i18n.changeLanguage(locale);
+      snapshot.capture();
       return { previous, snapshot };
     },
     onSuccess: (_, { locale, tz }, context) => {

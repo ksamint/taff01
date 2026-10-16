@@ -180,7 +180,7 @@ export function useSetPlan(projectId: string) {
             )
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);
@@ -242,7 +242,7 @@ export function useAddDependency(projectId: string) {
             }
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);
@@ -302,7 +302,7 @@ export function useRemoveDependency(projectId: string) {
             }
           : current,
       );
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);
@@ -385,7 +385,7 @@ export function useSaveMilestone(projectId: string) {
             ),
           };
         });
-      return snapshot;
+      return snapshot.capture();
     },
     onError: (error, _, snapshot) => {
       restoreQueries(client, snapshot);

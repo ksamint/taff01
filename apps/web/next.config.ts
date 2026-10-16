@@ -6,6 +6,7 @@ import type { NextConfig } from "next";
 const assetVersion = process.env.ASSET_VERSION || Date.now().toString(36);
 
 const config: NextConfig = {
+  poweredByHeader: false,
   agentRules: false,
   devIndicators: false,
   output: "standalone",
@@ -15,6 +16,33 @@ const config: NextConfig = {
   images: { unoptimized: true },
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          {
+            key: "Content-Security-Policy",
+            // Next hydration uses inline scripts; calendar/graph use inline styles.
+            // All network resources are served by this origin, including realtime.
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline'" +
+                (process.env.NODE_ENV === "development"
+                  ? " 'unsafe-eval'"
+                  : ""),
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "font-src 'self'",
+              "connect-src 'self'",
+              "worker-src 'self'",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+              "frame-ancestors 'none'",
+            ].join("; "),
+          },
+        ],
+      },
       {
         source: "/sw.js",
         headers: [

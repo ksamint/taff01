@@ -83,6 +83,7 @@ export function useManageProject(
       client.setQueryData<Project[]>(projectsKey(workspaceId), (current = []) =>
         withProjectSave(current, mode, workspaceId, id, body, now),
       );
+      snapshot.capture();
       return { snapshot, id };
     },
     onError: (_, __, context) => restoreQueries(client, context?.snapshot),
