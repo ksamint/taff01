@@ -26,12 +26,25 @@ export function Landing({
   const { t } = useTranslation();
   const [index, setIndex] = useState(0);
   useEffect(() => {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
-    const timer = setInterval(
-      () => setIndex((current) => (current + 1) % headlines.length),
-      ROTATE_MS,
-    );
-    return () => clearInterval(timer);
+    const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    let timer: ReturnType<typeof setInterval> | undefined;
+    const sync = () => {
+      clearInterval(timer);
+      if (motion?.matches) {
+        setIndex(0);
+        return;
+      }
+      timer = setInterval(
+        () => setIndex((current) => (current + 1) % headlines.length),
+        ROTATE_MS,
+      );
+    };
+    sync();
+    motion?.addEventListener("change", sync);
+    return () => {
+      clearInterval(timer);
+      motion?.removeEventListener("change", sync);
+    };
   }, []);
   return (
     <div className="landing">

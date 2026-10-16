@@ -51,11 +51,12 @@ test("headline rotates every four seconds and holds under reduced motion", async
   await expect(headline).toHaveText(m.home.headline2);
   await page.clock.fastForward(4000);
   await expect(headline).toHaveText(m.home.headline3);
-  await page.clock.fastForward(4000);
-  await expect(headline).toHaveText(m.home.headline1);
+  // A preference change must stop the running timer without a reload.
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.reload();
   await expect(headline).toHaveText(m.home.headline1);
   await page.clock.fastForward(12_000);
   await expect(headline).toHaveText(m.home.headline1);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.fastForward(4000);
+  await expect(headline).toHaveText(m.home.headline2);
 });

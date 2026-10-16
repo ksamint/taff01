@@ -862,8 +862,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.invalid_input` | 13 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
-| `home.headline1` | 8 | home-layout.spec.ts, landing.spec.ts, ui-v2.spec.ts |
-| `home.headline2` | 2 | home-layout.spec.ts, landing.spec.ts |
+| `home.headline1` | 7 | home-layout.spec.ts, landing.spec.ts, ui-v2.spec.ts |
+| `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |
 | `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
