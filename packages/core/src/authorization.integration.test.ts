@@ -1,7 +1,8 @@
-import { randomUUID } from "node:crypto";
+import { randomInt, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createCore, userPrincipal } from "@taff/core";
 import { connectDatabase, members, notificationPreferences } from "@taff/db";
+import { createEmailVerificationToken } from "better-auth/api";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
@@ -42,6 +43,49 @@ let foreignAgentToken: string;
 let digestId: string;
 let cookies: Record<Exclude<Actor, "agent">, string>;
 const owner = () => userPrincipal(ownerUserId);
+const authSecret = `authorization-matrix-${randomUUID()}`;
+const messages: { to: string; text: string }[] = [];
+const delivered = new Map<string, string>();
+const lifecycleRoutes = [
+  ["GET", "/api/health"],
+  ["GET", "/api/auth/methods"],
+  ["POST", "/api/auth/phone-number/send-otp"],
+  ["POST", "/api/auth/phone-number/verify"],
+  ["POST", "/api/auth/sign-in/email"],
+  ["POST", "/api/auth/sign-in/username"],
+  ["POST", "/api/auth/sign-up/email"],
+  ["POST", "/api/auth/sign-out"],
+  ["POST", "/api/me/email-verification/request"],
+  ["POST", "/api/me/email-verification/verify"],
+  ["POST", "/api/workspace-invites/accept"],
+] as const;
+function sessionCookie(response: Response) {
+  return response.headers
+    .getSetCookie()
+    .map((v) => v.split(";")[0])
+    .join("; ");
+}
+async function signup(name: string) {
+  const password = `test-${randomUUID()}`;
+  const username = `u${randomUUID().replaceAll("-", "").slice(0, 20)}`;
+  const email = `${randomUUID()}@test.local`;
+  const result = await core.auth.api.signUpEmail({
+    body: { name, email, password, username },
+  });
+  const response = await core.auth.api.signInEmail({
+    body: { email, password },
+    asResponse: true,
+  });
+  expect(response.status).toBe(200);
+  return {
+    id: result.user.id,
+    email,
+    username,
+    password,
+    cookie: sessionCookie(response),
+  };
+}
+let people: Record<Exclude<Actor, "agent">, Awaited<ReturnType<typeof signup>>>;
 
 async function fixture() {
   const project = await core.createProject(owner(), workspaceId, {
@@ -687,7 +731,18 @@ describe.skipIf(!databaseUrl)(
       core = createCore({
         databaseUrl: databaseUrl!,
         authUrl: origin,
-        authSecret: "authorization-matrix-secret-at-least-32-characters",
+        authSecret,
+        email: {
+          send: async (message) => {
+            messages.push(message);
+            return "logged";
+          },
+        },
+        sms: {
+          sendOTP: async ({ phoneNumber, code }) => {
+            delivered.set(phoneNumber, code);
+          },
+        },
         tokenPepper: "authorization-matrix-pepper-16-chars",
       });
       app = createApp(core, origin, pino({ enabled: false }), {
@@ -695,27 +750,10 @@ describe.skipIf(!databaseUrl)(
         hit: async () => ({ allowed: true, count: 1 }),
         close: async () => {},
       });
-      async function signup(name: string) {
-        const password = `test-${randomUUID()}`;
-        const result = await core.auth.api.signUpEmail({
-          body: { name, email: `${randomUUID()}@test.local`, password },
-        });
-        const response = await core.auth.api.signInEmail({
-          body: { email: result.user.email, password },
-          asResponse: true,
-        });
-        expect(response.status).toBe(200);
-        return {
-          id: result.user.id,
-          cookie: response.headers
-            .getSetCookie()
-            .map((value) => value.split(";")[0])
-            .join("; "),
-        };
-      }
       const a = await signup("Matrix owner");
       const b = await signup("Matrix member");
       const c = await signup("Matrix other workspace");
+      people = { owner: a, member: b, "other-workspace": c };
       ownerUserId = a.id;
       const workspace = (await core.getMe(a.id)).workspaces[0];
       workspaceId = workspace.id;
@@ -1127,30 +1165,232 @@ describe.skipIf(!databaseUrl)(
       },
     );
 
-    // These endpoints have account/public lifecycles rather than a workspace
-    // authorization gate. Existing auth, delivery and invite integration suites
-    // exercise those lifecycles; keep the exceptions explicit and fail on new routes.
-    it("every REST endpoint is a matrix row or an explicit lifecycle exception", () => {
+    // Public authentication follows the supplied credentials, never an existing
+    // cookie or MCP bearer. Protected proof/invite routes remain person-scoped.
+    const lifecycleActors = [...actors, "anonymous" as const];
+    function lifecycleHeaders(actor: Actor | "anonymous") {
+      return {
+        "Content-Type": "application/json",
+        origin,
+        ...(actor === "agent"
+          ? { Authorization: `Bearer ${agentToken}` }
+          : actor === "anonymous"
+            ? {}
+            : { cookie: cookies[actor] }),
+      };
+    }
+    it.each(
+      lifecycleRoutes.flatMap(([method, path]) =>
+        lifecycleActors.map((actor) => ({ method, path, actor })),
+      ),
+    )(
+      "lifecycle $method $path × $actor",
+      async ({ method, path, actor }) => {
+        const headers: Record<string, string> = lifecycleHeaders(actor);
+        const person =
+          actor === "agent" || actor === "anonymous"
+            ? undefined
+            : people[actor];
+        let body: unknown;
+        let expected = 200;
+        let target: Awaited<ReturnType<typeof signup>> | undefined;
+        let invitedWorkspace: string | undefined;
+        let number: string | undefined;
+        if (path.includes("phone-number")) {
+          number = `+86138${String(randomInt(0, 100_000_000)).padStart(8, "0")}`;
+          if (path.endsWith("verify")) {
+            const sent = await app.request("/api/auth/phone-number/send-otp", {
+              method: "POST",
+              headers: { "Content-Type": "application/json", origin },
+              body: JSON.stringify({ phoneNumber: number }),
+            });
+            expect(sent.status).toBe(200);
+            body = { phoneNumber: number, code: delivered.get(number) };
+          } else body = { phoneNumber: number };
+        } else if (path.includes("sign-in")) {
+          target = await signup("Lifecycle credential target");
+          body = path.endsWith("username")
+            ? { username: target.username, password: target.password }
+            : { email: target.email, password: target.password };
+        } else if (path.endsWith("sign-up/email")) {
+          body = {
+            name: "Lifecycle signup",
+            email: `${randomUUID()}@test.local`,
+            password: randomUUID(),
+          };
+        } else if (path.endsWith("sign-out")) {
+          // Revoke a fresh session, leaving other matrix rows independent.
+          if (person) {
+            const signedIn = await core.auth.api.signInEmail({
+              body: { email: person.email, password: person.password },
+              asResponse: true,
+            });
+            headers.cookie = sessionCookie(signedIn);
+          }
+          body = {};
+        } else if (path.includes("email-verification")) {
+          expected = person ? 200 : 401;
+          body = path.endsWith("/verify")
+            ? {
+                token: await createEmailVerificationToken(
+                  authSecret,
+                  (person ?? people.owner).email,
+                  undefined,
+                  3600,
+                  {
+                    purpose: "taff.email-verification",
+                    userId: (person ?? people.owner).id,
+                  },
+                ),
+              }
+            : {};
+        } else if (path.endsWith("invites/accept")) {
+          expected = person ? 200 : 401;
+          const recipient = person ?? people.owner;
+          // The same valid recipient proof is required for every workspace role.
+          const proof = await createEmailVerificationToken(
+            authSecret,
+            recipient.email,
+            undefined,
+            3600,
+            { purpose: "taff.email-verification", userId: recipient.id },
+          );
+          await core.verifyEmailOwnership(userPrincipal(recipient.id), {
+            token: proof,
+          });
+          const issuer = userPrincipal((await signup("Lifecycle inviter")).id);
+          const ws = await core.createWorkspace(issuer, {
+            name: "Lifecycle invitation",
+          });
+          invitedWorkspace = ws.id;
+          const invite = await core.createWorkspaceInvite(issuer, ws.id, {
+            email: recipient.email,
+            role: "member",
+          });
+          body = { token: invite.token };
+        }
+        const response = await app.request(path, {
+          method,
+          headers,
+          ...(method === "POST" ? { body: JSON.stringify(body) } : {}),
+        });
+        const data = await response.json();
+        expect(response.status, JSON.stringify(data)).toBe(expected);
+        if (expected === 401) {
+          expect(data).toEqual({ error: "unauthorized" });
+          return;
+        }
+        if (path === "/api/health") expect(data).toEqual({ status: "ok" });
+        if (path === "/api/auth/methods")
+          expect(data).toEqual({ smsEnabled: true });
+        if (path.endsWith("send-otp"))
+          expect(delivered.get(number!)).toMatch(/^\d{6}$/);
+        if (
+          path.includes("sign-in") ||
+          path.endsWith("sign-up/email") ||
+          path.endsWith("phone-number/verify")
+        ) {
+          const fresh = sessionCookie(response);
+          expect(fresh).toContain("session_token=");
+          const me = await (
+            await app.request("/api/me", { headers: { cookie: fresh } })
+          ).json();
+          if (target) expect(me.user.id).toBe(target.id);
+          if (person) expect(me.user.id).not.toBe(person.id);
+          if (path.endsWith("sign-up/email"))
+            expect(me.user.email).toBe((body as { email: string }).email);
+          if (number) expect(data).toEqual({ status: true });
+        }
+        if (path.endsWith("sign-out") && person) {
+          expect(
+            (
+              await app.request("/api/me", {
+                headers: { cookie: headers.cookie },
+              })
+            ).status,
+          ).toBe(401);
+          expect(
+            (
+              await app.request("/api/me", {
+                headers: { cookie: person.cookie },
+              })
+            ).status,
+          ).toBe(200);
+        }
+        if (path.endsWith("email-verification/request")) {
+          expect(
+            messages.some(
+              (m) => m.to === person!.email && m.text.includes("#verifyEmail="),
+            ),
+          ).toBe(true);
+          expect(data).toEqual({ emailVerified: false, delivery: "logged" });
+        }
+        if (path.endsWith("email-verification/verify"))
+          expect(data).toEqual({ emailVerified: true });
+        if (invitedWorkspace && person) {
+          const me = await core.getMe(person.id);
+          expect(me.workspaces.some((w) => w.id === invitedWorkspace)).toBe(
+            true,
+          );
+        }
+      },
+      15000,
+    );
+    it.each(actors.filter((actor) => actor !== "agent"))(
+      "lifecycle proofs cannot cross account boundaries × %s",
+      async (actor) => {
+        const person = people[actor];
+        const stranger = await signup("Lifecycle stranger");
+        const proof = await createEmailVerificationToken(
+          authSecret,
+          stranger.email,
+          undefined,
+          3600,
+          { purpose: "taff.email-verification", userId: stranger.id },
+        );
+        const response = await app.request(
+          "/api/me/email-verification/verify",
+          {
+            method: "POST",
+            headers: lifecycleHeaders(actor),
+            body: JSON.stringify({ token: proof }),
+          },
+        );
+        expect(response.status).toBe(400);
+        expect(
+          await core.getEmailVerificationStatus(userPrincipal(stranger.id)),
+        ).toEqual({ emailVerified: false });
+        const issuer = userPrincipal(
+          (await signup("Separate lifecycle inviter")).id,
+        );
+        const ws = await core.createWorkspace(issuer, {
+          name: "Foreign recipient invite",
+        });
+        const invite = await core.createWorkspaceInvite(issuer, ws.id, {
+          email: stranger.email,
+          role: "member",
+        });
+        const denied = await app.request("/api/workspace-invites/accept", {
+          method: "POST",
+          headers: lifecycleHeaders(actor),
+          body: JSON.stringify({ token: invite.token }),
+        });
+        expect([403, 404]).toContain(denied.status);
+        expect(
+          (await core.getMe(person.id)).workspaces.some((w) => w.id === ws.id),
+        ).toBe(false);
+      },
+    );
+
+    it("every REST endpoint is covered by the actor matrix", () => {
       const normalize = (path: string) =>
         path.split("?")[0].replace(/:[^/]+/g, ":id");
       const covered = new Set([
         ...routes.map((row) => `${row.method} ${normalize(row.path)}`),
         ...personal.map((path) => `GET ${path}`),
         ...personalWrites.map((row) => `${row.method} ${row.path}`),
+        ...lifecycleRoutes.map(([method, path]) => `${method} ${path}`),
       ]);
-      const exceptions = [
-        "GET /api/health",
-        "GET /api/auth/methods",
-        "POST /api/auth/phone-number/send-otp",
-        "POST /api/auth/phone-number/verify",
-        "POST /api/auth/sign-in/email",
-        "POST /api/auth/sign-in/username",
-        "POST /api/auth/sign-up/email",
-        "POST /api/auth/sign-out",
-        "POST /api/me/email-verification/request",
-        "POST /api/me/email-verification/verify",
-        "POST /api/workspace-invites/accept",
-      ];
       const uncovered = [
         ...new Set(
           app.routes
@@ -1158,7 +1398,7 @@ describe.skipIf(!databaseUrl)(
             .map((route) => `${route.method} ${normalize(route.path)}`),
         ),
       ].filter((key) => !covered.has(key));
-      expect(uncovered.sort()).toEqual(exceptions.sort());
+      expect(uncovered).toEqual([]);
     });
   },
 );

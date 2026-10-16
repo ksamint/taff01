@@ -46,6 +46,7 @@ function setup(person: Me = me) {
     listTasks: vi.fn().mockResolvedValue([]),
     listMembers: vi.fn().mockResolvedValue([]),
     listRuns: vi.fn().mockResolvedValue([]),
+    listProjects: vi.fn().mockResolvedValue([]),
     listCalendar: vi.fn().mockResolvedValue({
       occurrences: [],
       unscheduled: [],
@@ -79,7 +80,12 @@ describe("authorized Today bootstrap", () => {
       const result = await bootstrap("person", query);
       expect(result.today?.workspaceId).toBe(id(selected));
       expect(reads.getMe).toHaveBeenCalledWith("person");
-      for (const read of [reads.listTasks, reads.listMembers, reads.listRuns])
+      for (const read of [
+        reads.listTasks,
+        reads.listMembers,
+        reads.listRuns,
+        reads.listProjects,
+      ])
         expect(read).toHaveBeenCalledWith(
           { kind: "user", userId: "person" },
           id(selected),
@@ -104,6 +110,7 @@ describe("authorized Today bootstrap", () => {
       reads.listMembers,
       reads.listRuns,
       reads.listCalendar,
+      reads.listProjects,
     ])
       expect(read).not.toHaveBeenCalled();
   });
@@ -167,6 +174,7 @@ describe("authorized Today bootstrap", () => {
       reads.listMembers,
       reads.listRuns,
       reads.listCalendar,
+      reads.listProjects,
     ])
       expect(read.mock.calls[0].slice(0, 2)).toEqual([
         { kind: "user", userId: "person" },

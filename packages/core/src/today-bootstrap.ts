@@ -7,6 +7,7 @@ import {
   type Me,
   type Member,
   meSchema,
+  type Project,
   type Run,
   type Task,
   type TodayBootstrap,
@@ -21,6 +22,7 @@ type TodayReads = {
   listTasks(principal: Principal, workspaceId: string): Promise<Task[]>;
   listMembers(principal: Principal, workspaceId: string): Promise<Member[]>;
   listRuns(principal: Principal, workspaceId: string): Promise<Run[]>;
+  listProjects(principal: Principal, workspaceId: string): Promise<Project[]>;
   listCalendar(
     principal: Principal,
     workspaceId: string,
@@ -61,13 +63,16 @@ export function createTodayBootstrap(
     );
     const principal = userPrincipal(userId);
     const workspaceId = workspace.id;
-    const [tasks, members, runs, calendar, inbox] = await Promise.all([
-      reads.listTasks(principal, workspaceId),
-      reads.listMembers(principal, workspaceId),
-      reads.listRuns(principal, workspaceId),
-      reads.listCalendar(principal, workspaceId, { from, to }),
-      reads.listInbox(principal, workspaceId),
-    ]);
+    const [tasks, members, runs, calendar, inbox, projects] = await Promise.all(
+      [
+        reads.listTasks(principal, workspaceId),
+        reads.listMembers(principal, workspaceId),
+        reads.listRuns(principal, workspaceId),
+        reads.listCalendar(principal, workspaceId, { from, to }),
+        reads.listInbox(principal, workspaceId),
+        reads.listProjects(principal, workspaceId),
+      ],
+    );
     return todayBootstrapSchema.parse({
       me,
       today: {
@@ -80,6 +85,7 @@ export function createTodayBootstrap(
         runs,
         calendar,
         inbox,
+        projects,
       },
     });
   };

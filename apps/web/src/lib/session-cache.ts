@@ -5,6 +5,7 @@ import {
   calendarKey,
   inboxKey,
   membersKey,
+  projectsKey,
   runsKey,
   tasksKey,
 } from "./query-keys";
@@ -59,6 +60,8 @@ export function bootstrapSession(
       data: today.calendar,
     },
   ];
+  if (today.projects)
+    reads.push({ key: projectsKey(today.workspaceId), data: today.projects });
   serverReads.set(client, new Set(reads.map(({ key }) => JSON.stringify(key))));
   for (const { key, data } of reads)
     client.setQueryData(key, data, { updatedAt: today.now });

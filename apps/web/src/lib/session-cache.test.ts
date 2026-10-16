@@ -40,6 +40,7 @@ const initialToday: NonNullable<TodayBootstrap["today"]> = {
   tasks: [],
   members: [],
   runs: [],
+  projects: [],
   calendar: { occurrences: [], unscheduled: [], truncated: false },
   inbox: {
     items: [],
@@ -63,6 +64,9 @@ it("retains only authenticated server reads on matching confirmation, reconciles
     if (event.type === "removed") removed.push(String(event.query.queryKey[0]));
   });
   expect(client.getQueryData(taskKey)).toEqual([]);
+  expect(client.getQueryData(["projects", initialToday.workspaceId])).toEqual(
+    [],
+  );
   await expect(snapshotQueries(client, [taskKey])).rejects.toMatchObject({
     code: "unauthorized",
   });
@@ -74,6 +78,9 @@ it("retains only authenticated server reads on matching confirmation, reconciles
   expect(currentSession(client)?.confirmed).toBe(true);
   expect(removed).toEqual(["mcp-calls"]);
   expect(client.getQueryData(taskKey)).toEqual([]);
+  expect(client.getQueryData(["projects", initialToday.workspaceId])).toEqual(
+    [],
+  );
   expect(client.getQueryState(taskKey)?.isInvalidated).toBe(true);
   const snapshot = await snapshotQueries(client, [taskKey]);
   expect(isCurrentSnapshot(client, snapshot)).toBe(true);

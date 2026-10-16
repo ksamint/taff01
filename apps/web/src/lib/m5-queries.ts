@@ -10,9 +10,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { request } from "./api";
 import { invalidateM3 } from "./m3-queries";
 import { m3MutationKey, patchTask, snapshotM3 } from "./optimistic-m3";
+import { projectsKey } from "./query-keys";
 import { isCurrentSnapshot, restoreQueries } from "./query-snapshot";
 import { currentSession } from "./session-cache";
-export const projectsKey = (id: string) => ["projects", id] as const;
+
+export { projectsKey } from "./query-keys";
 export const commentsKey = (id: string) => ["task-comments", id] as const;
 export const accessKey = (id: string) => ["task-access", id] as const;
 export function useProjects(id: string) {

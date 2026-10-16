@@ -1,13 +1,8 @@
 "use client";
-import dynamic from "next/dynamic";
 import { useWorkspace } from "./app-shell";
-import { RouteLoading } from "./route-loading";
+import { CalendarScene } from "./calendar-scene";
 
-const Scene = dynamic(
-  () => import("./calendar-scene").then((module) => module.CalendarScene),
-  { ssr: false, loading: RouteLoading },
-);
 export function CalendarView() {
   const { me, workspace } = useWorkspace();
-  return <Scene key={`${me.user.id}:${workspace.id}`} />;
+  return <CalendarScene key={`${me.user.id}:${workspace.id}`} />;
 }

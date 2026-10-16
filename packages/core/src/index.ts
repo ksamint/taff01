@@ -1147,6 +1147,7 @@ export function createCore(options: {
   });
   const getTodayBootstrap = createTodayBootstrap({
     getMe,
+    listProjects: planning.operations.listProjects,
     listTasks,
     listMembers,
     listRuns: runOperations.listRuns,

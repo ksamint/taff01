@@ -4,8 +4,19 @@
 // must stay at or below 2000 ms (instruction_v0.md). No Lighthouse needed.
 import { spawn } from "node:child_process";
 import { chromium } from "@playwright/test";
+import {
+  type PerformanceRoute,
+  performanceFixture,
+  performanceMarkers,
+} from "./perf-fixture";
 
 const LIMIT_MS = 2000;
+const route = process.env.PERF_ROUTE ?? "today";
+if (!["today", "projects", "calendar", "timeline"].includes(route))
+  throw new Error("Unknown audit route");
+let path = "/";
+let fixtureReady = false;
+const marker = performanceMarkers[route as PerformanceRoute];
 const runs = Number(process.env.LCP_RUNS ?? 3);
 // The API trusts AUTH_URL only (CORS and sign-in origin), so the production
 // server must answer on that origin; stop a development server on its port.
@@ -109,9 +120,24 @@ async function measure(): Promise<number> {
       await page.reload();
       await page.getByTestId("today-heading").waitFor();
     }
+    if (route !== "today" && !fixtureReady) {
+      path = await performanceFixture(
+        context.request,
+        origin,
+        route as PerformanceRoute,
+      );
+      fixtureReady = true;
+    }
+    // Preserve only the signed-in cookie: drop in-memory and persisted route data.
+    await page.goto("about:blank");
     const cdp = await context.newCDPSession(page);
     await cdp.send("Network.enable");
     await cdp.send("Network.clearBrowserCache");
+    await cdp.send("Network.setCacheDisabled", { cacheDisabled: true });
+    await cdp.send("Storage.clearDataForOrigin", {
+      origin,
+      storageTypes: "indexeddb,cache_storage,service_workers,local_storage",
+    });
     await cdp.send("Network.emulateNetworkConditions", {
       offline: false,
       latency: 150,
@@ -139,8 +165,12 @@ async function measure(): Promise<number> {
         transferMode: "ReportEvents",
       });
     }
-    await page.goto(`${origin}/`, { waitUntil: "load" });
-    await page.getByTestId("today-heading").waitFor();
+    await page.goto(`${origin}${path}`, { waitUntil: "load" });
+    await page.getByTestId(marker).waitFor();
+    if (route === "timeline")
+      await page.getByTestId("timeline-row").first().waitFor();
+    if (route === "projects")
+      await page.getByTestId("board-task").first().waitFor();
     await page.waitForTimeout(3000);
     if (process.env.LCP_TRACE) {
       const done = new Promise<void>((resolve) =>
@@ -306,7 +336,7 @@ try {
   const sorted = [...samples].sort((a, b) => a - b);
   const median = sorted[Math.floor(sorted.length / 2)];
   console.log(
-    `Today LCP (${locale}) median ${median} ms over ${runs} runs (slow 4G, 4x CPU); limit ${LIMIT_MS} ms`,
+    `${route} cold LCP (${locale}) median ${median} ms over ${runs} runs (slow 4G, 4x CPU); limit ${LIMIT_MS} ms`,
   );
   if (median > LIMIT_MS) {
     console.error("LCP budget exceeded");

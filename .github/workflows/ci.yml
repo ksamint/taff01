@@ -109,6 +109,70 @@ jobs:
             api.log
             api-lcp.log
           retention-days: 7
+  route-performance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        route: [projects, calendar, timeline]
+    env:
+      PERF_ROUTE: ${{ matrix.route }}
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: taff
+          POSTGRES_PASSWORD: ci-password
+          POSTGRES_DB: taff
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U taff -d taff" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+      valkey:
+        image: valkey/valkey:9-alpine
+        ports: ["56379:6379"]
+        options: >-
+          --health-cmd "valkey-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: printf 'CI=1\n' > .env
+      - run: pnpm db:migrate
+      - run: pnpm db:seed
+      - run: pnpm build
+      - run: pnpm build:server
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Cold route LCP guard in all three locales
+        run: |
+          node dist/runtime/api/api.mjs > api-lcp.log 2>&1 &
+          api_pid=$!
+          trap 'kill "$api_pid"; wait "$api_pid" || true' EXIT
+          for i in $(seq 1 30); do
+            kill -0 "$api_pid"
+            if curl -sf http://127.0.0.1:3001/api/health; then break; fi
+            sleep 1
+          done
+          curl -sf http://127.0.0.1:3001/api/health
+          for locale in en zh-CN zh-HK; do
+            LCP_LOCALE="$locale" LCP_RUNS=3 pnpm perf:lcp
+          done
+      - run: pnpm perf:lighthouse
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-${{ matrix.route }}
+          path: lighthouse-reports/*.report.json
+          retention-days: 7
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20

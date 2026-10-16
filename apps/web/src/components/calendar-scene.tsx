@@ -32,13 +32,13 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useRuns } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
-import type { CalendarEngineProps, CalendarMode } from "./calendar-engine";
+import {
+  CalendarEngine,
+  type CalendarEngineProps,
+  type CalendarMode,
+} from "./calendar-engine";
 import { RouteLoading } from "./route-loading";
 
-const CalendarEngine = dynamic(
-  () => import("./calendar-engine").then((module) => module.CalendarEngine),
-  { ssr: false, loading: RouteLoading },
-);
 const ScheduleEditor = dynamic(
   () => import("./schedule-editor").then((module) => module.ScheduleEditor),
   { ssr: false, loading: RouteLoading },

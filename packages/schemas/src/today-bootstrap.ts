@@ -14,6 +14,7 @@ import { memberSchema, meSchema, taskSchema } from "./base";
 import { calendarViewDataSchema } from "./calendar-read";
 import { inboxSchema } from "./inbox-read";
 import { idSchema, nonnegativeInteger } from "./primitives";
+import { projectSchema } from "./project-read";
 import { runSchema } from "./run-read";
 
 export const todayBootstrapQuerySchema = strictObject({
@@ -32,6 +33,7 @@ export const todayBootstrapSchema = object({
       tasks: array(taskSchema),
       members: array(memberSchema),
       runs: array(runSchema),
+      projects: optional(array(projectSchema)),
       calendar: calendarViewDataSchema,
       // Today › 待你處理 renders from the server in the same pass (M13).
       inbox: inboxSchema,
@@ -45,9 +47,12 @@ export const todayBootstrapSchema = object({
       me.workspaces.some((workspace) => workspace.id === workspaceId) &&
       Date.parse(today.from) <= today.now &&
       today.now < Date.parse(today.to) &&
-      [...today.tasks, ...today.members, ...today.runs].every(
-        (row) => row.workspaceId === workspaceId,
-      ) &&
+      [
+        ...today.tasks,
+        ...today.members,
+        ...today.runs,
+        ...(today.projects ?? []),
+      ].every((row) => row.workspaceId === workspaceId) &&
       today.calendar.occurrences.every(
         (row) =>
           row.task.workspaceId === workspaceId &&

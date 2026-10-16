@@ -1,4 +1,4 @@
-// Audits real signed-in Today pages on the production web/API builds.
+// Audits real signed-in routes on cold production web/API builds.
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
@@ -9,8 +9,12 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { chromium } from "@playwright/test";
 import lighthouse, { type Puppeteer } from "lighthouse";
-import { meSchema } from "../packages/schemas/src/index";
 import { lighthouseReport } from "./lighthouse-report";
+import {
+  type PerformanceRoute,
+  performanceFixture,
+  performanceMarkers,
+} from "./perf-fixture";
 
 const origin = new URL(process.env.AUTH_URL ?? "http://localhost:3000");
 const apiOrigin = new URL(
@@ -29,6 +33,11 @@ for (const url of [origin, apiOrigin]) {
     );
   });
 }
+const route = process.env.PERF_ROUTE ?? "today";
+assert(
+  ["today", "projects", "calendar", "timeline"].includes(route),
+  "Unknown audit route",
+);
 const reports = "lighthouse-reports";
 await mkdir(reports, { recursive: true });
 const profile = await mkdtemp(join(tmpdir(), "taff-lighthouse-"));
@@ -90,24 +99,12 @@ try {
     },
   );
   assert(created.ok(), "Audit account could not sign in");
-  const me = meSchema.parse(
-    await (await context.request.get(`${origin.origin}/api/me`)).json(),
+  const path = await performanceFixture(
+    context.request,
+    origin.origin,
+    route as PerformanceRoute,
   );
-  const workspace = me.workspaces[0];
-  assert(workspace, "Audit account needs a workspace");
-  for (let index = 0; index < 20; index++) {
-    const response = await context.request.post(`${origin.origin}/api/tasks`, {
-      headers: { Origin: origin.origin },
-      data: {
-        workspaceId: workspace.id,
-        ownerId: workspace.memberId,
-        title: `Today audit task ${index + 1}`,
-        priority: (index % 4) + 1,
-        dueAt: new Date().toISOString(),
-      },
-    });
-    assert(response.ok(), "Audit task creation failed");
-  }
+  const marker = performanceMarkers[route as PerformanceRoute];
   const port = Number(
     (await readFile(join(profile, "DevToolsActivePort"), "utf8")).split(
       "\n",
@@ -131,20 +128,21 @@ try {
       `${origin.origin}/api/profile`,
       {
         headers: { Origin: origin.origin },
-        data: { locale, tz: "Asia/Singapore" },
+        data: { locale, tz: "UTC" },
       },
     );
     assert(changed.ok(), "Audit locale update failed");
     const lang =
       locale === "en" ? "en" : locale === "zh-CN" ? "zh-Hans-CN" : "zh-Hant-HK";
-    await warm.goto(origin.origin);
-    await warm.getByTestId("today-heading").waitFor();
+    await warm.goto(`${origin.origin}${path}`);
+    await warm.getByTestId(marker).waitFor();
     await warm.waitForFunction(
       (value) => document.documentElement.lang === value,
       lang,
     );
     await warm
-      .getByRole("link", { name: "Today audit task 1", exact: true })
+      .getByText("Today audit task 1", { exact: true })
+      .first()
       .waitFor();
     await warm.goto("about:blank");
     await auditPage.goto("about:blank");
@@ -155,7 +153,7 @@ try {
     });
     phase = `${locale} audit`;
     const result = await lighthouse(
-      origin.origin,
+      `${origin.origin}${path}`,
       {
         port,
         logLevel: "error",
@@ -170,15 +168,20 @@ try {
     );
     assert(
       result && !result.lhr.runtimeError,
-      "Lighthouse could not audit Today",
+      "Lighthouse could not audit route",
     );
-    const realToday = await auditPage.evaluate(() => ({
-      lang: document.documentElement.lang,
-      today: document.querySelector('[data-testid="today-heading"]') !== null,
-      task: [...document.querySelectorAll("a")].some(
-        (link) => link.textContent === "Today audit task 1",
-      ),
-    }));
+    const realToday = await auditPage.evaluate(
+      (marker) => ({
+        lang: document.documentElement.lang,
+        today: document.querySelector(`[data-testid="${marker}"]`) !== null,
+        task: [
+          ...document.querySelectorAll(
+            "a, [data-testid=timeline-row], .sx__event, .sx__month-grid-event",
+          ),
+        ].some((link) => link.textContent?.includes("Today audit task 1")),
+      }),
+      marker,
+    );
     assert(
       realToday.today && realToday.task && realToday.lang === lang,
       "Lighthouse measured login/loading or the wrong locale",
@@ -193,7 +196,10 @@ try {
         .map((cookie) => cookie.value),
     ];
     await writeFile(
-      join(reports, `${locale}.report.json`),
+      join(
+        reports,
+        `${route === "today" ? "" : `${route}-`}${locale}.report.json`,
+      ),
       lighthouseReport(result.lhr, secrets),
       { mode: 0o600 },
     );
@@ -211,7 +217,12 @@ try {
     );
     console.log(
       JSON.stringify({
+        route,
         locale,
+        cold: true,
+        lcpMs: Math.round(
+          result.lhr.audits["largest-contentful-paint"].numericValue ?? 0,
+        ),
         signedIn: true,
         scores,
         lighthouse: result.lhr.lighthouseVersion,
@@ -226,7 +237,7 @@ try {
 } catch (error) {
   // Playwright transport errors include request cookies in their message and stack.
   console.error(
-    `Lighthouse failed during ${phase} (${error instanceof Error ? error.name : "Error"})`,
+    `Lighthouse failed during ${phase} (${error instanceof Error ? error.name : "Error"})${error instanceof Error && "code" in error && error.code === "ERR_ASSERTION" ? `: ${error.message}` : ""}`,
   );
   process.exitCode = 1;
 } finally {
