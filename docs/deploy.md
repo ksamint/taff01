@@ -2776,3 +2776,16 @@ backfill; existing payload unchanged)
 - Additional live home checks passed: fresh en-HK → Traditional Chinese, English picker override survives reload, en-US → English, headline rotation, email/username sign-in and phone-code form. Zero SMS requests; no mobile number submitted or public MCP flood.
 - Decision closed: retain ADR 0018 for HK/Macau, including en-HK; saved picker choice overrides detection.
 - Follow-ups: none. Rollback: `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; previous images and data retained. Acceptance receipt, deployment.done, annotated tag verification and independent lock-release probe complete before this docs push.
+
+### Existing system-admin phone passwords
+
+The private API image CLI also accepts `--phone-passwords` with a JSON object
+containing `phones` (canonical +86 numbers, unique, maximum ten) and `password`.
+Supply that object through stdin from a private source; never put it in command
+arguments, the repository or logs. Run the immutable API image's
+`node dist/administration.mjs --phone-passwords` using the same scoped Compose
+command as the administrative setup above. Every phone must already identify a
+system administrator. Setup adds password hashes atomically, preserves phone
+verification and organization membership, and creates no accounts or workspaces.
+Re-running the same setup is idempotent; a different existing password fails
+with conflict. Phone login offers "Use password instead" after a mobile number.
