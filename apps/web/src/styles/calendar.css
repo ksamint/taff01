@@ -5,8 +5,6 @@
 
 /* Schedule-X theme mapped onto the design tokens. */
 .calendar-engine {
-  position: relative;
-  min-height: max(360px, calc(100dvh - 300px));
   min-width: 0;
   width: 100%;
   overflow-x: auto;
@@ -742,24 +740,4 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-/* Authenticated agenda first paint while the interactive grid hydrates. */
-.calendar-bootstrap {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  height: calc(100dvh - 300px);
-  min-height: 360px;
-  overflow: hidden;
-  margin: 0;
-  padding: 0 12px;
-  list-style: none;
-  background: var(--bg);
-}
-.calendar-bootstrap > li {
-  min-height: 44px;
-  padding: 3px 8px;
-  border: 1px solid var(--border);
-  margin-bottom: 4px;
 }

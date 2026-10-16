@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (341 distinct, 1791 uses)
+## Test ids (340 distinct, 1788 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -93,7 +93,6 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `calendar-*` | 5 | calendar-scene.tsx, crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar-accessibility.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts |
-| `calendar-bootstrap` | 3 | calendar-scene.tsx | ssr-session.spec.ts |
 | `calendar-engine` | 1 | calendar-scene.tsx | calendar-accessibility.spec.ts |
 
 ### calendar-scene.tsx
@@ -673,7 +672,7 @@ read (`data-event-id`, `data-date`).
 
 | Selector | Uses | Used in |
 | --- | ---: | --- |
-| `.sx__calendar` | 4 | calendar.spec.ts, ssr-session.spec.ts, ui-v2.spec.ts |
+| `.sx__calendar` | 3 | calendar.spec.ts, ssr-session.spec.ts, ui-v2.spec.ts |
 | `.sx__calendar-wrapper` | 1 | support/calendar.ts |
 | `.sx__date-grid` | 1 | calendar-accessibility.spec.ts |
 | `.sx__date-grid-event` | 3 | calendar.spec.ts, live/release/checklist.spec.ts |
@@ -702,7 +701,6 @@ read (`data-event-id`, `data-date`).
 | `.agent-profile-heading p` | 1 | agent-creation.spec.ts |
 | `.agent-profile-overview` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.agent-profile-parity.is-embedded` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
-| `.calendar-engine` | 1 | ssr-session.spec.ts |
 | `.calendar-engine-month-grid` | 1 | ui-v2.spec.ts |
 | `.calendar-engine-week` | 1 | ui-v2.spec.ts |
 | `.calendar-list-item` | 5 | calendar.spec.ts, persistence.spec.ts |
@@ -803,7 +801,7 @@ read (`data-event-id`, `data-date`).
 | `dialog.task-detail-sheet` | 2 | calendar.spec.ts, planning.spec.ts |
 | `dialog.task-detail-sheet .review-comments li` | 1 | planning.spec.ts |
 | `head link[rel="preload"][as="font"][href="/fonts/NotoSansTC-ui-common.woff2"]` | 1 | i18n.spec.ts |
-| `main.content` | 15 | live/platform.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
+| `main.content` | 14 | live/platform.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 | `main.loading` | 2 | i18n.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |

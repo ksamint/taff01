@@ -1,10 +1,13 @@
 "use client";
-import "@schedule-x/theme-default/dist/index.css";
-import "../styles/calendar.css";
+import dynamic from "next/dynamic";
 import { useWorkspace } from "./app-shell";
-import { CalendarScene } from "./calendar-scene";
+import { RouteLoading } from "./route-loading";
 
+const Scene = dynamic(
+  () => import("./calendar-scene").then((module) => module.CalendarScene),
+  { ssr: false, loading: RouteLoading },
+);
 export function CalendarView() {
   const { me, workspace } = useWorkspace();
-  return <CalendarScene key={`${me.user.id}:${workspace.id}`} />;
+  return <Scene key={`${me.user.id}:${workspace.id}`} />;
 }

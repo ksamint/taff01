@@ -405,13 +405,6 @@ export function CalendarEngine(props: CalendarEngineProps) {
       onPointerCancel={cancelMonthDrag}
       onLostPointerCapture={cancelMonthDrag}
     >
-      {!ready && props.view === "day" && props.events.length > 0 && (
-        <CalendarPreview
-          events={props.events}
-          locale={props.locale}
-          timeZone={props.timeZone}
-        />
-      )}
       <ScheduleXCalendar calendarApp={app} />
       {preview &&
         createPortal(
@@ -424,40 +417,5 @@ export function CalendarEngine(props: CalendarEngineProps) {
           document.body,
         )}
     </div>
-  );
-}
-
-// A cold visit can read the authenticated schedule before the interactive grid
-// hydrates. Its fixed viewport keeps the grid's place without shifting the page.
-function CalendarPreview({
-  events,
-  locale,
-  timeZone,
-}: Pick<CalendarEngineProps, "events" | "locale" | "timeZone">) {
-  const { t } = useTranslation();
-  const clock = new Intl.DateTimeFormat(locale, {
-    timeZone,
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  });
-  return (
-    <ol
-      className="calendar-bootstrap"
-      data-testid="calendar-bootstrap"
-      aria-label={t("calendar.title")}
-    >
-      {events.map((event) => (
-        <li key={String(event.id)}>
-          <span className="calendar-event-title">{event.title}</span>
-          {typeof event.start === "object" &&
-            "epochMilliseconds" in event.start && (
-              <span className="calendar-event-time">
-                {clock.format(new Date(Number(event.start.epochMilliseconds)))}
-              </span>
-            )}
-        </li>
-      ))}
-    </ol>
   );
 }

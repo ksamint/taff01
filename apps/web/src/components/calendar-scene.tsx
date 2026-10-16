@@ -37,7 +37,6 @@ import {
   type CalendarEngineProps,
   type CalendarMode,
 } from "./calendar-engine";
-import { useInitialTodayTime } from "./providers";
 import { RouteLoading } from "./route-loading";
 
 const ScheduleEditor = dynamic(
@@ -67,7 +66,7 @@ type Undo = {
 // Prototype v2 Calendar: phone 141–247 (Schedule-X keeps the gestures),
 // desktop header 1221–1238 and grid 1405–1442 with the tray on the side.
 export function CalendarScene() {
-  const { me, workspace, openQuick, confirmed } = useWorkspace();
+  const { me, workspace, openQuick } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const desktop = useSyncExternalStore(
@@ -80,11 +79,7 @@ export function CalendarScene() {
   const access = useWorkspaceAccess(workspace.id);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
-  const serverNow = useInitialTodayTime();
-  const now = confirmed
-    ? Temporal.Now.instant()
-    : Temporal.Instant.fromEpochMilliseconds(serverNow ?? Date.now());
-  const today = now.toZonedDateTimeISO(me.user.tz).toPlainDate();
+  const today = Temporal.Now.zonedDateTimeISO(me.user.tz).toPlainDate();
   const [date, setDate] = useState(today.toString());
   const [view, setView] = useState<CalendarMode>("day");
   const [list, setList] = useState(false);
