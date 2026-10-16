@@ -2663,3 +2663,15 @@ Applied additive migration hash: -
 `packages/db/migrations/0029_v022_relation_versions.sql`:
 `72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72` (zero explicit row
 backfill; existing payload unchanged)
+
+### Frontend v2 release candidate v0.2.3 — 2026-10-16
+- Source `66534378d81ac57aed31683f2a0a32248c7a6e9b`; tag after acceptance: `v0.2.3`.
+- Exact-source main [CI 38834383104](https://github.com/ksamint/taff01/actions/runs/38834383104) passed in 9m 7s; merged PR-head CI: [#51 / 38832370275](https://github.com/ksamint/taff01/actions/runs/38832370275), [#52 / 38833466980](https://github.com/ksamint/taff01/actions/runs/38833466980).
+- Changes: four-way browser sharding, isolated optimistic rollback, compatible CSP/frame denial, removed project placeholder, current-goal instruction; real authorization matrix and lazy Projects/Calendar/Timeline.
+- Validation: 1582 unit/integration tests (including 570 matrix cases), 164 visual cases, 237 browser cases; no skips or baseline/tolerance changes. Three image builds and all-tool MCP smoke passed.
+- Today initial JS 191.2 KiB; three-run LCP en/zh-CN/zh-HK 628/688/684 ms; Lighthouse performance/accessibility/best practices: en 96/100/100; zh-CN 97/100/100; zh-HK 97/100/100.
+- Migrations: none. No environment-template, Compose, Dockerfile or Caddy changes; production changes only TAFF_TAG. AI_* remain unset.
+- Patch acceptance: 20 critical live cases across en/zh-HK phone/desktop (with zh-CN spot checks), one independent realtime case, and one official-client all-30-tool MCP round trip; zero page/CSP errors. Full 146-case checklist is for minor releases.
+- Local production: all three exact-source image builds and the API/worker/web all-tool MCP smoke passed. A temporary build-only proxy bypass cleared a slow dependency fetch. Steps 0–6 retain the native lock, exclusive DB/env backups and scoped replacement.
+- Follow-up: controlled non-Today cold LCP/Lighthouse measurements and further optimization; those budgets are not claimed passed.
+- Rollback source: `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; preserve additive migrations and data.
