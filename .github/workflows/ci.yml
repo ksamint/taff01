@@ -163,10 +163,13 @@ jobs:
             sleep 1
           done
           curl -sf http://127.0.0.1:3001/api/health
+          status=0
           for locale in en zh-CN zh-HK; do
-            LCP_LOCALE="$locale" LCP_RUNS=3 pnpm perf:lcp
+            LCP_LOCALE="$locale" LCP_RUNS=3 pnpm perf:lcp || status=1
           done
+          exit "$status"
       - run: pnpm perf:lighthouse
+        if: ${{ !cancelled() }}
       - uses: actions/upload-artifact@v4
         if: always()
         with:

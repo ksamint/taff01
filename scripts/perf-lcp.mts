@@ -97,7 +97,7 @@ async function measure(): Promise<number> {
               element?: Element | null;
             };
             log.push(
-              `${Math.round(entry.startTime)}ms size ${candidate.size} ${candidate.element?.tagName ?? "?"} ${candidate.element?.textContent?.slice(0, 50) ?? ""}`,
+              `${Math.round(entry.startTime)}ms size ${candidate.size} ${candidate.element?.tagName ?? "?"}.${String(candidate.element?.className ?? "")} ${candidate.element ? getComputedStyle(candidate.element).fontSize : ""} ${candidate.element?.textContent?.slice(0, 50) ?? ""}`,
             );
           }
         }).observe({ type: "largest-contentful-paint", buffered: true });

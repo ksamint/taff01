@@ -21,7 +21,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useState, useSyncExternalStore } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { useCalendar, useSetCalendar } from "../lib/calendar-queries";
@@ -88,7 +88,7 @@ export function CalendarScene() {
   const [date, setDate] = useState(today.toString());
   const [view, setView] = useState<CalendarMode>("day");
   const [list, setList] = useState(false);
-  const selected = Temporal.PlainDate.from(date);
+  const selected = useMemo(() => Temporal.PlainDate.from(date), [date]);
   const first = view === "month-grid" ? selected.with({ day: 1 }) : selected;
   const start =
     view === "day" ? first : first.subtract({ days: first.dayOfWeek - 1 });
@@ -122,18 +122,26 @@ export function CalendarScene() {
   const create = useCreateCalendarTask(workspace.id, {
     onCreated: () => setEditor(undefined),
   });
-  const clock = new Intl.DateTimeFormat(locale, {
-    timeZone: me.user.tz,
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  });
-  const dayLabel = new Intl.DateTimeFormat(locale, {
-    timeZone: me.user.tz,
-    month: "short",
-    day: "numeric",
-    weekday: "short",
-  });
+  const clock = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        timeZone: me.user.tz,
+        hour: "2-digit",
+        minute: "2-digit",
+        hourCycle: "h23",
+      }),
+    [locale, me.user.tz],
+  );
+  const dayLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale, {
+        timeZone: me.user.tz,
+        month: "short",
+        day: "numeric",
+        weekday: "short",
+      }),
+    [locale, me.user.tz],
+  );
   // Undo is the inverse API call with the returned version (plan §2.4).
   const revert = (entry: Undo) =>
     update.mutate({
@@ -218,34 +226,41 @@ export function CalendarScene() {
       void invalidateM3(client);
     }
   };
-  const agentState = (task: Task) => {
-    const run = runs.data
-      ?.filter((item) => item.taskId === task.id)
-      .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
-    return t(run ? `run.status.${run.status}` : `status.${task.status}`);
-  };
-  const events: CalendarEvent[] = (data.data?.occurrences ?? []).map(
-    (item) => ({
-      id: `occurrence-${item.task.id.replaceAll(":", "-")}-${Date.parse(item.startAt)}`,
-      occurrenceId: item.id,
-      title: item.task.title,
-      isAgent: item.isAgent,
-      start: Temporal.Instant.from(item.startAt).toZonedDateTimeISO(me.user.tz),
-      end: Temporal.Instant.from(item.endAt).toZonedDateTimeISO(me.user.tz),
-      // Prototype event block: title, then the 24-hour range (and the
-      // agent's state); the SDK keeps its own event element and handles.
-      _customContent: {
-        timeGrid: `<span class="calendar-event-title">${escapeHtml(item.task.title)}</span><span class="calendar-event-time">${clock.format(new Date(item.startAt))}–${clock.format(new Date(item.endAt))}</span>${item.isAgent ? `<span class="calendar-event-time">${escapeHtml(agentState(item.task))}</span>` : ""}`,
-      },
-      _options: {
-        disableDND: busy || !item.canSchedule,
-        disableResize: busy || !item.canSchedule,
-        additionalClasses: [
-          `taff-event-${item.task.status}`,
-          ...(item.isAgent ? ["taff-agent-event"] : []),
-        ],
-      },
-    }),
+  const agentState = useCallback(
+    (task: Task) => {
+      const run = runs.data
+        ?.filter((item) => item.taskId === task.id)
+        .sort((a, b) => b.startedAt.localeCompare(a.startedAt))[0];
+      return t(run ? `run.status.${run.status}` : `status.${task.status}`);
+    },
+    [runs.data, t],
+  );
+  const events: CalendarEvent[] = useMemo(
+    () =>
+      (data.data?.occurrences ?? []).map((item) => ({
+        id: `occurrence-${item.task.id.replaceAll(":", "-")}-${Date.parse(item.startAt)}`,
+        occurrenceId: item.id,
+        title: item.task.title,
+        isAgent: item.isAgent,
+        start: Temporal.Instant.from(item.startAt).toZonedDateTimeISO(
+          me.user.tz,
+        ),
+        end: Temporal.Instant.from(item.endAt).toZonedDateTimeISO(me.user.tz),
+        // Prototype event block: title, then the 24-hour range (and the
+        // agent's state); the SDK keeps its own event element and handles.
+        _customContent: {
+          timeGrid: `<span class="calendar-event-title">${escapeHtml(item.task.title)}</span><span class="calendar-event-time">${clock.format(new Date(item.startAt))}–${clock.format(new Date(item.endAt))}</span>${item.isAgent ? `<span class="calendar-event-time">${escapeHtml(agentState(item.task))}</span>` : ""}`,
+        },
+        _options: {
+          disableDND: busy || !item.canSchedule,
+          disableResize: busy || !item.canSchedule,
+          additionalClasses: [
+            `taff-event-${item.task.status}`,
+            ...(item.isAgent ? ["taff-agent-event"] : []),
+          ],
+        },
+      })),
+    [data.data?.occurrences, me.user.tz, clock, agentState, busy],
   );
   const hasAgents = data.data?.occurrences.some((item) => item.isAgent);
   const showEditor = (
@@ -291,19 +306,22 @@ export function CalendarScene() {
       !busy &&
       !!data.data?.occurrences.find((item) => item.id === id)?.canSchedule,
   };
-  const periodTitle =
-    desktop && view === "day"
-      ? selected.toLocaleString(locale, {
-          month: "long",
-          day: "numeric",
-          weekday: "short",
-        })
-      : selected.toLocaleString(
-          locale,
-          view === "month-grid" || desktop
-            ? { month: "long", year: "numeric" }
-            : { month: "long" },
-        );
+  const periodTitle = useMemo(
+    () =>
+      desktop && view === "day"
+        ? selected.toLocaleString(locale, {
+            month: "long",
+            day: "numeric",
+            weekday: "short",
+          })
+        : selected.toLocaleString(
+            locale,
+            view === "month-grid" || desktop
+              ? { month: "long", year: "numeric" }
+              : { month: "long" },
+          ),
+    [desktop, view, selected, locale],
+  );
   const navigation = (
     <div className="calendar-source-navigation">
       <p className="calendar-month-title" aria-live="polite">
