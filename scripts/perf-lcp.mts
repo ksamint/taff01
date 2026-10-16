@@ -3,6 +3,7 @@
 // 1.6 Mbps down, 750 Kbps up, 150 ms RTT, 4x CPU slowdown). Median of runs
 // must stay at or below 2000 ms (instruction_v0.md). No Lighthouse needed.
 import { spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { chromium } from "@playwright/test";
 import {
   type PerformanceRoute,
@@ -22,8 +23,12 @@ const runs = Number(process.env.LCP_RUNS ?? 3);
 // server must answer on that origin; stop a development server on its port.
 const origin = process.env.AUTH_URL ?? "http://localhost:3000";
 const port = Number(process.env.BUDGET_PORT ?? new URL(origin).port ?? 3000);
-const email = process.env.DEMO_EMAIL ?? "alex@taff.local";
-const password = process.env.DEMO_PASSWORD;
+const email =
+  route === "today"
+    ? (process.env.DEMO_EMAIL ?? "alex@taff.local")
+    : `lcp-${randomUUID()}@example.test`;
+const password = route === "today" ? process.env.DEMO_PASSWORD : randomUUID();
+let accountReady = route === "today";
 if (!password) throw new Error("DEMO_PASSWORD is required");
 const executablePath = process.env.CHROMIUM_PATH;
 const locale = process.env.LCP_LOCALE ?? "en";
@@ -60,6 +65,18 @@ async function measure(): Promise<number> {
       // A first visit has no service worker; measure that cold path.
       serviceWorkers: "block",
     });
+    if (!accountReady) {
+      const created = await context.request.post(
+        `${origin}/api/auth/sign-up/email`,
+        {
+          headers: { Origin: origin },
+          data: { name: "Cold route verification", email, password },
+        },
+      );
+      if (!created.ok()) throw new Error("Cold route account creation failed");
+      accountReady = true;
+      await context.clearCookies();
+    }
     const page = await context.newPage();
     if (process.env.LCP_DEBUG)
       await page.addInitScript(() => {
