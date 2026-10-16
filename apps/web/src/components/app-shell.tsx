@@ -211,8 +211,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
   const identityReady = sessionMatches(client, userId, scope);
   const confirmed = currentSession(client)?.confirmed !== false;
-  const provisionalToday =
-    !confirmed && identityReady && pathname === "/" && !!me.data;
+  // The authenticated server snapshot can paint while the browser confirms.
+  // The whole content remains inert and all protected reads/writes stay gated.
+  const provisionalRoute =
+    !confirmed &&
+    identityReady &&
+    !!me.data &&
+    (pathname === "/" ||
+      pathname.startsWith("/projects") ||
+      pathname.startsWith("/calendar"));
   const selectionUser = useRef<string | null>(null);
   useEffect(() => {
     if (!me.data || !identityReady || !confirmed) return;
@@ -341,8 +348,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [client, workspace?.id, me.data?.user.id, identityReady, confirmed]);
   return (
     <div className={`app-shell${me.data ? " signed-in" : ""}`}>
-      {(me.isPending && !provisionalToday) ||
-      ((!identityReady || !confirmed) && !provisionalToday && !me.isError) ? (
+      {(me.isPending && !provisionalRoute) ||
+      ((!identityReady || !confirmed) && !provisionalRoute && !me.isError) ? (
         <main className="loading" aria-live="polite">
           {t("loading")}
         </main>

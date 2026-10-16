@@ -122,7 +122,14 @@ try {
   const warm = await context.newPage();
   const cdp = await context.newCDPSession(warm);
   const failures: string[] = [];
-  for (const locale of ["en", "zh-CN", "zh-HK"] as const) {
+  const locales = process.env.PERF_LOCALE
+    ? [process.env.PERF_LOCALE]
+    : ["en", "zh-CN", "zh-HK"];
+  assert(
+    locales.every((locale) => ["en", "zh-CN", "zh-HK"].includes(locale)),
+    "Unknown audit locale",
+  );
+  for (const locale of locales) {
     phase = `${locale} profile and warm-up`;
     const changed = await context.request.patch(
       `${origin.origin}/api/profile`,
@@ -149,7 +156,7 @@ try {
     await cdp.send("Network.clearBrowserCache");
     await cdp.send("Storage.clearDataForOrigin", {
       origin: origin.origin,
-      storageTypes: "indexeddb,cache_storage,service_workers",
+      storageTypes: "indexeddb,cache_storage,service_workers,local_storage",
     });
     phase = `${locale} audit`;
     const result = await lighthouse(
@@ -173,7 +180,9 @@ try {
     const realToday = await auditPage.evaluate(
       (marker) => ({
         lang: document.documentElement.lang,
-        today: document.querySelector(`[data-testid="${marker}"]`) !== null,
+        today: [...document.querySelectorAll("[data-testid]")].some(
+          (element) => element.getAttribute("data-testid") === marker,
+        ),
         task: [
           ...document.querySelectorAll(
             "a, [data-testid=timeline-row], .sx__event, .sx__month-grid-event",

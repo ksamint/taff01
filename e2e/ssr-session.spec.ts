@@ -307,3 +307,60 @@ for (const signedIn of [false, true]) {
     ).toBeEnabled();
   });
 }
+
+for (const route of ["/projects", "/calendar"]) {
+  test(`authenticated ${route} paints read-only while browser confirmation is pending`, async ({
+    page,
+  }, info) => {
+    const locale = info.project.name as TestLocale;
+    const me = await account(page.request, locale, "SSR route account", "UTC");
+    const projectName = `SSR route project ${crypto.randomUUID()}`;
+    expect(
+      (
+        await page.request.post(
+          `/api/projects?workspaceId=${me.workspaces[0].id}`,
+          {
+            data: { name: projectName },
+          },
+        )
+      ).status(),
+    ).toBe(201);
+    let release!: () => void;
+    const confirmation = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const protectedReads: string[] = [];
+    page.on("request", (request) => {
+      const path = new URL(request.url()).pathname;
+      if (
+        /^\/api\/(projects|tasks|members|runs|calendar|workspaces\/[^/]+\/access)$/.test(
+          path,
+        )
+      )
+        protectedReads.push(path);
+    });
+    await page.route("**/api/me", async (request) => {
+      await confirmation;
+      await request.continue();
+    });
+    try {
+      await page.goto(route, { waitUntil: "domcontentloaded" });
+      await expect(page.locator("main.content")).toHaveAttribute("inert", "");
+      if (route === "/projects")
+        await expect(page.locator(".projects-title-text")).toHaveText(
+          projectName,
+        );
+      else await expect(page.getByTestId("calendar-previous")).toBeVisible();
+      await expect(page.getByTestId("open-quick")).toBeDisabled();
+      expect(protectedReads).toEqual([]);
+      release();
+      await expect(page.getByTestId("open-quick")).toBeEnabled();
+      await expect(page.locator("main.content")).not.toHaveAttribute(
+        "inert",
+        "",
+      );
+    } finally {
+      release();
+    }
+  });
+}

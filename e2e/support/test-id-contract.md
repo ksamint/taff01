@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (339 distinct, 1784 uses)
+## Test ids (339 distinct, 1786 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -45,7 +45,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `inbox-badge` | 2 |  | optimistic-m4.spec.ts |
-| `open-quick` | 16 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts |
+| `open-quick` | 18 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts |
 
 ### auth.tsx
 
@@ -103,7 +103,7 @@ several do). “Also rendered by” lists the other files.
 | `calendar-list` | 5 |  | calendar.spec.ts, persistence.spec.ts, support/calendar.ts |
 | `calendar-month-grid` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `calendar-next` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
-| `calendar-previous` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
+| `calendar-previous` | 3 |  | calendar-accessibility.spec.ts, calendar.spec.ts, ssr-session.spec.ts |
 | `calendar-tools` | 1 |  | support/calendar.ts |
 | `calendar-undo` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, support/calendar.ts |
 | `calendar-week` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
@@ -368,7 +368,7 @@ several do). “Also rendered by” lists the other files.
 | `board-column-in_progress` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-column-todo` | 1 |  | planning.spec.ts |
 | `board-status` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `board-task` | 19 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `board-task` | 20 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `new-project` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-filter` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -563,7 +563,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-new-milestone` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-predecessor` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-rename-milestone` | 6 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
-| `timeline-row` | 4 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, timeline.spec.ts, v021-feature-gaps.spec.ts |
+| `timeline-row` | 5 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-save` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-start` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-view` | 7 |  | finance-visibility.spec.ts, live/platform.spec.ts, live/timeline.spec.ts, timeline.spec.ts |
@@ -574,7 +574,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-v2.spec.ts |
-| `today-heading` | 67 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, scripts/perf-lighthouse.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 64 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
 
 ## Role and name locators
@@ -631,7 +631,6 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: project.name` | 2 | persistence.spec.ts |
 | `link` | 2 | calendar.spec.ts, ui-v2.spec.ts |
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
-| `link — name: "Today audit task 1"` | 1 | scripts/perf-lighthouse.mts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
 | `link — name: childTitle` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `link — name: controlled.title` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -676,11 +675,11 @@ read (`data-event-id`, `data-date`).
 | `.sx__calendar-wrapper` | 1 | support/calendar.ts |
 | `.sx__date-grid` | 1 | calendar-accessibility.spec.ts |
 | `.sx__date-grid-event` | 3 | calendar.spec.ts, live/release/checklist.spec.ts |
-| `.sx__event` | 6 | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
+| `.sx__event` | 7 | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts, scripts/perf-lighthouse.mts |
 | `.sx__is-resizing` | 1 | calendar.spec.ts |
 | `.sx__month-grid-day__header` | 1 | calendar.spec.ts |
 | `.sx__month-grid-day[data-date=…]` | 3 | calendar.spec.ts |
-| `.sx__month-grid-event` | 5 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `.sx__month-grid-event` | 6 | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, scripts/perf-lighthouse.mts |
 | `.sx__month-grid-event[data-event-id=…]` | 2 | calendar.spec.ts, ui-v2.spec.ts |
 | `.sx__month-grid-wrapper` | 2 | calendar-accessibility.spec.ts, support/calendar.ts |
 | `.sx__time-grid-day` | 5 | calendar.spec.ts, support/calendar.ts |
@@ -724,6 +723,7 @@ read (`data-event-id`, `data-date`).
 | `.organizations-view > .page-heading` | 3 | me.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
 | `.planning-board` | 3 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `.planning-board .board-card[data-task-id="*"]` | 1 | ui-v2.spec.ts |
+| `.projects-title-text` | 1 | ssr-session.spec.ts |
 | `.quick-fab` | 2 | ui-v2.spec.ts |
 | `.relations-label` | 2 | timeline.spec.ts |
 | `.relations-marker` | 1 | timeline.spec.ts |
@@ -800,7 +800,7 @@ read (`data-event-id`, `data-date`).
 | `dialog.task-detail-sheet` | 2 | calendar.spec.ts, planning.spec.ts |
 | `dialog.task-detail-sheet .review-comments li` | 1 | planning.spec.ts |
 | `head link[rel="preload"][as="font"][href="/fonts/NotoSansTC-ui-common.woff2"]` | 1 | i18n.spec.ts |
-| `main.content` | 12 | live/platform.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
+| `main.content` | 14 | live/platform.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 | `main.loading` | 2 | i18n.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |

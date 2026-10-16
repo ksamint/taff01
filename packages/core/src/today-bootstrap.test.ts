@@ -183,6 +183,7 @@ describe("authorized Today bootstrap", () => {
   });
   it.each([
     "tasks",
+    "projects",
     "members",
     "runs",
     "occurrences",
@@ -200,6 +201,21 @@ describe("authorized Today bootstrap", () => {
       rrule: null,
     };
     if (kind === "tasks") reads.listTasks.mockResolvedValue([foreignTask]);
+    if (kind === "projects")
+      reads.listProjects.mockResolvedValue([
+        {
+          id: id(40),
+          workspaceId: id(99),
+          name: "Foreign project",
+          archived: false,
+          version: 1,
+          contractAmount: null,
+          currency: null,
+          clientCompanyId: null,
+          createdAt: instant,
+          updatedAt: instant,
+        },
+      ]);
     if (kind === "members")
       reads.listMembers.mockResolvedValue([
         {
