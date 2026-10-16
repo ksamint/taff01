@@ -866,7 +866,6 @@ Keys read from `apps/web/locales/*/common.json` through
 | `home.headline2` | 1 | landing.spec.ts |
 | `home.headline3` | 1 | landing.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
-| `m.home.headline1` | 1 | landing.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |
 | `me.languageCN` | 1 | me.spec.ts |

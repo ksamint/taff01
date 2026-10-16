@@ -22,7 +22,7 @@ test("fresh browser language agrees between server HTML and hydrated home", asyn
       const response = await page.goto("/");
       expect(await response!.text()).toContain(`<html lang="${lang}"`);
       await expect(page.locator(".landing-title")).toHaveText(
-        messages[locale].m.home.headline1,
+        messages[locale].home.headline1,
       );
       await expect(page.getByTestId("locale-select")).toHaveValue(locale);
       await expect(page.locator("html")).toHaveAttribute("lang", lang);
