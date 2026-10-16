@@ -271,6 +271,6 @@ it("removes only its own insertion into a previously absent query", async () => 
   restoreQueries(client, a);
   expect(client.getQueryData(key)).toEqual([{ id: "b" }]);
   restoreQueries(client, b);
-  expect(client.getQueryData(key)).toEqual([]);
+  expect(client.getQueryData(key)).toBeUndefined();
   client.clear();
 });
