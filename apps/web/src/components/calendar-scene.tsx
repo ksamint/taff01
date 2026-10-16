@@ -1,4 +1,5 @@
 "use client";
+import "@schedule-x/theme-default/dist/index.css";
 import "../styles/calendar.css";
 import "temporal-polyfill/global";
 import type { CalendarEvent } from "@schedule-x/calendar";
@@ -19,6 +20,7 @@ import {
   Plus,
   Sparkles,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
@@ -30,12 +32,18 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useRuns } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
-import {
-  CalendarEngine,
-  type CalendarEngineProps,
-  type CalendarMode,
-} from "./calendar-engine";
-import { ScheduleEditor } from "./schedule-editor";
+import type { CalendarEngineProps, CalendarMode } from "./calendar-engine";
+import { RouteLoading } from "./route-loading";
+
+const CalendarEngine = dynamic(
+  () => import("./calendar-engine").then((module) => module.CalendarEngine),
+  { ssr: false, loading: RouteLoading },
+);
+const ScheduleEditor = dynamic(
+  () => import("./schedule-editor").then((module) => module.ScheduleEditor),
+  { ssr: false, loading: RouteLoading },
+);
+
 import { TaskRow } from "./task-row";
 import { Button } from "./ui/button";
 

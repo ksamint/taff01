@@ -1,0 +1,1164 @@
+import { randomUUID } from "node:crypto";
+import { createRequire } from "node:module";
+import { createCore, userPrincipal } from "@taff/core";
+import { connectDatabase, members, notificationPreferences } from "@taff/db";
+import { eq, sql } from "drizzle-orm";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import {
+  MCP_TOOLS,
+  ROUND_TRIP_SCOPES,
+} from "../../../apps/api/scripts/mcp-round-trip";
+import { createApp } from "../../../apps/api/src/app";
+import { migrateDatabase } from "../../db/src/migrate";
+
+const databaseUrl = process.env.TEST_DATABASE_URL;
+if (databaseUrl && !new URL(databaseUrl).pathname.endsWith("_test"))
+  throw new Error("Authorization matrix requires an isolated _test database");
+const pino = createRequire(
+  new URL("../../../apps/api/package.json", import.meta.url),
+)("pino");
+const origin = "http://localhost:3000";
+type Actor = "owner" | "member" | "agent" | "other-workspace";
+const actors: Actor[] = ["owner", "member", "agent", "other-workspace"];
+type RequestCase = {
+  method: string;
+  path: string;
+  body?: (f: Fixture) => unknown;
+  member?: "deny";
+  allowedStatus?: number[];
+  foreign?: "own-workspace";
+  prepare?: (f: Fixture) => Promise<void>;
+};
+let core: ReturnType<typeof createCore>;
+let app: ReturnType<typeof createApp>;
+let connection: ReturnType<typeof connectDatabase>;
+let workspaceId: string;
+let ownerId: string;
+let ownerUserId: string;
+let memberId: string;
+let agentId: string;
+let agentToken: string;
+let foreignAgentToken: string;
+let digestId: string;
+let cookies: Record<Exclude<Actor, "agent">, string>;
+const owner = () => userPrincipal(ownerUserId);
+
+async function fixture() {
+  const project = await core.createProject(owner(), workspaceId, {
+    name: `Matrix ${randomUUID()}`,
+  });
+  const task = await core.createTask(owner(), {
+    workspaceId,
+    ownerId,
+    workerId: agentId,
+    projectId: project.id,
+    title: "Matrix task",
+  });
+  const predecessor = await core.createTask(owner(), {
+    workspaceId,
+    ownerId,
+    workerId: agentId,
+    projectId: project.id,
+    title: "Predecessor",
+  });
+  const company = await core.createCompany(owner(), workspaceId, {
+    name: "Matrix company",
+  });
+  const contact = await core.createContact(owner(), workspaceId, {
+    name: "Matrix contact",
+    companyId: company.id,
+  });
+  const milestone = await core.createMilestone(owner(), project.id, {
+    name: "Matrix milestone",
+    date: "2026-10-20",
+  });
+  const node = await core.createMindNode(owner(), workspaceId, {
+    title: "Matrix node",
+    layer: 0,
+    angle: 0,
+  });
+  const otherNode = await core.createMindNode(owner(), workspaceId, {
+    title: "Other node",
+    layer: 1,
+    angle: 60,
+  });
+  const edge = await core.createMindEdge(owner(), workspaceId, {
+    fromNodeId: node.id,
+    toNodeId: otherNode.id,
+  });
+  const source = await core.createMindSource(owner(), workspaceId, {
+    title: "Matrix source",
+  });
+  await core.linkMindSource(owner(), node.id, source.id);
+  const dependency = await core.addDependency(owner(), {
+    predecessorTaskId: predecessor.id,
+    successorTaskId: task.id,
+  });
+  const suggestion = await core.createSuggestion(owner(), {
+    taskId: task.id,
+    kind: "split",
+    payload: { subtasks: [{ title: "Child" }] },
+  });
+  const invite = await core.createWorkspaceInvite(owner(), workspaceId, {
+    email: `${randomUUID()}@test.local`,
+    role: "member",
+  });
+  const token = await core.createAgentToken(owner(), {
+    workspaceId,
+    memberId: agentId,
+    name: "Matrix fixture",
+    scopes: [...ROUND_TRIP_SCOPES],
+  });
+  return {
+    project,
+    task,
+    predecessor,
+    company,
+    contact,
+    milestone,
+    node,
+    otherNode,
+    edge,
+    source,
+    dependency,
+    suggestion,
+    invite,
+    token,
+    run: undefined as Awaited<ReturnType<typeof core.startRun>> | undefined,
+    grantId: "",
+    inboxId: "",
+    artifactIds: [] as string[],
+    crmUndo: undefined as
+      | Awaited<ReturnType<typeof core.setContactRoles>>["undo"]
+      | undefined,
+  };
+}
+type Fixture = Awaited<ReturnType<typeof fixture>>;
+async function running(f: Fixture) {
+  f.run = await core.startRun(owner(), f.task.id, {});
+}
+async function review(f: Fixture) {
+  await running(f);
+  await core.attachRunArtifact(owner(), f.run!.id, {
+    version: f.run!.version,
+    name: "matrix.txt",
+    mimeType: "text/plain",
+    content: "Matrix output",
+    diff: null,
+    sourceUrl: null,
+  });
+  const detail = await core.getRun(owner(), f.run!.id);
+  f.run = detail.run;
+  f.artifactIds = detail.artifacts.map((artifact) => artifact.id);
+  f.run = await core.submitRun(owner(), f.run.id, {
+    version: f.run.version,
+    summary: "Matrix review",
+    requestReview: true,
+  });
+  f.inboxId = (await core.listInbox(owner(), workspaceId)).items.find(
+    (item) => item.taskId === f.task.id,
+  )!.id;
+}
+
+const routes: RequestCase[] = [
+  { method: "GET", path: "/api/digests/:digest", member: "deny" },
+  {
+    method: "GET",
+    path: "/api/realtime?workspaceId=:workspace",
+    allowedStatus: [503],
+  },
+  {
+    method: "POST",
+    path: "/api/ask",
+    body: () => ({ workspaceId, question: "What is at risk?" }),
+  },
+  {
+    method: "POST",
+    path: "/api/crm/undo",
+    prepare: async (f) => {
+      f.crmUndo = (
+        await core.setContactRoles(owner(), "task", f.task.id, f.contact.id, {
+          roles: ["ops"],
+        })
+      ).undo;
+    },
+    body: (f) => f.crmUndo,
+  },
+  ...[
+    "members",
+    "tasks",
+    "projects",
+    "runs",
+    "inbox",
+    "agent-tokens",
+    "mcp-calls",
+    "digests",
+    "companies",
+    "contacts",
+  ].map((name) => ({
+    method: "GET",
+    path: `/api/${name}?workspaceId=:workspace`,
+    ...(name === "agent-tokens" || name === "mcp-calls"
+      ? { member: "deny" as const }
+      : {}),
+  })),
+  {
+    method: "GET",
+    path: "/api/calendar?workspaceId=:workspace&from=2026-10-16T00:00:00Z&to=2026-10-23T00:00:00Z",
+  },
+  {
+    method: "GET",
+    path: "/api/bootstrap/today?workspaceId=:workspace",
+    foreign: "own-workspace",
+  },
+  ...["", "/access", "/calendar", "/comments", "/review", "/contacts"].map(
+    (suffix) => ({
+      method: "GET",
+      path: `/api/tasks/:task${suffix}`,
+      ...(suffix === "/review" ? { prepare: review } : {}),
+    }),
+  ),
+  ...["/timeline", "/milestones", "/payments", "/contacts"].map((suffix) => ({
+    method: "GET",
+    path: `/api/projects/:project${suffix}`,
+    ...(suffix === "/payments" ? { member: "deny" as const } : {}),
+  })),
+  ...[
+    "/access",
+    "/invites",
+    "/crm/audit",
+    "/crm/search?q=Matrix",
+    "/graph",
+    "/mind",
+    "/suggestions",
+    "/ai",
+  ].map((suffix) => ({
+    method: "GET",
+    path: `/api/workspaces/:workspace${suffix}`,
+    ...(["/invites", "/crm/audit"].includes(suffix)
+      ? { member: "deny" as const }
+      : {}),
+  })),
+  { method: "GET", path: "/api/companies/:company" },
+  { method: "GET", path: "/api/companies/:company/contacts" },
+  { method: "GET", path: "/api/contacts/:contact" },
+  { method: "GET", path: "/api/agents/:agent" },
+  { method: "GET", path: "/api/runs/:run", prepare: running },
+  { method: "GET", path: "/api/brief?scope=workspace&workspaceId=:workspace" },
+  {
+    method: "POST",
+    path: "/api/search?workspaceId=:workspace",
+    body: () => ({ query: "Matrix" }),
+  },
+  {
+    method: "POST",
+    path: "/api/quick-add/parse?workspaceId=:workspace",
+    body: () => ({ text: "Matrix tomorrow" }),
+  },
+  {
+    method: "POST",
+    path: "/api/tasks",
+    body: () => ({
+      workspaceId,
+      ownerId,
+      workerId: null,
+      title: "Created by matrix",
+    }),
+  },
+  {
+    method: "PATCH",
+    path: "/api/tasks/:task",
+    body: (f) => ({ version: f.task.version, title: "Edited" }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/tasks/:task/assignment",
+    body: () => ({ workerId: null }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/tasks/:task/status",
+    body: () => ({ status: "in_progress" }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/tasks/:task/schedule",
+    body: () => ({ dueAt: "2026-10-20T00:00:00Z" }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/tasks/:task/calendar",
+    body: (f) => ({ version: f.task.version, schedule: null }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/tasks/:task/plan",
+    body: () => ({ startDate: "2026-10-20", durationDays: 2 }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/tasks/:task/comments",
+    body: () => ({ body: "Matrix comment" }),
+  },
+  {
+    method: "POST",
+    path: "/api/projects?workspaceId=:workspace",
+    body: () => ({ name: "Matrix project" }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/projects/:project",
+    body: () => ({ version: 1, name: "Edited project" }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspace/invites",
+    body: () => ({ email: `${randomUUID()}@test.local`, role: "member" }),
+    member: "deny",
+  },
+  { method: "DELETE", path: "/api/workspace-invites/:invite", member: "deny" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspace/members",
+    body: () => ({ name: `Matrix agent ${randomUUID()}`, kind: "agent" }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/workspaces/:workspace/members/:member",
+    body: () => ({ role: "member" }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/tasks/:task/runs",
+    body: () => ({}),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/runs/:run/control",
+    prepare: running,
+    body: (f) => ({ version: f.run!.version, action: "pause" }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/runs/:run/events",
+    prepare: running,
+    body: (f) => ({
+      version: f.run!.version,
+      kind: "step",
+      title: "Matrix step",
+    }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/runs/:run/artifacts",
+    prepare: running,
+    body: (f) => ({
+      version: f.run!.version,
+      name: "matrix.txt",
+      mimeType: "text/plain",
+      content: "Matrix",
+      diff: null,
+      sourceUrl: null,
+    }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/runs/:run/submit",
+    prepare: async (f) => {
+      await running(f);
+      await core.attachRunArtifact(owner(), f.run!.id, {
+        version: f.run!.version,
+        name: "matrix.txt",
+        mimeType: "text/plain",
+        content: "Matrix",
+        diff: null,
+        sourceUrl: null,
+      });
+      f.run = (await core.getRun(owner(), f.run!.id)).run;
+    },
+    body: (f) => ({ version: f.run!.version, summary: "Matrix submitted" }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/runs/:run/review",
+    prepare: review,
+    body: (f) => ({
+      version: f.run!.version,
+      decision: "approve",
+      items: f.artifactIds.map((artifactId) => ({
+        artifactId,
+        decision: "approve",
+      })),
+      checks: {
+        matchesDescription: true,
+        verifiable: true,
+        withinPermissions: true,
+      },
+    }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/runs/:run/comments",
+    prepare: review,
+    body: (f) => ({ version: f.run!.version, body: "Matrix review comment" }),
+  },
+  {
+    method: "PATCH",
+    path: "/api/inbox/:inbox",
+    prepare: review,
+    body: () => ({ read: true }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/agents/:agent",
+    body: () => ({ supervisorId: ownerId, reviewPolicy: "always_review" }),
+    member: "deny",
+  },
+  {
+    method: "PUT",
+    path: "/api/agents/:agent/permissions",
+    body: () => ({ capability: "repo.read", decision: "ask" }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/agents/:agent/grants",
+    body: (f) => ({
+      taskId: f.task.id,
+      capability: "repo.read",
+      reason: "Matrix grant",
+    }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/grants/:grant/decision",
+    prepare: async (f) => {
+      f.grantId = (
+        await core.requestGrant(owner(), agentId, {
+          taskId: f.task.id,
+          capability: "repo.read",
+          reason: "Matrix decision",
+        })
+      ).id;
+    },
+    body: () => ({ decision: "deny" }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/agent-tokens",
+    body: () => ({
+      workspaceId,
+      memberId: agentId,
+      name: "Matrix token",
+      scopes: ["tasks:read"],
+    }),
+    member: "deny",
+  },
+  { method: "DELETE", path: "/api/agent-tokens/:token", member: "deny" },
+  {
+    method: "POST",
+    path: "/api/agent-tokens/:token/restore",
+    prepare: async (f) => {
+      await core.revokeAgentToken(owner(), f.token.id);
+    },
+    member: "deny",
+  },
+  ...["companies", "contacts"].flatMap((name) => {
+    const entity = name === "companies" ? "company" : "contact";
+    return [
+      {
+        method: "POST",
+        path: `/api/${name}?workspaceId=:workspace`,
+        body: () => ({ name: "Matrix created" }),
+      },
+      {
+        method: "PATCH",
+        path: `/api/${name}/:${entity}`,
+        body: () => ({ version: 1, name: "Matrix updated" }),
+      },
+      {
+        method: "DELETE",
+        path: `/api/${name}/:${entity}?version=1`,
+        member: "deny" as const,
+      },
+    ];
+  }),
+  {
+    method: "PATCH",
+    path: "/api/contacts/:contact/company",
+    body: () => ({ version: 1, companyId: null }),
+  },
+  ...["companies", "projects", "tasks"].flatMap((scope) => {
+    const entity =
+      scope === "companies"
+        ? "company"
+        : scope === "projects"
+          ? "project"
+          : "task";
+    return [
+      {
+        method: "PUT",
+        path: `/api/${scope}/:${entity}/contacts/:contact`,
+        body: () => ({ roles: ["ops"] }),
+      },
+      {
+        method: "DELETE",
+        path: `/api/${scope}/:${entity}/contacts/:contact`,
+        prepare: async (f: Fixture) => {
+          await core.setContactRoles(
+            owner(),
+            entity as "company" | "project" | "task",
+            f[entity].id,
+            f.contact.id,
+            { roles: ["ops"] },
+          );
+        },
+      },
+    ];
+  }),
+  {
+    method: "POST",
+    path: "/api/projects/:project/milestones",
+    body: () => ({ name: "Matrix milestone", date: "2026-10-20" }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/milestones/:milestone",
+    body: () => ({ version: 1, name: "Updated milestone" }),
+    member: "deny",
+  },
+  {
+    method: "DELETE",
+    path: "/api/milestones/:milestone?version=1",
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/projects/:project/payments",
+    body: () => ({ amount: "1.00", paidOn: "2026-10-16" }),
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/dependencies",
+    body: (f) => ({
+      predecessorTaskId: f.task.id,
+      successorMilestoneId: f.milestone.id,
+    }),
+    member: "deny",
+  },
+  { method: "DELETE", path: "/api/dependencies/:dependency", member: "deny" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspace/mind/nodes",
+    body: () => ({ title: "New node", layer: 0, angle: 0 }),
+  },
+  {
+    method: "PATCH",
+    path: "/api/mind/nodes/:node",
+    body: () => ({ version: 1, title: "Edited node" }),
+  },
+  {
+    method: "POST",
+    path: "/api/mind/nodes/:node/task",
+    body: () => ({
+      version: 1,
+      dueDate: "2026-10-20",
+      title: "Validation task",
+    }),
+  },
+  {
+    method: "PUT",
+    path: "/api/mind/nodes/:node/sources/:source",
+    prepare: async (f) => {
+      await core.unlinkMindSource(owner(), f.node.id, f.source.id);
+    },
+  },
+  { method: "DELETE", path: "/api/mind/nodes/:node/sources/:source" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspace/mind/edges",
+    prepare: async (f) => {
+      await core.removeMindEdge(owner(), f.edge.id);
+    },
+    body: (f) => ({
+      fromNodeId: f.node.id,
+      toNodeId: f.otherNode.id,
+      kind: "supports",
+    }),
+  },
+  {
+    method: "PATCH",
+    path: "/api/mind/edges/:edge",
+    body: () => ({ version: 1, kind: "supports" }),
+  },
+  { method: "DELETE", path: "/api/mind/edges/:edge" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspace/mind/sources",
+    body: () => ({ title: "New source" }),
+  },
+  {
+    method: "PATCH",
+    path: "/api/mind/sources/:source",
+    body: () => ({ version: 1, title: "Edited source" }),
+  },
+  {
+    method: "POST",
+    path: "/api/suggestions",
+    body: (f) => ({
+      taskId: f.task.id,
+      kind: "split",
+      payload: { subtasks: [{ title: "Child" }] },
+    }),
+    member: "deny",
+  },
+  ...["apply", "dismiss", "undo"].map((action) => ({
+    method: "POST",
+    path: `/api/suggestions/:suggestion/${action}`,
+    body: () => ({ version: action === "undo" ? 2 : 1 }),
+    member: "deny" as const,
+    ...(action === "undo"
+      ? {
+          prepare: async (f: Fixture) => {
+            await core.applySuggestion(owner(), f.suggestion.id, {
+              version: 1,
+            });
+          },
+        }
+      : {}),
+  })),
+  {
+    method: "PATCH",
+    path: "/api/workspaces/:workspace/ai",
+    body: () => ({ enabled: false }),
+    member: "deny",
+  },
+];
+
+function pathFor(path: string, f: Fixture) {
+  const ids: Record<string, string> = {
+    workspace: workspaceId,
+    digest: digestId,
+    owner: ownerId,
+    member: memberId,
+    agent: agentId,
+    run: f.run?.id ?? "",
+    grant: f.grantId,
+    inbox: f.inboxId,
+  };
+  for (const [name, value] of Object.entries(f))
+    if (value && typeof value === "object" && "id" in value)
+      ids[name] = value.id;
+  return path.replace(/:([a-zA-Z]+)/g, (_, name: string) => {
+    if (!ids[name]) throw new Error(`Missing fixture ${name}`);
+    return ids[name];
+  });
+}
+
+// Cookie sessions identify people; agent bearer tokens are MCP-only. No core
+// methods, sessions, permissions, or database operations are mocked.
+describe.skipIf(!databaseUrl)(
+  "REST authorization matrix against PostgreSQL",
+  () => {
+    beforeAll(async () => {
+      await migrateDatabase(databaseUrl!);
+      connection = connectDatabase(databaseUrl!);
+      core = createCore({
+        databaseUrl: databaseUrl!,
+        authUrl: origin,
+        authSecret: "authorization-matrix-secret-at-least-32-characters",
+        tokenPepper: "authorization-matrix-pepper-16-chars",
+      });
+      app = createApp(core, origin, pino({ enabled: false }), {
+        limit: 10000,
+        hit: async () => ({ allowed: true, count: 1 }),
+        close: async () => {},
+      });
+      async function signup(name: string) {
+        const password = `test-${randomUUID()}`;
+        const result = await core.auth.api.signUpEmail({
+          body: { name, email: `${randomUUID()}@test.local`, password },
+        });
+        const response = await core.auth.api.signInEmail({
+          body: { email: result.user.email, password },
+          asResponse: true,
+        });
+        expect(response.status).toBe(200);
+        return {
+          id: result.user.id,
+          cookie: response.headers
+            .getSetCookie()
+            .map((value) => value.split(";")[0])
+            .join("; "),
+        };
+      }
+      const a = await signup("Matrix owner");
+      const b = await signup("Matrix member");
+      const c = await signup("Matrix other workspace");
+      ownerUserId = a.id;
+      const workspace = (await core.getMe(a.id)).workspaces[0];
+      workspaceId = workspace.id;
+      ownerId = workspace.memberId;
+      cookies = {
+        owner: a.cookie,
+        member: b.cookie,
+        "other-workspace": c.cookie,
+      };
+      await connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id', ${a.id}, true)`,
+        );
+        const [member] = await tx
+          .insert(members)
+          .values({
+            workspaceId,
+            userId: b.id,
+            name: "Matrix member",
+            kind: "person",
+            role: "member",
+          })
+          .returning();
+        memberId = member.id;
+      });
+      const agent = await core.createWorkspaceAgent(owner(), workspaceId, {
+        name: "Matrix agent",
+        kind: "agent",
+      });
+      agentId = agent.id;
+      agentToken = (
+        await core.createAgentToken(owner(), {
+          workspaceId,
+          memberId: agentId,
+          name: "Matrix bearer",
+          scopes: [...ROUND_TRIP_SCOPES],
+        })
+      ).token;
+      for (const capability of ["crm.read", "files.attach"] as const)
+        await core.setAgentPermission(owner(), agentId, {
+          capability,
+          decision: "allow",
+        });
+      const foreignWorkspace = (await core.getMe(c.id)).workspaces[0];
+      const foreignAgent = await core.createWorkspaceAgent(
+        userPrincipal(c.id),
+        foreignWorkspace.id,
+        { name: "Foreign matrix agent", kind: "agent" },
+      );
+      await core.setAgentPermission(userPrincipal(c.id), foreignAgent.id, {
+        capability: "crm.read",
+        decision: "allow",
+      });
+      foreignAgentToken = (
+        await core.createAgentToken(userPrincipal(c.id), {
+          workspaceId: foreignWorkspace.id,
+          memberId: foreignAgent.id,
+          name: "Foreign matrix bearer",
+          scopes: [...ROUND_TRIP_SCOPES],
+        })
+      ).token;
+      // Put this isolated account after its daily slot without mocking clocks.
+      const offset = new Date().getUTCHours() - 12;
+      const tz =
+        offset === 0 ? "Etc/GMT" : `Etc/GMT${offset > 0 ? "+" : ""}${offset}`;
+      await core.updateProfile(ownerUserId, { locale: "en", tz });
+      const scheduledAt = new Date(Date.now() - 60_000).toISOString();
+      await connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id', ${ownerUserId}, true)`,
+        );
+        await tx
+          .update(notificationPreferences)
+          .set({ nextDigestAt: new Date(scheduledAt) })
+          .where(eq(notificationPreferences.id, ownerUserId));
+      });
+      const preferences = await core.getNotificationPreferences(owner());
+      const generated = await core.generateDailyDigest(
+        ownerUserId,
+        scheduledAt,
+        preferences.version,
+      );
+      expect(generated.status).toBe("generated");
+      digestId = generated.digestIds[0];
+    }, 30000);
+    afterAll(async () => {
+      await core?.close();
+      await connection?.close();
+    });
+
+    it.each(
+      routes.flatMap((route) => actors.map((actor) => ({ ...route, actor }))),
+    )("$method $path × $actor", async (row) => {
+      const f = await fixture();
+      await row.prepare?.(f);
+      const response = await app.request(pathFor(row.path, f), {
+        method: row.method,
+        headers: {
+          "Content-Type": "application/json",
+          origin,
+          ...(row.actor === "agent"
+            ? { Authorization: `Bearer ${agentToken}` }
+            : { cookie: cookies[row.actor] }),
+        },
+        ...(row.body ? { body: JSON.stringify(row.body(f)) } : {}),
+      });
+      const body = await response.json();
+      if (row.actor === "other-workspace" && row.foreign === "own-workspace") {
+        expect(response.status).toBe(200);
+        expect(body.today?.workspaceId).not.toBe(workspaceId);
+        expect(
+          body.me.workspaces.every((w: { id: string }) => w.id !== workspaceId),
+        ).toBe(true);
+      } else if (row.actor === "agent") {
+        expect(response.status, JSON.stringify(body)).toBe(401);
+        expect(body).toMatchObject({ error: "unauthorized" });
+      } else if (
+        row.actor === "other-workspace" ||
+        (row.actor === "member" && row.member === "deny")
+      ) {
+        expect([403, 404], JSON.stringify(body)).toContain(response.status);
+        expect(["forbidden", "not_found"]).toContain(body.error);
+      } else {
+        expect(row.allowedStatus ?? [200, 201], JSON.stringify(body)).toContain(
+          response.status,
+        );
+      }
+    });
+
+    const implicitWorkspaceTools = new Set([
+      "tasks.list",
+      "projects.list",
+      "search.query",
+      "quickadd.parse",
+      "calendar.list",
+      "companies.list",
+      "contacts.list",
+      "relations.get",
+      "brief.get",
+    ]);
+    async function toolArgs(
+      name: string,
+      f: Fixture,
+    ): Promise<Record<string, unknown>> {
+      if (
+        [
+          "runs.get",
+          "runs.control",
+          "runs.event",
+          "runs.submit",
+          "files.attach",
+          "inbox.request_review",
+        ].includes(name)
+      )
+        await running(f);
+      if (name === "dependencies.add")
+        await core.removeDependency(owner(), f.dependency.id);
+      if (name === "runs.submit" || name === "inbox.request_review") {
+        await core.attachRunArtifact(owner(), f.run!.id, {
+          version: f.run!.version,
+          name: "matrix.txt",
+          mimeType: "text/plain",
+          content: "Matrix",
+          diff: null,
+          sourceUrl: null,
+        });
+        f.run = (await core.getRun(owner(), f.run!.id)).run;
+      }
+      const args: Record<string, Record<string, unknown>> = {
+        "tasks.list": {},
+        "tasks.create": {
+          ownerId,
+          title: "Matrix MCP task",
+          projectId: f.project.id,
+        },
+        "tasks.update": { taskId: f.task.id, status: "in_progress" },
+        "tasks.edit": {
+          taskId: f.task.id,
+          version: f.task.version,
+          title: "Matrix MCP edit",
+        },
+        "tasks.comments.list": { taskId: f.task.id },
+        "tasks.comments.add": { taskId: f.task.id, body: "Matrix MCP comment" },
+        "projects.list": {},
+        "search.query": { query: "Matrix" },
+        "quickadd.parse": { text: "Matrix tomorrow" },
+        "calendar.list": {
+          from: "2026-10-16T00:00:00Z",
+          to: "2026-10-23T00:00:00Z",
+        },
+        "calendar.set": {
+          taskId: f.task.id,
+          version: f.task.version,
+          schedule: null,
+        },
+        "calendar.schedule": {
+          taskId: f.task.id,
+          dueAt: "2026-10-20T00:00:00Z",
+        },
+        "inbox.request_review": { taskId: f.task.id, note: "Matrix review" },
+        "runs.get": { runId: f.run?.id },
+        "runs.start": { taskId: f.task.id },
+        "runs.control": {
+          runId: f.run?.id,
+          version: f.run?.version,
+          action: "pause",
+        },
+        "runs.event": {
+          runId: f.run?.id,
+          version: f.run?.version,
+          kind: "step",
+          title: "Matrix step",
+        },
+        "runs.submit": {
+          runId: f.run?.id,
+          version: f.run?.version,
+          summary: "Matrix submitted",
+        },
+        "files.attach": {
+          runId: f.run?.id,
+          version: f.run?.version,
+          name: "matrix.txt",
+          mimeType: "text/plain",
+          content: "Matrix",
+        },
+        "grants.request": {
+          agentId,
+          taskId: f.task.id,
+          capability: "repo.read",
+          reason: "Matrix grant",
+        },
+        "timeline.get": { projectId: f.project.id },
+        "tasks.plan": {
+          taskId: f.task.id,
+          startDate: "2026-10-20",
+          durationDays: 2,
+        },
+        "dependencies.add": {
+          predecessorTaskId: f.predecessor.id,
+          successorTaskId: f.task.id,
+        },
+        "dependencies.remove": { dependencyId: f.dependency.id },
+        "companies.list": {},
+        "contacts.list": {},
+        "contacts.get": { contactId: f.contact.id },
+        "relations.get": {},
+        "brief.get": {},
+        "suggestions.create": {
+          taskId: f.task.id,
+          kind: "split",
+          payload: { subtasks: [{ title: "Matrix child" }] },
+        },
+      };
+      if (!args[name]) throw new Error(`Missing tool matrix row: ${name}`);
+      return args[name];
+    }
+
+    async function rpcJson(response: Response) {
+      const text = await response.text();
+      const raw = response.headers.get("content-type")?.includes("event-stream")
+        ? text
+            .split("\n")
+            .find((line) => line.startsWith("data:"))
+            ?.slice(5)
+        : text;
+      if (!raw) throw new Error("MCP response has no JSON result");
+      return JSON.parse(raw);
+    }
+    async function rpc(actor: Actor, method: string, params: unknown) {
+      return app.request("/mcp", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json, text/event-stream",
+          ...(actor === "agent" || actor === "other-workspace"
+            ? {
+                Authorization: `Bearer ${actor === "agent" ? agentToken : foreignAgentToken}`,
+              }
+            : { cookie: cookies[actor] }),
+        },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      });
+    }
+    it("MCP matrix includes exactly every registered tool", async () => {
+      const response = await rpc("agent", "tools/list", {});
+      expect(response.status).toBe(200);
+      const data = await rpcJson(response);
+      expect(
+        data.result.tools.map((tool: { name: string }) => tool.name).sort(),
+      ).toEqual([...MCP_TOOLS]);
+    });
+    it.each(
+      MCP_TOOLS.flatMap((name) => actors.map((actor) => ({ name, actor }))),
+    )("MCP $name × $actor", async ({ name, actor }) => {
+      const f = await fixture();
+      const args = await toolArgs(name, f);
+      const response = await rpc(actor, "tools/call", {
+        name,
+        arguments: args,
+      });
+      const data = await rpcJson(response);
+      if (actor === "owner" || actor === "member") {
+        expect(response.status).toBe(401);
+        expect(data.error).toBe("unauthorized");
+        return;
+      }
+      expect(response.status, JSON.stringify(data)).toBe(200);
+      expect(data.error, JSON.stringify(data)).toBeUndefined();
+      if (actor === "other-workspace" && !implicitWorkspaceTools.has(name)) {
+        expect(data.result.isError, JSON.stringify(data)).toBe(true);
+        // A foreign owner is invalid in the token's workspace; core rejects it
+        // before task creation. Resource-targeted tools hide or deny the target.
+        expect(
+          name === "tasks.create"
+            ? ["invalid_input"]
+            : ["forbidden", "not_found"],
+        ).toContain(data.result.content[0].text);
+      } else {
+        expect(data.result.isError, JSON.stringify(data)).not.toBe(true);
+        if (actor === "other-workspace") {
+          const text = JSON.stringify(data.result);
+          for (const id of [
+            workspaceId,
+            ownerId,
+            agentId,
+            f.task.id,
+            f.project.id,
+            f.contact.id,
+          ])
+            expect(text).not.toContain(id);
+        }
+      }
+    });
+
+    const personal = [
+      "/api/me",
+      "/api/bootstrap",
+      "/api/me/notifications",
+      "/api/me/email-verification",
+    ];
+    it.each(
+      personal.flatMap((path) => actors.map((actor) => ({ path, actor }))),
+    )("self-scoped $path × $actor", async ({ path, actor }) => {
+      const response = await app.request(path, {
+        headers:
+          actor === "agent"
+            ? { Authorization: `Bearer ${agentToken}` }
+            : { cookie: cookies[actor] },
+      });
+      const data = await rpcJson(response);
+      expect(response.status).toBe(actor === "agent" ? 401 : 200);
+      if (
+        actor === "other-workspace" &&
+        (path === "/api/me" || path === "/api/bootstrap")
+      ) {
+        expect(data.user.id).not.toBe(ownerUserId);
+        expect(
+          data.workspaces.every((w: { id: string }) => w.id !== workspaceId),
+        ).toBe(true);
+      }
+    });
+    const personalWrites = [
+      {
+        method: "PATCH",
+        path: "/api/profile",
+        body: { locale: "en", tz: "UTC" },
+      },
+      {
+        method: "POST",
+        path: "/api/workspaces",
+        body: { name: "Matrix personal workspace" },
+      },
+      {
+        method: "PATCH",
+        path: "/api/me/notifications",
+        body: {
+          version: 1,
+          review: true,
+          block: true,
+          mention: true,
+          done: true,
+          digest: true,
+          digestAt: "09:00",
+          quiet: false,
+        },
+      },
+    ];
+    it.each(
+      personalWrites.flatMap((row) =>
+        actors.map((actor) => ({ ...row, actor })),
+      ),
+    )(
+      "self-scoped $method $path × $actor",
+      async ({ path, method, body, actor }) => {
+        const response = await app.request(path, {
+          method,
+          headers: {
+            "Content-Type": "application/json",
+            origin,
+            ...(actor === "agent"
+              ? { Authorization: `Bearer ${agentToken}` }
+              : { cookie: cookies[actor] }),
+          },
+          body: JSON.stringify(body),
+        });
+        expect(response.status).toBe(
+          actor === "agent" ? 401 : method === "POST" ? 201 : 200,
+        );
+      },
+    );
+
+    // These endpoints have account/public lifecycles rather than a workspace
+    // authorization gate. Existing auth, delivery and invite integration suites
+    // exercise those lifecycles; keep the exceptions explicit and fail on new routes.
+    it("every REST endpoint is a matrix row or an explicit lifecycle exception", () => {
+      const normalize = (path: string) =>
+        path.split("?")[0].replace(/:[^/]+/g, ":id");
+      const covered = new Set([
+        ...routes.map((row) => `${row.method} ${normalize(row.path)}`),
+        ...personal.map((path) => `GET ${path}`),
+        ...personalWrites.map((row) => `${row.method} ${row.path}`),
+      ]);
+      const exceptions = [
+        "GET /api/health",
+        "GET /api/auth/methods",
+        "POST /api/auth/phone-number/send-otp",
+        "POST /api/auth/phone-number/verify",
+        "POST /api/auth/sign-in/email",
+        "POST /api/auth/sign-in/username",
+        "POST /api/auth/sign-up/email",
+        "POST /api/auth/sign-out",
+        "POST /api/me/email-verification/request",
+        "POST /api/me/email-verification/verify",
+        "POST /api/workspace-invites/accept",
+      ];
+      const uncovered = [
+        ...new Set(
+          app.routes
+            .filter((route) => route.method !== "ALL")
+            .map((route) => `${route.method} ${normalize(route.path)}`),
+        ),
+      ].filter((key) => !covered.has(key));
+      expect(uncovered.sort()).toEqual(exceptions.sort());
+    });
+  },
+);

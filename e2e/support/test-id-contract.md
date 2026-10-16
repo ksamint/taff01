@@ -107,7 +107,7 @@ several do). “Also rendered by” lists the other files.
 | `calendar-tools` | 1 |  | support/calendar.ts |
 | `calendar-undo` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, support/calendar.ts |
 | `calendar-week` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `desktop-new-task` | 6 | projects-view.tsx, today-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, support/tasks.ts, ui-v2.spec.ts |
+| `desktop-new-task` | 6 | projects-scene.tsx, today-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, support/tasks.ts, ui-v2.spec.ts |
 | `schedule-task-*` | 5 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 
 ### crm/companies-view.tsx
@@ -126,10 +126,10 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `board-column-*` | 2 | crm/contact-role-row.tsx, projects-view.tsx, relations-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `board-column-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `contact-search` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx, relations-view.tsx | me.spec.ts |
-| `open-search` | 3 | inbox-view.tsx, projects-view.tsx, today-view.tsx | planning.spec.ts |
+| `open-search` | 3 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts |
 | `quick-field-*` | 2 | crm/contact-role-row.tsx, quick-add-dialog.tsx, relations-view.tsx | support/tasks.ts |
 | `review-check-*` | 12 | crm/contact-role-row.tsx, relations-view.tsx, review-view.tsx | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
 | `role-*` | 7 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -160,7 +160,7 @@ several do). “Also rendered by” lists the other files.
 | `task-contact-remove` | 1 | task-contacts.tsx | task-contacts.spec.ts |
 | `task-contact-role-signoff` | 1 | task-contacts.tsx | task-contacts.spec.ts |
 | `task-contact-roles` | 4 | task-contacts.tsx | task-contacts.spec.ts |
-| `timeline-predecessor-remove` | 2 | timeline-view.tsx | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline-predecessor-remove` | 2 | timeline-scene.tsx | live/timeline.spec.ts, timeline.spec.ts |
 
 ### crm/contacts-view.tsx
 
@@ -360,7 +360,7 @@ several do). “Also rendered by” lists the other files.
 | `team-add-agent` | 7 |  | agent-creation.spec.ts, release/support.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
 
-### projects-view.tsx
+### projects-scene.tsx
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
@@ -539,7 +539,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `task-schedule` | 12 |  | calendar.spec.ts, planning.spec.ts, ui-v2.spec.ts |
 
-### timeline-view.tsx
+### timeline-scene.tsx
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
