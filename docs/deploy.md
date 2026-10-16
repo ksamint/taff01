@@ -2699,3 +2699,15 @@ backfill; existing payload unchanged)
 - Remaining after the 60-minute box: Calendar LCP/Lighthouse; final-source Node 24 Projects/Timeline Lighthouse revalidation, including Timeline zh-CN/HK. Unproven Calendar startup UI and experimental route CI jobs were removed; strict route measurement commands remain.
 - Patch acceptance: 20 critical live cases with en/zh-HK phone/desktop and zh-CN spot checks, independent realtime, official-client all-30-tool MCP round trip; zero browser page errors, one retry at most.
 - Rollback source: `66534378d81ac57aed31683f2a0a32248c7a6e9b`; preserve data.
+
+### Frontend v2 v0.2.4 upgrade checkpoint — 2026-10-16 UTC
+- Source `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; annotated tag `v0.2.4`. [PR #53](https://github.com/ksamint/taff01/pull/53) merged green; main fast-forwarded to that tested head.
+- Exact-source [main CI 38850556326](https://github.com/ksamint/taff01/actions/runs/38850556326) passed in 8m 51s: 1641 unit/integration tests (628 actor cases), 164 visual and 243 browser cases, unchanged baselines/tolerances.
+- All 11 public/auth/email/invite lifecycle routes now cover owner/member/agent/other-workspace/anonymous; cross-account proof/invite denials included.
+- Three pinned clean-checkout production images and official all-30-tool MCP smoke passed on Node 24; image identities retained in private local/host deployment logs.
+- Migrations: none. Exclusive env and verified database backups; native deploy lock; only API/worker/web replaced. AI_* unset; Caddy, neighbors and PostgreSQL start preserved.
+- Live: 22/22 passed (20 critical cases, independent realtime and official-client all-30-tool MCP round trip); zero retries and zero browser page errors.
+- Guarded omissions retained: SMS form only (no real phone/code); public MCP rate-limit flood forbidden, covered locally.
+- Performance time box closed: pre-repair Node 26 diagnostics are qualified in the candidate, not final-source Node 24 budget passes.
+- Remaining: Calendar LCP/Lighthouse; final-source Node 24 cold LCP/Lighthouse validation for Projects/Timeline, including Timeline zh-CN/HK. No further optimization in this release.
+- Rollback source: `66534378d81ac57aed31683f2a0a32248c7a6e9b`; preserve data. Acceptance receipt/deployment.done and independent lock-release probe complete before docs push.
