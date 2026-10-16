@@ -1,7 +1,6 @@
 "use client";
 import "@schedule-x/theme-default/dist/index.css";
 import "../styles/calendar.css";
-import "temporal-polyfill/global";
 import type { CalendarEvent } from "@schedule-x/calendar";
 import {
   type CalendarScheduleInput,
@@ -30,6 +29,7 @@ import { useWorkspaceAccess } from "../lib/m5-queries";
 import { useCreateCalendarTask } from "../lib/mutations/calendar";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useRuns } from "../lib/queries";
+import { withTemporal } from "../lib/temporal";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
 import {
@@ -37,10 +37,14 @@ import {
   type CalendarEngineProps,
   type CalendarMode,
 } from "./calendar-engine";
+import { useInitialTodayTime } from "./providers";
 import { RouteLoading } from "./route-loading";
 
 const ScheduleEditor = dynamic(
-  () => import("./schedule-editor").then((module) => module.ScheduleEditor),
+  () =>
+    withTemporal(() => import("./schedule-editor")).then(
+      (module) => module.ScheduleEditor,
+    ),
   { ssr: false, loading: RouteLoading },
 );
 
@@ -79,7 +83,11 @@ export function CalendarScene() {
   const access = useWorkspaceAccess(workspace.id);
   const members = useMembers(workspace.id);
   const runs = useRuns(workspace.id);
-  const today = Temporal.Now.zonedDateTimeISO(me.user.tz).toPlainDate();
+  const serverNow = useInitialTodayTime();
+  const now = confirmed
+    ? Temporal.Now.instant()
+    : Temporal.Instant.fromEpochMilliseconds(serverNow ?? Date.now());
+  const today = now.toZonedDateTimeISO(me.user.tz).toPlainDate();
   const [date, setDate] = useState(today.toString());
   const [view, setView] = useState<CalendarMode>("day");
   const [list, setList] = useState(false);

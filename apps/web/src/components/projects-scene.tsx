@@ -22,7 +22,7 @@ import {
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
@@ -82,15 +82,19 @@ const VIEW_LABEL: Record<ProjectView, string> = {
   mind: "projects.mindView",
 };
 
-function projectDueLabel(
-  dueAt: string,
-  locale: string,
-  timeZone: string,
-): string {
+function projectDueLabels(locale: string, timeZone: string) {
   const dayFormat = new Intl.DateTimeFormat("en", {
     timeZone,
     year: "numeric",
     month: "numeric",
+    day: "numeric",
+  });
+  const relativeFormat = new Intl.RelativeTimeFormat(locale, {
+    numeric: "auto",
+  });
+  const dateFormat = new Intl.DateTimeFormat(locale, {
+    timeZone,
+    month: "short",
     day: "numeric",
   });
   const civilDay = (date: Date) => {
@@ -99,20 +103,15 @@ function projectDueLabel(
       Number(parts.find((item) => item.type === kind)?.value);
     return Date.UTC(part("year"), part("month") - 1, part("day"));
   };
-  const due = new Date(dueAt);
-  const delta = (civilDay(due) - civilDay(new Date())) / 86_400_000;
-  const label =
-    Math.abs(delta) <= 1
-      ? new Intl.RelativeTimeFormat(locale, { numeric: "auto" }).format(
-          delta,
-          "day",
-        )
-      : new Intl.DateTimeFormat(locale, {
-          timeZone,
-          month: "short",
-          day: "numeric",
-        }).format(due);
-  return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1);
+  return (dueAt: string): string => {
+    const due = new Date(dueAt);
+    const delta = (civilDay(due) - civilDay(new Date())) / 86_400_000;
+    const label =
+      Math.abs(delta) <= 1
+        ? relativeFormat.format(delta, "day")
+        : dateFormat.format(due);
+    return label.charAt(0).toLocaleUpperCase(locale) + label.slice(1);
+  };
 }
 
 function useDesktop() {
@@ -191,6 +190,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
   const selectedProjectId = selected?.id ?? projectId;
   const locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
+  const dueLabel = useMemo(
+    () => projectDueLabels(locale, me.user.tz),
+    [locale, me.user.tz],
+  );
   const projectName = selected ? selected.name : t("projects.allProjects");
   const admin = workspaceAccess.data?.canManageProjects;
   const manage = useManageProject(workspace.id, {
@@ -370,8 +373,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const filterValue = agentId ? `agent:${agentId}` : filter;
   const cardProps = {
     reference: (task: Task) => taskReference(workspace.key, task.number),
-    due: (task: Task) =>
-      task.dueAt ? projectDueLabel(task.dueAt, locale, me.user.tz) : "",
+    due: (task: Task) => (task.dueAt ? dueLabel(task.dueAt) : ""),
     member: (id: string | null) =>
       id ? members.data?.find((item) => item.id === id) : undefined,
     parent: (task: Task) =>

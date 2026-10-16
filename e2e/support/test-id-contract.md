@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (339 distinct, 1786 uses)
+## Test ids (340 distinct, 1788 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -103,7 +103,8 @@ several do). “Also rendered by” lists the other files.
 | `calendar-list` | 5 |  | calendar.spec.ts, persistence.spec.ts, support/calendar.ts |
 | `calendar-month-grid` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `calendar-next` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
-| `calendar-previous` | 3 |  | calendar-accessibility.spec.ts, calendar.spec.ts, ssr-session.spec.ts |
+| `calendar-previous` | 4 |  | calendar-accessibility.spec.ts, calendar.spec.ts, ssr-session.spec.ts |
+| `calendar-scene` | 1 |  | ssr-session.spec.ts |
 | `calendar-tools` | 1 |  | support/calendar.ts |
 | `calendar-undo` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, support/calendar.ts |
 | `calendar-week` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
@@ -671,7 +672,7 @@ read (`data-event-id`, `data-date`).
 
 | Selector | Uses | Used in |
 | --- | ---: | --- |
-| `.sx__calendar` | 2 | calendar.spec.ts, ui-v2.spec.ts |
+| `.sx__calendar` | 3 | calendar.spec.ts, ssr-session.spec.ts, ui-v2.spec.ts |
 | `.sx__calendar-wrapper` | 1 | support/calendar.ts |
 | `.sx__date-grid` | 1 | calendar-accessibility.spec.ts |
 | `.sx__date-grid-event` | 3 | calendar.spec.ts, live/release/checklist.spec.ts |

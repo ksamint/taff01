@@ -7,11 +7,15 @@ import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { useSetCalendar, useTaskCalendar } from "../lib/calendar-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
+import { withTemporal } from "../lib/temporal";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 
 const Editor = dynamic(
-  () => import("./schedule-editor").then((module) => module.ScheduleEditor),
+  () =>
+    withTemporal(() => import("./schedule-editor")).then(
+      (module) => module.ScheduleEditor,
+    ),
   { ssr: false },
 );
 export function TaskScheduleButton({ taskId }: { taskId: string }) {

@@ -1,5 +1,4 @@
 "use client";
-import "temporal-polyfill/global";
 import "@schedule-x/theme-default/dist/index.css";
 import {
   type CalendarEvent,

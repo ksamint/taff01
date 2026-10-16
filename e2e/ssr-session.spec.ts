@@ -364,3 +364,26 @@ for (const route of ["/projects", "/calendar"]) {
     }
   });
 }
+
+test("calendar loads its Temporal fallback when the browser has no native implementation", async ({
+  page,
+}, info) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(globalThis, "Temporal", {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
+  });
+  await account(
+    page.request,
+    info.project.name as TestLocale,
+    "Temporal fallback",
+    "UTC",
+  );
+  await page.goto("/calendar");
+  await expect(page.getByTestId("calendar-scene")).toBeVisible();
+  await expect(page.locator(".sx__calendar")).toBeVisible();
+  await expect(page.getByTestId("calendar-previous")).toBeEnabled();
+  expect(await page.evaluate(() => typeof globalThis.Temporal)).toBe("object");
+});
