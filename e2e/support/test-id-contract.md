@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (340 distinct, 1802 uses)
+## Test ids (340 distinct, 1803 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -51,7 +51,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `auth-email` | 43 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-email` | 44 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, home-layout.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-password` | 36 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-submit` | 44 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 7 |  | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
@@ -708,7 +708,7 @@ read (`data-event-id`, `data-date`).
 | `.history-list > li` | 1 | agent-review.spec.ts |
 | `.invite-banner a[href="/orgs"]` | 1 | live/live.ts |
 | `.is-event-copy` | 2 | calendar.spec.ts |
-| `.landing-title` | 3 | landing.spec.ts, ui-v2.spec.ts |
+| `.landing-title` | 4 | home-layout.spec.ts, landing.spec.ts, ui-v2.spec.ts |
 | `.loading` | 2 | ui-v2.spec.ts |
 | `.mcp-call` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-config` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -862,9 +862,9 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.invalid_input` | 13 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
-| `home.headline1` | 6 | landing.spec.ts, ui-v2.spec.ts |
-| `home.headline2` | 1 | landing.spec.ts |
-| `home.headline3` | 1 | landing.spec.ts |
+| `home.headline1` | 8 | home-layout.spec.ts, landing.spec.ts, ui-v2.spec.ts |
+| `home.headline2` | 2 | home-layout.spec.ts, landing.spec.ts |
+| `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |

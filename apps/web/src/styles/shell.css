@@ -271,6 +271,10 @@
   text-wrap: balance;
   animation: landing-title-in 600ms ease-out;
 }
+/* The longest English line wraps; keep the sign-in form still while typing. */
+.landing-title:lang(en) {
+  min-height: 2.6em;
+}
 @keyframes landing-title-in {
   from {
     opacity: 0;
