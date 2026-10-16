@@ -153,6 +153,121 @@ describe.skipIf(!databaseUrl)(
       );
       expect(rejected.status).toBe(400);
     });
+    it("adds an idempotent password to an existing phone admin without SMS, new workspaces or ownership changes", async () => {
+      const phoneNumber = phones[1];
+      const password = randomUUID().slice(0, 7);
+      const before = await connection.db.select().from(workspaces);
+      expect(
+        await core.provisionPhonePasswords({ phones: [phoneNumber], password }),
+      ).toEqual({ users: 1, credentialsCreated: 1 });
+      const [person] = await connection.db
+        .select()
+        .from(user)
+        .where(eq(user.phoneNumber, phoneNumber));
+      expect(person).toMatchObject({
+        systemAdmin: true,
+        phoneNumberVerified: false,
+        username: null,
+      });
+      const credentials = () =>
+        connection.db
+          .select()
+          .from(account)
+          .where(
+            and(
+              eq(account.userId, person.id),
+              eq(account.providerId, "credential"),
+            ),
+          );
+      const [created] = await credentials();
+      expect(created.password).not.toBe(password);
+      expect(
+        await core.provisionPhonePasswords({ phones: [phoneNumber], password }),
+      ).toEqual({ users: 1, credentialsCreated: 0 });
+      expect(await credentials()).toEqual([created]);
+      expect(await connection.db.select().from(workspaces)).toEqual(before);
+      const login = (value: string, number = phoneNumber) =>
+        core.handlePhoneAuth(
+          new Request("https://username.test/api/auth/sign-in/phone-number", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Origin: "https://username.test",
+            },
+            body: JSON.stringify({ phoneNumber: number, password: value }),
+          }),
+          "127.0.0.1",
+        );
+      expect((await login("wrong-password")).status).toBe(401);
+      expect((await login(password, phone())).status).toBe(401);
+      const accepted = await login(password);
+      expect(accepted.status).toBe(200);
+      expect(accepted.headers.get("Set-Cookie")).toContain("Secure");
+      expect((await accepted.json()).user.id).toBe(person.id);
+      await expect(
+        core.provisionPhonePasswords({
+          phones: [phoneNumber],
+          password: randomUUID(),
+        }),
+      ).rejects.toMatchObject({ code: "conflict" });
+      await expect(
+        core.provisionPhonePasswords({
+          phones: [phoneNumber, phone()],
+          password,
+        }),
+      ).rejects.toMatchObject({ code: "not_found" });
+      const [after] = await connection.db
+        .select()
+        .from(user)
+        .where(eq(user.id, person.id));
+      expect(after).toEqual(person);
+      expect(await credentials()).toEqual([created]);
+    });
+    it("does not promote a non-admin or replace their credential through phone setup", async () => {
+      const password = randomUUID();
+      const plain = await core.auth.api.signUpEmail({
+        body: {
+          name: "Plain phone",
+          email: `${randomUUID()}@test.local`,
+          password,
+        },
+      });
+      userIds.add(plain.user.id);
+      const number = phone();
+      await connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id','system:test',true)`,
+        );
+        await tx
+          .update(user)
+          .set({ phoneNumber: number })
+          .where(eq(user.id, plain.user.id));
+      });
+      await expect(
+        core.provisionPhonePasswords({
+          phones: [number],
+          password: randomUUID(),
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      expect(
+        (
+          await connection.db
+            .select()
+            .from(user)
+            .where(eq(user.id, plain.user.id))
+        )[0].systemAdmin,
+      ).toBe(false);
+      const [credential] = await connection.db
+        .select()
+        .from(account)
+        .where(eq(account.userId, plain.user.id));
+      expect(
+        await (await core.auth.$context).password.verify({
+          hash: credential.password!,
+          password,
+        }),
+      ).toBe(true);
+    });
     it("preserves verified identity, leaves new phone unverified and creates durable real memberships", async () => {
       const [existing] = await connection.db
         .select()

@@ -1,5 +1,7 @@
 import {
   administrationProvisionSchema,
+  phonePasswordProvisionSchema,
+  phonePasswordSignInSchema,
   signInSchema,
   signUpSchema,
   usernameSignInSchema,
@@ -9,6 +11,35 @@ import { describe, expect, it } from "vitest";
 import { type Actor, can } from "./permissions";
 
 describe("username and privileged administration contracts", () => {
+  it("limits private phone credentials and public sign-in to their exact contracts", () => {
+    const phoneNumber = "+8613800000000";
+    expect(
+      phonePasswordSignInSchema.safeParse({ phoneNumber, password: "test12" })
+        .success,
+    ).toBe(true);
+    expect(
+      phonePasswordProvisionSchema.safeParse({
+        phones: [phoneNumber],
+        password: "test12",
+      }).success,
+    ).toBe(true);
+    for (const body of [
+      { phones: [], password: "test12" },
+      { phones: [phoneNumber, phoneNumber], password: "test12" },
+      { phones: ["13800000000"], password: "test12" },
+      { phones: [phoneNumber], password: "short" },
+      { phones: [phoneNumber], password: "test12", systemAdmin: true },
+    ])
+      expect(phonePasswordProvisionSchema.safeParse(body).success).toBe(false);
+    expect(
+      phonePasswordSignInSchema.safeParse({
+        phoneNumber,
+        password: "test12",
+        phoneNumberVerified: true,
+      }).success,
+    ).toBe(false);
+  });
+
   it("shares username login validation and keeps stronger public registration", () => {
     expect(leafUsernameSchema).toBe(usernameSignInSchema);
     expect(

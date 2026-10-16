@@ -23,6 +23,7 @@ import {
   inboxFilterSchema,
   inboxItemInputSchema,
   memberRoleInputSchema,
+  phonePasswordSignInSchema,
   profileSchema,
   projectInputSchema,
   projectUpdateSchema,
@@ -207,6 +208,7 @@ export function createApp(
   for (const [path, validator] of [
     ["/api/auth/phone-number/send-otp", sendPhoneOtpSchema],
     ["/api/auth/phone-number/verify", verifyPhoneOtpSchema],
+    ["/api/auth/sign-in/phone-number", phonePasswordSignInSchema],
   ] as const) {
     app.post(path, async (c) => {
       validator.parse(await c.req.raw.clone().json());
@@ -233,6 +235,10 @@ export function createApp(
       if (response.ok) return c.json({ status: true });
       if (response.status === 429)
         return c.json({ error: "rate_limited" }, 429);
+      if (path === "/api/auth/sign-in/phone-number")
+        return response.status >= 500
+          ? c.json({ error: "unavailable" }, 503)
+          : c.json({ error: "invalid_credentials" }, 401);
       if (response.status >= 500)
         return c.json({ error: "sms_unavailable" }, 503);
       return c.json({ error: "sms_invalid_code" }, 400);

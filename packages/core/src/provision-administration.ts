@@ -1,5 +1,8 @@
 import { fileURLToPath } from "node:url";
-import { administrationProvisionSchema } from "@taff/schemas";
+import {
+  administrationProvisionSchema,
+  phonePasswordProvisionSchema,
+} from "@taff/schemas";
 import { CoreError, createCore } from "./index";
 
 /** Private deployment entry: credentials and identity input are never CLI arguments. */
@@ -20,7 +23,12 @@ async function main() {
     } catch {
       throw new CoreError("invalid_input", 400);
     }
-    const parsed = administrationProvisionSchema.safeParse(input);
+    const phonePasswords = process.argv[2] === "--phone-passwords";
+    const parsed = (
+      phonePasswords
+        ? phonePasswordProvisionSchema
+        : administrationProvisionSchema
+    ).safeParse(input);
     if (!parsed.success) throw new CoreError("invalid_input", 400);
     const { DATABASE_URL, AUTH_URL, AUTH_SECRET, TOKEN_PEPPER } = process.env;
     if (
@@ -48,7 +56,15 @@ async function main() {
       tokenPepper: TOKEN_PEPPER,
     });
     console.log(
-      JSON.stringify(await core.provisionAdministration(parsed.data)),
+      JSON.stringify(
+        phonePasswords
+          ? await core.provisionPhonePasswords(
+              phonePasswordProvisionSchema.parse(parsed.data),
+            )
+          : await core.provisionAdministration(
+              administrationProvisionSchema.parse(parsed.data),
+            ),
+      ),
     );
   } catch (error) {
     console.error(

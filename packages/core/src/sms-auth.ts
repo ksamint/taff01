@@ -25,7 +25,7 @@ function rateLimited(retry: number): never {
 export function createSmsAuth(
   db: Database,
   secret: string,
-  provider: SmsProvider,
+  provider?: SmsProvider,
 ) {
   const digest = (domain: string, value: string) =>
     createHmac("sha256", secret).update(`${domain}\0${value}`).digest("hex");
@@ -117,6 +117,7 @@ export function createSmsAuth(
     });
   }
   async function sendOTP(input: unknown, peer: string) {
+    if (!provider) unavailable();
     const { phoneNumber: phone } = sendPhoneOtpSchema.parse(input);
     const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
     const reservation = await reserve(phone, code, peer);
@@ -222,14 +223,17 @@ export function createSmsAuth(
   const peerKey = (headers?: Headers) =>
     headers?.get(CLIENT_HEADER) ?? "trusted-server";
   const plugin = phoneNumber({
+    // A provisioned password authenticates an existing identity without sending
+    // SMS or claiming phone ownership. OTP verification remains a separate flow.
+    requireVerification: false,
     otpLength: 6,
     expiresIn: 300,
     allowedAttempts: 3,
     phoneNumberValidator: (phone) =>
       sendPhoneOtpSchema.safeParse({ phoneNumber: phone }).success,
     // This callback is retained for the plugin contract; its plaintext-storage
-    // send endpoint is replaced below, and password/reset routes are not exposed.
-    sendOTP: provider.sendOTP,
+    // send endpoint is replaced below, and reset/update routes are not exposed.
+    sendOTP: provider?.sendOTP ?? unavailable,
     verifyOTP: (data, ctx) =>
       verifyOTP(ctx?.body ?? data, peerKey(ctx?.headers)),
     signUpOnVerification: {
@@ -245,6 +249,7 @@ export function createSmsAuth(
       // memory rule would unnecessarily halve logins behind one proxy peer.
       rateLimit: [],
       endpoints: {
+        signInPhoneNumber: plugin.endpoints.signInPhoneNumber,
         verifyPhoneNumber: plugin.endpoints.verifyPhoneNumber,
         sendPhoneNumberOTP: createAuthEndpoint(
           "/phone-number/send-otp",

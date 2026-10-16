@@ -94,6 +94,10 @@ export const signUpSchema = extend(signInSchema, {
 export const signOutSchema = strictObject({});
 /** Initial SMS rollout accepts canonical mainland mobile numbers only. */
 export const mainlandPhoneSchema = string().check(regex(/^\+861[3-9]\d{9}$/));
+export const phonePasswordSignInSchema = strictObject({
+  phoneNumber: mainlandPhoneSchema,
+  password: string().check(minLength(6), maxLength(128)),
+});
 export const sendPhoneOtpSchema = strictObject({
   phoneNumber: mainlandPhoneSchema,
 });

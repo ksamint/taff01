@@ -34,6 +34,7 @@ import {
   type Member,
   mcpCallEntrySchema,
   type Profile,
+  phonePasswordSignInSchema,
   profileSchema,
   SchemaError,
   type Scope,
@@ -245,9 +246,7 @@ export function createCore(options: {
     })();
     return closed;
   }
-  const sms = options.sms
-    ? createSmsAuth(db, options.authSecret, options.sms)
-    : undefined;
+  const sms = createSmsAuth(db, options.authSecret, options.sms);
   const auth = betterAuth({
     plugins: [
       username({
@@ -255,7 +254,7 @@ export function createCore(options: {
         maxUsernameLength: 30,
         displayUsername: false,
       }),
-      ...(sms ? [sms.plugin] : []),
+      sms.plugin,
     ],
     logger: { disabled: true },
     baseURL: options.authUrl,
@@ -1232,6 +1231,14 @@ export function createCore(options: {
         options.authSecret,
         (await auth.$context).password,
       ).provisionAdministration(input),
+    provisionPhonePasswords: async (
+      input: import("@taff/schemas").PhonePasswordProvision,
+    ) =>
+      createAdministrationOperations(
+        db,
+        options.authSecret,
+        (await auth.$context).password,
+      ).provisionPhonePasswords(input),
     ...createEmailVerificationOperations({
       db,
       mutation,
@@ -1253,7 +1260,7 @@ export function createCore(options: {
     getTodayBootstrap,
     getContext,
     auth,
-    getAuthMethods: () => ({ smsEnabled: Boolean(sms) }),
+    getAuthMethods: () => ({ smsEnabled: Boolean(options.sms) }),
     handlePhoneAuth: async (request: Request, peerAddress: string) => {
       const path = new URL(request.url).pathname;
       const validator =
@@ -1261,11 +1268,13 @@ export function createCore(options: {
           ? sendPhoneOtpSchema
           : path === "/api/auth/phone-number/verify"
             ? verifyPhoneOtpSchema
-            : null;
+            : path === "/api/auth/sign-in/phone-number"
+              ? phonePasswordSignInSchema
+              : null;
       if (request.method !== "POST" || !validator)
         return new Response(null, { status: 404 });
       validator.parse(await request.clone().json());
-      if (!sms)
+      if (!options.sms && path !== "/api/auth/sign-in/phone-number")
         return Response.json({ error: "sms_unavailable" }, { status: 503 });
       return auth.handler(sms.request(request, peerAddress));
     },

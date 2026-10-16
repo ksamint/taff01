@@ -36,3 +36,14 @@ export const administrationProvisionSchema = strictObject({
 export type AdministrationProvision = Infer<
   typeof administrationProvisionSchema
 >;
+
+/** Adds credentials to existing system admins; never creates or promotes users. */
+export const phonePasswordProvisionSchema = strictObject({
+  phones: array(mainlandPhoneSchema).check(
+    minLength(1),
+    maxLength(10),
+    refine((phones) => new Set(phones).size === phones.length),
+  ),
+  password: string().check(minLength(6), maxLength(128)),
+});
+export type PhonePasswordProvision = Infer<typeof phonePasswordProvisionSchema>;

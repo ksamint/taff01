@@ -1,7 +1,12 @@
 import { randomInt, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createCore, userPrincipal } from "@taff/core";
-import { connectDatabase, members, notificationPreferences } from "@taff/db";
+import {
+  connectDatabase,
+  members,
+  notificationPreferences,
+  user,
+} from "@taff/db";
 import { createEmailVerificationToken } from "better-auth/api";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -53,6 +58,7 @@ const lifecycleRoutes = [
   ["POST", "/api/auth/phone-number/verify"],
   ["POST", "/api/auth/sign-in/email"],
   ["POST", "/api/auth/sign-in/username"],
+  ["POST", "/api/auth/sign-in/phone-number"],
   ["POST", "/api/auth/sign-up/email"],
   ["POST", "/api/auth/sign-out"],
   ["POST", "/api/me/email-verification/request"],
@@ -1198,7 +1204,20 @@ describe.skipIf(!databaseUrl)(
         let target: Awaited<ReturnType<typeof signup>> | undefined;
         let invitedWorkspace: string | undefined;
         let number: string | undefined;
-        if (path.includes("phone-number")) {
+        if (path === "/api/auth/sign-in/phone-number") {
+          target = await signup("Lifecycle phone credential target");
+          number = `+86138${String(randomInt(0, 100_000_000)).padStart(8, "0")}`;
+          await connection.db.transaction(async (tx) => {
+            await tx.execute(
+              sql`select set_config('taff.actor_id','system:test',true)`,
+            );
+            await tx
+              .update(user)
+              .set({ phoneNumber: number })
+              .where(eq(user.id, target!.id));
+          });
+          body = { phoneNumber: number, password: target.password };
+        } else if (path.includes("phone-number")) {
           number = `+86138${String(randomInt(0, 100_000_000)).padStart(8, "0")}`;
           if (path.endsWith("verify")) {
             const sent = await app.request("/api/auth/phone-number/send-otp", {

@@ -32,6 +32,50 @@ const request = (
 afterEach(() => vi.restoreAllMocks());
 afterAll(() => core.close());
 describe("public SMS authentication adapter", () => {
+  it("validates password phone sign-in, rejects foreign origins and strips sensitive native responses", async () => {
+    const handler = vi.spyOn(core, "handlePhoneAuth").mockResolvedValue(
+      Response.json(
+        { token: "never-forward", user: { phoneNumber } },
+        {
+          headers: {
+            "Set-Cookie": "session=opaque; Secure; HttpOnly; SameSite=Lax",
+          },
+        },
+      ),
+    );
+    const call = (body: unknown, origin = "https://taff.test") =>
+      app.request("/api/auth/sign-in/phone-number", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Origin: origin },
+        body: JSON.stringify(body),
+      });
+    expect(
+      (
+        await call(
+          { phoneNumber, password: "test-password" },
+          "https://foreign.test",
+        )
+      ).status,
+    ).toBe(403);
+    for (const body of [
+      { phoneNumber, password: "short" },
+      { phoneNumber: "invalid", password: "test-password" },
+      { phoneNumber, password: "test-password", systemAdmin: true },
+    ])
+      expect((await call(body)).status).toBe(400);
+    expect(handler).not.toHaveBeenCalled();
+    const accepted = await call({ phoneNumber, password: "test-password" });
+    expect(accepted.status).toBe(200);
+    expect(accepted.headers.get("Cache-Control")).toBe("no-store");
+    expect(accepted.headers.get("Set-Cookie")).toContain("Secure; HttpOnly");
+    expect(await accepted.json()).toEqual({ status: true });
+    handler.mockResolvedValueOnce(
+      Response.json({ message: "private diagnostic" }, { status: 401 }),
+    );
+    const rejected = await call({ phoneNumber, password: "wrong-password" });
+    expect(rejected.status).toBe(401);
+    expect(await rejected.json()).toEqual({ error: "invalid_credentials" });
+  });
   it("normalizes Better Auth cooldown headers and derives the same socket peer despite forwarded browser IPs", async () => {
     const handler = vi
       .spyOn(core, "handlePhoneAuth")

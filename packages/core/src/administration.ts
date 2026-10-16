@@ -3,8 +3,10 @@ import { account, type Database, members, user, workspaces } from "@taff/db";
 import {
   type AdministrationProvision,
   administrationProvisionSchema,
+  type PhonePasswordProvision,
+  phonePasswordProvisionSchema,
 } from "@taff/schemas";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { CoreError } from "./index";
 /** Trusted runtime boundary; never expose through a user or agent adapter. */
 export function createAdministrationOperations(
@@ -164,5 +166,61 @@ export function createAdministrationOperations(
       throw error;
     }
   }
-  return { provisionAdministration };
+  async function provisionPhonePasswords(input: PhonePasswordProvision) {
+    const parsed = phonePasswordProvisionSchema.safeParse(input);
+    if (!parsed.success) throw new CoreError("invalid_input", 400);
+    const body = parsed.data;
+    return db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select set_config('taff.actor_id','system:administration',true)`,
+      );
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtextextended('taff:system-administration',0))`,
+      );
+      const people = await tx
+        .select()
+        .from(user)
+        .where(inArray(user.phoneNumber, body.phones))
+        .for("update");
+      if (people.length !== body.phones.length)
+        throw new CoreError("not_found", 404);
+      if (people.some((person) => !person.systemAdmin))
+        throw new CoreError("forbidden", 403);
+      let created = 0;
+      for (const person of people) {
+        const [prior] = await tx
+          .select()
+          .from(account)
+          .where(
+            and(
+              eq(account.userId, person.id),
+              eq(account.providerId, "credential"),
+            ),
+          )
+          .for("update");
+        if (prior) {
+          // Idempotent setup cannot silently reset an existing credential.
+          if (
+            !prior.password ||
+            !(await password.verify({
+              hash: prior.password,
+              password: body.password,
+            }))
+          )
+            throw new CoreError("conflict", 409);
+          continue;
+        }
+        await tx.insert(account).values({
+          id: randomUUID(),
+          userId: person.id,
+          accountId: person.id,
+          providerId: "credential",
+          password: await password.hash(body.password),
+        });
+        created++;
+      }
+      return { users: people.length, credentialsCreated: created };
+    });
+  }
+  return { provisionAdministration, provisionPhonePasswords };
 }
