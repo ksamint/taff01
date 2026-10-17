@@ -86,15 +86,13 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
   it("preserves a person's explicit invitation to another personal workspace", async () => {
     await connection.db.transaction(async (tx) => {
       await tx.execute(sql`select set_config('taff.actor_id',${alice},true)`);
-      await tx
-        .insert(members)
-        .values({
-          workspaceId: personal,
-          userId: bob,
-          name: "Workspace Bob",
-          kind: "person",
-          role: "member",
-        });
+      await tx.insert(members).values({
+        workspaceId: personal,
+        userId: bob,
+        name: "Workspace Bob",
+        kind: "person",
+        role: "member",
+      });
     });
     expect(
       (await core.getMe(bob)).workspaces.some((row) => row.id === personal),
