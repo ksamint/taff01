@@ -2840,3 +2840,21 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Owner chose system fonts; no font file added. Desktop Chromium resolves Songti SC; real iPhone/Android rendering and native Safari/Chrome saved-password autofill remain unverified. Devices lacking a CJK serif retain browser fallback.
 - Verification signup histories, including one additional UI-signup personal workspace, are retained; no hard deletes or cleanup expansion.
 - Rollback: `e6928f066616b400ad2f2740c5e3e388beae5eb3`. Acceptance receipt/deployment.done written; annotated tag verified remotely; independent native flock probe confirmed lock release and healthy pinned runtime before this docs push.
+
+
+### Frontend v2 release candidate v0.2.9 — 2026-10-17 UTC
+- Source `dee8c00f152bb7db73edfc3f13d40a48ad6bc8f1`; [organization defaults/cleanup PR #58](https://github.com/ksamint/taff01/pull/58), [MCP version repair PR #59](https://github.com/ksamint/taff01/pull/59). [Exact-source main CI](https://github.com/ksamint/taff01/actions/runs/39027213072) and [repair PR CI](https://github.com/ksamint/taff01/actions/runs/39026619151) passed on attempt 1.
+- Changes: audited organization archiving and live-test cleanup; personal ownership; saved login default editable by the user or system administrator; automatic organization/personal fallback; readable phone admin controls. Invited personal workspaces remain available to ordinary members; system administrators' normal switcher hides other users' personal workspaces.
+- Migration `0030_workspace_lifecycle` is additive: owner/archive/default columns, audited ownership backfill of 147 existing personal workspaces, and future signup ownership. Later organizations with the same name are preserved as organizations.
+- No new env variables, dependencies, Compose/Dockerfile/route changes or AI enablement. Native lock, exclusive verified DB/env backups and scoped API/worker/web replacement remain required.
+- Acceptance: protect Table AI, 侍天TIANSIGHT, APUCH and personal workspaces; archive only the 32 R1 organizations; verify persisted defaults and the critical live checklist. Rollback: `700ad4f0080070c6b0e4d67e9e28294749a316e9`; retain data and previous images.
+
+### Frontend v2 v0.2.9 upgrade checkpoint — 2026-10-17 UTC
+- Source `dee8c00f152bb7db73edfc3f13d40a48ad6bc8f1`, annotated tag `v0.2.9`, exact-source CI above: 1,689 unit/integration tests, 270 browser cases, 166 visual comparisons and three image builds passed.
+- Today JS 190.9 KiB; LCP en/zh-CN/zh-HK 616/680/680 ms; Lighthouse P/A/BP 95/100/100, 94/100/100, 94/100/100.
+- Cleanup: 32 R1 organizations archived with history retained; final core verification reports exactly Table AI, 侍天TIANSIGHT and APUCH as active organizations, 151 personal workspaces retained, zero additional organizations. Verification-created personal histories remain preserved.
+- Saved default persisted across two independent authenticated sessions; the verification account's original choice was restored. Its public Me response exposes only its personal workspace after cleanup. User/admin authorization and actual acting-admin audit coverage passed.
+- Live: 22 unique cases passed. Sixteen unchanged platform/sign-in/task/calendar cases passed on `07419c2`; four review cases, all-31-tool MCP and independent-process realtime passed on the final image. The only application difference is MCP version metadata plus its regression test.
+- Initial review initialization guards rejected the stale hard-coded MCP v0.2.8 advertisement after packages advanced to v0.2.9; four initial cases failed at that precondition. Direct initialize/context reads remained healthy. PR #59 derives the advertised version from package metadata; all six affected/unrun live cases then passed without retries. No required check was weakened.
+- The same native lock covered both candidates. Fresh exclusive DB/env backups preceded each replacement; migration 0030 applied once. AI_* stayed unset; Caddy, Valkey, neighbors and PostgreSQL start were preserved. Verification tokens/grants/runs/settings were cleaned or restored through supported APIs.
+- Acceptance receipt and deployment.done name the final source; the annotated remote tag was verified. The independent native flock probe confirmed lock release and healthy final runtime. Follow-ups for this request: none.
