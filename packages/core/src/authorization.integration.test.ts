@@ -51,6 +51,11 @@ const owner = () => userPrincipal(ownerUserId);
 const authSecret = `authorization-matrix-${randomUUID()}`;
 const messages: { to: string; text: string }[] = [];
 const delivered = new Map<string, string>();
+const organizationRoutes = [
+  ["PATCH", "/api/users/:id/default-workspace"],
+  ["GET", "/api/admin/workspaces"],
+  ["DELETE", "/api/workspaces/:id"],
+] as const;
 const lifecycleRoutes = [
   ["GET", "/api/health"],
   ["GET", "/api/auth/methods"],
@@ -1096,6 +1101,51 @@ describe.skipIf(!databaseUrl)(
       }
     });
 
+    it.each(
+      organizationRoutes.flatMap(([method, path]) =>
+        actors.map((actor) => ({ method, path, actor })),
+      ),
+    )(
+      "organization lifecycle $method $path × $actor",
+      async ({ method, path, actor }) => {
+        const target =
+          method === "DELETE"
+            ? (
+                await core.createWorkspace(owner(), {
+                  name: `Matrix cleanup ${randomUUID()}`,
+                })
+              ).id
+            : ownerUserId;
+        const response = await app.request(path.replace(":id", target), {
+          method,
+          headers:
+            actor === "agent"
+              ? { Authorization: `Bearer ${agentToken}` }
+              : {
+                  cookie: cookies[actor],
+                  Origin: origin,
+                  "Content-Type": "application/json",
+                },
+          ...(method === "PATCH"
+            ? { body: JSON.stringify({ workspaceId }) }
+            : {}),
+        });
+        expect(response.status).toBe(
+          actor === "agent"
+            ? 401
+            : method !== "GET" && actor === "owner"
+              ? 200
+              : 403,
+        );
+        if (method === "DELETE" && response.status === 200)
+          expect(
+            (await core.getMe(ownerUserId)).workspaces.some(
+              (row) => row.id === target,
+            ),
+          ).toBe(false);
+      },
+    );
+
     const personal = [
       "/api/me",
       "/api/bootstrap",
@@ -1408,6 +1458,9 @@ describe.skipIf(!databaseUrl)(
         path.split("?")[0].replace(/:[^/]+/g, ":id");
       const covered = new Set([
         ...routes.map((row) => `${row.method} ${normalize(row.path)}`),
+        ...organizationRoutes.map(
+          ([method, path]) => `${method} ${normalize(path)}`,
+        ),
         ...personal.map((path) => `GET ${path}`),
         ...personalWrites.map((row) => `${row.method} ${row.path}`),
         ...lifecycleRoutes.map(([method, path]) => `${method} ${path}`),

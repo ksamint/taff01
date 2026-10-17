@@ -8,6 +8,7 @@ import {
   suggestions,
   type Transaction,
   tasks,
+  user,
   workspaces,
 } from "@taff/db";
 import {
@@ -26,7 +27,7 @@ import {
   SchemaError,
   type SuggestionKind,
 } from "@taff/schemas";
-import { and, asc, eq, inArray, ne, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import type { AiProvider } from "./ai-provider";
 import { answerAsk } from "./ask";
 import { type BriefSource, buildBrief } from "./brief";
@@ -96,7 +97,18 @@ export function createAssistantOperations({
       .select({ id: members.workspaceId })
       .from(members)
       .innerJoin(workspaces, eq(workspaces.id, members.workspaceId))
-      .where(eq(members.userId, p.userId))
+      .innerJoin(user, eq(user.id, members.userId))
+      .where(
+        and(
+          eq(members.userId, p.userId),
+          isNull(workspaces.archivedAt),
+          or(
+            eq(user.systemAdmin, false),
+            isNull(workspaces.personalOwnerId),
+            eq(workspaces.personalOwnerId, p.userId),
+          ),
+        ),
+      )
       .orderBy(asc(workspaces.createdAt), asc(workspaces.id));
     return rows.map((row) => row.id);
   }

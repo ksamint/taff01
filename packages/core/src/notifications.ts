@@ -9,6 +9,7 @@ import {
   type Transaction,
   tasks,
   user,
+  workspaces,
 } from "@taff/db";
 import {
   canonicalCalendarTimeZone,
@@ -427,12 +428,25 @@ export function createNotificationOperations({
       const ids: string[] = [];
       if (currentSlot.getTime() <= now.getTime()) {
         const roster = await tx
-          .select()
+          .select({ member: members })
           .from(members)
-          .where(and(eq(members.userId, person.id), eq(members.kind, "person")))
+          .innerJoin(workspaces, eq(workspaces.id, members.workspaceId))
+          .where(
+            and(
+              eq(members.userId, person.id),
+              eq(members.kind, "person"),
+              isNull(workspaces.archivedAt),
+              person.systemAdmin
+                ? or(
+                    isNull(workspaces.personalOwnerId),
+                    eq(workspaces.personalOwnerId, person.id),
+                  )
+                : undefined,
+            ),
+          )
           .orderBy(members.workspaceId)
           .for("share");
-        for (const member of roster) {
+        for (const { member } of roster) {
           if (
             !can(member, "digest:read", {
               workspaceId: member.workspaceId,

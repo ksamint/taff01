@@ -903,6 +903,24 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
       if (restored !== theme) throw new Error("theme restore not confirmed");
     });
   }
+  for (const entry of entries.filter(
+    (item) => item.kind === "workspaces" && !item.retained,
+  )) {
+    await perform(entry.kind, entry.id, async () => {
+      await checked(
+        await request.delete(`/api/workspaces/${entry.id}`),
+        "archive current-run organization",
+      );
+      const me = meSchema.parse(
+        await checked(
+          await request.get("/api/me"),
+          "verify organization cleanup",
+        ),
+      );
+      if (me.workspaces.some((row) => row.id === entry.id))
+        throw new Error("organization archive not confirmed");
+    });
+  }
   const dir = process.env.RELEASE_REPORT_DIR ?? "reports";
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   writeFileSync(
@@ -918,12 +936,9 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
           ...e,
           retained:
             !!e.retained ||
-            [
-              "tasks",
-              "workspaces",
-              "verification-recipient",
-              "recipient-member",
-            ].includes(e.kind),
+            ["tasks", "verification-recipient", "recipient-member"].includes(
+              e.kind,
+            ),
         })),
         cleanup: notes,
         ...(failed

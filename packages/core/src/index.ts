@@ -75,7 +75,7 @@ export {
   SmsProviderError,
 } from "./tencent-sms";
 
-import { and, desc, eq, isNull, max, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, max, or, sql } from "drizzle-orm";
 import { createAdministrationOperations } from "./administration";
 import type { AiProvider } from "./ai-provider";
 import { createAssistantOperations } from "./assistant";
@@ -90,6 +90,7 @@ import { createRunOperations } from "./runs";
 import { createSuggestionOperations } from "./suggestions";
 import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
+import { createWorkspaceLifecycle } from "./workspace-lifecycle";
 
 export class CoreError extends Error {
   constructor(
@@ -295,6 +296,13 @@ export function createCore(options: {
     principal: Principal,
     workspaceId: string,
   ): Promise<Actor | null> {
+    const [workspace] = await query
+      .select({ id: workspaces.id })
+      .from(workspaces)
+      .where(
+        and(eq(workspaces.id, workspaceId), isNull(workspaces.archivedAt)),
+      );
+    if (!workspace) return null;
     if (principal.kind === "agent") {
       if (principal.workspaceId !== workspaceId) return null;
       const [member] = await query
@@ -423,8 +431,20 @@ export function createCore(options: {
       })
       .from(members)
       .innerJoin(workspaces, eq(members.workspaceId, workspaces.id))
-      .where(eq(members.userId, userId))
+      .where(
+        and(
+          eq(members.userId, userId),
+          isNull(workspaces.archivedAt),
+          person.systemAdmin
+            ? or(
+                isNull(workspaces.personalOwnerId),
+                eq(workspaces.personalOwnerId, userId),
+              )
+            : undefined,
+        ),
+      )
       .orderBy(
+        sql`CASE WHEN ${workspaces.id} = ${person.defaultWorkspaceId}::uuid THEN 0 WHEN ${workspaces.personalOwnerId} IS DISTINCT FROM ${userId} THEN 1 ELSE 2 END`,
         sql`CASE WHEN ${workspaces.seedKey} IS NOT NULL THEN 0 ELSE 1 END`,
         workspaces.createdAt,
         // Workspaces created in one transaction share createdAt; the first
@@ -437,6 +457,8 @@ export function createCore(options: {
         id: person.id,
         name: person.name,
         email: person.email,
+        systemAdmin: person.systemAdmin,
+        defaultWorkspaceId: person.defaultWorkspaceId,
         locale: person.locale as Me["user"]["locale"],
         tz: person.tz,
       },
@@ -446,6 +468,7 @@ export function createCore(options: {
       })),
     };
   }
+  const workspaceLifecycle = createWorkspaceLifecycle({ db, mutation });
   async function listMembers(
     principal: Principal,
     workspaceId: string,
@@ -1082,16 +1105,19 @@ export function createCore(options: {
     token: string,
   ): Promise<Principal | null> {
     if (!token.startsWith("taff_") || token.length > 200) return null;
-    const [row] = await db
-      .select()
+    const [found] = await db
+      .select({ token: agentTokens })
       .from(agentTokens)
+      .innerJoin(workspaces, eq(workspaces.id, agentTokens.workspaceId))
       .where(
         and(
           eq(agentTokens.hash, hashToken(token, options.tokenPepper)),
           isNull(agentTokens.revokedAt),
+          isNull(workspaces.archivedAt),
         ),
       )
       .limit(1);
+    const row = found?.token;
     if (!row) return null;
     return {
       kind: "agent",
@@ -1289,6 +1315,7 @@ export function createCore(options: {
     updateTaskWork,
     scheduleTask,
     updateProfile,
+    ...workspaceLifecycle,
     createAgentToken,
     listAgentTokens,
     revokeAgentToken,

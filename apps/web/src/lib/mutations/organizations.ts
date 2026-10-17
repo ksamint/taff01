@@ -1,5 +1,6 @@
 // Workspace (organization) mutations: create, add agent, invites and roles.
 import {
+  defaultWorkspaceInputSchema,
   issuedWorkspaceInviteSchema,
   type Member,
   memberRoleInputSchema,
@@ -282,5 +283,26 @@ export function useRevokeWorkspaceInvite(workspaceId: string) {
     },
     onError: (_, __, snapshot) => restoreQueries(client, snapshot),
     onSettled: () => invalidateWorkspaces(client),
+  });
+}
+
+export function useDefaultWorkspace() {
+  const client = useQueryClient();
+  return useMutation({
+    mutationKey: m3MutationKey,
+    mutationFn: ({
+      userId,
+      workspaceId,
+    }: {
+      userId: string;
+      workspaceId: string | null;
+    }) =>
+      request(`/api/users/${encodeURIComponent(userId)}/default-workspace`, {
+        method: "PATCH",
+        body: JSON.stringify(
+          defaultWorkspaceInputSchema.parse({ workspaceId }),
+        ),
+      }).then(defaultWorkspaceInputSchema.parse),
+    onSuccess: () => client.invalidateQueries({ queryKey: meKey }),
   });
 }

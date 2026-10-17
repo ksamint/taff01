@@ -636,7 +636,12 @@
       "failed": "邀请邮件未能发送，下方链接仍然有效，可复制分享。"
     },
     "label": "组织",
-    "switchShort": "切换"
+    "switchShort": "切换",
+    "loginDefault": "登录后默认组织",
+    "automaticDefault": "自动选择",
+    "loginDefaultHint": "自动进入已加入的组织；未加入组织时进入以姓名命名的个人空间。手动选择后在不同设备间保存。",
+    "setMemberDefault": "设为 {{name}} 的登录默认组织",
+    "defaultUpdated": "已更新 {{name}} 的登录默认组织。"
   },
   "pwa": {
     "description": "人与智能体协作的任务和日历。",

@@ -50,7 +50,7 @@ import {
   workspaceInviteInputSchema,
   workspaceKeyFromName,
 } from "@taff/schemas";
-import { and, desc, eq, inArray, isNull, type SQL, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, or, type SQL, sql } from "drizzle-orm";
 import { deliverEmail, type EmailStatus, type EmailTransport } from "./email";
 import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
@@ -500,7 +500,7 @@ export function createPlanningOperations({
       .from(workspaces)
       .where(eq(workspaces.id, w))
       .for("update");
-    if (!row) throw new CoreError("not_found", 404);
+    if (!row || row.archivedAt) throw new CoreError("not_found", 404);
     return row;
   }
   async function createWorkspace(
@@ -833,7 +833,19 @@ export function createPlanningOperations({
         ? await db
             .select({ workspaceId: members.workspaceId, id: members.id })
             .from(members)
-            .where(eq(members.userId, p.userId))
+            .innerJoin(workspaces, eq(workspaces.id, members.workspaceId))
+            .innerJoin(user, eq(user.id, members.userId))
+            .where(
+              and(
+                eq(members.userId, p.userId),
+                isNull(workspaces.archivedAt),
+                or(
+                  eq(user.systemAdmin, false),
+                  isNull(workspaces.personalOwnerId),
+                  eq(workspaces.personalOwnerId, p.userId),
+                ),
+              ),
+            )
         : [];
     const ids = memberships.length
       ? memberships.map((m) => m.workspaceId)

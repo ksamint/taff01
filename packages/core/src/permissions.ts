@@ -9,6 +9,8 @@ import type {
 } from "@taff/schemas";
 
 export type Action =
+  | "workspace:archive"
+  | "workspace:default"
   | "workspace:create"
   | "workspace:join"
   | "workspace:manage"
@@ -72,6 +74,7 @@ export type Resource =
   | { userId: string };
 /** A member acting through an agent token carries that token's scopes. */
 export type Actor = Member & {
+  systemAdmin?: boolean;
   scopes?: Scope[];
   permissions?: { capability: Capability; decision: PermissionDecision }[];
   grants?: Pick<
@@ -97,6 +100,21 @@ export function can(
   resource: Resource,
 ): boolean {
   if (!actor) return false;
+  if (action === "workspace:default")
+    return (
+      actor.kind === "person" &&
+      "userId" in resource &&
+      (actor.userId === resource.userId || actor.systemAdmin === true)
+    );
+  if (action === "workspace:archive")
+    return (
+      actor.kind === "person" &&
+      (actor.systemAdmin === true ||
+        (actor.role === "admin" &&
+          "workspaceId" in resource &&
+          actor.workspaceId === resource.workspaceId))
+    );
+
   if (
     action === "notification:read" ||
     action === "notification:update" ||

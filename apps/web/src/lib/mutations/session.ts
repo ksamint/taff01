@@ -14,6 +14,7 @@ import {
   snapshotQueries,
 } from "../query-snapshot";
 import { synchronizeSession } from "../session-cache";
+import { clearWorkspaceSession } from "../workspace-preference";
 
 /** The signed-in user with a new locale and time zone, or the same value. */
 export function withProfile(
@@ -93,6 +94,7 @@ export function useSignOut({
     mutationFn: () =>
       request("/api/auth/sign-out", { method: "POST", body: "{}" }),
     onSuccess: () => {
+      clearWorkspaceSession();
       synchronizeSession(client, null);
       client.clear();
       client.setQueryData(meKey, null);

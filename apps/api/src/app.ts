@@ -17,6 +17,7 @@ import {
   createAgentTokenSchema,
   createTaskSchema,
   decideGrantSchema,
+  defaultWorkspaceInputSchema,
   emailVerificationConsumeSchema,
   emailVerificationRequestSchema,
   idSchema,
@@ -329,6 +330,28 @@ export function createApp(
     ),
   );
   app.get("/api/me", async (c) => c.json(await core.getMe(c.get("userId"))));
+  app.patch("/api/users/:id/default-workspace", async (c) =>
+    c.json(
+      await core.setDefaultWorkspace(
+        userPrincipal(c.get("userId")),
+        c.req.param("id"),
+        defaultWorkspaceInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.get("/api/admin/workspaces", async (c) =>
+    c.json(
+      await core.listWorkspaceAdministration(userPrincipal(c.get("userId"))),
+    ),
+  );
+  app.delete("/api/workspaces/:id", async (c) =>
+    c.json(
+      await core.archiveWorkspace(
+        userPrincipal(c.get("userId")),
+        c.req.param("id"),
+      ),
+    ),
+  );
   app.get("/api/bootstrap", async (c) => {
     c.header("Cache-Control", "private, no-store");
     return c.json(await core.getMe(c.get("userId")));

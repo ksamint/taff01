@@ -22,6 +22,7 @@ for (const [entry, name] of [
   ["apps/worker/src/index.ts", "worker"],
   ["packages/db/src/migrate.ts", "migrate"],
   ["packages/core/src/provision-administration.ts", "administration"],
+  ["packages/core/src/cleanup-organizations.ts", "cleanup-organizations"],
 ] as const) {
   await build({
     entryPoints: [entry],
@@ -58,8 +59,13 @@ for (const target of ["api", "worker"]) {
   );
   await cp(`${out}/${target}.mjs`, `${runtime}/${target}.mjs`);
   await cp(`${out}/migrate.mjs`, `${runtime}/migrate.mjs`);
-  if (target === "api")
+  if (target === "api") {
     await cp(`${out}/administration.mjs`, `${runtime}/administration.mjs`);
+    await cp(
+      `${out}/cleanup-organizations.mjs`,
+      `${runtime}/cleanup-organizations.mjs`,
+    );
+  }
   await cp(`${out}/migrations`, `${runtime}/migrations`, { recursive: true });
   const require = createRequire(resolve(runtime, `${target}.mjs`));
   for (const auditTool of ["lighthouse", "axe-core"]) {

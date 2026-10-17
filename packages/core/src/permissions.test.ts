@@ -22,6 +22,62 @@ const agent: Actor = {
 const task = { workspaceId: "workspace", ownerId: "owner", workerId: "agent" };
 describe("permissions", () => {
   it.each<[string, Actor | null, Action, Resource, boolean]>([
+    [
+      "user can select own login default",
+      person,
+      "workspace:default",
+      { userId: "user" },
+      true,
+    ],
+    [
+      "user cannot change another login default",
+      person,
+      "workspace:default",
+      { userId: "other" },
+      false,
+    ],
+    [
+      "system admin can change another login default",
+      { ...person, systemAdmin: true },
+      "workspace:default",
+      { userId: "other" },
+      true,
+    ],
+    [
+      "agent cannot change login default",
+      agent,
+      "workspace:default",
+      { userId: "user" },
+      false,
+    ],
+    [
+      "organization admin can archive own organization",
+      { ...person, role: "admin" },
+      "workspace:archive",
+      task,
+      true,
+    ],
+    [
+      "member cannot archive organization",
+      person,
+      "workspace:archive",
+      task,
+      false,
+    ],
+    [
+      "system admin can archive organization",
+      { ...person, systemAdmin: true },
+      "workspace:archive",
+      task,
+      true,
+    ],
+    [
+      "agent cannot archive organization",
+      agent,
+      "workspace:archive",
+      task,
+      false,
+    ],
     ["anonymous cannot read", null, "workspace:read", task, false],
     ["member can read", person, "workspace:read", task, true],
     [

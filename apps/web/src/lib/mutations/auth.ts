@@ -9,6 +9,7 @@ import type {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ApiError, request } from "../api";
 import { meKey } from "../queries";
+import { clearWorkspaceSession } from "../workspace-preference";
 
 export type CredentialAuth = {
   endpoint:
@@ -33,6 +34,7 @@ export function useCredentialAuth() {
         body: JSON.stringify(body),
       }),
     onSuccess: async () => {
+      clearWorkspaceSession();
       await client.invalidateQueries({ queryKey: meKey });
     },
   });
@@ -73,6 +75,7 @@ export function useVerifyPhoneOtp() {
         body: JSON.stringify(body),
       }),
     onSuccess: async () => {
+      clearWorkspaceSession();
       await client.invalidateQueries({ queryKey: meKey });
     },
   });
