@@ -1,7 +1,7 @@
 "use client";
 
 import { verifyPhoneOtpSchema } from "@taff/schemas/base";
-import { type FormEvent, useEffect, useRef, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ApiError } from "../lib/api";
 import { useSendPhoneOtp, useVerifyPhoneOtp } from "../lib/mutations/auth";
@@ -10,15 +10,19 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 
+/**
+ * Second sign-in step for a mainland mobile number: one tap texts the code,
+ * and the person can switch to a password instead. Nothing is sent until
+ * they ask, so password users never trigger an SMS.
+ */
 export function SmsAuth({
-  initialPhone,
-  onBack,
+  phone,
+  onUsePassword,
 }: {
-  initialPhone?: string;
-  onBack: () => void;
+  phone: string;
+  onUsePassword: () => void;
 }) {
   const { t } = useTranslation();
-  const [phone, setPhone] = useState(initialPhone ?? "");
   const [destination, setDestination] = useState<string | null>(null);
   const [code, setCode] = useState("");
   const [invalid, setInvalid] = useState(false);
@@ -57,14 +61,6 @@ export function SmsAuth({
       send.mutate(phoneNumber);
     }
   }
-  // A number typed on the sign-in form gets its code straight away; the ref
-  // keeps development double effects from sending twice.
-  const autoSent = useRef(false);
-  useEffect(() => {
-    if (!initialPhone || autoSent.current) return;
-    autoSent.current = true;
-    sendCode();
-  }, []);
   function signIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const parsed = verifyPhoneOtpSchema.safeParse({
@@ -86,31 +82,7 @@ export function SmsAuth({
           : "sms.sendFailed";
   return (
     <>
-      <p className="field-hint">{t("sms.accountHint")}</p>
       <form onSubmit={destination ? signIn : sendCode} noValidate>
-        <div className="field">
-          <Label htmlFor="sms-phone">{t("sms.phone")}</Label>
-          <Input
-            id="sms-phone"
-            name="phone"
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={phone}
-            onChange={(event) => {
-              setPhone(event.target.value);
-              setInvalid(false);
-              send.reset();
-            }}
-            disabled={pending || destination !== null}
-            maxLength={24}
-            required
-            aria-describedby="sms-phone-hint"
-          />
-          <p id="sms-phone-hint" className="field-hint">
-            {t("sms.phoneHint")}
-          </p>
-        </div>
         {destination && (
           <div className="field">
             <Label htmlFor="sms-code">{t("sms.code")}</Label>
@@ -129,6 +101,7 @@ export function SmsAuth({
               minLength={6}
               disabled={pending}
               required
+              autoFocus
               aria-describedby="sms-code-hint"
             />
             <p id="sms-code-hint" className="field-hint" role="status">
@@ -142,6 +115,7 @@ export function SmsAuth({
           </p>
         )}
         <Button
+          data-testid="sms-submit"
           className="button-primary button-full"
           type="submit"
           disabled={pending || (!destination && cooldown > 0)}
@@ -149,35 +123,26 @@ export function SmsAuth({
           {t(pending ? "working" : destination ? "sms.verify" : "sms.send")}
         </Button>
       </form>
+      <p className="field-hint">{t("sms.accountHint")}</p>
       {destination && (
-        <>
-          <Button
-            data-testid="sms-resend"
-            className="button-link"
-            disabled={pending || cooldown > 0}
-            onClick={() => sendCode()}
-          >
-            {cooldown > 0
-              ? t("sms.resendIn", { count: cooldown })
-              : t("sms.resend")}
-          </Button>
-          <Button
-            className="button-link"
-            disabled={pending}
-            onClick={() => {
-              setDestination(null);
-              setCode("");
-              setInvalid(false);
-              verify.reset();
-              send.reset();
-            }}
-          >
-            {t("sms.changePhone")}
-          </Button>
-        </>
+        <Button
+          data-testid="sms-resend"
+          className="button-link"
+          disabled={pending || cooldown > 0}
+          onClick={() => sendCode()}
+        >
+          {cooldown > 0
+            ? t("sms.resendIn", { count: cooldown })
+            : t("sms.resend")}
+        </Button>
       )}
-      <Button className="button-link" disabled={pending} onClick={onBack}>
-        {t("sms.emailInstead")}
+      <Button
+        data-testid="phone-auth-toggle"
+        className="button-link"
+        disabled={pending}
+        onClick={onUsePassword}
+      >
+        {t("sms.usePassword")}
       </Button>
     </>
   );

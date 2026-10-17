@@ -69,11 +69,15 @@ test("optional username signup, username sign-in and email compatibility", async
   }
   await expect(page.getByTestId("today-heading")).toHaveText(m.today);
   await signOut(page, locale);
+  // Sign-in asks for the account first, then the password.
+  await expect(page.getByTestId("auth-password")).toHaveCount(0);
+  await page.getByTestId("auth-email").fill(`  ${username}  `);
+  await page.getByTestId("auth-continue").click();
+  await expect(page.getByTestId("auth-identity")).toHaveText(username);
   await expect(page.getByTestId("auth-password")).toHaveAttribute(
     "minlength",
     "6",
   );
-  await page.getByTestId("auth-email").fill(`  ${username}  `);
   await page.getByTestId("auth-password").fill(password);
   const signedIn = authResponse(page, "sign-in/username");
   await page.getByTestId("auth-submit").click();
@@ -86,6 +90,7 @@ test("optional username signup, username sign-in and email compatibility", async
   await expect(page.getByTestId("today-heading")).toHaveText(m.today);
   await signOut(page, locale);
   await page.getByTestId("auth-email").fill(email);
+  await page.getByTestId("auth-continue").click();
   await page.getByTestId("auth-password").fill(password);
   const emailLogin = authResponse(page, "sign-in/email");
   await page.getByTestId("auth-submit").click();
@@ -147,8 +152,9 @@ test("sign-in six-character passwords reach the selected endpoint with localized
     });
     await route.fulfill({ status: 401, json: { error: "unauthorized" } });
   });
-  await expect(page.locator("#password-hint")).toHaveText(m.signInPasswordHint);
   await page.getByTestId("auth-email").fill("invalid-name");
+  await page.getByTestId("auth-continue").click();
+  await expect(page.locator("#password-hint")).toHaveText(m.signInPasswordHint);
   await page.getByTestId("auth-password").fill("abcdef");
   await page.getByTestId("auth-submit").click();
   await expect(page.locator("form").getByRole("alert")).toHaveText(
@@ -156,7 +162,10 @@ test("sign-in six-character passwords reach the selected endpoint with localized
   );
   expect(requests).toEqual([]);
   for (const identifier of ["synthetic.user", "synthetic@example.test"]) {
+    await page.getByTestId("auth-change").click();
     await page.getByTestId("auth-email").fill(identifier);
+    await page.getByTestId("auth-continue").click();
+    await page.getByTestId("auth-password").fill("abcdef");
     const endpoint = identifier.includes("@")
       ? "sign-in/email"
       : "sign-in/username";

@@ -327,7 +327,7 @@ test("durable cache never records pending rollback data and revocation rejects a
         })
       ).status(),
     ).toBe(200);
-    await expect(page.getByTestId("auth-submit")).toBeVisible({
+    await expect(page.getByTestId("auth-continue")).toBeVisible({
       timeout: 1000,
     });
     await expect.poll(() => readCache(page)).toBeNull();

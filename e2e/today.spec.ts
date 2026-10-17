@@ -37,6 +37,7 @@ async function signIn(page: Page) {
   await page
     .getByTestId("auth-email")
     .fill(process.env.DEMO_EMAIL ?? "alex@taff.local");
+  await page.getByTestId("auth-continue").click();
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
@@ -180,7 +181,7 @@ test("sign in, create a task and assign it to an agent", async ({
     labels[otherLocale].today,
   );
   await signOutFromMe(page, otherLocale);
-  await expect(page.getByTestId("auth-submit")).toBeVisible();
+  await expect(page.getByTestId("auth-continue")).toBeVisible();
 });
 
 test("create an account with a workspace, then sign in again", async ({
@@ -215,6 +216,7 @@ test("create an account with a workspace, then sign in again", async ({
     .click();
   await signOutFromMe(page, locale);
   await page.getByTestId("auth-email").fill(email);
+  await page.getByTestId("auth-continue").click();
   await page.getByTestId("auth-password").fill(password);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toHaveText(

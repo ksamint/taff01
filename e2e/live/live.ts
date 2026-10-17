@@ -199,6 +199,7 @@ export async function liveSignIn(page: Page, locale: string) {
   const account = credentialAccount();
   await setupNavigation(page, "/");
   await page.getByTestId("auth-email").fill(account.username);
+  await page.getByTestId("auth-continue").click();
   await page.getByTestId("auth-password").fill(account.password);
   for (let attempt = 0; attempt < 4; attempt++) {
     const promise = page.waitForResponse(

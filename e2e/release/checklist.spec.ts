@@ -67,6 +67,7 @@ async function submitAuth(page: Page, endpoint: string) {
 
 async function formSignIn(page: Page, identifier: string, password: string) {
   await page.getByTestId("auth-email").fill(identifier);
+  await page.getByTestId("auth-continue").click();
   await page.getByTestId("auth-password").fill(password);
   await submitAuth(
     page,
@@ -85,7 +86,7 @@ const htmlLang = {
 async function signOut(page: Page, desktop: boolean, label: string) {
   await openMeSettings(page, desktop);
   await page.getByRole("button", { name: label, exact: true }).click();
-  await expect(page.getByTestId("auth-submit")).toBeVisible();
+  await expect(page.getByTestId("auth-continue")).toBeVisible();
 }
 
 test("[item 1] Sign-in and preferences", async ({ page, browser }, info) => {
@@ -128,8 +129,9 @@ test("[item 1] Sign-in and preferences", async ({ page, browser }, info) => {
       // A mobile number switches the form to a texted code. The checklist
       // never submits it, so no real code is requested.
       await sms.getByTestId("auth-email").fill("13800138000");
+      await sms.getByTestId("auth-continue").click();
       await expect(sms.getByTestId("auth-password")).toHaveCount(0);
-      await expect(sms.getByTestId("auth-submit")).toHaveText(m.sms.send);
+      await expect(sms.getByTestId("sms-submit")).toHaveText(m.sms.send);
       skipStep(
         info,
         "SMS sign-in: a mobile number switches the form to a texted code; completing it needs a real phone and code, which the checklist never sends",

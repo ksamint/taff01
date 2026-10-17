@@ -82,5 +82,5 @@ export async function signOutFromMe(page: Page, locale: TestLocale) {
     .getByRole("button", { name: messages[locale].signOut, exact: true })
     .click();
   await expect(page).toHaveURL(new URL("/", process.env.AUTH_URL!).href);
-  await expect(page.getByTestId("auth-submit")).toBeVisible();
+  await expect(page.getByTestId("auth-continue")).toBeVisible();
 }

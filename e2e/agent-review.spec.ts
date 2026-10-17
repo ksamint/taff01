@@ -53,6 +53,7 @@ async function signIn(page: Page, locale: TestLocale) {
   await page
     .getByTestId("auth-email")
     .fill(process.env.DEMO_EMAIL ?? "alex@taff.local");
+  await page.getByTestId("auth-continue").click();
   await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();

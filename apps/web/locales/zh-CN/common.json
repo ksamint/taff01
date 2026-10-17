@@ -15,6 +15,8 @@
   "email": "邮箱",
   "emailOrUsername": "邮箱或用户名",
   "accountIdentifier": "用户名、手机号或邮箱",
+  "continue": "继续",
+  "changeAccount": "更改",
   "usernameOptional": "用户名（可选）",
   "usernameHint": "2–30 个字符：英文字母、数字、_ 或 .",
   "password": "密码",

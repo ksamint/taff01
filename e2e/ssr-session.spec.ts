@@ -301,7 +301,7 @@ for (const signedIn of [false, true]) {
     failing = false;
     await retry.click();
     if (signedIn) await expect(page.getByTestId("open-quick")).toBeEnabled();
-    else await expect(page.getByTestId("auth-submit")).toBeVisible();
+    else await expect(page.getByTestId("auth-continue")).toBeVisible();
     await expect(
       page.getByTestId(signedIn ? "open-quick" : "locale-select"),
     ).toBeEnabled();

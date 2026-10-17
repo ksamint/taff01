@@ -16,6 +16,8 @@
   "email": "電郵",
   "emailOrUsername": "電郵或用戶名稱",
   "accountIdentifier": "用戶名稱、手機號碼或電郵",
+  "continue": "繼續",
+  "changeAccount": "更改",
   "usernameOptional": "用戶名稱（選填）",
   "usernameHint": "2–30 個字元：英文字母、數字、_ 或 .",
   "password": "密碼",

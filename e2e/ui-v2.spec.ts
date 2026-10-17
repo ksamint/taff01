@@ -40,7 +40,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       await expect(page.locator(".landing-title")).toHaveText(
         messages[locale].home.headline1,
       );
-      await expect(page.getByTestId("auth-submit")).toBeEnabled();
+      await expect(page.getByTestId("auth-continue")).toBeEnabled();
       await expect(page.getByTestId("locale-select")).toHaveValue(locale);
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     });

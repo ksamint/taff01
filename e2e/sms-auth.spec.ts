@@ -24,9 +24,14 @@ test("unconfigured SMS keeps email login available", async ({ page }, info) => {
   await expect(
     page.getByLabel(messages[locale].accountIdentifier, { exact: true }),
   ).toBeVisible();
-  // Without SMS a phone number keeps the password and never requests a code.
+  // The account comes first; nothing else is asked yet.
+  await expect(page.getByTestId("auth-password")).toHaveCount(0);
+  // Without SMS a phone number goes on to the password and never offers a code.
   await page.getByTestId("auth-email").fill("13800138000");
+  await page.getByTestId("auth-continue").click();
+  await expect(page.getByTestId("auth-identity")).toHaveText("13800138000");
   await expect(page.getByTestId("auth-password")).toBeVisible();
+  await expect(page.getByTestId("phone-auth-toggle")).toHaveCount(0);
   await expect(page.getByTestId("auth-submit")).toHaveText(
     messages[locale].signIn,
   );
@@ -78,11 +83,13 @@ test("SMS validates input, limits resend and signs in only after verification", 
   });
   await page.goto("/");
   // The one sign-in field takes a username, mobile or email; a mobile number
-  // drops the password and texts a code instead.
+  // continues to the texted code, sent only when asked.
   await expect(
     page.getByLabel(m.accountIdentifier, { exact: true }),
   ).toHaveAttribute("data-testid", "auth-email");
   await page.getByTestId("auth-email").fill("138 0013 8000");
+  await page.getByTestId("auth-continue").click();
+  await expect(page.getByTestId("auth-identity")).toHaveText("138 0013 8000");
   await expect(page.getByTestId("auth-password")).toHaveCount(0);
   expect(sends).toBe(0);
   await page.getByRole("button", { name: m.sms.send, exact: true }).click();
@@ -102,20 +109,13 @@ test("SMS validates input, limits resend and signs in only after verification", 
   await page.getByTestId("sms-resend").click();
   await expect(page.getByTestId("sms-resend")).toBeDisabled();
   await expect.poll(() => sends).toBe(2);
-  await page.getByRole("button", { name: m.sms.changePhone }).click();
-  await page.clock.fastForward(61_000);
-  await page.getByLabel(m.sms.phone, { exact: true }).fill("invalid");
-  await page.getByRole("button", { name: m.sms.send, exact: true }).click();
+  await page.getByLabel(m.sms.code, { exact: true }).fill("12345");
+  await page.getByRole("button", { name: m.sms.verify, exact: true }).click();
   await expect(
     page
       .getByRole("region", { name: m.sms.title, exact: true })
       .getByRole("alert"),
   ).toHaveText(m.errors.invalid_input);
-  expect(sends).toBe(2);
-  await page.getByLabel(m.sms.phone, { exact: true }).fill("13800138000");
-  await page.getByRole("button", { name: m.sms.send, exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText(m.sms.sent);
-  await expect.poll(() => sends).toBe(3);
   await page.getByLabel(m.sms.code, { exact: true }).fill("123456");
   await page.getByRole("button", { name: m.sms.verify, exact: true }).click();
   await expect(page.getByTestId("today-heading")).toHaveText(m.today);
@@ -143,8 +143,9 @@ test("SMS respects server Retry-After and recovers from provider failure", async
   });
   await page.goto("/");
   await page.getByTestId("auth-email").fill("13800138000");
-  await page.getByTestId("auth-submit").click();
+  await page.getByTestId("auth-continue").click();
   const send = page.getByRole("button", { name: m.sms.send, exact: true });
+  await send.click();
   await expect(
     page
       .getByRole("region", { name: m.sms.title, exact: true })
@@ -163,8 +164,10 @@ test("SMS respects server Retry-After and recovers from provider failure", async
       .getByRole("alert"),
   ).toHaveText(m.sms.sendFailed);
   await expect(page.getByLabel(m.sms.code, { exact: true })).toHaveCount(0);
-  await page.getByRole("button", { name: m.sms.emailInstead }).click();
-  await expect(page.getByTestId("auth-email")).toBeVisible();
+  await page.getByTestId("phone-auth-toggle").click();
+  await expect(page.getByTestId("auth-password")).toBeVisible();
+  await page.getByTestId("auth-change").click();
+  await expect(page.getByTestId("auth-email")).toHaveValue("13800138000");
 });
 
 for (const enabled of [true, false]) {
@@ -214,6 +217,7 @@ for (const enabled of [true, false]) {
     });
     await page.goto("/");
     await page.getByTestId("auth-email").fill("138 0013 8000");
+    await page.getByTestId("auth-continue").click();
     if (enabled) {
       await expect(page.getByTestId("auth-password")).toHaveCount(0);
       await expect(page.getByTestId("phone-auth-toggle")).toHaveText(
@@ -221,9 +225,12 @@ for (const enabled of [true, false]) {
       );
       await page.getByTestId("phone-auth-toggle").click();
       await expect(page.getByTestId("auth-password")).toBeVisible();
+      await expect(page.getByTestId("phone-auth-toggle")).toHaveText(
+        m.sms.useCode,
+      );
       await page.getByTestId("phone-auth-toggle").click();
       await expect(page.getByTestId("auth-password")).toHaveCount(0);
-      await expect(page.getByTestId("auth-submit")).toHaveText(m.sms.send);
+      await expect(page.getByTestId("sms-submit")).toHaveText(m.sms.send);
       await page.getByTestId("phone-auth-toggle").click();
     } else await expect(page.getByTestId("phone-auth-toggle")).toHaveCount(0);
     await expect(page.getByTestId("auth-submit")).toHaveText(m.signIn);

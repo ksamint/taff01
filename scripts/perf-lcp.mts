@@ -129,6 +129,7 @@ async function measure(): Promise<number> {
     // Sign in at full speed, then measure a cold navigation with the session kept.
     await page.goto(`${origin}/`);
     await page.getByTestId("auth-email").fill(email);
+    await page.getByTestId("auth-continue").click();
     await page.getByTestId("auth-password").fill(password);
     await page.getByTestId("auth-submit").click();
     await page.getByTestId("today-heading").waitFor();

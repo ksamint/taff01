@@ -26,6 +26,7 @@ async function signIn(page: Page, locale: Locale) {
   await page
     .getByTestId("auth-email")
     .fill(process.env.DEMO_EMAIL ?? "alex@taff.local");
+  await page.getByTestId("auth-continue").click();
   await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
   await page.getByTestId("auth-submit").click();
   await expect(page.getByTestId("today-heading")).toBeVisible();
@@ -756,7 +757,7 @@ test("remote session revocation clears private caches and an old write cannot re
       headers: { Origin: process.env.AUTH_URL! },
     });
     expect(out.ok()).toBe(true);
-    await expect(page.getByTestId("auth-submit")).toBeVisible({
+    await expect(page.getByTestId("auth-continue")).toBeVisible({
       timeout: 1000,
     });
     await page.evaluate((privateTitle) => {
