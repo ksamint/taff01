@@ -2813,3 +2813,17 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Migrations: none. Native lock, exclusive private env backup and verified database dump; only API/worker/web replaced. AI_* unset; Caddy, Valkey, neighbors and PostgreSQL start preserved. Original host build completed after slow dependency downloads.
 - Workspace inventory before this verification: 3 business organizations, 167 test workspaces and 3 admin personal workspaces. Signup automatically creates personal workspaces; verification history retained under supported cleanup, no hard deletes.
 - Follow-up: retained verification-account personal workspaces explain the crowded picker; no cleanup change in this release. Rollback: `69434acc66851c766f43834131a449382b461ce7`; previous images and data retained. Acceptance receipt/deployment.done, tag verification and independent lock-release probe complete before docs push.
+
+
+### Frontend v2 release candidate v0.2.8 — 2026-10-17 UTC
+- Source `700ad4f0080070c6b0e4d67e9e28294749a316e9`; annotated tag after acceptance: `v0.2.8`; [PR #57](https://github.com/ksamint/taff01/pull/57) merged by fast-forward to its tested head.
+- Exact-source [main CI 39018484498](https://github.com/ksamint/taff01/actions/runs/39018484498) and [PR CI 39017862865](https://github.com/ksamint/taff01/actions/runs/39017862865) passed on attempt 1, without reruns.
+- Validation: 1662 unit/integration tests, 267 browser cases across three locales and 166 visual comparisons. All 12 home references reviewed and approved; baselines and tolerances retained.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 636/692/676 ms; Lighthouse P/A/BP 98/100/100 in every locale.
+- Local: 267/267 browser cases; LCP 744/808/808 ms; Lighthouse 99/100/100 each. Final `release:stack --build --migrate --seed` and production checklist 32/32 passed, retries 0; three pinned images and official all-31-tool MCP smoke passed.
+- Changes: account-first sign-in; explicit SMS sending; password/code toggle and account preservation; keyboard focus; designed ink/underline/round-button landing with system serif headlines (ADR 0020).
+- Review repairs: focus returns to the account and moves to the SMS action; Me visual capture waits for its seeded Brief badge. No baseline or threshold change.
+- Owner decision: keep system fonts and report fallback; no font file added. Desktop Chromium resolves Songti SC. Real iPhone/Android rendering and native Safari/Chrome saved-password autofill remain unverified.
+- Migrations: none. Env template, Compose, Dockerfiles and host layout unchanged; AI_* remain unset. Native lock, exclusive verified DB/env backups and scoped API/worker/web replacement required.
+- Acceptance: 22 critical/platform/realtime/MCP live cases, fresh zh-HK/en-US landing, email/username sign-in, mobile code/password toggle with zero SMS requests and signup. Never tap Send code or flood public MCP.
+- Rollback: `e6928f066616b400ad2f2740c5e3e388beae5eb3`; retain prior images and all data.
