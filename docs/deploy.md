@@ -2827,3 +2827,16 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Migrations: none. Env template, Compose, Dockerfiles and host layout unchanged; AI_* remain unset. Native lock, exclusive verified DB/env backups and scoped API/worker/web replacement required.
 - Acceptance: 22 critical/platform/realtime/MCP live cases, fresh zh-HK/en-US landing, email/username sign-in, mobile code/password toggle with zero SMS requests and signup. Never tap Send code or flood public MCP.
 - Rollback: `e6928f066616b400ad2f2740c5e3e388beae5eb3`; retain prior images and all data.
+
+
+### Frontend v2 v0.2.8 upgrade checkpoint — 2026-10-17 UTC
+- Source `700ad4f0080070c6b0e4d67e9e28294749a316e9`, annotated tag `v0.2.8`; [PR #57](https://github.com/ksamint/taff01/pull/57) merged at the tested head. Exact-source [main CI 39018484498](https://github.com/ksamint/taff01/actions/runs/39018484498) and [PR CI 39017862865](https://github.com/ksamint/taff01/actions/runs/39017862865) passed on attempt 1.
+- Validation: 1662 unit/integration tests, 267 browser cases in all three locales, 166 visual comparisons; all 12 home references approved. Local browser 267/267 and production checklist 32/32, retries 0; three pinned images and all-31-tool MCP smoke passed.
+- Today JS 190.7 KiB; main LCP en/zh-CN/zh-HK 636/692/676 ms; Lighthouse P/A/BP 98/100/100 each. Local LCP 744/808/808 ms and Lighthouse 99/100/100 each.
+- Live: 22/22 critical/platform/realtime/all-31-tool MCP cases, retries 0; 22 cleanup journals, zero cleanup failures and browser page errors.
+- Fresh zh-HK/en-US landing, signup, email and username password login, and mobile code/password toggle passed; zero SMS requests. Fresh live phone capture shows the approved layout and system serif headline.
+- Migrations: none. Native lock, exclusive verified private DB/env backups and scoped API/worker/web replacement; AI_* unset. Caddy, Valkey, neighbors and PostgreSQL start preserved; previous images and data retained.
+- Ops: corrected the relay's worktree path before the successful pinned-source relay/build; no service replacement occurred during that correction.
+- Owner chose system fonts; no font file added. Desktop Chromium resolves Songti SC; real iPhone/Android rendering and native Safari/Chrome saved-password autofill remain unverified. Devices lacking a CJK serif retain browser fallback.
+- Verification signup histories, including one additional UI-signup personal workspace, are retained; no hard deletes or cleanup expansion.
+- Rollback: `e6928f066616b400ad2f2740c5e3e388beae5eb3`. Acceptance receipt/deployment.done written; annotated tag verified remotely; independent native flock probe confirmed lock release and healthy pinned runtime before this docs push.
