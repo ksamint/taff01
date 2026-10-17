@@ -1,4 +1,5 @@
 import {
+  activity,
   type Database,
   members,
   type Transaction,
@@ -6,6 +7,7 @@ import {
   workspaces,
 } from "@taff/db";
 import {
+  changeEventSchema,
   type DefaultWorkspaceInput,
   defaultWorkspaceInputSchema,
   idSchema,
@@ -79,6 +81,34 @@ export function createWorkspaceLifecycle({
         .update(user)
         .set({ defaultWorkspaceId: body.workspaceId, updatedAt: new Date() })
         .where(eq(user.id, targetUserId));
+      // The generic users trigger attributes identity changes to their subject.
+      // Preserve the actual administrator for this delegated preference change.
+      const [change] = await tx
+        .insert(activity)
+        .values({
+          actorId: actor.userId!,
+          workspaceId: null,
+          action: "users.update",
+          resourceId: targetUserId,
+          details: {
+            operation: "default_workspace",
+            previousWorkspaceId: target.defaultWorkspaceId,
+            workspaceId: body.workspaceId,
+          },
+        })
+        .returning({ id: activity.id });
+      const event = changeEventSchema.parse({
+        activityId: change.id,
+        workspaceId: null,
+        resourceId: targetUserId,
+        action: "users.update",
+        actorId: actor.userId!,
+        userId: targetUserId,
+        recipientOnly: true,
+      });
+      await tx.execute(
+        sql`select pg_notify('taff_changes', ${JSON.stringify(event)})`,
+      );
       return body;
     });
   }

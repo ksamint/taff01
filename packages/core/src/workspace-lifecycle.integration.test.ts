@@ -178,6 +178,21 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
       expect((await core.getMe(bob)).user.defaultWorkspaceId).toBe(
         organization,
       );
+      const audit = await connection.db
+        .select()
+        .from(activity)
+        .where(and(eq(activity.resourceId, bob), eq(activity.actorId, alice)));
+      expect(audit).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            action: "users.update",
+            details: expect.objectContaining({
+              operation: "default_workspace",
+              workspaceId: organization,
+            }),
+          }),
+        ]),
+      );
       const me = await core.getMe(alice);
       expect(me.workspaces.some((row) => row.name === "Workspace Bob")).toBe(
         false,
