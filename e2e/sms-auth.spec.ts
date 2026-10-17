@@ -92,8 +92,10 @@ test("SMS validates input, limits resend and signs in only after verification", 
   await expect(page.getByTestId("auth-identity")).toHaveText("138 0013 8000");
   await expect(page.getByTestId("auth-password")).toHaveCount(0);
   expect(sends).toBe(0);
+  await expect(page.getByTestId("sms-submit")).toBeFocused();
   await page.getByRole("button", { name: m.sms.send, exact: true }).click();
   await expect(page.getByRole("status")).toHaveText(m.sms.sent);
+  await expect(page.getByLabel(m.sms.code, { exact: true })).toBeFocused();
   await expect(page.getByTestId("sms-resend")).toBeDisabled();
   expect(sends).toBe(1);
   await page.getByLabel(m.sms.code, { exact: true }).fill("111111");

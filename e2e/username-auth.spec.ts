@@ -188,3 +188,34 @@ test("sign-in six-character passwords reach the selected endpoint with localized
     },
   ]);
 });
+
+test("two-step keyboard flow preserves the account and password-manager pairing", async ({
+  page,
+}, info) => {
+  await setup(page, info.project.name as TestLocale);
+  const account = page.getByTestId("auth-email");
+  await account.fill("synthetic.user");
+  await account.press("Enter");
+  const password = page.getByTestId("auth-password");
+  await expect(password).toBeFocused();
+  await expect(page.locator('form input[autocomplete="username"]')).toHaveValue(
+    "synthetic.user",
+  );
+  await password.press("Tab");
+  await expect(page.getByTestId("auth-submit")).toBeFocused();
+  await page.getByTestId("auth-change").click();
+  await expect(account).toHaveValue("synthetic.user");
+  await expect(account).toBeFocused();
+  await account.press("Tab");
+  await expect(page.getByTestId("auth-continue")).toBeFocused();
+  await page.getByTestId("auth-continue").press("Enter");
+  await expect(password).toBeFocused();
+  let submissions = 0;
+  await page.route("**/api/auth/sign-in/username", async (route) => {
+    submissions++;
+    await route.fulfill({ status: 401, json: { error: "unauthorized" } });
+  });
+  await password.fill("abcdef");
+  await password.press("Enter");
+  await expect.poll(() => submissions).toBe(1);
+});

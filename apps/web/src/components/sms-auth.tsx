@@ -116,6 +116,7 @@ export function SmsAuth({
         )}
         <Button
           data-testid="sms-submit"
+          autoFocus={!destination}
           className="button-primary button-full"
           type="submit"
           disabled={pending || (!destination && cooldown > 0)}

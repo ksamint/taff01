@@ -28,6 +28,7 @@ type Step = "identify" | "password" | "code";
 export function Auth() {
   const { t } = useTranslation();
   const [signup, setSignup] = useState(false);
+  const [focusAccount, setFocusAccount] = useState(false);
   const [step, setStep] = useState<Step>("identify");
   const [identifier, setIdentifier] = useState("");
   const [validationError, setValidationError] = useState(false);
@@ -47,6 +48,7 @@ export function Auth() {
     auth.reset();
   }
   function goTo(next: Step) {
+    setFocusAccount(next === "identify");
     clearErrors();
     setStep(next);
   }
@@ -133,6 +135,7 @@ export function Auth() {
       name="email"
       type={signup ? "email" : "text"}
       autoComplete={signup ? "email" : "username"}
+      autoFocus={!signup && focusAccount}
       value={identifier}
       onChange={(event) => setIdentifier(event.target.value)}
       required
