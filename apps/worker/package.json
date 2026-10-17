@@ -11,9 +11,9 @@
   "dependencies": {
     "@taff/core": "workspace:*",
     "@taff/schemas": "workspace:*",
-    "bullmq": "^6.3.0",
+    "bullmq": "^6.3.15",
+    "ioredis": "^5.11.1",
     "pino": "^10.4.0",
-    "zod": "^4.6.0",
-    "ioredis": "^5.11.0"
+    "zod": "^4.6.7"
   }
 }
