@@ -222,7 +222,11 @@ export function AppShell({ children }: { children: ReactNode }) {
       pathname === "/calendar");
   const selectionUser = useRef<string | null>(null);
   useEffect(() => {
-    if (!me.data || !identityReady || !confirmed) return;
+    if (!me.data) {
+      selectionUser.current = null;
+      return;
+    }
+    if (!identityReady || !confirmed) return;
     try {
       const key = `taff:workspace:${me.data.user.id}`;
       if (selectionUser.current !== me.data.user.id) {
@@ -277,6 +281,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   });
   const signOut = useSignOut({
     onSignedOut: () => {
+      selectionUser.current = null;
       setWorkspaceId("");
       // A pending invitation belongs to the account that opened it.
       setInvitation(null);

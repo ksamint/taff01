@@ -115,6 +115,11 @@ export const profileSchema = strictObject({
     refine(timeZone, "Invalid time zone"),
   ),
 });
+export const defaultWorkspaceInputSchema = strictObject({
+  workspaceId: nullable(idSchema),
+});
+export type DefaultWorkspaceInput = Infer<typeof defaultWorkspaceInputSchema>;
+
 export const memberSchema = object({
   id: idSchema,
   workspaceId: idSchema,
@@ -164,6 +169,8 @@ export const meSchema = object({
     id: string(),
     name: string(),
     email: email(),
+    systemAdmin: optional(boolean()),
+    defaultWorkspaceId: optional(nullable(idSchema)),
     locale: localeSchema,
     tz: string(),
   }),

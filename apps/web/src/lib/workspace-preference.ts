@@ -16,3 +16,16 @@ export function saveWorkspacePreference(userId: string, workspaceId: string) {
 import type { TodayBootstrapQuery } from "@taff/schemas/today-bootstrap";
 
 export const workspacePreferenceCookie = "taff-workspace";
+
+/** Start every authenticated login from the saved server default. */
+export function clearWorkspaceSession() {
+  try {
+    for (const key of Object.keys(window.sessionStorage)) {
+      if (key.startsWith("taff:workspace:"))
+        window.sessionStorage.removeItem(key);
+    }
+    document.cookie = `${workspacePreferenceCookie}=; Path=/; Max-Age=0; SameSite=Lax`;
+  } catch {
+    // Storage may be blocked; server ordering still supplies a safe default.
+  }
+}

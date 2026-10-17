@@ -636,7 +636,12 @@
       "failed": "The invitation email could not be sent. The link below is still valid and can be shared."
     },
     "label": "Organization",
-    "switchShort": "Switch"
+    "switchShort": "Switch",
+    "loginDefault": "Organization after login",
+    "automaticDefault": "Automatic",
+    "loginDefaultHint": "Automatic opens an organization you belong to, or your personal workspace named after you. Your choice is saved across devices.",
+    "setMemberDefault": "Set login default for {{name}}",
+    "defaultUpdated": "Login default updated for {{name}}."
   },
   "pwa": {
     "description": "Tasks and calendars for people and agents.",

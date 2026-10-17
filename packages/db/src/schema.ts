@@ -36,6 +36,7 @@ export const user = pgTable(
     image: text("image"),
     username: text("username").unique(),
     systemAdmin: boolean("system_admin").default(false).notNull(),
+    defaultWorkspaceId: uuid("default_workspace_id"),
     phoneNumber: text("phone_number").unique(),
     phoneNumberVerified: boolean("phone_number_verified")
       .default(false)
@@ -150,6 +151,10 @@ export const workspaces = pgTable("workspaces", {
   /** Short prefix of every task reference in the workspace, such as NW in NW-141. */
   key: text("key").default("WS").notNull(),
   seedKey: text("seed_key").unique(),
+  personalOwnerId: text("personal_owner_id")
+    .unique()
+    .references(() => user.id, { onDelete: "set null" }),
+  archivedAt: timestamp("archived_at", { withTimezone: true }),
   /** Opt-in for the optional model path of Ask taff (D6, ADR 0016). */
   aiEnabled: boolean("ai_enabled").default(false).notNull(),
   ...dates,

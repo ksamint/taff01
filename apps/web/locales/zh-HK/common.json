@@ -636,7 +636,12 @@
       "failed": "邀請電郵未能傳送，下方連結仍然有效，可複製分享。"
     },
     "label": "組織",
-    "switchShort": "切換"
+    "switchShort": "切換",
+    "loginDefault": "登入後預設組織",
+    "automaticDefault": "自動選擇",
+    "loginDefaultHint": "自動進入已加入的組織；未加入組織時進入以您姓名命名的個人空間。手動選擇後跨裝置儲存。",
+    "setMemberDefault": "設為 {{name}} 的登入預設組織",
+    "defaultUpdated": "已更新 {{name}} 的登入預設組織。"
   },
   "pwa": {
     "description": "人與代理協作的任務和日曆。",

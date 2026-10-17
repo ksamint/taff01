@@ -20,6 +20,7 @@ import {
   useAddWorkspaceAgent,
   useChangeMemberRole,
   useCreateWorkspace,
+  useDefaultWorkspace,
   useRevokeWorkspaceInvite,
 } from "../lib/mutations/organizations";
 import { m3MutationKey } from "../lib/optimistic-m3";
@@ -147,11 +148,13 @@ export function OrganizationsView() {
       setWorkspaceId(value.id);
     },
   });
+  const defaults = useDefaultWorkspace();
   const changeRole = useChangeMemberRole(workspace.id);
   const revoke = useRevokeWorkspaceInvite(workspace.id);
   const formatDate = useInviteDateFormat();
   const openInvite = () => setDialog("invite");
   const error =
+    defaults.error ??
     accept.error ??
     changeRole.error ??
     revoke.error ??
@@ -197,6 +200,30 @@ export function OrganizationsView() {
           </Button>
         </section>
       )}
+      <section className="me-section">
+        <Label htmlFor="default-workspace">
+          {t("organization.loginDefault")}
+        </Label>
+        <select
+          id="default-workspace"
+          disabled={busy}
+          value={me.user.defaultWorkspaceId ?? ""}
+          onChange={(event) =>
+            defaults.mutate({
+              userId: me.user.id,
+              workspaceId: event.target.value || null,
+            })
+          }
+        >
+          <option value="">{t("organization.automaticDefault")}</option>
+          {me.workspaces.map((item) => (
+            <option key={item.id} value={item.id}>
+              {item.name}
+            </option>
+          ))}
+        </select>
+        <p className="section-hint">{t("organization.loginDefaultHint")}</p>
+      </section>
       <div className="org-grid">
         {me.workspaces.map((item) => (
           <button
@@ -315,6 +342,33 @@ export function OrganizationsView() {
                           {t("taskCount", { count: assigned })}
                         </span>
                       )}
+                      {kind === "person" &&
+                        me.user.systemAdmin &&
+                        member.userId && (
+                          <Button
+                            disabled={busy}
+                            onClick={() =>
+                              defaults.mutate(
+                                {
+                                  userId: member.userId!,
+                                  workspaceId: workspace.id,
+                                },
+                                {
+                                  onSuccess: () =>
+                                    showToast(
+                                      t("organization.defaultUpdated", {
+                                        name: member.name,
+                                      }),
+                                    ),
+                                },
+                              )
+                            }
+                          >
+                            {t("organization.setMemberDefault", {
+                              name: member.name,
+                            })}
+                          </Button>
+                        )}
                       {kind === "person" && access.data?.canManageRoles && (
                         <select
                           aria-label={t("organization.roleFor", {
