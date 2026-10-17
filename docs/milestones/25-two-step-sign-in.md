@@ -32,5 +32,8 @@ Date: 2026-10-17. Decision record: ADR 0020.
   and zh-HK: sms-auth, username-auth, landing, home-layout, today and i18n
   all pass after fixes. The fixes were a remounted-field warning on sign-up,
   desktop headline wrapping and six signed-out test checks.
+- Full browser suite: 252/264. The 12 failures are four tests in each locale
+  (finance-visibility, native-select-fonts, two ssr-session) that failed the
+  same way here before this change; CI passes them on main.
 - Screenshots checked: identify step, password step, SMS code step (phone,
   zh-HK) and desktop.
