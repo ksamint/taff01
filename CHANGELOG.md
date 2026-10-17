@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.8 — 2026-10-17
+
+- Ask for the account first, then a password or an explicitly requested SMS code.
+- Preserve the account when changing steps; support keyboard focus and password-manager pairing.
+- Match the approved signed-out design with existing ink tokens, underline fields,
+  round buttons and system serif headlines in all three locales.
+- No migrations or bundled font changes.
+
 ## v0.2.2 — 2026-10-15
 
 Accepted live and annotated-tagged on exact source `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; 146/146 fresh checks and supplemental route cleanup passed.
