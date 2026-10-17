@@ -1,5 +1,13 @@
 import { randomUUID } from "node:crypto";
-import { activity, connectDatabase, members, tasks, user } from "@taff/db";
+import { readFileSync } from "node:fs";
+import {
+  activity,
+  connectDatabase,
+  members,
+  tasks,
+  user,
+  workspaces,
+} from "@taff/db";
 import { eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
@@ -41,6 +49,52 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
   afterAll(async () => {
     await core?.close();
     await connection?.close();
+  });
+  it("backfills legacy personal ownership from audit history and preserves later namesakes", async () => {
+    const name = `Legacy personal ${randomUUID()}`;
+    const legacy = await core.auth.api.signUpEmail({
+      body: {
+        name,
+        email: `${randomUUID()}@test.local`,
+        password: `test-${randomUUID()}`,
+      },
+    });
+    const original = (await core.getMe(legacy.user.id)).workspaces[0];
+    const namesake = await core.createWorkspace(userPrincipal(legacy.user.id), {
+      name,
+    });
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(sql`select set_config('taff.actor_id',${alice},true)`);
+      await tx
+        .update(workspaces)
+        .set({ personalOwnerId: null })
+        .where(eq(workspaces.id, original.id));
+    });
+    const statements = readFileSync(
+      new URL(
+        "../../db/migrations/0030_workspace_lifecycle.sql",
+        import.meta.url,
+      ),
+      "utf8",
+    ).split("--> statement-breakpoint");
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(
+        sql.raw(statements.find((text) => text.includes("SELECT set_config"))!),
+      );
+      await tx.execute(
+        sql.raw(statements.find((text) => text.includes("WITH candidates"))!),
+      );
+    });
+    const [recovered] = await connection.db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.id, original.id));
+    const [team] = await connection.db
+      .select()
+      .from(workspaces)
+      .where(eq(workspaces.id, namesake.id));
+    expect(recovered.personalOwnerId).toBe(legacy.user.id);
+    expect(team.personalOwnerId).toBe(null);
   });
   it("uses the named personal workspace until an organization exists, then prefers the organization", async () => {
     expect((await core.getMe(alice)).workspaces[0].name).toBe(

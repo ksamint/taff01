@@ -4,6 +4,8 @@ ALTER TABLE workspaces ADD COLUMN personal_owner_id text UNIQUE REFERENCES users
 --> statement-breakpoint
 ALTER TABLE workspaces ADD COLUMN archived_at timestamptz;
 --> statement-breakpoint
+SELECT set_config('taff.actor_id','system:workspace-lifecycle-migration',true);
+--> statement-breakpoint
 -- Signup's provisioning trigger records the new user's identity as actor.
 -- Choose the earliest audited matching workspace, never a later namesake.
 WITH candidates AS (
@@ -12,7 +14,7 @@ WITH candidates AS (
  JOIN workspaces w ON w.id::text=a.resource_id AND w.name=u.name
  ORDER BY u.id,w.created_at,w.id
 )
-UPDATE workspaces w SET personal_owner_id=c.user_id FROM candidates c WHERE w.id=c.workspace_id;
+UPDATE workspaces w SET personal_owner_id=c.user_id FROM candidates c WHERE w.id=c.workspace_id AND w.personal_owner_id IS NULL;
 --> statement-breakpoint
 CREATE OR REPLACE FUNCTION taff_provision_user() RETURNS trigger LANGUAGE plpgsql AS $$
 DECLARE workspace uuid;
