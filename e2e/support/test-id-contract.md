@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (345 distinct, 1865 uses)
+## Test ids (345 distinct, 1866 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -264,7 +264,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `advanced-theme-system` | 2 |  | me.spec.ts |
-| `brief-dot` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-dot` | 3 |  | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
 | `me-inbox` | 1 |  | ui-v2.spec.ts |
 | `me-team` | 3 |  | me.spec.ts, scripts/ui/app-shots.mjs |
 | `me-tz` | 9 |  | me.spec.ts |

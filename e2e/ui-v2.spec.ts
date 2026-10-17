@@ -361,6 +361,9 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         } else {
           await expect(page.getByTestId("me-inbox")).toBeVisible();
           await expect(page.getByTestId("me-brief")).toBeVisible();
+          // The seeded Brief query resolves after the row shell renders.
+          // Wait for its action badge before comparing the approved pixels.
+          await expect(page.getByTestId("brief-dot")).toBeVisible();
         }
       } else if (screen === "inbox") {
         await expect(page.getByTestId("inbox-item")).toHaveCount(
