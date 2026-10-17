@@ -226,11 +226,26 @@
   }
 }
 
-/* Signed-out landing: wordmark, language, one rotating line, sign-in. */
+/* Signed-out landing: wordmark, language, one rotating line, sign-in.
+   ADR 0020: the approved design's quiet look, from existing tokens only —
+   ink text and button (--text-body), hairline underline fields, a round
+   button, an ink focus ring and a system serif for the wordmark and line. */
 .landing {
+  --landing-ink: var(--text-body);
+  --landing-serif:
+    "Noto Serif TC", "Noto Serif CJK TC", "Source Han Serif TC", "Songti TC",
+    "Noto Serif SC", "Noto Serif CJK SC", "Songti SC", Georgia, serif;
+  --focus-ring: var(--landing-ink);
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
+  color: var(--landing-ink);
+}
+.landing:lang(zh-Hans) {
+  --landing-serif:
+    "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC",
+    "Noto Serif TC", "Noto Serif CJK TC", "Songti TC", Georgia, serif;
 }
 .landing-bar {
   display: flex;
@@ -241,9 +256,10 @@
   padding: 0 var(--gutter);
 }
 .landing-brand {
-  font-size: 20px;
-  font-weight: var(--weight-label);
-  letter-spacing: -0.01em;
+  font-family: var(--landing-serif);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
 }
 .landing-language {
   min-height: 44px;
@@ -265,8 +281,10 @@
 .landing-title {
   margin: 0;
   min-height: 1.3em;
+  font-family: var(--landing-serif);
   font-size: 34px;
-  font-weight: 300;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   line-height: 1.3;
   text-wrap: balance;
   animation: landing-title-in 600ms ease-out;
@@ -293,6 +311,60 @@
   background: none;
   padding: 0;
 }
+.landing-auth .label {
+  font-size: var(--text-body-sm);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.landing-auth .input {
+  border: 0;
+  border-bottom: var(--hairline) solid var(--border);
+  border-radius: 0;
+  padding-inline: 0;
+  background: transparent;
+  color: var(--landing-ink);
+}
+.landing-auth .input:focus-visible {
+  border-bottom-color: var(--landing-ink);
+  outline: 0;
+  box-shadow: inset 0 -1px 0 var(--landing-ink);
+}
+.landing-auth .button-primary {
+  margin-top: var(--space-lg);
+  min-height: 48px;
+  border-radius: 999px;
+  background: var(--landing-ink);
+  border-color: var(--landing-ink);
+  color: var(--bg);
+}
+.landing-auth .button-primary:hover:not(:disabled) {
+  background: var(--landing-ink);
+  opacity: 0.86;
+}
+.landing-auth .button-link:hover:not(:disabled) {
+  background: transparent;
+  color: var(--landing-ink);
+}
+.landing-auth form + .field-hint {
+  margin-top: var(--space-md);
+}
+.auth-identity {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding-bottom: var(--space-sm);
+  border-bottom: var(--hairline) solid var(--border);
+  overflow-wrap: anywhere;
+}
+.auth-identity .button-link {
+  width: auto;
+  margin: 0;
+  padding-inline: 0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 @media (prefers-reduced-motion: reduce) {
   .landing-title {
     animation: none;
@@ -304,6 +376,9 @@
     padding: 0 40px;
   }
   .landing-title {
+    /* Two lines reserved: CJK lines wrap at this size in the 400px column,
+       and the form must not move as the headline rotates. */
+    min-height: 2.6em;
     font-size: 44px;
   }
 }
