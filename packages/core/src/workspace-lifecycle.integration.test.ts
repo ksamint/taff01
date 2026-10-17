@@ -83,6 +83,30 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
     });
     expect((await core.getMe(alice)).workspaces[0].id).toBe(organization);
   });
+  it("preserves a person's explicit invitation to another personal workspace", async () => {
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(sql`select set_config('taff.actor_id',${alice},true)`);
+      await tx
+        .insert(members)
+        .values({
+          workspaceId: personal,
+          userId: bob,
+          name: "Workspace Bob",
+          kind: "person",
+          role: "member",
+        });
+    });
+    expect(
+      (await core.getMe(bob)).workspaces.some((row) => row.id === personal),
+    ).toBe(true);
+    await core.setDefaultWorkspace(userPrincipal(bob), bob, {
+      workspaceId: personal,
+    });
+    expect((await core.getMe(bob)).workspaces[0].id).toBe(personal);
+    await core.setDefaultWorkspace(userPrincipal(bob), bob, {
+      workspaceId: organization,
+    });
+  });
   it("allows a system admin to set a member's default, and hides other people's personal workspaces", async () => {
     await connection.db.transaction(async (tx) => {
       await tx.execute(sql`select set_config('taff.actor_id',${alice},true)`);

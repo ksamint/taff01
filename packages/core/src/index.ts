@@ -299,8 +299,9 @@ export function createCore(options: {
     const [workspace] = await query
       .select({ id: workspaces.id })
       .from(workspaces)
-      .where(and(eq(workspaces.id, workspaceId), isNull(workspaces.archivedAt)))
-      .for("share");
+      .where(
+        and(eq(workspaces.id, workspaceId), isNull(workspaces.archivedAt)),
+      );
     if (!workspace) return null;
     if (principal.kind === "agent") {
       if (principal.workspaceId !== workspaceId) return null;
@@ -434,14 +435,16 @@ export function createCore(options: {
         and(
           eq(members.userId, userId),
           isNull(workspaces.archivedAt),
-          or(
-            isNull(workspaces.personalOwnerId),
-            eq(workspaces.personalOwnerId, userId),
-          ),
+          person.systemAdmin
+            ? or(
+                isNull(workspaces.personalOwnerId),
+                eq(workspaces.personalOwnerId, userId),
+              )
+            : undefined,
         ),
       )
       .orderBy(
-        sql`CASE WHEN ${workspaces.id} = ${person.defaultWorkspaceId}::uuid THEN 0 WHEN ${workspaces.personalOwnerId} IS NULL THEN 1 ELSE 2 END`,
+        sql`CASE WHEN ${workspaces.id} = ${person.defaultWorkspaceId}::uuid THEN 0 WHEN ${workspaces.personalOwnerId} IS DISTINCT FROM ${userId} THEN 1 ELSE 2 END`,
         sql`CASE WHEN ${workspaces.seedKey} IS NOT NULL THEN 0 ELSE 1 END`,
         workspaces.createdAt,
         // Workspaces created in one transaction share createdAt; the first

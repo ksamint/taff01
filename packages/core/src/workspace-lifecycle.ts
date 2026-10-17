@@ -69,7 +69,10 @@ export function createWorkspaceLifecycle({
               isNull(workspaces.archivedAt),
             ),
           );
-        if (!joined || (joined.owner && joined.owner !== targetUserId))
+        if (
+          !joined ||
+          (target.systemAdmin && joined.owner && joined.owner !== targetUserId)
+        )
           throw new CoreError("forbidden", 403);
       }
       await tx

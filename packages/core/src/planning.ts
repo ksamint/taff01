@@ -834,11 +834,13 @@ export function createPlanningOperations({
             .select({ workspaceId: members.workspaceId, id: members.id })
             .from(members)
             .innerJoin(workspaces, eq(workspaces.id, members.workspaceId))
+            .innerJoin(user, eq(user.id, members.userId))
             .where(
               and(
                 eq(members.userId, p.userId),
                 isNull(workspaces.archivedAt),
                 or(
+                  eq(user.systemAdmin, false),
                   isNull(workspaces.personalOwnerId),
                   eq(workspaces.personalOwnerId, p.userId),
                 ),

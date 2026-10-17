@@ -436,6 +436,12 @@ export function createNotificationOperations({
               eq(members.userId, person.id),
               eq(members.kind, "person"),
               isNull(workspaces.archivedAt),
+              person.systemAdmin
+                ? or(
+                    isNull(workspaces.personalOwnerId),
+                    eq(workspaces.personalOwnerId, person.id),
+                  )
+                : undefined,
             ),
           )
           .orderBy(members.workspaceId)

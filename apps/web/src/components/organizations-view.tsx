@@ -346,6 +346,7 @@ export function OrganizationsView() {
                         me.user.systemAdmin &&
                         member.userId && (
                           <Button
+                            className="team-login-default-button"
                             disabled={busy}
                             onClick={() =>
                               defaults.mutate(
