@@ -8,7 +8,7 @@ import {
   user,
   workspaces,
 } from "@taff/db";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, notInArray, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
 import { type Core, createCore, userPrincipal } from "./index";
@@ -160,6 +160,10 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
     });
   });
   it("allows a system admin to set a member's default, and hides other people's personal workspaces", async () => {
+    const priorMemberships = await connection.db
+      .select({ id: members.id })
+      .from(members)
+      .where(eq(members.userId, alice));
     await connection.db.transaction(async (tx) => {
       await tx.execute(sql`select set_config('taff.actor_id',${alice},true)`);
       await tx
@@ -186,6 +190,15 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
           .update(user)
           .set({ systemAdmin: false })
           .where(eq(user.id, alice));
+        await tx.delete(members).where(
+          and(
+            eq(members.userId, alice),
+            notInArray(
+              members.id,
+              priorMemberships.map((row) => row.id),
+            ),
+          ),
+        );
       });
     }
   });
