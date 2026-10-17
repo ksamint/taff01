@@ -1,0 +1,171 @@
+{
+  "sourceSha": "c70ac3942403a804f0440b059b5631024ae085d7",
+  "repository": "ksamint/taff01",
+  "workflowSha": "c70ac3942403a804f0440b059b5631024ae085d7",
+  "runId": "39007612280",
+  "runAttempt": "1",
+  "sourceTree": "402cfe066755e27c049392b4d1b4af808a6591ed",
+  "runnerImage": "ubuntu24",
+  "runnerImageVersion": "20261012.334.1",
+  "os": "PRETTY_NAME=\"Ubuntu 24.04.5 LTS\"\nNAME=\"Ubuntu\"\nVERSION_ID=\"24.04\"\nVERSION=\"24.04.5 LTS (Noble Numbat)\"\nVERSION_CODENAME=noble\nID=ubuntu\nID_LIKE=debian\nHOME_URL=\"https://www.ubuntu.com/\"\nSUPPORT_URL=\"https://help.ubuntu.com/\"\nBUG_REPORT_URL=\"https://bugs.launchpad.net/ubuntu/\"\nPRIVACY_POLICY_URL=\"https://www.ubuntu.com/legal/terms-and-policies/privacy-policy\"\nUBUNTU_CODENAME=noble\nLOGO=ubuntu-logo\n",
+  "node": "v24.21.0",
+  "playwright": "1.64.0",
+  "monospace": "DejaVuSansMono.ttf: \"DejaVu Sans Mono\" \"Book\"",
+  "fontRuntime": "fontconfig\t2.15.0-1.1ubuntu2\nlibfreetype6:amd64\t2.13.2+dfsg-1ubuntu0.2",
+  "captureScope": {
+    "mode": "selected",
+    "screens": [
+      "home"
+    ],
+    "expectedCases": 6,
+    "expectedPngCount": 6,
+    "expectedPaths": [
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-CN/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-en/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-CN/home.png",
+      "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/home.png"
+    ],
+    "darkScreens": [
+      "home-dark"
+    ],
+    "expectedTotalPngCount": 12
+  },
+  "screenResults": [
+    {
+      "screen": "home",
+      "stats": {
+        "startTime": "2026-10-17T05:53:57.848Z",
+        "duration": 15658.563,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "f182d009d540684e637e6e52762527cf1c31bbd68100e10c53c2e9b80b0c05a4"
+    },
+    {
+      "screen": "home-dark",
+      "stats": {
+        "startTime": "2026-10-17T05:54:14.059Z",
+        "duration": 15452.875,
+        "expected": 6,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      },
+      "sha256": "2432920611242063cd456d1bc02d019f6c2be43d2b5da07eafed02a6f1e06ecb"
+    }
+  ],
+  "fontNetwork": {
+    "startTime": "2026-10-17T05:57:23.427Z",
+    "duration": 10434.291,
+    "expected": 6,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "fontReadiness": {
+    "startTime": "2026-10-17T05:57:34.436Z",
+    "duration": 50787.789000000004,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "nativeSelectFonts": {
+    "startTime": "2026-10-17T05:58:25.788Z",
+    "duration": 62106.04,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "captures": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en-dark/home.png",
+      "bytes": 21714,
+      "width": 1280,
+      "height": 800,
+      "sha256": "d326ce96e3998cbd9565a65bfa59f0943a31ae8298368d8dfa9b5f7b045c252d"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/home.png",
+      "bytes": 21229,
+      "width": 1280,
+      "height": 800,
+      "sha256": "75198b9a4ede422d78e8a58f8720a47b16c203394da642f5c96914539a197f72"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-CN-dark/home.png",
+      "bytes": 24839,
+      "width": 1280,
+      "height": 800,
+      "sha256": "c0ad843d0573b23e6e86f2be342b70880bb5cb9dc67f93fb4de715755500d2a9"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-CN/home.png",
+      "bytes": 24486,
+      "width": 1280,
+      "height": 800,
+      "sha256": "874b6f278f7a9217bf6510814d9604b0ebc0bb29f3416a0e0c748af1460a2707"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK-dark/home.png",
+      "bytes": 27453,
+      "width": 1280,
+      "height": 800,
+      "sha256": "1755b97fb4c6e4ccd3f28bb59be18ddcda2cd33e1031389756d00bf9e40bc7b9"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/home.png",
+      "bytes": 27128,
+      "width": 1280,
+      "height": 800,
+      "sha256": "63895ec821442d1adc5608f3ec9de08cfd75a0b1e4c78468c536f390f7eb5ef9"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en-dark/home.png",
+      "bytes": 17361,
+      "width": 390,
+      "height": 844,
+      "sha256": "415d042c42b1dd7ab15c3cda7e9657e75f7079a5268c01dc3c6703b4d183cab6"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/home.png",
+      "bytes": 16917,
+      "width": 390,
+      "height": 844,
+      "sha256": "bb9c4b34d1644cc81423293ce40f09a0d23c77c316368ba11bcf3b90765893d3"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-CN-dark/home.png",
+      "bytes": 20108,
+      "width": 390,
+      "height": 844,
+      "sha256": "39becab087f16a73feefaa2a1e480e7c66b83a31c5ece2d81275d6ffc11e95e5"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-CN/home.png",
+      "bytes": 19843,
+      "width": 390,
+      "height": 844,
+      "sha256": "c4b3fed257e46e95314179ecb94148b3e3a4963b6f88e12f37d7cc45e8ea7e68"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK-dark/home.png",
+      "bytes": 22516,
+      "width": 390,
+      "height": 844,
+      "sha256": "030736f2ae84d2d4945f7ca486acd86f6351d0460bb16e283bf220b120658865"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/home.png",
+      "bytes": 22277,
+      "width": 390,
+      "height": 844,
+      "sha256": "21aee41f38d9e9ce9894f9c0f7ebc919299ed29ece50f8818d13bf1dc1bf334c"
+    }
+  ]
+}
