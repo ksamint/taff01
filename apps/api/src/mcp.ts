@@ -10,6 +10,7 @@ import {
   type output,
   toJSONSchema,
 } from "zod/v4/core";
+import apiPackage from "../package.json";
 
 /** zod/mini schemas validate but carry no JSON Schema; the SDK needs both. */
 export function toolSchema<T extends $ZodType>(
@@ -94,7 +95,7 @@ export function createMcpServer(
   state: CallState,
   logger?: ErrorLogger,
 ) {
-  const server = new McpServer({ name: "taff", version: "0.2.8" });
+  const server = new McpServer({ name: "taff", version: apiPackage.version });
   const run = async (fn: () => Promise<unknown>) => {
     try {
       return ok(await fn());

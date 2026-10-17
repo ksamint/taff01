@@ -1,6 +1,7 @@
 import { createCore } from "@taff/core";
 import pino from "pino";
 import { afterAll, afterEach, expect, it, vi } from "vitest";
+import apiPackage from "../package.json";
 import { createApp } from "./app";
 
 const core = createCore({
@@ -81,4 +82,18 @@ it("advertises read-only context and binds it to the authenticated token; reject
   });
   expect(rejected.error || rejected.result?.isError).toBeTruthy();
   expect(read).toHaveBeenCalledTimes(1);
+});
+
+it("advertises the API package version during MCP initialization", async () => {
+  vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+  vi.spyOn(core, "recordMcpCall").mockResolvedValue();
+  const response = await call("initialize", {
+    protocolVersion: "2026-07-28",
+    capabilities: {},
+    clientInfo: { name: "version-regression", version: "0.0.0" },
+  });
+  expect(response.result.serverInfo).toMatchObject({
+    name: "taff",
+    version: apiPackage.version,
+  });
 });
