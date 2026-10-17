@@ -16,7 +16,7 @@ Date: 2026-10-17. Decision record: ADR 0020.
 
 ## Missing
 
-- `home` visual baselines need a fresh capture and approval.
+- `home` baselines captured in run 39007612280 and committed; owner approval pending.
 - Not deployed.
 
 ## Open decisions
