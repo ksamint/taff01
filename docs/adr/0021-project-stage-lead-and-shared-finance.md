@@ -13,7 +13,7 @@ collected amount and collection % were admin-only (D7).
 ## Decision
 
 - `projects.stage` is a `project_stage` enum, nullable. Null means "not set",
-  so existing projects need no backfill and show nothing new.
+  so existing projects need no backfill; read-only views omit unset metadata.
 - `projects.lead_id` references a member of the same workspace. A trigger
   rejects agents, like the task owner rule; core also rejects guests with
   `invalid_input`. A later role demotion leaves the reference intact.
