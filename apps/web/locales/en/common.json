@@ -183,7 +183,8 @@
     "statusTabs": "Jump to a status column",
     "buildingNote": "This view is still being built. The board and list work now.",
     "openBoard": "Open the board",
-    "openList": "Open the list"
+    "openList": "Open the list",
+    "stageMoved": "Stage changed to {{stage}}"
   },
   "inbox": {
     "title": "Inbox",
@@ -1151,7 +1152,8 @@
       "applied": "Applied",
       "dismissed": "Dismissed",
       "undone": "Suggestion undone."
-    }
+    },
+    "stageAll": "All"
   },
   "ask": {
     "label": "Ask across all projects",

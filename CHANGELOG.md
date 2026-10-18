@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- People in charge can move their project's stage from the header with Undo;
+  profile and finance edits remain admin-only. Guests cannot be assigned as leads.
+- Brief shows stage and person in charge, filters rows and currency totals by
+  stage, and exposes both fields over MCP. Project switching groups the pipeline.
+
 - Projects gain a stage (lead, proposal sent, contract signed, in service,
   closed) and a person in charge, set by admins and shown under the title.
 - Every person in the organization reads contract, collected and collection %;

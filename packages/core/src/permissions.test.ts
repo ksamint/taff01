@@ -22,6 +22,44 @@ const agent: Actor = {
 const task = { workspaceId: "workspace", ownerId: "owner", workerId: "agent" };
 describe("permissions", () => {
   it.each<[string, Actor | null, Action, Resource, boolean]>([
+    ...([
+      [
+        "admin moves stage",
+        { ...person, role: "admin" },
+        "project:stage",
+        task,
+        true,
+      ],
+      [
+        "lead moves stage",
+        person,
+        "project:stage",
+        { ...task, leadId: person.id },
+        true,
+      ],
+      ["other member cannot move stage", person, "project:stage", task, false],
+      [
+        "guest lead cannot move stage",
+        { ...person, role: "guest" },
+        "project:stage",
+        { ...task, leadId: person.id },
+        false,
+      ],
+      [
+        "agent lead cannot move stage",
+        agent,
+        "project:stage",
+        { ...task, leadId: agent.id },
+        false,
+      ],
+      [
+        "other workspace cannot move stage",
+        person,
+        "project:stage",
+        { workspaceId: "other", leadId: person.id },
+        false,
+      ],
+    ] as [string, Actor, Action, Resource, boolean][]),
     [
       "user can select own login default",
       person,

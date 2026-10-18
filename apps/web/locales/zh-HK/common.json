@@ -183,7 +183,8 @@
     "statusTabs": "跳到狀態欄",
     "buildingNote": "此視圖仍在建設中，看板和列表現已可用。",
     "openBoard": "打開看板",
-    "openList": "打開列表"
+    "openList": "打開列表",
+    "stageMoved": "階段已改為{{stage}}"
   },
   "inbox": {
     "title": "收件箱",
@@ -1151,7 +1152,8 @@
       "applied": "已套用",
       "dismissed": "已略過",
       "undone": "已復原建議。"
-    }
+    },
+    "stageAll": "全部"
   },
   "ask": {
     "label": "詢問所有項目",

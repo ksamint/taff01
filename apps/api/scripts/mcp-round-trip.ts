@@ -517,9 +517,14 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
     text(await client.callTool({ name: "brief.get", arguments: {} })),
   );
   check(
-    "brief.get reads the token workspace's projects without finance",
+    "brief.get reads stage and person in charge in the token workspace, never finance",
     JSON.stringify(brief.workspaceIds) === JSON.stringify([workspace.id]) &&
-      brief.projects.some((item) => item.projectId === project.id) &&
+      brief.projects.some(
+        (item) =>
+          item.projectId === project.id &&
+          item.stage === (project.stage ?? null) &&
+          item.leadId === (project.leadId ?? null),
+      ) &&
       brief.projects.every((item) => item.risk.finance === null),
     brief,
   );

@@ -596,6 +596,12 @@ describe.skipIf(!url)(
         leadId: owner,
       });
       expect(created).toMatchObject({ stage: "lead", leadId: owner });
+      await expect(
+        core.updateProject(bob, created.id, {
+          version: created.version,
+          stage: "proposal_sent",
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
       const moved = await core.updateProject(alice, created.id, {
         version: created.version,
         stage: "contract_signed",
@@ -619,14 +625,67 @@ describe.skipIf(!url)(
           stage: "won" as never,
         }),
       ).rejects.toMatchObject({ code: "invalid_input" });
+      const led = await core.updateProject(bob, created.id, {
+        version: moved.version,
+        stage: "in_service",
+      });
+      expect(led).toMatchObject({
+        stage: "in_service",
+        leadId: bobMember,
+        version: moved.version + 1,
+      });
       await expect(
         core.updateProject(bob, created.id, {
           version: moved.version,
-          stage: "in_service",
+          stage: "closed",
+        }),
+      ).rejects.toMatchObject({ code: "conflict" });
+      for (const fields of [
+        { name: "Renamed" },
+        { leadId: owner },
+        { archived: true },
+        { contractAmount: "100.00", currency: "HKD" },
+        { stage: "closed" as const, name: "Mixed" },
+      ]) {
+        await expect(
+          core.updateProject(bob, created.id, {
+            version: led.version,
+            ...fields,
+          }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+      }
+      await expect(
+        core.updateProject(agent, created.id, {
+          version: led.version,
+          stage: "closed",
         }),
       ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(
+        core.updateProject(outsider, created.id, {
+          version: led.version,
+          stage: "closed",
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      // A later demotion leaves the lead in place but removes stage authority.
+      await core.updateMemberRole(alice, w, bobMember, { role: "guest" });
+      await expect(
+        core.updateProject(bob, created.id, {
+          version: led.version,
+          stage: "closed",
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(
+        core.updateProject(alice, created.id, {
+          version: led.version,
+          leadId: bobMember,
+        }),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      await expect(
+        core.createProject(alice, w, { name: "Guest lead", leadId: bobMember }),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      await core.updateMemberRole(alice, w, bobMember, { role: "member" });
       const cleared = await core.updateProject(alice, created.id, {
-        version: moved.version,
+        version: led.version,
         stage: null,
         leadId: null,
       });
@@ -638,7 +697,18 @@ describe.skipIf(!url)(
       const [audit] = await connection.client<{ n: number }[]>`
         select count(*)::int as n from activity
         where resource_id=${created.id} and action='projects.update'`;
-      expect(audit.n).toBe(2);
+      expect(audit.n).toBe(3);
+      const ledAudit = await connection.db
+        .select()
+        .from(activity)
+        .where(
+          and(
+            eq(activity.resourceId, created.id),
+            eq(activity.action, "projects.update"),
+            eq(activity.actorId, bob.kind === "user" ? bob.userId : ""),
+          ),
+        );
+      expect(ledAudit).toHaveLength(1);
     });
 
     it("shows finance to people but not guests or agents, and records payments for admins", async () => {

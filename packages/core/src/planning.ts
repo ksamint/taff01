@@ -50,7 +50,17 @@ import {
   workspaceInviteInputSchema,
   workspaceKeyFromName,
 } from "@taff/schemas";
-import { and, desc, eq, inArray, isNull, or, type SQL, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  inArray,
+  isNull,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import { deliverEmail, type EmailStatus, type EmailTransport } from "./email";
 import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
@@ -459,7 +469,19 @@ export function createPlanningOperations({
         .where(eq(projects.id, id))
         .for("update");
       if (!row) throw new CoreError("not_found", 404);
-      await requireMember(tx, p, row.workspaceId, "project:manage");
+      const stageOnly = Object.keys(body).every(
+        (key) => key === "stage" || key === "version",
+      );
+      await requireMember(
+        tx,
+        p,
+        row.workspaceId,
+        stageOnly ? "project:stage" : "project:manage",
+        {
+          workspaceId: row.workspaceId,
+          leadId: row.leadId,
+        },
+      );
       if (row.version !== body.version) conflict();
       if (
         body.contractAmount !== undefined ||
@@ -505,6 +527,7 @@ export function createPlanningOperations({
           eq(members.id, leadId),
           eq(members.workspaceId, w),
           eq(members.kind, "person"),
+          ne(members.role, "guest"),
         ),
       );
     if (!lead) invalid();

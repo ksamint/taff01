@@ -4,6 +4,7 @@
 import "../styles/projects.css";
 import {
   PROJECT_STAGES,
+  type Project,
   type ProjectStage,
   projectInputSchema,
   projectUpdateSchema,
@@ -58,6 +59,7 @@ import {
   type TaskFilter,
 } from "../lib/project-board";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
+import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
 import { useInitialTodayTime } from "./providers";
 import { TimelineView } from "./timeline-view";
@@ -227,6 +229,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       router.push(`/projects/${project.id}`);
     },
   });
+  const canMoveStage =
+    admin ||
+    (selected?.leadId === workspace.memberId &&
+      workspaceAccess.data?.canEditPlan);
   const describeMove = useCallback(
     (status: Task["status"]) =>
       t("projects.moved", { status: t(`status.${status}`) }),
@@ -511,17 +517,26 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </div>
         </div>
-        {selected && (selected.stage || lead) && (
+        {selected && (selected.stage || lead || canMoveStage) && (
           <p className="projects-meta" data-testid="project-meta">
-            {selected.stage && (
-              <span
-                className="projects-stage"
-                data-testid="project-stage"
-                data-stage={selected.stage}
-              >
-                <span className="sr-only">{t("projects.stageLabel")}: </span>
-                {t(`projects.stages.${selected.stage}`)}
-              </span>
+            {canMoveStage ? (
+              <ProjectStageControl
+                key={selected.id}
+                project={selected}
+                workspaceId={workspace.id}
+                confirmed={confirmed}
+              />
+            ) : (
+              selected.stage && (
+                <span
+                  className="projects-stage"
+                  data-testid="project-stage"
+                  data-stage={selected.stage}
+                >
+                  <span className="sr-only">{t("projects.stageLabel")}: </span>
+                  {t(`projects.stages.${selected.stage}`)}
+                </span>
+              )
             )}
             {lead && (
               <span className="projects-lead" data-testid="project-lead">
@@ -620,15 +635,31 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 }
               >
                 <option value="">{t("projects.allProjects")}</option>
-                {projects.data?.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                    {project.stage
-                      ? ` · ${t(`projects.stages.${project.stage}`)}`
-                      : ""}
-                    {project.archived ? ` · ${t("projects.archived")}` : ""}
-                  </option>
-                ))}
+                {[...PROJECT_STAGES, null].map((stage) => {
+                  const group =
+                    projects.data?.filter(
+                      (project) => project.stage === stage,
+                    ) ?? [];
+                  return group.length ? (
+                    <optgroup
+                      key={stage ?? "none"}
+                      label={t(
+                        stage
+                          ? `projects.stages.${stage}`
+                          : "projects.stageNone",
+                      )}
+                    >
+                      {group.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                          {project.archived
+                            ? ` · ${t("projects.archived")}`
+                            : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : null;
+                })}
               </select>
             </div>
             {admin && (
@@ -915,11 +946,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 onChange={(event) => setLeadId(event.target.value || null)}
               >
                 <option value="">{t("projects.leadNone")}</option>
-                {people.map((person) => (
-                  <option key={person.id} value={person.id}>
-                    {person.name}
-                  </option>
-                ))}
+                {people
+                  .filter((person) => person.role !== "guest")
+                  .map((person) => (
+                    <option key={person.id} value={person.id}>
+                      {person.name}
+                    </option>
+                  ))}
               </select>
             </div>
             <Button
@@ -1380,5 +1413,68 @@ function DesktopList({
         })}
       </tbody>
     </table>
+  );
+}
+
+/** Keyed by project so an Undo toast always edits the project it came from. */
+function ProjectStageControl({
+  project,
+  workspaceId,
+  confirmed,
+}: {
+  project: Project;
+  workspaceId: string;
+  confirmed: boolean;
+}) {
+  const { t } = useTranslation();
+  const edit = useManageProject(workspaceId, {
+    mode: "edit",
+    baseline: project,
+  });
+  const failed = (error: Error) => showToast(t(errorKey(error)));
+  function move(stage: ProjectStage | null) {
+    if (stage === project.stage) return;
+    const previous = project.stage;
+    edit.mutate(
+      { version: project.version, stage },
+      {
+        onSuccess: (saved) =>
+          showToast(
+            t("projects.stageMoved", {
+              stage: t(
+                stage ? `projects.stages.${stage}` : "projects.stageNone",
+              ),
+            }),
+            {
+              label: t("actions.undo"),
+              run: () =>
+                edit.mutate(
+                  { version: saved.version, stage: previous },
+                  { onError: failed },
+                ),
+            },
+          ),
+        onError: failed,
+      },
+    );
+  }
+  return (
+    <select
+      className="projects-stage"
+      data-testid="project-stage-control"
+      aria-label={t("projects.stageLabel")}
+      value={project.stage ?? ""}
+      disabled={edit.isPending || !confirmed}
+      onChange={(event) =>
+        move((event.target.value || null) as ProjectStage | null)
+      }
+    >
+      <option value="">{t("projects.stageNone")}</option>
+      {PROJECT_STAGES.map((stage) => (
+        <option key={stage} value={stage}>
+          {t(`projects.stages.${stage}`)}
+        </option>
+      ))}
+    </select>
   );
 }

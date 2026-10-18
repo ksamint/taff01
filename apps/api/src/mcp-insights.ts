@@ -36,7 +36,7 @@ export function registerInsightTools(
     {
       title: "Read the brief",
       description:
-        "Read the token workspace's deterministic brief: each project's risk level and reason codes, slip and delivery %, and counts of reviews waiting, blocked agents, tasks due today and agents working. Codes and numbers only; finance is never shown to agents.",
+        "Read the token workspace's deterministic brief: each project's stage, person in charge (leadId, a non-guest person member), risk level and reason codes, slip and delivery %, and counts of reviews waiting, blocked agents, tasks due today and agents working. Codes and numbers only; finance is never shown to agents.",
       inputSchema: toolSchema(mcpBriefGetArgs),
     },
     () =>

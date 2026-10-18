@@ -148,6 +148,8 @@ export function createAssistantOperations({
           workspaceId: w,
           projectId: project.id,
           name: project.name,
+          stage: project.stage,
+          leadId: project.leadId,
           plan: (await planSource(actor, project, timeZone)).input,
         });
       const reviewRows = await db
@@ -298,9 +300,12 @@ export function createAssistantOperations({
     const taskIds = [...new Set(mentioned.taskIds)].filter(
       (id): id is string => !!id,
     );
-    const agentIds = [...new Set(mentioned.agentIds)].filter(
-      (id): id is string => !!id,
-    );
+    const agentIds = [
+      ...new Set([
+        ...mentioned.agentIds,
+        ...source.projects.map((project) => project.leadId),
+      ]),
+    ].filter((id): id is string => !!id);
     const [workspaceRows, taskRows, agentRows] = await Promise.all([
       w.length
         ? db

@@ -16,6 +16,7 @@ import {
   answerView,
   briefStats,
   briefSummary,
+  filterBriefProjects,
   greetingPart,
   labelIndex,
   portfolioTotals,
@@ -131,6 +132,24 @@ describe("brief display model: Northwind on 2026-10-08", () => {
   const brief = buildBrief(source());
   const index = labelIndex(labels);
   const checkout = brief.projects.find((p) => p.projectId === NORTHWIND);
+
+  it("filters rows and portfolio totals by stage without reordering risks", () => {
+    const input = source();
+    input.projects[0]!.stage = "lead";
+    input.projects[1]!.stage = "in_service";
+    const staged = buildBrief(input);
+    expect(
+      filterBriefProjects(staged, "lead").map((project) => project.name),
+    ).toEqual(["Website"]);
+    expect(portfolioTotals(staged, "lead")).toMatchObject([
+      { projects: 1, amount: 360000, collected: 180000, collectedPercent: 50 },
+    ]);
+    expect(portfolioTotals(staged, "in_service")).toMatchObject([
+      { projects: 1, amount: 1280000, collected: 512000, collectedPercent: 40 },
+    ]);
+    expect(filterBriefProjects(staged, null)).toEqual(staged.projects);
+    expect(portfolioTotals(staged, "closed")).toEqual([]);
+  });
 
   it("shows exactly the plan-model fixture numbers", () => {
     // M17 acceptance: what the brief renders equals buildPlanModel() on the

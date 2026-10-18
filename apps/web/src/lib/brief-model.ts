@@ -1,3 +1,4 @@
+import type { ProjectStage } from "@taff/schemas";
 // The brief's display model (M17): pure, deterministic and built only from
 // the server's codes, numbers and labels (plan §4.4). Every sentence is an
 // i18n key with values; nothing here invents prose, progress or advice.
@@ -178,9 +179,18 @@ export type PortfolioTotal = {
  * Totals over the projects whose finance the reader may see (ADR 0021), one per
  * currency so amounts are never added across currencies.
  */
-export function portfolioTotals(brief: Brief): PortfolioTotal[] {
+export function filterBriefProjects(brief: Brief, stage: ProjectStage | null) {
+  return stage === null
+    ? brief.projects
+    : brief.projects.filter((project) => project.stage === stage);
+}
+
+export function portfolioTotals(
+  brief: Brief,
+  stage: ProjectStage | null = null,
+): PortfolioTotal[] {
   const totals = new Map<string, PortfolioTotal & { weighted: number }>();
-  for (const project of brief.projects) {
+  for (const project of filterBriefProjects(brief, stage)) {
     const finance = project.risk.finance;
     if (!finance?.contractAmount || !finance.currency) continue;
     const amount = Number(finance.contractAmount);

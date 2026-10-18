@@ -15,6 +15,7 @@ export type Action =
   | "workspace:join"
   | "workspace:manage"
   | "project:manage"
+  | "project:stage"
   | "task:edit"
   | "task:owner"
   | "task:comment"
@@ -60,6 +61,7 @@ export type Resource =
   | {
       workspaceId: string;
       ownerId?: string;
+      leadId?: string | null;
       workerId?: string | null;
       toWorkerId?: string | null;
       to?: TaskStatus;
@@ -149,6 +151,11 @@ export function can(
     action === "mind:archive"
   )
     return actor.kind === "person" && actor.role === "admin";
+  if (action === "project:stage")
+    return (
+      actor.kind === "person" &&
+      (actor.role === "admin" || actor.id === resource.leadId)
+    );
   // Every person of the workspace reads contract and collection figures
   // (ADR 0021, superseding D7); guests and agents never do.
   if (

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (350 distinct, 1894 uses)
+## Test ids (355 distinct, 1908 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -65,7 +65,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `me-brief` | 9 | me-view.tsx | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
+| `me-brief` | 10 | me-view.tsx | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, ui-v2.spec.ts |
 
 ### brief-view.tsx
 
@@ -82,10 +82,14 @@ several do). “Also rendered by” lists the other files.
 | `brief-action-open` | 8 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-close` | 4 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-greeting` | 4 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-portfolio` | 1 |  | project-profile.spec.ts |
 | `brief-proposal-apply` | 5 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-dismiss` | 3 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-subtasks` | 2 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-risk` | 3 |  | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
+| `brief-risk` | 4 |  | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, ui-v2.spec.ts |
+| `brief-stage-all` | 1 |  | project-profile.spec.ts |
+| `brief-stage-in_service` | 1 |  | project-profile.spec.ts |
+| `brief-stage-proposal_sent` | 2 |  | project-profile.spec.ts |
 | `brief-stat-agents` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-stat-dueToday` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-stat-toConfirm` | 2 |  | brief.spec.ts, live/brief.spec.ts |
@@ -147,7 +151,7 @@ several do). “Also rendered by” lists the other files.
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
 | `token-confirm` | 6 | mcp-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 30 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
+| `workspace-*` | 31 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -375,19 +379,20 @@ several do). “Also rendered by” lists the other files.
 | `board-status` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-task` | 20 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `manage-project` | 1 |  | project-profile.spec.ts |
+| `manage-project` | 2 |  | project-profile.spec.ts |
 | `new-project` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-filter` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-filters` | 9 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts |
 | `project-label` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `project-lead` | 1 |  | project-profile.spec.ts |
-| `project-lead-select` | 2 |  | project-profile.spec.ts |
+| `project-lead` | 2 |  | project-profile.spec.ts |
+| `project-lead-select` | 3 |  | project-profile.spec.ts |
 | `project-name` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-select` | 1 |  | support/task-fields.ts |
 | `project-sort` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `project-stage` | 3 |  | project-profile.spec.ts |
+| `project-stage` | 1 |  | project-profile.spec.ts |
+| `project-stage-control` | 4 |  | project-profile.spec.ts |
 | `project-stage-select` | 3 |  | project-profile.spec.ts |
-| `project-submit` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-submit` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-view-list` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 
 ### quick-add-dialog.tsx
@@ -604,7 +609,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
 | `button — name: locale === "en" ? m.en : locale === "zh-HK" ? m.me.languageHK : m.me.languageCN` | 1 | me.spec.ts |
-| `button — name: m.actions.undo` | 5 | brief.spec.ts, live/brief.spec.ts |
+| `button — name: m.actions.undo` | 6 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts |
 | `button — name: m.mcp.copyConfig` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.mcp.dismiss` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -826,7 +831,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | Key | Uses | Used in |
 | --- | ---: | --- |
 | `accountIdentifier` | 5 | sms-auth.spec.ts, username-auth.spec.ts |
-| `actions.undo` | 16 | brief.spec.ts, live/brief.spec.ts, task-contacts.spec.ts |
+| `actions.undo` | 18 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
@@ -912,9 +917,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.invite` | 25 | planning.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 17 | me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
-| `projects.leadIs` | 1 | project-profile.spec.ts |
-| `projects.stages.in_service` | 1 | project-profile.spec.ts |
-| `projects.stages.lead` | 1 | project-profile.spec.ts |
+| `projects.leadIs` | 4 | project-profile.spec.ts |
+| `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `pwa.reconnect` | 1 | persistence.spec.ts |
 | `relations.edge.depends_on.out` | 12 | live/timeline.spec.ts, timeline.spec.ts |

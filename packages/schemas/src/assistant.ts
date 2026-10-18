@@ -35,6 +35,7 @@ import {
   taskStatusSchema,
   versionSchema,
 } from "./primitives";
+import { projectStageSchema } from "./project-read";
 import { runStatusSchema } from "./run-read";
 
 /*
@@ -153,6 +154,8 @@ export const briefQuerySchema = strictObject({
   workspaceId: optional(idSchema),
 }).check(refine((v) => v.scope !== "workspace" || !!v.workspaceId));
 export const briefProjectSchema = object({
+  stage: nullable(projectStageSchema),
+  leadId: nullable(idSchema),
   workspaceId: idSchema,
   projectId: idSchema,
   name: string(),

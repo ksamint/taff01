@@ -146,6 +146,8 @@ describe.skipIf(!url)(
       otherAgent = (await core.authenticateAgentToken(readOnly.token))!;
       const project = await core.createProject(alice, w, {
         name: "Checkout v2",
+        stage: "lead",
+        leadId: bobMember,
       });
       projectId = project.id;
       await core.updateProject(alice, projectId, {
@@ -749,6 +751,12 @@ describe.skipIf(!url)(
           await core.getBrief(alice, { workspaceId: w }, { labels: true }),
         );
         expect(brief.labels?.workspaces.map((item) => item.id)).toEqual([w]);
+        expect(
+          brief.projects.find((project) => project.projectId === projectId),
+        ).toMatchObject({ stage: "lead", leadId: bobMember });
+        expect(brief.labels?.members).toContainEqual(
+          expect.objectContaining({ id: bobMember, name: "Bob Lee" }),
+        );
         expect(brief.labels?.tasks).toContainEqual(
           expect.objectContaining({ id: task.id, title: "Label me" }),
         );
