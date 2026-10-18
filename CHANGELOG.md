@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Projects gain a stage (lead, proposal sent, contract signed, in service,
+  closed) and a person in charge, set by admins and shown under the title.
+- Every person in the organization reads contract, collected and collection %;
+  guests and agents see delivery % only. Admins still edit amounts and payments.
+- MCP `projects.list` returns stage and `leadId`. Additive migration 0031 (ADR 0021).
+
 ## v0.2.8 — 2026-10-17
 
 - Ask for the account first, then a password or an explicitly requested SMS code.
