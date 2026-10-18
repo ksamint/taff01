@@ -207,23 +207,19 @@ describe("authenticated realtime boundaries", () => {
     expect(await third).toEqual(change());
     expect(bobMessages).toEqual([]);
   });
-  it("routes planning changes to the workspace and keeps payments from non-admins", async () => {
+  it("routes planning and payment changes to the workspace's members", async () => {
     const alice = await connect("alice");
     const seen: ChangeEvent[] = [];
     alice.on("message", (data) => seen.push(JSON.parse(data.toString())));
-    for (const action of [
+    const actions = [
       "project_payments.insert",
       "task_plans.update",
       "milestones.insert",
       "task_dependencies.delete",
-    ])
-      await deliver(change({ action }));
-    await vi.waitFor(() => expect(seen).toHaveLength(3));
-    expect(seen.map((event) => event.action)).toEqual([
-      "task_plans.update",
-      "milestones.insert",
-      "task_dependencies.delete",
-    ]);
+    ];
+    for (const action of actions) await deliver(change({ action }));
+    await vi.waitFor(() => expect(seen).toHaveLength(4));
+    expect(seen.map((event) => event.action)).toEqual(actions);
   });
   it("closes sockets on membership removal, session deletion and listener reconnect", async () => {
     const alice = await connect("alice");
@@ -298,7 +294,7 @@ describe("authenticated realtime boundaries", () => {
     expect(await toWorkspace).toEqual(membership);
     expect(unrelated).toEqual([]);
   });
-  it("routes CRM changes to members of the workspace but not to guests", async () => {
+  it("routes CRM and payment changes to members of the workspace but not to guests", async () => {
     const alice = await connect("alice");
     const dana = await connect("dana");
     const danaSeen: ChangeEvent[] = [];
@@ -316,6 +312,7 @@ describe("authenticated realtime boundaries", () => {
       "project_contacts.insert",
       "task_contacts.update",
       "contact_roles.delete",
+      "project_payments.update",
     ]) {
       const received = message(alice);
       await deliver(change({ action }));

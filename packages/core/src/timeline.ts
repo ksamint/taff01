@@ -234,7 +234,7 @@ export function createTimelineOperations({
 
   /**
    * The plan-model input of one project as `actor` sees it: finance only
-   * with finance:read (D7). The timeline and the brief share it, so their
+   * with finance:read (ADR 0021). The timeline and the brief share it, so their
    * numbers are the same by construction.
    */
   async function planSource(

@@ -23,6 +23,8 @@ import {
   grantSchema,
   type McpCall,
   mcpContextSchema,
+  type Project,
+  projectListSchema,
   quickAddResultSchema,
   type ReviewRun,
   type ReviewWorkspace,
@@ -118,7 +120,8 @@ export type McpRoundTripOptions = {
   token: string;
   agentId: string;
   workspace: { id: string; memberId: string };
-  project: { id: string; name: string };
+  project: Pick<Project, "id" | "name"> &
+    Partial<Pick<Project, "stage" | "leadId">>;
   /** Requests per token per minute before the server answers 429. */
   rateLimit: number;
   human: McpHumanActions;
@@ -269,10 +272,20 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
   const projectList = text(
     await client.callTool({ name: "projects.list", arguments: {} }),
   );
+  const listedProject = projectListSchema
+    .parse(projectList)
+    .find((item) => item.id === project.id);
   check(
-    "projects.list reads the token workspace",
-    Array.isArray(projectList) &&
-      projectList.some((item) => item.id === project.id),
+    "projects.list reads stage and person in charge, never finance",
+    !!listedProject &&
+      listedProject.stage === (project.stage ?? null) &&
+      listedProject.leadId === (project.leadId ?? null) &&
+      listedProject.contractAmount === null &&
+      listedProject.currency === null,
+    listedProject && {
+      stage: listedProject.stage,
+      leadId: listedProject.leadId,
+    },
   );
   const parsed = quickAddResultSchema.parse(
     text(

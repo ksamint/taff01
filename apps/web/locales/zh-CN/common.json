@@ -154,6 +154,18 @@
     "archive": "归档项目",
     "restore": "恢复项目",
     "archived": "已归档",
+    "stageLabel": "阶段",
+    "stageNone": "未设置阶段",
+    "stages": {
+      "lead": "潜在客户",
+      "proposal_sent": "已发方案",
+      "contract_signed": "已签合同",
+      "in_service": "服务中",
+      "closed": "已结束"
+    },
+    "leadLabel": "负责人",
+    "leadNone": "未设置",
+    "leadIs": "负责人：{{name}}",
     "drag": "将任务拖到其他状态列",
     "dragHint": "拖动手柄移动任务，或使用状态选择器。",
     "moved": "已移至{{status}}",

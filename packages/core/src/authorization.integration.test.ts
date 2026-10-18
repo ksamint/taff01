@@ -273,10 +273,10 @@ const routes: RequestCase[] = [
       ...(suffix === "/review" ? { prepare: review } : {}),
     }),
   ),
+  // Members read payments (ADR 0021); recording one stays admin-only below.
   ...["/timeline", "/milestones", "/payments", "/contacts"].map((suffix) => ({
     method: "GET",
     path: `/api/projects/:project${suffix}`,
-    ...(suffix === "/payments" ? { member: "deny" as const } : {}),
   })),
   ...[
     "/access",

@@ -40,6 +40,8 @@ export function withProjectSave(
           contractAmount: null,
           currency: null,
           clientCompanyId: null,
+          stage: body.stage ?? null,
+          leadId: body.leadId ?? null,
           createdAt: now,
           updatedAt: now,
         },

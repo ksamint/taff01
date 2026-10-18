@@ -680,7 +680,7 @@ describe.skipIf(!url)(
     });
 
     describe("brief", () => {
-      it("equals the timeline's risk and keeps finance for admins only", async () => {
+      it("equals the timeline's risk and shows finance to people, not agents", async () => {
         const brief = briefSchema.parse(
           await core.getBrief(alice, { scope: "workspace", workspaceId: w }),
         );
@@ -693,7 +693,7 @@ describe.skipIf(!url)(
         expect(asBob.scope).toBe("workspace");
         expect(
           asBob.projects.find((p) => p.projectId === projectId)?.risk.finance,
-        ).toBeNull();
+        ).toMatchObject({ collectedPercent: 40 });
         const asAgent = await core.getBrief(agent, {});
         expect(asAgent.workspaceIds).toEqual([w]);
         expect(asAgent.projects.every((p) => p.risk.finance === null)).toBe(

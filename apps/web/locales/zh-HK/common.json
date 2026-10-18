@@ -154,6 +154,18 @@
     "archive": "封存項目",
     "restore": "還原項目",
     "archived": "已封存",
+    "stageLabel": "階段",
+    "stageNone": "未設定階段",
+    "stages": {
+      "lead": "潛在客戶",
+      "proposal_sent": "已發方案",
+      "contract_signed": "已訂合約",
+      "in_service": "服務中",
+      "closed": "已結束"
+    },
+    "leadLabel": "負責人",
+    "leadNone": "未設定",
+    "leadIs": "負責人：{{name}}",
     "drag": "將任務拖到其他狀態欄",
     "dragHint": "拖動手柄移動任務，或使用狀態選擇器。",
     "moved": "已移至{{status}}",

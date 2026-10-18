@@ -156,7 +156,7 @@ export const briefProjectSchema = object({
   workspaceId: idSchema,
   projectId: idSchema,
   name: string(),
-  /** Finance inside is null unless the reader may read it (D7). */
+  /** Finance inside is null unless the reader may read it (finance:read, ADR 0021). */
   risk: projectRiskSchema,
 });
 export const briefActionSchema = union([

@@ -827,7 +827,8 @@ describe("M12 planning and CRM permission decisions", () => {
   const workspace = { workspaceId: "workspace" };
   it.each<[string, Actor, Action, Resource, boolean]>([
     ["admin reads finance", admin, "finance:read", workspace, true],
-    ["member cannot read finance", person, "finance:read", workspace, false],
+    ["member reads finance", person, "finance:read", workspace, true],
+    ["guest cannot read finance", guest, "finance:read", workspace, false],
     ["admin manages finance", admin, "finance:manage", workspace, true],
     [
       "member cannot manage finance",

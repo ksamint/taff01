@@ -88,8 +88,8 @@ export function connectWorkspace(
         // Me (the person's roles) is the exception: a role change committed
         // between the page's first read and this open reached no socket, and
         // the server only closes a connected one. Marking Me stale is not
-        // enough, so a demoted member would keep admin-only views such as
-        // finance (D7) until the next focus. Refetching it applies the role
+        // enough, so a demoted member would keep views such as finance
+        // (ADR 0021) until the next focus. Refetching it applies the role
         // (a new scope resets every cache); an unchanged Me changes nothing.
         if (!opened) void client.invalidateQueries({ queryKey: ["me"] });
         invalidate(opened ? undefined : { refetchType: "none" });

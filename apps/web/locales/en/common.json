@@ -154,6 +154,18 @@
     "archive": "Archive project",
     "restore": "Restore project",
     "archived": "Archived",
+    "stageLabel": "Stage",
+    "stageNone": "No stage",
+    "stages": {
+      "lead": "Lead",
+      "proposal_sent": "Proposal sent",
+      "contract_signed": "Contract signed",
+      "in_service": "In service",
+      "closed": "Closed"
+    },
+    "leadLabel": "Person in charge",
+    "leadNone": "Not assigned",
+    "leadIs": "In charge: {{name}}",
     "drag": "Drag task to another status column",
     "dragHint": "Drag a handle to move a task, or use its status selector.",
     "moved": "Moved to {{status}}",

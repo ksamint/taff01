@@ -3,6 +3,8 @@
 // header and filter bar 1221–1238, board and list 1538–1572.
 import "../styles/projects.css";
 import {
+  PROJECT_STAGES,
+  type ProjectStage,
   projectInputSchema,
   projectUpdateSchema,
   type Run,
@@ -194,6 +196,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     archived: boolean;
   } | null>(null);
   const [name, setName] = useState("");
+  const [stage, setStage] = useState<ProjectStage | null>(null);
+  const [leadId, setLeadId] = useState<string | null>(null);
   const [invalid, setInvalid] = useState(false);
   const dragHintId = useId();
   const selected = projectId
@@ -233,6 +237,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     undoLabel: t("actions.undo"),
   });
   const agents = (members.data ?? []).filter((item) => item.kind === "agent");
+  const people = (members.data ?? []).filter((item) => item.kind === "person");
+  const lead = selected?.leadId
+    ? members.data?.find((item) => item.id === selected.leadId)
+    : undefined;
   const filterAgent = agentId
     ? members.data?.find((item) => item.id === agentId)
     : undefined;
@@ -503,6 +511,25 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </div>
         </div>
+        {selected && (selected.stage || lead) && (
+          <p className="projects-meta" data-testid="project-meta">
+            {selected.stage && (
+              <span
+                className="projects-stage"
+                data-testid="project-stage"
+                data-stage={selected.stage}
+              >
+                <span className="sr-only">{t("projects.stageLabel")}: </span>
+                {t(`projects.stages.${selected.stage}`)}
+              </span>
+            )}
+            {lead && (
+              <span className="projects-lead" data-testid="project-lead">
+                {t("projects.leadIs", { name: lead.name })}
+              </span>
+            )}
+          </p>
+        )}
       </header>
       {showFilters && (
         <div className="projects-filter-bar">
@@ -596,6 +623,9 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 {projects.data?.map((project) => (
                   <option key={project.id} value={project.id}>
                     {project.name}
+                    {project.stage
+                      ? ` · ${t(`projects.stages.${project.stage}`)}`
+                      : ""}
                     {project.archived ? ` · ${t("projects.archived")}` : ""}
                   </option>
                 ))}
@@ -606,6 +636,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 data-testid="new-project"
                 onClick={() => {
                   setName("");
+                  setStage(null);
+                  setLeadId(null);
                   setSheetOpen(false);
                   setProjectDialog("new");
                 }}
@@ -615,6 +647,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
             {admin && selected && (
               <Button
+                data-testid="manage-project"
                 onClick={() => {
                   setSheetOpen(false);
                   setProjectBaseline({
@@ -623,6 +656,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                     archived: selected.archived,
                   });
                   setName(selected.name);
+                  setStage(selected.stage);
+                  setLeadId(selected.leadId);
                   setProjectDialog("edit");
                 }}
               >
@@ -831,10 +866,12 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               event.preventDefault();
               const parsed =
                 projectDialog === "new"
-                  ? projectInputSchema.safeParse({ name })
+                  ? projectInputSchema.safeParse({ name, stage, leadId })
                   : projectUpdateSchema.safeParse({
                       version: projectBaseline?.version,
                       name,
+                      stage,
+                      leadId,
                     });
               setInvalid(!parsed.success);
               if (parsed.success) manage.mutate(parsed.data);
@@ -850,6 +887,40 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 maxLength={100}
                 autoFocus
               />
+            </div>
+            <div className="field">
+              <Label htmlFor="project-stage">{t("projects.stageLabel")}</Label>
+              <select
+                id="project-stage"
+                data-testid="project-stage-select"
+                value={stage ?? ""}
+                onChange={(event) =>
+                  setStage((event.target.value || null) as ProjectStage | null)
+                }
+              >
+                <option value="">{t("projects.stageNone")}</option>
+                {PROJECT_STAGES.map((value) => (
+                  <option key={value} value={value}>
+                    {t(`projects.stages.${value}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <Label htmlFor="project-lead">{t("projects.leadLabel")}</Label>
+              <select
+                id="project-lead"
+                data-testid="project-lead-select"
+                value={leadId ?? ""}
+                onChange={(event) => setLeadId(event.target.value || null)}
+              >
+                <option value="">{t("projects.leadNone")}</option>
+                {people.map((person) => (
+                  <option key={person.id} value={person.id}>
+                    {person.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <Button
               data-testid="project-submit"

@@ -198,7 +198,7 @@ export function createMcpServer(
     {
       title: "Read projects",
       description:
-        "List the token workspace's projects. Project administration is a human action.",
+        "List the token workspace's projects with their stage (lead, proposal_sent, contract_signed, in_service, closed or null) and person in charge (leadId, a person member; resolve names with context.get). Contract and collection figures are never shown to agents. Project administration is a human action.",
       inputSchema: toolSchema(mcpProjectsListArgs),
     },
     () => run(() => core.listProjects(principal, principal.workspaceId)),

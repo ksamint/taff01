@@ -84,7 +84,7 @@ function dtoTask(row: typeof tasks.$inferSelect): Task {
     updatedAt: row.updatedAt.toISOString(),
   };
 }
-/** Finance stays null unless the reader may see it (D7). */
+/** Finance stays null unless the reader may see it (finance:read, ADR 0021). */
 export function dtoProject(
   row: typeof projects.$inferSelect,
   finance = false,
@@ -437,6 +437,7 @@ export function createPlanningOperations({
     const body = parse(projectInputSchema, input);
     return mutation(p, async (tx) => {
       await requireMember(tx, p, w, "project:manage");
+      if (body.leadId) await requireLead(tx, w, body.leadId);
       const [row] = await tx
         .insert(projects)
         .values({ ...body, workspaceId: w })
@@ -473,6 +474,7 @@ export function createPlanningOperations({
           ? row.contractAmount
           : body.contractAmount;
       if (amount !== null && currency === null) invalid();
+      if (body.leadId) await requireLead(tx, row.workspaceId, body.leadId);
       if (body.clientCompanyId) {
         const [company] = await tx
           .select({ archivedAt: companies.archivedAt })
@@ -492,6 +494,20 @@ export function createPlanningOperations({
         .returning();
       return dtoProject(updated, true);
     });
+  }
+  /** The person in charge is a person of the project's workspace. */
+  async function requireLead(tx: Transaction, w: string, leadId: string) {
+    const [lead] = await tx
+      .select({ id: members.id })
+      .from(members)
+      .where(
+        and(
+          eq(members.id, leadId),
+          eq(members.workspaceId, w),
+          eq(members.kind, "person"),
+        ),
+      );
+    if (!lead) invalid();
   }
   async function lockWorkspace(tx: Transaction, w: string) {
     parse(idSchema, w);

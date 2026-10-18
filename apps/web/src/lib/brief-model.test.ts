@@ -201,7 +201,7 @@ describe("brief display model: Northwind on 2026-10-08", () => {
     ]);
   });
 
-  it("shows no totals when finance is hidden (D7)", () => {
+  it("shows no totals when finance is hidden (ADR 0021)", () => {
     const hidden = buildBrief(
       source({
         projects: source().projects.map((project) => ({

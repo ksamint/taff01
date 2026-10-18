@@ -11,8 +11,8 @@ import { verifyTestEmail } from "./support/email-verification";
 import type { TestLocale } from "./support/messages";
 import { selectLocale } from "./support/preferences";
 
-// D7: contract amount and collected are admin-only (finance:read); members
-// see delivery %. The restricted-member check of the public acceptance run.
+// ADR 0021: every person of the workspace reads contract amount and collected
+// (finance:read); guests and agents see delivery % only. Only admins edit.
 // A role change takes effect on an open page without a reload, including a
 // change committed after the page's first reads but before its live
 // connection opens: the server only closes sockets that are connected.
@@ -31,7 +31,7 @@ async function signIn(page: Page, locale: TestLocale) {
   await selectLocale(page, locale);
 }
 
-test("finance stays admin-only for a member and follows a role change made before the live connection", async ({
+test("finance is hidden from a guest and follows a role change made before the live connection", async ({
   page,
   browser,
 }, info) => {
@@ -58,7 +58,7 @@ test("finance stays admin-only for a member and follows a role change made befor
   });
   expect(financed.status()).toBe(200);
 
-  // A second, verified person joins as a member.
+  // A second, verified person joins as a guest.
   const context = await browser.newContext({
     baseURL: process.env.AUTH_URL,
     locale: locale === "en" ? "en-US" : locale,
@@ -82,7 +82,7 @@ test("finance stays admin-only for a member and follows a role change made befor
     await verifyTestEmail(member, me.user.id);
     const issued = await page.request.post(
       `/api/workspaces/${workspace.id}/invites`,
-      { data: { email, role: "member" } },
+      { data: { email, role: "guest" } },
     );
     expect(issued.status()).toBe(201);
     const invite = issuedWorkspaceInviteSchema.parse(await issued.json());
@@ -99,7 +99,7 @@ test("finance stays admin-only for a member and follows a role change made befor
       )
       .find((item) => item.userId === me.user.id)?.id;
     if (!memberId) throw new Error("The member did not join");
-    const setRole = async (role: "admin" | "member") => {
+    const setRole = async (role: "member" | "guest") => {
       const response = await page.request.patch(
         `/api/workspaces/${workspace.id}/members/${memberId}`,
         { data: { role } },
@@ -107,7 +107,7 @@ test("finance stays admin-only for a member and follows a role change made befor
       expect(response.status()).toBe(200);
     };
 
-    // The API withholds the figures from the member.
+    // The API withholds the figures from the guest.
     const read = timelineSchema.parse(
       await (
         await member.request.get(`/api/projects/${project.id}/timeline`)
@@ -139,12 +139,27 @@ test("finance stays admin-only for a member and follows a role change made befor
     await expect(member.getByTestId("timeline-finance")).toHaveCount(0);
 
     // Promoted before the connection opens: the open page shows finance.
-    await setRole("admin");
+    await setRole("member");
     connect();
     await expect(member.getByTestId("timeline-finance")).toBeVisible();
+    const asMember = timelineSchema.parse(
+      await (
+        await member.request.get(`/api/projects/${project.id}/timeline`)
+      ).json(),
+    );
+    expect(asMember.risk.finance).toMatchObject({
+      contractAmount: "360000.00",
+      currency: "HKD",
+    });
+    // Members read the figures; recording a payment stays an admin act.
+    const payment = await member.request.post(
+      `/api/projects/${project.id}/payments`,
+      { data: { amount: "1.00", paidOn: "2026-10-01" } },
+    );
+    expect(payment.status()).toBe(403);
 
     // Demoted over the live connection: the figures leave at once.
-    await setRole("member");
+    await setRole("guest");
     await expect(member.getByTestId("timeline-view")).toBeVisible();
     await expect(member.getByTestId("timeline-finance")).toHaveCount(0);
   } finally {

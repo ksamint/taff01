@@ -46,7 +46,7 @@ export function StakeholdersView({
         {t("crm.stakeholders.pickProject")}
       </p>
     );
-  // finance:manage is admin-only, the same rule as finance:read (D7).
+  // finance:manage is admin-only; canManageProjects is the client's proxy for it.
   const canSetClient =
     !!access.data?.canReadFinance &&
     !!access.data?.canManageProjects &&

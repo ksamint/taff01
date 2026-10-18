@@ -143,14 +143,19 @@ export function can(
   if (
     action === "workspace:manage" ||
     action === "project:manage" ||
-    action === "finance:read" ||
     action === "finance:manage" ||
     action === "crm:archive" ||
     action === "crm:audit" ||
     action === "mind:archive"
   )
     return actor.kind === "person" && actor.role === "admin";
-  if (action === "contact:manage" || action === "mind:write")
+  // Every person of the workspace reads contract and collection figures
+  // (ADR 0021, superseding D7); guests and agents never do.
+  if (
+    action === "contact:manage" ||
+    action === "mind:write" ||
+    action === "finance:read"
+  )
     return actor.kind === "person";
   if (action === "suggestion:create") {
     if (actor.kind === "person")

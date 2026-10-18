@@ -66,6 +66,23 @@
 .projects-crumb {
   display: none;
 }
+/* Stage and person in charge under the title (ADR 0021). */
+.projects-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.projects-stage {
+  padding: 2px 8px;
+  border-radius: var(--radius-control);
+  background: var(--bg-container);
+  color: var(--text);
+  font-weight: 500;
+}
 .projects-title {
   min-width: 0;
   max-width: 100%;
@@ -834,6 +851,9 @@
     justify-content: flex-start;
     gap: 12px;
     min-height: 52px;
+  }
+  .projects-meta {
+    padding-bottom: 10px;
   }
   .projects-crumb {
     display: inline-flex;

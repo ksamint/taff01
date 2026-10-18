@@ -175,7 +175,7 @@ export type PortfolioTotal = {
 };
 
 /**
- * Totals over the projects whose finance the reader may see (D7), one per
+ * Totals over the projects whose finance the reader may see (ADR 0021), one per
  * currency so amounts are never added across currencies.
  */
 export function portfolioTotals(brief: Brief): PortfolioTotal[] {
