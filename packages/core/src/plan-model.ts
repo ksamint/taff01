@@ -49,7 +49,7 @@ export type PlanModelInput = {
   tasks: PlanModelTask[];
   milestones: PlanModelMilestone[];
   dependencies: PlanModelDependency[];
-  /** Null when the viewer may not read finance (D7). */
+  /** Null when the viewer may not read finance (ADR 0021). */
   finance: {
     contractAmount: string | null;
     currency: string | null;

@@ -47,6 +47,8 @@ try {
   const asUser = userPrincipal(person.id);
   const project = await core.createProject(asUser, workspace.id, {
     name: `Smoke-${Date.now()}`,
+    stage: "in_service",
+    leadId: workspace.memberId,
   });
   const members = await core.listMembers(asUser, workspace.id);
   const agent = members.find((member) => member.kind === "agent");

@@ -50,6 +50,7 @@ import {
   timeZone,
   versionSchema,
 } from "./primitives";
+import { projectStageSchema } from "./project-read";
 import { runSchema, runStatusSchema } from "./run-read";
 
 export * from "./assistant";
@@ -449,17 +450,31 @@ export const taskCommentSchema = object({
   body: string(),
   createdAt: iso.datetime(),
 });
-export const projectInputSchema = strictObject({ name: boundedText(100) });
+const projectProfileFields = {
+  stage: optional(nullable(projectStageSchema)),
+  leadId: optional(nullable(idSchema)),
+};
+export const projectInputSchema = strictObject({
+  name: boundedText(100),
+  ...projectProfileFields,
+});
 export const projectUpdateSchema = strictObject({
   version: versionSchema,
   name: optional(boundedText(100)),
   archived: optional(boolean()),
+  ...projectProfileFields,
   ...projectFinanceFields,
 }).check(
   refine((v) =>
-    [v.name, v.archived, v.contractAmount, v.currency, v.clientCompanyId].some(
-      (field) => field !== undefined,
-    ),
+    [
+      v.name,
+      v.archived,
+      v.stage,
+      v.leadId,
+      v.contractAmount,
+      v.currency,
+      v.clientCompanyId,
+    ].some((field) => field !== undefined),
   ),
 );
 export const workspaceCreateSchema = strictObject({

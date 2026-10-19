@@ -453,6 +453,8 @@ describe("projects", () => {
     contractAmount: null,
     currency: null,
     clientCompanyId: null,
+    stage: null,
+    leadId: null,
     createdAt: NOW,
     updatedAt: NOW,
   };
@@ -474,6 +476,8 @@ describe("projects", () => {
       contractAmount: null,
       currency: null,
       clientCompanyId: null,
+      stage: null,
+      leadId: null,
       createdAt: NOW,
       updatedAt: NOW,
     });

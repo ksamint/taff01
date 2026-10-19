@@ -546,3 +546,34 @@
     font-size: 24px;
   }
 }
+
+.brief-stage-filter,
+.brief-project-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.brief-stage-filter {
+  margin-block: 12px;
+}
+.brief-stage-filter button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.brief-stage-filter button[aria-pressed="true"],
+.brief-stage {
+  color: var(--accent-text);
+  background: var(--bg-container-low);
+}
+.brief-stage {
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 12px;
+}
+.brief-project-meta {
+  font-size: 12px;
+}

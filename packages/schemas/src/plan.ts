@@ -200,7 +200,7 @@ export const projectRiskSchema = object({
   blockedTaskId: nullable(idSchema),
   conflictDependencyId: nullable(idSchema),
   lastMilestoneId: nullable(idSchema),
-  /** Finance is null unless the caller may read it (D7). */
+  /** Finance is null unless the caller may read it (ADR 0021). */
   finance: nullable(
     object({
       contractAmount: nullable(moneySchema),

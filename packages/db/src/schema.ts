@@ -214,6 +214,14 @@ export const companies = pgTable(
     check("companies_version", sql`${t.version} > 0`),
   ],
 );
+/** Commercial stage of a project (ADR 0021); null until someone sets it. */
+export const projectStage = pgEnum("project_stage", [
+  "lead",
+  "proposal_sent",
+  "contract_signed",
+  "in_service",
+  "closed",
+]);
 export const projects = pgTable(
   "projects",
   {
@@ -224,10 +232,13 @@ export const projects = pgTable(
     name: text("name").notNull(),
     archived: boolean("archived").default(false).notNull(),
     version: integer("version").default(1).notNull(),
-    /** Finance (admins only, D7): contract value in `currency`. */
+    /** Finance (read by people, managed by admins; ADR 0021): contract value in `currency`. */
     contractAmount: numeric("contract_amount", { precision: 14, scale: 2 }),
     currency: text("currency"),
     clientCompanyId: uuid("client_company_id"),
+    stage: projectStage("stage"),
+    /** Person in charge; a person in the project's workspace (trigger). */
+    leadId: uuid("lead_id"),
     ...dates,
   },
   (t) => [
@@ -246,6 +257,11 @@ export const projects = pgTable(
       columns: [t.workspaceId, t.clientCompanyId],
       foreignColumns: [companies.workspaceId, companies.id],
       name: "projects_client_company_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.leadId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "projects_lead_fk",
     }),
   ],
 );

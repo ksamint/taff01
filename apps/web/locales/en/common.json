@@ -154,6 +154,18 @@
     "archive": "Archive project",
     "restore": "Restore project",
     "archived": "Archived",
+    "stageLabel": "Stage",
+    "stageNone": "No stage",
+    "stages": {
+      "lead": "Lead",
+      "proposal_sent": "Proposal sent",
+      "contract_signed": "Contract signed",
+      "in_service": "In service",
+      "closed": "Closed"
+    },
+    "leadLabel": "Person in charge",
+    "leadNone": "Not assigned",
+    "leadIs": "In charge: {{name}}",
     "drag": "Drag task to another status column",
     "dragHint": "Drag a handle to move a task, or use its status selector.",
     "moved": "Moved to {{status}}",
@@ -171,7 +183,9 @@
     "statusTabs": "Jump to a status column",
     "buildingNote": "This view is still being built. The board and list work now.",
     "openBoard": "Open the board",
-    "openList": "Open the list"
+    "openList": "Open the list",
+    "stageMoved": "Stage changed to {{stage}}",
+    "leadGuest": "{{name}} (guest)"
   },
   "inbox": {
     "title": "Inbox",
@@ -1139,7 +1153,8 @@
       "applied": "Applied",
       "dismissed": "Dismissed",
       "undone": "Suggestion undone."
-    }
+    },
+    "stageAll": "All"
   },
   "ask": {
     "label": "Ask across all projects",

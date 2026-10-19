@@ -42,6 +42,16 @@ initial JavaScript limit. Core's PostgreSQL tests and the official MCP smoke
 exercise schedules against the running Node 24 API; real browser gestures
 verify the legacy plugin bridge.
 
+## Patch refresh on 2026-10-17
+
+`pnpm up -r` within the fixed majors: Next 16.4.2, React 19.3.1, better-auth
+1.7.10, Hono 4.13.13, @hono/node-server 2.1.5, Zod 4.6.7, BullMQ 6.3.15,
+TanStack Query 5.104.3, react-i18next 17.0.20, Tailwind 4.3.3, Vitest 5.0.5,
+Turbo 2.11.8, Playwright 1.64.1 and smaller bumps. No new dependencies or
+licences. Releases younger than pnpm's release-age cutoff were held back.
+Validation: lint, typecheck, licence gate, 1689 Vitest tests on PostgreSQL 18,
+production build, Today budget 191.9 KiB, `pnpm mcp:smoke` against the bundled API.
+
 ## Scheduled
 
 | When | Move | How | Validation |

@@ -16,7 +16,7 @@ graph data and isolation scope.
 - **Desktop:** a sidebar with ⌘K.
 - **Projects:** board, list, timeline, stakeholders, relations and mind map.
 - **Also new:** companies and contacts, an AI brief and Ask taff (both
-  rules-based; the model path is off by default, ADR 0016), and 30 MCP tools.
+  rules-based; the model path is off by default, ADR 0016), and 31 MCP tools.
 
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.
@@ -174,7 +174,17 @@ directory and are uploaded by CI. The audit adds sample tasks to the local
 database. Lighthouse and axe-core remain development dependencies.
 `pnpm mcp:smoke` connects the official MCP client to the running API, exercises
 every tool, measured events, artifacts, grants, review changes, the rate limit
-and revocation; run it with `pnpm dev` up. Agents must submit their own real
+and revocation; run it with `pnpm dev` up. To probe `/mcp` by hand, issue an agent token
+on the MCP page (shown once), then send JSON-RPC over Streamable HTTP:
+
+```sh
+curl -s http://127.0.0.1:3001/mcp -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"context.get","arguments":{}}}'
+```
+
+`tools/list` lists the 31 tools; a missing or revoked token returns 401, and
+each call appears in the MCP page's call log. Agents must submit their own real
 outputs: assigning or starting a run does not launch an LLM or simulate progress.
 Run duration and cost limits pause further submissions from reported metrics;
 external runtimes must enforce their own process limits. See

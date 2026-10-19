@@ -90,7 +90,7 @@ The badge count is unresolved reviews plus blockers, everywhere (Today ›
 | Status `todo`, `doing`, `review` (待確認), `done` | `todo`, `in_progress`, `needs_review`, `done` |
 | Task `due` + `dur` (days) | `tasks.due_at`; `task_plans(start_date, duration_days)` keeps `due_at` at the plan end |
 | `PLAN`, `DEPS`, `MILESTONES` | `task_plans`, `task_dependencies` (typed task or milestone ends), `milestones` |
-| `FINANCE` (contract, collected, HK$) | `projects.contract_amount`, `currency`, `client_company_id`; `project_payments`; `Intl.NumberFormat` in the project currency; admins only |
+| `FINANCE` (contract, collected, HK$) | `projects.contract_amount`, `currency`, `client_company_id`; `project_payments`; `Intl.NumberFormat` in the project currency; read by every person (not guests or agents), edited by admins (ADR 0021) |
 | `CRM_SEED` companies, contacts | `companies`, `contacts` (archive, never delete) |
 | `contact_links` + `contact_link_roles` (polymorphic) | typed `company_contacts`, `project_contacts`, `task_contacts` with role rows checked against `CONTACT_ROLE_RULES` |
 | `crmRepair` on load | not ported; read-only admin `auditCrm()` returns `[]` |

@@ -3,6 +3,7 @@ import type {
   BriefAction,
   BriefProject,
   BriefScope,
+  ProjectStage,
   RunStatus,
   SuggestionKind,
   TaskStatus,
@@ -23,6 +24,8 @@ export type BriefSource = {
     workspaceId: string;
     projectId: string;
     name: string;
+    stage?: ProjectStage | null;
+    leadId?: string | null;
     /** The same input the timeline builds (finance null without finance:read). */
     plan: PlanModelInput;
   }[];
@@ -84,6 +87,8 @@ export function buildBrief(source: BriefSource): Brief {
       workspaceId: project.workspaceId,
       projectId: project.projectId,
       name: project.name,
+      stage: project.stage ?? null,
+      leadId: project.leadId ?? null,
       risk: buildPlanModel(project.plan).risk,
     }))
     .sort(

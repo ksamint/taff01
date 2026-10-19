@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- Admins can rename or archive projects while retaining a person in charge who was later demoted to guest.
+
+- People in charge can move their project's stage from the header with Undo;
+  profile and finance edits remain admin-only. Guests cannot be assigned as leads.
+- Brief shows stage and person in charge, filters rows and currency totals by
+  stage, and exposes both fields over MCP. Project switching groups the pipeline.
+
+- Projects gain a stage (lead, proposal sent, contract signed, in service,
+  closed) and a person in charge, set by admins and shown under the title.
+- Every person in the organization reads contract, collected and collection %;
+  guests and agents see delivery % only. Admins still edit amounts and payments.
+- MCP `projects.list` returns stage and `leadId`. Additive migration 0031 (ADR 0021).
+
 ## v0.2.8 — 2026-10-17
 
 - Ask for the account first, then a password or an explicitly requested SMS code.

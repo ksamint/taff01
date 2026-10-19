@@ -589,7 +589,147 @@ describe.skipIf(!url)(
       expect(timeline.risk.reasons).toContain("blocked");
     });
 
-    it("redacts finance for members and agents and records payments for admins", async () => {
+    it("stores a project's stage and person in charge for admins", async () => {
+      const created = await core.createProject(alice, w, {
+        name: "Pipeline",
+        stage: "lead",
+        leadId: owner,
+      });
+      expect(created).toMatchObject({ stage: "lead", leadId: owner });
+      await expect(
+        core.updateProject(bob, created.id, {
+          version: created.version,
+          stage: "proposal_sent",
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      const moved = await core.updateProject(alice, created.id, {
+        version: created.version,
+        stage: "contract_signed",
+        leadId: bobMember,
+      });
+      expect(moved).toMatchObject({
+        stage: "contract_signed",
+        leadId: bobMember,
+        version: created.version + 1,
+      });
+      for (const leadId of [agentId, outsiderMember, randomUUID()])
+        await expect(
+          core.updateProject(alice, created.id, {
+            version: moved.version,
+            leadId,
+          }),
+        ).rejects.toMatchObject({ code: "invalid_input" });
+      await expect(
+        core.updateProject(alice, created.id, {
+          version: moved.version,
+          stage: "won" as never,
+        }),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      const led = await core.updateProject(bob, created.id, {
+        version: moved.version,
+        stage: "in_service",
+      });
+      expect(led).toMatchObject({
+        stage: "in_service",
+        leadId: bobMember,
+        version: moved.version + 1,
+      });
+      await expect(
+        core.updateProject(bob, created.id, {
+          version: moved.version,
+          stage: "closed",
+        }),
+      ).rejects.toMatchObject({ code: "conflict" });
+      for (const fields of [
+        { name: "Renamed" },
+        { leadId: owner },
+        { archived: true },
+        { contractAmount: "100.00", currency: "HKD" },
+        { stage: "closed" as const, name: "Mixed" },
+      ]) {
+        await expect(
+          core.updateProject(bob, created.id, {
+            version: led.version,
+            ...fields,
+          }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+      }
+      await expect(
+        core.updateProject(agent, created.id, {
+          version: led.version,
+          stage: "closed",
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(
+        core.updateProject(outsider, created.id, {
+          version: led.version,
+          stage: "closed",
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      // A later demotion leaves the lead in place but removes stage authority.
+      await core.updateMemberRole(alice, w, bobMember, { role: "guest" });
+      await expect(
+        core.updateProject(bob, created.id, {
+          version: led.version,
+          stage: "closed",
+        }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      const renamed = await core.updateProject(alice, created.id, {
+        version: led.version,
+        name: "Renamed pipeline",
+        leadId: bobMember,
+      });
+      expect(renamed).toMatchObject({
+        name: "Renamed pipeline",
+        leadId: bobMember,
+      });
+      const archived = await core.updateProject(alice, created.id, {
+        version: renamed.version,
+        archived: true,
+        leadId: bobMember,
+      });
+      expect(archived).toMatchObject({ archived: true, leadId: bobMember });
+      const another = await core.createProject(alice, w, {
+        name: "Another pipeline",
+      });
+      await expect(
+        core.updateProject(alice, another.id, {
+          version: another.version,
+          leadId: bobMember,
+        }),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      await expect(
+        core.createProject(alice, w, { name: "Guest lead", leadId: bobMember }),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      await core.updateMemberRole(alice, w, bobMember, { role: "member" });
+      const cleared = await core.updateProject(alice, created.id, {
+        version: archived.version,
+        stage: null,
+        leadId: null,
+      });
+      expect(cleared).toMatchObject({ stage: null, leadId: null });
+      const asAgent = (await core.listProjects(agent, w)).find(
+        (x) => x.id === moved.id,
+      );
+      expect(asAgent).toMatchObject({ stage: null, leadId: null });
+      const [audit] = await connection.client<{ n: number }[]>`
+        select count(*)::int as n from activity
+        where resource_id=${created.id} and action='projects.update'`;
+      expect(audit.n).toBe(5);
+      const ledAudit = await connection.db
+        .select()
+        .from(activity)
+        .where(
+          and(
+            eq(activity.resourceId, created.id),
+            eq(activity.action, "projects.update"),
+            eq(activity.actorId, bob.kind === "user" ? bob.userId : ""),
+          ),
+        );
+      expect(ledAudit).toHaveLength(1);
+    });
+
+    it("shows finance to people but not guests or agents, and records payments for admins", async () => {
       const finance = await core.createProject(alice, w, { name: "Paid work" });
       await expect(
         core.updateProject(alice, finance.id, {
@@ -629,9 +769,9 @@ describe.skipIf(!url)(
           paidOn: "2026-10-01",
         }),
       ).rejects.toMatchObject({ code: "invalid_input" });
-      await expect(core.listPayments(bob, finance.id)).rejects.toMatchObject({
-        code: "forbidden",
-      });
+      expect(
+        (await core.listPayments(bob, finance.id)).map((x) => x.id),
+      ).toEqual([payment.id]);
       await expect(core.listPayments(agent, finance.id)).rejects.toMatchObject({
         code: "forbidden",
       });
@@ -644,14 +784,54 @@ describe.skipIf(!url)(
         currency: "HKD",
         collectedPercent: 25,
       });
-      expect((await core.getTimeline(bob, finance.id)).risk.finance).toBeNull();
+      expect((await core.getTimeline(bob, finance.id)).risk.finance).toEqual({
+        contractAmount: "1000.00",
+        collectedAmount: "250.00",
+        currency: "HKD",
+        collectedPercent: 25,
+      });
       expect(
         (await core.getTimeline(agent, finance.id)).risk.finance,
       ).toBeNull();
       const asBob = (await core.listProjects(bob, w)).find(
         (x) => x.id === finance.id,
       );
-      expect(asBob).toMatchObject({ contractAmount: null, currency: null });
+      expect(asBob).toMatchObject({
+        contractAmount: "1000.00",
+        currency: "HKD",
+      });
+      const asAgent = (await core.listProjects(agent, w)).find(
+        (x) => x.id === finance.id,
+      );
+      expect(asAgent).toMatchObject({ contractAmount: null, currency: null });
+
+      // A guest of the workspace reads the plan but never the figures.
+      const g = await core.auth.api.signUpEmail({
+        body: {
+          name: "Gina Guest",
+          email: `${randomUUID()}@test.local`,
+          password: `test-${randomUUID()}`,
+        },
+      });
+      await connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id',${aliceId},true)`,
+        );
+        await tx.insert(members).values({
+          workspaceId: w,
+          userId: g.user.id,
+          name: "Gina Guest",
+          kind: "person",
+          role: "guest",
+        });
+      });
+      const guest = userPrincipal(g.user.id);
+      expect(
+        (await core.getTimeline(guest, finance.id)).risk.finance,
+      ).toBeNull();
+      await expect(core.listPayments(guest, finance.id)).rejects.toMatchObject({
+        code: "forbidden",
+      });
     });
 
     it("guards reads: outsiders are refused and unknown projects are not found", async () => {

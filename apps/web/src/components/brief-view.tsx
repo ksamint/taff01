@@ -6,7 +6,7 @@
 // answers from rules unless an admin opted a workspace into a model (D6).
 import "../styles/brief.css";
 
-import type { Locale } from "@taff/schemas";
+import { type Locale, PROJECT_STAGES, type ProjectStage } from "@taff/schemas";
 import type {
   AskAnswer,
   Brief,
@@ -31,6 +31,7 @@ import {
   answerView,
   briefStats,
   briefSummary,
+  filterBriefProjects,
   greetingPart,
   type LabelIndex,
   labelIndex,
@@ -331,7 +332,13 @@ function RiskSection({
 }) {
   const { t } = useTranslation();
   const headingId = useId();
-  const totals = portfolioTotals(brief);
+  const [stage, setStage] = useState<ProjectStage | null>(null);
+  const stages = PROJECT_STAGES.filter((value) =>
+    brief.projects.some((project) => project.stage === value),
+  );
+  const activeStage = stage && stages.includes(stage) ? stage : null;
+  const projects = filterBriefProjects(brief, activeStage);
+  const totals = portfolioTotals(brief, activeStage);
   if (!brief.projects.length) return null;
   return (
     <section
@@ -342,6 +349,30 @@ function RiskSection({
       <Sub id={headingId} className="brief-label">
         {t("brief.risk.title")}
       </Sub>
+      {stages.length > 0 && (
+        <div
+          className="brief-stage-filter"
+          role="group"
+          aria-label={t("projects.stageLabel")}
+        >
+          {[null, ...stages].map((value) => (
+            <button
+              key={value ?? "all"}
+              type="button"
+              data-testid={value ? `brief-stage-${value}` : "brief-stage-all"}
+              aria-pressed={activeStage === value}
+              onClick={() => setStage(value)}
+            >
+              {t(value ? `projects.stages.${value}` : "brief.stageAll")} (
+              {value
+                ? brief.projects.filter((project) => project.stage === value)
+                    .length
+                : brief.projects.length}
+              )
+            </button>
+          ))}
+        </div>
+      )}
       {totals.map((total) => (
         <div
           key={total.currency}
@@ -362,7 +393,7 @@ function RiskSection({
         </div>
       ))}
       <ul className="brief-risk-list">
-        {brief.projects.map((project) => (
+        {projects.map((project) => (
           <RiskRow
             key={project.projectId}
             project={project}
@@ -428,6 +459,22 @@ function RiskRow({
             {t(`timeline.risk.level.${risk.level}`)}
           </span>
         </span>
+        {(project.stage || project.leadId) && (
+          <span className="brief-project-meta">
+            {project.stage && (
+              <span className="brief-stage">
+                {t(`projects.stages.${project.stage}`)}
+              </span>
+            )}
+            {project.leadId && (
+              <span>
+                {t("projects.leadIs", {
+                  name: labels.member(project.leadId) ?? "—",
+                })}
+              </span>
+            )}
+          </span>
+        )}
         <span className="brief-risk-reason" data-testid="brief-risk-reason">
           {sentences(reasonPhrases(project, labels).map(say), locale)}
         </span>

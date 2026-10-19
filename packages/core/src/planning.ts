@@ -50,7 +50,17 @@ import {
   workspaceInviteInputSchema,
   workspaceKeyFromName,
 } from "@taff/schemas";
-import { and, desc, eq, inArray, isNull, or, type SQL, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  inArray,
+  isNull,
+  ne,
+  or,
+  type SQL,
+  sql,
+} from "drizzle-orm";
 import { deliverEmail, type EmailStatus, type EmailTransport } from "./email";
 import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
@@ -84,7 +94,7 @@ function dtoTask(row: typeof tasks.$inferSelect): Task {
     updatedAt: row.updatedAt.toISOString(),
   };
 }
-/** Finance stays null unless the reader may see it (D7). */
+/** Finance stays null unless the reader may see it (finance:read, ADR 0021). */
 export function dtoProject(
   row: typeof projects.$inferSelect,
   finance = false,
@@ -437,6 +447,7 @@ export function createPlanningOperations({
     const body = parse(projectInputSchema, input);
     return mutation(p, async (tx) => {
       await requireMember(tx, p, w, "project:manage");
+      if (body.leadId) await requireLead(tx, w, body.leadId);
       const [row] = await tx
         .insert(projects)
         .values({ ...body, workspaceId: w })
@@ -458,7 +469,19 @@ export function createPlanningOperations({
         .where(eq(projects.id, id))
         .for("update");
       if (!row) throw new CoreError("not_found", 404);
-      await requireMember(tx, p, row.workspaceId, "project:manage");
+      const stageOnly = Object.keys(body).every(
+        (key) => key === "stage" || key === "version",
+      );
+      await requireMember(
+        tx,
+        p,
+        row.workspaceId,
+        stageOnly ? "project:stage" : "project:manage",
+        {
+          workspaceId: row.workspaceId,
+          leadId: row.leadId,
+        },
+      );
       if (row.version !== body.version) conflict();
       if (
         body.contractAmount !== undefined ||
@@ -473,6 +496,8 @@ export function createPlanningOperations({
           ? row.contractAmount
           : body.contractAmount;
       if (amount !== null && currency === null) invalid();
+      if (body.leadId && body.leadId !== row.leadId)
+        await requireLead(tx, row.workspaceId, body.leadId);
       if (body.clientCompanyId) {
         const [company] = await tx
           .select({ archivedAt: companies.archivedAt })
@@ -492,6 +517,21 @@ export function createPlanningOperations({
         .returning();
       return dtoProject(updated, true);
     });
+  }
+  /** The person in charge is a person of the project's workspace. */
+  async function requireLead(tx: Transaction, w: string, leadId: string) {
+    const [lead] = await tx
+      .select({ id: members.id })
+      .from(members)
+      .where(
+        and(
+          eq(members.id, leadId),
+          eq(members.workspaceId, w),
+          eq(members.kind, "person"),
+          ne(members.role, "guest"),
+        ),
+      );
+    if (!lead) invalid();
   }
   async function lockWorkspace(tx: Transaction, w: string) {
     parse(idSchema, w);

@@ -3,6 +3,9 @@
 // header and filter bar 1221–1238, board and list 1538–1572.
 import "../styles/projects.css";
 import {
+  PROJECT_STAGES,
+  type Project,
+  type ProjectStage,
   projectInputSchema,
   projectUpdateSchema,
   type Run,
@@ -56,6 +59,7 @@ import {
   type TaskFilter,
 } from "../lib/project-board";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
+import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
 import { useInitialTodayTime } from "./providers";
 import { TimelineView } from "./timeline-view";
@@ -194,6 +198,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     archived: boolean;
   } | null>(null);
   const [name, setName] = useState("");
+  const [stage, setStage] = useState<ProjectStage | null>(null);
+  const [leadId, setLeadId] = useState<string | null>(null);
   const [invalid, setInvalid] = useState(false);
   const dragHintId = useId();
   const selected = projectId
@@ -223,6 +229,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       router.push(`/projects/${project.id}`);
     },
   });
+  const canMoveStage =
+    admin ||
+    (selected?.leadId === workspace.memberId &&
+      workspaceAccess.data?.canEditPlan);
   const describeMove = useCallback(
     (status: Task["status"]) =>
       t("projects.moved", { status: t(`status.${status}`) }),
@@ -233,6 +243,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     undoLabel: t("actions.undo"),
   });
   const agents = (members.data ?? []).filter((item) => item.kind === "agent");
+  const people = (members.data ?? []).filter((item) => item.kind === "person");
+  const lead = selected?.leadId
+    ? members.data?.find((item) => item.id === selected.leadId)
+    : undefined;
   const filterAgent = agentId
     ? members.data?.find((item) => item.id === agentId)
     : undefined;
@@ -503,6 +517,34 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </div>
         </div>
+        {selected && (selected.stage || lead || canMoveStage) && (
+          <p className="projects-meta" data-testid="project-meta">
+            {canMoveStage ? (
+              <ProjectStageControl
+                key={selected.id}
+                project={selected}
+                workspaceId={workspace.id}
+                confirmed={confirmed}
+              />
+            ) : (
+              selected.stage && (
+                <span
+                  className="projects-stage"
+                  data-testid="project-stage"
+                  data-stage={selected.stage}
+                >
+                  <span className="sr-only">{t("projects.stageLabel")}: </span>
+                  {t(`projects.stages.${selected.stage}`)}
+                </span>
+              )
+            )}
+            {lead && (
+              <span className="projects-lead" data-testid="project-lead">
+                {t("projects.leadIs", { name: lead.name })}
+              </span>
+            )}
+          </p>
+        )}
       </header>
       {showFilters && (
         <div className="projects-filter-bar">
@@ -593,12 +635,31 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 }
               >
                 <option value="">{t("projects.allProjects")}</option>
-                {projects.data?.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.name}
-                    {project.archived ? ` · ${t("projects.archived")}` : ""}
-                  </option>
-                ))}
+                {[...PROJECT_STAGES, null].map((stage) => {
+                  const group =
+                    projects.data?.filter(
+                      (project) => project.stage === stage,
+                    ) ?? [];
+                  return group.length ? (
+                    <optgroup
+                      key={stage ?? "none"}
+                      label={t(
+                        stage
+                          ? `projects.stages.${stage}`
+                          : "projects.stageNone",
+                      )}
+                    >
+                      {group.map((project) => (
+                        <option key={project.id} value={project.id}>
+                          {project.name}
+                          {project.archived
+                            ? ` · ${t("projects.archived")}`
+                            : ""}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : null;
+                })}
               </select>
             </div>
             {admin && (
@@ -606,6 +667,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 data-testid="new-project"
                 onClick={() => {
                   setName("");
+                  setStage(null);
+                  setLeadId(null);
                   setSheetOpen(false);
                   setProjectDialog("new");
                 }}
@@ -615,6 +678,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
             {admin && selected && (
               <Button
+                data-testid="manage-project"
                 onClick={() => {
                   setSheetOpen(false);
                   setProjectBaseline({
@@ -623,6 +687,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                     archived: selected.archived,
                   });
                   setName(selected.name);
+                  setStage(selected.stage);
+                  setLeadId(selected.leadId);
                   setProjectDialog("edit");
                 }}
               >
@@ -831,10 +897,12 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               event.preventDefault();
               const parsed =
                 projectDialog === "new"
-                  ? projectInputSchema.safeParse({ name })
+                  ? projectInputSchema.safeParse({ name, stage, leadId })
                   : projectUpdateSchema.safeParse({
                       version: projectBaseline?.version,
                       name,
+                      stage,
+                      leadId,
                     });
               setInvalid(!parsed.success);
               if (parsed.success) manage.mutate(parsed.data);
@@ -850,6 +918,53 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 maxLength={100}
                 autoFocus
               />
+            </div>
+            <div className="field">
+              <Label htmlFor="project-stage">{t("projects.stageLabel")}</Label>
+              <select
+                id="project-stage"
+                data-testid="project-stage-select"
+                value={stage ?? ""}
+                onChange={(event) =>
+                  setStage((event.target.value || null) as ProjectStage | null)
+                }
+              >
+                <option value="">{t("projects.stageNone")}</option>
+                {PROJECT_STAGES.map((value) => (
+                  <option key={value} value={value}>
+                    {t(`projects.stages.${value}`)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <Label htmlFor="project-lead">{t("projects.leadLabel")}</Label>
+              <select
+                id="project-lead"
+                data-testid="project-lead-select"
+                value={leadId ?? ""}
+                onChange={(event) => setLeadId(event.target.value || null)}
+              >
+                <option value="">{t("projects.leadNone")}</option>
+                {people
+                  .filter(
+                    (person) =>
+                      person.role !== "guest" ||
+                      (projectDialog === "edit" &&
+                        person.id === selected?.leadId),
+                  )
+                  .map((person) => (
+                    <option
+                      key={person.id}
+                      value={person.id}
+                      disabled={person.role === "guest"}
+                    >
+                      {person.role === "guest"
+                        ? t("projects.leadGuest", { name: person.name })
+                        : person.name}
+                    </option>
+                  ))}
+              </select>
             </div>
             <Button
               data-testid="project-submit"
@@ -1309,5 +1424,68 @@ function DesktopList({
         })}
       </tbody>
     </table>
+  );
+}
+
+/** Keyed by project so an Undo toast always edits the project it came from. */
+function ProjectStageControl({
+  project,
+  workspaceId,
+  confirmed,
+}: {
+  project: Project;
+  workspaceId: string;
+  confirmed: boolean;
+}) {
+  const { t } = useTranslation();
+  const edit = useManageProject(workspaceId, {
+    mode: "edit",
+    baseline: project,
+  });
+  const failed = (error: Error) => showToast(t(errorKey(error)));
+  function move(stage: ProjectStage | null) {
+    if (stage === project.stage) return;
+    const previous = project.stage;
+    edit.mutate(
+      { version: project.version, stage },
+      {
+        onSuccess: (saved) =>
+          showToast(
+            t("projects.stageMoved", {
+              stage: t(
+                stage ? `projects.stages.${stage}` : "projects.stageNone",
+              ),
+            }),
+            {
+              label: t("actions.undo"),
+              run: () =>
+                edit.mutate(
+                  { version: saved.version, stage: previous },
+                  { onError: failed },
+                ),
+            },
+          ),
+        onError: failed,
+      },
+    );
+  }
+  return (
+    <select
+      className="projects-stage"
+      data-testid="project-stage-control"
+      aria-label={t("projects.stageLabel")}
+      value={project.stage ?? ""}
+      disabled={edit.isPending || !confirmed}
+      onChange={(event) =>
+        move((event.target.value || null) as ProjectStage | null)
+      }
+    >
+      <option value="">{t("projects.stageNone")}</option>
+      {PROJECT_STAGES.map((stage) => (
+        <option key={stage} value={stage}>
+          {t(`projects.stages.${stage}`)}
+        </option>
+      ))}
+    </select>
   );
 }

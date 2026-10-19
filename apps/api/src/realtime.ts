@@ -43,10 +43,9 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
     const membershipChange = /^(members|workspaces)\.(update|delete)$/.test(
       event.action,
     );
-    // Payments are finance (D7): admins only, like token and call logs.
-    const adminOnly = /^(agent_tokens|mcp_calls|project_payments)\./.test(
-      event.action,
-    );
+    const adminOnly = /^(agent_tokens|mcp_calls)\./.test(event.action);
+    // CRM and payments (finance, ADR 0021) reach people, never guests.
+    const peopleOnly = /^project_payments\./.test(event.action);
     const crmEvent =
       /^(companies|contacts|company_contacts|project_contacts|task_contacts|contact_roles)\./.test(
         event.action,
@@ -76,7 +75,7 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
         continue;
       }
       if (authEvent || (adminOnly && !client.admin)) continue;
-      if (crmEvent && !client.crmReader) continue;
+      if ((crmEvent || peopleOnly) && !client.crmReader) continue;
       if (client.socket.readyState !== 1) continue;
       if (client.ready) send(client, event);
       else client.pending = event;

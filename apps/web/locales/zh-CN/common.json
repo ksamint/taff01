@@ -154,6 +154,18 @@
     "archive": "归档项目",
     "restore": "恢复项目",
     "archived": "已归档",
+    "stageLabel": "阶段",
+    "stageNone": "未设置阶段",
+    "stages": {
+      "lead": "潜在客户",
+      "proposal_sent": "已发方案",
+      "contract_signed": "已签合同",
+      "in_service": "服务中",
+      "closed": "已结束"
+    },
+    "leadLabel": "负责人",
+    "leadNone": "未设置",
+    "leadIs": "负责人：{{name}}",
     "drag": "将任务拖到其他状态列",
     "dragHint": "拖动手柄移动任务，或使用状态选择器。",
     "moved": "已移至{{status}}",
@@ -171,7 +183,9 @@
     "statusTabs": "跳到状态栏",
     "buildingNote": "此视图仍在建设中，看板和列表现已可用。",
     "openBoard": "打开看板",
-    "openList": "打开列表"
+    "openList": "打开列表",
+    "stageMoved": "阶段已改为{{stage}}",
+    "leadGuest": "{{name}}（访客）"
   },
   "inbox": {
     "title": "收件箱",
@@ -1139,7 +1153,8 @@
       "applied": "已应用",
       "dismissed": "已跳过",
       "undone": "已撤销建议。"
-    }
+    },
+    "stageAll": "全部"
   },
   "ask": {
     "label": "询问所有项目",
