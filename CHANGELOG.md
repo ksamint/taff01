@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.2.10 — 2026-10-19
 
 - Admins can rename or archive projects while retaining a person in charge who was later demoted to guest.
 
