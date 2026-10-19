@@ -2,6 +2,10 @@
 
 ## v0.2.10 — 2026-10-19
 
+- Every MCP tool carries annotations: the 14 read tools are read-only, so
+  MCP clients can run them without asking; changes are marked additive or
+  updating. The smoke now also covers protocol 2026-07-28 without initialize.
+
 - Admins can rename or archive projects while retaining a person in charge who was later demoted to guest.
 
 - People in charge can move their project's stage from the header with Undo;

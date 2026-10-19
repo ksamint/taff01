@@ -59,6 +59,7 @@ import {
   mcpTasksListArgs,
   mcpTasksUpdateArgs,
 } from "@taff/schemas";
+import { ADDITIVE, READ_ONLY, UPDATE } from "./mcp-annotations";
 import { registerCrmTools } from "./mcp-crm";
 import { registerInsightTools } from "./mcp-insights";
 import { registerTimelineTools } from "./mcp-timeline";
@@ -110,12 +111,7 @@ export function createMcpServer(
       description:
         "Read the current instant, workspace display time zone (the token creator's saved user profile), calling member, default human owner, members and projects. Call before resolving relative dates such as today, tomorrow 3pm, Friday or next Monday, or names such as Alice. Resolve wall times in workspace.timeZone, then send ISO instants; never assume the client clock or UTC is the workspace zone. No data is changed.",
       inputSchema: toolSchema(mcpContextGetArgs),
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false,
-      },
+      annotations: READ_ONLY,
     },
     () => run(() => core.getContext(principal, principal.workspaceId)),
   );
@@ -125,6 +121,7 @@ export function createMcpServer(
       title: "List tasks",
       description: "Read and filter the workspace's tasks.",
       inputSchema: toolSchema(mcpTasksListArgs),
+      annotations: READ_ONLY,
     },
     (args) => run(() => core.listTasks(principal, principal.workspaceId, args)),
   );
@@ -135,6 +132,7 @@ export function createMcpServer(
       description:
         "Create a task owned by a person; the calling agent becomes its worker.",
       inputSchema: toolSchema(mcpTasksCreateArgs),
+      annotations: ADDITIVE,
     },
     (args) =>
       run(() =>
@@ -152,6 +150,7 @@ export function createMcpServer(
       description:
         "Update the status (in_progress or needs_review) or worker of a task the agent works on.",
       inputSchema: toolSchema(mcpTasksUpdateArgs),
+      annotations: UPDATE,
     },
     (args) =>
       // Worker and status change together or not at all.
@@ -169,6 +168,7 @@ export function createMcpServer(
       description:
         "Edit the calling agent's task using its current version. Human review rules still apply.",
       inputSchema: toolSchema(mcpTasksEditArgs),
+      annotations: UPDATE,
     },
     ({ taskId, ...input }) =>
       run(() => core.updateTask(principal, taskId, input)),
@@ -179,6 +179,7 @@ export function createMcpServer(
       title: "Read task comments",
       description: "Read comments on an authorized workspace task.",
       inputSchema: toolSchema(mcpTaskCommentsListArgs),
+      annotations: READ_ONLY,
     },
     ({ taskId }) => run(() => core.listTaskComments(principal, taskId)),
   );
@@ -189,6 +190,7 @@ export function createMcpServer(
       description:
         "Add an actual comment to the calling agent's assigned task.",
       inputSchema: toolSchema(mcpTaskCommentsAddArgs),
+      annotations: ADDITIVE,
     },
     ({ taskId, ...input }) =>
       run(() => core.addTaskComment(principal, taskId, input)),
@@ -200,6 +202,7 @@ export function createMcpServer(
       description:
         "List the token workspace's projects with their stage (lead, proposal_sent, contract_signed, in_service, closed or null) and person in charge (leadId, a person member; resolve names with context.get). Contract and collection figures are never shown to agents. Project administration is a human action.",
       inputSchema: toolSchema(mcpProjectsListArgs),
+      annotations: READ_ONLY,
     },
     () => run(() => core.listProjects(principal, principal.workspaceId)),
   );
@@ -210,6 +213,7 @@ export function createMcpServer(
       description:
         "Search authorized tasks and comments; an agent remains limited to its token workspace.",
       inputSchema: toolSchema(mcpSearchArgs),
+      annotations: READ_ONLY,
     },
     (input) => run(() => core.search(principal, principal.workspaceId, input)),
   );
@@ -220,6 +224,7 @@ export function createMcpServer(
       description:
         "Parse editable task fields in the saved time zone without creating a task.",
       inputSchema: toolSchema(mcpQuickAddArgs),
+      annotations: READ_ONLY,
     },
     (input) =>
       run(() => core.parseQuickAdd(principal, principal.workspaceId, input)),
@@ -231,6 +236,7 @@ export function createMcpServer(
       description:
         "Read bounded calendar occurrences and unscheduled tasks in the token workspace.",
       inputSchema: toolSchema(mcpCalendarListArgs),
+      annotations: READ_ONLY,
     },
     (input) =>
       run(() => core.listCalendar(principal, principal.workspaceId, input)),
@@ -242,6 +248,7 @@ export function createMcpServer(
       description:
         "Set or clear a calendar interval and whole-series recurrence using the task's current version. Its deadline stays unchanged.",
       inputSchema: toolSchema(mcpCalendarSetArgs),
+      annotations: UPDATE,
     },
     ({ taskId, ...input }) =>
       run(() => core.setTaskCalendar(principal, taskId, input)),
@@ -253,6 +260,7 @@ export function createMcpServer(
       description:
         "Set or clear a task deadline (legacy protocol). Use calendar.set for calendar intervals and recurrence.",
       inputSchema: toolSchema(mcpCalendarScheduleArgs),
+      annotations: UPDATE,
     },
     (args) =>
       run(() =>
@@ -266,6 +274,7 @@ export function createMcpServer(
       description:
         "Hand the task to its owner for review; it waits in needs_review until a person approves.",
       inputSchema: toolSchema(mcpInboxRequestReviewArgs),
+      annotations: UPDATE,
     },
     (args) =>
       run(() =>
@@ -279,6 +288,7 @@ export function createMcpServer(
       description:
         "Read real steps, tool calls, sources, tests and artifacts for a run.",
       inputSchema: toolSchema(mcpRunsGetArgs),
+      annotations: READ_ONLY,
     },
     ({ runId }) => run(() => core.getRun(principal, runId)),
   );
@@ -289,6 +299,7 @@ export function createMcpServer(
       description:
         "Start a run for a task assigned to this agent. Progress is submitted explicitly.",
       inputSchema: toolSchema(mcpRunsStartArgs),
+      annotations: ADDITIVE,
     },
     ({ taskId }) => run(() => core.startRun(principal, taskId, {})),
   );
@@ -299,6 +310,7 @@ export function createMcpServer(
       description:
         "Pause, resume or cancel this agent's run using its current version.",
       inputSchema: toolSchema(mcpRunsControlArgs),
+      annotations: UPDATE,
     },
     ({ runId, ...input }) =>
       run(() => core.controlRun(principal, runId, input)),
@@ -310,6 +322,7 @@ export function createMcpServer(
       description:
         "Record a real step, tool call, source or test with measured duration and cost.",
       inputSchema: toolSchema(mcpRunsEventArgs),
+      annotations: ADDITIVE,
     },
     ({ runId, ...input }) =>
       run(() => core.appendRunEvent(principal, runId, input)),
@@ -321,6 +334,7 @@ export function createMcpServer(
       description:
         "Attach text content, an optional diff and source URL to this agent's running task; requires files:write.",
       inputSchema: toolSchema(mcpFilesAttachArgs),
+      annotations: ADDITIVE,
     },
     ({ runId, ...input }) =>
       run(() => core.attachRunArtifact(principal, runId, input)),
@@ -332,6 +346,7 @@ export function createMcpServer(
       description:
         "Submit this run for human review using its current version. Requires at least one artifact already attached with files.attach; a runs.event progress message is not an artifact. When the user only reports progress, attach an accurately attributed text progress note, never invented report content, then submit with the updated run version. Only the configured review policy can allow completion without review.",
       inputSchema: toolSchema(mcpRunsSubmitArgs),
+      annotations: UPDATE,
     },
     ({ runId, ...input }) => run(() => core.submitRun(principal, runId, input)),
   );
@@ -342,6 +357,7 @@ export function createMcpServer(
       description:
         "Request a scoped, expiring grant. A person must decide; deny and token scopes remain binding.",
       inputSchema: toolSchema(mcpGrantsRequestArgs),
+      annotations: ADDITIVE,
     },
     ({ agentId, ...input }) =>
       run(() => core.requestGrant(principal, agentId, input)),

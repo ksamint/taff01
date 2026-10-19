@@ -78,6 +78,24 @@ export const MCP_TOOLS = [
   "timeline.get",
 ] as const;
 
+/** Tools that only read; every other tool changes data (ADR 0021 follow-up). */
+export const MCP_READ_ONLY_TOOLS = [
+  "brief.get",
+  "calendar.list",
+  "companies.list",
+  "contacts.get",
+  "contacts.list",
+  "context.get",
+  "projects.list",
+  "quickadd.parse",
+  "relations.get",
+  "runs.get",
+  "search.query",
+  "tasks.comments.list",
+  "tasks.list",
+  "timeline.get",
+] as const;
+
 /** What the person does during the round trip, through core or HTTP. */
 export type McpHumanActions = {
   decideGrant(grantId: string, input: DecideGrant): Promise<unknown>;
@@ -174,13 +192,64 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
     authProvider: { token: async () => options.token },
   });
   await client.connect(transport);
-  const tools = (await client.listTools()).tools
-    .map((tool) => tool.name)
-    .sort();
+  const toolList = (await client.listTools()).tools;
+  const tools = toolList.map((tool) => tool.name).sort();
   check(
     "lists every task, calendar, timeline, project, search, draft, run, grant, file, CRM, relations, brief and suggestion tool",
     JSON.stringify(tools) === JSON.stringify(MCP_TOOLS),
     tools,
+  );
+  const readOnly = toolList
+    .filter((tool) => tool.annotations?.readOnlyHint === true)
+    .map((tool) => tool.name)
+    .sort();
+  check(
+    "every tool carries annotations and exactly the read tools are read-only",
+    toolList.every(
+      (tool) =>
+        tool.annotations?.openWorldHint === false &&
+        typeof tool.annotations.destructiveHint === "boolean",
+    ) && JSON.stringify(readOnly) === JSON.stringify(MCP_READ_ONLY_TOOLS),
+    readOnly,
+  );
+  // The official client negotiates 2025-11-25; probe the 2026-07-28
+  // per-request revision directly so both protocol eras stay covered.
+  const modern = await fetch(apiUrl, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${options.token}`,
+      "Content-Type": "application/json",
+      Accept: "application/json, text/event-stream",
+      "MCP-Protocol-Version": "2026-07-28",
+      "Mcp-Method": "tools/list",
+    },
+    body: JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/list",
+      params: {
+        _meta: {
+          "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+          "io.modelcontextprotocol/clientInfo": clientInfo,
+          "io.modelcontextprotocol/clientCapabilities": {},
+        },
+      },
+    }),
+  });
+  const modernText = await modern.text();
+  const modernData = modernText.match(/^data: (.*)$/m)?.[1] ?? modernText;
+  const modernTools = (() => {
+    try {
+      return (JSON.parse(modernData) as { result?: { tools?: unknown[] } })
+        .result?.tools;
+    } catch {
+      return undefined;
+    }
+  })();
+  check(
+    "protocol 2026-07-28 lists every tool without initialize",
+    modern.status === 200 && modernTools?.length === MCP_TOOLS.length,
+    { status: modern.status, count: modernTools?.length },
   );
   const context = mcpContextSchema.parse(
     text(await client.callTool({ name: "context.get", arguments: {} })),
