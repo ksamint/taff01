@@ -184,7 +184,8 @@
     "buildingNote": "此视图仍在建设中，看板和列表现已可用。",
     "openBoard": "打开看板",
     "openList": "打开列表",
-    "stageMoved": "阶段已改为{{stage}}"
+    "stageMoved": "阶段已改为{{stage}}",
+    "leadGuest": "{{name}}（访客）"
   },
   "inbox": {
     "title": "收件箱",

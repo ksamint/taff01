@@ -270,6 +270,58 @@ test("the person in charge moves the pipeline and Brief filters rows and totals"
     await lead.person.getByTestId("brief-stage-all").click();
     await expect(rows).toHaveCount(2);
     await expect(totals).toContainText(money(3000));
+
+    // Retain a saved lead after demotion without offering guests as new picks.
+    expect(
+      (
+        await page.request.patch(
+          `/api/workspaces/${workspace.id}/members/${lead.member.id}`,
+          {
+            data: { role: "guest" },
+          },
+        )
+      ).status(),
+    ).toBe(200);
+    await page.reload();
+    await openProjectFilters(page);
+    await page.getByTestId("manage-project").click();
+    const picker = page.getByTestId("project-lead-select");
+    await expect(picker).toHaveValue(lead.member.id);
+    const savedGuest = picker.locator(`option[value="${lead.member.id}"]`);
+    await expect(savedGuest).toHaveText(
+      m.projects.leadGuest.replace("{{name}}", lead.member.name),
+    );
+    await expect(savedGuest).toBeDisabled();
+    await page.getByTestId("project-name").fill("Renamed pipeline");
+    const renamedResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === "PATCH" &&
+        new URL(response.url()).pathname === `/api/projects/${project.id}`,
+    );
+    await page.getByTestId("project-submit").click();
+    expect(
+      projectSchema.parse(await (await renamedResponse).json()),
+    ).toMatchObject({ name: "Renamed pipeline", leadId: lead.member.id });
+    await openProjectFilters(page);
+    await page.getByTestId("manage-project").click();
+    const archivedResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === "PATCH" &&
+        new URL(response.url()).pathname === `/api/projects/${project.id}`,
+    );
+    await page
+      .getByRole("button", { name: m.projects.archive, exact: true })
+      .click();
+    expect(
+      projectSchema.parse(await (await archivedResponse).json()),
+    ).toMatchObject({ archived: true, leadId: lead.member.id });
+    await openProjectFilters(page);
+    await page.getByTestId("new-project").click();
+    await expect(
+      page
+        .getByTestId("project-lead-select")
+        .locator(`option[value="${lead.member.id}"]`),
+    ).toHaveCount(0);
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (355 distinct, 1908 uses)
+## Test ids (355 distinct, 1915 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -379,20 +379,20 @@ several do). “Also rendered by” lists the other files.
 | `board-status` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-task` | 20 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `manage-project` | 2 |  | project-profile.spec.ts |
-| `new-project` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `manage-project` | 4 |  | project-profile.spec.ts |
+| `new-project` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-filter` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-filters` | 9 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts |
 | `project-label` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-lead` | 2 |  | project-profile.spec.ts |
-| `project-lead-select` | 3 |  | project-profile.spec.ts |
-| `project-name` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-lead-select` | 5 |  | project-profile.spec.ts |
+| `project-name` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-select` | 1 |  | support/task-fields.ts |
 | `project-sort` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-stage` | 1 |  | project-profile.spec.ts |
 | `project-stage-control` | 4 |  | project-profile.spec.ts |
 | `project-stage-select` | 3 |  | project-profile.spec.ts |
-| `project-submit` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-submit` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-view-list` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 
 ### quick-add-dialog.tsx
@@ -615,6 +615,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.invite` | 9 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.planning.close` | 6 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
+| `button — name: m.projects.archive` | 1 | project-profile.spec.ts |
 | `button — name: m.run.cancel` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.sms.send` | 2 | sms-auth.spec.ts |
 | `button — name: m.sms.verify` | 3 | sms-auth.spec.ts |
@@ -819,7 +820,7 @@ read (`data-event-id`, `data-date`).
 | `main.loading` | 2 | i18n.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |
-| `option[value="*"]` | 6 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, planning.spec.ts, v021-feature-gaps.spec.ts |
+| `option[value="*"]` | 8 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, planning.spec.ts, project-profile.spec.ts, v021-feature-gaps.spec.ts |
 | `select[id="grant-expiry-*"]` | 1 | agent-review.spec.ts |
 
 ## Locale message lookups
@@ -917,6 +918,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.invite` | 25 | planning.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 17 | me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
+| `projects.archive` | 2 | project-profile.spec.ts |
+| `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |

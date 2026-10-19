@@ -674,9 +674,27 @@ describe.skipIf(!url)(
           stage: "closed",
         }),
       ).rejects.toMatchObject({ code: "forbidden" });
+      const renamed = await core.updateProject(alice, created.id, {
+        version: led.version,
+        name: "Renamed pipeline",
+        leadId: bobMember,
+      });
+      expect(renamed).toMatchObject({
+        name: "Renamed pipeline",
+        leadId: bobMember,
+      });
+      const archived = await core.updateProject(alice, created.id, {
+        version: renamed.version,
+        archived: true,
+        leadId: bobMember,
+      });
+      expect(archived).toMatchObject({ archived: true, leadId: bobMember });
+      const another = await core.createProject(alice, w, {
+        name: "Another pipeline",
+      });
       await expect(
-        core.updateProject(alice, created.id, {
-          version: led.version,
+        core.updateProject(alice, another.id, {
+          version: another.version,
           leadId: bobMember,
         }),
       ).rejects.toMatchObject({ code: "invalid_input" });
@@ -685,7 +703,7 @@ describe.skipIf(!url)(
       ).rejects.toMatchObject({ code: "invalid_input" });
       await core.updateMemberRole(alice, w, bobMember, { role: "member" });
       const cleared = await core.updateProject(alice, created.id, {
-        version: led.version,
+        version: archived.version,
         stage: null,
         leadId: null,
       });
@@ -697,7 +715,7 @@ describe.skipIf(!url)(
       const [audit] = await connection.client<{ n: number }[]>`
         select count(*)::int as n from activity
         where resource_id=${created.id} and action='projects.update'`;
-      expect(audit.n).toBe(3);
+      expect(audit.n).toBe(5);
       const ledAudit = await connection.db
         .select()
         .from(activity)

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Admins can rename or archive projects while retaining a person in charge who was later demoted to guest.
+
 - People in charge can move their project's stage from the header with Undo;
   profile and finance edits remain admin-only. Guests cannot be assigned as leads.
 - Brief shows stage and person in charge, filters rows and currency totals by

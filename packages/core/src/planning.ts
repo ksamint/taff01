@@ -496,7 +496,8 @@ export function createPlanningOperations({
           ? row.contractAmount
           : body.contractAmount;
       if (amount !== null && currency === null) invalid();
-      if (body.leadId) await requireLead(tx, row.workspaceId, body.leadId);
+      if (body.leadId && body.leadId !== row.leadId)
+        await requireLead(tx, row.workspaceId, body.leadId);
       if (body.clientCompanyId) {
         const [company] = await tx
           .select({ archivedAt: companies.archivedAt })

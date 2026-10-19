@@ -947,10 +947,21 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               >
                 <option value="">{t("projects.leadNone")}</option>
                 {people
-                  .filter((person) => person.role !== "guest")
+                  .filter(
+                    (person) =>
+                      person.role !== "guest" ||
+                      (projectDialog === "edit" &&
+                        person.id === selected?.leadId),
+                  )
                   .map((person) => (
-                    <option key={person.id} value={person.id}>
-                      {person.name}
+                    <option
+                      key={person.id}
+                      value={person.id}
+                      disabled={person.role === "guest"}
+                    >
+                      {person.role === "guest"
+                        ? t("projects.leadGuest", { name: person.name })
+                        : person.name}
                     </option>
                   ))}
               </select>

@@ -184,7 +184,8 @@
     "buildingNote": "This view is still being built. The board and list work now.",
     "openBoard": "Open the board",
     "openList": "Open the list",
-    "stageMoved": "Stage changed to {{stage}}"
+    "stageMoved": "Stage changed to {{stage}}",
+    "leadGuest": "{{name}} (guest)"
   },
   "inbox": {
     "title": "Inbox",
