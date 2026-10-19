@@ -97,3 +97,48 @@ it("advertises the API package version during MCP initialization", async () => {
     version: apiPackage.version,
   });
 });
+
+it("annotates every tool: reads are read-only, additions and updates are marked", async () => {
+  vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+  vi.spyOn(core, "recordMcpCall").mockResolvedValue();
+  const additive = [
+    "dependencies.add",
+    "files.attach",
+    "grants.request",
+    "runs.event",
+    "runs.start",
+    "suggestions.create",
+    "tasks.comments.add",
+    "tasks.create",
+  ];
+  const update = [
+    "calendar.schedule",
+    "calendar.set",
+    "dependencies.remove",
+    "inbox.request_review",
+    "runs.control",
+    "runs.submit",
+    "tasks.edit",
+    "tasks.plan",
+    "tasks.update",
+  ];
+  const listed: {
+    name: string;
+    annotations?: Record<string, boolean>;
+  }[] = (await call("tools/list", {})).result.tools;
+  expect(listed).toHaveLength(31);
+  for (const tool of listed) {
+    const expected = additive.includes(tool.name)
+      ? { readOnlyHint: false, destructiveHint: false, idempotentHint: false }
+      : update.includes(tool.name)
+        ? { readOnlyHint: false, destructiveHint: true, idempotentHint: true }
+        : { readOnlyHint: true, destructiveHint: false, idempotentHint: true };
+    expect(tool.annotations, tool.name).toEqual({
+      ...expected,
+      openWorldHint: false,
+    });
+  }
+  expect(listed.filter((tool) => tool.annotations?.readOnlyHint).length).toBe(
+    31 - additive.length - update.length,
+  );
+});

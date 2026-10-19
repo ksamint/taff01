@@ -7,6 +7,7 @@ import {
   mcpTimelineGetArgs,
 } from "@taff/schemas";
 import { toolSchema } from "./mcp";
+import { ADDITIVE, READ_ONLY, UPDATE } from "./mcp-annotations";
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
 
@@ -29,6 +30,7 @@ export function registerTimelineTools(
       description:
         "Read a project's plan: spans, progress, dependencies, conflicts, critical path and risk. Finance is never shown to agents.",
       inputSchema: toolSchema(mcpTimelineGetArgs),
+      annotations: READ_ONLY,
     },
     ({ projectId }) => run(() => core.getTimeline(principal, projectId)),
   );
@@ -39,6 +41,7 @@ export function registerTimelineTools(
       description:
         "Set the start date and duration of a task this agent works on, using the plan's current version (omit it for a new plan). The deadline follows the last day; shiftChildren moves the whole subtree.",
       inputSchema: toolSchema(mcpTasksPlanArgs),
+      annotations: UPDATE,
     },
     ({ taskId, ...input }) =>
       run(() => core.setTaskPlan(principal, taskId, input)),
@@ -50,6 +53,7 @@ export function registerTimelineTools(
       description:
         "Make a task this agent works on wait for another task or milestone (finish-to-start). Duplicates and cycles are refused.",
       inputSchema: toolSchema(mcpDependenciesAddArgs),
+      annotations: ADDITIVE,
     },
     (input) => run(() => core.addDependency(principal, input)),
   );
@@ -60,6 +64,7 @@ export function registerTimelineTools(
       description:
         "Remove a dependency into a task this agent works on; the removed link is returned so it can be re-added.",
       inputSchema: toolSchema(mcpDependenciesRemoveArgs),
+      annotations: UPDATE,
     },
     ({ dependencyId }) =>
       run(() => core.removeDependency(principal, dependencyId)),

@@ -6,6 +6,7 @@ import {
   mcpSuggestionsCreateArgs,
 } from "@taff/schemas";
 import { toolSchema } from "./mcp";
+import { ADDITIVE, READ_ONLY } from "./mcp-annotations";
 
 /**
  * Phase B read and proposal tools (M16–M17). Core enforces every gate:
@@ -27,6 +28,7 @@ export function registerInsightTools(
       description:
         "Read the token workspace's relations: projects, tasks, people, agents and dependencies, plus CRM companies and contacts only with the crm.read capability (never phone or email). Optional projectId and layers (people, dependencies, org, crm).",
       inputSchema: toolSchema(mcpRelationsGetArgs),
+      annotations: READ_ONLY,
     },
     (args) =>
       run(() => core.relationGraph(principal, principal.workspaceId, args)),
@@ -38,6 +40,7 @@ export function registerInsightTools(
       description:
         "Read the token workspace's deterministic brief: each project's stage, person in charge (leadId), risk level and reason codes, slip and delivery %, and counts of reviews waiting, blocked agents, tasks due today and agents working. Codes and numbers only; finance is never shown to agents.",
       inputSchema: toolSchema(mcpBriefGetArgs),
+      annotations: READ_ONLY,
     },
     () =>
       run(() =>
@@ -54,6 +57,7 @@ export function registerInsightTools(
       description:
         "Propose splitting a task this agent works on into 1–10 subtasks, or moving its plan (startDate, durationDays). A person applies or dismisses the proposal; nothing changes until then. Needs tasks:write.",
       inputSchema: toolSchema(mcpSuggestionsCreateArgs),
+      annotations: ADDITIVE,
     },
     (input) => run(() => core.createSuggestion(principal, input)),
   );

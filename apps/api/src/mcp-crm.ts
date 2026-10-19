@@ -6,6 +6,7 @@ import {
   mcpContactsListArgs,
 } from "@taff/schemas";
 import { toolSchema } from "./mcp";
+import { READ_ONLY } from "./mcp-annotations";
 
 /**
  * Read-only CRM tools (ADR 0015). Core enforces `contact:read`: the token's
@@ -25,6 +26,7 @@ export function registerCrmTools(
       description:
         "List the token workspace's CRM companies. Needs the crm.read capability.",
       inputSchema: toolSchema(mcpCompaniesListArgs),
+      annotations: READ_ONLY,
     },
     (args) =>
       run(() => core.listCompanies(principal, principal.workspaceId, args)),
@@ -36,6 +38,7 @@ export function registerCrmTools(
       description:
         "List or search CRM contacts. Phone and email are null unless crm.contact_details is allowed.",
       inputSchema: toolSchema(mcpContactsListArgs),
+      annotations: READ_ONLY,
     },
     (args) =>
       run(() => core.listContacts(principal, principal.workspaceId, args)),
@@ -47,6 +50,7 @@ export function registerCrmTools(
       description:
         "Read one contact with its company and every company, project and task link with roles.",
       inputSchema: toolSchema(mcpContactsGetArgs),
+      annotations: READ_ONLY,
     },
     ({ contactId }) => run(() => core.getContactDetail(principal, contactId)),
   );
