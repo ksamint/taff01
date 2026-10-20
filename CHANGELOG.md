@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- MCP supports OAuth 2.1 (ADR 0022): Claude.ai custom connectors and other
+  OAuth clients connect with only the server URL. Dynamic client
+  registration, PKCE, hourly access tokens with rotating refresh tokens and
+  revocation; an organization admin approves the agent and scopes in the
+  browser, and the grant is listed and revoked on the MCP page.
+- Additive migration 0032. The web app forwards `/.well-known/oauth-*` to the
+  API; Caddy and Traefik are unchanged.
+
 ## v0.2.11 — 2026-10-20
 
 - Every MCP tool carries annotations: the 14 read tools are read-only, so

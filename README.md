@@ -61,9 +61,8 @@ performance budgets in all three locales; the
 records its measurements and CI evidence.
 See [the deployment guide](docs/deploy.md) and the M8 milestone report.
 
-Open items for release: OAuth 2.1 metadata on `/mcp` (needs an authorization
-server decision), outgoing email for invitations, the M9 accessibility and i18n
-pass, prototype seed data and release notes. Milestone reports record working
+Open items for release: outgoing email for invitations, the M9 accessibility
+and i18n pass, prototype seed data and release notes. Milestone reports record working
 behavior and validation; development continues while they are reviewed.
 
 Tencent Cloud SMS login is optional: configure the approved provider values
@@ -184,7 +183,14 @@ curl -s http://127.0.0.1:3001/mcp -H "Authorization: Bearer $TOKEN" \
 ```
 
 `tools/list` lists the 31 tools; a missing or revoked token returns 401, and
-each call appears in the MCP page's call log. Agents must submit their own real
+each call appears in the MCP page's call log.
+
+MCP clients with OAuth 2.1 (Claude.ai custom connectors, Claude Code, Codex,
+the MCP Inspector) need only the server URL, `AUTH_URL/mcp`: they discover
+Taff's authorization server from the 401, register themselves and open
+`/oauth/authorize`, where an organization admin picks the agent and scopes
+(ADR 0022). The grant then appears with the agent tokens on the MCP page and
+is revoked there. The smoke also runs this flow with the official client. Agents must submit their own real
 outputs: assigning or starting a run does not launch an LLM or simulate progress.
 Run duration and cost limits pause further submissions from reported metrics;
 external runtimes must enforce their own process limits. See

@@ -412,7 +412,11 @@ Keep the additive schema and data.
 
 ## Not configured yet
 
-- OAuth 2.1 for `/mcp`: personal access tokens are the only credential.
+- OAuth Client ID Metadata Documents (CIMD) for `/mcp`; OAuth 2.1 with
+  dynamic registration is available (ADR 0022). Its discovery paths
+  `/.well-known/oauth-*` reach the API through the web app's rewrites, so the
+  Caddy and Traefik routes stay unchanged; verify them after an upgrade with
+  `curl AUTH_URL/.well-known/oauth-authorization-server`.
 - Push notifications: digests are in-app pages.
 
 ## Agent creation upgrade checkpoint — 2026-10-11
