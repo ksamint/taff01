@@ -70,6 +70,11 @@ const lifecycleRoutes = [
   ["POST", "/api/me/email-verification/verify"],
   ["POST", "/api/workspace-invites/accept"],
 ] as const;
+const oauthMetadataRoutes = [
+  "/.well-known/oauth-protected-resource",
+  "/.well-known/oauth-protected-resource/mcp",
+  "/.well-known/oauth-authorization-server",
+] as const;
 function sessionCookie(response: Response) {
   return response.headers
     .getSetCookie()
@@ -1453,6 +1458,114 @@ describe.skipIf(!databaseUrl)(
       },
     );
 
+    // OAuth for MCP (ADR 0022): public endpoints ignore cookies and bearer
+    // tokens; consent needs a person, and only an admin may approve.
+    it.each(lifecycleActors)(
+      "public OAuth endpoints ignore credentials × %s",
+      async (actor) => {
+        const headers = lifecycleHeaders(actor);
+        for (const path of oauthMetadataRoutes) {
+          const response = await app.request(path, { headers });
+          expect(response.status).toBe(200);
+          expect(response.headers.get("access-control-allow-origin")).toBe("*");
+        }
+        const registered = await app.request("/api/oauth/register", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            client_name: `Matrix ${actor}`,
+            redirect_uris: ["https://claude.ai/api/mcp/auth_callback"],
+          }),
+        });
+        expect(registered.status).toBe(201);
+        const { client_id } = await registered.json();
+        const form = (fields: Record<string, string>) => ({
+          method: "POST",
+          headers: {
+            ...headers,
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: new URLSearchParams(fields).toString(),
+        });
+        const bogus = await app.request(
+          "/api/oauth/token",
+          form({
+            grant_type: "authorization_code",
+            client_id,
+            code: "taffcode_not-a-code",
+            code_verifier: "v".repeat(43),
+            redirect_uri: "https://claude.ai/api/mcp/auth_callback",
+          }),
+        );
+        expect(bogus.status).toBe(400);
+        expect((await bogus.json()).error).toBe("invalid_grant");
+        const stranger = await app.request(
+          "/api/oauth/token",
+          form({
+            grant_type: "refresh_token",
+            client_id: "mcp_unknown",
+            refresh_token: "taffr_unknown",
+          }),
+        );
+        expect(stranger.status).toBe(401);
+        expect((await stranger.json()).error).toBe("invalid_client");
+        const revoked = await app.request(
+          "/api/oauth/revoke",
+          form({ token: agentToken, client_id }),
+        );
+        expect(revoked.status).toBe(200);
+        // Revoking someone else's personal token through OAuth does nothing.
+        expect(await core.authenticateAgentToken(agentToken)).not.toBeNull();
+      },
+    );
+    it.each(lifecycleActors)(
+      "OAuth consent needs a person and approval needs an admin × %s",
+      async (actor) => {
+        const client = await core.oauth.registerClient({
+          redirect_uris: ["https://claude.ai/api/mcp/auth_callback"],
+        });
+        const request = {
+          response_type: "code",
+          client_id: client.client_id,
+          redirect_uri: "https://claude.ai/api/mcp/auth_callback",
+          code_challenge: "c".repeat(43),
+          code_challenge_method: "S256",
+          state: "matrix",
+        };
+        const headers = lifecycleHeaders(actor);
+        const read = await app.request(
+          `/api/oauth/consent?${new URLSearchParams(request)}`,
+          { headers },
+        );
+        const decided = await app.request("/api/oauth/consent", {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            request,
+            decision: "approve",
+            workspaceId,
+            memberId: agentId,
+            scopes: ["tasks:read"],
+          }),
+        });
+        if (actor === "agent" || actor === "anonymous") {
+          expect(read.status).toBe(401);
+          expect(decided.status).toBe(401);
+          return;
+        }
+        expect(read.status).toBe(200);
+        const listed = (await read.json()).workspaces.some(
+          (item: { id: string }) => item.id === workspaceId,
+        );
+        expect(listed).toBe(actor === "owner");
+        expect(decided.status).toBe(actor === "owner" ? 200 : 403);
+        if (actor === "owner")
+          expect(
+            new URL((await decided.json()).redirectTo).searchParams.get("code"),
+          ).toMatch(/^taffcode_/);
+      },
+    );
+
     it("every REST endpoint is covered by the actor matrix", () => {
       const normalize = (path: string) =>
         path.split("?")[0].replace(/:[^/]+/g, ":id");
@@ -1464,6 +1577,12 @@ describe.skipIf(!databaseUrl)(
         ...personal.map((path) => `GET ${path}`),
         ...personalWrites.map((row) => `${row.method} ${row.path}`),
         ...lifecycleRoutes.map(([method, path]) => `${method} ${path}`),
+        ...oauthMetadataRoutes.map((path) => `GET ${path}`),
+        "POST /api/oauth/register",
+        "POST /api/oauth/token",
+        "POST /api/oauth/revoke",
+        "GET /api/oauth/consent",
+        "POST /api/oauth/consent",
       ]);
       const uncovered = [
         ...new Set(

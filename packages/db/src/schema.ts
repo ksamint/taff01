@@ -348,6 +348,28 @@ export const activity = pgTable(
   ],
 );
 
+/** Dynamically registered public OAuth clients for MCP (ADR 0022). */
+export const oauthClients = pgTable(
+  "oauth_clients",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    redirectUris: text("redirect_uris").array().notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    check(
+      "oauth_clients_name",
+      sql`length(btrim(${t.name})) BETWEEN 1 AND 100`,
+    ),
+    check(
+      "oauth_clients_redirects",
+      sql`cardinality(${t.redirectUris}) BETWEEN 1 AND 5`,
+    ),
+  ],
+);
 export const agentTokens = pgTable(
   "agent_tokens",
   {
@@ -363,6 +385,11 @@ export const agentTokens = pgTable(
     prefix: text("prefix").notNull(),
     scopes: text("scopes").array().notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    /** OAuth grants (ADR 0022): client, access expiry and rotating refresh. */
+    oauthClientId: text("oauth_client_id").references(() => oauthClients.id),
+    expiresAt: timestamp("expires_at", { withTimezone: true }),
+    refreshHash: text("refresh_hash").unique(),
+    refreshExpiresAt: timestamp("refresh_expires_at", { withTimezone: true }),
     ...dates,
   },
   (t) => [
@@ -378,6 +405,49 @@ export const agentTokens = pgTable(
       name: "agent_tokens_creator_fk",
     }),
     check("agent_tokens_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 100`),
+    check(
+      "agent_tokens_oauth_shape",
+      sql`(${t.oauthClientId} IS NULL AND ${t.expiresAt} IS NULL AND ${t.refreshHash} IS NULL AND ${t.refreshExpiresAt} IS NULL) OR (${t.oauthClientId} IS NOT NULL AND ${t.expiresAt} IS NOT NULL AND ${t.refreshExpiresAt} IS NOT NULL)`,
+    ),
+  ],
+);
+/** Single-use authorization codes, hashed, valid for 10 minutes. */
+export const oauthCodes = pgTable(
+  "oauth_codes",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    hash: text("hash").notNull().unique(),
+    clientId: text("client_id")
+      .notNull()
+      .references(() => oauthClients.id, { onDelete: "cascade" }),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    memberId: uuid("member_id").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    scopes: text("scopes").array().notNull(),
+    redirectUri: text("redirect_uri").notNull(),
+    codeChallenge: text("code_challenge").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    usedAt: timestamp("used_at", { withTimezone: true }),
+    tokenId: uuid("token_id").references(() => agentTokens.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.memberId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "oauth_codes_member_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.createdBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "oauth_codes_creator_fk",
+    }).onDelete("cascade"),
   ],
 );
 export const mcpCallStatus = pgEnum("mcp_call_status", [

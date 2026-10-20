@@ -45,6 +45,7 @@ import {
   nonnegativeInteger,
   positiveInteger,
   prioritySchema,
+  scopeSchema,
   taskFields,
   taskStatusSchema,
   timeZone,
@@ -64,6 +65,7 @@ export * from "./graph";
 export * from "./inbox-read";
 export * from "./mind";
 export * from "./notification-preferences";
+export * from "./oauth";
 export * from "./plan";
 export * from "./project-read";
 export * from "./run-read";
@@ -96,14 +98,6 @@ export const scheduleTaskSchema = strictObject({
   ),
   dueAt: nullable(iso.datetime({ offset: true })),
 });
-/** MCP token scopes, as shown on the MCP page. */
-export const scopeSchema = zodEnum([
-  "tasks:read",
-  "tasks:write",
-  "calendar:write",
-  "inbox:review",
-  "files:write",
-]);
 export const createAgentTokenSchema = strictObject({
   workspaceId: idSchema,
   memberId: idSchema,
@@ -161,6 +155,7 @@ export const mcpInboxRequestReviewArgs = strictObject({
 /** Thrown by every schema above on invalid input. */
 
 export type Scope = Infer<typeof scopeSchema>;
+export { scopeSchema };
 export type CreateAgentToken = Infer<typeof createAgentTokenSchema>;
 export type AgentToken = Infer<typeof agentTokenSchema>;
 export type IssuedAgentToken = Infer<typeof issuedAgentTokenSchema>;

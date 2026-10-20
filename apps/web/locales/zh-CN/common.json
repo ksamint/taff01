@@ -258,7 +258,7 @@
     "open": "打开 MCP 设置",
     "endpoint": "MCP 端点",
     "endpointUrl": "服务器地址",
-    "endpointHint": "MCP 客户端目前使用智能体令牌授权：Authorization: Bearer <token>。暂未计划支持 OAuth 2.1，需先确定授权服务器。",
+    "endpointHint": "支持 OAuth 的客户端（如 Claude.ai 连接器、Claude Code 或 Codex）只需服务器 URL，由管理员在浏览器中批准。其他客户端发送智能体令牌：Authorization: Bearer <token>。",
     "adminOnly": "只有工作空间管理员可以管理智能体令牌。",
     "newToken": "新令牌",
     "showOnce": "请立即复制，令牌只显示一次。",
@@ -1340,5 +1340,19 @@
       "evidenceRemoved": "已从 {{title}} 的证据移除 {{source}}",
       "taskMade": "已创建任务：{{ref}} · {{title}}"
     }
+  },
+  "oauth": {
+    "title": "连接 MCP 客户端",
+    "invalidTitle": "链接无效",
+    "invalid": "此授权链接无效，或其客户端未登记。请从 MCP 客户端重新开始连接。",
+    "subtitle": "{{client}} 想以你的智能体身份在 Taff 中工作。",
+    "redirectNote": "你选择后将返回 {{host}}。只有在你自己发起此连接时才继续。",
+    "organization": "组织",
+    "agent": "以智能体身份",
+    "agentHint": "客户端将获得此智能体的权限和审核规则，并限于下方的授权范围。",
+    "noWorkspace": "只有组织管理员可以连接 MCP 客户端。请联系你所在组织的管理员。",
+    "noAgent": "此组织还没有智能体。请先添加智能体，然后重新连接。",
+    "approve": "允许访问",
+    "deny": "拒绝"
   }
 }

@@ -68,6 +68,7 @@ export {
   createEmailTransportFromEnv,
   createLoggingEmailTransport,
 } from "./email";
+export { ACCESS_TOKEN_SECONDS, OAuthError } from "./oauth";
 export type { SmsProvider } from "./tencent-sms";
 export {
   createTencentSmsProvider,
@@ -75,7 +76,7 @@ export {
   SmsProviderError,
 } from "./tencent-sms";
 
-import { and, desc, eq, isNull, max, or, sql } from "drizzle-orm";
+import { and, desc, eq, gt, isNull, max, or, sql } from "drizzle-orm";
 import { createAdministrationOperations } from "./administration";
 import type { AiProvider } from "./ai-provider";
 import { createAssistantOperations } from "./assistant";
@@ -83,6 +84,7 @@ import { createCalendarOperations } from "./calendar";
 import { createCrmOperations } from "./crm";
 import { createMindOperations } from "./mind";
 import { createNotificationOperations } from "./notifications";
+import { createOAuthOperations } from "./oauth";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRelationOperations } from "./relations";
@@ -1114,6 +1116,11 @@ export function createCore(options: {
           eq(agentTokens.hash, hashToken(token, options.tokenPepper)),
           isNull(agentTokens.revokedAt),
           isNull(workspaces.archivedAt),
+          // OAuth access tokens expire hourly; personal tokens never do.
+          or(
+            isNull(agentTokens.expiresAt),
+            gt(agentTokens.expiresAt, new Date()),
+          ),
         ),
       )
       .limit(1);
@@ -1238,6 +1245,13 @@ export function createCore(options: {
     requireMember,
     lockTask,
   });
+  const oauth = createOAuthOperations({
+    db,
+    tokenPepper: options.tokenPepper,
+    authUrl: options.authUrl,
+    mutation,
+    requireMember,
+  });
   const getTodayBootstrap = createTodayBootstrap({
     getMe,
     listProjects: planning.operations.listProjects,
@@ -1249,6 +1263,8 @@ export function createCore(options: {
       runOperations.listInbox(principal, workspaceId),
   });
   return {
+    oauth: oauth.operations,
+    oauthMetadata: oauth.metadata,
     provisionAdministration: async (
       input: import("@taff/schemas").AdministrationProvision,
     ) =>

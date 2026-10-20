@@ -9,6 +9,7 @@ import {
   StreamableHTTPClientTransport,
 } from "@modelcontextprotocol/client";
 import { expect, type Page } from "@playwright/test";
+import { runMcpOAuthRoundTrip } from "../../../apps/api/scripts/mcp-oauth-round-trip";
 import {
   ROUND_TRIP_SCOPES,
   runMcpRoundTrip,
@@ -1420,6 +1421,25 @@ test("[item 8] MCP", async ({ page, context }, info) => {
           calls.locator('dd[data-status="rate_limited"]').first(),
         ).toBeVisible();
       check("the call log UI lists the round trip's calls", true);
+    },
+  });
+  // OAuth 2.1 (ADR 0022): the official client registers, the person
+  // approves through the consent endpoint, and the grant is revoked.
+  await runMcpOAuthRoundTrip({
+    endpoint: new URL("/mcp", baseURL),
+    check,
+    approve: async (authorizationUrl) => {
+      const response = await page.request.post("/api/oauth/consent", {
+        data: {
+          request: Object.fromEntries(authorizationUrl.searchParams),
+          decision: "approve",
+          workspaceId: workspace.id,
+          memberId: agent.id,
+          scopes: ["tasks:read"],
+        },
+      });
+      expect(response.ok()).toBe(true);
+      return ((await response.json()) as { redirectTo: string }).redirectTo;
     },
   });
   trackTask(roundTrip.taskId);

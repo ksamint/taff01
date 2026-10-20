@@ -59,6 +59,19 @@ const config: NextConfig = {
     return [
       { source: "/api/:path*", destination: `${api}/api/:path*` },
       { source: "/mcp", destination: `${api}/mcp` },
+      // OAuth discovery for MCP clients (ADR 0022); Caddy sends these here.
+      {
+        source: "/.well-known/oauth-protected-resource/:path*",
+        destination: `${api}/.well-known/oauth-protected-resource/:path*`,
+      },
+      {
+        source: "/.well-known/oauth-protected-resource",
+        destination: `${api}/.well-known/oauth-protected-resource`,
+      },
+      {
+        source: "/.well-known/oauth-authorization-server",
+        destination: `${api}/.well-known/oauth-authorization-server`,
+      },
     ];
   },
 };
