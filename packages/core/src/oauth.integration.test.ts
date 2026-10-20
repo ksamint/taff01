@@ -1,6 +1,12 @@
 import { createHash, randomBytes, randomUUID } from "node:crypto";
-import { agentTokens, connectDatabase, members } from "@taff/db";
-import { eq, sql } from "drizzle-orm";
+import {
+  activity,
+  agentProfiles,
+  agentTokens,
+  connectDatabase,
+  members,
+} from "@taff/db";
+import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
 import {
@@ -186,7 +192,7 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
     expect(consent.scopes).toEqual(["tasks:read", "calendar:write"]);
     // Bob is a member, not an admin, of Alice's organization.
     const bobs = await core.oauth.getConsent(bob, request);
-    expect(bobs.workspaces.some((item) => item.id === w)).toBe(false);
+    expect(bobs.workspaces).toEqual([]);
     // A redirect URI that was not registered is an error page, not a redirect.
     await expect(
       core.oauth.getConsent(alice, {
@@ -360,4 +366,204 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
       error: "invalid_grant",
     });
   });
+  async function supervise(supervisorId: string | null) {
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(sql`select set_config('taff.actor_id','test',true)`);
+      await tx
+        .insert(agentProfiles)
+        .values({ id: agentId, workspaceId: w, supervisorId })
+        .onConflictDoUpdate({
+          target: agentProfiles.id,
+          set: { supervisorId },
+        });
+    });
+  }
+  async function role(memberId: string, role: "admin" | "member" | "guest") {
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(sql`select set_config('taff.actor_id','test',true)`);
+      await tx.update(members).set({ role }).where(eq(members.id, memberId));
+    });
+  }
+  async function memberGrant(
+    scopes: ("tasks:read" | "files:write")[] = ["tasks:read"],
+  ) {
+    const proof = pkce();
+    const { redirectTo } = await core.oauth.decide(bob, {
+      request: {
+        response_type: "code",
+        client_id: clientId,
+        redirect_uri: REDIRECT,
+        code_challenge: proof.challenge,
+        code_challenge_method: "S256",
+      },
+      decision: "approve",
+      workspaceId: w,
+      memberId: agentId,
+      scopes,
+    });
+    return exchange(
+      new URL(redirectTo).searchParams.get("code")!,
+      proof.verifier,
+    );
+  }
+  it("a supervisor connects only their agent within the member ceiling, and owns only their grants", async () => {
+    await supervise(bobMember);
+    try {
+      const consent = await core.oauth.getConsent(bob, {
+        response_type: "code",
+        client_id: clientId,
+        redirect_uri: REDIRECT,
+        code_challenge: pkce().challenge,
+        code_challenge_method: "S256",
+        scope: "tasks:read files:write",
+      });
+      expect(consent.workspaces.find((item) => item.id === w)).toMatchObject({
+        agents: [{ id: agentId }],
+        allowedScopes: [
+          "tasks:read",
+          "tasks:write",
+          "calendar:write",
+          "inbox:review",
+        ],
+      });
+      await expect(memberGrant(["files:write"])).rejects.toMatchObject({
+        code: "forbidden",
+        status: 403,
+      });
+      const first = await memberGrant();
+      const grant = await core.oauth.token({
+        grant_type: "refresh_token",
+        client_id: clientId,
+        refresh_token: first.refresh_token,
+      });
+      expect(await core.authenticateAgentToken(first.access_token)).toBeNull();
+      const actor = await core.authenticateAgentToken(grant.access_token);
+      expect(actor).not.toBeNull();
+      expect(await core.getContext(actor!, w)).toMatchObject({
+        memberId: agentId,
+      });
+      const tokenId = (actor as { tokenId: string }).tokenId;
+      const personal = await core.createAgentToken(alice, {
+        workspaceId: w,
+        memberId: agentId,
+        name: "Personal",
+        scopes: ["tasks:read"],
+      });
+      // A separate admin-approved grant, redeemed with its matching proof.
+      const proof = pkce();
+      const adminGrant = await exchange(
+        await approve(proof.challenge),
+        proof.verifier,
+      );
+      const adminActor = await core.authenticateAgentToken(
+        adminGrant.access_token,
+      );
+      const adminId = (adminActor as { tokenId: string }).tokenId;
+      const own = await core.listAgentTokens(bob, w);
+      expect(own.map((item) => item.id)).toEqual([tokenId]);
+      expect(
+        (await core.listAgentTokens(alice, w)).map((item) => item.id),
+      ).toEqual(expect.arrayContaining([personal.id, tokenId, adminId]));
+      for (const id of [personal.id, adminId]) {
+        await expect(core.revokeAgentToken(bob, id)).rejects.toMatchObject({
+          code: "forbidden",
+        });
+        await expect(core.restoreAgentToken(bob, id)).rejects.toMatchObject({
+          code: "forbidden",
+        });
+      }
+      await core.revokeAgentToken(bob, tokenId);
+      expect(await core.authenticateAgentToken(grant.access_token)).toBeNull();
+      await core.restoreAgentToken(bob, tokenId);
+      expect(
+        await core.authenticateAgentToken(grant.access_token),
+      ).not.toBeNull();
+      await supervise(null);
+      await expect(memberGrant()).rejects.toMatchObject({
+        code: "forbidden",
+        status: 403,
+      });
+    } finally {
+      await supervise(null);
+    }
+  });
+  it("rechecks a member's supervision when redeeming a code", async () => {
+    await supervise(bobMember);
+    const proof = pkce();
+    const { redirectTo } = await core.oauth.decide(bob, {
+      request: {
+        response_type: "code",
+        client_id: clientId,
+        redirect_uri: REDIRECT,
+        code_challenge: proof.challenge,
+        code_challenge_method: "S256",
+      },
+      decision: "approve",
+      workspaceId: w,
+      memberId: agentId,
+      scopes: ["tasks:read"],
+    });
+    await supervise(null);
+    await expect(
+      exchange(new URL(redirectTo).searchParams.get("code")!, proof.verifier),
+    ).rejects.toMatchObject({ error: "invalid_grant" });
+  });
+
+  it.each(["supervisor changed", "guest", "admin demoted"])(
+    "refresh revokes an ineligible approver: %s",
+    async (reason) => {
+      await supervise(bobMember);
+      let memberId = bobMember;
+      if (reason === "admin demoted") {
+        const [person] = await connection.db
+          .select()
+          .from(members)
+          .where(eq(members.userId, (alice as { userId: string }).userId));
+        memberId = person.id;
+      }
+      const proof = pkce();
+      const grant =
+        reason === "admin demoted"
+          ? await exchange(
+              await approve(proof.challenge, { scopes: ["files:write"] }),
+              proof.verifier,
+            )
+          : await memberGrant();
+      const actor = await core.authenticateAgentToken(grant.access_token);
+      const tokenId = (actor as { tokenId: string }).tokenId;
+      if (reason === "supervisor changed") await supervise(null);
+      else await role(memberId, reason === "guest" ? "guest" : "member");
+      try {
+        await expect(
+          core.oauth.token({
+            grant_type: "refresh_token",
+            client_id: clientId,
+            refresh_token: grant.refresh_token,
+          }),
+        ).rejects.toMatchObject({ error: "invalid_grant" });
+        const [row] = await connection.db
+          .select()
+          .from(agentTokens)
+          .where(eq(agentTokens.id, tokenId));
+        expect(row.revokedAt).not.toBeNull();
+        expect(
+          await core.authenticateAgentToken(grant.access_token),
+        ).toBeNull();
+        const changes = await connection.db
+          .select()
+          .from(activity)
+          .where(
+            and(
+              eq(activity.resourceId, tokenId),
+              eq(activity.action, "agent_tokens.update"),
+            ),
+          );
+        expect(changes).toHaveLength(1);
+        expect(changes[0].actorId).toBe(`agent:${agentId}`);
+      } finally {
+        await role(memberId, reason === "admin demoted" ? "admin" : "member");
+        await supervise(null);
+      }
+    },
+  );
 });

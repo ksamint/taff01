@@ -369,7 +369,10 @@
       "slackHint": "频道通知",
       "gcal": "Google 日历",
       "gcalHint": "双向同步日程"
-    }
+    },
+    "connectedApps": "已连接的应用",
+    "approvedBy": "由 {{name}} 授权",
+    "approved": "授权于 {{date}}"
   },
   "taskDetail": {
     "back": "返回今天",
@@ -1353,6 +1356,8 @@
     "noWorkspace": "只有组织管理员可以连接 MCP 客户端。请联系你所在组织的管理员。",
     "noAgent": "此组织还没有智能体。请先添加智能体，然后重新连接。",
     "approve": "允许访问",
-    "deny": "拒绝"
+    "deny": "拒绝",
+    "noSupervisedAgent": "请联系组织管理员，成为智能体的主管。",
+    "adminOnlyScope": "仅组织管理员可授予此权限。"
   }
 }

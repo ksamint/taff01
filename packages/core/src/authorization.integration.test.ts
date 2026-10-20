@@ -1,4 +1,4 @@
-import { randomInt, randomUUID } from "node:crypto";
+import { createHash, randomInt, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createCore, userPrincipal } from "@taff/core";
 import {
@@ -258,9 +258,7 @@ const routes: RequestCase[] = [
   ].map((name) => ({
     method: "GET",
     path: `/api/${name}?workspaceId=:workspace`,
-    ...(name === "agent-tokens" || name === "mcp-calls"
-      ? { member: "deny" as const }
-      : {}),
+    ...(name === "mcp-calls" ? { member: "deny" as const } : {}),
   })),
   {
     method: "GET",
@@ -1563,6 +1561,147 @@ describe.skipIf(!databaseUrl)(
           expect(
             new URL((await decided.json()).redirectTo).searchParams.get("code"),
           ).toMatch(/^taffcode_/);
+      },
+    );
+
+    it.each([...lifecycleActors, "guest" as const])(
+      "role-based OAuth grant list, revoke and restore × %s",
+      async (actor) => {
+        await core.updateAgentProfile(owner(), agentId, {
+          supervisorId: memberId,
+          maxDurationMs: null,
+          maxCostMicros: null,
+          reviewPolicy: "always_review",
+        });
+        try {
+          const client = await core.oauth.registerClient({
+            redirect_uris: ["https://claude.ai/api/mcp/auth_callback"],
+          });
+          const request = {
+            response_type: "code",
+            client_id: client.client_id,
+            redirect_uri: "https://claude.ai/api/mcp/auth_callback",
+            code_challenge: "c".repeat(43),
+            code_challenge_method: "S256",
+          };
+          const approval = await app.request("/api/oauth/consent", {
+            method: "POST",
+            headers: lifecycleHeaders("member"),
+            body: JSON.stringify({
+              request,
+              decision: "approve",
+              workspaceId,
+              memberId: agentId,
+              scopes: ["tasks:read"],
+            }),
+          });
+          expect(approval.status).toBe(200);
+          // Issue a real OAuth grant with PKCE, rather than forging a token row.
+          const verifier = "v".repeat(43);
+          const challenge = createHash("sha256")
+            .update(verifier)
+            .digest("base64url");
+          const approved = await core.oauth.decide(
+            userPrincipal(people.member.id),
+            {
+              request: {
+                ...request,
+                response_type: "code",
+                code_challenge: challenge,
+                code_challenge_method: "S256",
+              },
+              decision: "approve",
+              workspaceId,
+              memberId: agentId,
+              scopes: ["tasks:read"],
+            },
+          );
+          const issued = await core.oauth.token({
+            grant_type: "authorization_code",
+            client_id: client.client_id,
+            code: new URL(approved.redirectTo).searchParams.get("code")!,
+            redirect_uri: request.redirect_uri,
+            code_verifier: verifier,
+          });
+          const principal = await core.authenticateAgentToken(
+            issued.access_token,
+          );
+          const id = (principal as { tokenId: string }).tokenId;
+          if (actor === "guest")
+            await core.updateMemberRole(owner(), workspaceId, memberId, {
+              role: "guest",
+            });
+          const headers = lifecycleHeaders(
+            actor === "guest" ? "member" : actor,
+          );
+          const consent = await app.request(
+            `/api/oauth/consent?${new URLSearchParams(request)}`,
+            { headers },
+          );
+          if (actor === "guest") {
+            expect(consent.status).toBe(200);
+            expect(
+              (await consent.json()).workspaces.some(
+                (item: { id: string }) => item.id === workspaceId,
+              ),
+            ).toBe(false);
+          }
+          const deniedScope = await app.request("/api/oauth/consent", {
+            method: "POST",
+            headers,
+            body: JSON.stringify({
+              request,
+              decision: "approve",
+              workspaceId,
+              memberId: agentId,
+              scopes: ["files:write"],
+            }),
+          });
+          expect(deniedScope.status).toBe(
+            actor === "owner"
+              ? 200
+              : actor === "agent" || actor === "anonymous"
+                ? 401
+                : 403,
+          );
+          const allowed = actor === "owner" || actor === "member";
+          const status = allowed
+            ? 200
+            : actor === "agent" || actor === "anonymous"
+              ? 401
+              : 403;
+          const list = await app.request(
+            `/api/agent-tokens?workspaceId=${workspaceId}`,
+            { headers },
+          );
+          expect(list.status).toBe(status);
+          if (allowed)
+            expect(
+              (await list.json()).some((row: { id: string }) => row.id === id),
+            ).toBe(true);
+          const revoked = await app.request(`/api/agent-tokens/${id}`, {
+            method: "DELETE",
+            headers,
+          });
+          expect(revoked.status).toBe(status);
+          if (!allowed) await core.revokeAgentToken(owner(), id);
+          const restored = await app.request(
+            `/api/agent-tokens/${id}/restore`,
+            { method: "POST", headers },
+          );
+          expect(restored.status).toBe(status);
+        } finally {
+          if (actor === "guest")
+            await core.updateMemberRole(owner(), workspaceId, memberId, {
+              role: "member",
+            });
+          await core.updateAgentProfile(owner(), agentId, {
+            supervisorId: null,
+            maxDurationMs: null,
+            maxCostMicros: null,
+            reviewPolicy: "always_review",
+          });
+        }
       },
     );
 

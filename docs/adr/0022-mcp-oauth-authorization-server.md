@@ -27,7 +27,7 @@ and token tables that know nothing about Taff agents, scopes or revocation.
   rotated on every use (30 days, sliding) and also stored as a hash. One row
   per grant, so the MCP page lists it, the call log attributes it, and
   revoking it there ends the grant. Expired access tokens are refused.
-- **Who may approve**: a signed-in person with `token:manage` (an admin) in
+- **Who may approve** (superseded by ADR 0023): a signed-in person with `token:manage` (an admin) in
   the chosen workspace, choosing one of its agents. People never receive
   OAuth tokens for themselves; MCP stays an agent surface with the agent's
   existing capabilities, grants and review rules.
@@ -63,4 +63,5 @@ and token tables that know nothing about Taff agents, scopes or revocation.
   rotation and revocation by the client is audited as the agent.
 - Registration is globally limited to 30 per minute, and token requests to 30
   per minute per client, in Valkey like the MCP limiter.
-- Open: CIMD support; a per-person "connected apps" view outside the MCP page.
+- Open: CIMD support. ADR 0023 resolves role-based approval and provides a
+  per-person Connected apps view on the MCP page.

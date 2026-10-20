@@ -150,6 +150,7 @@ function toAgentToken(
     createdBy: row.createdBy,
     name: row.name,
     prefix: row.prefix,
+    oauthClientId: row.oauthClientId,
     scopes: row.scopes as Scope[],
     createdAt: row.createdAt.toISOString(),
     revokedAt: row.revokedAt?.toISOString() ?? null,
@@ -991,7 +992,20 @@ export function createCore(options: {
     workspaceId: string,
   ): Promise<AgentToken[]> {
     parse(idSchema, workspaceId);
-    await requireMember(db, principal, workspaceId, "token:manage");
+    const actor = await requireMember(
+      db,
+      principal,
+      workspaceId,
+      "workspace:read",
+    );
+    if (
+      !can(actor, "token:revoke", {
+        workspaceId,
+        ownerId: actor.id,
+        oauthGrant: true,
+      })
+    )
+      throw new CoreError("forbidden", 403);
     const lastUsed = db
       .select({
         tokenId: mcpCalls.tokenId,
@@ -1004,7 +1018,17 @@ export function createCore(options: {
       .select({ token: agentTokens, lastUsedAt: lastUsed.lastUsedAt })
       .from(agentTokens)
       .leftJoin(lastUsed, eq(lastUsed.tokenId, agentTokens.id))
-      .where(eq(agentTokens.workspaceId, workspaceId))
+      .where(
+        and(
+          eq(agentTokens.workspaceId, workspaceId),
+          can(actor, "token:manage", { workspaceId })
+            ? undefined
+            : and(
+                eq(agentTokens.createdBy, actor.id),
+                sql`${agentTokens.oauthClientId} is not null`,
+              ),
+        ),
+      )
       .orderBy(desc(agentTokens.createdAt), desc(agentTokens.id));
     return rows.map(({ token, lastUsedAt }) =>
       toAgentToken(token, lastUsedAt ? new Date(lastUsedAt) : null),
@@ -1023,7 +1047,11 @@ export function createCore(options: {
         .limit(1)
         .for("update");
       if (!row) throw new CoreError("not_found", 404);
-      await requireMember(tx, principal, row.workspaceId, "token:manage");
+      await requireMember(tx, principal, row.workspaceId, "token:revoke", {
+        workspaceId: row.workspaceId,
+        ownerId: row.createdBy,
+        oauthGrant: !!row.oauthClientId,
+      });
       if (row.revokedAt) return toAgentToken(row, null);
       const [updated] = await tx
         .update(agentTokens)
@@ -1053,7 +1081,11 @@ export function createCore(options: {
         .limit(1)
         .for("update");
       if (!row) throw new CoreError("not_found", 404);
-      await requireMember(tx, principal, row.workspaceId, "token:manage");
+      await requireMember(tx, principal, row.workspaceId, "token:revoke", {
+        workspaceId: row.workspaceId,
+        ownerId: row.createdBy,
+        oauthGrant: !!row.oauthClientId,
+      });
       if (!row.revokedAt) return toAgentToken(row, null);
       if (Date.now() - row.revokedAt.getTime() > RESTORE_WINDOW_MS)
         throw new CoreError("conflict", 409);

@@ -26,6 +26,8 @@ export type Action =
   | "task:schedule"
   | "task:review"
   | "token:manage"
+  | "token:connect"
+  | "token:revoke"
   | "profile:read"
   | "profile:update"
   | "notification:read"
@@ -61,6 +63,7 @@ export type Resource =
   | {
       workspaceId: string;
       ownerId?: string;
+      oauthGrant?: boolean;
       leadId?: string | null;
       workerId?: string | null;
       toWorkerId?: string | null;
@@ -151,6 +154,17 @@ export function can(
     action === "mind:archive"
   )
     return actor.kind === "person" && actor.role === "admin";
+  if (action === "token:connect")
+    return (
+      actor.kind === "person" &&
+      (actor.role === "admin" || actor.id === resource.supervisorId)
+    );
+  if (action === "token:revoke")
+    return (
+      actor.kind === "person" &&
+      (actor.role === "admin" ||
+        (resource.oauthGrant === true && actor.id === resource.ownerId))
+    );
   if (action === "project:stage")
     return (
       actor.kind === "person" &&
@@ -375,4 +389,31 @@ function capabilityScope(capability: Capability): Scope {
         : capability.startsWith("crm.")
           ? "tasks:read"
           : "tasks:write";
+}
+
+/** OAuth approval narrows an agent's existing capabilities; it never expands them. */
+export const OAUTH_SCOPE_CEILING: Record<
+  "admin" | "member" | "guest",
+  Scope[]
+> = {
+  admin: [
+    "tasks:read",
+    "tasks:write",
+    "calendar:write",
+    "inbox:review",
+    "files:write",
+  ],
+  member: ["tasks:read", "tasks:write", "calendar:write", "inbox:review"],
+  guest: [],
+};
+export function canGrantOAuthScopes(
+  actor: Actor | null,
+  resource: Resource,
+  scopes: Scope[],
+): boolean {
+  return (
+    !!actor &&
+    can(actor, "token:connect", resource) &&
+    scopes.every((scope) => OAUTH_SCOPE_CEILING[actor.role].includes(scope))
+  );
 }

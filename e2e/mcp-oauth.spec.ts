@@ -1,10 +1,14 @@
 import { createHash, randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import {
+  issuedWorkspaceInviteSchema,
   memberListSchema,
+  meSchema,
   oauthClientSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
+import { freshAccount } from "./support/account";
+import { verifyTestEmail } from "./support/email-verification";
 import { messages, type TestLocale } from "./support/messages";
 import { selectLocale } from "./support/preferences";
 
@@ -175,4 +179,187 @@ test("an unregistered redirect shows an error and never redirects", async ({
     messages[locale].oauth.invalid,
   );
   await expect(page).toHaveURL(authorize.toString());
+});
+
+test("a member approves only a supervised agent, with locked files scope, and revokes their connected app", async ({
+  page,
+  browser,
+}, info) => {
+  test.setTimeout(120000);
+  const locale = info.project.name as TestLocale;
+  const admin = await freshAccount(page, locale);
+  await verifyTestEmail(page, admin.user.id);
+  const workspace = admin.workspaces[0]!;
+  const context = await browser.newContext({
+    baseURL: process.env.AUTH_URL,
+    viewport: page.viewportSize(),
+  });
+  try {
+    const memberPage = await context.newPage();
+    const email = `oauth-${crypto.randomUUID()}@example.test`;
+    const signup = await memberPage.request.post("/api/auth/sign-up/email", {
+      headers: { Origin: process.env.AUTH_URL! },
+      data: {
+        name: "OAuth supervisor",
+        email,
+        password: process.env.DEMO_PASSWORD,
+      },
+    });
+    expect(signup.status()).toBe(200);
+    const me = meSchema.parse(
+      await (await memberPage.request.get("/api/me")).json(),
+    );
+    await verifyTestEmail(memberPage, me.user.id);
+    const invite = issuedWorkspaceInviteSchema.parse(
+      await (
+        await page.request.post(`/api/workspaces/${workspace.id}/invites`, {
+          data: { email, role: "member" },
+        })
+      ).json(),
+    );
+    expect(
+      (
+        await memberPage.request.post("/api/workspace-invites/accept", {
+          data: { token: invite.token },
+        })
+      ).status(),
+    ).toBe(200);
+    await memberPage.goto("/");
+    await selectLocale(memberPage, locale);
+    await memberPage.goto("/orgs");
+    await memberPage.getByTestId(`workspace-${workspace.id}`).click();
+    const client = oauthClientSchema.parse(
+      await (
+        await page.request.post("/api/oauth/register", {
+          data: {
+            client_name: `Member client ${locale}`,
+            redirect_uris: [REDIRECT],
+          },
+        })
+      ).json(),
+    );
+    const verifier = randomBytes(32).toString("base64url");
+    const request = {
+      response_type: "code",
+      client_id: client.client_id,
+      redirect_uri: REDIRECT,
+      code_challenge: createHash("sha256").update(verifier).digest("base64url"),
+      code_challenge_method: "S256",
+      scope: "tasks:read files:write",
+    };
+    // Empty personal workspaces must not hide the no-supervised-agent message.
+    await memberPage.goto(`/oauth/authorize?${new URLSearchParams(request)}`);
+    await expect(memberPage.getByTestId("oauth-no-workspace")).toBeVisible();
+    const members = memberListSchema.parse(
+      await (
+        await page.request.get(`/api/members?workspaceId=${workspace.id}`)
+      ).json(),
+    );
+    const member = members.find((item) => item.userId === me.user.id)!;
+    for (const name of ["Supervised", "Other"])
+      expect(
+        (
+          await page.request.post(`/api/workspaces/${workspace.id}/members`, {
+            data: { name, kind: "agent" },
+          })
+        ).status(),
+      ).toBe(201);
+    const agents = memberListSchema.parse(
+      await (
+        await page.request.get(`/api/members?workspaceId=${workspace.id}`)
+      ).json(),
+    );
+    const agent = agents.find((item) => item.name === "Supervised")!;
+    const other = agents.find((item) => item.name === "Other")!;
+    expect(
+      (
+        await page.request.patch(`/api/agents/${agent.id}`, {
+          data: {
+            supervisorId: member.id,
+            reviewPolicy: "always_review",
+            maxDurationMs: null,
+            maxCostMicros: null,
+          },
+        })
+      ).status(),
+    ).toBe(200);
+    await memberPage.goto(`/oauth/authorize?${new URLSearchParams(request)}`);
+    await memberPage.getByTestId("oauth-workspace").selectOption(workspace.id);
+    await expect(memberPage.getByTestId("oauth-agent")).toHaveValue(agent.id);
+    await expect(
+      memberPage.getByTestId("oauth-agent").locator("option"),
+    ).toHaveCount(1);
+    await expect(
+      memberPage.getByTestId("oauth-scope-files:write"),
+    ).toBeDisabled();
+    await expect(
+      memberPage.getByTestId("oauth-scope-files:write"),
+    ).not.toBeChecked();
+    await expect(
+      memberPage.getByTestId("oauth-scope-locked-files:write"),
+    ).toBeVisible();
+    for (const [memberId, scopes] of [
+      [other.id, ["tasks:read"]],
+      [agent.id, ["files:write"]],
+    ] as const)
+      expect(
+        (
+          await memberPage.request.post("/api/oauth/consent", {
+            data: {
+              request,
+              decision: "approve",
+              workspaceId: workspace.id,
+              memberId,
+              scopes,
+            },
+          })
+        ).status(),
+      ).toBe(403);
+    let callback: URL | undefined;
+    await memberPage.route("http://127.0.0.1:33419/**", (route) => {
+      callback = new URL(route.request().url());
+      return route.fulfill({ status: 200, body: "ok" });
+    });
+    await memberPage.getByTestId("oauth-approve").click();
+    await expect.poll(() => !!callback?.searchParams.get("code")).toBe(true);
+    const token = await memberPage.request.post("/api/oauth/token", {
+      form: {
+        grant_type: "authorization_code",
+        client_id: client.client_id,
+        code: callback!.searchParams.get("code")!,
+        code_verifier: verifier,
+        redirect_uri: REDIRECT,
+      },
+    });
+    expect(token.status()).toBe(200);
+    const issued = await token.json();
+    expect(issued.scope).toBe("tasks:read");
+    const mcp = () =>
+      memberPage.request.post("/mcp", {
+        headers: {
+          Authorization: `Bearer ${issued.access_token}`,
+          Accept: "application/json, text/event-stream",
+        },
+        data: {
+          jsonrpc: "2.0",
+          id: 1,
+          method: "tools/call",
+          params: { name: "context.get", arguments: {} },
+        },
+      });
+    expect((await mcp()).status()).toBe(200);
+    await memberPage.goto("/me/mcp");
+    await expect(memberPage.getByTestId("mcp-connected-apps")).toBeVisible();
+    await expect(memberPage.getByTestId("token-name")).toHaveCount(0);
+    await expect(memberPage.locator("#mcp-calls-heading")).toHaveCount(0);
+    const card = memberPage
+      .getByTestId("token-card")
+      .filter({ hasText: `Member client ${locale}` });
+    await card.locator("summary").click();
+    await card.getByTestId("token-revoke").click();
+    await memberPage.getByTestId("token-confirm").click();
+    await expect.poll(async () => (await mcp()).status()).toBe(401);
+  } finally {
+    await context.close();
+  }
 });

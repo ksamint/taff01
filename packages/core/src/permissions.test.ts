@@ -1,6 +1,13 @@
 import type { Member } from "@taff/schemas";
 import { describe, expect, it } from "vitest";
-import { type Action, type Actor, can, type Resource } from "./permissions";
+import {
+  type Action,
+  type Actor,
+  can,
+  canGrantOAuthScopes,
+  OAUTH_SCOPE_CEILING,
+  type Resource,
+} from "./permissions";
 
 const person: Member = {
   id: "owner",
@@ -1204,4 +1211,67 @@ describe("self profile read permission", () => {
   ])("%s", (_, actor, resource, expected) =>
     expect(can(actor, "profile:read", resource)).toBe(expected),
   );
+});
+
+describe("role-based OAuth approval", () => {
+  const supervised = {
+    workspaceId: person.workspaceId,
+    supervisorId: person.id,
+  };
+  it.each([
+    ["admin", { ...person, role: "admin" }, true, true],
+    ["supervisor", person, true, false],
+    ["other member", { ...person, id: "other" }, false, false],
+    ["guest supervisor", { ...person, role: "guest" }, false, false],
+    ["agent supervisor", { ...agent, id: person.id }, false, false],
+    [
+      "foreign admin",
+      { ...person, workspaceId: "foreign", role: "admin" },
+      false,
+      false,
+    ],
+  ] as [string, Actor, boolean, boolean][])(
+    "%s connection and scope ceiling",
+    (_, actor, connect, files) => {
+      expect(can(actor, "token:connect", supervised)).toBe(connect);
+      expect(
+        canGrantOAuthScopes(actor, supervised, [
+          "tasks:read",
+          "tasks:write",
+          "calendar:write",
+          "inbox:review",
+        ]),
+      ).toBe(connect);
+      expect(canGrantOAuthScopes(actor, supervised, ["files:write"])).toBe(
+        files,
+      );
+    },
+  );
+  it.each([
+    ["admin personal", { ...person, role: "admin" }, false, "other", true],
+    ["admin OAuth", { ...person, role: "admin" }, true, "other", true],
+    ["own grant", person, true, person.id, true],
+    ["other grant", person, true, "other", false],
+    ["own personal", person, false, person.id, false],
+    ["guest", { ...person, role: "guest" }, true, person.id, false],
+    ["agent", agent, true, agent.id, false],
+    ["foreign", { ...person, workspaceId: "foreign" }, true, person.id, false],
+  ] as [string, Actor, boolean, string, boolean][])(
+    "%s revocation",
+    (_, actor, oauthGrant, ownerId, allowed) => {
+      expect(
+        can(actor, "token:revoke", {
+          workspaceId: person.workspaceId,
+          oauthGrant,
+          ownerId,
+        }),
+      ).toBe(allowed);
+    },
+  );
+  it("exports precisely the role ceilings", () => {
+    expect(OAUTH_SCOPE_CEILING.admin).toHaveLength(5);
+    expect(OAUTH_SCOPE_CEILING.member).toHaveLength(4);
+    expect(OAUTH_SCOPE_CEILING.member).not.toContain("files:write");
+    expect(OAUTH_SCOPE_CEILING.guest).toEqual([]);
+  });
 });

@@ -3,6 +3,7 @@
 // expires hourly and whose refresh token rotates on every use.
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import {
+  agentProfiles,
   agentTokens,
   type Database,
   members,
@@ -28,7 +29,14 @@ import {
 } from "@taff/schemas";
 import { and, eq, gt, inArray, isNull, or } from "drizzle-orm";
 import { CoreError, hashToken, type Principal, userPrincipal } from "./index";
-import { type Action, type Actor, can, type Resource } from "./permissions";
+import {
+  type Action,
+  type Actor,
+  can,
+  canGrantOAuthScopes,
+  OAUTH_SCOPE_CEILING,
+  type Resource,
+} from "./permissions";
 
 export const ACCESS_TOKEN_SECONDS = 3600;
 const REFRESH_TOKEN_MS = 30 * 24 * 3_600_000;
@@ -187,7 +195,7 @@ export function createOAuthOperations({
       )
       .orderBy(workspaces.name, workspaces.id);
     const managed = rows.filter(({ member }) =>
-      can(member as Actor, "token:manage", {
+      can(member as Actor, "workspace:read", {
         workspaceId: member.workspaceId,
       }),
     );
@@ -197,8 +205,10 @@ export function createOAuthOperations({
             id: members.id,
             name: members.name,
             workspaceId: members.workspaceId,
+            supervisorId: agentProfiles.supervisorId,
           })
           .from(members)
+          .leftJoin(agentProfiles, eq(agentProfiles.id, members.id))
           .where(
             and(
               inArray(
@@ -216,15 +226,52 @@ export function createOAuthOperations({
         name: client.name,
         redirectHost: new URL(body.redirect_uri).host || body.redirect_uri,
       },
-      workspaces: managed.map(({ workspace }) => ({
-        id: workspace.id,
-        name: workspace.name,
-        agents: agents
-          .filter((agent) => agent.workspaceId === workspace.id)
-          .map(({ id, name }) => ({ id, name })),
-      })),
+      workspaces: managed
+        .map(({ workspace, member }) => ({
+          id: workspace.id,
+          name: workspace.name,
+          allowedScopes: OAUTH_SCOPE_CEILING[member.role],
+          agents: agents
+            .filter((agent) => can(member as Actor, "token:connect", agent))
+            .map(({ id, name }) => ({ id, name })),
+        }))
+        .filter((item) => item.agents.length > 0),
       scopes: requestedScopes(body.scope),
     };
+  }
+
+  async function requireApproval(
+    q: Database | Transaction,
+    principal: Principal,
+    workspaceId: string,
+    memberId: string,
+    scopes: Scope[],
+  ) {
+    const [agent] = await q
+      .select({ id: members.id, supervisorId: agentProfiles.supervisorId })
+      .from(members)
+      .leftJoin(agentProfiles, eq(agentProfiles.id, members.id))
+      .where(
+        and(
+          eq(members.id, memberId),
+          eq(members.workspaceId, workspaceId),
+          eq(members.kind, "agent"),
+        ),
+      );
+    // Check membership first so foreign users cannot probe agent existence.
+    await requireMember(q, principal, workspaceId, "workspace:read");
+    if (!agent) throw new CoreError("invalid_input", 400);
+    const resource = { workspaceId, supervisorId: agent.supervisorId };
+    const actor = await requireMember(
+      q,
+      principal,
+      workspaceId,
+      "token:connect",
+      resource,
+    );
+    if (!canGrantOAuthScopes(actor, resource, scopes))
+      throw new CoreError("forbidden", 403);
+    return actor;
   }
 
   /** Approve (issue a code) or deny; both answer with the client redirect. */
@@ -252,29 +299,19 @@ export function createOAuthOperations({
     }
     if (!body.workspaceId || !body.memberId || !body.scopes)
       throw new CoreError("invalid_input", 400);
-    const actor = await requireMember(
+    const actor = await requireApproval(
       db,
       principal,
       body.workspaceId,
-      "token:manage",
+      body.memberId,
+      body.scopes,
     );
-    const [agent] = await db
-      .select({ id: members.id })
-      .from(members)
-      .where(
-        and(
-          eq(members.id, body.memberId),
-          eq(members.workspaceId, body.workspaceId),
-          eq(members.kind, "agent"),
-        ),
-      );
-    if (!agent) throw new CoreError("invalid_input", 400);
     const code = secret("taffcode_");
     await db.insert(oauthCodes).values({
       hash: hash(code),
       clientId: request.client_id,
       workspaceId: body.workspaceId,
-      memberId: agent.id,
+      memberId: body.memberId,
       createdBy: actor.id,
       scopes: [...new Set(body.scopes)],
       redirectUri: request.redirect_uri,
@@ -350,7 +387,13 @@ export function createOAuthOperations({
           .returning({ id: oauthCodes.id });
         if (!claimed.length) return fail();
         // The approver must still manage tokens when the code is redeemed.
-        await requireMember(tx, person, code.workspaceId, "token:manage");
+        await requireApproval(
+          tx,
+          person,
+          code.workspaceId,
+          code.memberId,
+          code.scopes as Scope[],
+        );
         const now = Date.now();
         const [row] = await tx
           .insert(agentTokens)
@@ -404,7 +447,35 @@ export function createOAuthOperations({
     const access = secret("taff_");
     const refresh = secret("taffr_");
     const now = Date.now();
-    return mutation(agentPrincipal(row), async (tx) => {
+    const result = await mutation(agentPrincipal(row), async (tx) => {
+      const [approver] = await tx
+        .select({ userId: members.userId })
+        .from(members)
+        .where(
+          and(
+            eq(members.id, row.createdBy),
+            eq(members.workspaceId, row.workspaceId),
+          ),
+        );
+      try {
+        if (!approver?.userId) throw new CoreError("forbidden", 403);
+        await requireApproval(
+          tx,
+          userPrincipal(approver.userId),
+          row.workspaceId,
+          row.memberId,
+          row.scopes as Scope[],
+        );
+      } catch (error) {
+        if (!(error instanceof CoreError)) throw error;
+        await tx
+          .update(agentTokens)
+          .set({ revokedAt: new Date(), updatedAt: new Date() })
+          .where(
+            and(eq(agentTokens.id, row.id), isNull(agentTokens.revokedAt)),
+          );
+        return null; // Commit the audited revocation before answering invalid_grant.
+      }
       // Rotation: the presented refresh token works exactly once.
       const rotated = await tx
         .update(agentTokens)
@@ -427,6 +498,7 @@ export function createOAuthOperations({
       if (!rotated.length) return fail();
       return issued(access, refresh, row.scopes);
     });
+    return result ?? fail();
   }
 
   /** RFC 6749 §3.2 token endpoint for public clients. */
