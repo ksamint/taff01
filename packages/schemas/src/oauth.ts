@@ -84,6 +84,7 @@ export const oauthConsentSchema = object({
     object({
       id: idSchema,
       name: string(),
+      allowedScopes: array(scopeSchema),
       agents: array(object({ id: idSchema, name: string() })),
     }),
   ),

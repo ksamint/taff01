@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Role-based MCP OAuth approval: members connect supervised agents within their
+  scope ceiling, manage their own Connected apps, and lose refresh access when
+  supervision or role changes (ADR 0023).
+
 - MCP supports OAuth 2.1 (ADR 0022): Claude.ai custom connectors and other
   OAuth clients connect with only the server URL. Dynamic client
   registration, PKCE, hourly access tokens with rotating refresh tokens and

@@ -369,7 +369,10 @@
       "slackHint": "Channel notifications",
       "gcal": "Google Calendar",
       "gcalHint": "Two-way event sync"
-    }
+    },
+    "connectedApps": "Connected apps",
+    "approvedBy": "Approved by {{name}}",
+    "approved": "Approved {{date}}"
   },
   "taskDetail": {
     "back": "Back to Today",
@@ -1353,6 +1356,8 @@
     "noWorkspace": "Only organization admins can connect MCP clients. Ask an admin of your organization.",
     "noAgent": "This organization has no agents yet. Add an agent first, then connect again.",
     "approve": "Allow access",
-    "deny": "Deny"
+    "deny": "Deny",
+    "noSupervisedAgent": "Ask an organization admin to make you the supervisor of an agent.",
+    "adminOnlyScope": "Only organization admins may grant this scope."
   }
 }

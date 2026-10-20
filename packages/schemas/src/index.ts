@@ -111,6 +111,7 @@ export const agentTokenSchema = object({
   createdBy: idSchema,
   name: string(),
   prefix: string(),
+  oauthClientId: optional(nullable(string())),
   scopes: array(scopeSchema),
   createdAt: iso.datetime(),
   revokedAt: nullable(iso.datetime()),

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (365 distinct, 1939 uses)
+## Test ids (368 distinct, 1953 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -149,9 +149,9 @@ several do). “Also rendered by” lists the other files.
 | `task-contact-option` | 4 | task-contacts.tsx | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `task-contact-search` | 3 | task-contacts.tsx | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
-| `token-confirm` | 6 | mcp-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `token-confirm` | 7 | mcp-view.tsx | live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 33 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
+| `workspace-*` | 34 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -245,12 +245,13 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `issued-token` | 14 |  | live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `mcp-connected-apps` | 1 |  | mcp-oauth.spec.ts |
 | `mcp-endpoint` | 4 |  | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `token-agent` | 2 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `token-card` | 5 |  | live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `token-name` | 4 |  | live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `token-card` | 6 |  | live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `token-name` | 5 |  | live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `token-regenerate` | 2 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `token-revoke` | 4 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `token-revoke` | 5 |  | live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `token-submit` | 5 |  | live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 
 ### me-desktop.tsx
@@ -351,16 +352,18 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `oauth-agent` | 1 |  | mcp-oauth.spec.ts |
-| `oauth-approve` | 2 |  | mcp-oauth.spec.ts |
+| `oauth-agent` | 3 |  | mcp-oauth.spec.ts |
+| `oauth-approve` | 3 |  | mcp-oauth.spec.ts |
 | `oauth-client` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-consent` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-invalid` | 1 |  | mcp-oauth.spec.ts |
+| `oauth-no-workspace` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-redirect` | 1 |  | mcp-oauth.spec.ts |
-| `oauth-scope-files:write` | 1 |  | mcp-oauth.spec.ts |
+| `oauth-scope-files:write` | 3 |  | mcp-oauth.spec.ts |
+| `oauth-scope-locked-files:write` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-scope-tasks:read` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-scope-tasks:write` | 1 |  | mcp-oauth.spec.ts |
-| `oauth-workspace` | 1 |  | mcp-oauth.spec.ts |
+| `oauth-workspace` | 2 |  | mcp-oauth.spec.ts |
 
 ### organization-chooser.tsx
 
@@ -807,7 +810,7 @@ read (`data-event-id`, `data-date`).
 | `#invite-email` | 5 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `#invite-role` | 3 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `#issued-invite` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `#mcp-calls-heading` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `#mcp-calls-heading` | 3 | live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `#org-name` | 4 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `#paragraph` | 2 | font-readiness.spec.ts |
 | `#password-hint` | 1 | username-auth.spec.ts |

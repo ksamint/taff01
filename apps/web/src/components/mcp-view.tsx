@@ -92,6 +92,7 @@ export function McpView({ origin }: { origin?: string }) {
   const { me, workspace } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
+  const isAdmin = workspace.role === "admin";
   const members = useMembers(workspace.id);
   const tokens = useQuery({
     queryKey: agentTokensKey(workspace.id),
@@ -103,6 +104,7 @@ export function McpView({ origin }: { origin?: string }) {
   });
   const calls = useQuery({
     queryKey: mcpCallsKey(workspace.id),
+    enabled: isAdmin,
     queryFn: async () =>
       mcpCallListSchema.parse(
         await request(`/api/mcp-calls?workspaceId=${workspace.id}`),
@@ -340,127 +342,130 @@ export function McpView({ origin }: { origin?: string }) {
           </>
         ) : (
           <>
-            <section
-              className="mcp-section mcp-pat"
-              aria-labelledby="mcp-pat-heading"
-            >
-              <h2 id="mcp-pat-heading" className="mcp-label">
-                {t("mcp.personalToken")}
-              </h2>
-              <p className="mcp-note">{t("mcp.personalTokenHint")}</p>
-              {issued && (
-                <div className="mcp-issued" data-testid="issued-token">
-                  <p className="mcp-show-once">{t("mcp.showOnce")}</p>
-                  <div className="mcp-copy-row">
-                    <code className="mcp-token-value">{issued.token}</code>
+            {isAdmin && (
+              <section
+                className="mcp-section mcp-pat"
+                aria-labelledby="mcp-pat-heading"
+              >
+                <h2 id="mcp-pat-heading" className="mcp-label">
+                  {t("mcp.personalToken")}
+                </h2>
+                <p className="mcp-note">{t("mcp.personalTokenHint")}</p>
+                {issued && (
+                  <div className="mcp-issued" data-testid="issued-token">
+                    <p className="mcp-show-once">{t("mcp.showOnce")}</p>
+                    <div className="mcp-copy-row">
+                      <code className="mcp-token-value">{issued.token}</code>
+                      <Button
+                        type="button"
+                        className="button-quiet mcp-icon-button"
+                        aria-label={t(
+                          tokenCopied ? "mcp.copied" : "mcp.copyToken",
+                        )}
+                        onClick={() =>
+                          void copy(issued.token, () => setTokenCopied(true))
+                        }
+                      >
+                        {tokenCopied ? (
+                          <Check size={16} aria-hidden="true" />
+                        ) : (
+                          <Copy size={16} aria-hidden="true" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="mcp-note">
+                      {issued.name} · {agentName(issued.memberId)}
+                    </p>
                     <Button
                       type="button"
-                      className="button-quiet mcp-icon-button"
-                      aria-label={t(
-                        tokenCopied ? "mcp.copied" : "mcp.copyToken",
-                      )}
-                      onClick={() =>
-                        void copy(issued.token, () => setTokenCopied(true))
-                      }
+                      className="button-quiet mcp-text-button"
+                      onClick={() => setIssued(null)}
                     >
-                      {tokenCopied ? (
-                        <Check size={16} aria-hidden="true" />
-                      ) : (
-                        <Copy size={16} aria-hidden="true" />
-                      )}
+                      {t("mcp.dismiss")}
                     </Button>
                   </div>
-                  <p className="mcp-note">
-                    {issued.name} · {agentName(issued.memberId)}
-                  </p>
-                  <Button
-                    type="button"
-                    className="button-quiet mcp-text-button"
-                    onClick={() => setIssued(null)}
-                  >
-                    {t("mcp.dismiss")}
-                  </Button>
-                </div>
-              )}
-              <form className="mcp-form" onSubmit={submit} noValidate>
-                <h3 className="mcp-form-title">{t("mcp.newToken")}</h3>
-                <div className="field">
-                  <Label htmlFor="token-name">{t("mcp.tokenName")}</Label>
-                  <Input
-                    id="token-name"
-                    data-testid="token-name"
-                    value={name}
-                    onChange={(event) => setName(event.target.value)}
-                    maxLength={100}
-                    required
-                    placeholder={t("mcp.tokenNamePlaceholder")}
-                  />
-                </div>
-                <div className="field">
-                  <Label htmlFor="token-agent">{t("agent")}</Label>
-                  <select
-                    id="token-agent"
-                    data-testid="token-agent"
-                    value={memberId || agents[0]?.id || ""}
-                    onChange={(event) => setMemberId(event.target.value)}
-                    disabled={!agents.length}
-                  >
-                    {agents.map((agent) => (
-                      <option key={agent.id} value={agent.id}>
-                        {agent.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <fieldset className="mcp-scopes">
-                  <legend className="mcp-label">{t("mcp.scopes")}</legend>
-                  {SCOPES.map((scope) => (
-                    <label key={scope} className="mcp-scope">
-                      <span className="mcp-row-copy">
-                        <span className="mcp-row-title">
-                          {t(`mcp.scope.${scope}`, { nsSeparator: false })}
-                        </span>
-                        <code className="mcp-row-sub mcp-mono">{scope}</code>
-                      </span>
-                      <Switch
-                        checked={scopes.includes(scope)}
-                        onChange={(event) =>
-                          setScopes((current) =>
-                            event.target.checked
-                              ? [...current, scope]
-                              : current.filter((item) => item !== scope),
-                          )
-                        }
-                      />
-                    </label>
-                  ))}
-                </fieldset>
-                {(validationError || create.isError) && (
-                  <p className="alert" role="alert">
-                    {t(
-                      validationError
-                        ? "errors.invalid_input"
-                        : errorKey(create.error),
-                    )}
-                  </p>
                 )}
-                <Button
-                  data-testid="token-submit"
-                  className="button-primary mcp-submit"
-                  type="submit"
-                  disabled={busy || !agents.length}
-                >
-                  {t(create.isPending ? "working" : "mcp.createToken")}
-                </Button>
-              </form>
-            </section>
+                <form className="mcp-form" onSubmit={submit} noValidate>
+                  <h3 className="mcp-form-title">{t("mcp.newToken")}</h3>
+                  <div className="field">
+                    <Label htmlFor="token-name">{t("mcp.tokenName")}</Label>
+                    <Input
+                      id="token-name"
+                      data-testid="token-name"
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      maxLength={100}
+                      required
+                      placeholder={t("mcp.tokenNamePlaceholder")}
+                    />
+                  </div>
+                  <div className="field">
+                    <Label htmlFor="token-agent">{t("agent")}</Label>
+                    <select
+                      id="token-agent"
+                      data-testid="token-agent"
+                      value={memberId || agents[0]?.id || ""}
+                      onChange={(event) => setMemberId(event.target.value)}
+                      disabled={!agents.length}
+                    >
+                      {agents.map((agent) => (
+                        <option key={agent.id} value={agent.id}>
+                          {agent.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <fieldset className="mcp-scopes">
+                    <legend className="mcp-label">{t("mcp.scopes")}</legend>
+                    {SCOPES.map((scope) => (
+                      <label key={scope} className="mcp-scope">
+                        <span className="mcp-row-copy">
+                          <span className="mcp-row-title">
+                            {t(`mcp.scope.${scope}`, { nsSeparator: false })}
+                          </span>
+                          <code className="mcp-row-sub mcp-mono">{scope}</code>
+                        </span>
+                        <Switch
+                          checked={scopes.includes(scope)}
+                          onChange={(event) =>
+                            setScopes((current) =>
+                              event.target.checked
+                                ? [...current, scope]
+                                : current.filter((item) => item !== scope),
+                            )
+                          }
+                        />
+                      </label>
+                    ))}
+                  </fieldset>
+                  {(validationError || create.isError) && (
+                    <p className="alert" role="alert">
+                      {t(
+                        validationError
+                          ? "errors.invalid_input"
+                          : errorKey(create.error),
+                      )}
+                    </p>
+                  )}
+                  <Button
+                    data-testid="token-submit"
+                    className="button-primary mcp-submit"
+                    type="submit"
+                    disabled={busy || !agents.length}
+                  >
+                    {t(create.isPending ? "working" : "mcp.createToken")}
+                  </Button>
+                </form>
+              </section>
+            )}
 
             <section
               className="mcp-section"
+              data-testid="mcp-connected-apps"
               aria-labelledby="mcp-clients-heading"
             >
               <h2 id="mcp-clients-heading" className="mcp-label mcp-list-label">
-                {t("mcp.connectedClients")}
+                {t(isAdmin ? "mcp.connectedClients" : "mcp.connectedApps")}
               </h2>
               {mutationError && !create.isError && (
                 <p className="mcp-notice alert" role="alert">
@@ -532,6 +537,16 @@ export function McpView({ origin }: { origin?: string }) {
                             />
                           </summary>
                           <div className="mcp-client-body">
+                            {token.oauthClientId && isAdmin && (
+                              <p className="mcp-note">
+                                {t("mcp.approvedBy", {
+                                  name:
+                                    members.data?.find(
+                                      (member) => member.id === token.createdBy,
+                                    )?.name ?? t("unknownMember"),
+                                })}
+                              </p>
+                            )}
                             <p className="mcp-note">
                               {token.lastUsedAt
                                 ? t("mcp.lastUsed", {
@@ -539,9 +554,14 @@ export function McpView({ origin }: { origin?: string }) {
                                   })
                                 : t("mcp.neverUsed")}
                               {" · "}
-                              {t("mcp.created", {
-                                date: when(token.createdAt),
-                              })}
+                              {t(
+                                token.oauthClientId
+                                  ? "mcp.approved"
+                                  : "mcp.created",
+                                {
+                                  date: when(token.createdAt),
+                                },
+                              )}
                             </p>
                             <ul
                               className="mcp-granted"
@@ -585,18 +605,20 @@ export function McpView({ origin }: { origin?: string }) {
                             </ul>
                             {!token.revokedAt && !pending && (
                               <div className="mcp-actions">
-                                <Button
-                                  type="button"
-                                  className="button-quiet mcp-text-button"
-                                  data-testid="token-regenerate"
-                                  disabled={busy}
-                                  onClick={() =>
-                                    setConfirm({ kind: "regenerate", token })
-                                  }
-                                >
-                                  <RefreshCw size={16} aria-hidden="true" />
-                                  {t("mcp.regenerate")}
-                                </Button>
+                                {isAdmin && (
+                                  <Button
+                                    type="button"
+                                    className="button-quiet mcp-text-button"
+                                    data-testid="token-regenerate"
+                                    disabled={busy}
+                                    onClick={() =>
+                                      setConfirm({ kind: "regenerate", token })
+                                    }
+                                  >
+                                    <RefreshCw size={16} aria-hidden="true" />
+                                    {t("mcp.regenerate")}
+                                  </Button>
+                                )}
                                 <Button
                                   type="button"
                                   className="button-quiet mcp-text-button"
@@ -622,71 +644,73 @@ export function McpView({ origin }: { origin?: string }) {
 
             {tools}
 
-            <section
-              className="mcp-section"
-              aria-labelledby="mcp-calls-heading"
-            >
-              <h2 id="mcp-calls-heading" className="mcp-label mcp-list-label">
-                {t("mcp.callLog")}
-              </h2>
-              {calls.isPending ? (
-                <p className="mcp-notice" aria-live="polite">
-                  {t("loading")}
-                </p>
-              ) : calls.isError ? (
-                <p className="mcp-notice alert" role="alert">
-                  {t(errorKey(calls.error))}
-                </p>
-              ) : calls.data.length === 0 ? (
-                <p className="mcp-notice">{t("mcp.noCalls")}</p>
-              ) : (
-                <ul className="mcp-rows">
-                  {calls.data.map((call) => (
-                    <li key={call.id} className="mcp-row mcp-call">
-                      <span className="mcp-row-copy">
-                        <code className="mcp-mono mcp-row-title">
-                          {call.tool ?? "—"}
-                        </code>
-                        <dl className="mcp-call-meta">
-                          <div>
-                            <dt className="sr-only">{t("mcp.method")}</dt>
-                            <dd>
-                              <code className="mcp-mono">{call.method}</code>
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="sr-only">{t("mcp.token")}</dt>
-                            <dd>
-                              {tokens.data?.find(
-                                (token) => token.id === call.tokenId,
-                              )?.name ?? "—"}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="sr-only">{t("mcp.status")}</dt>
-                            <dd data-status={call.status}>
-                              {t(`mcp.callStatus.${call.status}`)}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className="sr-only">{t("mcp.duration")}</dt>
-                            <dd>
-                              {new Intl.NumberFormat(locale, {
-                                style: "unit",
-                                unit: "millisecond",
-                              }).format(call.durationMs)}
-                            </dd>
-                          </div>
-                        </dl>
-                      </span>
-                      <time className="mcp-note" dateTime={call.createdAt}>
-                        {when(call.createdAt)}
-                      </time>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
+            {isAdmin && (
+              <section
+                className="mcp-section"
+                aria-labelledby="mcp-calls-heading"
+              >
+                <h2 id="mcp-calls-heading" className="mcp-label mcp-list-label">
+                  {t("mcp.callLog")}
+                </h2>
+                {calls.isPending ? (
+                  <p className="mcp-notice" aria-live="polite">
+                    {t("loading")}
+                  </p>
+                ) : calls.isError ? (
+                  <p className="mcp-notice alert" role="alert">
+                    {t(errorKey(calls.error))}
+                  </p>
+                ) : calls.data.length === 0 ? (
+                  <p className="mcp-notice">{t("mcp.noCalls")}</p>
+                ) : (
+                  <ul className="mcp-rows">
+                    {calls.data.map((call) => (
+                      <li key={call.id} className="mcp-row mcp-call">
+                        <span className="mcp-row-copy">
+                          <code className="mcp-mono mcp-row-title">
+                            {call.tool ?? "—"}
+                          </code>
+                          <dl className="mcp-call-meta">
+                            <div>
+                              <dt className="sr-only">{t("mcp.method")}</dt>
+                              <dd>
+                                <code className="mcp-mono">{call.method}</code>
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="sr-only">{t("mcp.token")}</dt>
+                              <dd>
+                                {tokens.data?.find(
+                                  (token) => token.id === call.tokenId,
+                                )?.name ?? "—"}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="sr-only">{t("mcp.status")}</dt>
+                              <dd data-status={call.status}>
+                                {t(`mcp.callStatus.${call.status}`)}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt className="sr-only">{t("mcp.duration")}</dt>
+                              <dd>
+                                {new Intl.NumberFormat(locale, {
+                                  style: "unit",
+                                  unit: "millisecond",
+                                }).format(call.durationMs)}
+                              </dd>
+                            </div>
+                          </dl>
+                        </span>
+                        <time className="mcp-note" dateTime={call.createdAt}>
+                          {when(call.createdAt)}
+                        </time>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </section>
+            )}
 
             {integrations}
           </>

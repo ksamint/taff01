@@ -185,11 +185,16 @@ curl -s http://127.0.0.1:3001/mcp -H "Authorization: Bearer $TOKEN" \
 `tools/list` lists the 31 tools; a missing or revoked token returns 401, and
 each call appears in the MCP page's call log.
 
+Organization admins can approve any agent; members can approve only agents they
+supervise, within four scopes (files:write is admin-only). Members manage their own
+grants in Connected apps. Refresh rechecks the current role and supervision
+(ADR 0023); personal tokens and the call log remain admin-only.
+
 MCP clients with OAuth 2.1 (Claude.ai custom connectors, Claude Code, Codex,
 the MCP Inspector) need only the server URL, `AUTH_URL/mcp`: they discover
 Taff's authorization server from the 401, register themselves and open
-`/oauth/authorize`, where an organization admin picks the agent and scopes
-(ADR 0022). The grant then appears with the agent tokens on the MCP page and
+`/oauth/authorize`, where an eligible person picks the agent and scopes
+(ADR 0022 and 0023). The grant then appears with the agent tokens on the MCP page and
 is revoked there. The smoke also runs this flow with the official client. Agents must submit their own real
 outputs: assigning or starting a run does not launch an LLM or simulate progress.
 Run duration and cost limits pause further submissions from reported metrics;

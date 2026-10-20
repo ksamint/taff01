@@ -52,7 +52,11 @@ export function OAuthConsentView() {
       consent.data.workspaces[0];
     setWorkspaceId(first?.id ?? "");
     setMemberId(first?.agents[0]?.id ?? "");
-    setScopes(consent.data.scopes);
+    setScopes(
+      consent.data.scopes.filter((scope) =>
+        first?.allowedScopes.includes(scope),
+      ),
+    );
   }, [consent.data]);
 
   if (!parsed.success || consent.error)
@@ -103,7 +107,7 @@ export function OAuthConsentView() {
       </p>
       {!consent.data.workspaces.length ? (
         <p className="alert" role="alert" data-testid="oauth-no-workspace">
-          {t("oauth.noWorkspace")}
+          {t("oauth.noSupervisedAgent")}
         </p>
       ) : (
         <form
@@ -127,6 +131,11 @@ export function OAuthConsentView() {
                 );
                 setWorkspaceId(event.target.value);
                 setMemberId(next?.agents[0]?.id ?? "");
+                setScopes(
+                  consent.data.scopes.filter((scope) =>
+                    next?.allowedScopes.includes(scope),
+                  ),
+                );
               }}
             >
               {consent.data.workspaces.map((item) => (
@@ -167,10 +176,19 @@ export function OAuthConsentView() {
                     {t(`mcp.scope.${scope}`, { nsSeparator: false })}
                   </span>
                   <code className="mcp-row-sub mcp-mono">{scope}</code>
+                  {!workspace?.allowedScopes.includes(scope) && (
+                    <span
+                      className="mcp-row-sub"
+                      data-testid={`oauth-scope-locked-${scope}`}
+                    >
+                      {t("oauth.adminOnlyScope")}
+                    </span>
+                  )}
                 </span>
                 <Switch
                   data-testid={`oauth-scope-${scope}`}
                   checked={scopes.includes(scope)}
+                  disabled={!workspace?.allowedScopes.includes(scope)}
                   onChange={(event) =>
                     setScopes((current) =>
                       event.target.checked
