@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v0.2.12 — 2026-10-20
 
 - Role-based MCP OAuth approval: members connect supervised agents within their
   scope ceiling, manage their own Connected apps, and lose refresh access when
@@ -9,7 +9,7 @@
 - MCP supports OAuth 2.1 (ADR 0022): Claude.ai custom connectors and other
   OAuth clients connect with only the server URL. Dynamic client
   registration, PKCE, hourly access tokens with rotating refresh tokens and
-  revocation; an organization admin approves the agent and scopes in the
+  revocation; an admin or supervising member approves the agent and scopes in the
   browser, and the grant is listed and revoked on the MCP page.
 - Additive migration 0032. The web app forwards `/.well-known/oauth-*` to the
   API; Caddy and Traefik are unchanged.
