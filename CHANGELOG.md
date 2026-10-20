@@ -1,10 +1,12 @@
 # Changelog
 
-## Unreleased
+## v0.2.11 — 2026-10-20
 
 - Every MCP tool carries annotations: the 14 read tools are read-only, so
   MCP clients can run them without asking; changes are marked additive or
   updating. The smoke now also covers protocol 2026-07-28 without initialize.
+
+- Visual capture waits for each board card's task access (PR #63); no baseline or product change.
 
 ## v0.2.10 — 2026-10-19
 
