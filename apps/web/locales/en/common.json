@@ -258,7 +258,7 @@
     "open": "Open MCP settings",
     "endpoint": "Endpoint",
     "endpointUrl": "Server URL",
-    "endpointHint": "MCP clients authenticate today with a bearer agent token: Authorization: Bearer <token>. OAuth 2.1 is not planned yet; it needs an authorization-server decision first.",
+    "endpointHint": "Clients with OAuth, such as Claude.ai connectors, Claude Code or Codex, need only the server URL; an admin approves them in the browser. Other clients send an agent token: Authorization: Bearer <token>.",
     "adminOnly": "Only workspace admins manage agent tokens.",
     "newToken": "New token",
     "showOnce": "Copy it now. It is shown only once.",
@@ -1340,5 +1340,19 @@
       "evidenceRemoved": "Removed {{source}} from the evidence for {{title}}",
       "taskMade": "Task created: {{ref}} · {{title}}"
     }
+  },
+  "oauth": {
+    "title": "Connect an MCP client",
+    "invalidTitle": "Link not valid",
+    "invalid": "This authorization link is invalid or its client is not registered. Start the connection again from your MCP client.",
+    "subtitle": "{{client}} wants to work in Taff as one of your agents.",
+    "redirectNote": "After you choose, you return to {{host}}. Only continue if you started this connection.",
+    "organization": "Organization",
+    "agent": "Act as agent",
+    "agentHint": "The client gets this agent's permissions and review rules, limited to the scopes below.",
+    "noWorkspace": "Only organization admins can connect MCP clients. Ask an admin of your organization.",
+    "noAgent": "This organization has no agents yet. Add an agent first, then connect again.",
+    "approve": "Allow access",
+    "deny": "Deny"
   }
 }

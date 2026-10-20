@@ -33,6 +33,14 @@ export const taskStatusSchema = zodEnum([
   "done",
 ]);
 export const idSchema = uuid();
+/** MCP token scopes, as shown on the MCP page. */
+export const scopeSchema = zodEnum([
+  "tasks:read",
+  "tasks:write",
+  "calendar:write",
+  "inbox:review",
+  "files:write",
+]);
 export const workspaceQuerySchema = strictObject({ workspaceId: idSchema });
 export const prioritySchema = number().check(
   refine((v) => Number.isInteger(v) && v >= 1 && v <= 4),

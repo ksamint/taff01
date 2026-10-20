@@ -3,6 +3,7 @@
 // round trip itself lives in ./mcp-round-trip.ts, shared with the release
 // checklist; here the person acts through core.
 import { createCore, userPrincipal } from "@taff/core";
+import { runMcpOAuthRoundTrip } from "./mcp-oauth-round-trip";
 import { ROUND_TRIP_SCOPES, runMcpRoundTrip } from "./mcp-round-trip";
 
 const env = (name: string) => {
@@ -89,6 +90,30 @@ try {
       getTimeline: (projectId) => core.getTimeline(asUser, projectId),
       dismissSuggestion: (id, input) =>
         core.dismissSuggestion(asUser, id, input),
+    },
+  });
+  // OAuth 2.1 (ADR 0022): the proxy sends AUTH_URL's /api and /.well-known
+  // paths to the API, so the smoke routes the public origin to it as well.
+  const publicOrigin = new URL(env("AUTH_URL")).origin;
+  await runMcpOAuthRoundTrip({
+    endpoint: apiUrl,
+    check,
+    trustAdvertisedResource: true,
+    fetch: (input, init) => {
+      const url = new URL(input instanceof Request ? input.url : input);
+      if (url.origin === publicOrigin) url.host = apiUrl.host;
+      return fetch(url, init);
+    },
+    approve: async (authorizationUrl) => {
+      const request = Object.fromEntries(authorizationUrl.searchParams);
+      const { redirectTo } = await core.oauth.decide(asUser, {
+        request: request as never,
+        decision: "approve",
+        workspaceId: workspace.id,
+        memberId: agent.id,
+        scopes: ["tasks:read"],
+      });
+      return redirectTo;
     },
   });
 } finally {

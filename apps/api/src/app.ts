@@ -61,6 +61,7 @@ import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
 import type { Logger } from "pino";
 import { createMcpHttpHandler, describeCall } from "./mcp";
+import { registerConsentRoutes, registerPublicOAuthRoutes } from "./oauth";
 import type { RateLimiter } from "./rate-limit";
 import type { Realtime } from "./realtime";
 import { registerAssistantRoutes } from "./routes/assistant";
@@ -99,10 +100,13 @@ export function createApp(
   realtime?: Realtime,
   emailRateLimiter?: RateLimiter,
   askRateLimiter?: RateLimiter,
+  oauthRateLimiter?: RateLimiter,
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<AppEnv>();
   const mcp = createMcpHttpHandler(core, logger);
+  // Clients discover the authorization server from a 401 (RFC 9728 §5.1).
+  const challenge = `Bearer realm="taff", resource_metadata="${core.oauthMetadata().resourceMetadataUrl}"`;
   app.use(
     "/mcp",
     bodyLimit({
@@ -118,7 +122,7 @@ export function createApp(
     const header = c.req.header("authorization") ?? "";
     const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
     if (!token || token.length > 200) {
-      c.header("WWW-Authenticate", 'Bearer realm="taff"');
+      c.header("WWW-Authenticate", challenge);
       return c.json({ error: "unauthorized" }, 401);
     }
     const started = Date.now();
@@ -159,7 +163,7 @@ export function createApp(
     }
     const principal = await core.authenticateAgentToken(token);
     if (!principal || principal.kind !== "agent") {
-      c.header("WWW-Authenticate", 'Bearer realm="taff"');
+      c.header("WWW-Authenticate", challenge);
       return c.json({ error: "unauthorized" }, 401);
     }
     const state: { failed?: "error" | "denied" } = {};
@@ -175,6 +179,7 @@ export function createApp(
     await record(principal, state.failed ?? (await callStatus(response)));
     return response;
   });
+  registerPublicOAuthRoutes(app, core, oauthRateLimiter ?? rateLimiter);
   app.use("/api/me/email-verification*", async (c, next) => {
     c.header("Cache-Control", "private, no-store");
     await next();
@@ -545,6 +550,7 @@ export function createApp(
     ),
   );
   registerTimelineRoutes(app, core);
+  registerConsentRoutes(app, core);
   app.post("/api/workspaces", async (c) =>
     c.json(
       await core.createWorkspace(

@@ -258,7 +258,7 @@
     "open": "開啟 MCP 設定",
     "endpoint": "MCP 端點",
     "endpointUrl": "伺服器地址",
-    "endpointHint": "MCP 客戶端目前以智能體權杖授權：Authorization: Bearer <token>。暫未計劃支援 OAuth 2.1，需先決定授權伺服器。",
+    "endpointHint": "支援 OAuth 的客戶端（如 Claude.ai 連接器、Claude Code 或 Codex）只需伺服器 URL，由管理員在瀏覽器中批准。其他客戶端傳送智能體權杖：Authorization: Bearer <token>。",
     "adminOnly": "只有工作空間管理員可以管理智能體權杖。",
     "newToken": "新權杖",
     "showOnce": "請立即複製，權杖只顯示一次。",
@@ -1340,5 +1340,19 @@
       "evidenceRemoved": "已從 {{title}} 的證據移除 {{source}}",
       "taskMade": "已建立任務：{{ref}} · {{title}}"
     }
+  },
+  "oauth": {
+    "title": "連接 MCP 客戶端",
+    "invalidTitle": "連結無效",
+    "invalid": "此授權連結無效，或其客戶端未登記。請從 MCP 客戶端重新開始連接。",
+    "subtitle": "{{client}} 想以你的智能體身份在 Taff 中工作。",
+    "redirectNote": "你選擇後將返回 {{host}}。只有在你自己發起此連接時才繼續。",
+    "organization": "組織",
+    "agent": "以智能體身份",
+    "agentHint": "客戶端將獲得此智能體的權限和審核規則，並限於下方的授權範圍。",
+    "noWorkspace": "只有組織管理員可以連接 MCP 客戶端。請聯絡你所在組織的管理員。",
+    "noAgent": "此組織還沒有智能體。請先新增智能體，然後重新連接。",
+    "approve": "允許存取",
+    "deny": "拒絕"
   }
 }
