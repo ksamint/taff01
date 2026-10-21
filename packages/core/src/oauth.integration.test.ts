@@ -566,4 +566,40 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
       }
     },
   );
+
+  it("a member undoes only their own revocation, and only while still allowed to connect", async () => {
+    await supervise(bobMember);
+    try {
+      const tokenFor = async (access: string) =>
+        ((await core.authenticateAgentToken(access)) as { tokenId: string })
+          .tokenId;
+      // An admin's revocation stays revoked, even for the supervising member.
+      const byAdmin = await memberGrant();
+      const adminRevoked = await tokenFor(byAdmin.access_token);
+      await core.revokeAgentToken(alice, adminRevoked);
+      await expect(
+        core.restoreAgentToken(bob, adminRevoked),
+      ).rejects.toMatchObject({ code: "forbidden", status: 403 });
+      expect(
+        await core.authenticateAgentToken(byAdmin.access_token),
+      ).toBeNull();
+      // The member's own revocation cannot be undone after supervision ends.
+      const own = await memberGrant();
+      const ownId = await tokenFor(own.access_token);
+      await core.revokeAgentToken(bob, ownId);
+      await supervise(null);
+      await expect(core.restoreAgentToken(bob, ownId)).rejects.toMatchObject({
+        code: "forbidden",
+        status: 403,
+      });
+      expect(await core.authenticateAgentToken(own.access_token)).toBeNull();
+      // Admins may still undo either revocation.
+      await core.restoreAgentToken(alice, adminRevoked);
+      expect(
+        await core.authenticateAgentToken(byAdmin.access_token),
+      ).not.toBeNull();
+    } finally {
+      await supervise(null);
+    }
+  });
 });

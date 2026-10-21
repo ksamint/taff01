@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Security fix (ADR 0023 amendment): a member could undo an admin's
+  revocation of their OAuth grant, or their own after losing supervision of
+  the agent, re-enabling its access token for up to an hour. Members now undo
+  only their own revocations and only while still allowed to connect the agent.
+
 ## v0.2.12 — 2026-10-20
 
 - Role-based MCP OAuth approval: members connect supervised agents within their

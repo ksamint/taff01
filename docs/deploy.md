@@ -60,6 +60,8 @@ docker compose --env-file .env.production -f compose.prod.yaml build
 docker compose --env-file .env.production -f compose.prod.yaml up -d
 ```
 
+Every release closes out with [the closeout checklist](release-closeout.md).
+
 Migrations are additive and run before the new API starts. Take a backup
 first: `umask 077; docker compose --env-file .env.production -f compose.prod.yaml exec -T postgres pg_dump -U taff taff > backup.sql`. Keep the dump private.
 
