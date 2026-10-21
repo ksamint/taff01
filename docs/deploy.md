@@ -2931,3 +2931,13 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - PENDING: Claude.ai admin custom connector check (tools/context.get, /me/mcp grant, revoke/reconnect); run later without the lock and record via a one-line docs PR. PENDING: live member-supervisor approval; no eligible non-admin verification supervisor exists, flow passed CI in all three locales.
 - Native build used a verified bundle after bounded GitHub fetch timeout; slow registry downloads; stale SSH client closed after remote completion, no rebuild/migration retry. Receipt carries pending items; deployment.done holds only the SHA. Lock release follows receipt publication and is confirmed by an independent nonblocking flock probe.
 - Rollback: restore env backup + retained v0.2.11 images, source `897340eb25605a8acb7f9e44a878453b80dc2238`; keep migration 0032 and its data. [Milestone 34](milestones/34-v0.2.12.md).
+
+### Release candidate v0.2.13 — 2026-10-21 UTC
+- Release source: the tested head of the v0.2.13 PR. Exact-source main CI and PR CI must both pass all eight jobs before production replacement; the checkpoint records the full SHA.
+- Security patch only: `restoreAgentToken` lets a member undo only an OAuth-grant revocation they made, and only while `token:connect` and the scope ceiling still allow it; admins unchanged. Regression test fails on v0.2.12 and passes here.
+- No migration, dependency, env variable, Compose, Dockerfile, edge-route or UI change. Only apps/api, apps/web and apps/worker advance to 0.2.13. AI_* stay unset; PostgreSQL stays running.
+- Local candidate gate: pnpm release:stack --build --migrate --seed, then the complete pnpm release:checklist. No production seed.
+- Production and closeout follow [the closeout checklist](release-closeout.md), including capturing replaced-service container ids, startedAt and restartCount right after replacement.
+- Live acceptance: health, OAuth discovery and the `/mcp` 401 challenge, a personal token retained across replacement, and the full release checklist with the guarded production configuration. The v0.2.12 pending Claude.ai connector and member-supervisor checks stay pending unless run.
+- Rollback: v0.2.12 source 789bb20b4947d1a5ec15f83c73ae6fe6086e7be4, its retained images and the env backup; all schema and data retained.
+

@@ -1,11 +1,14 @@
 # Changelog
 
-## Unreleased
+## v0.2.13 — 2026-10-21
 
 - Security fix (ADR 0023 amendment): a member could undo an admin's
-  revocation of their OAuth grant, or their own after losing supervision of
-  the agent, re-enabling its access token for up to an hour. Members now undo
-  only their own revocations and only while still allowed to connect the agent.
+  revocation of their own OAuth grant within the 10-minute undo window. While
+  still supervising the agent, that kept the grant alive; after losing
+  supervision, its access token worked again until the next refresh (up to an
+  hour). Members now undo only revocations they made, and only while still
+  allowed to connect that agent with the grant's scopes. Admins keep undo.
+- Release closeout has one checklist, `docs/release-closeout.md`.
 
 ## v0.2.12 — 2026-10-20
 
