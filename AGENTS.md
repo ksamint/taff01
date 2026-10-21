@@ -22,3 +22,13 @@ There are no blocking review gates. At each milestone, push, record working
 behavior, missing work, open decisions and validation numbers (≤ 40 lines) in
 `docs/milestones/`, then continue. The user reviews asynchronously.
 The current goal is the user's latest command.
+
+Access changes: when a role, scope or permission tier changes, list every
+operation that issues, extends or re-enables access (approve, exchange,
+refresh, restore/undo, list, revoke) and test each with the lowest role that
+can reach it, including after that role loses the authority.
+
+Goals and prompts for deploy or closeout may only require evidence that
+`docs/release-closeout.md` names a source for; reference that file instead of
+restating the procedure. A requirement without a recorded source is a bug in
+the prompt, not a blocker for the operator.

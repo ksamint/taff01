@@ -22,7 +22,11 @@ admin-managed capabilities or allowing members to issue personal tokens.
   Existing access tokens otherwise expire within one hour.
 - `token:manage` remains admin-only, including personal tokens and call logs.
   `token:revoke` allows admins any token and members only OAuth grants they
-  approved. Members list those grants and revoke/undo from Connected apps.
+  approved. Members list those grants and revoke/undo from Connected apps;
+  a member undoes only a revocation they made, and only while they may still
+  connect that agent with the grant's scopes (amended 2026-10-21: undo was
+  first allowed for any person's revocation, so a member could reverse an
+  admin's).
 - Grants reuse created_by and agent supervision; no migration or dependency.
 
 ## Consequences

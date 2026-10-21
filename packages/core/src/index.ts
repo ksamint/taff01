@@ -85,7 +85,13 @@ import { createCrmOperations } from "./crm";
 import { createMindOperations } from "./mind";
 import { createNotificationOperations } from "./notifications";
 import { createOAuthOperations } from "./oauth";
-import { type Action, type Actor, can, type Resource } from "./permissions";
+import {
+  type Action,
+  type Actor,
+  can,
+  canGrantOAuthScopes,
+  type Resource,
+} from "./permissions";
 import { createPlanningOperations } from "./planning";
 import { createRelationOperations } from "./relations";
 import { createRunOperations } from "./runs";
@@ -1065,7 +1071,8 @@ export function createCore(options: {
    * Undoes a person's revocation within RESTORE_WINDOW_MS, keeping the same
    * hash so clients configured with the token work again. Person-only: the
    * last change to the token must have been made by a person in this
-   * workspace, and its agent member must still exist.
+   * workspace, and its agent member must still exist. A member restores only
+   * an OAuth grant they revoked themselves and may still approve.
    */
   async function restoreAgentToken(
     principal: Principal,
@@ -1081,11 +1088,17 @@ export function createCore(options: {
         .limit(1)
         .for("update");
       if (!row) throw new CoreError("not_found", 404);
-      await requireMember(tx, principal, row.workspaceId, "token:revoke", {
-        workspaceId: row.workspaceId,
-        ownerId: row.createdBy,
-        oauthGrant: !!row.oauthClientId,
-      });
+      const actor = await requireMember(
+        tx,
+        principal,
+        row.workspaceId,
+        "token:revoke",
+        {
+          workspaceId: row.workspaceId,
+          ownerId: row.createdBy,
+          oauthGrant: !!row.oauthClientId,
+        },
+      );
       if (!row.revokedAt) return toAgentToken(row, null);
       if (Date.now() - row.revokedAt.getTime() > RESTORE_WINDOW_MS)
         throw new CoreError("conflict", 409);
@@ -1115,8 +1128,9 @@ export function createCore(options: {
         : [];
       if (!revoker) throw new CoreError("conflict", 409);
       const [agent] = await tx
-        .select({ id: members.id })
+        .select({ id: members.id, supervisorId: agentProfiles.supervisorId })
         .from(members)
+        .leftJoin(agentProfiles, eq(agentProfiles.id, members.id))
         .where(
           and(
             eq(members.workspaceId, row.workspaceId),
@@ -1126,6 +1140,18 @@ export function createCore(options: {
         )
         .limit(1);
       if (!agent) throw new CoreError("conflict", 409);
+      // A member undoes only their own revocation, and only while they may
+      // still connect this agent with these scopes (ADR 0023).
+      if (
+        !can(actor, "token:manage", { workspaceId: row.workspaceId }) &&
+        (revoker.id !== actor.id ||
+          !canGrantOAuthScopes(
+            actor,
+            { workspaceId: row.workspaceId, supervisorId: agent.supervisorId },
+            row.scopes as Scope[],
+          ))
+      )
+        throw new CoreError("forbidden", 403);
       const [updated] = await tx
         .update(agentTokens)
         .set({ revokedAt: null, updatedAt: new Date() })
