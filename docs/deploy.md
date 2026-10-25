@@ -2941,3 +2941,14 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Live acceptance: health, OAuth discovery and the `/mcp` 401 challenge, a personal token retained across replacement, and the full release checklist with the guarded production configuration. The v0.2.12 pending Claude.ai connector and member-supervisor checks stay pending unless run.
 - Rollback: v0.2.12 source 789bb20b4947d1a5ec15f83c73ae6fe6086e7be4, its retained images and the env backup; all schema and data retained.
 
+### Frontend v2 v0.2.13 upgrade checkpoint — 2026-10-25 UTC
+- Source `45a7cc65fba6d859f0733466950cc1163ef298dc`, annotated tag `v0.2.13` verified on origin; [PR #69](https://github.com/ksamint/taff01/pull/69), [PR CI 39693073031](https://github.com/ksamint/taff01/actions/runs/39693073031) and [main CI 39694069213](https://github.com/ksamint/taff01/actions/runs/39694069213) passed 8/8.
+- Validation: 1,743 tests / 103 files, 285 browser cases, 166 visuals and three images. Today 197,028 gzip bytes; LCP en/CN/HK 608/680/676 ms; Lighthouse P 97/98/98, A/BP 100/100.
+- Local production checklist 32/32. Migrations: none; migration journal, env shape, Compose, Dockerfiles, route and PostgreSQL start unchanged.
+- Live full-project first attempts 138/146; bounded retries made the critical checklist 32/32 and the unique-case result 142/146. OAuth discovery, retained-token checks and official 31-tool MCP round trip passed.
+- Four remaining failures repeat one stale non-critical assertion that members lack finance; ADR 0021 intentionally grants finance to non-guest people. No v0.2.13 UI/finance change or rollback cause exists.
+- Follow-ups: align the stale finance test with ADR 0021; harden live cleanup transport; investigate two pre-write setup flakes. Current-run leftovers were archived through supported APIs.
+- The M1 Pro shell outage and hostd restarts interrupted two long harness invocations; the detached native keeper retained the lock and acceptance resumed per project without rebuild, migration or replacement.
+- Closeout: API/web/worker IDs, images and starts match capture with restartCount 0; 23 preserved containers, PostgreSQL and route are unchanged; health/OAuth/MCP challenge pass.
+- v0.2.12 Claude.ai connector and member-supervisor approval remain PENDING under the recorded owner decision. Rollback: v0.2.12 `789bb20b4947d1a5ec15f83c73ae6fe6086e7be4` and retained images/env; keep all data.
+
