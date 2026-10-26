@@ -77,7 +77,9 @@ test("Platform HTTPS, health, cookies, origin rejection, navigation and zh-CN sp
   ).toBe(200);
 });
 
-test("Restricted verification member sees timeline and graph without finance; guest sees no CRM switch", async ({
+// ADR 0021: every non-guest person reads finance; a guest demotion removes it
+// on an open page and takes away the CRM switch.
+test("Verification member sees finance; a guest demotion hides it live and removes the CRM switch", async ({
   page,
   browser,
 }, info) => {
@@ -134,20 +136,23 @@ test("Restricted verification member sees timeline and graph without finance; gu
       recipient.context.pages()[0] ?? (await recipient.context.newPage());
     await memberPage.goto("/orgs");
     await memberPage.getByTestId(`workspace-${workspace.id}`).click();
-    for (const view of ["timeline", "relations"]) {
-      await memberPage.goto(`/projects/${project.id}?view=${view}`);
-      await expect(memberPage.locator("main.content")).toBeVisible();
-      await expect(memberPage.getByTestId("timeline-finance")).toHaveCount(0);
-    }
+    await memberPage.goto(`/projects/${project.id}?view=relations`);
+    await expect(memberPage.locator("main.content")).toBeVisible();
+    await memberPage.goto(`/projects/${project.id}?view=timeline`);
+    await expect(memberPage.getByTestId("timeline-finance")).toBeVisible();
     const timeline = await recipient.context.request.get(
       `/api/projects/${project.id}/timeline`,
     );
     expect(timeline.status()).toBe(200);
-    expect((await timeline.json()).risk.finance).toBeNull();
+    expect((await timeline.json()).risk.finance.contractAmount).toBe(
+      "12345.67",
+    );
     const brief = await recipient.context.request.get("/api/brief?scope=all");
     expect(brief.status()).toBe(200);
-    for (const row of (await brief.json()).projects)
-      expect(row.risk.finance).toBeNull();
+    const briefRow = (await brief.json()).projects.find(
+      (row: { projectId: string }) => row.projectId === project.id,
+    );
+    expect(briefRow?.risk.finance).not.toBeNull();
     // Reproduce a role change after initial reads but before the first socket.
     let connect!: () => void;
     const gate = new Promise<void>((resolve) => {
@@ -159,19 +164,19 @@ test("Restricted verification member sees timeline and graph without finance; gu
     });
     await memberPage.goto(`/projects/${project.id}?view=timeline`);
     await expect(memberPage.getByTestId("timeline-view")).toBeVisible();
-    await expect(memberPage.getByTestId("timeline-finance")).toHaveCount(0);
-    const promoted = await page.request.patch(
-      `/api/workspaces/${workspace.id}/members/${recipient.member.id}`,
-      { data: { role: "admin" } },
-    );
-    expect(promoted.status()).toBe(200);
-    connect();
     await expect(memberPage.getByTestId("timeline-finance")).toBeVisible();
     const role = await page.request.patch(
       `/api/workspaces/${workspace.id}/members/${recipient.member.id}`,
       { data: { role: "guest" } },
     );
     expect(role.status()).toBe(200);
+    connect();
+    await expect(memberPage.getByTestId("timeline-finance")).toHaveCount(0);
+    const guestTimeline = await recipient.context.request.get(
+      `/api/projects/${project.id}/timeline`,
+    );
+    expect(guestTimeline.status()).toBe(200);
+    expect((await guestTimeline.json()).risk.finance).toBeNull();
     await memberPage.goto("/projects");
     await expect(
       memberPage.locator('a[href="/companies"],a[href="/contacts"]'),

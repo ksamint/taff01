@@ -161,6 +161,23 @@ async function captureProfileAndTheme(page: Page, me?: any) {
       await page.evaluate(() => localStorage.getItem("taff-theme")),
     );
 }
+// Idempotent cleanup reads only: retry a dropped connection or a gateway
+// 502/503/504 twice with a short backoff. Writes never retry.
+async function getWithRetry(request: any, url: string) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const response = await request.get(url);
+      if (attempt < 3 && [502, 503, 504].includes(response.status())) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        continue;
+      }
+      return response;
+    } catch (error) {
+      if (attempt >= 3) throw error;
+      await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+    }
+  }
+}
 async function cleanupHttp(step: string, operation: () => Promise<any>) {
   cleanupStep = step;
   try {
@@ -573,7 +590,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
         return;
       }
       const calendar = await cleanupHttp("task.read-calendar", () =>
-        request.get(`/api/tasks/${e.id}/calendar`),
+        getWithRetry(request, `/api/tasks/${e.id}/calendar`),
       );
       if (calendar.schedule)
         await cleanupHttp("task.clear-current-run-schedule", () =>
@@ -750,7 +767,8 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
     for (const e of entries.filter((e) => e.kind === kind))
       await perform(kind, e.id, async () => {
         const data = await checked(
-          await request.get(
+          await getWithRetry(
+            request,
             kind === "projects"
               ? `/api/projects?workspaceId=${current.workspaceId}`
               : `/api/${kind}/${e.id}`,
@@ -778,7 +796,8 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
         }
       });
   for (const e of entries.filter((e) => e.kind === "invites")) {
-    const response = await request.get(
+    const response = await getWithRetry(
+      request,
       `/api/workspaces/${e.workspaceId}/invites`,
     );
     if (!response.ok()) {
