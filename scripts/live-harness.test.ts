@@ -21,9 +21,10 @@ it("allows targeting while rejecting every artifact/config/parallelism override"
       "--repeat-each=3",
       "mind.spec.ts",
       "v021-feature-gaps.spec.ts",
+      "e2e/live/oauth-member.spec.ts",
       "--retries=1",
     ]),
-  ).toHaveLength(8);
+  ).toHaveLength(9);
   for (const flag of [
     "--trace=on",
     "--reporter=list",
