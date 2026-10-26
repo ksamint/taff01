@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Live acceptance: the verification-member finance case now matches ADR 0021
+  (non-guest people read finance; a guest demotion hides it on an open page).
+  Cleanup reads for task calendars, project archives and invitations retry a
+  dropped connection or gateway 502/503/504 twice; writes never retry.
+
 ## v0.2.13 — 2026-10-21
 
 - Security fix (ADR 0023 amendment): a member could undo an admin's
