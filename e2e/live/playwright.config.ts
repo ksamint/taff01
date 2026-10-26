@@ -20,13 +20,14 @@ const desktop = {
   ...devices["Desktop Chrome"],
   viewport: { width: 1280, height: 800 },
 };
+const releaseFiles = [
+  "release/checklist.spec.ts",
+  "platform.spec.ts",
+  ...milestoneFiles,
+];
 export default defineConfig({
   testDir: ".",
-  testMatch: [
-    "release/checklist.spec.ts",
-    "platform.spec.ts",
-    ...milestoneFiles,
-  ],
+  testMatch: releaseFiles,
   fullyParallel: false,
   workers: 1,
   retries: 0,
@@ -60,6 +61,8 @@ export default defineConfig({
     },
     {
       name: "desktop-en",
+      // One production OAuth grant per run: the member-supervisor check runs here only.
+      testMatch: [...releaseFiles, "oauth-member.spec.ts"],
       use: { ...desktop, locale: "en-US" },
       metadata: { locale: "en", formFactor: "desktop" },
       grepInvert:

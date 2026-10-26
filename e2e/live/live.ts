@@ -66,6 +66,15 @@ export function trackTask(id: string) {
   if (state && id)
     state.entries.push({ kind: "tasks", id, workspaceId: state.workspaceId });
 }
+/** OAuth grants are issued by /api/oauth/token, which response capture skips. */
+export function trackAgentToken(id: string) {
+  if (state && id)
+    state.entries.push({
+      kind: "agent-tokens",
+      id,
+      workspaceId: state.workspaceId,
+    });
+}
 /** Undo archives these rows, so retain their ownership evidence separately.
  * If apply fails before Undo, normal parent hierarchy cleanup finds active children. */
 export function trackSuggestionSubtask(id: string, parentId: string) {
