@@ -17,6 +17,7 @@ const files = new Set([
   "brief.spec.ts",
   "v021-feature-gaps.spec.ts",
   "release/checklist.spec.ts",
+  "oauth-member.spec.ts",
 ]);
 /** Targeting only: callers cannot override artifact safety or serialization. */
 export function validateLiveArgs(args) {
