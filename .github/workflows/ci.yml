@@ -111,7 +111,8 @@ jobs:
           retention-days: 7
   browser:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # A stalled apt mirror can stretch the Chromium dependency install to ~16 min.
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:

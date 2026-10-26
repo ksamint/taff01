@@ -6,6 +6,12 @@
   (non-guest people read finance; a guest demotion hides it on an open page).
   Cleanup reads for task calendars, project archives and invitations retry a
   dropped connection or gateway 502/503/504 twice; writes never retry.
+- Live acceptance gains a member-supervisor OAuth case (desktop-en only, one
+  grant per run). A fresh invited member supervises the Verification agent
+  and runs approve, exchange, list, refresh, revoke and restore. It is
+  refused above the member scope ceiling, and refused restore after losing
+  supervision; a refresh after the loss ends the grant. The full live matrix
+  is now 147 cases.
 
 ## v0.2.13 — 2026-10-21
 

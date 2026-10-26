@@ -74,7 +74,7 @@ it("cleanup accepts an explicitly journaled null-task grant but preserves baseli
   expect(ownsGrant({ ...created, status: "revoked" }, [], entries)).toBe(false);
 });
 
-it("discovers all 146 applicable public cases without credentials or browser activity", () => {
+it("discovers all 147 applicable public cases without credentials or browser activity", () => {
   const parent = mkdtempSync(join(tmpdir(), "taff-live-discovery-"));
   try {
     const discovery = spawnSync(
@@ -101,7 +101,7 @@ it("discovers all 146 applicable public cases without credentials or browser act
       .map((line) => JSON.parse(line));
     expect(
       events.find((entry) => entry.event === "acceptance-start"),
-    ).toMatchObject({ discovered: 146 });
+    ).toMatchObject({ discovered: 147 });
     expect(
       events.find((entry) => entry.event === "acceptance-finished"),
     ).toMatchObject({ status: "passed" });
