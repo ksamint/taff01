@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Runtime: Node 26 (ADR 0024). CI and the production images use Node 26;
+  `@types/node` 26. No source or migration change.
 - Live acceptance: the verification-member finance case now matches ADR 0021
   (non-guest people read finance; a guest demotion hides it on an open page).
   Cleanup reads for task calendars, project archives and invitations retry a

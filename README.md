@@ -73,7 +73,7 @@ records the current production checkpoint and next steps.
 
 ## Quick start
 
-Install Node 24, pnpm 12 and Docker with Compose, then:
+Install Node 26, pnpm 12 and Docker with Compose, then:
 
 ```sh
 git clone https://github.com/ksamint/taff01.git

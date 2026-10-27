@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7
 # TARGET selects the API or worker dependency tree; the API image also migrates.
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 RUN npm install -g pnpm@12.10.1
 WORKDIR /repo
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -14,7 +14,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build:server
 
-FROM node:24-alpine
+FROM node:26-alpine
 ENV NODE_ENV=production MIGRATIONS_DIR=/app/migrations API_HOST=0.0.0.0
 WORKDIR /app
 ARG TARGET=api
