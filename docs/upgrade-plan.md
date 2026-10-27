@@ -25,6 +25,16 @@ Validation on the upgraded stack: Biome, TypeScript 7 typecheck of six packages,
 build, six Playwright mobile tests in en and zh-CN, BullMQ 6 worker reaching
 ready against a Redis-protocol server.
 
+## Node 26 applied on 2026-10-27
+
+| Component | From | To | Code impact |
+| --- | --- | --- | --- |
+| Node | 24 | 26.12 | `.node-version`, both Dockerfiles `node:26-alpine`; `engines` keeps `>=24 <27`. No source changes ([ADR 0024](adr/0024-node-26-runtime.md)). |
+| @types/node | 24.19 | 26.6 | None. |
+
+Node 26 refuses `--env-file` in `NODE_OPTIONS`; pass it only on the launching
+`node` command, as the package scripts do.
+
 ## Calendar dependencies applied on 2026-10-09
 
 | Component | Version | Licence and integration |
@@ -56,13 +66,12 @@ production build, Today budget 191.9 KiB, `pnpm mcp:smoke` against the bundled A
 
 | When | Move | How | Validation |
 | --- | --- | --- | --- |
-| After 2026-10-28 | Node 24 → 26 LTS | `.node-version`, `engines`, CI image, Dockerfiles. | Full check set. |
 | After PostgreSQL 19 GA (targeted late October 2026) | 18 → 19 | Compose image; run migrations on a fresh volume; confirm `postgres` driver and Drizzle have no 19-specific issues. | `pnpm db:migrate`, `pnpm db:seed`, `pnpm test`. |
 | November 2026 (TypeScript 7.1) | Nothing to change; 7.1 restores the JS API for tools that need it. | `pnpm up typescript`. | `pnpm typecheck`, `pnpm build`. |
 | When Drizzle 1.0 is final | 0.45 → 1.0 | Read the 1.0 migration guide; regenerate migration snapshots. | Integration tests. |
 | Phase 2 decision | BullMQ PostgreSQL backend | Separate ADR: it would remove Valkey, move MCP rate limiting into PostgreSQL and change the worker's backend factory. | Load test of job throughput and rate-limit accuracy. |
 | When BullMQ documents support | ioredis 5 → 6 (worker) | 6.0.0 shipped on 2026-10-07; BullMQ 6 declares `ioredis >=5` but has not released against 6. The API already runs ioredis 6 for the rate limiter; the worker stays on 5 until BullMQ confirms 6. | `pnpm test`, `pnpm mcp:smoke`, worker reaches ready. |
-| With each Node major | `@types/node` | Tracks the runtime major (24 now), not the newest types package (26). | `pnpm typecheck`. |
+| With each Node major | `@types/node` | Tracks the runtime major (26 now). | `pnpm typecheck`. |
 | Monthly | Minor and patch bumps | `pnpm up --latest` within the fixed majors; pnpm's release-age policy delays packages younger than its cutoff. | Full check set. |
 
 ## Procedure for any version move

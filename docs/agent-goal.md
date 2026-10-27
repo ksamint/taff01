@@ -40,7 +40,7 @@ Standing rules that override anything else:
   Every mutation runs in one transaction, writes an `activity` row with the
   actor and emits `NOTIFY taff_changes`. Permissions go through
   `can(actor, action, resource)` with a table-driven test per rule.
-- Stack is fixed and installed (Node 24, pnpm 12, Next.js 16, React 19,
+- Stack is fixed and installed (Node 26, pnpm 12, Next.js 16, React 19,
   Tailwind 4, TanStack Query 5, @schedule-x, i18next 26, Hono 4, better-auth,
   MCP SDK v2, Drizzle, PostgreSQL 18, Valkey 9, BullMQ 6, Biome 2, Vitest 5,
   Playwright). Propose any stack change in an ADR, never swap.
