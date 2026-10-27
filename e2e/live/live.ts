@@ -25,7 +25,7 @@ import {
   cleanupNotificationBaseline,
   notificationBaseline,
 } from "./notification-cleanup";
-import { failureCategory } from "./safety.mjs";
+import { failureCategory, retriesSetupNavigation } from "./safety.mjs";
 import { cleanupSuggestion } from "./suggestion-cleanup";
 
 const execute = promisify(execFile);
@@ -137,18 +137,23 @@ async function checked(response: any, label: string) {
   return response.json();
 }
 
-/** App readiness comes from the assertions below, never font/image load. */
+/** App readiness comes from the assertions below, never font/image load.
+ * A setup navigation is a page load with no write of its own, so a slow or dropped load is retried once. */
 async function setupNavigation(page: Page, path: "/" | "/orgs") {
   return base.step(`live setup navigation ${path}`, async () => {
-    try {
-      await page.goto(path, { waitUntil: "domcontentloaded" });
-    } catch (error) {
-      base.info().annotations.push({
-        type: "check",
-        description: `fail|live setup navigation ${path}|${failureCategory(error)}`,
-      });
-      throw error;
-    }
+    for (let attempt = 1; ; attempt++)
+      try {
+        await page.goto(path, { waitUntil: "domcontentloaded" });
+        return;
+      } catch (error) {
+        const category = failureCategory(error);
+        const retry = attempt === 1 && retriesSetupNavigation(category);
+        base.info().annotations.push({
+          type: "check",
+          description: `${retry ? "retry" : "fail"}|live setup navigation ${path}|${category}`,
+        });
+        if (!retry) throw error;
+      }
   });
 }
 
