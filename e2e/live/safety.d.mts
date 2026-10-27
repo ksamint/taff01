@@ -6,3 +6,4 @@ export function ownsGrant(
   entries: readonly { kind: string; id: string }[],
 ): boolean;
 export function failureCategory(error: unknown): string;
+export function retriesSetupNavigation(category: string): boolean;

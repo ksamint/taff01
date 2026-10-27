@@ -12,6 +12,8 @@
   refused above the member scope ceiling, and refused restore after losing
   supervision; a refresh after the loss ends the grant. The full live matrix
   is now 147 cases.
+- Live acceptance repeats a timed-out or dropped setup page load once, recorded
+  as a `retry|` check; writes never repeat.
 
 ## v0.2.13 — 2026-10-21
 

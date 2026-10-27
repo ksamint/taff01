@@ -73,3 +73,7 @@ export function failureCategory(error) {
   if (/net::ERR_[A-Z_]+/.test(message)) return "browser_network_error";
   return "transport_or_local_error";
 }
+/** A setup page load may repeat after a slow or dropped load, never after a local error. */
+export function retriesSetupNavigation(category) {
+  return category !== "transport_or_local_error";
+}

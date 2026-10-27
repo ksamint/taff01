@@ -8,6 +8,7 @@ import {
   failureCategory,
   freshLiveReport,
   ownsGrant,
+  retriesSetupNavigation,
   validateLiveArgs,
 } from "../e2e/live/safety.mjs";
 
@@ -145,4 +146,9 @@ it("keeps transport diagnostics categorical even with credentials in the excepti
     ["unexpected secret body", "transport_or_local_error"],
   ])
     expect(failureCategory(new Error(message))).toBe(category);
+});
+it("retries a setup navigation only after a slow or dropped load", () => {
+  for (const category of ["timeout", "econnreset", "browser_network_error"])
+    expect(retriesSetupNavigation(category)).toBe(true);
+  expect(retriesSetupNavigation("transport_or_local_error")).toBe(false);
 });

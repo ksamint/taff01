@@ -26,9 +26,10 @@ Discovery without credentials: `RELEASE_BASE_URL=https://taff.apuch.cn node
  e2e/live/run.mjs --list`. Target regressions with `--grep 'keyboard|evidence|Restricted'`
 and `--repeat-each=3 --project=phone-en`. Failed deploy checks get one explicit
 retry under the deployment goal; the default here is zero automatic retries so
-first-attempt evidence is retained. Targeting flags are allowlisted; trace, reporter,
+first-attempt evidence is retained. Within a case, a setup page load that times out
+or drops is repeated once and recorded as a `retry|` check; writes never repeat. Targeting flags are allowlisted; trace, reporter,
 config, worker and debug overrides are rejected. Viewport-specific brief flows are
-selected by project, giving 146 applicable cases without runtime skips. The v0.2.1
+selected by project, giving 147 applicable cases without runtime skips. The v0.2.1
 feature checks add CRM membership/roles, milestone CRUD and keyboard movement,
 phone detail scrolling and AI-off settings, desktop snoozed items/agent profile,
 and versioned split/reschedule Undo. The existing proposal case also verifies
