@@ -83,7 +83,7 @@ test("an admin signs in on the consent page, approves an MCP client and the clie
         await page.request.get(`/api/members?workspaceId=${workspace.id}`)
       ).json(),
     )
-    .find((member) => member.kind === "agent");
+    .find((member) => member.name === `Claude agent ${locale}`);
   if (!agent) throw new Error("The agent was not created");
   await page.reload();
   await page.getByTestId("oauth-workspace").selectOption(workspace.id);
