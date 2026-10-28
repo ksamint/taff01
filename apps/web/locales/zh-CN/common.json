@@ -658,7 +658,10 @@
     "automaticDefault": "自动选择",
     "loginDefaultHint": "自动进入已加入的组织；未加入组织时进入以姓名命名的个人空间。手动选择后在不同设备间保存。",
     "setMemberDefault": "设为 {{name}} 的登录默认组织",
-    "defaultUpdated": "已更新 {{name}} 的登录默认组织。"
+    "defaultUpdated": "已更新 {{name}} 的登录默认组织。",
+    "sessionPending": "正在确认登录状态，请稍后再操作。",
+    "adminRequired": "只有组织管理员可以添加智能体。",
+    "noPeople": "此组织还没有成员。"
   },
   "pwa": {
     "description": "人与智能体协作的任务和日历。",

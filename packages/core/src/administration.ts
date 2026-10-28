@@ -7,6 +7,7 @@ import {
   phonePasswordProvisionSchema,
 } from "@taff/schemas";
 import { and, eq, inArray, sql } from "drizzle-orm";
+import { ensureDefaultAgent } from "./default-agents";
 import { CoreError } from "./index";
 /** Trusted runtime boundary; never expose through a user or agent adapter. */
 export function createAdministrationOperations(
@@ -42,6 +43,7 @@ export function createAdministrationOperations(
           const row =
             existing[0] ??
             (await tx.insert(workspaces).values({ name }).returning())[0];
+          await ensureDefaultAgent(tx, row.id);
           organizations.push({ id: row.id, name: row.name });
         }
         const organization = organizations.find(

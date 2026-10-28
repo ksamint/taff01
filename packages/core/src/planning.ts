@@ -61,6 +61,7 @@ import {
   type SQL,
   sql,
 } from "drizzle-orm";
+import { ensureDefaultAgent } from "./default-agents";
 import { deliverEmail, type EmailStatus, type EmailTransport } from "./email";
 import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
@@ -598,6 +599,7 @@ export function createPlanningOperations({
           kind: "agent",
           role: "member",
         });
+      await ensureDefaultAgent(tx, workspace.id);
       return {
         id: workspace.id,
         name: workspace.name,

@@ -16,7 +16,7 @@ test("Team creates a real custom agent through UI and assigns it as a task worke
   const locale = info.project.name as TestLocale;
   const me = await freshAccount(page, locale);
   const workspace = me.workspaces[0];
-  await page.goto("/orgs#team");
+  await page.goto("/orgs");
   await expect(page.getByTestId("team-add-agent")).toBeEnabled();
   await expect(page.locator(".sidebar")).toHaveCount(0);
   const peer = await page.context().newPage();
@@ -245,7 +245,10 @@ test("real member and guest memberships cannot add workspace agents", async ({
       await recipient.getByTestId(`workspace-${workspace.id}`).click();
       await recipient.goto("/orgs#team");
       await expect(recipient.locator(".team-directory > h1")).toBeVisible();
-      await expect(recipient.getByTestId("team-add-agent")).toHaveCount(0);
+      await expect(recipient.getByTestId("team-add-agent")).toBeDisabled();
+      await expect(recipient.locator("#add-agent-reason")).toHaveText(
+        messages[locale].organization.adminRequired,
+      );
       const denied = await recipient.request.post(
         `/api/workspaces/${workspace.id}/members`,
         { data: { name: `Denied ${role} agent`, kind: "agent" } },
@@ -264,4 +267,41 @@ test("real member and guest memberships cannot add workspace agents", async ({
       await context.close();
     }
   }
+});
+
+test("MCP explains an empty agent roster and links to organization creation; API failures stay visible", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  await freshAccount(page, locale);
+  await page.route("**/api/members?*", async (route) => {
+    const response = await route.fetch();
+    const members = memberListSchema.parse(await response.json());
+    await route.fulfill({
+      json: members.filter((member) => member.kind === "person"),
+    });
+  });
+  await page.goto("/me/mcp");
+  const empty = page.getByTestId("mcp-no-agents");
+  await expect(empty).toContainText(messages[locale].oauth.noAgent);
+  await expect(page.getByTestId("token-agent")).toHaveCount(0);
+  await expect(page.getByTestId("token-submit")).toBeDisabled();
+  await empty.getByRole("link").click();
+  await expect(page).toHaveURL(/\/orgs$/);
+  await page.getByTestId("team-add-agent").click();
+  await expect(page.getByTestId("agent-name")).toBeVisible();
+  await page.unroute("**/api/members?*");
+  await page.goto("/me/mcp");
+  await expect(
+    page.getByTestId("token-agent").locator("option"),
+  ).not.toHaveCount(0);
+  await page.route("**/api/agent-tokens", (route) =>
+    route.fulfill({ status: 403, json: { error: "forbidden" } }),
+  );
+  await page.getByTestId("token-name").fill("Rejected issuance");
+  await page.getByTestId("token-submit").click();
+  await expect(page.locator(".mcp-form").getByRole("alert")).toContainText(
+    messages[locale].errors.forbidden,
+  );
+  await expect(page.getByTestId("issued-token")).toHaveCount(0);
 });

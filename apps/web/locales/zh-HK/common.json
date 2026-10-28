@@ -658,7 +658,10 @@
     "automaticDefault": "自動選擇",
     "loginDefaultHint": "自動進入已加入的組織；未加入組織時進入以姓名命名的個人空間。手動選擇後在不同裝置間儲存。",
     "setMemberDefault": "設為 {{name}} 的登入預設組織",
-    "defaultUpdated": "已更新 {{name}} 的登入預設組織。"
+    "defaultUpdated": "已更新 {{name}} 的登入預設組織。",
+    "sessionPending": "正在確認登入狀態，請稍後再操作。",
+    "adminRequired": "只有組織管理員可以新增智能體。",
+    "noPeople": "此組織還沒有成員。"
   },
   "pwa": {
     "description": "人與代理協作的任務和日曆。",

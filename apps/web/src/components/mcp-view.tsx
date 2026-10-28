@@ -89,7 +89,7 @@ type Confirm = { kind: "regenerate" | "revoke"; token: AgentToken };
 
 /** Prototype v2 MCP page: phone lines 910–988, desktop Me › 設定 › MCP. */
 export function McpView({ origin }: { origin?: string }) {
-  const { me, workspace } = useWorkspace();
+  const { me, workspace, confirmed } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const isAdmin = workspace.role === "admin";
@@ -194,7 +194,8 @@ export function McpView({ origin }: { origin?: string }) {
       scopes,
     });
     setValidationError(!parsed.success);
-    if (parsed.success) create.mutate(parsed.data);
+    if (parsed.success && confirmed && isAdmin && !busy && agents.length)
+      create.mutate(parsed.data);
   }
   async function copy(value: string, onCopied?: () => void) {
     try {
@@ -203,6 +204,7 @@ export function McpView({ origin }: { origin?: string }) {
       showToast(t("mcp.copied"));
     } catch {
       setTokenCopied(false);
+      showToast(t("organization.copyFailed"));
     }
   }
   const mutationError = [create, regenerate, revoke, restore].find(
@@ -401,19 +403,36 @@ export function McpView({ origin }: { origin?: string }) {
                   </div>
                   <div className="field">
                     <Label htmlFor="token-agent">{t("agent")}</Label>
-                    <select
-                      id="token-agent"
-                      data-testid="token-agent"
-                      value={memberId || agents[0]?.id || ""}
-                      onChange={(event) => setMemberId(event.target.value)}
-                      disabled={!agents.length}
-                    >
-                      {agents.map((agent) => (
-                        <option key={agent.id} value={agent.id}>
-                          {agent.name}
-                        </option>
-                      ))}
-                    </select>
+                    {members.isPending ? (
+                      <p role="status">{t("loading")}</p>
+                    ) : members.isError ? (
+                      <p role="alert" className="alert">
+                        {t(errorKey(members.error))}
+                      </p>
+                    ) : !agents.length ? (
+                      <div data-testid="mcp-no-agents" role="status">
+                        <p>{t("oauth.noAgent")}</p>
+                        {isAdmin && (
+                          <Link className="button" href="/orgs">
+                            {t("organization.addAgent")}
+                          </Link>
+                        )}
+                      </div>
+                    ) : (
+                      <select
+                        id="token-agent"
+                        data-testid="token-agent"
+                        value={memberId || agents[0]?.id || ""}
+                        onChange={(event) => setMemberId(event.target.value)}
+                        disabled={!agents.length}
+                      >
+                        {agents.map((agent) => (
+                          <option key={agent.id} value={agent.id}>
+                            {agent.name}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                   <fieldset className="mcp-scopes">
                     <legend className="mcp-label">{t("mcp.scopes")}</legend>
@@ -447,11 +466,20 @@ export function McpView({ origin }: { origin?: string }) {
                       )}
                     </p>
                   )}
+                  {(!confirmed || busy) && (
+                    <p role="status">
+                      {t(
+                        !confirmed ? "organization.sessionPending" : "working",
+                      )}
+                    </p>
+                  )}
                   <Button
                     data-testid="token-submit"
                     className="button-primary mcp-submit"
                     type="submit"
-                    disabled={busy || !agents.length}
+                    disabled={
+                      busy || !confirmed || !agents.length || members.isError
+                    }
                   >
                     {t(create.isPending ? "working" : "mcp.createToken")}
                   </Button>
