@@ -2952,3 +2952,13 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Closeout: API/web/worker IDs, images and starts match capture with restartCount 0; 23 preserved containers, PostgreSQL and route are unchanged; health/OAuth/MCP challenge pass.
 - v0.2.12 Claude.ai connector and member-supervisor approval remain PENDING under the recorded owner decision. Rollback: v0.2.12 `789bb20b4947d1a5ec15f83c73ae6fe6086e7be4` and retained images/env; keep all data.
 
+
+### Release candidate v0.2.14 — 2026-10-28 UTC
+- Release source: the merge commit of the v0.2.14 prep PR. Exact-source main CI and PR CI must both pass all eight jobs before production replacement; the checkpoint records the full SHA.
+- Node 26 runtime (PR #75, ADR 0024): .node-version 26, server and web base images node:26-alpine, @types/node 26. The remaining changes since v0.2.13 are live-harness, CI and documentation (PRs #71–#74).
+- No migration or new env variable. Only apps/api, apps/web and apps/worker advance to 0.2.14. AI_* stay unset; PostgreSQL stays running.
+- Local candidate gate: Node 26, pnpm install --frozen-lockfile, pnpm release:stack --build --migrate --seed, then the complete pnpm release:checklist. No production seed.
+- Production and closeout follow [the closeout checklist](release-closeout.md): native lock, exclusive verified DB/env backups, default-builder builds, replace only api/web/worker and immediately capture container ids, startedAt and restartCount. Verify api node --version is v26.x; preserve neighbors with scripts/deploy/neighbor_preservation.py.
+- Live acceptance: health, OAuth discovery, /mcp 401 resource_metadata, retained personal token, MCP round trip advertising 0.2.14 and all 147 live cases, one project per detached invocation. Give each failure one targeted retry; distinguish Node-26-caused failures from pre-existing failures. Critical items 1–8 caused by Node 26 require rollback if still failing; pre-existing critical failures require an explicit NEEDS-DECISION. Non-critical failures are follow-ups.
+- Claude.ai connector remains pending under the recorded owner decision; run later without the lock.
+- Rollback: v0.2.13 source 45a7cc65fba6d859f0733466950cc1163ef298dc, its retained images and env backup; preserve all schema/data, Caddy, Valkey, neighbors, PostgreSQL, route and DNS.
