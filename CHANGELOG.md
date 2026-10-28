@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## v0.2.14 — 2026-10-28
+
+Node 26 runtime for API, web and worker (ADR 0024).
 
 - Runtime: Node 26 (ADR 0024). CI and the production images use Node 26;
   `@types/node` 26. No source or migration change.
