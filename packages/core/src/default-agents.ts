@@ -46,3 +46,23 @@ export async function backfillDefaultAgents(db: Database) {
     return { workspacesBackfilled: created };
   });
 }
+
+/** Read-only deployment inventory; no identities or credentials are returned. */
+export async function inspectDefaultAgents(db: Database) {
+  const rows = await db.select().from(workspaces).orderBy(workspaces.id);
+  const agents = await db
+    .select({ workspaceId: members.workspaceId, name: members.name })
+    .from(members)
+    .where(eq(members.kind, "agent"));
+  const names = (id: string) =>
+    agents
+      .filter((agent) => agent.workspaceId === id)
+      .map((agent) => agent.name);
+  return {
+    workspaces: rows.length,
+    workspacesWithoutAgents: rows.filter((row) => !names(row.id).length).length,
+    organizations: rows
+      .filter((row) => !row.personalOwnerId && !row.archivedAt)
+      .map((row) => ({ id: row.id, name: row.name, agents: names(row.id) })),
+  };
+}

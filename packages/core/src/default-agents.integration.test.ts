@@ -3,7 +3,11 @@ import { activity, connectDatabase, members, workspaces } from "@taff/db";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
-import { backfillDefaultAgents, DEFAULT_AGENT_NAME } from "./default-agents";
+import {
+  backfillDefaultAgents,
+  DEFAULT_AGENT_NAME,
+  inspectDefaultAgents,
+} from "./default-agents";
 import { createCore, userPrincipal } from "./index";
 
 const url = process.env.TEST_DATABASE_URL;
@@ -87,6 +91,9 @@ describe.skipIf(!url)("default organization agents", () => {
       });
       return { empty: empty.id, custom: custom.id };
     });
+    expect(
+      (await inspectDefaultAgents(connection!.db)).workspacesWithoutAgents,
+    ).toBeGreaterThanOrEqual(1);
     expect(
       (await backfillDefaultAgents(connection!.db)).workspacesBackfilled,
     ).toBeGreaterThanOrEqual(1);
