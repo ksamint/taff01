@@ -247,9 +247,18 @@ test("a member approves only a supervised agent, with locked files scope, and re
       code_challenge_method: "S256",
       scope: "tasks:read files:write",
     };
-    // Empty personal workspaces must not hide the no-supervised-agent message.
+    // The personal default is eligible; an unsupervised organization's agents
+    // remain absent for its ordinary member.
     await memberPage.goto(`/oauth/authorize?${new URLSearchParams(request)}`);
-    await expect(memberPage.getByTestId("oauth-no-workspace")).toBeVisible();
+    await expect(memberPage.getByTestId("oauth-workspace")).toBeVisible();
+    await expect(
+      memberPage
+        .getByTestId("oauth-workspace")
+        .locator(`option[value="${workspace.id}"]`),
+    ).toHaveCount(0);
+    await expect(
+      memberPage.getByTestId("oauth-agent").locator("option"),
+    ).toHaveText(["默认智能体 / Default agent"]);
     const members = memberListSchema.parse(
       await (
         await page.request.get(`/api/members?workspaceId=${workspace.id}`)

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (369 distinct, 1973 uses)
+## Test ids (368 distinct, 1975 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -353,18 +353,17 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `oauth-agent` | 5 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
+| `oauth-agent` | 6 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-approve` | 4 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-client` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-consent` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-invalid` | 1 |  | mcp-oauth.spec.ts |
-| `oauth-no-workspace` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-redirect` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-scope-files:write` | 4 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-scope-locked-files:write` | 2 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-scope-tasks:read` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-scope-tasks:write` | 1 |  | mcp-oauth.spec.ts |
-| `oauth-workspace` | 3 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
+| `oauth-workspace` | 5 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 
 ### organization-chooser.tsx
 
@@ -841,7 +840,7 @@ read (`data-event-id`, `data-date`).
 | `main.loading` | 2 | i18n.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |
-| `option[value="*"]` | 8 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, planning.spec.ts, project-profile.spec.ts, v021-feature-gaps.spec.ts |
+| `option[value="*"]` | 9 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, mcp-oauth.spec.ts, planning.spec.ts, project-profile.spec.ts, v021-feature-gaps.spec.ts |
 | `select[id="grant-expiry-*"]` | 1 | agent-review.spec.ts |
 
 ## Locale message lookups
