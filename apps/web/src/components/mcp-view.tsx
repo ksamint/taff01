@@ -151,6 +151,9 @@ export function McpView({ origin }: { origin?: string }) {
   });
   const agents =
     members.data?.filter((member) => member.kind === "agent") ?? [];
+  const selectedAgentId = agents.some((agent) => agent.id === memberId)
+    ? memberId
+    : (agents[0]?.id ?? "");
   const agentName = (id: string) =>
     agents.find((agent) => agent.id === id)?.name ?? t("unknownMember");
   const browserOrigin = useSyncExternalStore(
@@ -189,7 +192,7 @@ export function McpView({ origin }: { origin?: string }) {
     event.preventDefault();
     const parsed = createAgentTokenSchema.safeParse({
       workspaceId: workspace.id,
-      memberId: memberId || agents[0]?.id,
+      memberId: selectedAgentId,
       name,
       scopes,
     });
@@ -422,7 +425,7 @@ export function McpView({ origin }: { origin?: string }) {
                       <select
                         id="token-agent"
                         data-testid="token-agent"
-                        value={memberId || agents[0]?.id || ""}
+                        value={selectedAgentId}
                         onChange={(event) => setMemberId(event.target.value)}
                         disabled={!agents.length}
                       >

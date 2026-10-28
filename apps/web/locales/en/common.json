@@ -505,7 +505,8 @@
     "historyGrant": "{{capability}}: {{status}}",
     "historyPermission": "{{capability}}: {{decision}}",
     "historyPolicy": "Review policy: {{policy}}",
-    "historySettings": "Agent settings changed"
+    "historySettings": "Agent settings changed",
+    "manageRequired": "Only organization admins can change agent permissions and review rules."
   },
   "grants": {
     "history": "Grant history",

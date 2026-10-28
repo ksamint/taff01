@@ -300,6 +300,12 @@ function AgentEditor({
               <p className="section-hint">
                 {t("agentProfile.permissionsHint")}
               </p>
+              {!data.canManage && (
+                <p role="status" className="section-hint">
+                  {t("agentProfile.manageRequired")}
+                </p>
+              )}
+              {busy && <p role="status">{t("working")}</p>}
               <div className="permission-list">
                 {data.permissions.map((item) => (
                   <div className="permission-row" key={item.capability}>

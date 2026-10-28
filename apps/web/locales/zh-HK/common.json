@@ -505,7 +505,8 @@
     "historyGrant": "{{capability}}：{{status}}",
     "historyPermission": "{{capability}}：{{decision}}",
     "historyPolicy": "審核策略：{{policy}}",
-    "historySettings": "智能體設定已更改"
+    "historySettings": "智能體設定已更改",
+    "manageRequired": "只有組織管理員可以修改智能體權限和審核規則。"
   },
   "grants": {
     "history": "授權記錄",
