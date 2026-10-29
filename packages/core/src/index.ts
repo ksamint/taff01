@@ -1315,7 +1315,10 @@ export function createCore(options: {
       runOperations.listInbox(principal, workspaceId),
   });
   return {
-    applyTrustedReview,
+    applyTrustedReview: (input: unknown, signature: string) =>
+      applyTrustedReview(input, signature),
+    getTrustedReviewReceipt: (input: unknown, signature: string) =>
+      applyTrustedReview(input, signature, true),
     oauth: oauth.operations,
     oauthMetadata: oauth.metadata,
     provisionAdministration: async (

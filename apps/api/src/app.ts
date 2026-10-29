@@ -271,6 +271,14 @@ export function createApp(
     signOutSchema.parse(await c.req.raw.clone().json());
     return core.auth.handler(c.req.raw);
   });
+  app.post("/api/trusted-reviews/status", async (c) =>
+    c.json(
+      await core.getTrustedReviewReceipt(
+        await c.req.json(),
+        c.req.header("x-taff-approval-signature") ?? "",
+      ),
+    ),
+  );
   app.post("/api/trusted-reviews", async (c) =>
     c.json(
       await core.applyTrustedReview(

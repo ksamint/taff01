@@ -242,12 +242,16 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     ).rejects.toMatchObject({ code: "invalid_input" });
     expect((await core.getRun(person, run.id)).run.status).toBe("needs_review");
     const signed = sign();
+    await expect(core.getTrustedReviewReceipt(...signed)).rejects.toMatchObject(
+      { code: "not_found" },
+    );
     const results = await Promise.all([
       core.applyTrustedReview(...signed),
       core.applyTrustedReview(...signed),
     ]);
     expect(results[0]).toEqual(results[1]);
     expect(results[0].status).toBe("completed");
+    expect(await core.getTrustedReviewReceipt(...signed)).toEqual(results[0]);
     const saved = mappings[0];
     mappings.length = 0;
     await expect(core.applyTrustedReview(...signed)).rejects.toMatchObject({

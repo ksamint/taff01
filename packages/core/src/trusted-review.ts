@@ -76,7 +76,11 @@ export function createTrustedReview(deps: {
     receipt: TrustedReviewReceipt,
   ): Promise<Run>;
 }) {
-  return async (input: unknown, signature: string): Promise<Run> => {
+  return async (
+    input: unknown,
+    signature: string,
+    reconcileOnly = false,
+  ): Promise<Run> => {
     const receipt = verifyReviewReceipt(input, signature, deps.key ?? "");
     const mapping = deps.mappings.find(
       (m) =>
@@ -142,6 +146,7 @@ export function createTrustedReview(deps: {
           throw new CoreError("conflict", 409);
         return prior.result as Run;
       }
+      if (reconcileOnly) throw new CoreError("not_found", 404);
       if (
         Date.parse(receipt.expires_at) <= Date.now() ||
         Date.parse(receipt.expires_at) > Date.now() + 30 * 60_000
@@ -150,14 +155,12 @@ export function createTrustedReview(deps: {
       // Existing review code locks the run, checks version and human permissions,
       // and validates every required check and artifact decision in this transaction.
       const result = await deps.review(tx, principal, receipt);
-      await tx
-        .insert(trustedReviewReceipts)
-        .values({
-          id: receipt.receipt_id,
-          workspaceId: receipt.workspace_id,
-          operationHash: receipt.operation_hash,
-          result,
-        });
+      await tx.insert(trustedReviewReceipts).values({
+        id: receipt.receipt_id,
+        workspaceId: receipt.workspace_id,
+        operationHash: receipt.operation_hash,
+        result,
+      });
       return result;
     });
   };
