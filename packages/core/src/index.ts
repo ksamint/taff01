@@ -1293,6 +1293,7 @@ export function createCore(options: {
     mutation,
     loadActor,
     lockTask,
+    currentRunId,
     execute: async (tx, principal, operation) => {
       const within = <T>(_p: Principal, run: (tx: Transaction) => Promise<T>) =>
         run(tx);

@@ -778,3 +778,11 @@ export const approvedAgentOperationSchema = strictObject({
   operation_hash: string().check(regex(/^[a-f0-9]{64}$/)),
 });
 export type ApprovedAgentOperation = Infer<typeof approvedAgentOperationSchema>;
+
+export const approvedAgentPayloadSchema = omit(approvedAgentOperationSchema, {
+  operation_hash: true,
+});
+export const approvedAgentEnvelopeSchema = strictObject({
+  operation_json: string().check(minLength(1), maxLength(1_048_576)),
+  operation_hash: string().check(regex(/^[a-f0-9]{64}$/)),
+});

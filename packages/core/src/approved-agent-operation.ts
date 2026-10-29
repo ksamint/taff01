@@ -8,14 +8,14 @@ import {
 } from "@taff/db";
 import {
   type ApprovedAgentOperation,
-  approvedAgentOperationSchema,
+  approvedAgentEnvelopeSchema,
+  approvedAgentPayloadSchema,
   approvedAgentToolSchemas,
   SchemaError,
 } from "@taff/schemas";
 import { eq, sql } from "drizzle-orm";
 import { CoreError, type Principal } from "./index";
-import type { Actor } from "./permissions";
-import { canonicalJson } from "./trusted-review";
+import { type Action, type Actor, can, type Resource } from "./permissions";
 
 type Agent = Extract<Principal, { kind: "agent" }>;
 export function verifyAgentOperation(
@@ -24,23 +24,28 @@ export function verifyAgentOperation(
   key: string,
   tokenHash: string,
 ): ApprovedAgentOperation {
-  const parsed = approvedAgentOperationSchema.safeParse(input);
-  if (!parsed.success || key.length < 32 || !/^[a-f0-9]{64}$/.test(signature))
+  const envelope = approvedAgentEnvelopeSchema.safeParse(input);
+  if (!envelope.success || key.length < 32 || !/^[a-f0-9]{64}$/.test(signature))
     throw new CoreError("unauthorized", 401);
-  const expected = createHmac("sha256", key)
-    .update(canonicalJson(input))
-    .digest();
-  if (!timingSafeEqual(expected, Buffer.from(signature, "hex")))
-    throw new CoreError("unauthorized", 401);
-  const operation = parsed.data;
-  const { operation_hash: _, ...payload } = operation;
+  const bytes = envelope.data.operation_json;
+  const expected = createHmac("sha256", key).update(bytes, "utf8").digest();
   if (
-    operation.credential_hash !== tokenHash ||
-    createHash("sha256").update(canonicalJson(payload)).digest("hex") !==
-      operation.operation_hash
+    !timingSafeEqual(expected, Buffer.from(signature, "hex")) ||
+    createHash("sha256").update(bytes, "utf8").digest("hex") !==
+      envelope.data.operation_hash
   )
     throw new CoreError("unauthorized", 401);
-  return operation;
+  let raw: unknown;
+  try {
+    raw = JSON.parse(bytes);
+  } catch {
+    throw new CoreError("invalid_input", 400);
+  }
+  const payload = approvedAgentPayloadSchema.safeParse(raw);
+  if (!payload.success) throw new CoreError("invalid_input", 400);
+  if (payload.data.credential_hash !== tokenHash)
+    throw new CoreError("unauthorized", 401);
+  return { ...payload.data, operation_hash: envelope.data.operation_hash };
 }
 
 export function createApprovedAgentOperation(deps: {
@@ -52,6 +57,10 @@ export function createApprovedAgentOperation(deps: {
     w: string,
   ): Promise<Actor | null>;
   lockTask(tx: Transaction, id: string): Promise<typeof tasks.$inferSelect>;
+  currentRunId(
+    q: Database | Transaction,
+    taskId: string,
+  ): Promise<string | undefined>;
   execute(
     tx: Transaction,
     p: Agent,
@@ -87,11 +96,119 @@ export function createApprovedAgentOperation(deps: {
     }
     return deps.mutation(p, async (tx) => {
       // loadActor locks/rechecks the original token's current scopes and revocation.
-      if (!(await deps.loadActor(tx, p, p.workspaceId)))
-        throw new CoreError("forbidden", 403);
+      const actor = await deps.loadActor(tx, p, p.workspaceId);
+      if (!actor) throw new CoreError("forbidden", 403);
       await tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended(${operation.receipt_id}, 1))`,
       );
+      let currentVersion: number | null = null;
+      let resource: Extract<Resource, { workspaceId: string }> = {
+        workspaceId: p.workspaceId,
+      };
+      if ("runId" in args) {
+        const [candidate] = await tx
+          .select()
+          .from(runs)
+          .where(eq(runs.id, args.runId));
+        if (!candidate || candidate.workspaceId !== p.workspaceId)
+          throw new CoreError("forbidden", 403);
+        const task = await deps.lockTask(tx, candidate.taskId);
+        const [run] = await tx
+          .select()
+          .from(runs)
+          .where(eq(runs.id, candidate.id))
+          .for("update");
+        currentVersion = run.version;
+        resource = {
+          ...resource,
+          taskId: task.id,
+          runId: run.id,
+          agentId: run.agentId,
+          ownerId: task.ownerId,
+          workerId: run.agentId,
+        };
+        if (
+          task.workerId !== run.agentId ||
+          (operation.tool === "runs.control" &&
+            "action" in args &&
+            args.action === "resume" &&
+            run.pausedBy === "person")
+        )
+          throw new CoreError("forbidden", 403);
+      } else if ("taskId" in args) {
+        const task = await deps.lockTask(tx, args.taskId);
+        if (task.workspaceId !== p.workspaceId)
+          throw new CoreError("forbidden", 403);
+        currentVersion = task.version;
+        resource = {
+          ...resource,
+          taskId: task.id,
+          runId: await deps.currentRunId(tx, task.id),
+          ownerId: task.ownerId,
+          workerId: task.workerId,
+        };
+      }
+      const allowed = (action: Action, extra = {}) => {
+        if (!can(actor, action, { ...resource, ...extra }))
+          throw new CoreError("forbidden", 403);
+      };
+      // Replays also require current authority, without repeating business mutations.
+      switch (operation.tool) {
+        case "tasks.create":
+          allowed("task:create", {
+            toWorkerId: p.memberId,
+            taskId:
+              "parentId" in args ? (args.parentId ?? undefined) : undefined,
+          });
+          break;
+        case "tasks.edit":
+          if (
+            Object.keys(args).some(
+              (key) => !["taskId", "version", "dueAt", "status"].includes(key),
+            )
+          )
+            allowed("task:edit");
+          if ("ownerId" in args && args.ownerId !== undefined)
+            allowed("task:owner");
+          if ("dueAt" in args && args.dueAt !== undefined)
+            allowed("task:schedule");
+          if ("status" in args && args.status !== undefined)
+            allowed(args.status === "done" ? "task:review" : "task:status", {
+              to: args.status,
+            });
+          break;
+        case "tasks.comments.add":
+          allowed("task:comment");
+          break;
+        case "calendar.set":
+          allowed("task:schedule");
+          break;
+        case "runs.start":
+          allowed("run:start");
+          break;
+        case "runs.control":
+          allowed("run:control");
+          break;
+        case "files.attach":
+          allowed("files:attach");
+          break;
+        case "runs.event":
+          allowed("run:submit");
+          if ("capability" in args && args.capability)
+            allowed("capability:use", { capability: args.capability });
+          break;
+        case "runs.submit":
+          allowed("run:submit");
+          if (
+            !can(actor, "task:finish", {
+              ...resource,
+              requestedReview:
+                "requestReview" in args ? args.requestReview : undefined,
+            })
+          )
+            allowed("run:request_review");
+          break;
+      }
       const [prior] = await tx
         .select()
         .from(approvedAgentReceipts)
@@ -114,27 +231,6 @@ export function createApprovedAgentOperation(deps: {
           throw new CoreError("invalid_input", 400);
         if ("version" in args && args.version !== operation.expected_version)
           throw new CoreError("conflict", 409);
-        let currentVersion: number;
-        if ("runId" in args) {
-          const [candidate] = await tx
-            .select()
-            .from(runs)
-            .where(eq(runs.id, args.runId));
-          if (!candidate || candidate.workspaceId !== p.workspaceId)
-            throw new CoreError("forbidden", 403);
-          await deps.lockTask(tx, candidate.taskId);
-          const [run] = await tx
-            .select()
-            .from(runs)
-            .where(eq(runs.id, candidate.id))
-            .for("update");
-          currentVersion = run.version;
-        } else if ("taskId" in args) {
-          const task = await deps.lockTask(tx, args.taskId);
-          if (task.workspaceId !== p.workspaceId)
-            throw new CoreError("forbidden", 403);
-          currentVersion = task.version;
-        } else throw new CoreError("invalid_input", 400);
         if (currentVersion !== operation.expected_version)
           throw new CoreError("conflict", 409);
       }

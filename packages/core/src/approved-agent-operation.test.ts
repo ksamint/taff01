@@ -1,7 +1,6 @@
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { verifyAgentOperation } from "./approved-agent-operation";
-import { canonicalJson } from "./trusted-review";
 
 const key = "isolated-agent-approval-secret-at-least-32-characters";
 const tokenHash = createHash("sha256")
@@ -23,36 +22,71 @@ function signed(overrides = {}) {
     credential_hash: tokenHash,
     ...overrides,
   };
+  const operation_json = JSON.stringify(payload);
   const receipt = {
-    ...payload,
-    operation_hash: createHash("sha256")
-      .update(canonicalJson(payload))
-      .digest("hex"),
+    operation_json,
+    operation_hash: createHash("sha256").update(operation_json).digest("hex"),
   };
   return {
     receipt,
-    signature: createHmac("sha256", key)
-      .update(canonicalJson(receipt))
-      .digest("hex"),
+    signature: createHmac("sha256", key).update(operation_json).digest("hex"),
   };
 }
 describe("approved original-agent operations", () => {
+  it("verifies exact UTF-8 bytes without reserializing Unicode or integral floats", () => {
+    const { receipt } = signed({
+      arguments: {
+        taskId: "11111111-1111-4111-8111-111111111111",
+        version: 1,
+        title: "确认 🗓️ 海报",
+      },
+    });
+    const operation_json =
+      receipt.operation_json.replace('"version":1', '"version":1.0') + " ";
+    const envelope = {
+      operation_json,
+      operation_hash: createHash("sha256")
+        .update(operation_json, "utf8")
+        .digest("hex"),
+    };
+    const signature = createHmac("sha256", key)
+      .update(operation_json, "utf8")
+      .digest("hex");
+    expect(
+      verifyAgentOperation(envelope, signature, key, tokenHash).arguments.title,
+    ).toBe("确认 🗓️ 海报");
+    expect(() =>
+      verifyAgentOperation(
+        { ...envelope, operation_json: operation_json.trim() },
+        signature,
+        key,
+        tokenHash,
+      ),
+    ).toThrow();
+  });
   it("binds the original credential, target, arguments, version and audience", () => {
     const { receipt, signature } = signed();
-    expect(verifyAgentOperation(receipt, signature, key, tokenHash)).toEqual(
-      receipt,
-    );
+    expect(verifyAgentOperation(receipt, signature, key, tokenHash)).toEqual({
+      ...JSON.parse(receipt.operation_json),
+      operation_hash: receipt.operation_hash,
+    });
     expect(() =>
       verifyAgentOperation(receipt, signature, key, "0".repeat(64)),
     ).toThrow();
     for (const changes of [
       { expected_version: 2 },
       { controller_id: "other" },
-      { arguments: { ...receipt.arguments, title: "Changed" } },
+      { arguments: { title: "Changed" } },
     ])
       expect(() =>
         verifyAgentOperation(
-          { ...receipt, ...changes },
+          {
+            ...receipt,
+            operation_json: JSON.stringify({
+              ...JSON.parse(receipt.operation_json),
+              ...changes,
+            }),
+          },
           signature,
           key,
           tokenHash,

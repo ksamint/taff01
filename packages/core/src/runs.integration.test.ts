@@ -1,6 +1,7 @@
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import {
   activity,
+  agentTokens,
   connectDatabase,
   grants,
   inboxItems,
@@ -305,18 +306,17 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
         credential_hash: tokenHash,
         ...overrides,
       };
+      const operation_json = JSON.stringify(payload);
       const receipt = {
-        ...payload,
+        operation_json,
         operation_hash: createHash("sha256")
-          .update(canonicalJson(payload))
+          .update(operation_json)
           .digest("hex"),
       };
       return [
         principal,
         receipt,
-        createHmac("sha256", approvalKey)
-          .update(canonicalJson(receipt))
-          .digest("hex"),
+        createHmac("sha256", approvalKey).update(operation_json).digest("hex"),
         tokenHash,
       ] as const;
     }
@@ -367,7 +367,7 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       core.approvedAgentOperation(...create, true),
     ).rejects.toMatchObject({ code: "not_found" });
     const beforeTasks = await core.listTasks(person, workspaceId, {});
-    const rejectedReceipt = create[1].receipt_id;
+    const rejectedReceipt = JSON.parse(create[1].operation_json).receipt_id;
     await connection.db.execute(
       sql.raw(
         `CREATE FUNCTION taff_test_reject_agent_receipt() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id = '${rejectedReceipt}'::uuid THEN RAISE EXCEPTION 'fixture receipt persistence failure'; END IF; RETURN NEW; END $$`,
@@ -430,6 +430,17 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     expect(await core.approvedAgentOperation(...comment)).toEqual(
       await core.approvedAgentOperation(...comment),
     );
+    task = await core.assignTask(person, task.id, {
+      workerId: null,
+      version: task.version,
+    });
+    await expect(
+      core.approvedAgentOperation(...comment, true),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    task = await core.assignTask(person, task.id, {
+      workerId: agentId,
+      version: task.version,
+    });
     await core.approvedAgentOperation(
       ...sign(
         "calendar.set",
@@ -474,6 +485,34 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     );
     run = runSchema.parse(await core.approvedAgentOperation(...submission));
     expect(run.status).toBe("needs_review");
+    expect(await core.approvedAgentOperation(...submission, true)).toEqual(run);
+    await core.setAgentPermission(person, agentId, {
+      capability: "tasks.write",
+      decision: "deny",
+    });
+    await expect(
+      core.approvedAgentOperation(...submission, true),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await core.setAgentPermission(person, agentId, {
+      capability: "tasks.write",
+      decision: "allow",
+    });
+    async function setScopes(scopes: typeof issued.scopes) {
+      await connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id', ${person.kind === "user" ? person.userId : ""}, true)`,
+        );
+        await tx
+          .update(agentTokens)
+          .set({ scopes })
+          .where(eq(agentTokens.id, issued.id));
+      });
+    }
+    await setScopes(["tasks:read"]);
+    await expect(
+      core.approvedAgentOperation(...submission, true),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await setScopes(issued.scopes);
     expect(await core.approvedAgentOperation(...submission, true)).toEqual(run);
     await core.revokeAgentToken(person, issued.id);
     await expect(
