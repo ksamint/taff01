@@ -668,6 +668,9 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
   });
   it("chat context uses the issuing person's zone without leaking another workspace or writing activity", async () => {
     await core.updateProfile(aliceId, { locale: "en", tz: "America/New_York" });
+    const project = await core.createProject(alice, w, {
+      name: "Shared actor zone",
+    });
     const before = await connection.db
       .select()
       .from(activity)
@@ -683,6 +686,23 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
       ownerId: owner,
     });
     expect(Math.abs(Date.parse(context.now) - Date.now())).toBeLessThan(1000);
+    expect((await core.getTimeline(agent, project.id)).timeZone).toBe(
+      context.workspace.timeZone,
+    );
+    expect((await core.getBrief(agent, {})).timeZone).toBe(
+      context.workspace.timeZone,
+    );
+    for (const text of [
+      "Delivery 2026-03-08 09:00",
+      "Delivery 2026-11-01 09:00",
+    ]) {
+      const human = await core.parseQuickAdd(alice, w, { text });
+      const automated = await core.parseQuickAdd(agent, w, { text });
+      expect(human.dueAt).toMatch(/T(?:13|14):00:00.000Z$/);
+      expect(automated.dueAt).toBe(human.dueAt);
+      expect(automated.ownerId).toBeNull();
+    }
+
     expect(context.members).toContainEqual(
       expect.objectContaining({ id: bobMember, name: "Bob Lee" }),
     );

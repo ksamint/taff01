@@ -27,6 +27,23 @@ const env = z
   .parse(process.env);
 const logger = createLogger();
 const core = createCore({
+  trustedReview: process.env.TAFF_APPROVAL_KEY
+    ? {
+        key: z.string().min(32).parse(process.env.TAFF_APPROVAL_KEY),
+        mappings: z
+          .array(
+            z
+              .object({
+                controllerId: z.string().min(1).max(200),
+                workspaceId: z.string().uuid(),
+                userId: z.string().min(1),
+                verifiedByUserId: z.string().min(1),
+              })
+              .strict(),
+          )
+          .parse(JSON.parse(process.env.TAFF_WECHAT_CONTROLLERS ?? "[]")),
+      }
+    : undefined,
   databaseUrl: env.DATABASE_URL,
   authUrl: env.AUTH_URL,
   authSecret: env.AUTH_SECRET,

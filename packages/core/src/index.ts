@@ -52,10 +52,12 @@ import {
 } from "@taff/schemas";
 import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins/username";
+import { actorTimeZone } from "./actor-timezone";
 import type { EmailStatus, EmailTransport } from "./email";
 import { createEmailVerificationOperations } from "./email-verification";
 import { createSmsAuth } from "./sms-auth";
 import type { SmsProvider } from "./tencent-sms";
+import { type ControllerMapping, createTrustedReview } from "./trusted-review";
 
 export type { AiConfig, AiProvider } from "./ai-provider";
 export {
@@ -172,6 +174,7 @@ export function hashToken(token: string, pepper: string): string {
     .digest("hex");
 }
 export function createCore(options: {
+  trustedReview?: { key: string; mappings: ControllerMapping[] };
   databaseUrl: string;
   authUrl: string;
   authSecret: string;
@@ -511,34 +514,11 @@ export function createCore(options: {
       .from(workspaces)
       .where(eq(workspaces.id, workspaceId));
     if (!workspace) throw new CoreError("not_found", 404);
-    const personId =
-      principal.kind === "user"
-        ? principal.userId
-        : (
-            await db
-              .select({ userId: members.userId })
-              .from(agentTokens)
-              .innerJoin(
-                members,
-                and(
-                  eq(members.id, agentTokens.createdBy),
-                  eq(members.workspaceId, workspaceId),
-                ),
-              )
-              .where(
-                and(
-                  eq(agentTokens.id, principal.tokenId),
-                  eq(agentTokens.workspaceId, workspaceId),
-                  eq(agentTokens.memberId, actor.id),
-                ),
-              )
-          )[0]?.userId;
-    if (!personId) throw new CoreError("unauthorized", 401);
-    const [person] = await db
-      .select({ tz: user.tz })
-      .from(user)
-      .where(eq(user.id, personId));
-    if (!person) throw new CoreError("unauthorized", 401);
+    const { userId: personId, timeZone } = await actorTimeZone(
+      db,
+      principal,
+      actor,
+    );
     const [roster, projectRows] = await Promise.all([
       listMembers(principal, workspaceId),
       planning.operations.listProjects(principal, workspaceId),
@@ -547,7 +527,7 @@ export function createCore(options: {
       now: new Date().toISOString(),
       workspace: {
         ...workspace,
-        timeZone: person.tz,
+        timeZone,
         timeZoneSource: "user_profile" as const,
       },
       memberId: actor.id,
@@ -1303,6 +1283,20 @@ export function createCore(options: {
     requireMember,
     lockTask,
   });
+  const applyTrustedReview = createTrustedReview({
+    key: options.trustedReview?.key,
+    mappings: options.trustedReview?.mappings ?? [],
+    mutation,
+    requireMember,
+    review: (tx, principal, receipt) =>
+      createRunOperations({
+        db,
+        loadActor,
+        requireMember,
+        lockTask,
+        mutation: (_principal, run) => run(tx),
+      }).reviewRun(principal, receipt.run_id, receipt.review),
+  });
   const oauth = createOAuthOperations({
     db,
     tokenPepper: options.tokenPepper,
@@ -1321,6 +1315,7 @@ export function createCore(options: {
       runOperations.listInbox(principal, workspaceId),
   });
   return {
+    applyTrustedReview,
     oauth: oauth.operations,
     oauthMetadata: oauth.metadata,
     provisionAdministration: async (

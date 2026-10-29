@@ -61,6 +61,7 @@ import {
   type SQL,
   sql,
 } from "drizzle-orm";
+import { zoneOf } from "./actor-timezone";
 import { deliverEmail, type EmailStatus, type EmailTransport } from "./email";
 import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
@@ -848,15 +849,11 @@ export function createPlanningOperations({
       .select()
       .from(projects)
       .where(and(eq(projects.workspaceId, w), eq(projects.archived, false)));
-    const person =
-      p.kind === "user"
-        ? (await db.select().from(user).where(eq(user.id, p.userId)))[0]
-        : null;
     return parseQuickAddText(body.text, {
       members: roster,
       projects: projectRows,
       ownerId: actor.kind === "person" ? actor.id : null,
-      tz: person?.tz ?? "UTC",
+      tz: await zoneOf(db, p, actor),
       now: new Date(),
     });
   }
@@ -939,11 +936,11 @@ export function createPlanningOperations({
         sql`${tasks.workerId} IN (SELECT id FROM members WHERE kind='agent')`,
       );
     if (today) {
-      const person =
-        p.kind === "user"
-          ? (await db.select().from(user).where(eq(user.id, p.userId)))[0]
-          : null;
-      const tz = person?.tz ?? "UTC";
+      const tz = await zoneOf(
+        db,
+        p,
+        await requireMember(db, p, w, "workspace:read"),
+      );
       const day = localDate(new Date(), tz);
       const offset = /^([+-])(\d{2})(?::?(\d{2}))?$/.exec(tz);
       const local = offset

@@ -10,6 +10,7 @@ import {
   type infer as Infer,
   int,
   iso,
+  literal,
   maximum,
   maxLength,
   minimum,
@@ -724,3 +725,18 @@ export {
   DEFAULT_NOTIFICATION_PREFERENCES,
   shouldShowForegroundNotification,
 } from "./notifications";
+
+export const trustedReviewReceiptSchema = strictObject({
+  version: literal(1),
+  audience: literal("taff"),
+  issuer: literal("twin"),
+  source: literal("private_wechat"),
+  receipt_id: idSchema,
+  controller_id: string().check(minLength(1), maxLength(200)),
+  workspace_id: idSchema,
+  run_id: idSchema,
+  expires_at: iso.datetime(),
+  operation_hash: string().check(regex(/^[a-f0-9]{64}$/)),
+  review: reviewRunSchema,
+});
+export type TrustedReviewReceipt = Infer<typeof trustedReviewReceiptSchema>;

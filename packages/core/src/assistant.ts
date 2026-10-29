@@ -122,7 +122,7 @@ export function createAssistantOperations({
     const actors: Actor[] = [];
     for (const w of ids)
       actors.push(await requireMember(db, p, w, "workspace:read"));
-    // A person's saved zone; an agent's supervisor's (it has one workspace).
+    // Actor-relative dates share the context and quick-entry policy.
     const timeZone = await zoneOf(db, p, actors[0] as Actor);
     const source: BriefSource = {
       today: localDate(new Date(), timeZone),

@@ -1549,3 +1549,16 @@ export const mindNodeSources = pgTable(
     index("mind_node_sources_source_idx").on(t.workspaceId, t.sourceId),
   ],
 );
+
+/** One committed result per operation-specific private-controller receipt. */
+export const trustedReviewReceipts = pgTable("trusted_review_receipts", {
+  id: uuid("id").primaryKey(),
+  workspaceId: uuid("workspace_id")
+    .notNull()
+    .references(() => workspaces.id),
+  operationHash: text("operation_hash").notNull(),
+  result: jsonb("result").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .defaultNow()
+    .notNull(),
+});

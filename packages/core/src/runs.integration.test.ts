@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, createHmac, randomUUID } from "node:crypto";
 import {
   activity,
   connectDatabase,
@@ -24,6 +24,7 @@ import {
 } from "../../../e2e/live/agent-cleanup";
 import { migrateDatabase } from "../../db/src/migrate";
 import { type Core, createCore, type Principal, userPrincipal } from "./index";
+import { type ControllerMapping, canonicalJson } from "./trusted-review";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 if (!databaseUrl)
@@ -36,6 +37,8 @@ const checks = {
   withinPermissions: true,
 };
 describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
+  const mappings: ControllerMapping[] = [];
+  const approvalKey = "isolated-test-key-at-least-thirty-two-characters";
   let core: Core;
   let connection: ReturnType<typeof connectDatabase>;
   let person: Principal;
@@ -55,6 +58,7 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     expect(Number(version.server_version_num)).toBeGreaterThanOrEqual(180000);
     expect(Number(version.server_version_num)).toBeLessThan(190000);
     core = createCore({
+      trustedReview: { key: approvalKey, mappings },
       databaseUrl: databaseUrl!,
       authUrl: "http://localhost:3000",
       authSecret: "m3-test-secret-longer-than-thirty-two-characters",
@@ -71,6 +75,12 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     const me = await core.getMe(signup.user.id);
     workspaceId = me.workspaces[0].id;
     ownerId = me.workspaces[0].memberId;
+    mappings.push({
+      controllerId: "controller",
+      workspaceId,
+      userId: signup.user.id,
+      verifiedByUserId: signup.user.id,
+    });
     const other = await core.auth.api.signUpEmail({
       body: {
         name: "M3 outsider",
@@ -178,6 +188,80 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       items: [{ artifactId, decision: "approve", comment: "" }],
     };
   }
+  it("applies one signed human review atomically and returns its receipt to duplicate approvers", async () => {
+    const { run, artifact } = await pending();
+    function sign(review = approval(run, artifact.id), overrides = {}) {
+      const operation = {
+        version: 1,
+        audience: "taff",
+        issuer: "twin",
+        source: "private_wechat",
+        receipt_id: randomUUID(),
+        controller_id: "controller",
+        workspace_id: workspaceId,
+        run_id: run.id,
+        expires_at: new Date(Date.now() + 60_000).toISOString(),
+        review,
+        ...overrides,
+      };
+      const receipt = {
+        ...operation,
+        operation_hash: createHash("sha256")
+          .update(canonicalJson(operation))
+          .digest("hex"),
+      };
+      return [
+        receipt,
+        createHmac("sha256", approvalKey)
+          .update(canonicalJson(receipt))
+          .digest("hex"),
+      ] as const;
+    }
+    await expect(
+      core.applyTrustedReview(
+        ...sign(undefined, { expires_at: new Date(0).toISOString() }),
+      ),
+    ).rejects.toMatchObject({ code: "conflict" });
+    await expect(
+      core.applyTrustedReview(
+        ...sign(undefined, { workspace_id: randomUUID() }),
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.applyTrustedReview(
+        ...sign({ ...approval(run, artifact.id), version: run.version + 1 }),
+      ),
+    ).rejects.toMatchObject({ code: "conflict" });
+    await expect(
+      core.applyTrustedReview(
+        ...sign({
+          ...approval(run, artifact.id),
+          checks: { ...checks, verifiable: false },
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    expect((await core.getRun(person, run.id)).run.status).toBe("needs_review");
+    const signed = sign();
+    const results = await Promise.all([
+      core.applyTrustedReview(...signed),
+      core.applyTrustedReview(...signed),
+    ]);
+    expect(results[0]).toEqual(results[1]);
+    expect(results[0].status).toBe("completed");
+    const saved = mappings[0];
+    mappings.length = 0;
+    await expect(core.applyTrustedReview(...signed)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    mappings.push({
+      ...saved,
+      verifiedByUserId: outsider.kind === "user" ? outsider.userId : "",
+    });
+    await expect(core.applyTrustedReview(...signed)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    mappings[0] = saved;
+  });
   it("records actual steps, tool/source/test evidence, artifacts and metrics; defaults to review", async () => {
     let run = await start();
     await core.appendRunEvent(agent, run.id, {

@@ -356,8 +356,8 @@ describe.skipIf(!url)(
         startDate: "2026-10-12",
         durationDays: 2,
       });
-      // Agents without a supervisor use UTC: 23:59Z on the last day.
-      expect(planned.tasks[0].dueAt).toBe("2026-10-13T23:59:00.000Z");
+      // Agent dates use the token issuer's Hong Kong profile zone.
+      expect(planned.tasks[0].dueAt).toBe("2026-10-13T15:59:00.000Z");
       await expect(
         core.setTaskPlan(readOnlyAgent, agentTask.id, {
           version: 1,
@@ -584,7 +584,7 @@ describe.skipIf(!url)(
       });
       const timeline = await core.getTimeline(agent, projectId);
       expect(timelineSchema.parse(timeline)).toBeTruthy();
-      expect(timeline.timeZone).toBe("UTC");
+      expect(timeline.timeZone).toBe("Asia/Hong_Kong");
       expect(timeline.canEditPlan).toBe(true);
       expect(timeline.risk.reasons).toContain("blocked");
     });

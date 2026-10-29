@@ -1,6 +1,5 @@
 import { createHash } from "node:crypto";
 import {
-  agentProfiles,
   type Database,
   grants,
   members,
@@ -12,7 +11,6 @@ import {
   taskDependencies,
   taskPlans,
   tasks,
-  user,
   workspaces,
 } from "@taff/db";
 import {
@@ -37,6 +35,7 @@ import {
   taskPlanInputSchema,
 } from "@taff/schemas";
 import { and, eq, inArray, isNull, or, type SQL, sql } from "drizzle-orm";
+import { zoneOf } from "./actor-timezone";
 import { CoreError, type Principal } from "./index";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import {
@@ -187,30 +186,6 @@ export function createTimelineOperations({
       taskId: task.id,
       runId: await currentRunId(q, task.id),
     };
-  }
-  /**
-   * The zone that names "today" and civil due dates: a person's saved zone;
-   * for an agent, its supervisor's saved zone, else UTC (agents have none).
-   */
-  async function zoneOf(
-    q: Database | Transaction,
-    p: Principal,
-    actor: Actor,
-  ): Promise<string> {
-    if (p.kind === "user") {
-      const [row] = await q
-        .select({ tz: user.tz })
-        .from(user)
-        .where(eq(user.id, p.userId));
-      return row?.tz ?? "UTC";
-    }
-    const [row] = await q
-      .select({ tz: user.tz })
-      .from(agentProfiles)
-      .innerJoin(members, eq(members.id, agentProfiles.supervisorId))
-      .innerJoin(user, eq(user.id, members.userId))
-      .where(eq(agentProfiles.id, actor.id));
-    return row?.tz ?? "UTC";
   }
   async function readProject(projectId: string) {
     parse(idSchema, projectId);
