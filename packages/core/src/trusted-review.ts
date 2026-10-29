@@ -114,7 +114,8 @@ export function createTrustedReview(deps: {
       const [task] = await tx
         .select()
         .from(tasks)
-        .where(eq(tasks.id, run.taskId));
+        .where(eq(tasks.id, run.taskId))
+        .for("update");
       const [profile] = await tx
         .select()
         .from(agentProfiles)

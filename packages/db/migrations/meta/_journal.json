@@ -239,6 +239,13 @@
       "when": 1793232000000,
       "tag": "0033_trusted_review_receipts",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "7",
+      "when": 1793232000001,
+      "tag": "0034_approved_agent_receipts",
+      "breakpoints": true
     }
   ]
 }

@@ -24,7 +24,9 @@ env:
   NEXT_TELEMETRY_DISABLED: "1"
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Requires Valkey/browser or image-build capacity absent from the approved pool.
+    if: vars.TAFF_FULL_CI_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, linux, x64, ci-ephemeral, na-siliconvalley]
     timeout-minutes: 40
     services:
       postgres:
@@ -110,7 +112,9 @@ jobs:
             api-lcp.log
           retention-days: 7
   browser:
-    runs-on: ubuntu-latest
+    # Requires Valkey/browser or image-build capacity absent from the approved pool.
+    if: vars.TAFF_FULL_CI_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, linux, x64, ci-ephemeral, na-siliconvalley]
     # A stalled apt mirror can stretch the Chromium dependency install to ~16 min.
     timeout-minutes: 35
     strategy:
@@ -174,7 +178,9 @@ jobs:
           path: test-results
           retention-days: 7
   images:
-    runs-on: ubuntu-latest
+    # Requires Valkey/browser or image-build capacity absent from the approved pool.
+    if: vars.TAFF_FULL_CI_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: [self-hosted, linux, x64, ci-ephemeral, na-siliconvalley]
     timeout-minutes: 30
     strategy:
       fail-fast: false

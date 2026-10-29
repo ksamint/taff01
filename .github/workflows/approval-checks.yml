@@ -1,0 +1,60 @@
+name: Approval and timezone checks
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: approval-checks-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  checks:
+    runs-on: [self-hosted, linux, x64, ci-ephemeral, na-siliconvalley]
+    timeout-minutes: 40
+    services:
+      postgres:
+        image: postgres:18.6-bookworm@sha256:1c59e2c3c818eaa0f0628f695b36e7c9e362d6b219b36a54a32df645cbd7e1af
+        env:
+          POSTGRES_DB: taff_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: [5432/tcp]
+        options: >-
+          --health-cmd "pg_isready -U postgres -d taff_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      CI: '1'
+      NEXT_TELEMETRY_DISABLED: '1'
+      AUTH_URL: http://localhost:3000
+      AUTH_SECRET: isolated-approval-ci-secret-at-least-thirty-two-characters
+      TOKEN_PEPPER: isolated-approval-ci-pepper-at-least-sixteen
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: git rev-parse HEAD > reviewed-source.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - name: Locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Source checks
+        run: |
+          pnpm lint
+          pnpm --filter @taff/core --filter @taff/db --filter @taff/schemas --filter @taff/api typecheck
+      - name: Isolated approval, permission and timezone workflows
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/taff_test
+          TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/taff_test
+        run: |
+          pnpm test packages/core/src/trusted-review.test.ts packages/core/src/approved-agent-operation.test.ts packages/core/src/runs.integration.test.ts packages/core/src/planning.integration.test.ts packages/core/src/timeline.integration.test.ts packages/core/src/calendar.integration.test.ts packages/core/src/assistant.integration.test.ts packages/core/src/permissions.test.ts packages/core/src/quick-add.test.ts packages/core/src/calendar-recurrence.test.ts apps/api/src/app.test.ts packages/schemas/src/planning.test.ts packages/schemas/src/calendar.test.ts packages/schemas/src/runs.test.ts 2>&1 | tee approval-tests.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: approval-checks-${{ github.sha }}
+          path: |
+            reviewed-source.txt
+            approval-tests.log
+          retention-days: 14

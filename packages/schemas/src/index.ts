@@ -740,3 +740,41 @@ export const trustedReviewReceiptSchema = strictObject({
   review: reviewRunSchema,
 });
 export type TrustedReviewReceipt = Infer<typeof trustedReviewReceiptSchema>;
+
+export const approvedAgentToolSchemas = {
+  "tasks.create": mcpTasksCreateArgs,
+  "tasks.edit": mcpTasksEditArgs,
+  "tasks.comments.add": mcpTaskCommentsAddArgs,
+  "calendar.set": mcpCalendarSetArgs,
+  "runs.start": mcpRunsStartArgs,
+  "runs.control": mcpRunsControlArgs,
+  "runs.event": mcpRunsEventArgs,
+  "files.attach": mcpFilesAttachArgs,
+  "runs.submit": mcpRunsSubmitArgs,
+};
+export const approvedAgentOperationSchema = strictObject({
+  version: literal(1),
+  audience: literal("taff_agent"),
+  issuer: literal("twin"),
+  source: literal("private_wechat"),
+  receipt_id: idSchema,
+  controller_id: string().check(minLength(1), maxLength(200)),
+  workspace_id: idSchema,
+  expires_at: iso.datetime(),
+  tool: zodEnum([
+    "tasks.create",
+    "tasks.edit",
+    "tasks.comments.add",
+    "calendar.set",
+    "runs.start",
+    "runs.control",
+    "runs.event",
+    "files.attach",
+    "runs.submit",
+  ]),
+  arguments: record(string(), unknown()),
+  expected_version: nullable(versionSchema),
+  credential_hash: string().check(regex(/^[a-f0-9]{64}$/)),
+  operation_hash: string().check(regex(/^[a-f0-9]{64}$/)),
+});
+export type ApprovedAgentOperation = Infer<typeof approvedAgentOperationSchema>;

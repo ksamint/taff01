@@ -187,11 +187,13 @@ export function createApp(
   app.use("/api/*", cors({ origin, credentials: true }));
   app.use("/api/*", (c, next) =>
     bodyLimit({
-      maxSize: /^\/api\/runs\/[^/]+\/artifacts$/.test(c.req.path)
-        ? 1_048_576
-        : /^\/api\/tasks(?:\/[^/]+(?:\/comments)?)?$/.test(c.req.path)
-          ? 131_072
-          : 16_384,
+      maxSize:
+        /^\/api\/approved-operations(?:\/status)?$/.test(c.req.path) ||
+        /^\/api\/runs\/[^/]+\/artifacts$/.test(c.req.path)
+          ? 1_048_576
+          : /^\/api\/tasks(?:\/[^/]+(?:\/comments)?)?$/.test(c.req.path)
+            ? 131_072
+            : 16_384,
       onError: (ctx) => ctx.json({ error: "invalid_input" }, 413),
     })(c, next),
   );
@@ -271,6 +273,34 @@ export function createApp(
     signOutSchema.parse(await c.req.raw.clone().json());
     return core.auth.handler(c.req.raw);
   });
+  for (const path of [
+    "/api/approved-operations",
+    "/api/approved-operations/status",
+  ] as const) {
+    app.post(path, async (c) => {
+      const header = c.req.header("authorization") ?? "";
+      const token = header.startsWith("Bearer ") ? header.slice(7).trim() : "";
+      if (!token || token.length > 200)
+        return c.json({ error: "unauthorized" }, 401);
+      const tokenHash = createHash("sha256").update(token).digest("hex");
+      const limit = await rateLimiter
+        .hit(tokenHash)
+        .catch(() => ({ allowed: false }));
+      if (!limit.allowed) return c.json({ error: "rate_limited" }, 429);
+      const principal = await core.authenticateAgentToken(token);
+      if (!principal || principal.kind !== "agent")
+        return c.json({ error: "unauthorized" }, 401);
+      return c.json(
+        await core.approvedAgentOperation(
+          principal,
+          await c.req.json(),
+          c.req.header("x-taff-approval-signature") ?? "",
+          tokenHash,
+          path.endsWith("/status"),
+        ),
+      );
+    });
+  }
   app.post("/api/trusted-reviews/status", async (c) =>
     c.json(
       await core.getTrustedReviewReceipt(

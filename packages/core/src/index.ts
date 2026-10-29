@@ -19,6 +19,7 @@ import * as schema from "@taff/db/schema";
 import {
   type AgentToken,
   type AssignTask,
+  approvedAgentToolSchemas,
   assignTaskSchema,
   type ChangeEvent,
   type CreateAgentToken,
@@ -53,6 +54,7 @@ import {
 import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins/username";
 import { actorTimeZone } from "./actor-timezone";
+import { createApprovedAgentOperation } from "./approved-agent-operation";
 import type { EmailStatus, EmailTransport } from "./email";
 import { createEmailVerificationOperations } from "./email-verification";
 import { createSmsAuth } from "./sms-auth";
@@ -1224,14 +1226,15 @@ export function createCore(options: {
     mutation,
     requireMember,
   });
-  const calendar = createCalendarOperations({
+  const calendarDependencies = {
     db,
     mutation,
     requireMember,
     lockTask,
     currentRunId,
-  });
-  const planning = createPlanningOperations({
+  };
+  const calendar = createCalendarOperations(calendarDependencies);
+  const planningDependencies = {
     db,
     mutation,
     requireMember,
@@ -1242,7 +1245,8 @@ export function createCore(options: {
     authUrl: options.authUrl,
     email: options.email,
     onEmailStatus: options.onEmailStatus,
-  });
+  };
+  const planning = createPlanningOperations(planningDependencies);
   const timeline = createTimelineOperations({
     db,
     mutation,
@@ -1276,12 +1280,99 @@ export function createCore(options: {
     planSource: timeline.planSource,
     ai: options.ai,
   });
-  const runOperations = createRunOperations({
+  const runOperationsDependencies = {
     db,
     mutation,
     loadActor,
     requireMember,
     lockTask,
+  };
+  const runOperations = createRunOperations(runOperationsDependencies);
+  const approvedAgentOperation = createApprovedAgentOperation({
+    key: options.trustedReview?.key,
+    mutation,
+    loadActor,
+    lockTask,
+    execute: async (tx, principal, operation) => {
+      const within = <T>(_p: Principal, run: (tx: Transaction) => Promise<T>) =>
+        run(tx);
+      const plan = createPlanningOperations({
+        ...planningDependencies,
+        mutation: within,
+      }).operations;
+      const schedule = createCalendarOperations({
+        ...calendarDependencies,
+        mutation: within,
+      }).operations;
+      const runOps = createRunOperations({
+        ...runOperationsDependencies,
+        mutation: within,
+      });
+      switch (operation.tool) {
+        case "tasks.create": {
+          const args = approvedAgentToolSchemas["tasks.create"].parse(
+            operation.arguments,
+          );
+          return insertTask(
+            tx,
+            principal,
+            parse(createTaskSchema, {
+              ...args,
+              workspaceId: principal.workspaceId,
+              workerId: principal.memberId,
+            }),
+          );
+        }
+        case "tasks.edit": {
+          const { taskId, ...input } = approvedAgentToolSchemas[
+            "tasks.edit"
+          ].parse(operation.arguments);
+          return plan.updateTask(principal, taskId, input);
+        }
+        case "tasks.comments.add": {
+          const { taskId, ...input } = approvedAgentToolSchemas[
+            "tasks.comments.add"
+          ].parse(operation.arguments);
+          return plan.addTaskComment(principal, taskId, input);
+        }
+        case "calendar.set": {
+          const { taskId, ...input } = approvedAgentToolSchemas[
+            "calendar.set"
+          ].parse(operation.arguments);
+          return schedule.setTaskCalendar(principal, taskId, input);
+        }
+        case "runs.start": {
+          const { taskId } = approvedAgentToolSchemas["runs.start"].parse(
+            operation.arguments,
+          );
+          return runOps.startRun(principal, taskId, {});
+        }
+        case "runs.control": {
+          const { runId, ...input } = approvedAgentToolSchemas[
+            "runs.control"
+          ].parse(operation.arguments);
+          return runOps.controlRun(principal, runId, input);
+        }
+        case "runs.event": {
+          const { runId, ...input } = approvedAgentToolSchemas[
+            "runs.event"
+          ].parse(operation.arguments);
+          return runOps.appendRunEvent(principal, runId, input);
+        }
+        case "files.attach": {
+          const { runId, ...input } = approvedAgentToolSchemas[
+            "files.attach"
+          ].parse(operation.arguments);
+          return runOps.attachRunArtifact(principal, runId, input);
+        }
+        case "runs.submit": {
+          const { runId, ...input } = approvedAgentToolSchemas[
+            "runs.submit"
+          ].parse(operation.arguments);
+          return runOps.submitRun(principal, runId, input);
+        }
+      }
+    },
   });
   const applyTrustedReview = createTrustedReview({
     key: options.trustedReview?.key,
@@ -1315,6 +1406,7 @@ export function createCore(options: {
       runOperations.listInbox(principal, workspaceId),
   });
   return {
+    approvedAgentOperation,
     applyTrustedReview: (input: unknown, signature: string) =>
       applyTrustedReview(input, signature),
     getTrustedReviewReceipt: (input: unknown, signature: string) =>

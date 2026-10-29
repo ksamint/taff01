@@ -16,6 +16,7 @@ import type {
   ReviewRun,
   Run,
 } from "@taff/schemas";
+import { runArtifactSchema, runSchema, taskSchema } from "@taff/schemas";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
@@ -265,6 +266,219 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       code: "forbidden",
     });
     mappings[0] = saved;
+  });
+  it("executes approved ordinary calls as the original agent with durable results and revocation checks", async () => {
+    const issued = await core.createAgentToken(person, {
+      workspaceId,
+      memberId: agentId,
+      name: "Approved operations",
+      scopes: [
+        "tasks:read",
+        "tasks:write",
+        "files:write",
+        "calendar:write",
+        "inbox:review",
+      ],
+    });
+    const principal = await core.authenticateAgentToken(issued.token);
+    if (!principal || principal.kind !== "agent")
+      throw new Error("fixture authentication failed");
+    const tokenHash = createHash("sha256").update(issued.token).digest("hex");
+    function sign(
+      tool: string,
+      args: Record<string, unknown>,
+      expectedVersion: number | null,
+      overrides = {},
+    ) {
+      const payload = {
+        version: 1,
+        audience: "taff_agent",
+        issuer: "twin",
+        source: "private_wechat",
+        receipt_id: randomUUID(),
+        controller_id: "controller",
+        workspace_id: workspaceId,
+        expires_at: new Date(Date.now() + 60_000).toISOString(),
+        tool,
+        arguments: args,
+        expected_version: expectedVersion,
+        credential_hash: tokenHash,
+        ...overrides,
+      };
+      const receipt = {
+        ...payload,
+        operation_hash: createHash("sha256")
+          .update(canonicalJson(payload))
+          .digest("hex"),
+      };
+      return [
+        principal,
+        receipt,
+        createHmac("sha256", approvalKey)
+          .update(canonicalJson(receipt))
+          .digest("hex"),
+        tokenHash,
+      ] as const;
+    }
+    const readOnly = await core.createAgentToken(person, {
+      workspaceId,
+      memberId: agentId,
+      name: "Read-only approval cannot elevate",
+      scopes: ["tasks:read"],
+    });
+    const readPrincipal = await core.authenticateAgentToken(readOnly.token);
+    if (!readPrincipal || readPrincipal.kind !== "agent")
+      throw new Error("fixture authentication failed");
+    const readHash = createHash("sha256").update(readOnly.token).digest("hex");
+    const denied = sign(
+      "tasks.create",
+      { title: "Must not create", ownerId },
+      null,
+      { credential_hash: readHash },
+    );
+    await expect(
+      core.approvedAgentOperation(
+        readPrincipal,
+        denied[1],
+        denied[2],
+        readHash,
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.approvedAgentOperation(
+        ...sign("tasks.create", { title: "Expired", ownerId }, null, {
+          expires_at: new Date(0).toISOString(),
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "conflict" });
+    await expect(
+      core.approvedAgentOperation(
+        ...sign("tasks.create", { title: "Wrong workspace", ownerId }, null, {
+          workspace_id: randomUUID(),
+        }),
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    const create = sign(
+      "tasks.create",
+      { title: "Approved agent task", ownerId, dueAt: null },
+      null,
+    );
+    await expect(
+      core.approvedAgentOperation(...create, true),
+    ).rejects.toMatchObject({ code: "not_found" });
+    const beforeTasks = await core.listTasks(person, workspaceId, {});
+    const rejectedReceipt = create[1].receipt_id;
+    await connection.db.execute(
+      sql.raw(
+        `CREATE FUNCTION taff_test_reject_agent_receipt() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id = '${rejectedReceipt}'::uuid THEN RAISE EXCEPTION 'fixture receipt persistence failure'; END IF; RETURN NEW; END $$`,
+      ),
+    );
+    await connection.db.execute(
+      sql.raw(
+        "CREATE TRIGGER taff_test_reject_agent_receipt BEFORE INSERT ON approved_agent_receipts FOR EACH ROW EXECUTE FUNCTION taff_test_reject_agent_receipt()",
+      ),
+    );
+    try {
+      await expect(core.approvedAgentOperation(...create)).rejects.toThrow();
+      expect(await core.listTasks(person, workspaceId, {})).toEqual(
+        beforeTasks,
+      );
+      await expect(
+        core.approvedAgentOperation(...create, true),
+      ).rejects.toMatchObject({ code: "not_found" });
+    } finally {
+      await connection.db.execute(
+        sql.raw(
+          "DROP TRIGGER taff_test_reject_agent_receipt ON approved_agent_receipts",
+        ),
+      );
+      await connection.db.execute(
+        sql.raw("DROP FUNCTION taff_test_reject_agent_receipt()"),
+      );
+    }
+    const results = await Promise.all([
+      core.approvedAgentOperation(...create),
+      core.approvedAgentOperation(...create),
+    ]);
+    expect(results[0]).toEqual(results[1]);
+    let task = taskSchema.parse(results[0]);
+    expect(task.workerId).toBe(agentId);
+    expect(await core.approvedAgentOperation(...create, true)).toEqual(task);
+    await expect(
+      core.approvedAgentOperation(
+        ...sign(
+          "tasks.edit",
+          { taskId: task.id, version: task.version + 1, title: "Stale" },
+          task.version + 1,
+        ),
+      ),
+    ).rejects.toMatchObject({ code: "conflict" });
+    task = taskSchema.parse(
+      await core.approvedAgentOperation(
+        ...sign(
+          "tasks.edit",
+          { taskId: task.id, version: task.version, title: "Approved title" },
+          task.version,
+        ),
+      ),
+    );
+    const comment = sign(
+      "tasks.comments.add",
+      { taskId: task.id, body: "Approved comment" },
+      task.version,
+    );
+    expect(await core.approvedAgentOperation(...comment)).toEqual(
+      await core.approvedAgentOperation(...comment),
+    );
+    await core.approvedAgentOperation(
+      ...sign(
+        "calendar.set",
+        { taskId: task.id, version: task.version, schedule: null },
+        task.version,
+      ),
+    );
+    task = await core.getTask(person, task.id);
+    let run = runSchema.parse(
+      await core.approvedAgentOperation(
+        ...sign("runs.start", { taskId: task.id }, task.version),
+      ),
+    );
+    const artifact = runArtifactSchema.parse(
+      await core.approvedAgentOperation(
+        ...sign(
+          "files.attach",
+          {
+            runId: run.id,
+            version: run.version,
+            name: "report.md",
+            mimeType: "text/markdown",
+            content: "Real fixture output",
+            diff: "",
+            sourceUrl: null,
+          },
+          run.version,
+        ),
+      ),
+    );
+    expect(artifact.name).toBe("report.md");
+    run = (await core.getRun(person, run.id)).run;
+    const submission = sign(
+      "runs.submit",
+      {
+        runId: run.id,
+        version: run.version,
+        summary: "Fixture submitted",
+        requestReview: true,
+      },
+      run.version,
+    );
+    run = runSchema.parse(await core.approvedAgentOperation(...submission));
+    expect(run.status).toBe("needs_review");
+    expect(await core.approvedAgentOperation(...submission, true)).toEqual(run);
+    await core.revokeAgentToken(person, issued.id);
+    await expect(
+      core.approvedAgentOperation(...submission, true),
+    ).rejects.toMatchObject({ code: "forbidden" });
   });
   it("records actual steps, tool/source/test evidence, artifacts and metrics; defaults to review", async () => {
     let run = await start();

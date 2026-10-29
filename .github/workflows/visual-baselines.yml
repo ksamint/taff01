@@ -42,8 +42,9 @@ env:
   CAPTURE_WORKFLOW_SHA: ${{ github.workflow_sha }}
 jobs:
   capture:
-    # Match CI's browser, Ubuntu font stack and rasterizer, not a Docker host.
-    runs-on: ubuntu-latest
+    # Enable only when the existing self-hosted pool supports this workflow's services.
+    if: vars.TAFF_FULL_CI_ENABLED == 'true'
+    runs-on: [self-hosted, linux, x64, ci-ephemeral, na-siliconvalley]
     timeout-minutes: 40
     services:
       postgres:
