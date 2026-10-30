@@ -332,6 +332,7 @@ describe("REST adapter boundaries", () => {
     const authenticate = vi
       .spyOn(core, "authenticateAgentToken")
       .mockResolvedValue(principal);
+    vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
     const log = vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     vi.spyOn(core, "listTasks").mockResolvedValue([]);
     rateLimiter.hits = 0;
@@ -867,6 +868,7 @@ describe("REST adapter boundaries", () => {
       scopes: ["tasks:write" as const, "files:write" as const],
     };
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
     vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     const artifact = {
       id,
@@ -1194,5 +1196,45 @@ describe("integration audit REST boundaries", () => {
       { kind: "user", userId: id },
       { workspaceId: id, tokenId: id },
     );
+  });
+});
+
+describe("token workspace authorization REST boundaries", () => {
+  it("validates grants before passing only the session actor to core", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const write = vi
+      .spyOn(core, "setAgentTokenWorkspace")
+      .mockResolvedValue({} as never);
+    const body = { workspaceId: id, memberId: id, scopes: ["tasks:read"] };
+    const valid = await app.request(`/api/agent-tokens/${id}/workspaces`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    expect(valid.status).toBe(200);
+    expect(write).toHaveBeenCalledWith({ kind: "user", userId: id }, id, body);
+    write.mockClear();
+    const invalid = await app.request(`/api/agent-tokens/${id}/workspaces`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...body, scopes: ["admin"] }),
+    });
+    expect(invalid.status).toBe(400);
+    expect(write).not.toHaveBeenCalled();
+  });
+  it("requires a session to list target-workspace grants", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const read = vi.spyOn(core, "listAgentTokenWorkspaces");
+    const response = await app.request(
+      `/api/agent-tokens/${id}/workspaces?workspaceId=${id}`,
+    );
+    expect(response.status).toBe(401);
+    expect(read).not.toHaveBeenCalled();
   });
 });

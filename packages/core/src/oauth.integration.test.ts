@@ -274,6 +274,19 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
     });
     expect(issued.access_token.startsWith("taff_")).toBe(true);
     const principal = await core.authenticateAgentToken(issued.access_token);
+    if (!principal || principal.kind !== "agent")
+      throw new Error("OAuth fixture did not authenticate");
+    await expect(
+      core.resolveAgentWorkspace(principal, randomUUID()),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.setAgentTokenWorkspace(alice, principal.tokenId, {
+        workspaceId: w,
+        memberId: agentId,
+        scopes: ["tasks:read"],
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+
     expect(principal).toMatchObject({
       kind: "agent",
       memberId: agentId,

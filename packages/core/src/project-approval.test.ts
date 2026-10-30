@@ -72,6 +72,10 @@ function fixture() {
   } as unknown as Transaction;
   const apply = createApprovedAgentOperation({
     key,
+    resolveAgentWorkspace: async (p, workspaceId) => {
+      if (p.workspaceId !== workspaceId) throw new Error("forbidden");
+      return p;
+    },
     mappings: state.mappings,
     requireMember: member,
     mutation: async (_p, fn) => fn(tx),
@@ -174,4 +178,35 @@ describe("signed project operation fences", () => {
     });
     expect(f.execute).not.toHaveBeenCalled();
   });
+});
+
+it("does not disclose another workspace's durable approval receipt", async () => {
+  const f = fixture();
+  const args = f.sign();
+  f.state.prior = {
+    tokenId,
+    workspaceId: randomUUID(),
+    operationHash: args[1].operation_hash,
+    result: { secret: true },
+  };
+  await expect(f.apply(...args, true)).rejects.toMatchObject({
+    code: "conflict",
+  });
+  expect(f.execute).not.toHaveBeenCalled();
+});
+it("rechecks read-only scope even for an existing approval receipt", async () => {
+  const f = fixture();
+  const args = f.sign();
+  f.state.prior = {
+    tokenId,
+    workspaceId,
+    operationHash: args[1].operation_hash,
+    result: { id: projectId },
+  };
+  f.state.actor!.scopes = ["tasks:read"];
+  await expect(f.apply(...args)).rejects.toMatchObject({ code: "forbidden" });
+  await expect(f.apply(...args, true)).rejects.toMatchObject({
+    code: "forbidden",
+  });
+  expect(f.execute).not.toHaveBeenCalled();
 });

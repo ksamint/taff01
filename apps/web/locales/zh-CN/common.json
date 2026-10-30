@@ -372,7 +372,13 @@
     },
     "connectedApps": "已连接的应用",
     "approvedBy": "由 {{name}} 授权",
-    "approved": "授权于 {{date}}"
+    "approved": "授权于 {{date}}",
+    "workspaceGrants": "组织授权",
+    "targetWorkspace": "组织 ID",
+    "targetAgent": "智能体成员 ID",
+    "saveGrant": "保存授权",
+    "revokeGrant": "撤销授权",
+    "grantActive": "有效"
   },
   "taskDetail": {
     "back": "返回今天",
