@@ -1,6 +1,9 @@
 name: Approval, project and timezone checks
 on:
   workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
 permissions:
   contents: read
 concurrency:
@@ -8,6 +11,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   checks:
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: [self-hosted, linux, x64, ci-ephemeral, na-siliconvalley]
     timeout-minutes: 40
     services:
