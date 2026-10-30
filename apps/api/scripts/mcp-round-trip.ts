@@ -58,6 +58,8 @@ export const MCP_TOOLS = [
   "files.attach",
   "grants.request",
   "inbox.request_review",
+  "projects.create",
+  "projects.edit",
   "projects.list",
   "quickadd.parse",
   "relations.get",
@@ -86,6 +88,8 @@ export const MCP_READ_ONLY_TOOLS = [
   "contacts.get",
   "contacts.list",
   "context.get",
+  "projects.create",
+  "projects.edit",
   "projects.list",
   "quickadd.parse",
   "relations.get",
@@ -356,6 +360,50 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
       leadId: listedProject.leadId,
     },
   );
+  const priorProjectPermission = (
+    await human.getAgentProfile(agentId)
+  ).permissions.find(
+    ({ capability }) => capability === "projects.manage",
+  )?.decision;
+  try {
+    await human.setAgentPermission(agentId, {
+      capability: "projects.manage",
+      decision: "allow",
+    });
+    for (const [name, args] of [
+      ["projects.create", { name: "MCP prepared project" }],
+      [
+        "projects.edit",
+        {
+          projectId: project.id,
+          version: listedProject!.version,
+          name: "MCP prepared rename",
+        },
+      ],
+    ] as const) {
+      const prepared = text(
+        await client.callTool({ name, arguments: args }),
+      ) as { requires_confirmation?: boolean };
+      check(
+        `${name} prepares an explicit confirmation without changing projects`,
+        prepared.requires_confirmation === true,
+      );
+    }
+    const unchanged = projectListSchema.parse(
+      text(await client.callTool({ name: "projects.list", arguments: {} })),
+    );
+    check(
+      "project preparation leaves project versions and count unchanged",
+      unchanged.length === projectListSchema.parse(projectList).length &&
+        unchanged.find((p) => p.id === project.id)?.version ===
+          listedProject?.version,
+    );
+  } finally {
+    await human.setAgentPermission(agentId, {
+      capability: "projects.manage",
+      decision: priorProjectPermission ?? "deny",
+    });
+  }
   const parsed = quickAddResultSchema.parse(
     text(
       await client.callTool({

@@ -1,4 +1,4 @@
-import { createHash, randomInt, randomUUID } from "node:crypto";
+import { createHash, createHmac, randomInt, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createCore, userPrincipal } from "@taff/core";
 import {
@@ -16,6 +16,7 @@ import {
 } from "../../../apps/api/scripts/mcp-round-trip";
 import { createApp } from "../../../apps/api/src/app";
 import { migrateDatabase } from "../../db/src/migrate";
+import { canonicalJson } from "./trusted-review";
 
 const databaseUrl = process.env.TEST_DATABASE_URL;
 if (databaseUrl && !new URL(databaseUrl).pathname.endsWith("_test"))
@@ -49,6 +50,19 @@ let digestId: string;
 let cookies: Record<Exclude<Actor, "agent">, string>;
 const owner = () => userPrincipal(ownerUserId);
 const authSecret = `authorization-matrix-${randomUUID()}`;
+const approvalKey = `matrix-approval-${randomUUID()}`;
+const mappings: {
+  controllerId: string;
+  workspaceId: string;
+  userId: string;
+  verifiedByUserId: string;
+}[] = [];
+const signedRoutes = [
+  "/api/approved-operations",
+  "/api/approved-operations/status",
+  "/api/trusted-reviews",
+  "/api/trusted-reviews/status",
+];
 const messages: { to: string; text: string }[] = [];
 const delivered = new Map<string, string>();
 const organizationRoutes = [
@@ -221,6 +235,21 @@ async function review(f: Fixture) {
 }
 
 const routes: RequestCase[] = [
+  {
+    method: "GET",
+    path: "/api/admin/audit/search?workspaceId=:workspace",
+    member: "deny",
+  },
+  {
+    method: "GET",
+    path: "/api/admin/audit/trace/:trace?workspaceId=:workspace",
+    member: "deny",
+  },
+  {
+    method: "GET",
+    path: "/api/admin/integrations/permissions?workspaceId=:workspace&tokenId=:token",
+    member: "deny",
+  },
   { method: "GET", path: "/api/digests/:digest", member: "deny" },
   {
     method: "GET",
@@ -716,6 +745,7 @@ const routes: RequestCase[] = [
 
 function pathFor(path: string, f: Fixture) {
   const ids: Record<string, string> = {
+    trace: "a".repeat(32),
     workspace: workspaceId,
     digest: digestId,
     owner: ownerId,
@@ -746,6 +776,7 @@ describe.skipIf(!databaseUrl)(
         databaseUrl: databaseUrl!,
         authUrl: origin,
         authSecret,
+        trustedReview: { key: approvalKey, mappings },
         email: {
           send: async (message) => {
             messages.push(message);
@@ -806,7 +837,11 @@ describe.skipIf(!databaseUrl)(
           scopes: [...ROUND_TRIP_SCOPES],
         })
       ).token;
-      for (const capability of ["crm.read", "files.attach"] as const)
+      for (const capability of [
+        "crm.read",
+        "files.attach",
+        "projects.manage",
+      ] as const)
         await core.setAgentPermission(owner(), agentId, {
           capability,
           decision: "allow",
@@ -819,6 +854,10 @@ describe.skipIf(!databaseUrl)(
       );
       await core.setAgentPermission(userPrincipal(c.id), foreignAgent.id, {
         capability: "crm.read",
+        decision: "allow",
+      });
+      await core.setAgentPermission(userPrincipal(c.id), foreignAgent.id, {
+        capability: "projects.manage",
         decision: "allow",
       });
       foreignAgentToken = (
@@ -856,6 +895,297 @@ describe.skipIf(!databaseUrl)(
     afterAll(async () => {
       await core?.close();
       await connection?.close();
+    });
+
+    function agentEnvelope(f: Fixture, token: string) {
+      const operation_json = JSON.stringify({
+        version: 1,
+        audience: "taff_agent",
+        issuer: "twin",
+        source: "private_wechat",
+        receipt_id: randomUUID(),
+        controller_id: "matrix-controller",
+        workspace_id: workspaceId,
+        expires_at: new Date(Date.now() + 60000).toISOString(),
+        tool: "tasks.edit",
+        arguments: {
+          taskId: f.task.id,
+          version: f.task.version,
+          title: "Signed matrix edit",
+        },
+        expected_version: f.task.version,
+        credential_hash: createHash("sha256").update(token).digest("hex"),
+      });
+      return {
+        body: {
+          operation_json,
+          operation_hash: createHash("sha256")
+            .update(operation_json)
+            .digest("hex"),
+        },
+        signature: createHmac("sha256", approvalKey)
+          .update(operation_json)
+          .digest("hex"),
+      };
+    }
+    function reviewEnvelope(f: Fixture, controller_id: string) {
+      const payload = {
+        version: 1,
+        audience: "taff",
+        issuer: "twin",
+        source: "private_wechat",
+        receipt_id: randomUUID(),
+        controller_id,
+        workspace_id: workspaceId,
+        run_id: f.run!.id,
+        expires_at: new Date(Date.now() + 60000).toISOString(),
+        review: {
+          version: f.run!.version,
+          decision: "approve",
+          comment: "",
+          checks: {
+            matchesDescription: true,
+            verifiable: true,
+            withinPermissions: true,
+          },
+          items: f.artifactIds.map((artifactId) => ({
+            artifactId,
+            decision: "approve",
+            comment: "",
+          })),
+        },
+      };
+      const body = {
+        ...payload,
+        operation_hash: createHash("sha256")
+          .update(canonicalJson(payload))
+          .digest("hex"),
+      };
+      return {
+        body,
+        signature: createHmac("sha256", approvalKey)
+          .update(canonicalJson(body))
+          .digest("hex"),
+      };
+    }
+    function signedRequest(
+      path: string,
+      envelope: { body: unknown; signature: string },
+      headers: Record<string, string> = {},
+    ) {
+      return app.request(path, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-taff-approval-signature": envelope.signature,
+          ...headers,
+        },
+        body: JSON.stringify(envelope.body),
+      });
+    }
+    const agentApprovalRoutes = signedRoutes.filter((path) =>
+      path.includes("approved-operations"),
+    );
+    const humanApprovalRoutes = signedRoutes.filter((path) =>
+      path.includes("trusted-reviews"),
+    );
+    it.each(
+      agentApprovalRoutes.flatMap((path) =>
+        [
+          "owner-cookie",
+          "member-cookie",
+          "agent",
+          "other-workspace",
+          "read-only",
+          "revoked",
+          "bad-signature",
+        ].map((actor) => ({ path, actor })),
+      ),
+    )("signed original-agent $path × $actor", async ({ path, actor }) => {
+      const f = await fixture();
+      let token =
+        actor === "other-workspace" ? foreignAgentToken : f.token.token;
+      if (actor === "read-only")
+        token = (
+          await core.createAgentToken(owner(), {
+            workspaceId,
+            memberId: agentId,
+            name: "Low scope approval",
+            scopes: ["tasks:read"],
+          })
+        ).token;
+      if (actor === "revoked") await core.revokeAgentToken(owner(), f.token.id);
+      const envelope = agentEnvelope(f, token);
+      if (actor === "bad-signature") envelope.signature = "0".repeat(64);
+      const headers: Record<string, string> = actor.endsWith("cookie")
+        ? { cookie: cookies[actor === "owner-cookie" ? "owner" : "member"] }
+        : { Authorization: `Bearer ${token}` };
+      const response = await signedRequest(path, envelope, headers);
+      expect(response.status).toBe(
+        actor === "agent"
+          ? path.endsWith("/status")
+            ? 404
+            : 200
+          : actor.endsWith("cookie") ||
+              actor === "revoked" ||
+              actor === "bad-signature"
+            ? 401
+            : 403,
+      );
+      if (
+        actor.endsWith("cookie") ||
+        actor === "revoked" ||
+        actor === "bad-signature"
+      )
+        expect(await response.json()).toMatchObject({ error: "unauthorized" });
+    });
+    it("signed execution and receipt replay both reject lost capability", async () => {
+      const f = await fixture();
+      const envelope = agentEnvelope(f, f.token.token);
+      const headers = { Authorization: `Bearer ${f.token.token}` };
+      expect(
+        (await signedRequest(agentApprovalRoutes[0], envelope, headers)).status,
+      ).toBe(200);
+      const prior = (
+        await core.getAgentProfile(owner(), agentId)
+      ).permissions.find((p) => p.capability === "tasks.write")?.decision;
+      try {
+        await core.setAgentPermission(owner(), agentId, {
+          capability: "tasks.write",
+          decision: "deny",
+        });
+        for (const path of agentApprovalRoutes)
+          expect((await signedRequest(path, envelope, headers)).status).toBe(
+            403,
+          );
+      } finally {
+        await core.setAgentPermission(owner(), agentId, {
+          capability: "tasks.write",
+          decision: prior ?? "allow",
+        });
+      }
+    });
+    it.each(
+      humanApprovalRoutes.flatMap((path) =>
+        [
+          "owner",
+          "member",
+          "other-workspace",
+          "unmapped",
+          "bad-signature",
+          "agent-only",
+        ].map((actor) => ({ path, actor })),
+      ),
+    )("signed human review $path × $actor", async ({ path, actor }) => {
+      const f = await fixture();
+      await review(f);
+      const controllerId = randomUUID();
+      if (actor !== "unmapped")
+        mappings.push({
+          controllerId,
+          workspaceId,
+          userId:
+            actor === "member"
+              ? people.member.id
+              : actor === "other-workspace"
+                ? people["other-workspace"].id
+                : ownerUserId,
+          verifiedByUserId: ownerUserId,
+        });
+      const envelope = reviewEnvelope(f, controllerId);
+      if (actor === "bad-signature" || actor === "agent-only")
+        envelope.signature = "0".repeat(64);
+      try {
+        const response = await signedRequest(
+          path,
+          envelope,
+          actor === "agent-only"
+            ? { Authorization: `Bearer ${f.token.token}` }
+            : {},
+        );
+        expect(response.status).toBe(
+          actor === "owner"
+            ? path.endsWith("/status")
+              ? 404
+              : 200
+            : actor === "bad-signature" || actor === "agent-only"
+              ? 401
+              : 403,
+        );
+        if (actor === "bad-signature" || actor === "agent-only")
+          expect(await response.json()).toMatchObject({
+            error: "unauthorized",
+          });
+      } finally {
+        mappings.length = 0;
+      }
+    });
+    it.each(["mapping", "verifier"])(
+      "human execution and receipt replay reject revoked %s",
+      async (loss) => {
+        const f = await fixture();
+        await review(f);
+        const controllerId = randomUUID();
+        if (loss === "verifier")
+          await core.updateMemberRole(owner(), workspaceId, memberId, {
+            role: "admin",
+          });
+        mappings.push({
+          controllerId,
+          workspaceId,
+          userId: ownerUserId,
+          verifiedByUserId:
+            loss === "verifier" ? people.member.id : ownerUserId,
+        });
+        const envelope = reviewEnvelope(f, controllerId);
+        try {
+          expect(
+            (await signedRequest(humanApprovalRoutes[0], envelope)).status,
+          ).toBe(200);
+          if (loss === "mapping") mappings.length = 0;
+          else
+            await core.updateMemberRole(owner(), workspaceId, memberId, {
+              role: "member",
+            });
+          for (const path of humanApprovalRoutes)
+            expect((await signedRequest(path, envelope)).status).toBe(403);
+        } finally {
+          mappings.length = 0;
+          if (loss === "verifier")
+            await core.updateMemberRole(owner(), workspaceId, memberId, {
+              role: "member",
+            });
+        }
+      },
+    );
+    it("admin audit reads recheck the person's current workspace role", async () => {
+      const f = await fixture();
+      const reads = routes.filter(
+        (row) =>
+          row.path.startsWith("/api/admin/audit/") ||
+          row.path.startsWith("/api/admin/integrations/"),
+      );
+      const headers = { cookie: cookies.member };
+      try {
+        await core.updateMemberRole(owner(), workspaceId, memberId, {
+          role: "admin",
+        });
+        for (const row of reads)
+          expect(
+            (await app.request(pathFor(row.path, f), { headers })).status,
+          ).toBe(200);
+        await core.updateMemberRole(owner(), workspaceId, memberId, {
+          role: "member",
+        });
+        for (const row of reads)
+          expect(
+            (await app.request(pathFor(row.path, f), { headers })).status,
+          ).toBe(403);
+      } finally {
+        await core.updateMemberRole(owner(), workspaceId, memberId, {
+          role: "member",
+        });
+      }
     });
 
     it.each(
@@ -901,6 +1231,7 @@ describe.skipIf(!databaseUrl)(
       "context.get",
       "tasks.list",
       "projects.list",
+      "projects.create",
       "search.query",
       "quickadd.parse",
       "calendar.list",
@@ -954,6 +1285,12 @@ describe.skipIf(!databaseUrl)(
         "tasks.comments.list": { taskId: f.task.id },
         "tasks.comments.add": { taskId: f.task.id, body: "Matrix MCP comment" },
         "projects.list": {},
+        "projects.create": { name: "Matrix prepared project" },
+        "projects.edit": {
+          projectId: f.project.id,
+          version: f.project.version,
+          name: "Matrix prepared rename",
+        },
         "search.query": { query: "Matrix" },
         "quickadd.parse": { text: "Matrix tomorrow" },
         "calendar.list": {
@@ -1717,6 +2054,7 @@ describe.skipIf(!databaseUrl)(
         ...personalWrites.map((row) => `${row.method} ${row.path}`),
         ...lifecycleRoutes.map(([method, path]) => `${method} ${path}`),
         ...oauthMetadataRoutes.map((path) => `GET ${path}`),
+        ...signedRoutes.map((path) => `POST ${path}`),
         "POST /api/oauth/register",
         "POST /api/oauth/token",
         "POST /api/oauth/revoke",
