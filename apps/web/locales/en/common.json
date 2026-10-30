@@ -486,6 +486,7 @@
     "noChanges": "No configuration changes yet.",
     "capability": {
       "tasks.read": "Read tasks",
+      "projects.manage": "Manage projects with human confirmation",
       "tasks.write": "Create and update tasks",
       "calendar.schedule": "Change events",
       "files.attach": "Attach files",

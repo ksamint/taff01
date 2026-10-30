@@ -81,9 +81,10 @@ function conflict(): never {
 function invalid(): never {
   throw new CoreError("invalid_input", 400);
 }
-function toRun(row: typeof runs.$inferSelect): Run {
+function toRun(row: typeof runs.$inferSelect): Run & { createdAt: string } {
   return {
     ...row,
+    createdAt: row.createdAt.toISOString(),
     startedAt: row.startedAt.toISOString(),
     finishedAt: row.finishedAt?.toISOString() ?? null,
     updatedAt: row.updatedAt.toISOString(),

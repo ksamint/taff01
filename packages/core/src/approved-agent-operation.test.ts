@@ -96,6 +96,9 @@ describe("approved original-agent operations", () => {
       { audience: "taff" },
       { tool: "tasks.update" },
       { source: "group_wechat" },
+      { trace_id: "invalid" },
+      { request_id: "\nunsafe" },
+      { approval_id: "x".repeat(201) },
     ]) {
       const bad = signed(changes);
       expect(() =>

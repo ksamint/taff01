@@ -126,7 +126,7 @@ it("annotates every tool: reads are read-only, additions and updates are marked"
     name: string;
     annotations?: Record<string, boolean>;
   }[] = (await call("tools/list", {})).result.tools;
-  expect(listed).toHaveLength(31);
+  expect(listed).toHaveLength(33);
   for (const tool of listed) {
     const expected = additive.includes(tool.name)
       ? { readOnlyHint: false, destructiveHint: false, idempotentHint: false }
@@ -139,6 +139,40 @@ it("annotates every tool: reads are read-only, additions and updates are marked"
     });
   }
   expect(listed.filter((tool) => tool.annotations?.readOnlyHint).length).toBe(
-    31 - additive.length - update.length,
+    33 - additive.length - update.length,
   );
+});
+
+it("project MCP changes only prepare validated proposals; they never call native project mutations", async () => {
+  vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+  vi.spyOn(core, "recordMcpCall").mockResolvedValue();
+  const prepare = vi.spyOn(core, "prepareProjectOperation").mockResolvedValue({
+    requires_confirmation: true,
+    tool: "projects.create",
+    arguments: { name: "Confirmed" },
+    expected_version: null,
+  });
+  const create = vi.spyOn(core, "createProject");
+  const edit = vi.spyOn(core, "updateProject");
+  const result = await call("tools/call", {
+    name: "projects.create",
+    arguments: { name: "Confirmed" },
+  });
+  expect(result.result.structuredContent.result).toMatchObject({
+    requires_confirmation: true,
+    expected_version: null,
+  });
+  expect(prepare).toHaveBeenCalledExactlyOnceWith(
+    principal,
+    "projects.create",
+    { name: "Confirmed" },
+  );
+  expect(create).not.toHaveBeenCalled();
+  expect(edit).not.toHaveBeenCalled();
+  const invalid = await call("tools/call", {
+    name: "projects.edit",
+    arguments: { projectId: id, version: 1, deliveryProgress: 101 },
+  });
+  expect(invalid.error || invalid.result?.isError).toBeTruthy();
+  expect(prepare).toHaveBeenCalledTimes(1);
 });

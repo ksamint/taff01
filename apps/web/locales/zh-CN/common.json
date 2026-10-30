@@ -486,6 +486,7 @@
     "noChanges": "暂无配置更改。",
     "capability": {
       "tasks.read": "读取任务",
+      "projects.manage": "经本人确认管理项目",
       "tasks.write": "创建和更新任务",
       "calendar.schedule": "修改日程",
       "files.attach": "附加文件",

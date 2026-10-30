@@ -23,6 +23,9 @@ import {
   idSchema,
   inboxFilterSchema,
   inboxItemInputSchema,
+  integrationAuditQuerySchema,
+  integrationPermissionQuerySchema,
+  integrationTraceIdSchema,
   memberRoleInputSchema,
   phonePasswordSignInSchema,
   profileSchema,
@@ -611,6 +614,33 @@ export function createApp(
       await core.listWorkspaceInvites(
         userPrincipal(c.get("userId")),
         idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.get("/api/admin/audit/search", async (c) =>
+    c.json(
+      await core.searchIntegrationAudit(
+        userPrincipal(c.get("userId")),
+        integrationAuditQuerySchema.parse(c.req.query()),
+      ),
+    ),
+  );
+  app.get("/api/admin/audit/trace/:trace_id", async (c) =>
+    c.json(
+      await core.searchIntegrationAudit(
+        userPrincipal(c.get("userId")),
+        integrationAuditQuerySchema.parse({
+          ...c.req.query(),
+          trace_id: integrationTraceIdSchema.parse(c.req.param("trace_id")),
+        }),
+      ),
+    ),
+  );
+  app.get("/api/admin/integrations/permissions", async (c) =>
+    c.json(
+      await core.explainIntegrationPermission(
+        userPrincipal(c.get("userId")),
+        integrationPermissionQuerySchema.parse(c.req.query()),
       ),
     ),
   );

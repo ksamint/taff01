@@ -74,6 +74,9 @@ describe("trusted review signatures", () => {
       { audience: "vash" },
       { source: "group_wechat" },
       { issuer: "agent" },
+      { trace_id: "bad-trace" },
+      { request_id: "\nunsafe" },
+      { approval_id: "x".repeat(201) },
     ]) {
       const { receipt, signature } = signedReview({
         ...operation(),

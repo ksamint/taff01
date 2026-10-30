@@ -486,6 +486,7 @@
     "noChanges": "暫無設定更改。",
     "capability": {
       "tasks.read": "讀取任務",
+      "projects.manage": "經本人確認管理項目",
       "tasks.write": "建立及更新任務",
       "calendar.schedule": "修改日程",
       "files.attach": "附加檔案",

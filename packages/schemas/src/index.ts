@@ -167,6 +167,7 @@ export type McpCall = Infer<typeof mcpCallSchema>;
 export const capabilitySchema = zodEnum([
   "tasks.read",
   "tasks.write",
+  "projects.manage",
   "calendar.schedule",
   "files.attach",
   "web.search",
@@ -448,12 +449,17 @@ export const taskCommentSchema = object({
   createdAt: iso.datetime(),
 });
 const projectProfileFields = {
+  dueAt: optional(nullable(iso.datetime())),
+  deliveryProgress: optional(
+    number().check(refine((v) => Number.isInteger(v) && v >= 0 && v <= 100)),
+  ),
   stage: optional(nullable(projectStageSchema)),
   leadId: optional(nullable(idSchema)),
 };
 export const projectInputSchema = strictObject({
   name: boundedText(100),
   ...projectProfileFields,
+  ...projectFinanceFields,
 });
 export const projectUpdateSchema = strictObject({
   version: versionSchema,
@@ -465,6 +471,9 @@ export const projectUpdateSchema = strictObject({
   refine((v) =>
     [
       v.name,
+      v.dueAt,
+      v.deliveryProgress,
+      v.receivedAmount,
       v.archived,
       v.stage,
       v.leadId,
@@ -591,6 +600,10 @@ export const mcpContextSchema = object({
 });
 export type McpContext = Infer<typeof mcpContextSchema>;
 export const mcpProjectsListArgs = strictObject({});
+export const mcpProjectsCreateArgs = projectInputSchema;
+export const mcpProjectsEditArgs = extend(projectUpdateSchema, {
+  projectId: idSchema,
+});
 export const mcpSearchArgs = searchInputSchema;
 export const mcpQuickAddArgs = quickAddInputSchema;
 export type UpdateTask = Infer<typeof updateTaskSchema>;
@@ -726,7 +739,24 @@ export {
   shouldShowForegroundNotification,
 } from "./notifications";
 
+export const integrationTraceIdSchema = string().check(regex(/^[a-f0-9]{32}$/));
+export const integrationCorrelationFields = {
+  trace_id: optional(integrationTraceIdSchema),
+  request_id: optional(string().check(regex(/^[A-Za-z0-9_.:-]{1,200}$/))),
+  approval_id: optional(string().check(regex(/^[A-Za-z0-9_.:-]{1,200}$/))),
+};
+export const integrationAuditQuerySchema = strictObject({
+  workspaceId: idSchema,
+  receipt_id: optional(idSchema),
+  ...integrationCorrelationFields,
+});
+export const integrationPermissionQuerySchema = strictObject({
+  workspaceId: idSchema,
+  tokenId: idSchema,
+});
+
 export const trustedReviewReceiptSchema = strictObject({
+  ...integrationCorrelationFields,
   version: literal(1),
   audience: literal("taff"),
   issuer: literal("twin"),
@@ -742,6 +772,8 @@ export const trustedReviewReceiptSchema = strictObject({
 export type TrustedReviewReceipt = Infer<typeof trustedReviewReceiptSchema>;
 
 export const approvedAgentToolSchemas = {
+  "projects.create": mcpProjectsCreateArgs,
+  "projects.edit": mcpProjectsEditArgs,
   "tasks.create": mcpTasksCreateArgs,
   "tasks.edit": mcpTasksEditArgs,
   "tasks.comments.add": mcpTaskCommentsAddArgs,
@@ -753,6 +785,7 @@ export const approvedAgentToolSchemas = {
   "runs.submit": mcpRunsSubmitArgs,
 };
 export const approvedAgentOperationSchema = strictObject({
+  ...integrationCorrelationFields,
   version: literal(1),
   audience: literal("taff_agent"),
   issuer: literal("twin"),
@@ -762,6 +795,8 @@ export const approvedAgentOperationSchema = strictObject({
   workspace_id: idSchema,
   expires_at: iso.datetime(),
   tool: zodEnum([
+    "projects.create",
+    "projects.edit",
     "tasks.create",
     "tasks.edit",
     "tasks.comments.add",

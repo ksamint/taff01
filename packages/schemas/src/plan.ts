@@ -220,6 +220,7 @@ export const timelineSchema = object({
   canEditPlan: boolean(),
 });
 export const projectFinanceFields = {
+  receivedAmount: optional(moneySchema),
   contractAmount: optional(nullable(moneySchema)),
   currency: optional(nullable(currencySchema)),
   clientCompanyId: optional(nullable(idSchema)),

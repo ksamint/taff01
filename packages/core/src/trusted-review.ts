@@ -14,6 +14,7 @@ import {
 } from "@taff/schemas";
 import { eq, sql } from "drizzle-orm";
 import { CoreError, type Principal, userPrincipal } from "./index";
+import { setIntegrationAudit } from "./integration-audit";
 import type { Action, Actor, Resource } from "./permissions";
 
 export function canonicalJson(value: unknown): string {
@@ -82,15 +83,16 @@ export function createTrustedReview(deps: {
     reconcileOnly = false,
   ): Promise<Run> => {
     const receipt = verifyReviewReceipt(input, signature, deps.key ?? "");
-    const mapping = deps.mappings.find(
+    const matches = deps.mappings.filter(
       (m) =>
         m.controllerId === receipt.controller_id &&
         m.workspaceId === receipt.workspace_id,
     );
-    if (!mapping) throw new CoreError("forbidden", 403);
+    if (matches.length !== 1) throw new CoreError("forbidden", 403);
+    const mapping = matches[0];
     const principal = userPrincipal(mapping.userId);
     return deps.mutation(principal, async (tx) => {
-      await deps.requireMember(
+      const verifier = await deps.requireMember(
         tx,
         userPrincipal(mapping.verifiedByUserId),
         mapping.workspaceId,
@@ -120,7 +122,7 @@ export function createTrustedReview(deps: {
         .select()
         .from(agentProfiles)
         .where(eq(agentProfiles.id, run.agentId));
-      await deps.requireMember(
+      const reviewer = await deps.requireMember(
         tx,
         principal,
         mapping.workspaceId,
@@ -135,6 +137,8 @@ export function createTrustedReview(deps: {
           supervisorId: profile?.supervisorId,
         },
       );
+      if (reviewer.kind !== "person" || verifier.kind !== "person")
+        throw new CoreError("forbidden", 403);
       const [prior] = await tx
         .select()
         .from(trustedReviewReceipts)
@@ -155,6 +159,9 @@ export function createTrustedReview(deps: {
         throw new CoreError("conflict", 409);
       // Existing review code locks the run, checks version and human permissions,
       // and validates every required check and artifact decision in this transaction.
+      await setIntegrationAudit(tx, receipt, reviewer, {
+        verified_by_member_id: verifier.id,
+      });
       const result = await deps.review(tx, principal, receipt);
       await tx.insert(trustedReviewReceipts).values({
         id: receipt.receipt_id,

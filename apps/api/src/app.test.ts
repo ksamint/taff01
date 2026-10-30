@@ -1122,3 +1122,77 @@ describe("authenticated email ownership REST boundaries", () => {
     });
   });
 });
+
+describe("integration audit REST boundaries", () => {
+  it("requires a human session and validates trace correlation before querying core", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const read = vi
+      .spyOn(core, "searchIntegrationAudit")
+      .mockResolvedValue({ entries: [], truncated: false });
+    expect(
+      (
+        await app.request(`/api/admin/audit/search?workspaceId=${id}`, {
+          headers: { Authorization: "Bearer agent" },
+        })
+      ).status,
+    ).toBe(401);
+    expect(read).not.toHaveBeenCalled();
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    expect(
+      (await app.request(`/api/admin/audit/trace/invalid?workspaceId=${id}`))
+        .status,
+    ).toBe(400);
+    expect(read).not.toHaveBeenCalled();
+    const trace = "a".repeat(32);
+    expect(
+      (await app.request(`/api/admin/audit/trace/${trace}?workspaceId=${id}`))
+        .status,
+    ).toBe(200);
+    expect(read).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      { workspaceId: id, trace_id: trace },
+    );
+    read.mockRejectedValue(new CoreError("forbidden", 403));
+    expect(
+      (
+        await app.request(
+          `/api/admin/audit/search?workspaceId=${id}&approval_id=approved`,
+        )
+      ).status,
+    ).toBe(403);
+  });
+  it("validates permission explanation targets and passes through native denial", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const explain = vi
+      .spyOn(core, "explainIntegrationPermission")
+      .mockRejectedValue(new CoreError("forbidden", 403));
+    expect(
+      (
+        await app.request(
+          `/api/admin/integrations/permissions?workspaceId=${id}&tokenId=invalid`,
+        )
+      ).status,
+    ).toBe(400);
+    expect(explain).not.toHaveBeenCalled();
+    expect(
+      (
+        await app.request(
+          `/api/admin/integrations/permissions?workspaceId=${id}&tokenId=${id}`,
+        )
+      ).status,
+    ).toBe(403);
+    expect(explain).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      { workspaceId: id, tokenId: id },
+    );
+  });
+});

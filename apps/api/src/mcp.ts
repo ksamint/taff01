@@ -44,6 +44,8 @@ import {
   mcpFilesAttachArgs,
   mcpGrantsRequestArgs,
   mcpInboxRequestReviewArgs,
+  mcpProjectsCreateArgs,
+  mcpProjectsEditArgs,
   mcpProjectsListArgs,
   mcpQuickAddArgs,
   mcpRunsControlArgs,
@@ -195,12 +197,29 @@ export function createMcpServer(
     ({ taskId, ...input }) =>
       run(() => core.addTaskComment(principal, taskId, input)),
   );
+  for (const [name, schema] of [
+    ["projects.create", mcpProjectsCreateArgs],
+    ["projects.edit", mcpProjectsEditArgs],
+  ] as const) {
+    server.registerTool(
+      name,
+      {
+        title: "Prepare project change",
+        description:
+          "Prepare only. No project is changed. Show the exact returned arguments to the human controller for confirmation, then submit the existing signed approved-operation envelope with the original agent token. expected_version is null for creation and the current project version for editing. Money uses explicit currency and decimal strings; receivedAmount is cumulative actual collection and cannot decrease. Unknown outcomes must reconcile the identical signed receipt.",
+        inputSchema: toolSchema(schema),
+        annotations: READ_ONLY,
+      },
+      (input) =>
+        run(() => core.prepareProjectOperation(principal, name, input)),
+    );
+  }
   server.registerTool(
     "projects.list",
     {
       title: "Read projects",
       description:
-        "List the token workspace's projects with their stage (lead, proposal_sent, contract_signed, in_service, closed or null) and person in charge (leadId, a person member; resolve names with context.get). Contract and collection figures are never shown to agents. Project administration is a human action.",
+        "List the token workspace's projects with their stage (lead, proposal_sent, contract_signed, in_service, closed or null) and person in charge (leadId, a person member; resolve names with context.get). Contract and collection figures require tasks:read plus explicitly granted projects.manage; otherwise they remain null. Project mutations require separately granted projects.manage capability and a human-confirmed signed operation; project MCP write tools only prepare proposals.",
       inputSchema: toolSchema(mcpProjectsListArgs),
       annotations: READ_ONLY,
     },

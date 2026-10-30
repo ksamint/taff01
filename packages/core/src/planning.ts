@@ -4,6 +4,7 @@ import {
   type Database,
   members,
   projectContacts,
+  projectPayments,
   projects,
   reviewComments,
   type Transaction,
@@ -19,6 +20,8 @@ import {
   idSchema,
   type Member,
   type MemberRoleInput,
+  mcpProjectsCreateArgs,
+  mcpProjectsEditArgs,
   memberRoleInputSchema,
   type Project,
   type ProjectInput,
@@ -54,6 +57,7 @@ import {
   and,
   desc,
   eq,
+  getTableColumns,
   inArray,
   isNull,
   ne,
@@ -76,6 +80,15 @@ function parse<T>(schema: { parse(v: unknown): T }, v: unknown): T {
     throw e;
   }
 }
+export function decimalCents(amount: string) {
+  const [whole, fraction = ""] = amount.split(".");
+  return BigInt(whole) * 100n + BigInt(fraction.padEnd(2, "0"));
+}
+export function collectionDelta(amount: string, current: string) {
+  const delta = decimalCents(amount) - decimalCents(current);
+  if (delta < 0n) throw new CoreError("invalid_input", 400);
+  return delta;
+}
 function invalid(): never {
   throw new CoreError("invalid_input", 400);
 }
@@ -97,11 +110,14 @@ function dtoTask(row: typeof tasks.$inferSelect): Task {
 }
 /** Finance stays null unless the reader may see it (finance:read, ADR 0021). */
 export function dtoProject(
-  row: typeof projects.$inferSelect,
+  row: typeof projects.$inferSelect & { receivedAmount?: string },
   finance = false,
 ): Project {
   return {
     ...row,
+    dueAt: row.dueAt?.toISOString() ?? null,
+    deliveryProgress: row.deliveryProgress,
+    receivedAmount: finance ? (row.receivedAmount ?? null) : null,
     contractAmount: finance ? row.contractAmount : null,
     currency: finance ? row.currency : null,
     createdAt: row.createdAt.toISOString(),
@@ -126,6 +142,7 @@ function dtoInvite(row: typeof workspaceInvites.$inferSelect): WorkspaceInvite {
   };
 }
 type Dependencies = {
+  approvedProjects?: boolean;
   db: Database;
   tokenPepper: string;
   authUrl: string;
@@ -162,6 +179,7 @@ export function createPlanningOperations({
   lockTask,
   validateAssignees,
   currentRunId,
+  approvedProjects = false,
 }: Dependencies) {
   async function validateProject(
     tx: Transaction,
@@ -433,7 +451,10 @@ export function createPlanningOperations({
     const finance = can(actor, "finance:read", { workspaceId: w });
     return (
       await db
-        .select()
+        .select({
+          ...getTableColumns(projects),
+          receivedAmount: sql<string>`(select coalesce(sum(amount),0)::text from project_payments where workspace_id = ${projects.workspaceId} and project_id = ${projects.id})`,
+        })
         .from(projects)
         .where(eq(projects.workspaceId, w))
         .orderBy(projects.createdAt, projects.id)
@@ -446,14 +467,36 @@ export function createPlanningOperations({
   ): Promise<Project> {
     parse(idSchema, w);
     const body = parse(projectInputSchema, input);
+    if (p.kind === "agent" && !approvedProjects)
+      throw new CoreError("forbidden", 403);
+    const { dueAt, receivedAmount, ...fields } = body;
+    if (
+      (body.contractAmount != null || receivedAmount !== undefined) &&
+      !body.currency
+    )
+      invalid();
     return mutation(p, async (tx) => {
-      await requireMember(tx, p, w, "project:manage");
+      const actor = await requireMember(tx, p, w, "project:manage", {
+        workspaceId: w,
+        approvedProjectOperation: approvedProjects,
+      });
+      if (body.clientCompanyId)
+        await requireCompany(tx, w, body.clientCompanyId);
       if (body.leadId) await requireLead(tx, w, body.leadId);
       const [row] = await tx
         .insert(projects)
-        .values({ ...body, workspaceId: w })
+        .values({
+          ...fields,
+          dueAt: dueAt ? new Date(dueAt) : null,
+          workspaceId: w,
+        })
         .returning();
-      return dtoProject(row, true);
+      if (receivedAmount !== undefined)
+        await collectTo(tx, p, actor, row, receivedAmount);
+      return dtoProject(
+        { ...row, receivedAmount: receivedAmount ?? "0.00" },
+        true,
+      );
     });
   }
   async function updateProject(
@@ -463,6 +506,9 @@ export function createPlanningOperations({
   ): Promise<Project> {
     parse(idSchema, id);
     const body = parse(projectUpdateSchema, input);
+    if (p.kind === "agent" && !approvedProjects)
+      throw new CoreError("forbidden", 403);
+    const { dueAt, receivedAmount, ...fields } = body;
     return mutation(p, async (tx) => {
       const [row] = await tx
         .select()
@@ -473,21 +519,24 @@ export function createPlanningOperations({
       const stageOnly = Object.keys(body).every(
         (key) => key === "stage" || key === "version",
       );
-      await requireMember(
+      const actor = await requireMember(
         tx,
         p,
         row.workspaceId,
-        stageOnly ? "project:stage" : "project:manage",
+        stageOnly && p.kind !== "agent" ? "project:stage" : "project:manage",
         {
           workspaceId: row.workspaceId,
           leadId: row.leadId,
+          approvedProjectOperation: approvedProjects,
         },
       );
       if (row.version !== body.version) conflict();
       if (
-        body.contractAmount !== undefined ||
-        body.currency !== undefined ||
-        body.clientCompanyId !== undefined
+        p.kind !== "agent" &&
+        (body.receivedAmount !== undefined ||
+          body.contractAmount !== undefined ||
+          body.currency !== undefined ||
+          body.clientCompanyId !== undefined)
       )
         await requireMember(tx, p, row.workspaceId, "finance:manage");
       const currency =
@@ -496,28 +545,113 @@ export function createPlanningOperations({
         body.contractAmount === undefined
           ? row.contractAmount
           : body.contractAmount;
-      if (amount !== null && currency === null) invalid();
+      if (
+        (amount !== null || receivedAmount !== undefined) &&
+        currency === null
+      )
+        invalid();
+      const received = await receivedTotal(tx, id, row.workspaceId);
+      if (currency !== row.currency && decimalCents(received) > 0n) invalid();
       if (body.leadId && body.leadId !== row.leadId)
         await requireLead(tx, row.workspaceId, body.leadId);
-      if (body.clientCompanyId) {
-        const [company] = await tx
-          .select({ archivedAt: companies.archivedAt })
-          .from(companies)
-          .where(
-            and(
-              eq(companies.id, body.clientCompanyId),
-              eq(companies.workspaceId, row.workspaceId),
-            ),
-          );
-        if (!company || company.archivedAt) invalid();
-      }
+      if (body.clientCompanyId)
+        await requireCompany(tx, row.workspaceId, body.clientCompanyId);
+      if (receivedAmount !== undefined)
+        await collectTo(tx, p, actor, { ...row, currency }, receivedAmount);
       const [updated] = await tx
         .update(projects)
-        .set({ ...body, version: row.version + 1, updatedAt: new Date() })
+        .set({
+          ...fields,
+          ...(dueAt !== undefined
+            ? { dueAt: dueAt ? new Date(dueAt) : null }
+            : {}),
+          version: row.version + 1,
+          updatedAt: new Date(),
+        })
         .where(eq(projects.id, id))
         .returning();
-      return dtoProject(updated, true);
+      return dtoProject(
+        { ...updated, receivedAmount: receivedAmount ?? received },
+        true,
+      );
     });
+  }
+  async function receivedTotal(
+    tx: Database | Transaction,
+    id: string,
+    workspaceId: string,
+  ) {
+    const [total] = await tx
+      .select({
+        value: sql<string>`coalesce(sum(${projectPayments.amount}),0)::text`,
+      })
+      .from(projectPayments)
+      .where(
+        and(
+          eq(projectPayments.projectId, id),
+          eq(projectPayments.workspaceId, workspaceId),
+        ),
+      );
+    return total.value;
+  }
+  async function collectTo(
+    tx: Transaction,
+    p: Principal,
+    actor: Actor,
+    row: typeof projects.$inferSelect,
+    amount: string,
+  ) {
+    const delta = collectionDelta(
+      amount,
+      await receivedTotal(tx, row.id, row.workspaceId),
+    );
+    if (!row.currency) invalid();
+    if (delta === 0n) return;
+    await tx.insert(projectPayments).values({
+      workspaceId: row.workspaceId,
+      projectId: row.id,
+      amount: `${delta / 100n}.${String(delta % 100n).padStart(2, "0")}`,
+      paidOn: localDate(new Date(), await zoneOf(tx, p, actor)),
+      createdBy: actor.id,
+      note: "Cumulative collection update",
+    });
+  }
+  async function requireCompany(tx: Transaction, w: string, id: string) {
+    const [company] = await tx
+      .select({ archivedAt: companies.archivedAt })
+      .from(companies)
+      .where(and(eq(companies.id, id), eq(companies.workspaceId, w)));
+    if (!company || company.archivedAt) invalid();
+  }
+  async function prepareProjectOperation(
+    p: Principal,
+    tool: "projects.create" | "projects.edit",
+    input: unknown,
+  ) {
+    if (p.kind !== "agent") throw new CoreError("forbidden", 403);
+    const args =
+      tool === "projects.create"
+        ? parse(mcpProjectsCreateArgs, input)
+        : parse(mcpProjectsEditArgs, input);
+    await requireMember(db, p, p.workspaceId, "capability:use", {
+      workspaceId: p.workspaceId,
+      capability: "projects.manage",
+    });
+    if ("projectId" in args) {
+      const [row] = await db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, args.projectId));
+      if (!row || row.workspaceId !== p.workspaceId)
+        throw new CoreError("forbidden", 403);
+      if (row.version !== args.version) conflict();
+    }
+    return {
+      requires_confirmation: true,
+      tool,
+      arguments: args,
+      expected_version: "version" in args ? args.version : null,
+    };
   }
   /** The person in charge is a person of the project's workspace. */
   async function requireLead(tx: Transaction, w: string, leadId: string) {
@@ -1065,6 +1199,7 @@ export function createPlanningOperations({
       addTaskComment,
       listProjects,
       createProject,
+      prepareProjectOperation,
       updateProject,
       createWorkspace,
       listWorkspaceInvites,

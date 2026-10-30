@@ -57,6 +57,7 @@ import { actorTimeZone } from "./actor-timezone";
 import { createApprovedAgentOperation } from "./approved-agent-operation";
 import type { EmailStatus, EmailTransport } from "./email";
 import { createEmailVerificationOperations } from "./email-verification";
+import { createIntegrationAudit } from "./integration-audit";
 import { createSmsAuth } from "./sms-auth";
 import type { SmsProvider } from "./tencent-sms";
 import { type ControllerMapping, createTrustedReview } from "./trusted-review";
@@ -377,7 +378,7 @@ export function createCore(options: {
       )
       .limit(1)
       .for("share");
-    return member ?? null;
+    return member?.kind === "person" ? member : null;
   }
   async function requireMember(
     query: typeof db | Transaction,
@@ -1289,6 +1290,8 @@ export function createCore(options: {
   };
   const runOperations = createRunOperations(runOperationsDependencies);
   const approvedAgentOperation = createApprovedAgentOperation({
+    mappings: options.trustedReview?.mappings,
+    requireMember,
     key: options.trustedReview?.key,
     mutation,
     loadActor,
@@ -1300,6 +1303,7 @@ export function createCore(options: {
       const plan = createPlanningOperations({
         ...planningDependencies,
         mutation: within,
+        approvedProjects: true,
       }).operations;
       const schedule = createCalendarOperations({
         ...calendarDependencies,
@@ -1310,6 +1314,20 @@ export function createCore(options: {
         mutation: within,
       });
       switch (operation.tool) {
+        case "projects.create":
+          return plan.createProject(
+            principal,
+            principal.workspaceId,
+            approvedAgentToolSchemas["projects.create"].parse(
+              operation.arguments,
+            ),
+          );
+        case "projects.edit": {
+          const { projectId, ...input } = approvedAgentToolSchemas[
+            "projects.edit"
+          ].parse(operation.arguments);
+          return plan.updateProject(principal, projectId, input);
+        }
         case "tasks.create": {
           const args = approvedAgentToolSchemas["tasks.create"].parse(
             operation.arguments,
@@ -1407,6 +1425,7 @@ export function createCore(options: {
       runOperations.listInbox(principal, workspaceId),
   });
   return {
+    ...createIntegrationAudit({ db, requireMember, loadActor }),
     approvedAgentOperation,
     applyTrustedReview: (input: unknown, signature: string) =>
       applyTrustedReview(input, signature),

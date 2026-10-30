@@ -230,6 +230,8 @@ export const projects = pgTable(
       .notNull()
       .references(() => workspaces.id),
     name: text("name").notNull(),
+    dueAt: timestamp("due_at", { withTimezone: true }),
+    deliveryProgress: integer("delivery_progress").default(0).notNull(),
     archived: boolean("archived").default(false).notNull(),
     version: integer("version").default(1).notNull(),
     /** Finance (read by people, managed by admins; ADR 0021): contract value in `currency`. */
@@ -244,6 +246,10 @@ export const projects = pgTable(
   (t) => [
     unique("projects_workspace_id_unique").on(t.workspaceId, t.id),
     check("projects_name", sql`length(btrim(${t.name})) BETWEEN 1 AND 100`),
+    check(
+      "projects_delivery_progress",
+      sql`${t.deliveryProgress} BETWEEN 0 AND 100`,
+    ),
     check("projects_version", sql`${t.version}>0`),
     check(
       "projects_currency",
@@ -335,6 +341,7 @@ export const activity = pgTable(
   {
     id: uuid("id").defaultRandom().primaryKey(),
     actorId: text("actor_id").notNull(),
+    traceId: text("trace_id"),
     workspaceId: uuid("workspace_id"),
     action: text("action").notNull(),
     resourceId: text("resource_id").notNull(),
@@ -345,6 +352,11 @@ export const activity = pgTable(
   },
   (t) => [
     index("activity_workspace_created_idx").on(t.workspaceId, t.createdAt),
+    index("activity_workspace_trace_idx").on(t.workspaceId, t.traceId),
+    check(
+      "activity_trace_format",
+      sql`${t.traceId} IS NULL OR ${t.traceId} ~ '^[a-f0-9]{32}$'`,
+    ),
   ],
 );
 

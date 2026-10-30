@@ -196,13 +196,17 @@ export function createTimelineOperations({
     if (!project) notFound();
     return project;
   }
-  async function lockProject(tx: Transaction, projectId: string) {
+  async function lockProject(
+    tx: Transaction,
+    projectId: string,
+    write = false,
+  ) {
     parse(idSchema, projectId);
     const [project] = await tx
       .select()
       .from(projects)
       .where(eq(projects.id, projectId))
-      .for("share");
+      .for(write ? "update" : "share");
     if (!project) notFound();
     return project;
   }
@@ -878,7 +882,7 @@ export function createTimelineOperations({
   ): Promise<Payment> {
     const body = parse(paymentInputSchema, input);
     return mutation(p, async (tx) => {
-      const project = await lockProject(tx, projectId);
+      const project = await lockProject(tx, projectId, true);
       const actor = await requireMember(
         tx,
         p,
@@ -896,6 +900,10 @@ export function createTimelineOperations({
           createdBy: actor.id,
         })
         .returning();
+      await tx
+        .update(projects)
+        .set({ version: project.version + 1, updatedAt: new Date() })
+        .where(eq(projects.id, projectId));
       return dtoPayment(row);
     });
   }

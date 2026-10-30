@@ -7,7 +7,9 @@ import {
   type infer as Infer,
   iso,
   nullable,
+  number,
   object,
+  refine,
   string,
   enum as zodEnum,
 } from "zod/mini";
@@ -25,6 +27,11 @@ export const projectSchema = object({
   id: idSchema,
   workspaceId: idSchema,
   name: string(),
+  dueAt: nullable(iso.datetime()),
+  deliveryProgress: number().check(
+    refine((v) => Number.isInteger(v) && v >= 0 && v <= 100),
+  ),
+  receivedAmount: nullable(string()),
   archived: boolean(),
   version: versionSchema,
   /** Null unless the reader may see finance (ADR 0021). */

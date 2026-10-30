@@ -62,6 +62,7 @@ export type Action =
 export type Resource =
   | {
       workspaceId: string;
+      approvedProjectOperation?: boolean;
       ownerId?: string;
       oauthGrant?: boolean;
       leadId?: string | null;
@@ -145,9 +146,17 @@ export function can(
     )
   )
     return false;
+  if (action === "project:manage")
+    return actor.kind === "person"
+      ? actor.role === "admin"
+      : resource.approvedProjectOperation === true &&
+          !!actor.scopes?.includes("tasks:write") &&
+          can(actor, "capability:use", {
+            ...resource,
+            capability: "projects.manage",
+          });
   if (
     action === "workspace:manage" ||
-    action === "project:manage" ||
     action === "finance:manage" ||
     action === "crm:archive" ||
     action === "crm:audit" ||
@@ -169,6 +178,14 @@ export function can(
     return (
       actor.kind === "person" &&
       (actor.role === "admin" || actor.id === resource.leadId)
+    );
+  if (action === "finance:read" && actor.kind === "agent")
+    return (
+      !!actor.scopes?.includes("tasks:read") &&
+      can(actor, "capability:use", {
+        ...resource,
+        capability: "projects.manage",
+      })
     );
   // Every person of the workspace reads contract and collection figures
   // (ADR 0021, superseding D7); guests and agents never do.
@@ -364,6 +381,7 @@ export function can(
 export const DEFAULT_PERMISSIONS: Record<Capability, PermissionDecision> = {
   "tasks.read": "allow",
   "tasks.write": "allow",
+  "projects.manage": "deny",
   "files.attach": "allow",
   "calendar.schedule": "allow",
   "web.search": "ask",

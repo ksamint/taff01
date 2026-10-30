@@ -2,6 +2,7 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import {
   approvedAgentReceipts,
   type Database,
+  projects,
   runs,
   type Transaction,
   tasks,
@@ -14,8 +15,11 @@ import {
   SchemaError,
 } from "@taff/schemas";
 import { eq, sql } from "drizzle-orm";
-import { CoreError, type Principal } from "./index";
+import { CoreError, type Principal, userPrincipal } from "./index";
+import { setIntegrationAudit } from "./integration-audit";
 import { type Action, type Actor, can, type Resource } from "./permissions";
+
+import type { ControllerMapping } from "./trusted-review";
 
 type Agent = Extract<Principal, { kind: "agent" }>;
 export function verifyAgentOperation(
@@ -50,6 +54,14 @@ export function verifyAgentOperation(
 
 export function createApprovedAgentOperation(deps: {
   key?: string;
+  mappings?: ControllerMapping[];
+  requireMember?(
+    q: Database | Transaction,
+    p: Principal,
+    w: string,
+    a: Action,
+    r?: Resource,
+  ): Promise<Actor>;
   mutation<T>(p: Principal, run: (tx: Transaction) => Promise<T>): Promise<T>;
   loadActor(
     q: Database | Transaction,
@@ -98,14 +110,47 @@ export function createApprovedAgentOperation(deps: {
       // loadActor locks/rechecks the original token's current scopes and revocation.
       const actor = await deps.loadActor(tx, p, p.workspaceId);
       if (!actor) throw new CoreError("forbidden", 403);
+      if (operation.tool.startsWith("projects.")) {
+        const mappings =
+          deps.mappings?.filter(
+            (m) =>
+              m.controllerId === operation.controller_id &&
+              m.workspaceId === operation.workspace_id,
+          ) ?? [];
+        if (mappings.length !== 1 || !deps.requireMember)
+          throw new CoreError("forbidden", 403);
+        const mapping = mappings[0];
+        for (const userId of [mapping.userId, mapping.verifiedByUserId]) {
+          const person = await deps.requireMember(
+            tx,
+            userPrincipal(userId),
+            p.workspaceId,
+            "project:manage",
+          );
+          if (person.kind !== "person") throw new CoreError("forbidden", 403);
+        }
+      }
       await tx.execute(
         sql`select pg_advisory_xact_lock(hashtextextended(${operation.receipt_id}, 1))`,
       );
       let currentVersion: number | null = null;
       let resource: Extract<Resource, { workspaceId: string }> = {
         workspaceId: p.workspaceId,
+        approvedProjectOperation: operation.tool.startsWith("projects."),
       };
-      if ("runId" in args) {
+      if (operation.tool === "projects.edit") {
+        const projectArgs = approvedAgentToolSchemas["projects.edit"].parse(
+          operation.arguments,
+        );
+        const [project] = await tx
+          .select()
+          .from(projects)
+          .where(eq(projects.id, projectArgs.projectId))
+          .for("update");
+        if (!project || project.workspaceId !== p.workspaceId)
+          throw new CoreError("forbidden", 403);
+        currentVersion = project.version;
+      } else if ("runId" in args) {
         const [candidate] = await tx
           .select()
           .from(runs)
@@ -154,6 +199,10 @@ export function createApprovedAgentOperation(deps: {
       };
       // Replays also require current authority, without repeating business mutations.
       switch (operation.tool) {
+        case "projects.create":
+        case "projects.edit":
+          allowed("project:manage");
+          break;
         case "tasks.create":
           allowed("task:create", {
             toWorkerId: p.memberId,
@@ -223,7 +272,10 @@ export function createApprovedAgentOperation(deps: {
         return prior.result;
       }
       if (reconcileOnly) throw new CoreError("not_found", 404);
-      if (operation.tool === "tasks.create") {
+      if (
+        operation.tool === "tasks.create" ||
+        operation.tool === "projects.create"
+      ) {
         if (operation.expected_version !== null)
           throw new CoreError("invalid_input", 400);
       } else {
@@ -240,6 +292,7 @@ export function createApprovedAgentOperation(deps: {
       )
         throw new CoreError("conflict", 409);
       // The original operation enforces its own current scopes and resource permissions.
+      await setIntegrationAudit(tx, operation, actor, { token_id: p.tokenId });
       const result = await deps.execute(tx, p, operation);
       await tx.insert(approvedAgentReceipts).values({
         id: operation.receipt_id,

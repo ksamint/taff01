@@ -243,7 +243,11 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       ),
     ).rejects.toMatchObject({ code: "invalid_input" });
     expect((await core.getRun(person, run.id)).run.status).toBe("needs_review");
-    const signed = sign();
+    const signed = sign(undefined, {
+      trace_id: "a".repeat(32),
+      request_id: "human-request",
+      approval_id: "human-approval",
+    });
     await expect(core.getTrustedReviewReceipt(...signed)).rejects.toMatchObject(
       { code: "not_found" },
     );
@@ -253,6 +257,35 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     ]);
     expect(results[0]).toEqual(results[1]);
     expect(results[0].status).toBe("completed");
+    const audit = await core.searchIntegrationAudit(person, {
+      workspaceId,
+      trace_id: "a".repeat(32),
+    });
+    expect(
+      audit.entries.some(
+        (row) => row.action === "trusted_review_receipts.insert",
+      ),
+    ).toBe(true);
+    expect(
+      audit.entries.every(
+        (row) =>
+          row.actorId === mappings[0].userId && row.traceId === "a".repeat(32),
+      ),
+    ).toBe(true);
+    expect(audit.entries[0].details).toMatchObject({
+      source: "private_wechat",
+      kind: "person",
+      request_id: "human-request",
+      approval_id: "human-approval",
+    });
+    await expect(
+      core.searchIntegrationAudit(member, { workspaceId }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    mappings.push({ ...mappings[0] });
+    await expect(core.getTrustedReviewReceipt(...signed)).rejects.toMatchObject(
+      { code: "forbidden" },
+    );
+    mappings.pop();
     expect(await core.getTrustedReviewReceipt(...signed)).toEqual(results[0]);
     const saved = mappings[0];
     mappings.length = 0;
@@ -268,6 +301,176 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     });
     mappings[0] = saved;
   });
+  it("prepares project changes without writes and applies one receipt with exact ledger totals and current authority", async () => {
+    const issued = await core.createAgentToken(person, {
+      workspaceId,
+      memberId: agentId,
+      name: "Project approvals",
+      scopes: ["tasks:read", "tasks:write"],
+    });
+    const p = await core.authenticateAgentToken(issued.token);
+    if (!p || p.kind !== "agent") throw new Error("agent fixture");
+    const hash = createHash("sha256").update(issued.token).digest("hex");
+    const sign = (
+      tool: string,
+      args: Record<string, unknown>,
+      version: number | null,
+    ) => {
+      const operation_json = JSON.stringify({
+        version: 1,
+        audience: "taff_agent",
+        issuer: "twin",
+        source: "private_wechat",
+        receipt_id: randomUUID(),
+        controller_id: "controller",
+        workspace_id: workspaceId,
+        expires_at: new Date(Date.now() + 60000).toISOString(),
+        tool,
+        arguments: args,
+        expected_version: version,
+        credential_hash: hash,
+      });
+      return [
+        p,
+        {
+          operation_json,
+          operation_hash: createHash("sha256")
+            .update(operation_json)
+            .digest("hex"),
+        },
+        createHmac("sha256", approvalKey).update(operation_json).digest("hex"),
+        hash,
+      ] as const;
+    };
+    await expect(
+      core.prepareProjectOperation(p, "projects.create", {
+        name: "Unapproved",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await core.setAgentPermission(person, agentId, {
+      capability: "projects.manage",
+      decision: "allow",
+    });
+    try {
+      const before = await core.listProjects(person, workspaceId);
+      const args = {
+        name: "Confirmed project",
+        currency: "CNY",
+        contractAmount: "100.10",
+        receivedAmount: "0.10",
+        dueAt: "2026-12-01T00:00:00Z",
+        deliveryProgress: 10,
+      };
+      expect(
+        await core.prepareProjectOperation(p, "projects.create", args),
+      ).toMatchObject({
+        requires_confirmation: true,
+        expected_version: null,
+        arguments: args,
+      });
+      expect(await core.listProjects(person, workspaceId)).toEqual(before);
+      await expect(
+        core.createProject(p, workspaceId, args),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      const signed = sign("projects.create", args, null);
+      const created = (await core.approvedAgentOperation(...signed)) as {
+        id: string;
+        version: number;
+      };
+      expect(await core.approvedAgentOperation(...signed)).toEqual(created);
+      expect(
+        (await core.listPayments(person, created.id)).map((row) => row.amount),
+      ).toEqual(["0.10"]);
+      const edit = sign(
+        "projects.edit",
+        {
+          projectId: created.id,
+          version: 1,
+          receivedAmount: "0.30",
+          deliveryProgress: 50,
+        },
+        1,
+      );
+      const [first, second] = await Promise.all([
+        core.approvedAgentOperation(...edit),
+        core.approvedAgentOperation(...edit),
+      ]);
+      expect(second).toEqual(first);
+      expect(
+        (await core.listPayments(person, created.id)).map((row) => row.amount),
+      ).toEqual(["0.10", "0.20"]);
+      expect(
+        (await core.listProjects(p, workspaceId)).find(
+          (row) => row.id === created.id,
+        ),
+      ).toMatchObject({
+        receivedAmount: "0.30",
+        deliveryProgress: 50,
+        currency: "CNY",
+      });
+      await expect(
+        core.approvedAgentOperation(
+          ...sign(
+            "projects.edit",
+            { projectId: created.id, version: 1, name: "Stale" },
+            1,
+          ),
+        ),
+      ).rejects.toMatchObject({ code: "conflict" });
+      await expect(
+        core.approvedAgentOperation(
+          ...sign(
+            "projects.edit",
+            { projectId: created.id, version: 2, receivedAmount: "0.29" },
+            2,
+          ),
+        ),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      await expect(
+        core.approvedAgentOperation(
+          ...sign(
+            "projects.edit",
+            { projectId: created.id, version: 2, currency: "USD" },
+            2,
+          ),
+        ),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      await core.addPayment(person, created.id, {
+        amount: "0.01",
+        paidOn: "2026-10-30",
+      });
+      await expect(
+        core.approvedAgentOperation(
+          ...sign(
+            "projects.edit",
+            { projectId: created.id, version: 2, receivedAmount: "0.40" },
+            2,
+          ),
+        ),
+      ).rejects.toMatchObject({ code: "conflict" });
+      await core.setAgentPermission(person, agentId, {
+        capability: "projects.manage",
+        decision: "deny",
+      });
+      expect(
+        (await core.listProjects(p, workspaceId)).find(
+          (row) => row.id === created.id,
+        ),
+      ).toMatchObject({
+        contractAmount: null,
+        currency: null,
+        receivedAmount: null,
+      });
+      await expect(
+        core.approvedAgentOperation(...signed, true),
+      ).rejects.toMatchObject({ code: "forbidden" });
+    } finally {
+      await core.setAgentPermission(person, agentId, {
+        capability: "projects.manage",
+        decision: "deny",
+      });
+    }
+  });
   it("executes approved ordinary calls as the original agent with durable results and revocation checks", async () => {
     const issued = await core.createAgentToken(person, {
       workspaceId,
@@ -281,9 +484,10 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
         "inbox:review",
       ],
     });
-    const principal = await core.authenticateAgentToken(issued.token);
-    if (!principal || principal.kind !== "agent")
+    const authenticated = await core.authenticateAgentToken(issued.token);
+    if (!authenticated || authenticated.kind !== "agent")
       throw new Error("fixture authentication failed");
+    const principal = authenticated;
     const tokenHash = createHash("sha256").update(issued.token).digest("hex");
     function sign(
       tool: string,
@@ -362,6 +566,11 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       "tasks.create",
       { title: "Approved agent task", ownerId, dueAt: null },
       null,
+      {
+        trace_id: "b".repeat(32),
+        request_id: "agent-request",
+        approval_id: "agent-approval",
+      },
     );
     await expect(
       core.approvedAgentOperation(...create, true),
@@ -403,7 +612,41 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     expect(results[0]).toEqual(results[1]);
     let task = taskSchema.parse(results[0]);
     expect(task.workerId).toBe(agentId);
-    expect(await core.approvedAgentOperation(...create, true)).toEqual(task);
+    const audit = await core.searchIntegrationAudit(person, {
+      workspaceId,
+      request_id: "agent-request",
+    });
+    expect(audit.entries.map((row) => row.action).sort()).toEqual([
+      "approved_agent_receipts.insert",
+      "tasks.insert",
+    ]);
+    expect(
+      audit.entries.every(
+        (row) =>
+          row.actorId === `agent:${agentId}` && row.traceId === "b".repeat(32),
+      ),
+    ).toBe(true);
+    expect(audit.entries[0].details).toMatchObject({
+      kind: "agent",
+      token_id: principal.tokenId,
+      approval_id: "agent-approval",
+    });
+    const explained = await core.explainIntegrationPermission(person, {
+      workspaceId,
+      tokenId: principal.tokenId,
+    });
+    expect(explained.active).toBe(true);
+    expect(JSON.stringify([explained, audit])).not.toContain(tokenHash);
+    expect(JSON.stringify([explained, audit])).not.toContain(issued.token);
+    await expect(
+      core.explainIntegrationPermission(member, {
+        workspaceId,
+        tokenId: principal.tokenId,
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    expect(
+      taskSchema.parse(await core.approvedAgentOperation(...create, true)),
+    ).toEqual(task);
     await expect(
       core.approvedAgentOperation(
         ...sign(
@@ -485,7 +728,9 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
     );
     run = runSchema.parse(await core.approvedAgentOperation(...submission));
     expect(run.status).toBe("needs_review");
-    expect(await core.approvedAgentOperation(...submission, true)).toEqual(run);
+    expect(
+      runSchema.parse(await core.approvedAgentOperation(...submission, true)),
+    ).toEqual(run);
     await core.setAgentPermission(person, agentId, {
       capability: "tasks.write",
       decision: "deny",
@@ -513,7 +758,9 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       core.approvedAgentOperation(...submission, true),
     ).rejects.toMatchObject({ code: "forbidden" });
     await setScopes(issued.scopes);
-    expect(await core.approvedAgentOperation(...submission, true)).toEqual(run);
+    expect(
+      runSchema.parse(await core.approvedAgentOperation(...submission, true)),
+    ).toEqual(run);
     await core.revokeAgentToken(person, issued.id);
     await expect(
       core.approvedAgentOperation(...submission, true),
