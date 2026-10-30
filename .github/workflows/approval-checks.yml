@@ -36,7 +36,7 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
-      - run: git rev-parse HEAD > reviewed-source.txt
+      - run: git rev-parse HEAD | tee reviewed-source.txt
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node-version
@@ -56,11 +56,12 @@ jobs:
         run: |
           set -o pipefail
           pnpm test packages/core/src packages/schemas/src packages/db/src apps/api/src 2>&1 | tee approval-tests.log
-      - uses: actions/upload-artifact@v4
+      - name: Record source and test evidence
         if: always()
-        with:
-          name: approval-checks-${{ github.sha }}
-          path: |
-            reviewed-source.txt
-            approval-tests.log
-          retention-days: 14
+        run: |
+          if test -f reviewed-source.txt; then
+            cat reviewed-source.txt >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if test -f approval-tests.log; then
+            sha256sum approval-tests.log | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
