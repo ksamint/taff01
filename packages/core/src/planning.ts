@@ -454,7 +454,8 @@ export function createPlanningOperations({
       await db
         .select({
           ...getTableColumns(projects),
-          receivedAmount: sql<string>`(select coalesce(sum(amount),0)::text from project_payments where workspace_id = ${projects.workspaceId} and project_id = ${projects.id})`,
+          // Drizzle unqualifies interpolated columns in this projection; keep the outer references explicit.
+          receivedAmount: sql<string>`(select coalesce(sum(pp.amount),0)::text from project_payments pp where pp.workspace_id = "projects"."workspace_id" and pp.project_id = "projects"."id")`,
         })
         .from(projects)
         .where(eq(projects.workspaceId, w))

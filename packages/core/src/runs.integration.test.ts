@@ -378,6 +378,17 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
         version: number;
       };
       expect(await core.approvedAgentOperation(...signed)).toEqual(created);
+      // Another project must not contribute its receipts to this project's total.
+      await core.createProject(person, workspaceId, {
+        name: "Other collection",
+        currency: "CNY",
+        receivedAmount: "99.99",
+      });
+      expect(
+        (await core.listProjects(p, workspaceId)).find(
+          (row) => row.id === created.id,
+        ),
+      ).toMatchObject({ receivedAmount: "0.10", currency: "CNY" });
       expect(
         (await core.listPayments(person, created.id)).map((row) => row.amount),
       ).toEqual(["0.10"]);
