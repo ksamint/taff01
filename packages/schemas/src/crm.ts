@@ -4,6 +4,7 @@ import {
   array,
   boolean,
   email,
+  extend,
   type infer as Infer,
   iso,
   literal,
@@ -272,9 +273,16 @@ export const crmSearchResultSchema = object({
   contacts: contactListSchema,
 });
 
-export const mcpCompaniesListArgs = companyFilterSchema;
-export const mcpContactsListArgs = contactFilterSchema;
-export const mcpContactsGetArgs = strictObject({ contactId: idSchema });
+export const mcpCompaniesListArgs = extend(companyFilterSchema, {
+  workspaceId: optional(idSchema),
+});
+export const mcpContactsListArgs = extend(contactFilterSchema, {
+  workspaceId: optional(idSchema),
+});
+export const mcpContactsGetArgs = extend(
+  strictObject({ contactId: idSchema }),
+  { workspaceId: optional(idSchema) },
+);
 
 export type Company = Infer<typeof companySchema>;
 export type CompanyInput = Infer<typeof companyInputSchema>;

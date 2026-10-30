@@ -78,6 +78,7 @@ export const MCP_TOOLS = [
   "tasks.plan",
   "tasks.update",
   "timeline.get",
+  "workspaces.list",
 ] as const;
 
 /** Tools that only read; every other tool changes data (ADR 0021 follow-up). */
@@ -98,6 +99,7 @@ export const MCP_READ_ONLY_TOOLS = [
   "tasks.comments.list",
   "tasks.list",
   "timeline.get",
+  "workspaces.list",
 ] as const;
 
 /** What the person does during the round trip, through core or HTTP. */

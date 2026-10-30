@@ -136,24 +136,36 @@ export const mcpCallSchema = object({
 export const mcpCallListSchema = array(mcpCallSchema);
 /* MCP tool arguments. The token fixes the workspace, so no tool takes one. */
 
-export const mcpTasksCreateArgs = omit(createTaskSchema, {
-  workspaceId: true,
-  workerId: true,
-});
+export const mcpTasksCreateArgs = extend(
+  omit(createTaskSchema, {
+    workspaceId: true,
+    workerId: true,
+  }),
+  { workspaceId: optional(idSchema) },
+);
 
-export const mcpTasksUpdateArgs = strictObject({
-  taskId: idSchema,
-  status: optional(zodEnum(["in_progress", "needs_review"])),
-  workerId: optional(nullable(idSchema)),
-});
-export const mcpCalendarScheduleArgs = strictObject({
-  taskId: idSchema,
-  dueAt: nullable(iso.datetime({ offset: true })),
-});
-export const mcpInboxRequestReviewArgs = strictObject({
-  taskId: idSchema,
-  note: optional(string().check(maxLength(2000))),
-});
+export const mcpTasksUpdateArgs = extend(
+  strictObject({
+    taskId: idSchema,
+    status: optional(zodEnum(["in_progress", "needs_review"])),
+    workerId: optional(nullable(idSchema)),
+  }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpCalendarScheduleArgs = extend(
+  strictObject({
+    taskId: idSchema,
+    dueAt: nullable(iso.datetime({ offset: true })),
+  }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpInboxRequestReviewArgs = extend(
+  strictObject({
+    taskId: idSchema,
+    note: optional(string().check(maxLength(2000))),
+  }),
+  { workspaceId: optional(idSchema) },
+);
 /** Thrown by every schema above on invalid input. */
 
 export type Scope = Infer<typeof scopeSchema>;
@@ -369,19 +381,38 @@ export const agentProfileSchema = object({
   canManage: boolean(),
   canDecideGrants: boolean(),
 });
-export const mcpFilesAttachArgs = extend(attachRunArtifactSchema, {
-  runId: idSchema,
+export const mcpFilesAttachArgs = extend(
+  extend(attachRunArtifactSchema, {
+    runId: idSchema,
+  }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpRunsGetArgs = extend(strictObject({ runId: idSchema }), {
+  workspaceId: optional(idSchema),
 });
-export const mcpRunsGetArgs = strictObject({ runId: idSchema });
-export const mcpRunsStartArgs = strictObject({ taskId: idSchema });
-export const mcpRunsControlArgs = extend(controlRunSchema, { runId: idSchema });
-export const mcpRunsEventArgs = extend(appendRunEventSchema, {
-  runId: idSchema,
+export const mcpRunsStartArgs = extend(strictObject({ taskId: idSchema }), {
+  workspaceId: optional(idSchema),
 });
-export const mcpRunsSubmitArgs = extend(submitRunSchema, { runId: idSchema });
-export const mcpGrantsRequestArgs = extend(requestGrantSchema, {
-  agentId: idSchema,
-});
+export const mcpRunsControlArgs = extend(
+  extend(controlRunSchema, { runId: idSchema }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpRunsEventArgs = extend(
+  extend(appendRunEventSchema, {
+    runId: idSchema,
+  }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpRunsSubmitArgs = extend(
+  extend(submitRunSchema, { runId: idSchema }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpGrantsRequestArgs = extend(
+  extend(requestGrantSchema, {
+    agentId: idSchema,
+  }),
+  { workspaceId: optional(idSchema) },
+);
 export type Capability = Infer<typeof capabilitySchema>;
 export type PermissionDecision = Infer<typeof permissionDecisionSchema>;
 export type ReviewPolicy = Infer<typeof reviewPolicySchema>;
@@ -577,12 +608,23 @@ export const quickAddResultSchema = object({
   ),
   unresolved: array(string()),
 });
-export const mcpTasksEditArgs = extend(updateTaskSchema, { taskId: idSchema });
-export const mcpTaskCommentsListArgs = strictObject({ taskId: idSchema });
-export const mcpTaskCommentsAddArgs = extend(taskCommentInputSchema, {
-  taskId: idSchema,
+export const mcpTasksEditArgs = extend(
+  extend(updateTaskSchema, { taskId: idSchema }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpTaskCommentsListArgs = extend(
+  strictObject({ taskId: idSchema }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpTaskCommentsAddArgs = extend(
+  extend(taskCommentInputSchema, {
+    taskId: idSchema,
+  }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpContextGetArgs = extend(strictObject({}), {
+  workspaceId: optional(idSchema),
 });
-export const mcpContextGetArgs = strictObject({});
 export const mcpContextSchema = object({
   now: calendarInstantSchema,
   workspace: object({
@@ -605,13 +647,24 @@ export const mcpContextSchema = object({
   projects: array(object({ id: idSchema, name: string() })),
 });
 export type McpContext = Infer<typeof mcpContextSchema>;
-export const mcpProjectsListArgs = strictObject({});
-export const mcpProjectsCreateArgs = projectInputSchema;
-export const mcpProjectsEditArgs = extend(projectUpdateSchema, {
-  projectId: idSchema,
+export const mcpProjectsListArgs = extend(strictObject({}), {
+  workspaceId: optional(idSchema),
 });
-export const mcpSearchArgs = searchInputSchema;
-export const mcpQuickAddArgs = quickAddInputSchema;
+export const mcpProjectsCreateArgs = extend(projectInputSchema, {
+  workspaceId: optional(idSchema),
+});
+export const mcpProjectsEditArgs = extend(
+  extend(projectUpdateSchema, {
+    projectId: idSchema,
+  }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpSearchArgs = extend(searchInputSchema, {
+  workspaceId: optional(idSchema),
+});
+export const mcpQuickAddArgs = extend(quickAddInputSchema, {
+  workspaceId: optional(idSchema),
+});
 export type UpdateTask = Infer<typeof updateTaskSchema>;
 export type TaskFilter = Infer<typeof taskFilterSchema>;
 export type TaskCommentInput = Infer<typeof taskCommentInputSchema>;
@@ -631,7 +684,9 @@ export type SearchResult = Infer<typeof searchResultSchema>;
 export type QuickAddInput = Infer<typeof quickAddInputSchema>;
 export type QuickAddResult = Infer<typeof quickAddResultSchema>;
 
-export const mcpTasksListArgs = taskFilterSchema;
+export const mcpTasksListArgs = extend(taskFilterSchema, {
+  workspaceId: optional(idSchema),
+});
 
 export const taskAccessSchema = object({
   canEditMetadata: boolean(),
@@ -656,10 +711,15 @@ export const setTaskCalendarSchema = strictObject({
   version: versionSchema,
   schedule: nullable(calendarScheduleInputSchema),
 });
-export const mcpCalendarListArgs = calendarRangeSchema;
-export const mcpCalendarSetArgs = extend(setTaskCalendarSchema, {
-  taskId: idSchema,
+export const mcpCalendarListArgs = extend(calendarRangeSchema, {
+  workspaceId: optional(idSchema),
 });
+export const mcpCalendarSetArgs = extend(
+  extend(setTaskCalendarSchema, {
+    taskId: idSchema,
+  }),
+  { workspaceId: optional(idSchema) },
+);
 export type CalendarRange = Infer<typeof calendarRangeSchema>;
 export type SetTaskCalendar = Infer<typeof setTaskCalendarSchema>;
 export {
@@ -826,4 +886,11 @@ export const approvedAgentPayloadSchema = omit(approvedAgentOperationSchema, {
 export const approvedAgentEnvelopeSchema = strictObject({
   operation_json: string().check(minLength(1), maxLength(1_048_576)),
   operation_hash: string().check(regex(/^[a-f0-9]{64}$/)),
+});
+
+export const agentTokenWorkspaceInputSchema = strictObject({
+  workspaceId: idSchema,
+  memberId: idSchema,
+  scopes: array(scopeSchema).check(minLength(1)),
+  revoked: optional(boolean()),
 });

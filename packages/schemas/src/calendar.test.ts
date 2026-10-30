@@ -21,7 +21,7 @@ const schedule = {
   rrule: "FREQ=MONTHLY;BYMONTHDAY=-1",
 };
 describe("calendar shared trust boundaries and gestures", () => {
-  it("shares atomic create and MCP calendar fields without permitting workspace/worker injection", () => {
+  it("shares atomic create and MCP calendar fields with optional workspace selection and without worker injection", () => {
     expect(
       createTaskSchema.parse({
         workspaceId: id,
@@ -44,7 +44,7 @@ describe("calendar shared trust boundaries and gestures", () => {
         calendar: schedule,
         workspaceId: id,
       }).success,
-    ).toBe(false);
+    ).toBe(true);
     expect(
       mcpTasksCreateArgs.safeParse({ ownerId: id, title: "Slot", workerId: id })
         .success,
@@ -85,7 +85,7 @@ describe("calendar shared trust boundaries and gestures", () => {
         schedule,
         workspaceId: id,
       }).success,
-    ).toBe(false);
+    ).toBe(true);
   });
   it("resize and time-only moves preserve last-day and yearly selectors", () => {
     const resized = shiftCalendarSeries(

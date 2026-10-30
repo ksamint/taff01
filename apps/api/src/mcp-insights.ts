@@ -5,7 +5,7 @@ import {
   mcpRelationsGetArgs,
   mcpSuggestionsCreateArgs,
 } from "@taff/schemas";
-import { toolSchema } from "./mcp";
+import { type CallState, toolSchema } from "./mcp";
 import { ADDITIVE, READ_ONLY } from "./mcp-annotations";
 
 /**
@@ -18,8 +18,9 @@ import { ADDITIVE, READ_ONLY } from "./mcp-annotations";
 export function registerInsightTools(
   server: McpServer,
   core: Core,
-  principal: Extract<Principal, { kind: "agent" }>,
+  tokenPrincipal: Extract<Principal, { kind: "agent" }>,
   run: (fn: () => Promise<unknown>) => Promise<CallToolResult>,
+  state: CallState,
 ) {
   server.registerTool(
     "relations.get",
@@ -30,8 +31,21 @@ export function registerInsightTools(
       inputSchema: toolSchema(mcpRelationsGetArgs),
       annotations: READ_ONLY,
     },
-    (args) =>
-      run(() => core.relationGraph(principal, principal.workspaceId, args)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          execute(() =>
+            core.relationGraph(principal, principal.workspaceId, args),
+          ))(args);
+      }),
   );
   server.registerTool(
     "brief.get",
@@ -42,13 +56,24 @@ export function registerInsightTools(
       inputSchema: toolSchema(mcpBriefGetArgs),
       annotations: READ_ONLY,
     },
-    () =>
-      run(() =>
-        core.getBrief(principal, {
-          scope: "workspace",
-          workspaceId: principal.workspaceId,
-        }),
-      ),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((_unused: Args) =>
+          execute(() =>
+            core.getBrief(principal, {
+              scope: "workspace",
+              workspaceId: principal.workspaceId,
+            }),
+          ))(args);
+      }),
   );
   server.registerTool(
     "suggestions.create",
@@ -59,6 +84,18 @@ export function registerInsightTools(
       inputSchema: toolSchema(mcpSuggestionsCreateArgs),
       annotations: ADDITIVE,
     },
-    (input) => run(() => core.createSuggestion(principal, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((input: Args) =>
+          execute(() => core.createSuggestion(principal, input)))(args);
+      }),
   );
 }

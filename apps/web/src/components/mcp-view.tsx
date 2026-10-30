@@ -568,6 +568,12 @@ export function McpView({ origin }: { origin?: string }) {
                             />
                           </summary>
                           <div className="mcp-client-body">
+                            {!pending && (
+                              <TokenWorkspaces
+                                token={token}
+                                workspaceId={workspace.id}
+                              />
+                            )}
                             {token.oauthClientId && isAdmin && (
                               <p className="mcp-note">
                                 {t("mcp.approvedBy", {
@@ -797,5 +803,110 @@ export function McpView({ origin }: { origin?: string }) {
         </SheetDialog>
       )}
     </div>
+  );
+}
+
+function TokenWorkspaces({
+  token,
+  workspaceId,
+}: {
+  token: AgentToken;
+  workspaceId: string;
+}) {
+  const { t } = useTranslation();
+  const [target, setTarget] = useState(workspaceId);
+  const [memberId, setMemberId] = useState(token.memberId);
+  const [scopes, setScopes] = useState<Scope[]>(["tasks:read"]);
+  const [busy, setBusy] = useState(false);
+  const grants = useQuery({
+    queryKey: ["token-workspaces", token.id, workspaceId],
+    queryFn: () =>
+      request<
+        Array<{
+          workspaceId: string;
+          memberId: string;
+          scopes: Scope[];
+          revokedAt: string | null;
+        }>
+      >(`/api/agent-tokens/${token.id}/workspaces?workspaceId=${workspaceId}`),
+  });
+  async function save(revoked: boolean) {
+    setBusy(true);
+    try {
+      await request(`/api/agent-tokens/${token.id}/workspaces`, {
+        method: "PUT",
+        body: JSON.stringify({
+          workspaceId: target,
+          memberId,
+          scopes,
+          revoked,
+        }),
+      });
+      await grants.refetch();
+    } catch (error) {
+      showToast(t(errorKey(error)));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <section aria-label={t("mcp.workspaceGrants")}>
+      <h4>{t("mcp.workspaceGrants")}</h4>
+      {grants.isError && <p role="alert">{t(errorKey(grants.error))}</p>}
+      {grants.data?.map((grant) => (
+        <Button
+          key={grant.workspaceId}
+          type="button"
+          onClick={() => {
+            setTarget(grant.workspaceId);
+            setMemberId(grant.memberId);
+            setScopes(grant.scopes);
+          }}
+        >
+          {grant.workspaceId} · {grant.scopes.join(", ")} ·{" "}
+          {grant.revokedAt ? t("mcp.revoked") : t("mcp.grantActive")}
+        </Button>
+      ))}
+      <Label>
+        {t("mcp.targetWorkspace")}
+        <Input
+          value={target}
+          onChange={(event) => setTarget(event.target.value)}
+        />
+      </Label>
+      <Label>
+        {t("mcp.targetAgent")}
+        <Input
+          value={memberId}
+          onChange={(event) => setMemberId(event.target.value)}
+        />
+      </Label>
+      {SCOPES.map((scope) => (
+        <Label key={scope}>
+          <input
+            type="checkbox"
+            checked={scopes.includes(scope)}
+            onChange={(event) =>
+              setScopes(
+                event.target.checked
+                  ? [...scopes, scope]
+                  : scopes.filter((value) => value !== scope),
+              )
+            }
+          />
+          {scope}
+        </Label>
+      ))}
+      <Button
+        type="button"
+        disabled={busy || !scopes.length}
+        onClick={() => void save(false)}
+      >
+        {t("mcp.saveGrant")}
+      </Button>
+      <Button type="button" disabled={busy} onClick={() => void save(true)}>
+        {t("mcp.revokeGrant")}
+      </Button>
+    </section>
   );
 }

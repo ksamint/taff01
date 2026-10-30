@@ -277,6 +277,7 @@ describe("timeline MCP tools", () => {
   };
   it("lists the timeline tools and forwards validated arguments with the token identity", async () => {
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
     vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     const listed = await call("tools/list", {});
     expect(listed.result?.tools?.map((tool) => tool.name)).toEqual(
