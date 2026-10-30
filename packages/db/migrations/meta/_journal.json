@@ -236,29 +236,36 @@
     {
       "idx": 33,
       "version": "7",
-      "when": 1793232000000,
-      "tag": "0033_trusted_review_receipts",
+      "when": 1792483200001,
+      "tag": "0033_personal_default_agent",
       "breakpoints": true
     },
     {
       "idx": 34,
       "version": "7",
-      "when": 1793232000001,
-      "tag": "0034_approved_agent_receipts",
+      "when": 1793232000000,
+      "tag": "0034_trusted_review_receipts",
       "breakpoints": true
     },
     {
       "idx": 35,
       "version": "7",
-      "when": 1793232000002,
-      "tag": "0035_integration_audit",
+      "when": 1793232000001,
+      "tag": "0035_approved_agent_receipts",
       "breakpoints": true
     },
     {
       "idx": 36,
       "version": "7",
+      "when": 1793232000002,
+      "tag": "0036_integration_audit",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
       "when": 1793232000003,
-      "tag": "0036_project_delivery",
+      "tag": "0037_project_delivery",
       "breakpoints": true
     }
   ]

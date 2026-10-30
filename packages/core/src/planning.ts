@@ -66,6 +66,7 @@ import {
   sql,
 } from "drizzle-orm";
 import { zoneOf } from "./actor-timezone";
+import { ensureDefaultAgent } from "./default-agents";
 import { deliverEmail, type EmailStatus, type EmailTransport } from "./email";
 import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
@@ -613,7 +614,6 @@ export function createPlanningOperations({
       amount: `${delta / 100n}.${String(delta % 100n).padStart(2, "0")}`,
       paidOn: localDate(new Date(), await zoneOf(tx, p, actor)),
       createdBy: actor.id,
-      note: "Cumulative collection update",
     });
   }
   async function requireCompany(tx: Transaction, w: string, id: string) {
@@ -733,6 +733,7 @@ export function createPlanningOperations({
           kind: "agent",
           role: "member",
         });
+      await ensureDefaultAgent(tx, workspace.id);
       return {
         id: workspace.id,
         name: workspace.name,

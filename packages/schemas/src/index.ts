@@ -460,7 +460,13 @@ export const projectInputSchema = strictObject({
   name: boundedText(100),
   ...projectProfileFields,
   ...projectFinanceFields,
-});
+}).check(
+  refine(
+    (v) =>
+      (v.contractAmount == null && v.receivedAmount === undefined) ||
+      v.currency != null,
+  ),
+);
 export const projectUpdateSchema = strictObject({
   version: versionSchema,
   name: optional(boundedText(100)),

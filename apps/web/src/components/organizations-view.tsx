@@ -153,6 +153,17 @@ export function OrganizationsView() {
   const revoke = useRevokeWorkspaceInvite(workspace.id);
   const formatDate = useInviteDateFormat();
   const openInvite = () => setDialog("invite");
+  const addAgentReason = !confirmed
+    ? "organization.sessionPending"
+    : access.isPending || members.isPending
+      ? "loading"
+      : !access.data?.canManageRoles
+        ? "organization.adminRequired"
+        : busy
+          ? "working"
+          : members.isError
+            ? "errors.internal_error"
+            : null;
   const error =
     defaults.error ??
     accept.error ??
@@ -277,6 +288,17 @@ export function OrganizationsView() {
                   0,
               )}
             </h2>
+            {members.isPending && <p role="status">{t("loading")}</p>}
+            {members.isSuccess &&
+              !members.data.some((member) => member.kind === kind) && (
+                <p role="status">
+                  {t(
+                    kind === "agent"
+                      ? "oauth.noAgent"
+                      : "organization.noPeople",
+                  )}
+                </p>
+              )}
             <ul className="team-directory-list">
               {members.data
                 ?.filter((member) => member.kind === kind)
@@ -409,11 +431,12 @@ export function OrganizationsView() {
                 </Button>
               </div>
             )}
-            {kind === "agent" && teamOnly && access.data?.canManageRoles && (
+            {kind === "agent" && (
               <div className="team-invite-row">
                 <Button
                   type="button"
-                  disabled={busy || !confirmed || !members.data}
+                  disabled={!!addAgentReason}
+                  aria-describedby="add-agent-reason"
                   data-testid="team-add-agent"
                   onClick={() => {
                     setDialog("agent");
@@ -425,6 +448,11 @@ export function OrganizationsView() {
                   <Plus size={16} aria-hidden="true" />
                   {t("organization.addAgent")}
                 </Button>
+                {addAgentReason && (
+                  <p id="add-agent-reason" role="status">
+                    {t(addAgentReason)}
+                  </p>
+                )}
               </div>
             )}
           </section>

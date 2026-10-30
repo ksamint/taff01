@@ -45,6 +45,12 @@ describe("project delivery trust boundaries", () => {
         projectInputSchema.safeParse({ name: "Project", ...bad }).success,
       ).toBe(false);
     expect(
+      projectInputSchema.safeParse({
+        name: "Missing currency",
+        receivedAmount: "0.10",
+      }).success,
+    ).toBe(false);
+    expect(
       projectUpdateSchema.safeParse({
         version: 1,
         dueAt: null,

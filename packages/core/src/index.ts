@@ -552,6 +552,11 @@ export function createCore(options: {
     parse(idSchema, workspaceId);
     const body = parse(workspaceAgentInputSchema, input);
     return mutation(principal, async (tx) => {
+      await tx
+        .select({ id: workspaces.id })
+        .from(workspaces)
+        .where(eq(workspaces.id, workspaceId))
+        .for("update");
       await requireMember(tx, principal, workspaceId, "workspace:manage");
       const [member] = await tx
         .insert(members)

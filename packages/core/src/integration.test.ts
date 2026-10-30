@@ -90,6 +90,7 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       await core.listMembers(userPrincipal(userId), workspaceId),
     ).toMatchObject([
       { id: ownerId, kind: "person", role: "admin" },
+      { name: "默认智能体 / Default agent", kind: "agent", role: "member" },
       { id: agentId, kind: "agent" },
     ]);
     const rows = await connection.db

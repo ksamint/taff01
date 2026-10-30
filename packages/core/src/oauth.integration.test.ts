@@ -188,11 +188,21 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
       redirectHost: "claude.ai",
     });
     const mine = consent.workspaces.find((item) => item.id === w);
-    expect(mine?.agents).toEqual([{ id: agentId, name: "Claude" }]);
+    expect(mine?.agents).toHaveLength(2);
+    expect(mine?.agents).toEqual(
+      expect.arrayContaining([
+        { id: agentId, name: "Claude" },
+        expect.objectContaining({ name: "默认智能体 / Default agent" }),
+      ]),
+    );
     expect(consent.scopes).toEqual(["tasks:read", "calendar:write"]);
     // Bob is a member, not an admin, of Alice's organization.
     const bobs = await core.oauth.getConsent(bob, request);
-    expect(bobs.workspaces).toEqual([]);
+    expect(bobs.workspaces.some((item) => item.id === w)).toBe(false);
+    expect(bobs.workspaces).toHaveLength(1);
+    expect(bobs.workspaces[0].agents).toEqual([
+      expect.objectContaining({ name: "默认智能体 / Default agent" }),
+    ]);
     // A redirect URI that was not registered is an error page, not a redirect.
     await expect(
       core.oauth.getConsent(alice, {

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (368 distinct, 1964 uses)
+## Test ids (368 distinct, 1975 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -244,15 +244,16 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `issued-token` | 14 |  | live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `issued-token` | 15 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `mcp-connected-apps` | 2 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `mcp-endpoint` | 4 |  | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `token-agent` | 2 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `mcp-no-agents` | 1 |  | agent-creation.spec.ts |
+| `token-agent` | 4 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `token-card` | 7 |  | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `token-name` | 5 |  | live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `token-name` | 6 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `token-regenerate` | 2 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `token-revoke` | 6 |  | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
-| `token-submit` | 5 |  | live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `token-submit` | 7 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 
 ### me-desktop.tsx
 
@@ -352,18 +353,17 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `oauth-agent` | 5 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
+| `oauth-agent` | 6 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-approve` | 4 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-client` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-consent` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-invalid` | 1 |  | mcp-oauth.spec.ts |
-| `oauth-no-workspace` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-redirect` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-scope-files:write` | 4 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-scope-locked-files:write` | 2 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-scope-tasks:read` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-scope-tasks:write` | 1 |  | mcp-oauth.spec.ts |
-| `oauth-workspace` | 3 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
+| `oauth-workspace` | 5 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 
 ### organization-chooser.tsx
 
@@ -383,8 +383,8 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `accept-invitation` | 5 |  | live/live.ts, planning.spec.ts |
 | `agent-create` | 6 |  | agent-creation.spec.ts, release/support.ts |
-| `agent-name` | 5 |  | agent-creation.spec.ts, release/support.ts |
-| `team-add-agent` | 7 |  | agent-creation.spec.ts, release/support.ts |
+| `agent-name` | 6 |  | agent-creation.spec.ts, release/support.ts |
+| `team-add-agent` | 8 |  | agent-creation.spec.ts, release/support.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
 
 ### projects-scene.tsx
@@ -621,7 +621,7 @@ several do). “Also rendered by” lists the other files.
 
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
-| `alert` | 35 | agent-creation.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `alert` | 36 | agent-creation.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `button` | 9 | calendar.spec.ts, live/release/checklist.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -662,7 +662,7 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: messages[locale].notifications.title` | 1 | notifications.spec.ts |
 | `heading — name: messages[locale].pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `heading — name: project.name` | 2 | persistence.spec.ts |
-| `link` | 2 | calendar.spec.ts, ui-v2.spec.ts |
+| `link` | 3 | agent-creation.spec.ts, calendar.spec.ts, ui-v2.spec.ts |
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
 | `link — name: childTitle` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -745,6 +745,7 @@ read (`data-event-id`, `data-date`).
 | `.loading` | 2 | ui-v2.spec.ts |
 | `.mcp-call` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-config` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `.mcp-form` | 1 | agent-creation.spec.ts |
 | `.mcp-scopes label.mcp-scope` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="active"]` | 6 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="revoked"]` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -802,6 +803,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="timeline-dependency"][data-from="*"][data-to="*"]` | 4 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-row"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-time-grid-date]` | 1 | calendar-accessibility.spec.ts |
+| `#add-agent-reason` | 1 | agent-creation.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#default-workspace` | 1 | organization-default.spec.ts |
 | `#grant-reason` | 1 | optimistic-m4.spec.ts |
@@ -838,7 +840,7 @@ read (`data-event-id`, `data-date`).
 | `main.loading` | 2 | i18n.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |
-| `option[value="*"]` | 8 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, planning.spec.ts, project-profile.spec.ts, v021-feature-gaps.spec.ts |
+| `option[value="*"]` | 9 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, mcp-oauth.spec.ts, planning.spec.ts, project-profile.spec.ts, v021-feature-gaps.spec.ts |
 | `select[id="grant-expiry-*"]` | 1 | agent-review.spec.ts |
 
 ## Locale message lookups
@@ -891,7 +893,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.auth` | 6 | sms-auth.spec.ts, username-auth.spec.ts |
 | `errors.conflict` | 11 | calendar.spec.ts, planning.spec.ts |
 | `errors.email_verification_required` | 5 | planning.spec.ts |
-| `errors.forbidden` | 10 | agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
+| `errors.forbidden` | 11 | agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
 | `errors.internal_error` | 2 | calendar.spec.ts |
 | `errors.invalid_input` | 14 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
@@ -932,7 +934,9 @@ Keys read from `apps/web/locales/*/common.json` through
 | `notifications.title` | 1 | notifications.spec.ts |
 | `oauth.approve` | 1 | mcp-oauth.spec.ts |
 | `oauth.invalid` | 1 | mcp-oauth.spec.ts |
+| `oauth.noAgent` | 1 | agent-creation.spec.ts |
 | `organization.accept` | 5 | planning.spec.ts |
+| `organization.adminRequired` | 1 | agent-creation.spec.ts |
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
 | `organization.emailDelivery.logged` | 5 | planning.spec.ts |
 | `organization.invite` | 25 | planning.spec.ts |

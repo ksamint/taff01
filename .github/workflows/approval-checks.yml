@@ -1,4 +1,4 @@
-name: Approval and timezone checks
+name: Approval, project and timezone checks
 on:
   workflow_dispatch:
 permissions:
@@ -44,12 +44,13 @@ jobs:
         run: |
           pnpm lint
           pnpm --filter @taff/core --filter @taff/db --filter @taff/schemas --filter @taff/api typecheck
-      - name: Isolated approval, permission and timezone workflows
+      - name: Isolated PostgreSQL core, schemas and API workflows
         env:
           DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/taff_test
           TEST_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:${{ job.services.postgres.ports['5432'] }}/taff_test
         run: |
-          pnpm test packages/core/src/trusted-review.test.ts packages/core/src/approved-agent-operation.test.ts packages/core/src/runs.integration.test.ts packages/core/src/planning.integration.test.ts packages/core/src/timeline.integration.test.ts packages/core/src/calendar.integration.test.ts packages/core/src/assistant.integration.test.ts packages/core/src/permissions.test.ts packages/core/src/quick-add.test.ts packages/core/src/calendar-recurrence.test.ts apps/api/src/app.test.ts packages/schemas/src/planning.test.ts packages/schemas/src/calendar.test.ts packages/schemas/src/runs.test.ts 2>&1 | tee approval-tests.log
+          set -o pipefail
+          pnpm test packages/core/src packages/schemas/src packages/db/src apps/api/src 2>&1 | tee approval-tests.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

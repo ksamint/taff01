@@ -48,3 +48,8 @@ collected amount and collection % were admin-only (D7).
 - No further migration or backfill is needed. Unstaged Brief rows and their
   seeded screens keep their existing appearance; the admin project header
   gains the stage control even before a stage is set.
+
+
+2026-10-30 amendment: ADR0025 supersedes the unconditional agent-finance denial
+only for explicitly granted projects.manage with task read/write scopes. Project
+MCP writes prepare proposals; only signed human-confirmed operations mutate.

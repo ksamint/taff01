@@ -23,4 +23,4 @@ nothing; lower totals reject (refund/correction semantics are out of scope). A
 currency change after any receipt rejects. Payments also lock/update the project
 version, preventing approval with stale totals. Payment date uses the token
 issuer's saved timezone. Business changes, payment, audit and receipt share one
-transaction. ISO deadline and progress use additive migration0036.
+transaction. ISO deadline and progress use additive migration0037.

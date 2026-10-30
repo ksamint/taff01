@@ -187,8 +187,7 @@ export function can(
         capability: "projects.manage",
       })
     );
-  // Every person of the workspace reads contract and collection figures
-  // (ADR 0021, superseding D7); guests and agents never do.
+  // Non-guest people read finance; explicitly granted project agents are handled above (ADR0025).
   if (
     action === "contact:manage" ||
     action === "mind:write" ||

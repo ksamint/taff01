@@ -506,7 +506,8 @@
     "historyGrant": "{{capability}}: {{status}}",
     "historyPermission": "{{capability}}: {{decision}}",
     "historyPolicy": "Review policy: {{policy}}",
-    "historySettings": "Agent settings changed"
+    "historySettings": "Agent settings changed",
+    "manageRequired": "Only organization admins can change agent permissions and review rules."
   },
   "grants": {
     "history": "Grant history",
@@ -659,7 +660,10 @@
     "automaticDefault": "Automatic",
     "loginDefaultHint": "Automatic opens an organization you belong to, or your personal workspace named after you. Your choice is saved across devices.",
     "setMemberDefault": "Set login default for {{name}}",
-    "defaultUpdated": "Login default updated for {{name}}."
+    "defaultUpdated": "Login default updated for {{name}}.",
+    "sessionPending": "Confirming your session. Please wait before making changes.",
+    "adminRequired": "Only organization admins can add agents.",
+    "noPeople": "No people in this organization."
   },
   "pwa": {
     "description": "Tasks and calendars for people and agents.",

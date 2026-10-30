@@ -20,7 +20,7 @@ const alias = {
 for (const [entry, name] of [
   ["apps/api/src/index.ts", "api"],
   ["apps/worker/src/index.ts", "worker"],
-  ["packages/db/src/migrate.ts", "migrate"],
+  ["packages/core/src/migrate.ts", "migrate"],
   ["packages/core/src/provision-administration.ts", "administration"],
   ["packages/core/src/cleanup-organizations.ts", "cleanup-organizations"],
 ] as const) {

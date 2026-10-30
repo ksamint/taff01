@@ -435,6 +435,45 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
           ),
         ),
       ).rejects.toMatchObject({ code: "invalid_input" });
+      const failed = sign(
+        "projects.edit",
+        { projectId: created.id, version: 2, receivedAmount: "0.40" },
+        2,
+      );
+      const failedReceipt = JSON.parse(failed[1].operation_json).receipt_id;
+      await connection.db.execute(
+        sql.raw(
+          `CREATE FUNCTION taff_test_project_receipt_failure() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.id='${failedReceipt}'::uuid THEN RAISE EXCEPTION 'fixture receipt failure'; END IF; RETURN NEW; END $$`,
+        ),
+      );
+      await connection.db.execute(
+        sql.raw(
+          "CREATE TRIGGER taff_test_project_receipt_failure BEFORE INSERT ON approved_agent_receipts FOR EACH ROW EXECUTE FUNCTION taff_test_project_receipt_failure()",
+        ),
+      );
+      try {
+        await expect(core.approvedAgentOperation(...failed)).rejects.toThrow();
+      } finally {
+        await connection.db.execute(
+          sql.raw(
+            "DROP TRIGGER taff_test_project_receipt_failure ON approved_agent_receipts",
+          ),
+        );
+        await connection.db.execute(
+          sql.raw("DROP FUNCTION taff_test_project_receipt_failure()"),
+        );
+      }
+      expect(
+        (await core.listProjects(person, workspaceId)).find(
+          (row) => row.id === created.id,
+        ),
+      ).toMatchObject({ version: 2, receivedAmount: "0.30" });
+      expect(
+        (await core.listPayments(person, created.id)).map((row) => row.amount),
+      ).toEqual(["0.10", "0.20"]);
+      await expect(
+        core.approvedAgentOperation(...failed, true),
+      ).rejects.toMatchObject({ code: "not_found" });
       await core.addPayment(person, created.id, {
         amount: "0.01",
         paidOn: "2026-10-30",
