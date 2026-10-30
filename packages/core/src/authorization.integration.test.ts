@@ -686,6 +686,17 @@ const routes: RequestCase[] = [
     }),
     member: "deny",
   },
+  {
+    method: "GET",
+    path: "/api/agent-tokens/:token/workspaces?workspaceId=:workspace",
+    member: "deny",
+  },
+  {
+    method: "PUT",
+    path: "/api/agent-tokens/:token/workspaces",
+    member: "deny",
+    body: () => ({ workspaceId, memberId: agentId, scopes: ["tasks:read"] }),
+  },
   { method: "DELETE", path: "/api/agent-tokens/:token", member: "deny" },
   {
     method: "POST",
@@ -1355,6 +1366,7 @@ describe.skipIf(!databaseUrl)(
 
     const implicitWorkspaceTools = new Set([
       "context.get",
+      "workspaces.list",
       "tasks.list",
       "projects.list",
       "projects.create",
@@ -1396,6 +1408,7 @@ describe.skipIf(!databaseUrl)(
       }
       const args: Record<string, Record<string, unknown>> = {
         "context.get": {},
+        "workspaces.list": {},
         "tasks.list": {},
         "tasks.create": {
           ownerId,

@@ -29,6 +29,11 @@ describe("MCP round trip helpers", () => {
     const registered = [
       ...sources.matchAll(/registerTool\(\s*"([a-z_.]+)"/g),
     ].map((match) => match[1]);
+    registered.push(
+      ...[
+        ...sources.matchAll(/\["(projects\.(?:create|edit))", mcpProjects/g),
+      ].map((match) => match[1]),
+    );
     expect(registered.sort()).toEqual([...MCP_TOOLS]);
   });
 

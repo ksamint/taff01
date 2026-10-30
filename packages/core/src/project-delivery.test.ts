@@ -65,9 +65,21 @@ describe("project delivery trust boundaries", () => {
         deliveryProgress: 100,
       }).success,
     ).toBe(true);
-    expect(approvedAgentToolSchemas["projects.create"]).toBe(
-      projectInputSchema,
+    const input = {
+      name: "Signed project",
+      receivedAmount: "0.01",
+      contractAmount: "1.00",
+      currency: "CNY",
+    };
+    expect(approvedAgentToolSchemas["projects.create"].parse(input)).toEqual(
+      projectInputSchema.parse(input),
     );
+    expect(
+      approvedAgentToolSchemas["projects.create"].safeParse({
+        ...input,
+        receivedAmount: "invalid",
+      }).success,
+    ).toBe(false);
   });
   it("computes collection deltas without floating point or rewriting previous payments", () => {
     expect(collectionDelta("999999999999.99", "999999999999.98")).toBe(1n);

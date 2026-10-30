@@ -5,7 +5,7 @@ import {
   mcpContactsGetArgs,
   mcpContactsListArgs,
 } from "@taff/schemas";
-import { toolSchema } from "./mcp";
+import { type CallState, toolSchema } from "./mcp";
 import { READ_ONLY } from "./mcp-annotations";
 
 /**
@@ -16,8 +16,9 @@ import { READ_ONLY } from "./mcp-annotations";
 export function registerCrmTools(
   server: McpServer,
   core: Core,
-  principal: Extract<Principal, { kind: "agent" }>,
+  tokenPrincipal: Extract<Principal, { kind: "agent" }>,
   run: (fn: () => Promise<unknown>) => Promise<CallToolResult>,
+  state: CallState,
 ) {
   server.registerTool(
     "companies.list",
@@ -28,8 +29,21 @@ export function registerCrmTools(
       inputSchema: toolSchema(mcpCompaniesListArgs),
       annotations: READ_ONLY,
     },
-    (args) =>
-      run(() => core.listCompanies(principal, principal.workspaceId, args)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          execute(() =>
+            core.listCompanies(principal, principal.workspaceId, args),
+          ))(args);
+      }),
   );
   server.registerTool(
     "contacts.list",
@@ -40,8 +54,21 @@ export function registerCrmTools(
       inputSchema: toolSchema(mcpContactsListArgs),
       annotations: READ_ONLY,
     },
-    (args) =>
-      run(() => core.listContacts(principal, principal.workspaceId, args)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          execute(() =>
+            core.listContacts(principal, principal.workspaceId, args),
+          ))(args);
+      }),
   );
   server.registerTool(
     "contacts.get",
@@ -52,6 +79,18 @@ export function registerCrmTools(
       inputSchema: toolSchema(mcpContactsGetArgs),
       annotations: READ_ONLY,
     },
-    ({ contactId }) => run(() => core.getContactDetail(principal, contactId)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ contactId }: Args) =>
+          execute(() => core.getContactDetail(principal, contactId)))(args);
+      }),
   );
 }

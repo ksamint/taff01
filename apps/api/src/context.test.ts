@@ -1,4 +1,4 @@
-import { createCore } from "@taff/core";
+import { CoreError, createCore } from "@taff/core";
 import pino from "pino";
 import { afterAll, afterEach, expect, it, vi } from "vitest";
 import apiPackage from "../package.json";
@@ -45,8 +45,14 @@ async function call(method: string, params: unknown) {
       : raw,
   );
 }
-it("advertises read-only context and binds it to the authenticated token; rejects workspace overrides", async () => {
+it("advertises read-only context and binds it to the authenticated token; rejects unauthorized workspaces", async () => {
   vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+  vi.spyOn(core, "resolveAgentWorkspace").mockImplementation(
+    async (_actor, target) => {
+      if (target && target !== id) throw new CoreError("forbidden", 403);
+      return principal;
+    },
+  );
   vi.spyOn(core, "recordMcpCall").mockResolvedValue();
   const read = vi.spyOn(core, "getContext").mockResolvedValue({
     now: "2026-10-16T08:00:00Z",
@@ -78,7 +84,7 @@ it("advertises read-only context and binds it to the authenticated token; reject
   expect(read).toHaveBeenCalledExactlyOnceWith(principal, id);
   const rejected = await call("tools/call", {
     name: "context.get",
-    arguments: { workspaceId: id },
+    arguments: { workspaceId: "00000000-0000-4000-8000-000000000002" },
   });
   expect(rejected.error || rejected.result?.isError).toBeTruthy();
   expect(read).toHaveBeenCalledTimes(1);
@@ -86,6 +92,7 @@ it("advertises read-only context and binds it to the authenticated token; reject
 
 it("advertises the API package version during MCP initialization", async () => {
   vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+  vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
   vi.spyOn(core, "recordMcpCall").mockResolvedValue();
   const response = await call("initialize", {
     protocolVersion: "2026-07-28",
@@ -100,6 +107,7 @@ it("advertises the API package version during MCP initialization", async () => {
 
 it("annotates every tool: reads are read-only, additions and updates are marked", async () => {
   vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+  vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
   vi.spyOn(core, "recordMcpCall").mockResolvedValue();
   const additive = [
     "dependencies.add",
@@ -126,7 +134,7 @@ it("annotates every tool: reads are read-only, additions and updates are marked"
     name: string;
     annotations?: Record<string, boolean>;
   }[] = (await call("tools/list", {})).result.tools;
-  expect(listed).toHaveLength(33);
+  expect(listed).toHaveLength(34);
   for (const tool of listed) {
     const expected = additive.includes(tool.name)
       ? { readOnlyHint: false, destructiveHint: false, idempotentHint: false }
@@ -139,12 +147,13 @@ it("annotates every tool: reads are read-only, additions and updates are marked"
     });
   }
   expect(listed.filter((tool) => tool.annotations?.readOnlyHint).length).toBe(
-    33 - additive.length - update.length,
+    34 - additive.length - update.length,
   );
 });
 
 it("project MCP changes only prepare validated proposals; they never call native project mutations", async () => {
   vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+  vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
   vi.spyOn(core, "recordMcpCall").mockResolvedValue();
   const prepare = vi.spyOn(core, "prepareProjectOperation").mockResolvedValue({
     requires_confirmation: true,

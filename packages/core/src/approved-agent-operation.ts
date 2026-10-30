@@ -54,6 +54,7 @@ export function verifyAgentOperation(
 
 export function createApprovedAgentOperation(deps: {
   key?: string;
+  resolveAgentWorkspace(p: Agent, workspaceId: string): Promise<Agent>;
   mappings?: ControllerMapping[];
   requireMember?(
     q: Database | Transaction,
@@ -92,8 +93,7 @@ export function createApprovedAgentOperation(deps: {
       deps.key ?? "",
       tokenHash,
     );
-    if (operation.workspace_id !== p.workspaceId)
-      throw new CoreError("forbidden", 403);
+    p = await deps.resolveAgentWorkspace(p, operation.workspace_id);
     let args: ReturnType<
       (typeof approvedAgentToolSchemas)[ApprovedAgentOperation["tool"]]["parse"]
     >;
@@ -158,6 +158,8 @@ export function createApprovedAgentOperation(deps: {
         if (!candidate || candidate.workspaceId !== p.workspaceId)
           throw new CoreError("forbidden", 403);
         const task = await deps.lockTask(tx, candidate.taskId);
+        if (task.workspaceId !== p.workspaceId)
+          throw new CoreError("forbidden", 403);
         const [run] = await tx
           .select()
           .from(runs)

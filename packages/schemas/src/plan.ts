@@ -3,6 +3,7 @@
 import {
   array,
   boolean,
+  extend,
   type infer as Infer,
   iso,
   maxLength,
@@ -226,19 +227,30 @@ export const projectFinanceFields = {
   clientCompanyId: optional(nullable(idSchema)),
 };
 
-export const mcpTimelineGetArgs = strictObject({ projectId: idSchema });
-export const mcpTasksPlanArgs = strictObject({
-  taskId: idSchema,
-  version: optional(versionSchema),
-  startDate: civilDateSchema,
-  durationDays: durationDaysSchema,
-  shiftChildren: optional(boolean()),
-  expectedState: optional(string().check(regex(/^[a-f0-9]{64}$/))),
+export const mcpTimelineGetArgs = extend(
+  strictObject({ projectId: idSchema }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpTasksPlanArgs = extend(
+  strictObject({
+    taskId: idSchema,
+    version: optional(versionSchema),
+    startDate: civilDateSchema,
+    durationDays: durationDaysSchema,
+    shiftChildren: optional(boolean()),
+    expectedState: optional(string().check(regex(/^[a-f0-9]{64}$/))),
+  }),
+  { workspaceId: optional(idSchema) },
+);
+export const mcpDependenciesAddArgs = extend(dependencyInputSchema, {
+  workspaceId: optional(idSchema),
 });
-export const mcpDependenciesAddArgs = dependencyInputSchema;
-export const mcpDependenciesRemoveArgs = strictObject({
-  dependencyId: idSchema,
-});
+export const mcpDependenciesRemoveArgs = extend(
+  strictObject({
+    dependencyId: idSchema,
+  }),
+  { workspaceId: optional(idSchema) },
+);
 
 export type TaskPlan = Infer<typeof taskPlanSchema>;
 export type TaskPlanInput = Infer<typeof taskPlanInputSchema>;

@@ -3,6 +3,7 @@
 import {
   array,
   boolean,
+  extend,
   type infer as Infer,
   maxLength,
   nullable,
@@ -96,10 +97,13 @@ export const graphQuerySchema = strictObject({
   projectId: optional(idSchema),
   layers: optional(layerList),
 });
-export const mcpRelationsGetArgs = strictObject({
-  projectId: optional(idSchema),
-  layers: optional(layerList),
-});
+export const mcpRelationsGetArgs = extend(
+  strictObject({
+    projectId: optional(idSchema),
+    layers: optional(layerList),
+  }),
+  { workspaceId: optional(idSchema) },
+);
 
 export type GraphLayer = Infer<typeof graphLayerSchema>;
 export type GraphNodeKind = Infer<typeof graphNodeKindSchema>;

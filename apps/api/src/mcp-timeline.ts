@@ -6,7 +6,7 @@ import {
   mcpTasksPlanArgs,
   mcpTimelineGetArgs,
 } from "@taff/schemas";
-import { toolSchema } from "./mcp";
+import { type CallState, toolSchema } from "./mcp";
 import { ADDITIVE, READ_ONLY, UPDATE } from "./mcp-annotations";
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
@@ -20,8 +20,9 @@ type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
 export function registerTimelineTools(
   server: McpServer,
   core: Core,
-  principal: AgentPrincipal,
+  tokenPrincipal: AgentPrincipal,
   run: (fn: () => Promise<unknown>) => Promise<CallToolResult>,
+  state: CallState,
 ) {
   server.registerTool(
     "timeline.get",
@@ -32,7 +33,19 @@ export function registerTimelineTools(
       inputSchema: toolSchema(mcpTimelineGetArgs),
       annotations: READ_ONLY,
     },
-    ({ projectId }) => run(() => core.getTimeline(principal, projectId)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ projectId }: Args) =>
+          execute(() => core.getTimeline(principal, projectId)))(args);
+      }),
   );
   server.registerTool(
     "tasks.plan",
@@ -43,8 +56,19 @@ export function registerTimelineTools(
       inputSchema: toolSchema(mcpTasksPlanArgs),
       annotations: UPDATE,
     },
-    ({ taskId, ...input }) =>
-      run(() => core.setTaskPlan(principal, taskId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ taskId, ...input }: Args) =>
+          execute(() => core.setTaskPlan(principal, taskId, input)))(args);
+      }),
   );
   server.registerTool(
     "dependencies.add",
@@ -55,7 +79,19 @@ export function registerTimelineTools(
       inputSchema: toolSchema(mcpDependenciesAddArgs),
       annotations: ADDITIVE,
     },
-    (input) => run(() => core.addDependency(principal, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((input: Args) =>
+          execute(() => core.addDependency(principal, input)))(args);
+      }),
   );
   server.registerTool(
     "dependencies.remove",
@@ -66,7 +102,18 @@ export function registerTimelineTools(
       inputSchema: toolSchema(mcpDependenciesRemoveArgs),
       annotations: UPDATE,
     },
-    ({ dependencyId }) =>
-      run(() => core.removeDependency(principal, dependencyId)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ dependencyId }: Args) =>
+          execute(() => core.removeDependency(principal, dependencyId)))(args);
+      }),
   );
 }

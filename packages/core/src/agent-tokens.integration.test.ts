@@ -197,4 +197,179 @@ describe.skipIf(!url)("agent token restore (undo revoke)", () => {
       code: "invalid_input",
     });
   });
+  it("rechecks workspace grants and ignores forged scopes", async () => {
+    const issued = await issue();
+    const p = (await core.authenticateAgentToken(issued.token))!;
+    expect(await core.resolveAgentWorkspace(p)).toMatchObject({
+      workspaceId,
+      memberId: agentId,
+    });
+    await core.setAgentTokenWorkspace(admin, issued.id, {
+      workspaceId,
+      memberId: agentId,
+      scopes: ["tasks:read"],
+    });
+    expect(await core.resolveAgentWorkspace(p)).toMatchObject({
+      scopes: ["tasks:read"],
+    });
+    await expect(
+      core.resolveAgentWorkspace(p, randomUUID()),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.setAgentTokenWorkspace(outsider, issued.id, {
+        workspaceId,
+        memberId: agentId,
+        scopes: ["tasks:write"],
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await core.setAgentTokenWorkspace(admin, issued.id, {
+      workspaceId,
+      memberId: agentId,
+      scopes: ["tasks:read"],
+      revoked: true,
+    });
+    await expect(core.resolveAgentWorkspace(p)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+  });
+
+  it("isolates concurrent organization reads and revokes only the target grant", async () => {
+    const other = await core.auth.api.signUpEmail({
+      body: {
+        name: "Other owner",
+        email: `${randomUUID()}@test.local`,
+        password: `test-${randomUUID()}`,
+      },
+    });
+    const target = (await core.getMe(other.user.id)).workspaces[0].id;
+    let targetAgent = "";
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select set_config('taff.actor_id', ${adminId}, true)`,
+      );
+      await tx.insert(members).values({
+        workspaceId: target,
+        userId: adminId,
+        name: "Both admin",
+        kind: "person",
+        role: "admin",
+      });
+      const [row] = await tx
+        .insert(members)
+        .values({ workspaceId: target, name: "Target agent", kind: "agent" })
+        .returning();
+      targetAgent = row.id;
+    });
+    const issued = await issue();
+    const p = (await core.authenticateAgentToken(issued.token))!;
+    await core.setAgentTokenWorkspace(admin, issued.id, {
+      workspaceId: target,
+      memberId: targetAgent,
+      scopes: ["tasks:read"],
+    });
+    expect(
+      await core.listAgentTokenWorkspaces(admin, issued.id, workspaceId),
+    ).toHaveLength(2);
+    expect(
+      await core.listAgentTokenWorkspaces(
+        userPrincipal(other.user.id),
+        issued.id,
+        target,
+      ),
+    ).toHaveLength(1);
+    const [original, selected] = await Promise.all([
+      core.resolveAgentWorkspace(p),
+      core.resolveAgentWorkspace(p, target),
+    ]);
+    expect(original.workspaceId).toBe(workspaceId);
+    expect(selected).toMatchObject({
+      workspaceId: target,
+      memberId: targetAgent,
+      scopes: ["tasks:read"],
+    });
+    expect(await core.listTasks(selected, target, {})).toEqual([]);
+    const [owner] = await connection.db
+      .select()
+      .from(members)
+      .where(
+        and(eq(members.workspaceId, target), eq(members.userId, other.user.id)),
+      );
+    const targetAdmin = userPrincipal(other.user.id);
+    const task = await core.createTask(targetAdmin, {
+      workspaceId: target,
+      ownerId: owner.id,
+      workerId: targetAgent,
+      title: "Read only grant target",
+    });
+    const run = await core.startRun(targetAdmin, task.id, {});
+    await expect(
+      core.createTask(selected, {
+        workspaceId: target,
+        ownerId: owner.id,
+        workerId: targetAgent,
+        title: "Forbidden",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.createProject(selected, target, { name: "Forbidden" }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.setTaskCalendar(selected, task.id, {
+        version: (await core.getTask(targetAdmin, task.id)).version,
+        schedule: null,
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.attachRunArtifact(
+        { ...selected, scopes: ["tasks:write", "files:write"] },
+        run.id,
+        {
+          version: run.version,
+          name: "forged.txt",
+          mimeType: "text/plain",
+          content: "forged",
+          diff: null,
+          sourceUrl: null,
+        },
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.resolveAgentWorkspace(
+        p,
+        (await core.getMe(outsider.kind === "user" ? outsider.userId : ""))
+          .workspaces[0].id,
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
+
+    await expect(
+      core.listTasks(selected, workspaceId, {}),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id', ${adminId}, true)`,
+        );
+        await tx.delete(members).where(eq(members.id, targetAgent));
+      }),
+    ).rejects.toThrow();
+    await core.setAgentTokenWorkspace(userPrincipal(other.user.id), issued.id, {
+      workspaceId: target,
+      memberId: targetAgent,
+      scopes: ["tasks:read"],
+      revoked: true,
+    });
+    await expect(core.resolveAgentWorkspace(p, target)).rejects.toMatchObject({
+      code: "forbidden",
+    });
+    await expect(core.resolveAgentWorkspace(p)).resolves.toMatchObject({
+      workspaceId,
+    });
+    await expect(
+      core.setAgentTokenWorkspace(userPrincipal(other.user.id), issued.id, {
+        workspaceId: target,
+        memberId: targetAgent,
+        scopes: ["tasks:write"],
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
 });

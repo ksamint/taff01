@@ -1,6 +1,9 @@
 import { createHash, createHmac, randomUUID } from "node:crypto";
-import { describe, expect, it } from "vitest";
-import { verifyAgentOperation } from "./approved-agent-operation";
+import { describe, expect, it, vi } from "vitest";
+import {
+  createApprovedAgentOperation,
+  verifyAgentOperation,
+} from "./approved-agent-operation";
 
 const key = "isolated-agent-approval-secret-at-least-32-characters";
 const tokenHash = createHash("sha256")
@@ -106,4 +109,38 @@ describe("approved original-agent operations", () => {
       ).toThrow();
     }
   });
+});
+
+it("resolves the signed workspace only after signature verification", async () => {
+  const resolveAgentWorkspace = vi
+    .fn()
+    .mockRejectedValue(new Error("grant denied"));
+  const execute = createApprovedAgentOperation({
+    key,
+    resolveAgentWorkspace,
+    mutation: vi.fn(),
+    loadActor: vi.fn(),
+    lockTask: vi.fn(),
+    currentRunId: vi.fn(),
+    execute: vi.fn(),
+  });
+  const principal = {
+    kind: "agent" as const,
+    tokenId: randomUUID(),
+    memberId: randomUUID(),
+    workspaceId: randomUUID(),
+    scopes: [],
+  };
+  const { receipt, signature } = signed();
+  await expect(
+    execute(principal, receipt, "0".repeat(64), tokenHash),
+  ).rejects.toThrow();
+  expect(resolveAgentWorkspace).not.toHaveBeenCalled();
+  await expect(
+    execute(principal, receipt, signature, tokenHash),
+  ).rejects.toThrow("grant denied");
+  expect(resolveAgentWorkspace).toHaveBeenCalledWith(
+    principal,
+    JSON.parse(receipt.operation_json).workspace_id,
+  );
 });
