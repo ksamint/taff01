@@ -18,7 +18,10 @@ services:
   valkey:
     image: valkey/valkey:9-alpine
     restart: unless-stopped
-    command: ["valkey-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    # BullMQ keys must survive restarts and must never be partially evicted.
+    command: ["valkey-server", "--save", "", "--appendonly", "yes", "--appendfsync", "everysec", "--maxmemory", "256mb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - valkey_data:/data
     healthcheck:
       test: ["CMD", "valkey-cli", "ping"]
       interval: 5s
@@ -38,6 +41,7 @@ services:
   api:
     image: ${TAFF_IMAGE_API:-taff-api}:${TAFF_TAG:-latest}
     restart: unless-stopped
+    stop_grace_period: 30s
     environment:
       DATABASE_URL: postgres://taff:${POSTGRES_PASSWORD}@postgres:5432/taff
       REDIS_URL: redis://valkey:6379
@@ -75,6 +79,7 @@ services:
       dockerfile: deploy/Dockerfile.server
       args: { TARGET: worker }
     restart: unless-stopped
+    stop_grace_period: 30s
     command: ["node", "dist/worker.mjs"]
     environment:
       DATABASE_URL: postgres://taff:${POSTGRES_PASSWORD}@postgres:5432/taff
@@ -116,5 +121,6 @@ services:
       - api
 volumes:
   postgres18_data:
+  valkey_data:
   caddy_data:
   caddy_config:

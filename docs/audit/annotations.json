@@ -1,0 +1,301 @@
+{
+  "version": 1,
+  "entries": {
+    "priorities|P0-1|ANY /mcp": {
+      "note": "fp: Bearer validation and core.authenticateAgentToken in apps/api/src/app.ts:123-176; per-token rate limit before authentication. Inline body exceeds guard lookahead.",
+      "false_positive": true
+    },
+    "priorities|P0-1|DELETE /api/${path}/:id/contacts/:contactId": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|DELETE /api/companies/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|DELETE /api/contacts/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|DELETE /api/mind/edges/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|DELETE /api/mind/nodes/:id/sources/:sourceId": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PATCH /api/companies/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PATCH /api/contacts/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PATCH /api/contacts/:id/company": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PATCH /api/mind/edges/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PATCH /api/mind/nodes/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PATCH /api/mind/sources/:id": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PATCH /api/profile": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/ask": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/companies": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/contacts": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/crm/undo": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/me/email-verification/request": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/mind/nodes/:id/task": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/trusted-reviews": {
+      "note": "fp: Signed receipt verification packages/core/src/trusted-review.ts:32-46,82-103; core policy rechecks inside mutation. Separate integration authentication is intentional.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/trusted-reviews/status": {
+      "note": "fp: Signed receipt verification packages/core/src/trusted-review.ts:32-46,82-103; core policy rechecks inside mutation. Separate integration authentication is intentional.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/workspaces/:id/mind/edges": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/workspaces/:id/mind/nodes": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|POST /api/workspaces/:id/mind/sources": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|PUT /api/mind/nodes/:id/sources/:sourceId": {
+      "note": "fp: Session middleware apps/api/src/app.ts:330-348 is installed before these handlers/modules (608-609,939-942). Core requireMember/can enforces resources; route-line heuristic misses middleware inheritance. This annotation proves authentication wiring, not every permission rule.",
+      "false_positive": true
+    },
+    "priorities|P0-1|ANY /locales/{locale}": {
+      "note": "fp: Next route exports GET only; apps/web/app/{locales/[locale],manifest.webmanifest,offline}/route.ts. File-router ANY is an extractor default, not an accepted write method.",
+      "false_positive": true
+    },
+    "priorities|P0-1|ANY /manifest.webmanifest": {
+      "note": "fp: Next route exports GET only; apps/web/app/{locales/[locale],manifest.webmanifest,offline}/route.ts. File-router ANY is an extractor default, not an accepted write method.",
+      "false_positive": true
+    },
+    "priorities|P0-1|ANY /offline": {
+      "note": "fp: Next route exports GET only; apps/web/app/{locales/[locale],manifest.webmanifest,offline}/route.ts. File-router ANY is an extractor default, not an accepted write method.",
+      "false_positive": true
+    },
+    "priorities|P1-1|DELETE /api/${path}/:id/contacts/:contactId": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|DELETE /api/companies/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|DELETE /api/contacts/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|DELETE /api/dependencies/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|DELETE /api/milestones/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|DELETE /api/mind/edges/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|DELETE /api/mind/nodes/:id/sources/:sourceId": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/companies/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/contacts/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/contacts/:id/company": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/milestones/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/mind/edges/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/mind/nodes/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/mind/sources/:id": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/tasks/:id/plan": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PATCH /api/workspaces/:id/ai": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/ask": {
+      "note": "fp: POST is a read query, packages/core/src/assistant.ts:407-425; no business mutation to audit.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/companies": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/contacts": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/crm/undo": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/dependencies": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/mind/nodes/:id/task": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/oauth/revoke": {
+      "note": "fp: OAuth exchange/refresh/revoke call mutation in packages/core/src/oauth.ts:389,458,536; agent_tokens audit trigger packages/db/migrations/0003_agent_tokens.sql. Do not log token material.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/oauth/token": {
+      "note": "fp: OAuth exchange/refresh/revoke call mutation in packages/core/src/oauth.ts:389,458,536; agent_tokens audit trigger packages/db/migrations/0003_agent_tokens.sql. Do not log token material.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/projects/:id/milestones": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/projects/:id/payments": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/suggestions": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/suggestions/:id/apply": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/suggestions/:id/dismiss": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/suggestions/:id/undo": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/workspaces/:id/mind/edges": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/workspaces/:id/mind/nodes": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|POST /api/workspaces/:id/mind/sources": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PUT /api/${path}/:id/contacts/:contactId": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|PUT /api/mind/nodes/:id/sources/:sourceId": {
+      "note": "fp: Audit lives across shared-core mutation and Postgres triggers, not the adapter file. Core mutation packages/core/src/index.ts:419-435; CRM/timeline triggers 0023_m12_planning_crm.sql:181-199; suggestions 0024_m17_suggestions_ai.sql:27; mind 0025_m18_mind_map.sql:77-83. Route-file absence cannot establish an audit gap.",
+      "false_positive": true
+    },
+    "priorities|P1-1|ANY /locales/{locale}": {
+      "note": "fp: Next GET-only content response, not a persisted write; ANY is a file-router extractor default.",
+      "false_positive": true
+    },
+    "priorities|P1-1|ANY /manifest.webmanifest": {
+      "note": "fp: Next GET-only content response, not a persisted write; ANY is a file-router extractor default.",
+      "false_positive": true
+    },
+    "priorities|P1-1|ANY /offline": {
+      "note": "fp: Next GET-only content response, not a persisted write; ANY is a file-router extractor default.",
+      "false_positive": true
+    },
+    "priorities|P1-2|amount#type": {
+      "note": "fp: ORM-vs-SQL spelling/precision loss in regex extraction. numeric vs numeric(14,2), timestamp({withTimezone:true}) vs timestamptz are not confirmed schema conflicts; source packages/db/src/schema.ts:399,439,1185.",
+      "false_positive": true
+    },
+    "priorities|P1-2|revoked_at#type": {
+      "note": "fp: ORM-vs-SQL spelling/precision loss in regex extraction. numeric vs numeric(14,2), timestamp({withTimezone:true}) vs timestamptz are not confirmed schema conflicts; source packages/db/src/schema.ts:399,439,1185.",
+      "false_positive": true
+    },
+    "priorities|P2-1|apiUrl": {
+      "note": "fp: Unresolved expression or internal queue/smoke input, not evidence of an unknown deployed service. See report.md reviewed boundary ledger; raw confidence remains low.",
+      "false_positive": true
+    },
+    "priorities|P2-1|c.req.raw": {
+      "note": "fp: Unresolved expression or internal queue/smoke input, not evidence of an unknown deployed service. See report.md reviewed boundary ledger; raw confidence remains low.",
+      "false_positive": true
+    },
+    "priorities|P2-1|localeUrl": {
+      "note": "fp: Unresolved expression or internal queue/smoke input, not evidence of an unknown deployed service. See report.md reviewed boundary ledger; raw confidence remains low.",
+      "false_positive": true
+    },
+    "priorities|P2-1|request": {
+      "note": "fp: Unresolved expression or internal queue/smoke input, not evidence of an unknown deployed service. See report.md reviewed boundary ledger; raw confidence remains low.",
+      "false_positive": true
+    },
+    "priorities|P2-1|daily-digest": {
+      "note": "fp: Unresolved expression or internal queue/smoke input, not evidence of an unknown deployed service. See report.md reviewed boundary ledger; raw confidence remains low.",
+      "false_positive": true
+    },
+    "priorities|P2-1|taff": {
+      "note": "fp: Unresolved expression or internal queue/smoke input, not evidence of an unknown deployed service. See report.md reviewed boundary ledger; raw confidence remains low.",
+      "false_positive": true
+    }
+  }
+}

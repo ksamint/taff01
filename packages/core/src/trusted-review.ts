@@ -121,7 +121,8 @@ export function createTrustedReview(deps: {
       const [profile] = await tx
         .select()
         .from(agentProfiles)
-        .where(eq(agentProfiles.id, run.agentId));
+        .where(eq(agentProfiles.id, run.agentId))
+        .for("share");
       const reviewer = await deps.requireMember(
         tx,
         principal,

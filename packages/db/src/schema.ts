@@ -423,6 +423,20 @@ export const agentTokens = pgTable(
     ),
   ],
 );
+/** Consumed refresh hashes identify the still-active grant on replay. */
+export const oauthRefreshHistory = pgTable(
+  "oauth_refresh_history",
+  {
+    hash: text("hash").primaryKey(),
+    tokenId: uuid("token_id")
+      .notNull()
+      .references(() => agentTokens.id, { onDelete: "cascade" }),
+    consumedAt: timestamp("consumed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("oauth_refresh_history_token_idx").on(t.tokenId)],
+);
 export const agentTokenWorkspaces = pgTable(
   "agent_token_workspaces",
   {
