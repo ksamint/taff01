@@ -423,6 +423,53 @@ export const agentTokens = pgTable(
     ),
   ],
 );
+/** Consumed refresh hashes identify the still-active grant on replay. */
+export const oauthRefreshHistory = pgTable(
+  "oauth_refresh_history",
+  {
+    hash: text("hash").primaryKey(),
+    tokenId: uuid("token_id")
+      .notNull()
+      .references(() => agentTokens.id, { onDelete: "cascade" }),
+    consumedAt: timestamp("consumed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [index("oauth_refresh_history_token_idx").on(t.tokenId)],
+);
+export const agentTokenWorkspaces = pgTable(
+  "agent_token_workspaces",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    tokenId: uuid("token_id")
+      .notNull()
+      .references(() => agentTokens.id, { onDelete: "cascade" }),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    memberId: uuid("member_id").notNull(),
+    grantedBy: uuid("granted_by").notNull(),
+    scopes: text("scopes").array().notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    ...dates,
+  },
+  (t) => [
+    unique("agent_token_workspaces_token_workspace").on(
+      t.tokenId,
+      t.workspaceId,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.memberId],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "agent_token_workspaces_member_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.grantedBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "agent_token_workspaces_grantor_fk",
+    }),
+  ],
+);
 /** Single-use authorization codes, hashed, valid for 10 minutes. */
 export const oauthCodes = pgTable(
   "oauth_codes",

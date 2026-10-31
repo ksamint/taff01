@@ -1,0 +1,147 @@
+{
+  "exclude_dirs": [".local", "meta", "audit"],
+  "framework_hints": [
+    {
+      "id": "hono",
+      "langs": ["typescript"],
+      "regex": "from ['\"]hono['\"]"
+    },
+    {
+      "id": "drizzle",
+      "langs": ["typescript"],
+      "regex": "drizzle-orm"
+    },
+    {
+      "id": "bullmq",
+      "langs": ["typescript"],
+      "regex": "bullmq"
+    }
+  ],
+  "guard_keywords": [
+    "requiremember",
+    "requirehumanmember",
+    "requirepermission",
+    "authenticateagenttoken",
+    "getsession",
+    "asserttrusted",
+    "assertapproved"
+  ],
+  "patterns": [
+    {
+      "id": "express_verb",
+      "category": "route_api",
+      "langs": ["typescript", "javascript"],
+      "regex": "\\b(?:app|router|api)\\.(?P<method>get|post|put|patch|delete|options|head|all)\\(\\s*[\\'\\\"`](?P<path>[^\\'\\\"`]+)[\\'\\\"`]",
+      "handler_from": "same_line_idents"
+    },
+    {
+      "id": "taff_queue_scheduler",
+      "category": "route_job",
+      "langs": ["typescript"],
+      "regex": "^\\s*[\\'\\\"](?P<path>daily-digest-scan)[\\'\\\"],"
+    },
+    {
+      "id": "taff_queue_worker",
+      "category": "route_job",
+      "langs": ["typescript"],
+      "regex": "new Worker\\(\\s*['\\\"](?P<path>[^'\\\"]+)['\\\"]"
+    },
+    {
+      "id": "taff_queue_branch",
+      "category": "route_job",
+      "langs": ["typescript"],
+      "regex": "if \\(job\\.name === ['\\\"](?P<path>[^'\\\"]+)['\\\"]"
+    },
+    {
+      "id": "taff_queue_topic",
+      "category": "cross_mq",
+      "langs": ["typescript"],
+      "regex": "(?:new (?:Queue|Worker)|queue\\.add)\\(\\s*['\\\"](?P<topic>[^'\\\"]+)['\\\"]",
+      "require_context": "bullmq"
+    },
+    {
+      "id": "taff_permission",
+      "category": "guard",
+      "langs": ["typescript"],
+      "regex": "(?:await\\s+(?:deps\\.)?)?(?P<name>requireMember|requireHumanMember|can)\\(\\s*[^;\\n]*?(?:['\\\"](?P<roles>[a-z_]+:[a-z_]+)['\\\"]|$)",
+      "mechanism": "policy"
+    },
+    {
+      "id": "taff_session_middleware",
+      "category": "guard",
+      "langs": ["typescript"],
+      "regex": "await core\\.(?P<name>getSession|authenticateAgentToken)\\(",
+      "mechanism": "middleware"
+    },
+    {
+      "id": "taff_mutation_transaction",
+      "category": "audit",
+      "langs": ["typescript"],
+      "regex": "(?:return|await)\\s+(?P<name>mutation|mutate)\\(",
+      "mechanism": "event"
+    },
+    {
+      "id": "taff_actor_context",
+      "category": "audit",
+      "langs": ["typescript"],
+      "regex": "set_config\\('taff\\.(?P<name>actor_id|integration_audit)'",
+      "mechanism": "event"
+    },
+    {
+      "id": "taff_trigger_activity",
+      "category": "audit",
+      "langs": ["sql"],
+      "regex": "(?P<name>INSERT INTO activity)\\s*\\(",
+      "mechanism": "audit_table"
+    },
+    {
+      "id": "taff_trigger_notify",
+      "category": "audit",
+      "langs": ["sql"],
+      "regex": "(?P<name>pg_notify)\\('taff_changes'",
+      "mechanism": "event"
+    },
+    {
+      "id": "taff_record_mcp",
+      "category": "audit",
+      "langs": ["typescript"],
+      "regex": "\\.(?P<name>recordMcpCall)\\(",
+      "mechanism": "audit_table"
+    },
+    {
+      "id": "taff_drizzle_table",
+      "category": "model_table",
+      "langs": ["typescript"],
+      "regex": "export const (?P<table>\\w+) = pgTable\\(",
+      "column_scope": "paren",
+      "column_pattern": "taff_drizzle_column",
+      "source": "orm",
+      "tablename_pattern": "pgTable\\(\\s*[\\'\\\"](?P<table>[^\\'\\\"]+)[\\'\\\"]"
+    },
+    {
+      "id": "taff_drizzle_column",
+      "category": "model_column",
+      "langs": ["typescript"],
+      "regex": "^\\s*\\w+:\\s*(?P<type>uuid|text|timestamp|date|boolean|integer|bigint|jsonb|numeric|\\w+Enum)\\(['\\\"](?P<column>[^'\\\"]+)['\\\"](?P<rest>.*)",
+      "flags_from_rest": {
+        "pk": "\\.primaryKey\\(",
+        "nullable_false": "\\.notNull\\(",
+        "default": "\\.default\\((?P<default>[^)]*)\\)"
+      }
+    },
+    {
+      "id": "taff_web_request",
+      "category": "cross_http",
+      "langs": ["typescript"],
+      "regex": "\\brequest(?:<[^>]+>)?\\(\\s*(?P<url>[\\'\\\"`][^\\'\\\"`]+[\\'\\\"`])"
+    },
+    {
+      "id": "taff_trigger_registration",
+      "category": "audit",
+      "langs": ["sql"],
+      "regex": "CREATE TRIGGER (?P<name>\\w+_audit)\\s+AFTER.*?ON (?P<table>\\w+).*?EXECUTE FUNCTION taff_audit_change",
+      "mechanism": "audit_table"
+    }
+  ],
+  "exclude_globs": ["mcp-benchmark.mts", "runtime-faults.mts"]
+}

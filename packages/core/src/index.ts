@@ -5,6 +5,7 @@ import {
   agentPermissions,
   agentProfiles,
   agentTokens,
+  agentTokenWorkspaces,
   connectDatabase,
   grants,
   mcpCalls,
@@ -19,6 +20,7 @@ import * as schema from "@taff/db/schema";
 import {
   type AgentToken,
   type AssignTask,
+  agentTokenWorkspaceInputSchema,
   approvedAgentToolSchemas,
   assignTaskSchema,
   type ChangeEvent,
@@ -190,7 +192,8 @@ export function createCore(options: {
 }) {
   if (options.tokenPepper.length < 16)
     throw new Error("TOKEN_PEPPER must be at least 16 characters");
-  const connection = connectDatabase(options.databaseUrl);
+  // Bound runtime SQL; migration/maintenance callers keep their own connection policy.
+  const connection = connectDatabase(options.databaseUrl, 20_000);
   const { db } = connection;
   type Subscriber = {
     listener: (event: ChangeEvent) => void | Promise<void>;
@@ -320,7 +323,7 @@ export function createCore(options: {
     if (!workspace) return null;
     if (principal.kind === "agent") {
       if (principal.workspaceId !== workspaceId) return null;
-      const [member] = await query
+      const memberQuery = query
         .select()
         .from(members)
         .where(
@@ -330,6 +333,9 @@ export function createCore(options: {
           ),
         )
         .limit(1);
+      const [member] = await (query === db
+        ? memberQuery
+        : memberQuery.for("share"));
       if (!member || member.kind !== "agent") return null;
       const [token] = await query
         .select()
@@ -337,13 +343,34 @@ export function createCore(options: {
         .where(
           and(
             eq(agentTokens.id, principal.tokenId),
-            eq(agentTokens.workspaceId, workspaceId),
-            eq(agentTokens.memberId, member.id),
+
             isNull(agentTokens.revokedAt),
           ),
         )
         .for("share");
       if (!token) return null;
+      if (token.expiresAt && token.expiresAt <= new Date()) return null;
+      let effectiveScopes = token.scopes;
+      if (token.oauthClientId) {
+        if (token.workspaceId !== workspaceId || token.memberId !== member.id)
+          return null;
+      } else {
+        const [grant] = await query
+          .select()
+          .from(agentTokenWorkspaces)
+          .where(
+            and(
+              eq(agentTokenWorkspaces.tokenId, token.id),
+              eq(agentTokenWorkspaces.workspaceId, workspaceId),
+              eq(agentTokenWorkspaces.memberId, member.id),
+              isNull(agentTokenWorkspaces.revokedAt),
+            ),
+          )
+          .for("share");
+        if (!grant) return null;
+        effectiveScopes = grant.scopes;
+      }
+
       const [profile] = await query
         .select()
         .from(agentProfiles)
@@ -358,7 +385,7 @@ export function createCore(options: {
         .where(eq(grants.agentId, member.id));
       return {
         ...member,
-        scopes: token.scopes as Scope[],
+        scopes: effectiveScopes as Scope[],
         reviewPolicy: profile?.reviewPolicy ?? "always_review",
         permissions: permissions as Actor["permissions"],
         grants: grantRows.map((row) => ({
@@ -395,6 +422,7 @@ export function createCore(options: {
   async function mutation<T>(
     principal: Principal,
     run: (tx: Transaction) => Promise<T>,
+    lifecycle?: "archive",
   ): Promise<T> {
     const actorId =
       principal.kind === "user"
@@ -403,8 +431,20 @@ export function createCore(options: {
     try {
       return await db.transaction(async (tx) => {
         await tx.execute(
-          sql`select set_config('taff.actor_id', ${actorId}, true)`,
+          // Archive briefly pauses all mutations; take this before any resource locks.
+          sql`select set_config('taff.actor_id', ${actorId}, true), ${
+            lifecycle === "archive"
+              ? sql`pg_advisory_xact_lock(hashtextextended('taff:workspace-lifecycle', 0))`
+              : sql`pg_advisory_xact_lock_shared(hashtextextended('taff:workspace-lifecycle', 0))`
+          }`,
         );
+        // Agent authority precedes task locks; permission writers lock this row exclusively.
+        if (principal.kind === "agent")
+          await tx
+            .select({ id: members.id })
+            .from(members)
+            .where(eq(members.id, principal.memberId))
+            .for("share");
         return run(tx);
       });
     } catch (error) {
@@ -978,6 +1018,13 @@ export function createCore(options: {
           scopes: [...new Set(body.scopes)],
         })
         .returning();
+      await tx.insert(agentTokenWorkspaces).values({
+        tokenId: row.id,
+        workspaceId: row.workspaceId,
+        memberId: row.memberId,
+        grantedBy: row.createdBy,
+        scopes: row.scopes,
+      });
       return { ...toAgentToken(row, null), token };
     });
   }
@@ -1116,9 +1163,8 @@ export function createCore(options: {
         : [];
       if (!revoker) throw new CoreError("conflict", 409);
       const [agent] = await tx
-        .select({ id: members.id, supervisorId: agentProfiles.supervisorId })
+        .select({ id: members.id })
         .from(members)
-        .leftJoin(agentProfiles, eq(agentProfiles.id, members.id))
         .where(
           and(
             eq(members.workspaceId, row.workspaceId),
@@ -1128,6 +1174,11 @@ export function createCore(options: {
         )
         .limit(1);
       if (!agent) throw new CoreError("conflict", 409);
+      const [profile] = await tx
+        .select({ supervisorId: agentProfiles.supervisorId })
+        .from(agentProfiles)
+        .where(eq(agentProfiles.id, agent.id))
+        .for("share");
       // A member undoes only their own revocation, and only while they may
       // still connect this agent with these scopes (ADR 0023).
       if (
@@ -1135,7 +1186,10 @@ export function createCore(options: {
         (revoker.id !== actor.id ||
           !canGrantOAuthScopes(
             actor,
-            { workspaceId: row.workspaceId, supervisorId: agent.supervisorId },
+            {
+              workspaceId: row.workspaceId,
+              supervisorId: profile?.supervisorId,
+            },
             row.scopes as Scope[],
           ))
       )
@@ -1147,6 +1201,198 @@ export function createCore(options: {
         .returning();
       return toAgentToken(updated, null);
     });
+  }
+  async function listAgentWorkspaces(principal: Principal) {
+    if (principal.kind !== "agent") throw new CoreError("forbidden", 403);
+    const [token] = await db
+      .select()
+      .from(agentTokens)
+      .where(eq(agentTokens.id, principal.tokenId));
+    if (
+      !token ||
+      token.revokedAt ||
+      (token.expiresAt && token.expiresAt <= new Date())
+    )
+      throw new CoreError("forbidden", 403);
+    const rows = token.oauthClientId
+      ? await db
+          .select({ id: workspaces.id, name: workspaces.name })
+          .from(workspaces)
+          .where(eq(workspaces.id, token.workspaceId))
+      : await db
+          .select({ id: workspaces.id, name: workspaces.name })
+          .from(agentTokenWorkspaces)
+          .innerJoin(
+            workspaces,
+            eq(workspaces.id, agentTokenWorkspaces.workspaceId),
+          )
+          .where(
+            and(
+              eq(agentTokenWorkspaces.tokenId, token.id),
+              isNull(agentTokenWorkspaces.revokedAt),
+            ),
+          );
+    const result = [];
+    for (const row of rows) {
+      try {
+        const p = await resolveAgentWorkspace(principal, row.id);
+        if (p.kind === "agent")
+          result.push({ ...row, memberId: p.memberId, scopes: p.scopes });
+      } catch (error) {
+        if (!(error instanceof CoreError) || error.status !== 403) throw error;
+      }
+    }
+    return result;
+  }
+  async function listAgentTokenWorkspaces(
+    principal: Principal,
+    tokenId: string,
+    workspaceId: string,
+  ) {
+    parse(idSchema, tokenId);
+    parse(idSchema, workspaceId);
+    if (principal.kind !== "user") throw new CoreError("forbidden", 403);
+    await requireMember(db, principal, workspaceId, "token:manage");
+    const [token] = await db
+      .select()
+      .from(agentTokens)
+      .where(eq(agentTokens.id, tokenId));
+    if (!token) throw new CoreError("not_found", 404);
+    return db
+      .select()
+      .from(agentTokenWorkspaces)
+      .where(
+        and(
+          eq(agentTokenWorkspaces.tokenId, tokenId),
+          token.workspaceId === workspaceId
+            ? undefined
+            : eq(agentTokenWorkspaces.workspaceId, workspaceId),
+        ),
+      );
+  }
+  async function setAgentTokenWorkspace(
+    principal: Principal,
+    tokenId: string,
+    input: unknown,
+  ) {
+    parse(idSchema, tokenId);
+    const body = parse(agentTokenWorkspaceInputSchema, input);
+    if (principal.kind !== "user") throw new CoreError("forbidden", 403);
+    return mutation(principal, async (tx) => {
+      const [token] = await tx
+        .select()
+        .from(agentTokens)
+        .where(eq(agentTokens.id, tokenId))
+        .for("update");
+      if (!token || token.oauthClientId || token.revokedAt)
+        throw new CoreError("forbidden", 403);
+      const actor = await requireMember(
+        tx,
+        principal,
+        body.workspaceId,
+        "token:manage",
+      );
+      if (!body.revoked)
+        await requireMember(tx, principal, token.workspaceId, "token:manage");
+      const [member] = await tx
+        .select()
+        .from(members)
+        .where(
+          and(
+            eq(members.workspaceId, body.workspaceId),
+            eq(members.id, body.memberId),
+          ),
+        );
+      if (!member || member.kind !== "agent")
+        throw new CoreError("invalid_input", 400);
+      const values = {
+        tokenId,
+        workspaceId: body.workspaceId,
+        memberId: member.id,
+        grantedBy: actor.id,
+        scopes: body.scopes,
+        revokedAt: body.revoked ? new Date() : null,
+        updatedAt: new Date(),
+      };
+      const [row] = await tx
+        .insert(agentTokenWorkspaces)
+        .values(values)
+        .onConflictDoUpdate({
+          target: [
+            agentTokenWorkspaces.tokenId,
+            agentTokenWorkspaces.workspaceId,
+          ],
+          set: values,
+        })
+        .returning();
+      if (body.workspaceId === token.workspaceId && !body.revoked) {
+        await tx
+          .update(agentTokens)
+          .set({
+            memberId: row.memberId,
+            scopes: row.scopes,
+            updatedAt: new Date(),
+          })
+          .where(eq(agentTokens.id, tokenId));
+      }
+      return row;
+    });
+  }
+  async function resolveAgentWorkspace(
+    principal: Principal,
+    workspaceId = principal.kind === "agent" ? principal.workspaceId : "",
+  ): Promise<Extract<Principal, { kind: "agent" }>> {
+    parse(idSchema, workspaceId);
+    if (principal.kind !== "agent") throw new CoreError("forbidden", 403);
+    const [token] = await db
+      .select()
+      .from(agentTokens)
+      .where(
+        and(
+          eq(agentTokens.id, principal.tokenId),
+          isNull(agentTokens.revokedAt),
+          or(
+            isNull(agentTokens.expiresAt),
+            gt(agentTokens.expiresAt, new Date()),
+          ),
+        ),
+      );
+    if (!token) throw new CoreError("forbidden", 403);
+    if (token.oauthClientId) {
+      if (workspaceId !== token.workspaceId)
+        throw new CoreError("forbidden", 403);
+      const result = {
+        kind: "agent" as const,
+        tokenId: token.id,
+        workspaceId,
+        memberId: token.memberId,
+        scopes: token.scopes as Scope[],
+      };
+      if (!(await loadActor(db, result, workspaceId)))
+        throw new CoreError("forbidden", 403);
+      return result;
+    }
+    const [grant] = await db
+      .select()
+      .from(agentTokenWorkspaces)
+      .where(
+        and(
+          eq(agentTokenWorkspaces.tokenId, token.id),
+          eq(agentTokenWorkspaces.workspaceId, workspaceId),
+          isNull(agentTokenWorkspaces.revokedAt),
+        ),
+      );
+    if (!grant) throw new CoreError("forbidden", 403);
+    const result = {
+      kind: "agent" as const,
+      tokenId: token.id,
+      workspaceId,
+      memberId: grant.memberId,
+      scopes: grant.scopes as Scope[],
+    };
+    if (!(await loadActor(db, result, workspaceId)))
+      throw new CoreError("forbidden", 403);
+    return result;
   }
   /** Resolves a raw bearer token to an agent principal, or null. */
   async function authenticateAgentToken(
@@ -1193,15 +1439,25 @@ export function createCore(options: {
       const [token] = await tx
         .select()
         .from(agentTokens)
-        .where(
-          and(
-            eq(agentTokens.id, row.tokenId),
-            eq(agentTokens.workspaceId, row.workspaceId),
-          ),
-        );
+        .where(and(eq(agentTokens.id, row.tokenId)));
       if (!token) throw new CoreError("forbidden", 403);
+      let actorMemberId = token.memberId;
+      if (token.workspaceId !== row.workspaceId) {
+        if (token.oauthClientId) throw new CoreError("forbidden", 403);
+        const [grant] = await tx
+          .select()
+          .from(agentTokenWorkspaces)
+          .where(
+            and(
+              eq(agentTokenWorkspaces.tokenId, token.id),
+              eq(agentTokenWorkspaces.workspaceId, row.workspaceId),
+            ),
+          );
+        if (!grant) throw new CoreError("forbidden", 403);
+        actorMemberId = grant.memberId;
+      }
       await tx.execute(
-        sql`select set_config('taff.actor_id', ${`agent:${token.memberId}`}, true)`,
+        sql`select set_config('taff.actor_id', ${`agent:${actorMemberId}`}, true)`,
       );
       await tx.insert(mcpCalls).values(row);
     });
@@ -1295,6 +1551,7 @@ export function createCore(options: {
   };
   const runOperations = createRunOperations(runOperationsDependencies);
   const approvedAgentOperation = createApprovedAgentOperation({
+    resolveAgentWorkspace,
     mappings: options.trustedReview?.mappings,
     requireMember,
     key: options.trustedReview?.key,
@@ -1510,6 +1767,10 @@ export function createCore(options: {
     revokeAgentToken,
     restoreAgentToken,
     authenticateAgentToken,
+    resolveAgentWorkspace,
+    listAgentWorkspaces,
+    setAgentTokenWorkspace,
+    listAgentTokenWorkspaces,
     recordMcpCall,
     listMcpCalls,
     subscribeChanges,

@@ -143,7 +143,9 @@ export const suggestionInverseSchema = union([
   }),
 ]);
 export type SuggestionInverse = Infer<typeof suggestionInverseSchema>;
-export const mcpSuggestionsCreateArgs = suggestionInputSchema;
+export const mcpSuggestionsCreateArgs = extend(suggestionInputSchema, {
+  workspaceId: optional(idSchema),
+});
 
 // Brief ---------------------------------------------------------------------
 
@@ -242,7 +244,9 @@ export const briefSchema = object({
   actions: array(briefActionSchema),
   labels: optional(briefLabelsSchema),
 });
-export const mcpBriefGetArgs = strictObject({});
+export const mcpBriefGetArgs = extend(strictObject({}), {
+  workspaceId: optional(idSchema),
+});
 
 // Ask taff ------------------------------------------------------------------
 

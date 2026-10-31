@@ -372,7 +372,13 @@
     },
     "connectedApps": "Connected apps",
     "approvedBy": "Approved by {{name}}",
-    "approved": "Approved {{date}}"
+    "approved": "Approved {{date}}",
+    "workspaceGrants": "Workspace authorizations",
+    "targetWorkspace": "Workspace ID",
+    "targetAgent": "Agent member ID",
+    "saveGrant": "Save authorization",
+    "revokeGrant": "Revoke authorization",
+    "grantActive": "Active"
   },
   "taskDetail": {
     "back": "Back to Today",

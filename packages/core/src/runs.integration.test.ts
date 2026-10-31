@@ -1,7 +1,6 @@
 import { createHash, createHmac, randomUUID } from "node:crypto";
 import {
   activity,
-  agentTokens,
   connectDatabase,
   grants,
   inboxItems,
@@ -793,14 +792,10 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       decision: "allow",
     });
     async function setScopes(scopes: typeof issued.scopes) {
-      await connection.db.transaction(async (tx) => {
-        await tx.execute(
-          sql`select set_config('taff.actor_id', ${person.kind === "user" ? person.userId : ""}, true)`,
-        );
-        await tx
-          .update(agentTokens)
-          .set({ scopes })
-          .where(eq(agentTokens.id, issued.id));
+      await core.setAgentTokenWorkspace(person, issued.id, {
+        workspaceId,
+        memberId: agentId,
+        scopes,
       });
     }
     await setScopes(["tasks:read"]);

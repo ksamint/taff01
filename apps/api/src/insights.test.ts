@@ -148,6 +148,7 @@ describe("insight MCP tools", () => {
   };
   it("reads relations in the token workspace with validated arguments", async () => {
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
     vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     const listed = await call("tools/list", {});
     expect(listed.result?.tools?.map((tool) => tool.name)).toEqual(
@@ -173,6 +174,12 @@ describe("insight MCP tools", () => {
   });
   it("reads the brief of the token workspace and offers no ask tool", async () => {
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    vi.spyOn(core, "resolveAgentWorkspace").mockImplementation(
+      async (_actor, target) => {
+        if (target && target !== id) throw new CoreError("forbidden", 403);
+        return principal;
+      },
+    );
     vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     const listed = await call("tools/list", {});
     const names = listed.result?.tools?.map((tool) => tool.name) ?? [];
@@ -195,6 +202,7 @@ describe("insight MCP tools", () => {
   });
   it("forwards only well-formed proposals", async () => {
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
     vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     const create = vi
       .spyOn(core, "createSuggestion")

@@ -67,7 +67,10 @@ import { registerInsightTools } from "./mcp-insights";
 import { registerTimelineTools } from "./mcp-timeline";
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
-type CallState = { failed?: McpCall["status"] };
+export type CallState = {
+  failed?: McpCall["status"];
+  principal?: AgentPrincipal;
+};
 type ErrorLogger = { error(details: object, message: string): void };
 
 function ok(payload: unknown): CallToolResult {
@@ -94,7 +97,7 @@ function failure(
 /** One MCP server per request, bound to the token's agent and workspace. */
 export function createMcpServer(
   core: Core,
-  principal: AgentPrincipal,
+  tokenPrincipal: AgentPrincipal,
   state: CallState,
   logger?: ErrorLogger,
 ) {
@@ -107,6 +110,17 @@ export function createMcpServer(
     }
   };
   server.registerTool(
+    "workspaces.list",
+    {
+      title: "List authorized workspaces",
+      description:
+        "List only this token's currently authorized workspaces. Omitting workspaceId on other tools uses its original default workspace.",
+      inputSchema: toolSchema(mcpContextGetArgs),
+      annotations: READ_ONLY,
+    },
+    () => run(() => core.listAgentWorkspaces(tokenPrincipal)),
+  );
+  server.registerTool(
     "context.get",
     {
       title: "Read workspace context",
@@ -115,7 +129,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpContextGetArgs),
       annotations: READ_ONLY,
     },
-    () => run(() => core.getContext(principal, principal.workspaceId)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((_unused: Args) =>
+          execute(() => core.getContext(principal, principal.workspaceId)))(
+          args,
+        );
+      }),
   );
   server.registerTool(
     "tasks.list",
@@ -125,7 +153,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpTasksListArgs),
       annotations: READ_ONLY,
     },
-    (args) => run(() => core.listTasks(principal, principal.workspaceId, args)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          execute(() =>
+            core.listTasks(principal, principal.workspaceId, args),
+          ))(args);
+      }),
   );
   server.registerTool(
     "tasks.create",
@@ -136,14 +178,25 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpTasksCreateArgs),
       annotations: ADDITIVE,
     },
-    (args) =>
-      run(() =>
-        core.createTask(principal, {
-          workspaceId: principal.workspaceId,
-          ...args,
-          workerId: principal.memberId,
-        }),
-      ),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          execute(() =>
+            core.createTask(principal, {
+              workspaceId: principal.workspaceId,
+              ...args,
+              workerId: principal.memberId,
+            }),
+          ))(args);
+      }),
   );
   server.registerTool(
     "tasks.update",
@@ -154,14 +207,25 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpTasksUpdateArgs),
       annotations: UPDATE,
     },
-    (args) =>
-      // Worker and status change together or not at all.
-      run(() =>
-        core.updateTaskWork(principal, args.taskId, {
-          workerId: args.workerId,
-          status: args.status,
-        }),
-      ),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          // Worker and status change together or not at all.
+          execute(() =>
+            core.updateTaskWork(principal, args.taskId, {
+              workerId: args.workerId,
+              status: args.status,
+            }),
+          ))(args);
+      }),
   );
   server.registerTool(
     "tasks.edit",
@@ -172,8 +236,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpTasksEditArgs),
       annotations: UPDATE,
     },
-    ({ taskId, ...input }) =>
-      run(() => core.updateTask(principal, taskId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ taskId, ...input }: Args) =>
+          execute(() => core.updateTask(principal, taskId, input)))(args);
+      }),
   );
   server.registerTool(
     "tasks.comments.list",
@@ -183,7 +258,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpTaskCommentsListArgs),
       annotations: READ_ONLY,
     },
-    ({ taskId }) => run(() => core.listTaskComments(principal, taskId)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ taskId }: Args) =>
+          execute(() => core.listTaskComments(principal, taskId)))(args);
+      }),
   );
   server.registerTool(
     "tasks.comments.add",
@@ -194,8 +281,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpTaskCommentsAddArgs),
       annotations: ADDITIVE,
     },
-    ({ taskId, ...input }) =>
-      run(() => core.addTaskComment(principal, taskId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ taskId, ...input }: Args) =>
+          execute(() => core.addTaskComment(principal, taskId, input)))(args);
+      }),
   );
   for (const [name, schema] of [
     ["projects.create", mcpProjectsCreateArgs],
@@ -210,8 +308,21 @@ export function createMcpServer(
         inputSchema: toolSchema(schema),
         annotations: READ_ONLY,
       },
-      (input) =>
-        run(() => core.prepareProjectOperation(principal, name, input)),
+      (workspaceArgs) =>
+        run(async () => {
+          const { workspaceId, ...args } = workspaceArgs;
+          type Args = typeof args;
+          const principal = await core.resolveAgentWorkspace(
+            tokenPrincipal,
+            workspaceId,
+          );
+          state.principal = principal;
+          const execute = (fn: () => Promise<unknown>) => fn();
+          return ((input: Args) =>
+            execute(() =>
+              core.prepareProjectOperation(principal, name, input),
+            ))(args);
+        }),
     );
   }
   server.registerTool(
@@ -223,7 +334,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpProjectsListArgs),
       annotations: READ_ONLY,
     },
-    () => run(() => core.listProjects(principal, principal.workspaceId)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((_unused: Args) =>
+          execute(() => core.listProjects(principal, principal.workspaceId)))(
+          args,
+        );
+      }),
   );
   server.registerTool(
     "search.query",
@@ -234,7 +359,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpSearchArgs),
       annotations: READ_ONLY,
     },
-    (input) => run(() => core.search(principal, principal.workspaceId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((input: Args) =>
+          execute(() => core.search(principal, principal.workspaceId, input)))(
+          args,
+        );
+      }),
   );
   server.registerTool(
     "quickadd.parse",
@@ -245,8 +384,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpQuickAddArgs),
       annotations: READ_ONLY,
     },
-    (input) =>
-      run(() => core.parseQuickAdd(principal, principal.workspaceId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((input: Args) =>
+          execute(() =>
+            core.parseQuickAdd(principal, principal.workspaceId, input),
+          ))(args);
+      }),
   );
   server.registerTool(
     "calendar.list",
@@ -257,8 +409,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpCalendarListArgs),
       annotations: READ_ONLY,
     },
-    (input) =>
-      run(() => core.listCalendar(principal, principal.workspaceId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((input: Args) =>
+          execute(() =>
+            core.listCalendar(principal, principal.workspaceId, input),
+          ))(args);
+      }),
   );
   server.registerTool(
     "calendar.set",
@@ -269,8 +434,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpCalendarSetArgs),
       annotations: UPDATE,
     },
-    ({ taskId, ...input }) =>
-      run(() => core.setTaskCalendar(principal, taskId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ taskId, ...input }: Args) =>
+          execute(() => core.setTaskCalendar(principal, taskId, input)))(args);
+      }),
   );
   server.registerTool(
     "calendar.schedule",
@@ -281,10 +457,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpCalendarScheduleArgs),
       annotations: UPDATE,
     },
-    (args) =>
-      run(() =>
-        core.scheduleTask(principal, args.taskId, { dueAt: args.dueAt }),
-      ),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          execute(() =>
+            core.scheduleTask(principal, args.taskId, { dueAt: args.dueAt }),
+          ))(args);
+      }),
   );
   server.registerTool(
     "inbox.request_review",
@@ -295,10 +482,21 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpInboxRequestReviewArgs),
       annotations: UPDATE,
     },
-    (args) =>
-      run(() =>
-        core.requestReview(principal, args.taskId, { note: args.note }),
-      ),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return ((args: Args) =>
+          execute(() =>
+            core.requestReview(principal, args.taskId, { note: args.note }),
+          ))(args);
+      }),
   );
   server.registerTool(
     "runs.get",
@@ -309,7 +507,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpRunsGetArgs),
       annotations: READ_ONLY,
     },
-    ({ runId }) => run(() => core.getRun(principal, runId)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ runId }: Args) =>
+          execute(() => core.getRun(principal, runId)))(args);
+      }),
   );
   server.registerTool(
     "runs.start",
@@ -320,7 +530,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpRunsStartArgs),
       annotations: ADDITIVE,
     },
-    ({ taskId }) => run(() => core.startRun(principal, taskId, {})),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ taskId }: Args) =>
+          execute(() => core.startRun(principal, taskId, {})))(args);
+      }),
   );
   server.registerTool(
     "runs.control",
@@ -331,8 +553,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpRunsControlArgs),
       annotations: UPDATE,
     },
-    ({ runId, ...input }) =>
-      run(() => core.controlRun(principal, runId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ runId, ...input }: Args) =>
+          execute(() => core.controlRun(principal, runId, input)))(args);
+      }),
   );
   server.registerTool(
     "runs.event",
@@ -343,8 +576,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpRunsEventArgs),
       annotations: ADDITIVE,
     },
-    ({ runId, ...input }) =>
-      run(() => core.appendRunEvent(principal, runId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ runId, ...input }: Args) =>
+          execute(() => core.appendRunEvent(principal, runId, input)))(args);
+      }),
   );
   server.registerTool(
     "files.attach",
@@ -355,8 +599,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpFilesAttachArgs),
       annotations: ADDITIVE,
     },
-    ({ runId, ...input }) =>
-      run(() => core.attachRunArtifact(principal, runId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ runId, ...input }: Args) =>
+          execute(() => core.attachRunArtifact(principal, runId, input)))(args);
+      }),
   );
   server.registerTool(
     "runs.submit",
@@ -367,7 +622,19 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpRunsSubmitArgs),
       annotations: UPDATE,
     },
-    ({ runId, ...input }) => run(() => core.submitRun(principal, runId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ runId, ...input }: Args) =>
+          execute(() => core.submitRun(principal, runId, input)))(args);
+      }),
   );
   server.registerTool(
     "grants.request",
@@ -378,12 +645,23 @@ export function createMcpServer(
       inputSchema: toolSchema(mcpGrantsRequestArgs),
       annotations: ADDITIVE,
     },
-    ({ agentId, ...input }) =>
-      run(() => core.requestGrant(principal, agentId, input)),
+    (workspaceArgs) =>
+      run(async () => {
+        const { workspaceId, ...args } = workspaceArgs;
+        type Args = typeof args;
+        const principal = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          workspaceId,
+        );
+        state.principal = principal;
+        const execute = (fn: () => Promise<unknown>) => fn();
+        return (({ agentId, ...input }: Args) =>
+          execute(() => core.requestGrant(principal, agentId, input)))(args);
+      }),
   );
-  registerTimelineTools(server, core, principal, run);
-  registerCrmTools(server, core, principal, run);
-  registerInsightTools(server, core, principal, run);
+  registerTimelineTools(server, core, tokenPrincipal, run, state);
+  registerCrmTools(server, core, tokenPrincipal, run, state);
+  registerInsightTools(server, core, tokenPrincipal, run, state);
   return server;
 }
 

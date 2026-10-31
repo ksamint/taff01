@@ -20,3 +20,6 @@ lighthouse-reports
 # Private operator acceptance outputs are never build inputs.
 e2e/live/reports
 release-reports
+
+.local
+docs/audit

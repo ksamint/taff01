@@ -2,6 +2,7 @@ import { createCore } from "@taff/core";
 import { Queue, Worker } from "bullmq";
 import pino from "pino";
 import { z } from "zod";
+import { createShutdown } from "../../shutdown";
 import { createDigestProcessor } from "./digests";
 
 const redisUrl = new URL(z.url().parse(process.env.REDIS_URL));
@@ -62,11 +63,10 @@ await queue.upsertJobScheduler(
   },
 );
 logger.info("Worker ready");
-const shutdown = () => {
-  void worker
-    .close()
-    .then(() => Promise.all([queue.close(), core.close()]))
-    .then(() => process.exit(0));
-};
+const shutdown = createShutdown(
+  [() => worker.close()],
+  [() => queue.close(), () => core.close()],
+  (stage) => logger.error({ stage }, "Worker shutdown failed"),
+);
 process.once("SIGINT", shutdown);
 process.once("SIGTERM", shutdown);

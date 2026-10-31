@@ -372,7 +372,13 @@
     },
     "connectedApps": "已連接的應用",
     "approvedBy": "由 {{name}} 授權",
-    "approved": "授權於 {{date}}"
+    "approved": "授權於 {{date}}",
+    "workspaceGrants": "組織授權",
+    "targetWorkspace": "組織 ID",
+    "targetAgent": "智能體成員 ID",
+    "saveGrant": "儲存授權",
+    "revokeGrant": "撤銷授權",
+    "grantActive": "有效"
   },
   "taskDetail": {
     "back": "返回今天",

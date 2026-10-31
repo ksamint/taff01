@@ -27,16 +27,10 @@ export async function actorTimeZone(
               members,
               and(
                 eq(members.id, agentTokens.createdBy),
-                eq(members.workspaceId, actor.workspaceId),
+                eq(members.workspaceId, agentTokens.workspaceId),
               ),
             )
-            .where(
-              and(
-                eq(agentTokens.id, principal.tokenId),
-                eq(agentTokens.workspaceId, actor.workspaceId),
-                eq(agentTokens.memberId, actor.id),
-              ),
-            )
+            .where(and(eq(agentTokens.id, principal.tokenId)))
         )[0]?.userId;
   if (!personId) throw new CoreError("unauthorized", 401);
   const [person] = await q

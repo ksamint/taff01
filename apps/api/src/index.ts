@@ -6,6 +6,7 @@ import {
   createTencentSmsProviderFromEnv,
 } from "@taff/core";
 import { z } from "zod";
+import { createShutdown } from "../../shutdown";
 import { createApp } from "./app";
 import { createLogger } from "./logger";
 import { createRateLimiter } from "./rate-limit";
@@ -81,17 +82,22 @@ const server = serve(
     logger.info({ port: env.API_PORT }, "API ready");
   },
 );
-const shutdown = async () => {
-  await realtime.close();
-  server.close(() => {
-    void Promise.all([
-      core.close(),
-      rateLimiter.close(),
-      emailRateLimiter.close(),
-      askRateLimiter.close(),
-      oauthRateLimiter.close(),
-    ]).then(() => process.exit(0));
-  });
-};
+const shutdown = createShutdown(
+  [
+    () =>
+      new Promise<void>((resolve, reject) => {
+        server.close((error) => (error ? reject(error) : resolve()));
+      }),
+    () => realtime.close(),
+  ],
+  [
+    () => core.close(),
+    () => rateLimiter.close(),
+    () => emailRateLimiter.close(),
+    () => askRateLimiter.close(),
+    () => oauthRateLimiter.close(),
+  ],
+  (stage) => logger.error({ stage }, "API shutdown failed"),
+);
 process.once("SIGINT", shutdown);
 process.once("SIGTERM", shutdown);

@@ -151,36 +151,64 @@ export async function runMcpOAuthRoundTrip(options: McpOAuthRoundTripOptions) {
     refresh_token: issued!.refresh_token!,
   });
   const rotated = (await refreshed.json()) as OAuthTokens;
+  const access = (token: string) =>
+    (options.fetch ?? fetch)(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        Accept: "application/json, text/event-stream",
+      },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+  check(
+    "oauth: rotated access token is usable",
+    (await access(rotated.access_token)).ok,
+  );
   const replay = await form({
     grant_type: "refresh_token",
     client_id: clientId,
     refresh_token: issued!.refresh_token!,
   });
+  const descendant = await form({
+    grant_type: "refresh_token",
+    client_id: clientId,
+    refresh_token: rotated.refresh_token!,
+  });
   check(
-    "oauth: refresh rotates and the old refresh token is refused",
+    "oauth: refresh reuse revokes the descendant access and refresh tokens",
     refreshed.ok &&
       !!rotated.refresh_token &&
       rotated.refresh_token !== issued!.refresh_token &&
-      replay.status === 400,
+      replay.status === 400 &&
+      descendant.status === 400 &&
+      (await access(rotated.access_token)).status === 401,
   );
-  provider.saveTokens(rotated);
+  // Explicit revocation must also end a separate, still-live grant.
+  const freshCallback = new URL(
+    await options.approve(provider.authorizationUrl),
+  );
+  const freshResponse = await form({
+    grant_type: "authorization_code",
+    client_id: clientId,
+    code: freshCallback.searchParams.get("code")!,
+    redirect_uri: REDIRECT,
+    code_verifier: provider.verifier,
+  });
+  const fresh = (await freshResponse.json()) as OAuthTokens;
+  check(
+    "oauth: reauthorization issues a live grant",
+    freshResponse.ok && (await access(fresh.access_token)).ok,
+  );
   const revoke = await (options.fetch ?? fetch)(meta.revocation_endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
-      token: rotated.refresh_token!,
+      token: fresh.refresh_token!,
       client_id: clientId,
     }),
   });
-  const after = await (options.fetch ?? fetch)(endpoint, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${rotated.access_token}`,
-      "Content-Type": "application/json",
-      Accept: "application/json, text/event-stream",
-    },
-    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
-  });
+  const after = await access(fresh.access_token);
   check(
     "oauth: revocation ends the grant and the 401 names resource metadata",
     revoke.ok &&

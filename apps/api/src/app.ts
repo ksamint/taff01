@@ -9,6 +9,7 @@ import {
 import {
   agentPermissionInputSchema,
   agentProfileInputSchema,
+  agentTokenWorkspaceInputSchema,
   appendRunEventSchema,
   assignTaskSchema,
   attachRunArtifactSchema,
@@ -169,7 +170,10 @@ export function createApp(
       c.header("WWW-Authenticate", challenge);
       return c.json({ error: "unauthorized" }, 401);
     }
-    const state: { failed?: "error" | "denied" } = {};
+    const state: {
+      failed?: "error" | "denied";
+      principal?: Extract<Principal, { kind: "agent" }>;
+    } = {};
     const response = await mcp.fetch(c.req.raw, {
       authInfo: {
         token: "redacted",
@@ -179,7 +183,10 @@ export function createApp(
       },
       parsedBody: body ?? undefined,
     });
-    await record(principal, state.failed ?? (await callStatus(response)));
+    await record(
+      state.principal ?? principal,
+      state.failed ?? (await callStatus(response)),
+    );
     return response;
   });
   registerPublicOAuthRoutes(app, core, oauthRateLimiter ?? rateLimiter);
@@ -885,6 +892,25 @@ export function createApp(
       201,
     );
   });
+  app.get("/api/agent-tokens/:id/workspaces", async (c) => {
+    const { workspaceId } = workspaceQuerySchema.parse(c.req.query());
+    return c.json(
+      await core.listAgentTokenWorkspaces(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        workspaceId,
+      ),
+    );
+  });
+  app.put("/api/agent-tokens/:id/workspaces", async (c) =>
+    c.json(
+      await core.setAgentTokenWorkspace(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        agentTokenWorkspaceInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
   app.delete("/api/agent-tokens/:id", async (c) => {
     const id = idSchema.parse(c.req.param("id"));
     return c.json(

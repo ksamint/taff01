@@ -5,6 +5,8 @@ import {
   agentTokens,
   connectDatabase,
   members,
+  oauthCodes,
+  oauthRefreshHistory,
 } from "@taff/db";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -12,6 +14,7 @@ import { migrateDatabase } from "../../db/src/migrate";
 import {
   type Core,
   createCore,
+  hashToken,
   OAuthError,
   type Principal,
   userPrincipal,
@@ -274,6 +277,19 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
     });
     expect(issued.access_token.startsWith("taff_")).toBe(true);
     const principal = await core.authenticateAgentToken(issued.access_token);
+    if (!principal || principal.kind !== "agent")
+      throw new Error("OAuth fixture did not authenticate");
+    await expect(
+      core.resolveAgentWorkspace(principal, randomUUID()),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.setAgentTokenWorkspace(alice, principal.tokenId, {
+        workspaceId: w,
+        memberId: agentId,
+        scopes: ["tasks:read"],
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+
     expect(principal).toMatchObject({
       kind: "agent",
       memberId: agentId,
@@ -293,6 +309,95 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
     expect(await core.authenticateAgentToken(issued.access_token)).toBeNull();
   });
 
+  it("does not revoke a used code's grant without its client and PKCE proof", async () => {
+    const proof = pkce();
+    const code = await approve(proof.challenge);
+    const grant = await exchange(code, proof.verifier);
+    const otherClient = await core.oauth.registerClient({
+      redirect_uris: [REDIRECT],
+    });
+    for (const change of [
+      { client_id: otherClient.client_id },
+      { code_verifier: pkce().verifier },
+      { redirect_uri: "https://example.com/callback" },
+    ]) {
+      await expect(
+        core.oauth.token({
+          grant_type: "authorization_code",
+          client_id: clientId,
+          code,
+          code_verifier: proof.verifier,
+          redirect_uri: REDIRECT,
+          ...change,
+        }),
+      ).rejects.toMatchObject({ error: "invalid_grant" });
+      expect(
+        await core.authenticateAgentToken(grant.access_token),
+      ).not.toBeNull();
+    }
+    await expect(exchange(code, proof.verifier)).rejects.toMatchObject({
+      error: "invalid_grant",
+    });
+    expect(await core.authenticateAgentToken(grant.access_token)).toBeNull();
+  });
+
+  it("revokes the winning grant when a valid code is redeemed concurrently", async () => {
+    const proof = pkce();
+    const code = await approve(proof.challenge);
+    let release!: () => void;
+    let ready!: (pid: number) => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const locked = new Promise<number>((resolve) => {
+      ready = resolve;
+    });
+    const codeLock = connection.db.transaction(async (tx) => {
+      await tx
+        .select({ id: oauthCodes.id })
+        .from(oauthCodes)
+        .where(
+          eq(oauthCodes.hash, hashToken(code, "oauth-test-pepper-sixteen")),
+        )
+        .for("update");
+      const rows = await tx.execute(sql`select pg_backend_pid() as pid`);
+      ready(Number(rows[0].pid));
+      await held;
+    });
+    const blocker = await locked;
+    const exchanges = Promise.allSettled([
+      exchange(code, proof.verifier),
+      exchange(code, proof.verifier),
+    ]);
+    try {
+      // Both requests must read the unused code before either can claim it.
+      let waiting = 0;
+      const deadline = Date.now() + 5000;
+      while (waiting < 2 && Date.now() < deadline) {
+        const rows = await connection.client`
+          with recursive blocked(pid) as (
+            select pid from pg_stat_activity where ${blocker} = any(pg_blocking_pids(pid))
+            union
+            select a.pid from pg_stat_activity a join blocked b on b.pid = any(pg_blocking_pids(a.pid))
+          ) select pid from blocked`;
+        waiting = rows.length;
+        if (waiting < 2)
+          await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(waiting).toBe(2);
+    } finally {
+      release();
+      await codeLock;
+    }
+    const results = await exchanges;
+    const fulfilled = results.filter((r) => r.status === "fulfilled");
+    expect(fulfilled).toHaveLength(1);
+    expect(results.filter((r) => r.status === "rejected")).toHaveLength(1);
+    expect(
+      await core.authenticateAgentToken(fulfilled[0].value.access_token),
+    ).toBeNull();
+  });
+
   it("rotates refresh tokens and expires access tokens", async () => {
     const { verifier, challenge } = pkce();
     const first = await exchange(await approve(challenge), verifier);
@@ -307,10 +412,6 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
     expect(await core.authenticateAgentToken(first.access_token)).toBeNull();
     const principal = await core.authenticateAgentToken(second.access_token);
     expect(principal).not.toBeNull();
-    // The old refresh token worked exactly once.
-    await expect(refresh(first.refresh_token)).rejects.toMatchObject({
-      error: "invalid_grant",
-    });
     await expect(
       core.oauth.token({
         grant_type: "refresh_token",
@@ -340,6 +441,139 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
     await expect(refresh(third.refresh_token)).rejects.toMatchObject({
       error: "invalid_grant",
     });
+  });
+
+  it("revokes refresh descendants on replay only for the original client", async () => {
+    const proof = pkce();
+    const first = await exchange(
+      await approve(proof.challenge),
+      proof.verifier,
+    );
+    const refresh = (refresh_token: string, client_id = clientId) =>
+      core.oauth.token({
+        grant_type: "refresh_token",
+        client_id,
+        refresh_token,
+      });
+    const second = await refresh(first.refresh_token);
+    const third = await refresh(second.refresh_token);
+    const principal = await core.authenticateAgentToken(third.access_token);
+    if (!principal || principal.kind !== "agent")
+      throw new Error("Expected agent grant");
+    const other = await core.oauth.registerClient({
+      redirect_uris: [REDIRECT],
+    });
+    await expect(
+      refresh(first.refresh_token, other.client_id),
+    ).rejects.toMatchObject({ error: "invalid_grant" });
+    expect(
+      await core.authenticateAgentToken(third.access_token),
+    ).not.toBeNull();
+    const history = await connection.db
+      .select()
+      .from(oauthRefreshHistory)
+      .where(eq(oauthRefreshHistory.tokenId, principal.tokenId));
+    expect(history.map((row) => row.hash).sort()).toEqual(
+      [first, second]
+        .map((grant) =>
+          hashToken(grant.refresh_token, "oauth-test-pepper-sixteen"),
+        )
+        .sort(),
+    );
+    await expect(refresh(first.refresh_token)).rejects.toMatchObject({
+      error: "invalid_grant",
+    });
+    expect(await core.authenticateAgentToken(third.access_token)).toBeNull();
+    await expect(refresh(third.refresh_token)).rejects.toMatchObject({
+      error: "invalid_grant",
+    });
+    await expect(
+      core.restoreAgentToken(alice, principal.tokenId),
+    ).rejects.toMatchObject({ code: "conflict" });
+    const [audit] = await connection.db
+      .select()
+      .from(activity)
+      .where(
+        and(
+          eq(activity.resourceId, principal.tokenId),
+          eq(activity.action, "agent_tokens.update"),
+        ),
+      )
+      .orderBy(sql`${activity.createdAt} desc`, sql`${activity.id} desc`)
+      .limit(1);
+    expect(audit.actorId).toBe(`agent:${agentId}`);
+  });
+
+  it("commits revocation when two requests reuse the same refresh token concurrently", async () => {
+    const proof = pkce();
+    const grant = await exchange(
+      await approve(proof.challenge),
+      proof.verifier,
+    );
+    const principal = await core.authenticateAgentToken(grant.access_token);
+    if (!principal || principal.kind !== "agent")
+      throw new Error("Expected agent grant");
+    let release!: () => void;
+    let ready!: (pid: number) => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const locked = new Promise<number>((resolve) => {
+      ready = resolve;
+    });
+    const tokenLock = connection.db.transaction(async (tx) => {
+      await tx
+        .select({ id: agentTokens.id })
+        .from(agentTokens)
+        .where(eq(agentTokens.id, principal.tokenId))
+        .for("update");
+      const rows = await tx.execute(sql`select pg_backend_pid() as pid`);
+      ready(Number(rows[0].pid));
+      await held;
+    });
+    const blocker = await locked;
+    const refresh = () =>
+      core.oauth.token({
+        grant_type: "refresh_token",
+        client_id: clientId,
+        refresh_token: grant.refresh_token,
+      });
+    const attempts = Promise.allSettled([refresh(), refresh()]);
+    try {
+      let waiting = 0;
+      const deadline = Date.now() + 5000;
+      while (waiting < 2 && Date.now() < deadline) {
+        const rows = await connection.client`
+          with recursive blocked(pid) as (
+            select pid from pg_stat_activity where ${blocker} = any(pg_blocking_pids(pid))
+            union
+            select a.pid from pg_stat_activity a join blocked b on b.pid = any(pg_blocking_pids(a.pid))
+          ) select pid from blocked`;
+        waiting = rows.length;
+        if (waiting < 2)
+          await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+      expect(waiting).toBe(2);
+    } finally {
+      release();
+      await tokenLock;
+    }
+    const results = await attempts;
+    const success = results.filter((result) => result.status === "fulfilled");
+    expect(success).toHaveLength(1);
+    expect(
+      results.filter((result) => result.status === "rejected"),
+    ).toHaveLength(1);
+    expect(
+      await core.authenticateAgentToken(success[0].value.access_token),
+    ).toBeNull();
+    await expect(
+      core.oauth.token({
+        grant_type: "refresh_token",
+        client_id: clientId,
+        refresh_token: success[0].value.refresh_token,
+      }),
+    ).rejects.toMatchObject({ error: "invalid_grant" });
   });
 
   it("refuses a code whose approver is no longer an admin, and expired codes", async () => {
@@ -574,6 +808,113 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
         await role(memberId, reason === "admin demoted" ? "admin" : "member");
         await supervise(null);
       }
+    },
+  );
+
+  it.each(["approve", "exchange", "refresh", "restore"] as const)(
+    "%s waits for concurrent supervision removal and rejects stale authority",
+    async (operation) => {
+      await supervise(bobMember);
+      const proof = pkce();
+      const decision = {
+        request: {
+          response_type: "code" as const,
+          client_id: clientId,
+          redirect_uri: REDIRECT,
+          code_challenge: proof.challenge,
+          code_challenge_method: "S256" as const,
+        },
+        decision: "approve" as const,
+        workspaceId: w,
+        memberId: agentId,
+        scopes: ["tasks:read" as const],
+      };
+      const code =
+        operation === "exchange"
+          ? new URL(
+              (await core.oauth.decide(bob, decision)).redirectTo,
+            ).searchParams.get("code")!
+          : "";
+      const grant =
+        operation === "refresh" || operation === "restore"
+          ? await memberGrant()
+          : null;
+      const tokenId = grant
+        ? (
+            (await core.authenticateAgentToken(grant.access_token)) as {
+              tokenId: string;
+            }
+          ).tokenId
+        : "";
+      if (operation === "restore") await core.revokeAgentToken(bob, tokenId);
+      let unlock!: () => void;
+      let locked!: (pid: number) => void;
+      const held = new Promise<void>((resolve) => {
+        unlock = resolve;
+      });
+      const ready = new Promise<number>((resolve) => {
+        locked = resolve;
+      });
+      const removal = connection.db.transaction(async (tx) => {
+        await tx.execute(sql`select set_config('taff.actor_id','test',true)`);
+        await tx
+          .update(agentProfiles)
+          .set({ supervisorId: null })
+          .where(eq(agentProfiles.id, agentId));
+        const result = await tx.execute(sql`select pg_backend_pid() as pid`);
+        locked(Number(result[0].pid));
+        await held;
+      });
+      const blocker = await ready;
+      let settled = false;
+      const pending = (
+        operation === "approve"
+          ? core.oauth.decide(bob, decision)
+          : operation === "exchange"
+            ? exchange(code, proof.verifier)
+            : operation === "refresh"
+              ? core.oauth.token({
+                  grant_type: "refresh_token",
+                  client_id: clientId,
+                  refresh_token: grant!.refresh_token,
+                })
+              : core.restoreAgentToken(bob, tokenId)
+      ).then(
+        (value) => {
+          settled = true;
+          return { value, error: null };
+        },
+        (error: unknown) => {
+          settled = true;
+          return { value: null, error };
+        },
+      );
+      try {
+        // Observe actual database blocking instead of assuming a timing delay.
+        const deadline = Date.now() + 5000;
+        let blocked = false;
+        while (!settled && !blocked && Date.now() < deadline) {
+          const rows = await connection.client`
+            select pid from pg_stat_activity
+            where ${blocker} = any(pg_blocking_pids(pid))`;
+          blocked = rows.length > 0;
+          if (!blocked) await new Promise((resolve) => setTimeout(resolve, 10));
+        }
+        expect(blocked).toBe(true);
+      } finally {
+        unlock();
+        await removal;
+      }
+      const result = await pending;
+      expect(result.error).toMatchObject(
+        operation === "exchange" || operation === "refresh"
+          ? { error: "invalid_grant" }
+          : { code: "forbidden" },
+      );
+      if (grant)
+        expect(
+          await core.authenticateAgentToken(grant.access_token),
+        ).toBeNull();
     },
   );
 

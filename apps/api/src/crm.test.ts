@@ -374,6 +374,7 @@ describe("CRM MCP tools", () => {
   }
   it("lists the three read-only CRM tools and forwards token identity", async () => {
     vi.spyOn(core, "authenticateAgentToken").mockResolvedValue(principal);
+    vi.spyOn(core, "resolveAgentWorkspace").mockResolvedValue(principal);
     vi.spyOn(core, "recordMcpCall").mockResolvedValue();
     const listed = await json(await call({ method: "tools/list" }));
     const names = listed.result?.tools?.map((tool) => tool.name) ?? [];

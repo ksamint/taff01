@@ -2,13 +2,15 @@ import { createHash, createHmac, randomInt, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createCore, userPrincipal } from "@taff/core";
 import {
+  agentPermissions,
   connectDatabase,
   members,
   notificationPreferences,
+  tasks,
   user,
 } from "@taff/db";
 import { createEmailVerificationToken } from "better-auth/api";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import {
   MCP_TOOLS,
@@ -560,6 +562,17 @@ const routes: RequestCase[] = [
     }),
     member: "deny",
   },
+  {
+    method: "GET",
+    path: "/api/agent-tokens/:token/workspaces?workspaceId=:workspace",
+    member: "deny",
+  },
+  {
+    method: "PUT",
+    path: "/api/agent-tokens/:token/workspaces",
+    member: "deny",
+    body: () => ({ workspaceId, memberId: agentId, scopes: ["tasks:read"] }),
+  },
   { method: "DELETE", path: "/api/agent-tokens/:token", member: "deny" },
   {
     method: "POST",
@@ -1039,6 +1052,97 @@ describe.skipIf(!databaseUrl)(
       )
         expect(await response.json()).toMatchObject({ error: "unauthorized" });
     });
+    it.each(["explicit", "default"])(
+      "serializes signed execution against %s capability revocation",
+      async (permission) => {
+        const f = await fixture();
+        const prior = (
+          await core.getAgentProfile(owner(), agentId)
+        ).permissions.find((p) => p.capability === "tasks.write")?.decision;
+        if (permission === "explicit")
+          await core.setAgentPermission(owner(), agentId, {
+            capability: "tasks.write",
+            decision: "allow",
+          });
+        else
+          await connection.db.transaction(async (tx) => {
+            await tx.execute(
+              sql`select set_config('taff.actor_id', ${ownerUserId}, true)`,
+            );
+            await tx
+              .delete(agentPermissions)
+              .where(
+                and(
+                  eq(agentPermissions.agentId, agentId),
+                  eq(agentPermissions.capability, "tasks.write"),
+                ),
+              );
+          });
+        const envelope = agentEnvelope(f, f.token.token);
+        const headers = { Authorization: `Bearer ${f.token.token}` };
+        let release!: () => void;
+        let ready!: (pid: number) => void;
+        const held = new Promise<void>((resolve) => {
+          release = resolve;
+        });
+        const locked = new Promise<number>((resolve) => {
+          ready = resolve;
+        });
+        const taskLock = connection.db.transaction(async (tx) => {
+          await tx
+            .select({ id: tasks.id })
+            .from(tasks)
+            .where(eq(tasks.id, f.task.id))
+            .for("update");
+          const rows = await tx.execute(sql`select pg_backend_pid() as pid`);
+          ready(Number(rows[0].pid));
+          await held;
+        });
+        const blockedBy = async (pid: number) => {
+          const deadline = Date.now() + 5000;
+          while (Date.now() < deadline) {
+            const rows =
+              await connection.client`select pid from pg_stat_activity where ${pid} = any(pg_blocking_pids(pid))`;
+            if (rows.length) return Number(rows[0].pid);
+            await new Promise((resolve) => setTimeout(resolve, 10));
+          }
+          throw new Error("Expected authorization transaction to block");
+        };
+        const taskPid = await locked;
+        const execution = signedRequest(
+          agentApprovalRoutes[0],
+          envelope,
+          headers,
+        );
+        let revocation: ReturnType<typeof core.setAgentPermission> | undefined;
+        try {
+          const executionPid = await blockedBy(taskPid);
+          revocation = core.setAgentPermission(owner(), agentId, {
+            capability: "tasks.write",
+            decision: "deny",
+          });
+          await blockedBy(executionPid);
+          release();
+          await taskLock;
+          expect((await execution).status).toBe(200);
+          await revocation;
+          for (const path of agentApprovalRoutes)
+            expect((await signedRequest(path, envelope, headers)).status).toBe(
+              403,
+            );
+        } finally {
+          release();
+          await taskLock;
+          await execution;
+          await revocation;
+          await core.setAgentPermission(owner(), agentId, {
+            capability: "tasks.write",
+            decision: prior ?? "allow",
+          });
+        }
+      },
+    );
+
     it("signed execution and receipt replay both reject lost capability", async () => {
       const f = await fixture();
       const envelope = agentEnvelope(f, f.token.token);
@@ -1229,6 +1333,7 @@ describe.skipIf(!databaseUrl)(
 
     const implicitWorkspaceTools = new Set([
       "context.get",
+      "workspaces.list",
       "tasks.list",
       "projects.list",
       "projects.create",
@@ -1270,6 +1375,7 @@ describe.skipIf(!databaseUrl)(
       }
       const args: Record<string, Record<string, unknown>> = {
         "context.get": {},
+        "workspaces.list": {},
         "tasks.list": {},
         "tasks.create": {
           ownerId,

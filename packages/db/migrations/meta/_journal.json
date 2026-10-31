@@ -267,6 +267,20 @@
       "when": 1793232000003,
       "tag": "0037_project_delivery",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1793232000004,
+      "tag": "0038_agent_token_workspaces",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1793232000005,
+      "tag": "0039_oauth_refresh_history",
+      "breakpoints": true
     }
   ]
 }
