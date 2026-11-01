@@ -1,10 +1,12 @@
 mod calendar;
 mod error;
 mod schema;
+mod security;
 
 pub use calendar::normalize_rrule;
 pub use error::{CoreError, Result};
 pub use schema::{User, Workspace};
+pub use security::{canonical_json, hash_token};
 
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use uuid::Uuid;
