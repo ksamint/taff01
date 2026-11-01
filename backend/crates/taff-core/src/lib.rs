@@ -1,6 +1,8 @@
+mod calendar;
 mod error;
 mod schema;
 
+pub use calendar::normalize_rrule;
 pub use error::{CoreError, Result};
 pub use schema::{User, Workspace};
 

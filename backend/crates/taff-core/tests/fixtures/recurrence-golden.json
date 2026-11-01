@@ -1,0 +1,7 @@
+{
+  "weekly_reorder": "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;WKST=MO",
+  "monthly_last_day": "FREQ=MONTHLY;BYMONTHDAY=-1",
+  "daily_until": "FREQ=DAILY;UNTIL=20261010T090000Z",
+  "yearly_leap": "FREQ=YEARLY;COUNT=2",
+  "daily_interval": "FREQ=DAILY;INTERVAL=2;COUNT=5"
+}
