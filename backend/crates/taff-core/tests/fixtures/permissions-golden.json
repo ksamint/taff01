@@ -1,0 +1,202 @@
+[
+  {
+    "name": "admin moves stage",
+    "result": true
+  },
+  {
+    "name": "lead moves stage",
+    "result": true
+  },
+  {
+    "name": "other member cannot move stage",
+    "result": false
+  },
+  {
+    "name": "guest lead cannot move stage",
+    "result": false
+  },
+  {
+    "name": "agent cannot move stage",
+    "result": false
+  },
+  {
+    "name": "other workspace denied",
+    "result": false
+  },
+  {
+    "name": "user selects own default",
+    "result": true
+  },
+  {
+    "name": "user cannot change other default",
+    "result": false
+  },
+  {
+    "name": "system admin changes other default",
+    "result": true
+  },
+  {
+    "name": "agent cannot change default",
+    "result": false
+  },
+  {
+    "name": "admin archives own org",
+    "result": true
+  },
+  {
+    "name": "member cannot archive",
+    "result": false
+  },
+  {
+    "name": "system admin archives",
+    "result": true
+  },
+  {
+    "name": "agent cannot archive",
+    "result": false
+  },
+  {
+    "name": "anonymous cannot read",
+    "result": false
+  },
+  {
+    "name": "member can read",
+    "result": true
+  },
+  {
+    "name": "other workspace read denied",
+    "result": false
+  },
+  {
+    "name": "person can create",
+    "result": true
+  },
+  {
+    "name": "owner can assign",
+    "result": true
+  },
+  {
+    "name": "other member cannot assign",
+    "result": false
+  },
+  {
+    "name": "admin can assign",
+    "result": true
+  },
+  {
+    "name": "admin isolated",
+    "result": false
+  },
+  {
+    "name": "owner moves status",
+    "result": true
+  },
+  {
+    "name": "worker moves status",
+    "result": true
+  },
+  {
+    "name": "bystander cannot move status",
+    "result": false
+  },
+  {
+    "name": "agent uses tasks.write capability",
+    "result": true
+  },
+  {
+    "name": "agent denied projects.manage",
+    "result": false
+  },
+  {
+    "name": "agent missing scope",
+    "result": false
+  },
+  {
+    "name": "person capability always uses",
+    "result": true
+  },
+  {
+    "name": "admin creates suggestion",
+    "result": true
+  },
+  {
+    "name": "agent creates suggestion on own work",
+    "result": true
+  },
+  {
+    "name": "agent cannot create suggestion on others work",
+    "result": false
+  },
+  {
+    "name": "person decides suggestion",
+    "result": true
+  },
+  {
+    "name": "agent starts run on own work",
+    "result": true
+  },
+  {
+    "name": "agent cannot start run on other work",
+    "result": false
+  },
+  {
+    "name": "agent finishes own non-review task ask_only",
+    "result": true
+  },
+  {
+    "name": "agent cannot finish always_review",
+    "result": false
+  },
+  {
+    "name": "person manages token (admin)",
+    "result": true
+  },
+  {
+    "name": "agent cannot manage token",
+    "result": false
+  },
+  {
+    "name": "agent cannot review task",
+    "result": false
+  },
+  {
+    "name": "agent requests grant for itself",
+    "result": true
+  },
+  {
+    "name": "agent requests grant for other",
+    "result": false
+  },
+  {
+    "name": "admin decides grant",
+    "result": true
+  },
+  {
+    "name": "person reads contact",
+    "result": true
+  },
+  {
+    "name": "agent reads contact with crm.read allow",
+    "result": true
+  },
+  {
+    "name": "agent read contact denied by default ask",
+    "result": false
+  },
+  {
+    "name": "agent reads contact details with allow",
+    "result": true
+  },
+  {
+    "name": "person reads finance",
+    "result": true
+  },
+  {
+    "name": "person manages finance admin",
+    "result": true
+  },
+  {
+    "name": "member cannot manage finance",
+    "result": false
+  }
+]

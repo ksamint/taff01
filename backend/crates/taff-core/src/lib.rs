@@ -1,11 +1,16 @@
 mod calendar;
 mod error;
+mod permissions;
 mod schema;
 mod security;
 mod tz;
 
 pub use calendar::normalize_rrule;
 pub use error::{CoreError, Result};
+pub use permissions::{
+    Action, Actor, Capability, Grant, GrantStatus, MemberKind, PermissionDecision, Resource,
+    ReviewPolicy, Role, Scope, TaskStatus, can, can_grant_oauth_scopes, scope_name,
+};
 pub use schema::{User, Workspace};
 pub use security::{canonical_json, hash_token};
 pub use tz::{CivilDateTime, civil_datetime, wall_to_instant};
