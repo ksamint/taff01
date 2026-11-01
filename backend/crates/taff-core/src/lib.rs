@@ -2,11 +2,13 @@ mod calendar;
 mod error;
 mod schema;
 mod security;
+mod tz;
 
 pub use calendar::normalize_rrule;
 pub use error::{CoreError, Result};
 pub use schema::{User, Workspace};
 pub use security::{canonical_json, hash_token};
+pub use tz::{CivilDateTime, civil_datetime, wall_to_instant};
 
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use uuid::Uuid;
