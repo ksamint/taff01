@@ -20,3 +20,6 @@ lighthouse-reports/
 release-reports/
 
 e2e/live/reports/
+
+# Rust backend (ADR 0026)
+backend/target/

@@ -23,6 +23,28 @@ env:
   CI: "1"
   NEXT_TELEMETRY_DISABLED: "1"
 jobs:
+  rust-backend:
+    # The Rust migration (ADR 0026) builds and tests on standard hosted runners,
+    # independent of the constrained self-hosted pool used by the TypeScript gates.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: backend
+      - name: Build
+        run: cargo build --workspace --locked
+        working-directory: backend
+      - name: Test
+        run: cargo test --workspace --locked
+        working-directory: backend
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+        working-directory: backend
   checks:
     # Requires Valkey/browser or image-build capacity absent from the approved pool.
     if: vars.TAFF_FULL_CI_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
