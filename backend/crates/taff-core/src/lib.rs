@@ -12,8 +12,8 @@ pub use permissions::{
     ReviewPolicy, Role, Scope, TaskStatus, can, can_grant_oauth_scopes, scope_name,
 };
 pub use schema::{User, Workspace};
-pub use security::{canonical_json, hash_token};
-pub use tz::{CivilDateTime, civil_datetime, wall_to_instant};
+pub use security::{canonical_json, hash_token, js_number_to_string};
+pub use tz::{CivilDateTime, Zone, civil_datetime, wall_to_instant};
 
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use uuid::Uuid;

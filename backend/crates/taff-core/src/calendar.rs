@@ -1,6 +1,7 @@
 use chrono::{DateTime, Datelike, NaiveDate, TimeZone, Utc, Weekday};
 
 use crate::error::{CoreError, Result};
+use crate::tz::Zone;
 
 const PARTS: [&str; 8] = [
     "FREQ",
@@ -27,14 +28,14 @@ struct CivilDate {
     day: u32,
 }
 
-fn civil_date(instant: &DateTime<Utc>, zone: &chrono_tz::Tz) -> CivilDate {
+fn civil_date(instant: &DateTime<Utc>, zone: &Zone) -> CivilDate {
     // `chrono-tz` converts a UTC instant to the wall clock in `zone`; its
     // DST transition data matches IANA/ICU for the zones we normalize.
-    let local = instant.with_timezone(zone);
+    let local = zone.civil(instant);
     CivilDate {
-        year: local.year(),
-        month: local.month(),
-        day: local.day(),
+        year: local.year,
+        month: local.month,
+        day: local.day,
     }
 }
 
@@ -103,8 +104,9 @@ fn parse_until(value: &str) -> Result<DateTime<Utc>> {
 /// in `packages/core/src/calendar-recurrence.ts` (lines 54–138) — the pure
 /// validation/normalization that does not expand occurrences.
 ///
-/// `start_at` is the series start instant; `zone` is its IANA time zone (or a
-/// fixed offset like `+08:00`), used only to derive the anchor's civil date.
+/// `start_at` is the series start instant; `zone` is its IANA time zone or a
+/// fixed offset like `+08:00` (see [`Zone`]), used to derive the anchor's
+/// civil date and to reject an `UNTIL` earlier than the start.
 ///
 /// Note: the TypeScript `ruleFor` performs an additional `RRule.parseString`
 /// round-trip on the canonical string to populate per-frequency defaults used
@@ -113,12 +115,14 @@ fn parse_until(value: &str) -> Result<DateTime<Utc>> {
 /// to the expansion port; any difference it could make to acceptance is covered
 /// by the parity test.
 pub fn normalize_rrule(raw: &str, start_at: &DateTime<Utc>, zone: &str) -> Result<String> {
-    let tz: chrono_tz::Tz = zone.parse().map_err(|_| CoreError::InvalidInput)?;
-    let anchor = civil_date(start_at, &tz);
+    let zone: Zone = zone.parse()?;
+    let anchor = civil_date(start_at, &zone);
     if raw.contains(['\r', '\n']) {
         return Err(CoreError::InvalidInput);
     }
-    let body = raw.trim().trim_start_matches("RRULE:").to_uppercase();
+    // `.trim().replace(/^RRULE:/i, "").toUpperCase()`: one prefix, any case.
+    let upper = raw.trim().to_uppercase();
+    let body = upper.strip_prefix("RRULE:").unwrap_or(&upper);
 
     let mut values: std::collections::BTreeMap<String, String> = std::collections::BTreeMap::new();
     for part in body.split(';') {
@@ -242,10 +246,12 @@ pub fn normalize_rrule(raw: &str, start_at: &DateTime<Utc>, zone: &str) -> Resul
         }
     }
 
-    // `until` validation happens even though the canonical string strips it
-    // from the output below; reject invalid UNTIL before canonicalizing.
+    // An UNTIL must parse and must not precede the series start
+    // (`until.getTime() < actualStart.getTime()` is rejected in `ruleFor`).
     if let Some(until) = values.get("UNTIL") {
-        parse_until(until)?;
+        if parse_until(until)? < *start_at {
+            return Err(CoreError::InvalidInput);
+        }
     }
 
     let mut parts = Vec::new();
@@ -303,6 +309,20 @@ mod tests {
     }
 
     #[test]
+    fn strips_one_prefix_of_any_case_and_accepts_fixed_offsets() {
+        let start = utc(2026, 10, 9, 9, 0, 0);
+        assert_eq!(
+            normalize_rrule("rrule:freq=daily", &start, "UTC").unwrap(),
+            "FREQ=DAILY"
+        );
+        assert_eq!(
+            normalize_rrule("FREQ=DAILY", &start, "+08:00").unwrap(),
+            "FREQ=DAILY"
+        );
+        assert!(normalize_rrule("FREQ=DAILY", &start, "Mars/Olympus").is_err());
+    }
+
+    #[test]
     fn rejects_adversarial_rules() {
         for bad in [
             "FREQ=SECONDLY",
@@ -322,6 +342,8 @@ mod tests {
             "FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=30",
             "FREQ=WEEKLY;BYDAY=MO",
             "FREQ=DAILY;UNTIL=20260230T090000Z",
+            "FREQ=DAILY;UNTIL=20200101T000000Z",
+            "RRULE:RRULE:FREQ=DAILY",
         ] {
             assert!(
                 normalize_rrule(bad, &utc(2026, 10, 9, 9, 0, 0), "UTC").is_err(),

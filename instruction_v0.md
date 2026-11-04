@@ -16,11 +16,9 @@ Frontend (unchanged): TypeScript 7 · Next.js 16 App Router · React 19 · Tailw
 
 Backend (migrating from TypeScript to Rust, phased, parity-gated): Rust (edition 2024) · `axum` (replacing Hono) · `sqlx`/`tokio` (replacing Drizzle ORM + `postgres` driver) · `chrono`/`chrono-tz` + `rrule` (calendar recurrence) · `tracing` (replacing pino) · serde + a JSON-Schema validator consuming the generated schema from `packages/schemas` (single source of truth) · PostgreSQL 18 · Valkey 9. Until each module cutover completes, `packages/core` stays the database/session/permission authority and both run side by side.
 
-`schema.gen` regenerates the Rust contract from the Zod source in `packages/schemas`; never hand-duplicate a shape.
+`pnpm rust:fixtures` regenerates the Rust contract and every parity fixture from the TypeScript source of truth (CI fails on a stale fixture); never hand-duplicate a shape.
 
 Versions were reviewed on 2026-10-08 (`docs/adr/0004-stack-version-review.md`); the follow-up schedule is in `docs/upgrade-plan.md`. The Rust migration decision and phases are in `docs/adr/0026-backend-migration-to-rust.md`.
-
-Versions were reviewed on 2026-10-08 (`docs/adr/0004-stack-version-review.md`); the follow-up schedule is in `docs/upgrade-plan.md`.
 
 ## UI and UX source of truth
 

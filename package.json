@@ -19,6 +19,7 @@
     "e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test",
     "perf:budget": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/bundle-budget.mts",
     "mcp:smoke": "node --env-file=.env node_modules/tsx/dist/cli.mjs apps/api/scripts/mcp-smoke.mts",
+    "rust:fixtures": "node --env-file-if-exists=.env node_modules/tsx/dist/cli.mjs scripts/rust-fixtures.mts",
     "release:checklist": "node --env-file-if-exists=.env node_modules/@playwright/test/cli.js test --config playwright.release.config.ts",
     "release:stack": "node --env-file-if-exists=.env scripts/release-stack.mjs",
     "build:server": "node node_modules/tsx/dist/cli.mjs scripts/build-server.mts",

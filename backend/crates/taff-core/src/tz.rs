@@ -1,4 +1,8 @@
-use chrono::{DateTime, Datelike, NaiveDate, NaiveDateTime, Offset, TimeZone, Timelike, Utc};
+use std::str::FromStr;
+
+use chrono::{
+    DateTime, Datelike, FixedOffset, NaiveDate, NaiveDateTime, Offset, TimeZone, Timelike, Utc,
+};
 
 use crate::error::{CoreError, Result};
 
@@ -6,7 +10,7 @@ use crate::error::{CoreError, Result};
 /// whose fields are the *local* calendar values in a time zone, mirroring how
 /// `calendarCivilTime` in `packages/schemas` returns a `Date` whose UTC fields
 /// hold local calendar fields (never an actual instant).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct CivilDateTime {
     pub year: i32,
     /// 1-based month.
@@ -19,16 +23,86 @@ pub struct CivilDateTime {
 }
 
 impl CivilDateTime {
-    fn to_naive(self) -> NaiveDateTime {
-        NaiveDate::from_ymd_opt(self.year, self.month, self.day)
-            .expect("valid civil date")
-            .and_hms_milli_opt(self.hour, self.minute, self.second, self.millisecond)
-            .expect("valid civil time")
+    fn to_naive(self) -> Option<NaiveDateTime> {
+        NaiveDate::from_ymd_opt(self.year, self.month, self.day)?.and_hms_milli_opt(
+            self.hour,
+            self.minute,
+            self.second,
+            self.millisecond,
+        )
     }
 }
 
+/// A schedule time zone as `canonicalCalendarTimeZone` accepts it: an IANA
+/// name (link names such as `Asia/Calcutta` included) or a fixed offset
+/// written `±HH`, `±HHMM` or `±HH:MM`.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Zone {
+    Named(chrono_tz::Tz),
+    Fixed(FixedOffset),
+}
+
+impl Zone {
+    /// `instant` → local wall clock in this zone. Mirrors `calendarCivilTime`.
+    pub fn civil(&self, instant: &DateTime<Utc>) -> CivilDateTime {
+        match self {
+            Zone::Named(tz) => civil_datetime(instant, tz),
+            Zone::Fixed(offset) => civil_datetime(instant, offset),
+        }
+    }
+
+    /// `wall` (local) → UTC instant. Mirrors `calendarWallToInstant`.
+    pub fn instant(&self, wall: CivilDateTime) -> Result<DateTime<Utc>> {
+        match self {
+            Zone::Named(tz) => wall_to_instant(wall, tz),
+            Zone::Fixed(offset) => wall_to_instant(wall, offset),
+        }
+    }
+}
+
+impl FromStr for Zone {
+    type Err = CoreError;
+
+    fn from_str(zone: &str) -> Result<Self> {
+        if let Some(offset) = parse_fixed_offset(zone) {
+            return Ok(Zone::Fixed(offset));
+        }
+        zone.parse::<chrono_tz::Tz>()
+            .map(Zone::Named)
+            .map_err(|_| CoreError::InvalidInput)
+    }
+}
+
+/// `^([+-])(\d{2})(?::?(\d{2}))?$` as in `canonicalCalendarTimeZone`, bounded
+/// to the offsets `Intl.DateTimeFormat` accepts (hours ≤ 23, minutes ≤ 59).
+fn parse_fixed_offset(zone: &str) -> Option<FixedOffset> {
+    let b = zone.as_bytes();
+    let sign = match b.first()? {
+        b'+' => 1,
+        b'-' => -1,
+        _ => return None,
+    };
+    let two_digits = |s: &[u8]| -> Option<i32> {
+        if s.len() == 2 && s.iter().all(u8::is_ascii_digit) {
+            Some(((s[0] - b'0') as i32) * 10 + (s[1] - b'0') as i32)
+        } else {
+            None
+        }
+    };
+    let (hours, minutes) = match b.len() {
+        3 => (two_digits(&b[1..3])?, 0),
+        5 => (two_digits(&b[1..3])?, two_digits(&b[3..5])?),
+        6 if b[3] == b':' => (two_digits(&b[1..3])?, two_digits(&b[4..6])?),
+        _ => return None,
+    };
+    if hours > 23 || minutes > 59 {
+        return None;
+    }
+    FixedOffset::east_opt(sign * (hours * 3600 + minutes * 60))
+}
+
 /// `instant` → local wall clock in `zone`. Mirrors `calendarCivilTime`.
-pub fn civil_datetime(instant: &DateTime<Utc>, zone: &chrono_tz::Tz) -> CivilDateTime {
+pub fn civil_datetime<Z: TimeZone>(instant: &DateTime<Utc>, zone: &Z) -> CivilDateTime {
     let local = instant.with_timezone(zone);
     CivilDateTime {
         year: local.year(),
@@ -43,7 +117,7 @@ pub fn civil_datetime(instant: &DateTime<Utc>, zone: &chrono_tz::Tz) -> CivilDat
 
 /// Offset in seconds (local minus UTC, positive east), matching the sign the
 /// JS `calendarWallToInstant` samples (`civilTime(sample) - sample` in ms).
-fn offset_at(zone: &chrono_tz::Tz, instant: &DateTime<Utc>) -> i64 {
+fn offset_at<Z: TimeZone>(zone: &Z, instant: &DateTime<Utc>) -> i64 {
     zone.offset_from_utc_datetime(&instant.naive_utc())
         .fix()
         .local_minus_utc() as i64
@@ -51,9 +125,9 @@ fn offset_at(zone: &chrono_tz::Tz, instant: &DateTime<Utc>) -> i64 {
 
 /// `wall` (local) → UTC instant, with RFC 5545 / JS `calendarWallToInstant`
 /// semantics: the first instant in a fold, and the offset before the transition
-/// in a gap.
-pub fn wall_to_instant(wall: CivilDateTime, zone: &chrono_tz::Tz) -> Result<DateTime<Utc>> {
-    let naive = wall.to_naive();
+/// in a gap. An impossible calendar value (31 February) is `invalid_input`.
+pub fn wall_to_instant<Z: TimeZone>(wall: CivilDateTime, zone: &Z) -> Result<DateTime<Utc>> {
+    let naive = wall.to_naive().ok_or(CoreError::InvalidInput)?;
     // Offset samples around the wall date (±2 days), like the JS implementation,
     // so both fold candidates and gap-adjacent offsets are captured.
     let wall_utc = naive.and_utc();
@@ -75,6 +149,7 @@ pub fn wall_to_instant(wall: CivilDateTime, zone: &chrono_tz::Tz) -> Result<Date
             let dt = DateTime::<Utc>::from_timestamp_millis(ms).expect("valid instant");
             let civil_ms = civil_datetime(&dt, zone)
                 .to_naive()
+                .expect("civil time of a valid instant")
                 .and_utc()
                 .timestamp_millis();
             (dt, civil_ms - wall_ms)
@@ -106,55 +181,42 @@ pub fn wall_to_instant(wall: CivilDateTime, zone: &chrono_tz::Tz) -> Result<Date
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
 
-    fn wall(y: i32, mo: u32, d: u32, h: u32, mi: u32, s: u32) -> CivilDateTime {
-        CivilDateTime {
-            year: y,
-            month: mo,
-            day: d,
-            hour: h,
-            minute: mi,
-            second: s,
-            millisecond: 0,
+    #[test]
+    fn parses_fixed_offsets_like_canonical_calendar_time_zone() {
+        for (zone, seconds) in [
+            ("+08:00", 28_800),
+            ("+0800", 28_800),
+            ("+08", 28_800),
+            ("-03:30", -12_600),
+        ] {
+            assert_eq!(
+                zone.parse::<Zone>().unwrap(),
+                Zone::Fixed(FixedOffset::east_opt(seconds).unwrap()),
+                "{zone}"
+            );
         }
+        for bad in ["08:00", "+8", "+25:00", "+08:60", "Mars/Olympus", ""] {
+            assert!(bad.parse::<Zone>().is_err(), "{bad} must be rejected");
+        }
+        assert!(matches!(
+            "Asia/Calcutta".parse::<Zone>(),
+            Ok(Zone::Named(_))
+        ));
     }
 
     #[test]
-    fn wall_to_instant_matches_node_fold_and_half_hour() {
-        // calendarWallToInstant("2026-11-01T01:30", "America/New_York")
-        let ny: chrono_tz::Tz = "America/New_York".parse().unwrap();
-        let got = wall_to_instant(wall(2026, 11, 1, 1, 30, 0), &ny).unwrap();
-        assert_eq!(
-            got.to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-            "2026-11-01T05:30:00.000Z"
-        );
-
-        // calendarWallToInstant("2026-10-04T02:15", "Australia/Lord_Howe")
-        let lh: chrono_tz::Tz = "Australia/Lord_Howe".parse().unwrap();
-        let got = wall_to_instant(wall(2026, 10, 4, 2, 15, 0), &lh).unwrap();
-        assert_eq!(
-            got.to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-            "2026-10-03T15:45:00.000Z"
-        );
-
-        // calendarWallToInstant("2026-10-09T09:00", "Asia/Kathmandu")
-        let kt: chrono_tz::Tz = "Asia/Kathmandu".parse().unwrap();
-        let got = wall_to_instant(wall(2026, 10, 9, 9, 0, 0), &kt).unwrap();
-        assert_eq!(
-            got.to_rfc3339_opts(chrono::SecondsFormat::Millis, true),
-            "2026-10-09T03:15:00.000Z"
-        );
-    }
-
-    #[test]
-    fn civil_datetime_roundtrips() {
-        let utc: chrono_tz::Tz = "UTC".parse().unwrap();
-        let instant = Utc.with_ymd_and_hms(2026, 10, 9, 9, 0, 0).unwrap();
-        let civil = civil_datetime(&instant, &utc);
-        assert_eq!(civil.year, 2026);
-        assert_eq!(civil.month, 10);
-        assert_eq!(civil.day, 9);
-        assert_eq!(civil.hour, 9);
+    fn impossible_wall_time_is_invalid_input() {
+        let utc: Zone = "UTC".parse().unwrap();
+        let wall = CivilDateTime {
+            year: 2026,
+            month: 2,
+            day: 31,
+            hour: 9,
+            minute: 0,
+            second: 0,
+            millisecond: 0,
+        };
+        assert!(matches!(utc.instant(wall), Err(CoreError::InvalidInput)));
     }
 }

@@ -1,0 +1,323 @@
+{
+  "walls": [
+    {
+      "name": "newyork_fold_first_instant",
+      "wall": "2026-11-01T01:30",
+      "zone": "America/New_York",
+      "instant": "2026-11-01T05:30:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 11,
+        "day": 1,
+        "hour": 1,
+        "minute": 30,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "newyork_gap_offset_before",
+      "wall": "2026-03-08T02:30",
+      "zone": "America/New_York",
+      "instant": "2026-03-08T07:30:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 3,
+        "day": 8,
+        "hour": 3,
+        "minute": 30,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "newyork_plain",
+      "wall": "2026-07-04T12:00:30.250",
+      "zone": "America/New_York",
+      "instant": "2026-07-04T16:00:30.250Z",
+      "civil": {
+        "year": 2026,
+        "month": 7,
+        "day": 4,
+        "hour": 12,
+        "minute": 0,
+        "second": 30,
+        "millisecond": 250
+      }
+    },
+    {
+      "name": "lord_howe_gap",
+      "wall": "2026-10-04T02:15",
+      "zone": "Australia/Lord_Howe",
+      "instant": "2026-10-03T15:45:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 4,
+        "hour": 2,
+        "minute": 45,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "lord_howe_fold",
+      "wall": "2026-04-05T01:45",
+      "zone": "Australia/Lord_Howe",
+      "instant": "2026-04-04T14:45:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 4,
+        "day": 5,
+        "hour": 1,
+        "minute": 45,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "kathmandu_quarter_hour",
+      "wall": "2026-10-09T09:00",
+      "zone": "Asia/Kathmandu",
+      "instant": "2026-10-09T03:15:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "kolkata_half_hour",
+      "wall": "2026-10-09T09:00",
+      "zone": "Asia/Kolkata",
+      "instant": "2026-10-09T03:30:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "calcutta_alias",
+      "wall": "2026-10-09T09:00",
+      "zone": "Asia/Calcutta",
+      "instant": "2026-10-09T03:30:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "shanghai",
+      "wall": "2026-10-09T09:00",
+      "zone": "Asia/Shanghai",
+      "instant": "2026-10-09T01:00:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "hong_kong",
+      "wall": "2026-10-09T09:00",
+      "zone": "Asia/Hong_Kong",
+      "instant": "2026-10-09T01:00:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "fixed_plus_0800",
+      "wall": "2026-10-09T09:00",
+      "zone": "+08:00",
+      "instant": "2026-10-09T01:00:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "fixed_plus_0800_compact",
+      "wall": "2026-10-09T09:00",
+      "zone": "+0800",
+      "instant": "2026-10-09T01:00:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "fixed_plus_08",
+      "wall": "2026-10-09T09:00",
+      "zone": "+08",
+      "instant": "2026-10-09T01:00:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "fixed_minus_0330",
+      "wall": "2026-10-09T09:00",
+      "zone": "-03:30",
+      "instant": "2026-10-09T12:30:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "utc",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "instant": "2026-10-09T09:00:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "london_fold",
+      "wall": "2026-10-25T01:30",
+      "zone": "Europe/London",
+      "instant": "2026-10-25T00:30:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 25,
+        "hour": 1,
+        "minute": 30,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "sao_paulo_no_dst",
+      "wall": "2026-11-01T00:00",
+      "zone": "America/Sao_Paulo",
+      "instant": "2026-11-01T03:00:00.000Z",
+      "civil": {
+        "year": 2026,
+        "month": 11,
+        "day": 1,
+        "hour": 0,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    }
+  ],
+  "instants": [
+    {
+      "name": "newyork_fold_edt",
+      "instant": "2026-11-01T05:30:00.000Z",
+      "zone": "America/New_York",
+      "civil": {
+        "year": 2026,
+        "month": 11,
+        "day": 1,
+        "hour": 1,
+        "minute": 30,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "newyork_fold_est",
+      "instant": "2026-11-01T06:30:00.000Z",
+      "zone": "America/New_York",
+      "civil": {
+        "year": 2026,
+        "month": 11,
+        "day": 1,
+        "hour": 1,
+        "minute": 30,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "lord_howe_after_gap",
+      "instant": "2026-10-03T15:45:00.000Z",
+      "zone": "Australia/Lord_Howe",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 4,
+        "hour": 2,
+        "minute": 45,
+        "second": 0,
+        "millisecond": 0
+      }
+    },
+    {
+      "name": "fixed_minus_0330",
+      "instant": "2026-10-09T12:30:00.000Z",
+      "zone": "-03:30",
+      "civil": {
+        "year": 2026,
+        "month": 10,
+        "day": 9,
+        "hour": 9,
+        "minute": 0,
+        "second": 0,
+        "millisecond": 0
+      }
+    }
+  ],
+  "invalidZones": [
+    "Mars/Olympus",
+    "+25:00",
+    "08:00",
+    "+8"
+  ]
+}

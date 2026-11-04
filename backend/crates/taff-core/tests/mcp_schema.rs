@@ -1,5 +1,6 @@
 //! Verifies the MCP tool argument schemas — generated from the Zod source by
-//! `apps/api/scripts/mcp-schema-gen.mts` — are consumed and enforced by Rust.
+//! `apps/api/scripts/mcp-schema-gen.mts` (`pnpm rust:fixtures`) — are consumed
+//! and enforced by Rust.
 //! This proves the single-source-of-truth bridge in ADR 0026: the web/API
 //! canonicalizes Zod to JSON Schema, and Rust validates the same shapes.
 
@@ -10,8 +11,17 @@ fn tool_schemas() -> Value {
     serde_json::from_str(raw).expect("mcp-tools.json must be valid JSON")
 }
 
-/// Number of tools the API registers (`MCP_TOOLS` in mcp-round-trip.ts).
-const EXPECTED_TOOLS: usize = 34;
+/// Tools the migration already relies on; the full list is pinned by the
+/// generator (`MCP_TOOL_ARGS` in apps/api, unit-tested against `MCP_TOOLS`)
+/// and by the CI regeneration diff, not by a count here.
+const REQUIRED_TOOLS: [&str; 6] = [
+    "context.get",
+    "tasks.list",
+    "tasks.create",
+    "calendar.schedule",
+    "projects.create",
+    "tasks.plan",
+];
 
 #[test]
 fn every_mcp_tool_has_a_schema() {
@@ -19,7 +29,9 @@ fn every_mcp_tool_has_a_schema() {
     let map = tools
         .as_object()
         .expect("must be an object keyed by tool name");
-    assert_eq!(map.len(), EXPECTED_TOOLS, "tool schema count drifted");
+    for required in REQUIRED_TOOLS {
+        assert!(map.contains_key(required), "{required} schema missing");
+    }
     for (name, schema) in map {
         assert!(schema.is_object(), "{name} schema must be an object");
         assert_eq!(

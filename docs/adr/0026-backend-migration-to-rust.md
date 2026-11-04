@@ -6,8 +6,9 @@ Date: 2026-11-01. Status: accepted (owner override). Follows ADR 0004 and the
 ## Context
 
 The owner directed that the backend move from TypeScript to Rust ("rust is the
-way"), superseding the earlier recommendation in this file to keep the
-TypeScript backend and add Rust only as a strangler. This ADR records the new
+way"), superseding the earlier strangler-only recommendation (a Rust projection
+worker beside a permanent TypeScript core). The executable, phase-by-phase
+plan is `docs/rust-migration-guide.md`. This ADR records the new
 decision and the constraints that keep the migration safe.
 
 The backend today is three Node packages:
@@ -58,8 +59,9 @@ existing PostgreSQL schema and wire contract. The hard constraints are:
 
 1. **Foundation (this change).** A `backend/` Cargo workspace; a crate
    `taff-core` that connects read-only to PostgreSQL and mirrors `packages/db`
-   schema in `sqlx`; a JSON-Schema consumer; a `schema.gen` script that
-   regenerates the contract from the Zod source; CI builds and runs `cargo test`.
+   schema in `sqlx`; a JSON-Schema consumer; `pnpm rust:fixtures` regenerates
+   the contract and every parity fixture from the TypeScript source; CI builds,
+   runs `cargo test`, and fails on a stale fixture.
 2. **Pure logic.** Calendar recurrence (`calendar-recurrence.ts` → `rrule` +
    `chrono-tz`), permissions matrix, canonical JSON, token hashing — each with
    a parity test importing the Node golden output.

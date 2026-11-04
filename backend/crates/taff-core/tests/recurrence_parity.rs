@@ -1,49 +1,67 @@
 //! Parity test against the TypeScript `normalizeCalendarSchedule` output.
 //!
-//! The golden values in `fixtures/recurrence-golden.json` were generated from
-//! `packages/core/src/calendar-recurrence.ts` by
-//! `scripts/rust-recurrence-golden.mts`. This test re-reads them so the Rust
-//! canonicalizer is pinned to the Node behavior, not to hand-copied literals.
+//! `fixtures/recurrence-golden.json` is written by
+//! `scripts/rust-recurrence-golden.mts` (`pnpm rust:fixtures`) from
+//! `packages/core/src/calendar-recurrence.ts`; CI regenerates it and fails on
+//! a diff. Every case carries its start instant, zone and raw rule, so nothing
+//! here is hand-copied.
 
-use chrono::{TimeZone, Utc};
-use std::collections::HashMap;
+use chrono::{DateTime, Utc};
+use serde::Deserialize;
 
-fn golden() -> HashMap<String, String> {
-    let raw = include_str!("fixtures/recurrence-golden.json");
-    serde_json::from_str(raw).expect("golden fixture must be valid JSON")
+#[derive(Deserialize)]
+struct Accepted {
+    name: String,
+    #[serde(rename = "startAt")]
+    start_at: DateTime<Utc>,
+    zone: String,
+    rrule: String,
+    canonical: String,
 }
 
-fn start_cases() -> HashMap<&'static str, (i32, u32, u32, u32, u32, u32)> {
-    HashMap::from([
-        ("weekly_reorder", (2026, 10, 9, 9, 0, 0)),
-        ("monthly_last_day", (2026, 1, 31, 9, 0, 0)),
-        ("daily_until", (2026, 10, 9, 9, 0, 0)),
-        ("yearly_leap", (2024, 2, 29, 9, 0, 0)),
-        ("daily_interval", (2026, 10, 9, 9, 0, 0)),
-    ])
+#[derive(Deserialize)]
+struct Rejected {
+    name: String,
+    /// `None` when the zone itself is invalid and no instant exists.
+    #[serde(rename = "startAt")]
+    start_at: Option<DateTime<Utc>>,
+    zone: String,
+    rrule: String,
 }
 
-fn raw_rrule(name: &str) -> &'static str {
-    match name {
-        "weekly_reorder" => "byday=FR,MO;freq=weekly;interval=2;wkst=MO",
-        "monthly_last_day" => "FREQ=MONTHLY;BYMONTHDAY=-1",
-        "daily_until" => "FREQ=DAILY;UNTIL=20261010T090000Z",
-        "yearly_leap" => "FREQ=YEARLY;COUNT=2",
-        "daily_interval" => "FREQ=DAILY;INTERVAL=2;COUNT=5",
-        _ => unreachable!("unknown golden case"),
-    }
+#[derive(Deserialize)]
+struct Golden {
+    accepted: Vec<Accepted>,
+    rejected: Vec<Rejected>,
+}
+
+fn golden() -> Golden {
+    serde_json::from_str(include_str!("fixtures/recurrence-golden.json"))
+        .expect("golden fixture must match the generator's shape")
 }
 
 #[test]
 fn canonicalization_matches_node_golden() {
     let golden = golden();
-    for (name, (y, mo, d, h, mi, s)) in start_cases() {
-        let start = Utc.with_ymd_and_hms(y, mo, d, h, mi, s).unwrap();
-        let expected = golden
-            .get(name)
-            .unwrap_or_else(|| panic!("missing golden value for {name}"));
-        let got = taff_core::normalize_rrule(raw_rrule(name), &start, "UTC")
-            .unwrap_or_else(|e| panic!("{name} unexpectedly rejected: {e}"));
-        assert_eq!(&got, expected, "mismatch for {name}");
+    assert!(golden.accepted.len() >= 14, "accepted cases went missing");
+    for case in &golden.accepted {
+        let got = taff_core::normalize_rrule(&case.rrule, &case.start_at, &case.zone)
+            .unwrap_or_else(|e| panic!("{} unexpectedly rejected: {e}", case.name));
+        assert_eq!(got, case.canonical, "mismatch for {}", case.name);
+    }
+}
+
+#[test]
+fn rejections_match_node_golden() {
+    let golden = golden();
+    assert!(golden.rejected.len() >= 20, "rejected cases went missing");
+    for case in &golden.rejected {
+        let start = case.start_at.unwrap_or(DateTime::<Utc>::UNIX_EPOCH);
+        let result = taff_core::normalize_rrule(&case.rrule, &start, &case.zone);
+        assert!(
+            matches!(result, Err(taff_core::CoreError::InvalidInput)),
+            "{} must be rejected with invalid_input, got {result:?}",
+            case.name
+        );
     }
 }

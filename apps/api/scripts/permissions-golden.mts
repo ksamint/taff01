@@ -1,6 +1,8 @@
 // Emits a golden table of `can(actor, action, resource)` decisions for the
-// cases the Rust permissions port must match. Run from the repo root with:
-//   node --env-file=.env node_modules/tsx/dist/cli.mjs apps/api/scripts/permissions-golden.mts > backend/crates/taff-core/tests/fixtures/permissions-golden.json
+// cases the Rust permissions port must match. Part of `pnpm rust:fixtures`;
+// CI regenerates and diffs the output.
+import { writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import {
   type Action,
   type Actor,
@@ -276,4 +278,11 @@ const out = cases.map(([name, actor, action, resource]) => ({
   result: can(actor, action, resource),
 }));
 
-process.stdout.write(JSON.stringify(out, null, 2) + "\n");
+const target = fileURLToPath(
+  new URL(
+    "../../../backend/crates/taff-core/tests/fixtures/permissions-golden.json",
+    import.meta.url,
+  ),
+);
+writeFileSync(target, `${JSON.stringify(out, null, 2)}\n`);
+console.log(`${out.length} permission decisions -> ${target}`);

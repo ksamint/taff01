@@ -1,0 +1,153 @@
+[
+  {
+    "name": "sorted_nested",
+    "input": {
+      "b": 1,
+      "a": {
+        "z": 2,
+        "c": 3
+      }
+    },
+    "output": "{\"a\":{\"c\":3,\"z\":2},\"b\":1}"
+  },
+  {
+    "name": "arrays_keep_order",
+    "input": {
+      "list": [
+        3,
+        1,
+        2,
+        [
+          {
+            "y": 1,
+            "x": 2
+          }
+        ]
+      ]
+    },
+    "output": "{\"list\":[3,1,2,[{\"x\":2,\"y\":1}]]}"
+  },
+  {
+    "name": "integers",
+    "input": [
+      0,
+      1,
+      -1,
+      42,
+      9007199254740991,
+      -9007199254740991
+    ],
+    "output": "[0,1,-1,42,9007199254740991,-9007199254740991]"
+  },
+  {
+    "name": "integral_floats",
+    "input": [
+      1,
+      100,
+      -5
+    ],
+    "output": "[1,100,-5]"
+  },
+  {
+    "name": "negative_zero",
+    "input": [
+      0,
+      0
+    ],
+    "output": "[0,0]"
+  },
+  {
+    "name": "fractions",
+    "input": [
+      0.1,
+      0.5,
+      1.5,
+      -2.25,
+      123.456,
+      0.000001,
+      1e-7,
+      1.5e-7
+    ],
+    "output": "[0.1,0.5,1.5,-2.25,123.456,0.000001,1e-7,1.5e-7]"
+  },
+  {
+    "name": "large_magnitudes",
+    "input": [
+      100000000000000000000,
+      1e+21,
+      1e+22,
+      1.5e+300,
+      12345678901234567000,
+      18446744073709552000
+    ],
+    "output": "[100000000000000000000,1e+21,1e+22,1.5e+300,12345678901234567000,18446744073709552000]"
+  },
+  {
+    "name": "shortest_round_trip",
+    "input": [
+      0.30000000000000004,
+      0.3333333333333333,
+      5e-324,
+      1.7976931348623157e+308
+    ],
+    "output": "[0.30000000000000004,0.3333333333333333,5e-324,1.7976931348623157e+308]"
+  },
+  {
+    "name": "strings_escaped",
+    "input": {
+      "q": "say \"hi\"",
+      "bs": "a\\b",
+      "nl": "line\nbreak",
+      "tab": "\t",
+      "cr": "\r",
+      "bell": "\u0007",
+      "nul": "\u0000",
+      "del": ""
+    },
+    "output": "{\"bell\":\"\\u0007\",\"bs\":\"a\\\\b\",\"cr\":\"\\r\",\"del\":\"\",\"nl\":\"line\\nbreak\",\"nul\":\"\\u0000\",\"q\":\"say \\\"hi\\\"\",\"tab\":\"\\t\"}"
+  },
+  {
+    "name": "strings_unicode",
+    "input": {
+      "zh": "任务与日历",
+      "emoji": "🗓️",
+      "ls": " ",
+      "ps": " ",
+      "nbsp": " "
+    },
+    "output": "{\"emoji\":\"🗓️\",\"ls\":\" \",\"nbsp\":\" \",\"ps\":\" \",\"zh\":\"任务与日历\"}"
+  },
+  {
+    "name": "primitives",
+    "input": {
+      "t": true,
+      "f": false,
+      "n": null,
+      "e": "",
+      "empty_obj": {},
+      "empty_arr": []
+    },
+    "output": "{\"e\":\"\",\"empty_arr\":[],\"empty_obj\":{},\"f\":false,\"n\":null,\"t\":true}"
+  },
+  {
+    "name": "receipt_like",
+    "input": {
+      "operation_hash": "ab",
+      "workspaceId": "ws",
+      "amount": "1200.50",
+      "version": 3,
+      "decision": "approve",
+      "items": [
+        {
+          "id": "b",
+          "qty": 2
+        },
+        {
+          "id": "a",
+          "qty": 1
+        }
+      ]
+    },
+    "output": "{\"amount\":\"1200.50\",\"decision\":\"approve\",\"items\":[{\"id\":\"b\",\"qty\":2},{\"id\":\"a\",\"qty\":1}],\"operation_hash\":\"ab\",\"version\":3,\"workspaceId\":\"ws\"}"
+  }
+]

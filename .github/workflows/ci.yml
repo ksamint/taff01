@@ -45,6 +45,25 @@ jobs:
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
         working-directory: backend
+      - name: Format
+        run: cargo fmt --all -- --check
+        working-directory: backend
+      # Parity fixtures are generated from the TypeScript source of truth; a
+      # behaviour change there must update the committed fixture in the same PR.
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.10.1
+      - name: Locked dependencies
+        run: pnpm install --frozen-lockfile
+        env:
+          PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+      - name: Fixtures match the TypeScript source
+        run: |
+          pnpm rust:fixtures
+          git diff --exit-code -- backend/crates/taff-core/tests/fixtures
   checks:
     # Requires Valkey/browser or image-build capacity absent from the approved pool.
     if: vars.TAFF_FULL_CI_ENABLED == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
