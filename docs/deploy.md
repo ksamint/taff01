@@ -117,9 +117,10 @@ the same SHA-256 on the host, run `git bundle verify` from an existing Git
 checkout, then clone the bundle with `--no-checkout` into the new release path.
 Check out the pinned 40-character SHA with `--detach`, verify `HEAD` and a clean
 tree, and set `origin` back to `https://github.com/ksamint/taff01.git`.
-The controller must check the remote default branch and exact required CI from
-the connected workspace while holding the host deployment lock, both before
-building and again before container startup. The host's direct GitHub connection
+The controller must check the remote default branch and the recorded local gate
+for the exact SHA (closeout check 1; GitHub CI is retired) from the connected
+workspace while holding the host deployment lock, both before building and
+again before container startup. The host's direct GitHub connection
 is not used for these checks. Retain the same isolated Compose build, migration,
 readiness, HTTPS/DNS smoke and scoped rollback procedure.
 

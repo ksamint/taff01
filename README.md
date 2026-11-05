@@ -56,7 +56,9 @@ heartbeats and caps, person-held run pauses, agent task creation limits,
 database kind and vocabulary checks, browser time zone, versioned service
 worker and locale caches) and adds production packaging: server bundles,
 Docker images, a production compose file with Caddy, a licence gate, an LCP
-measurement on simulated slow 4G and a GitHub Actions pipeline.
+measurement on simulated slow 4G and a GitHub Actions pipeline (retired on
+2026-11-05; releases are verified by the local gate in
+[the closeout checklist](docs/release-closeout.md)).
 Lighthouse's axe-core dependency (MPL-2.0) is approved for development and CI
 only in ADR 0003. The M8 `pnpm perf:lcp` baseline is: English passes
 (1.94 s on simulated slow 4G), the Chinese locales measure 2.34 s and remain
@@ -174,7 +176,7 @@ Today in all three locales using the mobile preset with actual network and CPU
 throttling, so optional fonts follow the mobile download deadline. Both configured service
 ports must be free. Each performance, accessibility and best-practices score
 must reach 90; sanitized JSON reports go to the ignored `lighthouse-reports/`
-directory and are uploaded by CI. The audit adds sample tasks to the local
+directory and are kept with the local release gate's evidence. The audit adds sample tasks to the local
 database. Lighthouse and axe-core remain development dependencies.
 `pnpm mcp:smoke` connects the official MCP client to the running API, exercises
 every tool, measured events, artifacts, grants, review changes, the rate limit

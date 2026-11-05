@@ -20,7 +20,7 @@ Versions were reviewed on 2026-10-08 (`docs/adr/0004-stack-version-review.md`); 
 
 `docs/ui/prototype/` holds the approved Team Tasks prototype and the TABLE AI design system (tokens, fonts, component inventory). Build every screen from it: Today, Calendar (day/week/month, drag, unscheduled tray), Projects board and list, Task detail, Review workspace, Inbox, Agent profile and permissions, Me/Settings, MCP page, Search (⌘K), Organizations, and the desktop layout. `docs/ui/README.md` maps each screen to routes, data and phases. Use the design tokens through Tailwind `@theme`; never introduce a second palette.
 
-## Performance budget (CI fails if broken)
+## Performance budget (the local release gate fails if broken; GitHub CI is retired)
 
 - Mobile Today route: initial JS ≤ 200 KB gzipped, LCP ≤ 2 s on simulated 4G, Lighthouse performance ≥ 90.
 - Lists, board and calendar render from cache first, then reconcile. Mutations are optimistic with rollback.
