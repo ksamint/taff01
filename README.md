@@ -18,6 +18,11 @@ graph data and isolation scope.
 - **Also new:** companies and contacts, an AI brief and Ask taff (both
   rules-based; the model path is off by default, ADR 0016), and 31 MCP tools.
 
+**v0.2.17 (candidate) — shareholder daily summaries.** Admins tag projects
+for a shareholder organization, and each recipient gets a daily, watermarked
+progress summary in their language, in the app or by an expiring link
+(ADR 0027, milestones 85–89).
+
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.
 

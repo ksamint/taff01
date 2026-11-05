@@ -78,6 +78,10 @@ The badge count is unresolved reviews plus blockers, everywhere (Today ›
 | AI brief and Ask taff (Module Plan 240–285, 626–646) | `/brief` (phone overlay); desktop `/me?tab=brief` | `GET /api/brief`, `POST /api/ask` | M17 |
 | Mind map (Module Plan 198–237, 552–599) | `?view=mind` | `mind_nodes`, `mind_edges`, sources | M18 |
 | Digests | `/digests`, `/digests/[id]` | as v1, restyled on v2 tokens | M19 |
+| Shareholder summaries (no prototype screen; ADR 0027) | `/summaries`, `/summaries/[id]` | own summaries; admins also manage share links | M88 |
+| Shareholder summary admin | `/orgs/summaries` | audience tags, recipients, preview, sent summaries | M88 |
+| Shared summary link (outside the app shell) | `/s/[token]` | `POST /api/shared-summary`, server-rendered in the recipient's language | M88 |
+| Project shareholder tags | `/projects/[id]` header and edit dialog | `GET`/`PUT /api/projects/:id/audience-tags` | M88 |
 
 ## Prototype data mapped to Taff
 

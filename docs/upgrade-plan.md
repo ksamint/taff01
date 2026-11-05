@@ -90,6 +90,12 @@ work it waits on: [2026-11-05 review](reviews/2026-11-05-pr-and-plan-review.md).
 | 5 | S4 release as `v0.2.17`. | Candidate checkpoint in `deploy.md`; closeout per `release-closeout.md`. | Checklist evidence; `summary-scan` ready in the worker log; no production recipient created by the deployer. |
 | 6 | S5 phase 2 on the owner's decision: PDF (`pdf-lib`, MIT), e-mail link, MCP read tools, weekly roll-up. | Each its own ADR amendment and release. | Licence stated per dependency; access matrix extended. |
 
+Status 2026-11-05: rows 2–4 are done (milestones 86–88) and row 5's
+candidate is prepared (milestone 89); production deployment and closeout are
+pending. Rows 0 and 1 are not done. From row 4, the public page's 50 KiB
+target is missed (187.5 KiB, ADR 0027 notes S3) and the visual baselines are
+pending.
+
 Interplay with ADR 0026 (Rust): the module is written in `packages/core`
 TypeScript, which stays the authority. `buildDailySummary` is a pure
 function with a Node-generated golden fixture so it joins `pnpm rust:fixtures`

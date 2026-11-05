@@ -15,7 +15,10 @@
 >
 > **2026-11-05: S3 done** (`docs/milestones/88-daily-summary-web.md`) except
 > visual baselines and the public page's 50 KiB target (ADR notes, S3).
-> Start at S4.
+>
+> **2026-11-05: S4 candidate prepared** (`docs/milestones/89-v0.2.17-candidate.md`,
+> `docs/deploy.md` "Release candidate v0.2.17"). Next: the release PR, CI,
+> then deployment and closeout by the deploy operator.
 
 Paste everything below this line as the goal.
 

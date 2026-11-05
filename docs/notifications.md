@@ -38,3 +38,30 @@ Use one BullMQ periodic scanner (minute cadence), then one job per returned mark
 ChangeEvent gains optional `recipientOnly:boolean`. Preference and digest rows emit userId plus recipientOnly:true. Inbox item events also route to the affected member's userId with recipientOnly:true. The API hub must route these events to that authenticated user only, even when workspaceId is present. Extend strict action whitelist for `notification_preferences` and `daily_digests`. Audit details stay empty for private preference/digest rows; activity APIs must filter private rows by recipient, and must never expose snapshots.
 
 Browser query families: notificationPreferences, dailyDigests, dailyDigest plus Inbox. Preferences update optimistically with version checks and rollback. Persist only explicitly approved safe read caches; isolate by user and current authorized workspace fingerprint, remove on logout/revocation, and never replay offline writes. A service worker must not cache authenticated API, MCP, auth or private document responses.
+
+## Shareholder summaries (ADR 0027)
+
+A separate audience from digests: digests are private to a member; summaries
+address people outside the team. Tables `audience_tags` (kind `shareholder` +
+organization), `project_audience_tags`, `audience_recipients`,
+`daily_summaries` (immutable) and `summary_shares` (token hash only).
+
+- Core: `buildDailySummary` (pure, `summary-model.ts`) and the operations in
+  `summaries.ts`. Jobs `listDueSummaryJobs(now,limit,cursor)` and
+  `generateDailySummary(recipientId,scheduledAt,version)` follow the digest
+  rules above: keyset paging, a locked recipient row, stale or duplicate jobs
+  skipped, the current local day only, fold and gap handling from
+  `notifications-time.ts`.
+- Worker: `summary-scan` every minute on the `taff` queue enqueues
+  `daily-summary` jobs with ids from `sha256(summary\0recipient\0slot\0version)`.
+- Permissions: `audience:manage`, `summary:preview`, `summary:share`,
+  `summary:revoke` are admin-only; `audience:read` is any non-guest person;
+  `summary:read` is an admin or the linked recipient (guests included).
+  Agents have none.
+- No Inbox row (the kind CHECK cannot grow additively). Realtime events for
+  the five tables reach admin sockets only; the browser families are
+  `audience-tags`, `audience-recipients`, `project-audience-tags`,
+  `summaries`, `summary` and `summary-shares`, none persisted.
+- Public read `POST /api/shared-summary {token}`: no session; Valkey limits per
+  client address and per token hash first; one 404 for every miss;
+  `private, no-store`, `noindex`, `no-referrer`.

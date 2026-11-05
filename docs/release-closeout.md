@@ -15,6 +15,7 @@ source as a process gap in the milestone and fix the capture step below.
 | Migrator exit code and migration journal | Migration | Deployment log |
 | Replaced api/web/worker: container id, image id, startedAt, restartCount | Right after replacement | Docker inspect, recorded beside the image ids |
 | Local checklist, live acceptance, MCP smoke counts | Before and after replacement | Playwright and smoke output |
+| Worker scheduler readiness: the `Worker ready` line, logged only after every job scheduler (`daily-digest-scan`, `daily-summary-scan`) is registered | Right after replacement | Worker container log since its startedAt |
 
 ## Closeout checks (still under the lock)
 
