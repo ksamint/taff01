@@ -1,8 +1,6 @@
 # 86 — Daily summary S1: schema, core, permissions (2026-11-05)
 
-Branch `claude/daily-summary-module-plan-maapa1`. Plan:
-[ADR 0027](../adr/0027-shareholder-daily-summary.md), goal S1. Owner: "go
-ahead with the defaults".
+Plan: [ADR 0027](../adr/0027-shareholder-daily-summary.md), goal S1. Owner: "go ahead with the defaults".
 
 ## Works
 
@@ -37,6 +35,5 @@ ahead with the defaults".
 | Full `pnpm test` (PG 18.6, Redis) | 1,875 passed, 1 failed (below) |
 | Lint, licence gate, typecheck of all six packages | clean |
 
-The failure is `mcp-round-trip.test.ts`: its source scan misses `projects.create`/`edit`.
-It fails identically on unmodified `main`. `build:server` passed. Not run: web build,
-perf budget, e2e, MCP smoke (no web, route or tool changes).
+The failure (`mcp-round-trip.test.ts` misses `projects.create`/`edit`) also fails on unmodified `main`.
+`build:server` passed. Not run: web build, perf budget, e2e, MCP smoke (no web, route or tool changes).
