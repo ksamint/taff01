@@ -8,7 +8,10 @@
 >
 > **2026-11-05: S1 done** (`docs/milestones/86-daily-summary-core.md`);
 > migration 0038 is taken. Read the ADR's "Implementation notes" before S2:
-> there is no Inbox row in v1. Start at S2.
+> there is no Inbox row in v1.
+>
+> **2026-11-05: S2 done** (`docs/milestones/87-daily-summary-delivery.md`).
+> The public read is `POST /api/shared-summary` (ADR notes, S2). Start at S3.
 
 Paste everything below this line as the goal.
 

@@ -59,6 +59,8 @@ const emailRateLimiter = createRateLimiter(env.REDIS_URL, 3);
 const askRateLimiter = createRateLimiter(env.REDIS_URL, env.ASK_RATE_LIMIT);
 // OAuth registration (global) and token exchanges (per client) per minute.
 const oauthRateLimiter = createRateLimiter(env.REDIS_URL, 30);
+// Public share-link reads per client address and per token per minute.
+const shareRateLimiter = createRateLimiter(env.REDIS_URL, 30);
 const realtime = await createRealtime(core);
 const app = createApp(
   core,
@@ -69,6 +71,7 @@ const app = createApp(
   emailRateLimiter,
   askRateLimiter,
   oauthRateLimiter,
+  shareRateLimiter,
 );
 const server = serve(
   {
@@ -90,6 +93,7 @@ const shutdown = async () => {
       emailRateLimiter.close(),
       askRateLimiter.close(),
       oauthRateLimiter.close(),
+      shareRateLimiter.close(),
     ]).then(() => process.exit(0));
   });
 };

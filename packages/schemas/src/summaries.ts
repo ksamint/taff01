@@ -291,6 +291,13 @@ export const summaryShareInputSchema = strictObject({
 export const summaryShareTokenSchema = string().check(
   regex(/^tsum_[A-Za-z0-9_-]{43}$/),
 );
+/**
+ * Public read body. Any string up to 200 characters is accepted here so that
+ * malformed, unknown, expired and revoked tokens all answer the same 404.
+ */
+export const sharedSummaryRequestSchema = strictObject({
+  token: string().check(minLength(1), maxLength(200)),
+});
 /** What a share link shows: the summary, never its internal ids. */
 export const sharedSummarySchema = object({
   localDate: civilDateSchema,
@@ -348,6 +355,7 @@ export type SummaryShare = Infer<typeof summaryShareSchema>;
 export type IssuedSummaryShare = Infer<typeof issuedSummaryShareSchema>;
 export type SummaryShareInput = Infer<typeof summaryShareInputSchema>;
 export type SharedSummary = Infer<typeof sharedSummarySchema>;
+export type SharedSummaryRequest = Infer<typeof sharedSummaryRequestSchema>;
 export type SummaryJob = Infer<typeof summaryJobSchema>;
 export type SummaryJobCursor = Infer<typeof summaryJobCursorSchema>;
 export type DueSummaryJobs = Infer<typeof dueSummaryJobsSchema>;

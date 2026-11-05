@@ -71,6 +71,10 @@ import { registerAssistantRoutes } from "./routes/assistant";
 import { registerCrmRoutes } from "./routes/crm";
 import { registerMindRoutes } from "./routes/mind";
 import { registerRelationRoutes } from "./routes/relations";
+import {
+  registerPublicSummaryRoutes,
+  registerSummaryRoutes,
+} from "./routes/summaries";
 import { registerTimelineRoutes } from "./routes/timeline";
 
 type Core = ReturnType<typeof createCore>;
@@ -104,6 +108,7 @@ export function createApp(
   emailRateLimiter?: RateLimiter,
   askRateLimiter?: RateLimiter,
   oauthRateLimiter?: RateLimiter,
+  shareRateLimiter?: RateLimiter,
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<AppEnv>();
@@ -304,6 +309,8 @@ export function createApp(
       );
     });
   }
+  // Public share links (ADR 0027) answer before the session middleware.
+  registerPublicSummaryRoutes(app, core, shareRateLimiter ?? rateLimiter);
   app.post("/api/trusted-reviews/status", async (c) =>
     c.json(
       await core.getTrustedReviewReceipt(
@@ -911,6 +918,7 @@ export function createApp(
     return c.json({ success: true });
   });
   registerCrmRoutes(app, core);
+  registerSummaryRoutes(app, core);
   registerRelationRoutes(app, core);
   registerMindRoutes(app, core);
   registerAssistantRoutes(app, core, askRateLimiter ?? rateLimiter);

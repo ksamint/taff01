@@ -2,6 +2,7 @@ import { createHash, createHmac, randomInt, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
 import { createCore, userPrincipal } from "@taff/core";
 import {
+  audienceRecipients,
   connectDatabase,
   members,
   notificationPreferences,
@@ -205,9 +206,52 @@ async function fixture() {
     crmUndo: undefined as
       | Awaited<ReturnType<typeof core.setContactRoles>>["undo"]
       | undefined,
+    audienceTag: undefined as
+      | Awaited<ReturnType<typeof core.createAudienceTag>>
+      | undefined,
+    recipient: undefined as
+      | Awaited<ReturnType<typeof core.createAudienceRecipient>>
+      | undefined,
+    summary: undefined as { id: string } | undefined,
+    share: undefined as
+      | Awaited<ReturnType<typeof core.createSummaryShare>>
+      | undefined,
   };
 }
 type Fixture = Awaited<ReturnType<typeof fixture>>;
+/** A tagged project, a due recipient, its generated summary and a share (ADR 0027). */
+async function summarized(f: Fixture) {
+  f.audienceTag = await core.createAudienceTag(owner(), workspaceId, {
+    org: `Matrix holder ${randomUUID()}`,
+  });
+  await core.setProjectAudienceTags(owner(), f.project.id, {
+    tagIds: [f.audienceTag.id],
+  });
+  f.recipient = await core.createAudienceRecipient(owner(), f.audienceTag.id, {
+    name: "Matrix shareholder",
+    locale: "en",
+    timeZone: "UTC",
+    deliverAt: "00:00",
+  });
+  const due = new Date(Date.now() - 60_000);
+  await connection.db.transaction(async (tx) => {
+    await tx.execute(
+      sql`select set_config('taff.actor_id',${ownerUserId},true)`,
+    );
+    await tx
+      .update(audienceRecipients)
+      .set({ nextDueAt: due })
+      .where(eq(audienceRecipients.id, f.recipient!.id));
+  });
+  const generated = await core.generateDailySummary(
+    f.recipient.id,
+    due.toISOString(),
+    f.recipient.version,
+  );
+  expect(generated.status).toBe("generated");
+  f.summary = { id: generated.summaryId! };
+  f.share = await core.createSummaryShare(owner(), f.summary.id);
+}
 async function running(f: Fixture) {
   f.run = await core.startRun(owner(), f.task.id, {});
 }
@@ -326,6 +370,88 @@ const routes: RequestCase[] = [
       ? { member: "deny" as const }
       : {}),
   })),
+  // Shareholder summaries (ADR 0027): members read tags and their own
+  // (empty) summary list; everything else is admin-only.
+  { method: "GET", path: "/api/workspaces/:workspace/audience-tags" },
+  {
+    method: "POST",
+    path: "/api/workspaces/:workspace/audience-tags",
+    body: () => ({ org: `Matrix ${randomUUID()}` }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/audience-tags/:audienceTag",
+    prepare: summarized,
+    body: (f) => ({ version: f.audienceTag!.version, label: "Matrix" }),
+    member: "deny",
+  },
+  {
+    method: "GET",
+    path: "/api/audience-tags/:audienceTag/recipients",
+    prepare: summarized,
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/audience-tags/:audienceTag/recipients",
+    prepare: summarized,
+    body: () => ({
+      name: "Second holder",
+      locale: "zh-HK",
+      timeZone: "Asia/Hong_Kong",
+      deliverAt: "18:00",
+    }),
+    member: "deny",
+  },
+  {
+    method: "PATCH",
+    path: "/api/audience-recipients/:recipient",
+    prepare: summarized,
+    body: (f) => ({ version: f.recipient!.version, enabled: false }),
+    member: "deny",
+  },
+  { method: "GET", path: "/api/projects/:project/audience-tags" },
+  {
+    method: "PUT",
+    path: "/api/projects/:project/audience-tags",
+    prepare: summarized,
+    body: (f) => ({ tagIds: [f.audienceTag!.id] }),
+    member: "deny",
+  },
+  { method: "GET", path: "/api/summaries?workspaceId=:workspace" },
+  {
+    method: "POST",
+    path: "/api/summaries/preview",
+    prepare: summarized,
+    body: (f) => ({ recipientId: f.recipient!.id }),
+    member: "deny",
+  },
+  {
+    method: "GET",
+    path: "/api/summaries/:summary",
+    prepare: summarized,
+    member: "deny",
+  },
+  {
+    method: "GET",
+    path: "/api/summaries/:summary/shares",
+    prepare: summarized,
+    member: "deny",
+  },
+  {
+    method: "POST",
+    path: "/api/summaries/:summary/shares",
+    prepare: summarized,
+    body: () => ({ expiresInDays: 2 }),
+    member: "deny",
+  },
+  {
+    method: "DELETE",
+    path: "/api/summary-shares/:share",
+    prepare: summarized,
+    member: "deny",
+  },
   { method: "GET", path: "/api/companies/:company" },
   { method: "GET", path: "/api/companies/:company/contacts" },
   { method: "GET", path: "/api/contacts/:contact" },
@@ -2042,6 +2168,49 @@ describe.skipIf(!databaseUrl)(
       },
     );
 
+    it("serves a share link without a session and stops it on revocation", async () => {
+      const f = await fixture();
+      await summarized(f);
+      const read = (headers: Record<string, string> = {}) =>
+        app.request("/api/shared-summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", ...headers },
+          body: JSON.stringify({ token: f.share!.token }),
+        });
+      const callers: Record<string, string>[] = [
+        {},
+        { cookie: cookies["other-workspace"] },
+        { Authorization: `Bearer ${agentToken}` },
+      ];
+      for (const headers of callers) {
+        const response = await read(headers);
+        expect(response.status).toBe(200);
+        const body = await response.json();
+        expect(body.watermark.summaryId).toBe(f.summary!.id);
+        expect(body).not.toHaveProperty("workspaceId");
+      }
+      expect(
+        (
+          await app.request(`/api/summary-shares/${f.share!.id}`, {
+            method: "DELETE",
+            headers: { origin, cookie: cookies.member },
+          })
+        ).status,
+      ).toBe(403);
+      expect((await read()).status).toBe(200);
+      expect(
+        (
+          await app.request(`/api/summary-shares/${f.share!.id}`, {
+            method: "DELETE",
+            headers: { origin, cookie: cookies.owner },
+          })
+        ).status,
+      ).toBe(200);
+      const gone = await read();
+      expect(gone.status).toBe(404);
+      expect(await gone.json()).toEqual({ error: "not_found" });
+    });
+
     it("every REST endpoint is covered by the actor matrix", () => {
       const normalize = (path: string) =>
         path.split("?")[0].replace(/:[^/]+/g, ":id");
@@ -2055,6 +2224,8 @@ describe.skipIf(!databaseUrl)(
         ...lifecycleRoutes.map(([method, path]) => `${method} ${path}`),
         ...oauthMetadataRoutes.map((path) => `GET ${path}`),
         ...signedRoutes.map((path) => `POST ${path}`),
+        // Public by design; exercised in the share-link case above.
+        "POST /api/shared-summary",
         "POST /api/oauth/register",
         "POST /api/oauth/token",
         "POST /api/oauth/revoke",

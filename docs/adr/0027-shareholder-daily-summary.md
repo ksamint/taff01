@@ -177,3 +177,18 @@ Where S1 differs from the text above, this section wins.
 - **Realtime.** Events for the five tables reach admin sockets only.
 - **PR #84.** The four new actions change `can()`; its permission golden
   fixture must be regenerated when that branch is rebased.
+
+## Implementation notes (S2, 2026-11-05)
+
+- **The public read is `POST /api/shared-summary` with `{token}`**, not
+  `GET /api/share/:token`. The token never appears in an API path, so
+  proxy access logs and the API's error log (which records the path) never
+  hold it. The web page `/s/[token]` posts it server-side in S3.
+- **Rate limits.** 30 reads per minute per client address and per token
+  hash, counted in Valkey before any database read; a failed count denies.
+  Behind Caddy every request has the proxy's address, so the address bucket
+  acts as a global cap of 30 per minute until the API trusts a forwarded
+  header. That is enough for shareholder traffic; raise it in S4 if not.
+- **Tag routes** live under `/api/workspaces/:id/audience-tags`.
+- **Worker.** `summary-scan` runs every minute on the shared `taff` queue;
+  `daily-summary` jobs use stable ids. No new environment variable.

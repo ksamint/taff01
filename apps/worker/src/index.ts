@@ -3,6 +3,7 @@ import { Queue, Worker } from "bullmq";
 import pino from "pino";
 import { z } from "zod";
 import { createDigestProcessor } from "./digests";
+import { createSummaryProcessor, SUMMARY_JOB_NAMES } from "./summaries";
 
 const redisUrl = new URL(z.url().parse(process.env.REDIS_URL));
 if (!["redis:", "rediss:"].includes(redisUrl.protocol))
@@ -39,9 +40,13 @@ const queue = new Queue("taff", { connection });
 queue.on("error", (error) =>
   logger.error({ errorName: error.name }, "Queue connection error"),
 );
-const worker = new Worker("taff", createDigestProcessor(core, queue), {
-  connection,
-});
+const digests = createDigestProcessor(core, queue);
+const summaries = createSummaryProcessor(core, queue);
+const worker = new Worker(
+  "taff",
+  (job) => (SUMMARY_JOB_NAMES.has(job.name) ? summaries(job) : digests(job)),
+  { connection },
+);
 worker.on("error", (error) =>
   logger.error({ errorName: error.name }, "Worker connection error"),
 );
@@ -52,6 +57,20 @@ await queue.upsertJobScheduler(
   { every: 60_000 },
   {
     name: "digest-scan",
+    data: {},
+    opts: {
+      attempts: 3,
+      backoff: { type: "exponential", delay: 5000 },
+      removeOnComplete: 100,
+      removeOnFail: true,
+    },
+  },
+);
+await queue.upsertJobScheduler(
+  "daily-summary-scan",
+  { every: 60_000 },
+  {
+    name: "summary-scan",
     data: {},
     opts: {
       attempts: 3,
