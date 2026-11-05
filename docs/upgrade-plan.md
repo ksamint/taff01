@@ -102,14 +102,27 @@ function with a Node-generated golden fixture so it joins `pnpm rust:fixtures`
 when the Rust port reaches it; snapshot numbers are integers or decimal
 strings to keep canonical JSON parity trivial.
 
-## Tooling move: TypeScript-only sources (v0.2.18)
+## Release sequence after v0.2.17 (2026-11-05)
+
+Plan: [agent-goal-access-and-completion.md](agent-goal-access-and-completion.md);
+access design [ADR 0028](adr/0028-organization-wide-agent-grants.md).
+
+| Order | Release | Move | Validation |
+| --- | --- | --- | --- |
+| 1 | v0.2.17 | Operator deploy, tag and closeout of the merged candidate. | `release-closeout.md`. |
+| 2 | v0.2.18 | Land PR #81 (migration → 0039); ADR 0028 policy and enrollment (0040); MCP `workspaceId` on every tool, `workspaces.list`; Twin enrolled in every organization; SSR `Cache-Control: private`. | Access-change matrix after role loss; `pnpm mcp:smoke` 34 tools; `ssr-session.spec.ts` three locales. |
+| 3 | v0.2.19 | Access matrix: `/orgs/access` and `/admin/access`; generated `docs/spec/permissions-matrix.md`; CHANGELOG backfill v0.2.15–16. | `e2e/access.spec.ts` three locales; Today ≤ 200 KiB; local visual baselines. |
+| 4 | v0.2.20 | JavaScript-to-TypeScript T0–T3; small open items C1–C6. | Table below. |
+| — | no release | PR #82 rebased (0041) and merged on its evidence; Rust phase 0 (PR #84 rebased, local `pnpm rust:gate`) and phase 1. | `cargo fmt/clippy/test/deny`, fixture diff clean. |
+
+## Tooling move: TypeScript-only sources (v0.2.20)
 
 Plan: [agent-goal-js-to-ts.md](agent-goal-js-to-ts.md). Thirteen JavaScript
 files remain beside 456 TypeScript files; `docs/ui/prototype*/` assets stay.
 
 | Order | Move | How | Validation |
 | --- | --- | --- | --- |
-| 0 | v0.2.17 closeout recorded. | Deploy operator, per `release-closeout.md`. | Tag `v0.2.17` on origin. |
+| 0 | v0.2.19 closeout recorded (sequence above). | Deploy operator, per `release-closeout.md`. | Tag `v0.2.19` on origin. |
 | 1 | T0: type-check `scripts/` and `e2e/` in the gate. | Root `tsconfig.scripts.json`; fix pre-existing errors first. | `pnpm typecheck` clean; error count in the milestone. |
 | 2 | T1: eleven `.mjs`/`.cjs` → `.mts`. | Native type stripping (Node ≥ 24); references updated in the same commit. | `pnpm test` (harness, capture, visual-clock tests), `pnpm e2e`. |
 | 3 | T2: service worker from `src/sw/sw.ts`, `public/sw.js` generated. | esbuild in the web `build`/`dev` chain; `sw.js` git-ignored. | `persistence.spec.ts` PWA case in three locales; `/sw.js` headers on the candidate stack. |
