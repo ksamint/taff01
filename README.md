@@ -21,7 +21,8 @@ graph data and isolation scope.
 **v0.2.17 (candidate) — shareholder daily summaries.** Admins tag projects
 for a shareholder organization, and each recipient gets a daily, watermarked
 progress summary in their language, in the app or by an expiring link
-(ADR 0027, milestones 85–89).
+(ADR 0027, milestones 85–89; spec in
+[docs/spec/daily-summary.md](docs/spec/daily-summary.md)).
 
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.
