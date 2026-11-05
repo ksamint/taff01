@@ -120,8 +120,9 @@ token-based classes in one stylesheet per area under
 `apps/web/src/components/ui`, and bind real data where the prototype binds
 `st`. Every mutation is an extracted, optimistic hook in `apps/web/src/lib`
 that sends `version` and rolls back. Visual baselines are replaced per screen
-through `.github/workflows/visual-baselines.yml` and committed beside the
-reference capture in the milestone report.
+on a local Linux machine (GitHub workflows were removed on 2026-11-05; see
+"Local baseline capture" below) and committed beside the reference capture in
+the milestone report.
 
 ### Visual API calendar clock
 
@@ -141,7 +142,22 @@ with the same flag/preload when capturing Brief or Timeline. Never add this flag
 to a production environment or a general development API. The native dark-route
 workflow owns and cleans up its separate capture API/web process groups.
 
-Native capture supports an explicit partial matrix through the optional
+### Local baseline capture
+
+GitHub CI and runners are retired (owner, 2026-11-05), and
+`.github/workflows/visual-baselines.yml` was removed with them. Capture on a
+Linux machine with the pinned Playwright browser:
+
+```sh
+node --env-file=.env node_modules/@playwright/test/cli.js test --config playwright.visual.config.ts --update-snapshots
+```
+
+Record the machine, browser build and commit in the milestone report beside
+the new PNGs. The removed workflow's manifest and partial-matrix rules remain
+in history: `git show 26d20d8:.github/workflows/visual-baselines.yml`. The
+paragraphs below describe that workflow as it ran.
+
+Native capture supported an explicit partial matrix through the optional
 `visual-baselines.yml` `screens` input (space-separated allowlisted screen names,
 for example `brief timeline`). An empty input requires 26 light screen groups
 (104 cases, 126 PNGs) plus ten v2 dark groups across three locales and both
