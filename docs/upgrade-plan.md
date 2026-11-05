@@ -102,6 +102,19 @@ function with a Node-generated golden fixture so it joins `pnpm rust:fixtures`
 when the Rust port reaches it; snapshot numbers are integers or decimal
 strings to keep canonical JSON parity trivial.
 
+## Tooling move: TypeScript-only sources (v0.2.18)
+
+Plan: [agent-goal-js-to-ts.md](agent-goal-js-to-ts.md). Thirteen JavaScript
+files remain beside 456 TypeScript files; `docs/ui/prototype*/` assets stay.
+
+| Order | Move | How | Validation |
+| --- | --- | --- | --- |
+| 0 | v0.2.17 closeout recorded. | Deploy operator, per `release-closeout.md`. | Tag `v0.2.17` on origin. |
+| 1 | T0: type-check `scripts/` and `e2e/` in the gate. | Root `tsconfig.scripts.json`; fix pre-existing errors first. | `pnpm typecheck` clean; error count in the milestone. |
+| 2 | T1: eleven `.mjs`/`.cjs` → `.mts`. | Native type stripping (Node ≥ 24); references updated in the same commit. | `pnpm test` (harness, capture, visual-clock tests), `pnpm e2e`. |
+| 3 | T2: service worker from `src/sw/sw.ts`, `public/sw.js` generated. | esbuild in the web `build`/`dev` chain; `sw.js` git-ignored. | `persistence.spec.ts` PWA case in three locales; `/sw.js` headers on the candidate stack. |
+| 4 | T3: v0.2.18. | Candidate checkpoint in `deploy.md`; full local gate; closeout. | Gate counts recorded; only `postcss.config.mjs` remains JavaScript. |
+
 ## Procedure for any version move
 
 1. Branch from `main`, bump the manifest(s), run `pnpm install` (never edit the lockfile by hand).
