@@ -11,7 +11,11 @@
 > there is no Inbox row in v1.
 >
 > **2026-11-05: S2 done** (`docs/milestones/87-daily-summary-delivery.md`).
-> The public read is `POST /api/shared-summary` (ADR notes, S2). Start at S3.
+> The public read is `POST /api/shared-summary` (ADR notes, S2).
+>
+> **2026-11-05: S3 done** (`docs/milestones/88-daily-summary-web.md`) except
+> visual baselines and the public page's 50 KiB target (ADR notes, S3).
+> Start at S4.
 
 Paste everything below this line as the goal.
 

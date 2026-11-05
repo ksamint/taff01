@@ -72,6 +72,7 @@ export const audienceTagSchema = extend(audienceTagRefSchema, {
   createdAt: iso.datetime(),
   updatedAt: iso.datetime(),
 });
+export const audienceTagListSchema = array(audienceTagSchema);
 export const audienceTagInputSchema = strictObject({
   kind: optional(audienceKindSchema),
   org: boundedText(100),
@@ -102,6 +103,7 @@ export const audienceRecipientSchema = object({
   createdAt: iso.datetime(),
   updatedAt: iso.datetime(),
 });
+export const audienceRecipientListSchema = array(audienceRecipientSchema);
 const recipientUserId = nullable(string().check(minLength(1), maxLength(200)));
 export const audienceRecipientInputSchema = strictObject({
   name: boundedText(100),
@@ -279,6 +281,7 @@ export const summaryShareSchema = object({
   lastViewedAt: nullable(iso.datetime()),
   createdAt: iso.datetime(),
 });
+export const summaryShareListSchema = array(summaryShareSchema);
 /** Returned once by create; lists never carry the token. */
 export const issuedSummaryShareSchema = extend(summaryShareSchema, {
   token: string(),

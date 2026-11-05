@@ -46,6 +46,12 @@ const FAMILIES = [
   "workspace-ai",
   // Mind map (M18), keyed by workspace: ["mind-map", workspaceId, archived].
   "mind-map",
+  // Shareholder summaries (ADR 0027); events reach admin sockets only.
+  "audience-tags",
+  "audience-recipients",
+  "project-audience-tags",
+  "summaries",
+  "summary-shares",
 ];
 
 export function connectWorkspace(

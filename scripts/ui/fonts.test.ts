@@ -79,7 +79,8 @@ test("English relations symbols stay in tiny disjoint assets", () => {
     /^NotoSansTC-ui-(content|details)-/.test(asset.file),
   );
   expect(remaining).toHaveLength(10);
-  expect(remaining.reduce((sum, asset) => sum + asset.mappings, 0)).toBe(726);
+  // 726 until the shareholder summary strings added 13 (ADR 0027).
+  expect(remaining.reduce((sum, asset) => sum + asset.mappings, 0)).toBe(739);
   for (const asset of remaining) {
     expect(asset.bytes).toBeLessThanOrEqual(48 * 1024);
     expect(asset.mappings).toBeLessThanOrEqual(80);

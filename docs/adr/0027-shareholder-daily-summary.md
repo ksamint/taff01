@@ -192,3 +192,27 @@ Where S1 differs from the text above, this section wins.
 - **Tag routes** live under `/api/workspaces/:id/audience-tags`.
 - **Worker.** `summary-scan` runs every minute on the shared `taff` queue;
   `daily-summary` jobs use stable ids. No new environment variable.
+
+## Implementation notes (S3, 2026-11-05)
+
+- **Routes.** Recipients read `/summaries` and `/summaries/[id]` (Me has a
+  row). Admins manage everything at `/orgs/summaries`, linked from
+  Organizations; share links are managed on the summary page. The public
+  page is `/s/[token]`.
+- **One document component** renders all three places. It takes a translate
+  function, so the public page renders on the server in the recipient's
+  stored language with no client i18n, and only the print button hydrates.
+- **Outside the shell.** `AppShell` renders `/s/…` bare: no landing page,
+  sign-in, workspace reads or navigation. Dead links are a real 404 with
+  `no-store`; the page carries `noindex` and `no-referrer`.
+- **Public page JavaScript.** 187.5 KiB gzipped (225.9 KiB with the legacy
+  polyfills modern browsers skip), against a 50 KiB target. Nearly all of it
+  is the shared framework and root layout (providers, shell); the page's own
+  code adds almost nothing. Meeting the target needs a second root layout,
+  which means moving every existing route into an `(app)` route group.
+  That is an owner decision for S4 or later, not a change made inside S3.
+- **Fonts.** The new Chinese strings needed 13 more glyphs (`股東/股东`
+  among them). The documented subset procedure was rerun; see the fonts
+  README. No glyph was removed.
+- **Visual baselines** for the new screens are not committed: they come from
+  the approved Linux visual workflow, which this environment cannot run.

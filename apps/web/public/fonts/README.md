@@ -325,3 +325,13 @@ The same 186-view route matrix covers all three locales and both viewports;
 the manifest records the theme. The native visual capture workflow also records
 60 dark baselines for the ten v2-only screens, in addition to the 126 light
 baselines, without changing existing comparison tolerances.
+
+**Shareholder summaries (2026-11-05, ADR 0027).** The new `summary.*`,
+`audience.*` and `share.*` strings use characters outside the earlier ranges
+(`股東/股东`, `致`, `括`, `逾`, `哈`, `註` and others). The procedure above was
+rerun with the same pinned sources (both hashes verified) and FontTools 4.66.1 +
+Brotli 1.2.0. Coverage grows from 906 to 919 mappings with none lost; only the
+three detail fonts and their CSS ranges change. Rerunning on the previous `main`
+already regrouped those three files with identical coverage, because source
+text had changed since the last run, so the regrouping is not specific to these
+strings. Content, common, symbols, SC and Math assets are byte-for-byte unchanged.
