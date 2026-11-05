@@ -58,7 +58,13 @@ export type Action =
   | "suggestion:decide"
   | "suggestion:undo"
   | "mind:write"
-  | "mind:archive";
+  | "mind:archive"
+  | "audience:read"
+  | "audience:manage"
+  | "summary:read"
+  | "summary:preview"
+  | "summary:share"
+  | "summary:revoke";
 export type Resource =
   | {
       workspaceId: string;
@@ -76,6 +82,8 @@ export type Resource =
       memberId?: string;
       capability?: Capability;
       requestedReview?: boolean;
+      /** The Taff account linked to a summary recipient (ADR 0027). */
+      recipientUserId?: string | null;
     }
   | { userId: string };
 /** A member acting through an agent token carries that token's scopes. */
@@ -141,11 +149,32 @@ export function can(
     return false;
   if (
     actor.role === "guest" &&
-    !["workspace:read", "inbox:read", "inbox:update", "digest:read"].includes(
-      action,
-    )
+    ![
+      "workspace:read",
+      "inbox:read",
+      "inbox:update",
+      "digest:read",
+      "summary:read",
+    ].includes(action)
   )
     return false;
+  // Shareholder summaries (ADR 0027): people only. Admins manage audiences,
+  // preview and share; a linked recipient (often a guest) reads their own.
+  if (
+    action === "audience:manage" ||
+    action === "summary:preview" ||
+    action === "summary:share" ||
+    action === "summary:revoke"
+  )
+    return actor.kind === "person" && actor.role === "admin";
+  if (action === "audience:read") return actor.kind === "person";
+  if (action === "summary:read")
+    return (
+      actor.kind === "person" &&
+      (actor.role === "admin" ||
+        (!!resource.recipientUserId &&
+          actor.userId === resource.recipientUserId))
+    );
   if (action === "project:manage")
     return actor.kind === "person"
       ? actor.role === "admin"

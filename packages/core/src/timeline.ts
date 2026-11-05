@@ -220,6 +220,8 @@ export function createTimelineOperations({
     actor: Actor,
     project: typeof projects.$inferSelect,
     timeZone: string,
+    /** Overrides the actor's finance:read check; the summary job uses the recipient's switch. */
+    options: { finance?: boolean } = {},
   ) {
     const w = project.workspaceId;
     const projectId = project.id;
@@ -300,7 +302,7 @@ export function createTimelineOperations({
           .orderBy(taskDependencies.createdAt, taskDependencies.id)
       : [];
     let finance = null;
-    if (can(actor, "finance:read", { workspaceId: w })) {
+    if (options.finance ?? can(actor, "finance:read", { workspaceId: w })) {
       const [paid] = await db
         .select({
           total: sql<string>`coalesce(sum(${projectPayments.amount}), 0)::numeric(14,2)::text`,

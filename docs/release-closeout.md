@@ -15,10 +15,23 @@ source as a process gap in the milestone and fix the capture step below.
 | Migrator exit code and migration journal | Migration | Deployment log |
 | Replaced api/web/worker: container id, image id, startedAt, restartCount | Right after replacement | Docker inspect, recorded beside the image ids |
 | Local checklist, live acceptance, MCP smoke counts | Before and after replacement | Playwright and smoke output |
+| Worker scheduler readiness: the `Worker ready` line, logged only after every job scheduler (`daily-digest-scan`, `daily-summary-scan`) is registered | Right after replacement | Worker container log since its startedAt |
 
 ## Closeout checks (still under the lock)
 
-1. Exact-source `main` CI on the deployed SHA is green (8/8).
+1. The local gate passed on the exact deployed SHA, run by the operator on
+   a clean checkout. GitHub CI and runners are retired (owner, 2026-11-05: "no
+   ci, no github runner forever, we run locally push deploy directly since we
+   are ts and rust"). The gate is `pnpm lint`, `pnpm typecheck`,
+   `pnpm licence:check`, `pnpm test`, `pnpm build`, `pnpm build:server`,
+   `pnpm perf:budget`, `pnpm e2e` (en, zh-CN, zh-HK), `release:stack` then
+   `release:checklist`, `pnpm mcp:smoke` against that stack, and the three
+   image builds (`deploy/Dockerfile.server` with `TARGET=api` and
+   `TARGET=worker`, `deploy/Dockerfile.web`). Once `backend/` exists, add
+   `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings` and
+   `cargo test --locked`. Source: the command output, with pass and fail
+   counts, recorded in the release milestone. A check that cannot run is
+   listed there as not run, never as passed.
 2. Replaced services: image ids equal the recorded ones, running, healthy;
    container ids and startedAt equal the post-replacement record (no restart
    since acceptance).
@@ -28,9 +41,9 @@ source as a process gap in the milestone and fix the capture step below.
 4. Public checks named by the release (health, and for MCP OAuth the
    authorization-server metadata and the `/mcp` 401 `resource_metadata`).
 5. Annotated tag `vX.Y.Z` on the deployed SHA, verified on origin.
-6. Docs-only PR: `docs/deploy.md` checkpoint and `docs/milestones/NN-vX.Y.Z.md`
-   (≤ 40 lines), merged on green CI. Owner decisions and pending checks are
-   quoted there and in the receipt.
+6. Docs-only commit pushed to `main`: `docs/deploy.md` checkpoint and
+   `docs/milestones/NN-vX.Y.Z.md` (≤ 40 lines), after `pnpm lint` passes on
+   it. Owner decisions and pending checks are quoted there and in the receipt.
 7. Receipt written; `deployment.done` holds the accepted SHA only (pending
    items live in the receipt and milestone, never in `deployment.done`).
 8. Keeper logs `LOCK_RELEASED` and removes its owner file; an independent

@@ -66,13 +66,41 @@ production build, Today budget 191.9 KiB, `pnpm mcp:smoke` against the bundled A
 
 | When | Move | How | Validation |
 | --- | --- | --- | --- |
-| After PostgreSQL 19 GA (targeted late October 2026) | 18 → 19 | Compose image; run migrations on a fresh volume; confirm `postgres` driver and Drizzle have no 19-specific issues. | `pnpm db:migrate`, `pnpm db:seed`, `pnpm test`. |
-| November 2026 (TypeScript 7.1) | Nothing to change; 7.1 restores the JS API for tools that need it. | `pnpm up typescript`. | `pnpm typecheck`, `pnpm build`. |
+| After PostgreSQL 19 GA (RC 1 shipped 2026-10-15; GA moved from 2026-10-29 to 2026-11-19) | 18 → 19 | Compose image; run migrations on a fresh volume; confirm `postgres` driver and Drizzle have no 19-specific issues. Pin the CI image by digest as the approval workflow does. | `pnpm db:migrate`, `pnpm db:seed`, `pnpm test`. |
+| TypeScript 7.1 (beta October 2026; release candidate and stable expected in the second half of November) | Nothing to change; 7.1 restores the programmatic API for tools that need it. Take the stable, not the RC. | `pnpm up typescript`. | `pnpm typecheck`, `pnpm build`. |
 | When Drizzle 1.0 is final | 0.45 → 1.0 | Read the 1.0 migration guide; regenerate migration snapshots. | Integration tests. |
 | Phase 2 decision | BullMQ PostgreSQL backend | Separate ADR: it would remove Valkey, move MCP rate limiting into PostgreSQL and change the worker's backend factory. | Load test of job throughput and rate-limit accuracy. |
 | When BullMQ documents support | ioredis 5 → 6 (worker) | 6.0.0 shipped on 2026-10-07; BullMQ 6 declares `ioredis >=5` but has not released against 6. The API already runs ioredis 6 for the rate limiter; the worker stays on 5 until BullMQ confirms 6. | `pnpm test`, `pnpm mcp:smoke`, worker reaches ready. |
 | With each Node major | `@types/node` | Tracks the runtime major (26 now). | `pnpm typecheck`. |
 | Monthly | Minor and patch bumps | `pnpm up --latest` within the fixed majors; pnpm's release-age policy delays packages younger than its cutoff. | Full check set. |
+
+## Feature rollout: shareholder daily summary (ADR 0027)
+
+Design: [ADR 0027](adr/0027-shareholder-daily-summary.md). Goal:
+[agent-goal-daily-summary.md](agent-goal-daily-summary.md). Review of the
+work it waits on: [2026-11-05 review](reviews/2026-11-05-pr-and-plan-review.md).
+
+| Order | Move | How | Validation |
+| --- | --- | --- | --- |
+| 0 | Merge or rebase the open PRs: #81 (migration 0038), #82 (0039), then #84 (CI and `instruction_v0.md`). | Re-enable `TAFF_FULL_CI_ENABLED` for the merges or record the owner's replacement evidence per `release-closeout.md`. | Eight-job CI green on each merge, or the recorded alternative. |
+| 1 | Fix `Cache-Control: private` on authenticated SSR HTML (open item from PR #84's resync note). | Own small PR off `main`. | `ssr-session.spec.ts` green in en, zh-CN, zh-HK. |
+| 2 | S1 schema, core, permissions, access matrix. | Next free migration number; additive; no backfill. | `pnpm test`; permission table rows; access-matrix test after role loss. |
+| 3 | S2 worker jobs, REST, public share route, rate limit. | Same BullMQ queue; `summary-scan` every minute. | Route tests; processor test; `pnpm mcp:smoke` unchanged (33 or 34 tools). |
+| 4 | S3 web: project tags, admin page, recipient pages, public watermarked page. | Lazy routes; CSS watermark; three locales per commit. | `pnpm perf:budget` Today ≤ 200 KiB; public page ≤ 50 KiB recorded; Playwright share flow in three locales; visual baselines. |
+| 5 | S4 release as `v0.2.17`. | Candidate checkpoint in `deploy.md`; closeout per `release-closeout.md`. | Checklist evidence; `summary-scan` ready in the worker log; no production recipient created by the deployer. |
+| 6 | S5 phase 2 on the owner's decision: PDF (`pdf-lib`, MIT), e-mail link, MCP read tools, weekly roll-up. | Each its own ADR amendment and release. | Licence stated per dependency; access matrix extended. |
+
+Status 2026-11-05: rows 2–4 are done (milestones 86–88) and row 5's
+candidate is prepared (milestone 89); production deployment and closeout are
+pending. Rows 0 and 1 are not done. From row 4, the public page's 50 KiB
+target is missed (187.5 KiB, ADR 0027 notes S3) and the visual baselines are
+pending.
+
+Interplay with ADR 0026 (Rust): the module is written in `packages/core`
+TypeScript, which stays the authority. `buildDailySummary` is a pure
+function with a Node-generated golden fixture so it joins `pnpm rust:fixtures`
+when the Rust port reaches it; snapshot numbers are integers or decimal
+strings to keep canonical JSON parity trivial.
 
 ## Procedure for any version move
 

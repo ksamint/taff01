@@ -116,3 +116,46 @@ describe("Phase B migrations are additive", () => {
     }
   });
 });
+
+/*
+ * ADR 0027 shareholder summaries: additive tables, indexes, foreign keys,
+ * audit triggers, plus exactly one new guard function and its trigger that
+ * keep generated summaries immutable.
+ */
+const SUMMARIES = "0038_shareholder_summaries.sql";
+const SUMMARY_GUARD = `CREATE FUNCTION taff_summary_immutable() RETURNS trigger LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Daily summaries are immutable' USING ERRCODE = '23514';
+END;
+$$;`;
+const SUMMARY_GUARD_TRIGGER =
+  "CREATE TRIGGER daily_summaries_immutable BEFORE UPDATE ON daily_summaries FOR EACH ROW EXECUTE FUNCTION taff_summary_immutable();";
+describe("shareholder summary migration is additive", () => {
+  const list = statements(SUMMARIES);
+  it("uses additive statements and one immutability guard only", () => {
+    expect(list.length).toBeGreaterThan(0);
+    for (const statement of list) {
+      expect(
+        statement === SUMMARY_GUARD ||
+          statement === SUMMARY_GUARD_TRIGGER ||
+          ADDITIVE.some((pattern) => pattern.test(statement)),
+        statement,
+      ).toBe(true);
+      expect(statement).not.toMatch(/\b(DROP|TRUNCATE|RENAME|REPLACE)\b/i);
+      expect(
+        statement.replace(/ON DELETE|OR DELETE/g, ""),
+        statement,
+      ).not.toMatch(/\bDELETE\b|\bUPDATE\s+"?[a-z_]+"?\s+SET\b/i);
+    }
+  });
+  it("audits every table it creates", () => {
+    const created = list.flatMap(
+      (s) => s.match(/^CREATE TABLE "([a-z_]+)"/)?.[1] ?? [],
+    );
+    const audited = list.flatMap(
+      (s) => s.match(/^CREATE TRIGGER ([a-z_]+)_audit /)?.[1] ?? [],
+    );
+    expect(created).toHaveLength(5);
+    expect(audited.sort()).toEqual(created.sort());
+  });
+});

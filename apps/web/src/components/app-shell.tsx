@@ -101,7 +101,15 @@ const NAV = [
   { href: "/me", key: "me", Icon: User },
 ] as const;
 /** Screens pushed from 我的 keep the Me tab current. */
-const ME_PATHS = ["/me", "/inbox", "/brief", "/agents", "/orgs", "/digests"];
+const ME_PATHS = [
+  "/me",
+  "/inbox",
+  "/brief",
+  "/agents",
+  "/orgs",
+  "/digests",
+  "/summaries",
+];
 
 function Wordmark({ label }: { label: string }) {
   return (
@@ -166,7 +174,17 @@ export function InboxBadge({ workspaceId }: { workspaceId: string }) {
   ) : null;
 }
 
+/**
+ * Share links (`/s/…`, ADR 0027) are public documents: they render bare,
+ * without the signed-in shell, the landing page or workspace reads. The
+ * switch is a separate component so the shell's hooks never change order.
+ */
 export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  if (pathname.startsWith("/s/")) return <>{children}</>;
+  return <WorkspaceShell>{children}</WorkspaceShell>;
+}
+function WorkspaceShell({ children }: { children: ReactNode }) {
   const { t, i18n } = useTranslation();
   const client = useQueryClient();
   const pathname = usePathname();

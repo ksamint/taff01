@@ -36,9 +36,12 @@ const allowed = new Set([
   `bob:${otherWorkspace}`,
   `charlie:${workspace}`,
   `dana:${workspace}`,
+  `erin:${workspace}`,
 ]);
 /** Dana is a guest: guests never read CRM, so they get no CRM events. */
 const guests = new Set(["dana"]);
+/** Erin administers the workspace: admin-only events reach her alone. */
+const admins = new Set(["erin"]);
 const unsubscribe = vi.fn(async () => {});
 const sockets = new Set<WebSocket>();
 
@@ -93,7 +96,11 @@ beforeAll(async () => {
       return [
         {
           userId: principal.userId,
-          role: guests.has(principal.userId) ? "guest" : "member",
+          role: guests.has(principal.userId)
+            ? "guest"
+            : admins.has(principal.userId)
+              ? "admin"
+              : "member",
         },
       ] as Awaited<ReturnType<typeof core.listMembers>>;
     },
@@ -322,6 +329,36 @@ describe("authenticated realtime boundaries", () => {
     await deliver(change());
     expect(await task).toEqual(change());
     expect(danaSeen).toEqual([change()]);
+  });
+  it("routes shareholder audience, summary and share changes to admins only", async () => {
+    const alice = await connect("alice");
+    const dana = await connect("dana");
+    const erin = await connect("erin");
+    const others: ChangeEvent[] = [];
+    alice.on("message", (data) => others.push(JSON.parse(data.toString())));
+    dana.on("message", (data) => others.push(JSON.parse(data.toString())));
+    const warm = [message(alice), message(dana), message(erin)];
+    await deliver(change());
+    await Promise.all(warm);
+    others.length = 0;
+    for (const action of [
+      "audience_tags.insert",
+      "project_audience_tags.delete",
+      "audience_recipients.update",
+      "daily_summaries.insert",
+      "summary_shares.update",
+    ]) {
+      const toErin = message(erin);
+      await deliver(change({ action }));
+      expect((await toErin).action).toBe(action);
+    }
+    const last = [message(alice), message(dana)];
+    await deliver(change());
+    await Promise.all(last);
+    expect(others.map((event) => event.action)).toEqual([
+      change().action,
+      change().action,
+    ]);
   });
   it("routes Phase B changes to every member of the workspace, guests included", async () => {
     const alice = await connect("alice");

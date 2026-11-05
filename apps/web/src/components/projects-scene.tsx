@@ -61,6 +61,10 @@ import {
 import { useMembers, useRuns, useTasks } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
+import {
+  ProjectAudienceChips,
+  ProjectAudiencePicker,
+} from "./project-audience-tags";
 import { useInitialTodayTime } from "./providers";
 import { TimelineView } from "./timeline-view";
 import { Button } from "./ui/button";
@@ -545,6 +549,12 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </p>
         )}
+        {selected && (
+          <ProjectAudienceChips
+            projectId={selected.id}
+            canRead={confirmed && workspace.role !== "guest"}
+          />
+        )}
       </header>
       {showFilters && (
         <div className="projects-filter-bar">
@@ -966,6 +976,12 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                   ))}
               </select>
             </div>
+            {selected && projectDialog === "edit" && admin && (
+              <ProjectAudiencePicker
+                workspaceId={workspace.id}
+                projectId={selected.id}
+              />
+            )}
             <Button
               data-testid="project-submit"
               type="submit"

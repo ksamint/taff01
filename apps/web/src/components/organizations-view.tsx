@@ -268,6 +268,15 @@ export function OrganizationsView() {
       <Button disabled={busy} onClick={() => setDialog("create")}>
         {t("organization.create")}
       </Button>
+      {workspace.role === "admin" && (
+        <Link
+          className="button button-quiet"
+          href="/orgs/summaries"
+          data-testid="open-summaries-admin"
+        >
+          {t("audience.open")}
+        </Link>
+      )}
       <section className="team-directory" id="team">
         <header className="organization-toolbar">
           <Link className="button button-quiet" href="/me">

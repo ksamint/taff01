@@ -6,6 +6,7 @@ import {
   Bell,
   ChevronDown,
   ChevronRight,
+  FileText,
   Inbox,
   Languages,
   LogOut,
@@ -535,6 +536,19 @@ function MePhone() {
           <span className="me-row-stack">
             <span className="me-row-label">{t("notifications.title")}</span>
             <span className="me-row-summary">{notificationSummary}</span>
+          </span>
+          <ChevronRight size={16} aria-hidden="true" />
+        </Link>
+        <Link
+          className="me-row-control me-tall-row"
+          href="/summaries"
+          prefetch={false}
+          data-testid="open-summaries"
+        >
+          <FileText size={20} strokeWidth={1.5} aria-hidden="true" />
+          <span className="me-row-stack">
+            <span className="me-row-label">{t("summary.nav")}</span>
+            <span className="me-row-summary">{t("summary.meHint")}</span>
           </span>
           <ChevronRight size={16} aria-hidden="true" />
         </Link>

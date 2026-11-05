@@ -1,5 +1,26 @@
 # Changelog
 
+## v0.2.17 — release candidate, 2026-11-05
+
+Shareholder daily summaries (ADR 0027).
+
+- Admins tag projects for a shareholder organization (`Shareholder · {org}`)
+  and add recipients with a language, time zone, delivery time and finance and
+  names switches. A worker job writes one immutable summary per recipient per
+  local day, with the timeline's own risk numbers, a recipient watermark and a
+  content hash.
+- Recipients with an account read `/summaries`; admins manage audiences at
+  `/orgs/summaries` and share a summary by link. A link expires (7 days by
+  default, at most 90), is revoked at once, and stops when the recipient is
+  paused or the tag archived. The public page `/s/[token]` renders outside the
+  app in the recipient's language and is not indexed.
+- The public read is rate-limited in Valkey before the database; the token never
+  appears in an API path or a log. Agents get no summary access.
+- Additive migration 0038 (five audited tables). No new environment variable or
+  dependency. The CJK font subsets gain 13 glyphs; none is removed.
+- Changelog entries for v0.2.15 and v0.2.16 were never written; their records
+  are the deploy checkpoints and milestones 37 and 82.
+
 ## v0.2.14 — 2026-10-28
 
 Node 26 runtime for API, web and worker (ADR 0024).
