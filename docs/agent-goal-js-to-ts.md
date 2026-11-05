@@ -4,6 +4,10 @@
 > (`docs/milestones/91-js-to-ts-plan.md`). No code change yet. The owner
 > reviews asynchronously; the three open decisions below have proposed
 > defaults, so build on those unless redirected.
+>
+> **2026-11-05 (later):** sequenced as v0.2.20 after the access work; read
+> `agent-goal-access-and-completion.md` §2. Replace "v0.2.18" below with
+> "v0.2.20" and "after the v0.2.17 closeout" with "after the v0.2.19 closeout".
 
 Paste everything below this line as the goal.
 
