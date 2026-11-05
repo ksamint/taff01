@@ -1,7 +1,6 @@
 # 85 — Daily summary module: review and plan (2026-11-05)
 
-Docs-only milestone on branch `claude/daily-summary-module-plan-maapa1`
-from `main` `707161c` (v0.2.16). No code, schema or runtime change.
+Docs-only milestone from `main` `707161c` (v0.2.16); no code, schema or runtime change.
 
 ## What was done
 
@@ -38,5 +37,4 @@ migration number after PRs #81/#82 merge.
 
 ## Validation
 
-Docs only: `git diff --check` clean; links resolve to files on this branch.
-No test, build or e2e run was needed or claimed.
+Docs only: `git diff --check` clean; relative links resolve. No test, build or e2e run was needed or claimed.
