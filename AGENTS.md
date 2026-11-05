@@ -28,6 +28,12 @@ operation that issues, extends or re-enables access (approve, exchange,
 refresh, restore/undo, list, revoke) and test each with the lowest role that
 can reach it, including after that role loses the authority.
 
+No CI and no runners, ever (owner, 2026-11-05). Do not add `.github/`
+workflows, runner checks, or any step that waits on a hosted or self-hosted
+runner. Before every push run the local gate (`docs/release-closeout.md`,
+check 1); deploy by pushing directly to the server per `docs/deploy.md` and
+the closeout checklist. "CI" in older documents now means that local gate.
+
 Goals and prompts for deploy or closeout may only require evidence that
 `docs/release-closeout.md` names a source for; reference that file instead of
 restating the procedure. A requirement without a recorded source is a bug in
