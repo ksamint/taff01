@@ -88,8 +88,10 @@ test("ordinary browser and MCP API launch configuration never preloads the clock
   expect(readFileSync("playwright.config.ts", "utf8")).not.toMatch(
     /visual-clock|TAFF_VISUAL_API_CLOCK/,
   );
-  const ci = readFileSync(".github/workflows/ci.yml", "utf8");
-  expect(ci).not.toMatch(/TAFF_VISUAL_API_CLOCK|--import.*visual-clock/);
+  // GitHub CI is retired (docs/release-closeout.md); the local gate's commands
+  // live in package.json and must never preload the clock either.
+  const scripts = readFileSync("package.json", "utf8");
+  expect(scripts).not.toMatch(/TAFF_VISUAL_API_CLOCK|--import.*visual-clock/);
   const visual = readFileSync("playwright.visual.config.ts", "utf8");
   expect(visual).toContain("reuseExistingServer: false");
   expect(visual).toContain(
