@@ -43,7 +43,12 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
     const membershipChange = /^(members|workspaces)\.(update|delete)$/.test(
       event.action,
     );
-    const adminOnly = /^(agent_tokens|mcp_calls)\./.test(event.action);
+    // Shareholder audiences, summaries and share links (ADR 0027) are admin
+    // business; linked recipients reload their own summaries on read.
+    const adminOnly =
+      /^(agent_tokens|mcp_calls|audience_tags|project_audience_tags|audience_recipients|daily_summaries|summary_shares)\./.test(
+        event.action,
+      );
     // CRM and payments (finance, ADR 0021) reach people, never guests.
     const peopleOnly = /^project_payments\./.test(event.action);
     const crmEvent =

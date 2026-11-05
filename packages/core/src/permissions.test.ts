@@ -67,6 +67,103 @@ describe("permissions", () => {
         false,
       ],
     ] as [string, Actor, Action, Resource, boolean][]),
+    ...((): [string, Actor, Action, Resource, boolean][] => {
+      // Shareholder summaries (ADR 0027): every new action against each role.
+      const admin: Actor = { ...person, role: "admin" };
+      const guest: Actor = { ...person, role: "guest" };
+      const workspace = { workspaceId: "workspace" };
+      const mine = { ...workspace, recipientUserId: person.userId };
+      const theirs = { ...workspace, recipientUserId: "someone-else" };
+      const elsewhere = {
+        workspaceId: "other",
+        recipientUserId: person.userId,
+      };
+      const managed = [
+        "audience:manage",
+        "summary:preview",
+        "summary:share",
+        "summary:revoke",
+      ] as const;
+      return [
+        ...managed.flatMap(
+          (action): [string, Actor, Action, Resource, boolean][] => [
+            [`admin ${action}`, admin, action, workspace, true],
+            [`member cannot ${action}`, person, action, mine, false],
+            [`guest cannot ${action}`, guest, action, mine, false],
+            [`agent cannot ${action}`, agent, action, workspace, false],
+            [
+              `other-workspace admin cannot ${action}`,
+              admin,
+              action,
+              elsewhere,
+              false,
+            ],
+          ],
+        ),
+        ["admin reads audiences", admin, "audience:read", workspace, true],
+        ["member reads audiences", person, "audience:read", workspace, true],
+        [
+          "guest cannot read audiences",
+          guest,
+          "audience:read",
+          workspace,
+          false,
+        ],
+        [
+          "agent cannot read audiences",
+          agent,
+          "audience:read",
+          workspace,
+          false,
+        ],
+        ["admin reads any summary", admin, "summary:read", theirs, true],
+        [
+          "admin reads an unlinked summary",
+          admin,
+          "summary:read",
+          workspace,
+          true,
+        ],
+        ["linked member reads own summary", person, "summary:read", mine, true],
+        ["linked guest reads own summary", guest, "summary:read", mine, true],
+        [
+          "member cannot read another's summary",
+          person,
+          "summary:read",
+          theirs,
+          false,
+        ],
+        [
+          "guest cannot read another's summary",
+          guest,
+          "summary:read",
+          theirs,
+          false,
+        ],
+        [
+          "member cannot read an unlinked summary",
+          person,
+          "summary:read",
+          workspace,
+          false,
+        ],
+        [
+          "null link never matches a missing user id",
+          { ...person, userId: null },
+          "summary:read",
+          { ...workspace, recipientUserId: null },
+          false,
+        ],
+        ["agent cannot read summaries", agent, "summary:read", mine, false],
+        [
+          "linked person in another workspace cannot read",
+          person,
+          "summary:read",
+          elsewhere,
+          false,
+        ],
+      ];
+    })(),
     [
       "user can select own login default",
       person,

@@ -101,6 +101,7 @@ import { createPlanningOperations } from "./planning";
 import { createRelationOperations } from "./relations";
 import { createRunOperations } from "./runs";
 import { createSuggestionOperations } from "./suggestions";
+import { createSummaryOperations } from "./summaries";
 import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
 import { createWorkspaceLifecycle } from "./workspace-lifecycle";
@@ -187,6 +188,8 @@ export function createCore(options: {
   onEmailStatus?: (status: EmailStatus) => void;
   /** Optional model path for Ask taff (D6, ADR 0016); unset in production. */
   ai?: AiProvider;
+  /** Test-only clock for shareholder summary scheduling and share expiry. */
+  summaryClock?: () => Date;
 }) {
   if (options.tokenPepper.length < 16)
     throw new Error("TOKEN_PEPPER must be at least 16 characters");
@@ -1261,6 +1264,14 @@ export function createCore(options: {
     currentRunId,
   });
   const crm = createCrmOperations({ db, mutation, requireMember });
+  const summaries = createSummaryOperations({
+    db,
+    tokenPepper: options.tokenPepper,
+    mutation,
+    requireMember,
+    planSource: timeline.planSource,
+    now: options.summaryClock,
+  });
   const relations = createRelationOperations({ db, requireMember });
   const suggestionOperations = createSuggestionOperations({
     db,
@@ -1467,6 +1478,7 @@ export function createCore(options: {
     ...planning.operations,
     ...timeline.operations,
     ...crm.operations,
+    ...summaries,
     ...relations.operations,
     ...suggestionOperations.operations,
     ...assistant.operations,

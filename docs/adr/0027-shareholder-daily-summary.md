@@ -1,6 +1,7 @@
 # 0027 — Shareholder daily summary: audience tags, watermarked progress reports
 
-Date: 2026-11-05. Status: proposed (owner review asynchronous). Follows
+Date: 2026-11-05. Status: accepted with the proposed defaults (owner:
+"go ahead with the defaults, start S1"). Follows
 ADR 0015 (planning and CRM model), ADR 0016 (rules-first brief), ADR 0021
 (stage, lead, shared finance), ADR 0025 (confirmed project operations) and
 the ADR 0026 migration constraints.
@@ -152,3 +153,27 @@ recipient takes effect at once.
 6. Server-side PDF: phase 2 with `pdf-lib` (MIT) in the worker, or stay on
    print-to-PDF.
 7. Retention: keep every summary row; archive by archiving the tag.
+
+## Implementation notes (S1, 2026-11-05)
+
+Where S1 differs from the text above, this section wins.
+
+- **No Inbox row in v1.** `inbox_items.kind` is a CHECK listing five kinds;
+  adding `summary` means dropping and re-adding it, which the additive-only
+  deploy rule forbids. Linked recipients read `/summaries`. Revisit with an
+  owner-approved constraint change.
+- **Movement is approximated.** Tasks have no completion timestamp, and
+  task activity rows carry empty details. "Completed today" is a done task
+  whose last change fell on the recipient's local day; "moved today" is an
+  open task changed that day. Milestones reached or slipped are not listed;
+  the risk's slip reason covers slips.
+- **Project tag sets are unversioned.** A PUT replaces the set under the
+  project row lock; the UI's undo sends the previous set.
+- **Recipients are admin-only to list**, not `audience:read`, because they
+  name people outside the workspace.
+- **Share links also stop** when the recipient is disabled, the tag is
+  archived or the workspace is archived; re-enabling restores links that
+  are neither expired nor revoked. The access-matrix test covers that path.
+- **Realtime.** Events for the five tables reach admin sockets only.
+- **PR #84.** The four new actions change `can()`; its permission golden
+  fixture must be regenerated when that branch is rebased.

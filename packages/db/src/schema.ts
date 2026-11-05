@@ -1589,3 +1589,211 @@ export const approvedAgentReceipts = pgTable("approved_agent_receipts", {
     .defaultNow()
     .notNull(),
 });
+
+/**
+ * Shareholder daily summaries (ADR 0027). An audience tag is a kind and the
+ * audience's own organization; projects carry tags; each recipient of a tag
+ * receives one immutable, watermarked summary per local day.
+ */
+export const audienceTags = pgTable(
+  "audience_tags",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id),
+    kind: text("kind").notNull(),
+    org: text("org").notNull(),
+    label: text("label").default("").notNull(),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("audience_tags_workspace_id_unique").on(t.workspaceId, t.id),
+    uniqueIndex("audience_tags_workspace_kind_org_idx").on(
+      t.workspaceId,
+      t.kind,
+      sql`lower(${t.org})`,
+    ),
+    check("audience_tags_kind", sql`${t.kind} IN ('shareholder')`),
+    check("audience_tags_org", sql`length(btrim(${t.org})) BETWEEN 1 AND 100`),
+    check("audience_tags_label", sql`length(${t.label}) <= 100`),
+    check("audience_tags_version", sql`${t.version} > 0`),
+  ],
+);
+export const projectAudienceTags = pgTable(
+  "project_audience_tags",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    tagId: uuid("tag_id").notNull(),
+    createdBy: uuid("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("project_audience_tags_link_unique").on(
+      t.workspaceId,
+      t.projectId,
+      t.tagId,
+    ),
+    index("project_audience_tags_tag_idx").on(t.workspaceId, t.tagId),
+    foreignKey({
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+      name: "project_audience_tags_project_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.tagId],
+      foreignColumns: [audienceTags.workspaceId, audienceTags.id],
+      name: "project_audience_tags_tag_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.createdBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "project_audience_tags_creator_fk",
+    }),
+  ],
+);
+export const audienceRecipients = pgTable(
+  "audience_recipients",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    tagId: uuid("tag_id").notNull(),
+    name: text("name").notNull(),
+    contactId: uuid("contact_id"),
+    /** A Taff account that reads the summary in the app; optional. */
+    userId: text("user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    locale: text("locale").notNull(),
+    timeZone: text("time_zone").notNull(),
+    deliverAt: text("deliver_at").notNull(),
+    includeFinance: boolean("include_finance").default(false).notNull(),
+    showPeople: boolean("show_people").default(true).notNull(),
+    enabled: boolean("enabled").default(true).notNull(),
+    nextDueAt: timestamp("next_due_at", {
+      withTimezone: true,
+      precision: 3,
+    }).notNull(),
+    version: integer("version").default(1).notNull(),
+    ...dates,
+  },
+  (t) => [
+    unique("audience_recipients_workspace_id_unique").on(t.workspaceId, t.id),
+    uniqueIndex("audience_recipients_tag_user_idx")
+      .on(t.tagId, t.userId)
+      .where(sql`${t.userId} IS NOT NULL`),
+    index("audience_recipients_due_idx").on(t.enabled, t.nextDueAt, t.id),
+    foreignKey({
+      columns: [t.workspaceId, t.tagId],
+      foreignColumns: [audienceTags.workspaceId, audienceTags.id],
+      name: "audience_recipients_tag_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.contactId],
+      foreignColumns: [contacts.workspaceId, contacts.id],
+      name: "audience_recipients_contact_fk",
+    }),
+    check(
+      "audience_recipients_name",
+      sql`length(btrim(${t.name})) BETWEEN 1 AND 100`,
+    ),
+    check(
+      "audience_recipients_locale",
+      sql`${t.locale} IN ('en','zh-CN','zh-HK')`,
+    ),
+    check(
+      "audience_recipients_deliver_at",
+      sql`${t.deliverAt} ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$'`,
+    ),
+    check("audience_recipients_version", sql`${t.version} > 0`),
+  ],
+);
+/** Immutable: a trigger rejects UPDATE; the row's watermark never changes. */
+export const dailySummaries = pgTable(
+  "daily_summaries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    tagId: uuid("tag_id").notNull(),
+    recipientId: uuid("recipient_id").notNull(),
+    localDate: text("local_date").notNull(),
+    timeZone: text("time_zone").notNull(),
+    locale: text("locale").notNull(),
+    snapshot: jsonb("snapshot").notNull(),
+    watermark: jsonb("watermark").notNull(),
+    contentHash: text("content_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("daily_summaries_workspace_id_unique").on(t.workspaceId, t.id),
+    unique("daily_summaries_recipient_day").on(t.recipientId, t.localDate),
+    index("daily_summaries_workspace_tag_date_idx").on(
+      t.workspaceId,
+      t.tagId,
+      t.localDate,
+    ),
+    foreignKey({
+      columns: [t.workspaceId, t.tagId],
+      foreignColumns: [audienceTags.workspaceId, audienceTags.id],
+      name: "daily_summaries_tag_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.recipientId],
+      foreignColumns: [audienceRecipients.workspaceId, audienceRecipients.id],
+      name: "daily_summaries_recipient_fk",
+    }),
+    check(
+      "daily_summaries_date",
+      sql`${t.localDate} ~ '^\\d{4}-\\d{2}-\\d{2}$'`,
+    ),
+    check("daily_summaries_locale", sql`${t.locale} IN ('en','zh-CN','zh-HK')`),
+    check("daily_summaries_hash", sql`${t.contentHash} ~ '^[a-f0-9]{64}$'`),
+  ],
+);
+/** Signed links; only sha256(token + TOKEN_PEPPER) is stored. */
+export const summaryShares = pgTable(
+  "summary_shares",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    summaryId: uuid("summary_id").notNull(),
+    tokenHash: text("token_hash").notNull().unique(),
+    createdBy: uuid("created_by").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    revokedBy: uuid("revoked_by"),
+    viewCount: integer("view_count").default(0).notNull(),
+    lastViewedAt: timestamp("last_viewed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    index("summary_shares_summary_idx").on(t.workspaceId, t.summaryId),
+    foreignKey({
+      columns: [t.workspaceId, t.summaryId],
+      foreignColumns: [dailySummaries.workspaceId, dailySummaries.id],
+      name: "summary_shares_summary_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.createdBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "summary_shares_creator_fk",
+    }),
+    foreignKey({
+      columns: [t.workspaceId, t.revokedBy],
+      foreignColumns: [members.workspaceId, members.id],
+      name: "summary_shares_revoker_fk",
+    }),
+    check("summary_shares_hash", sql`${t.tokenHash} ~ '^[a-f0-9]{64}$'`),
+    check("summary_shares_views", sql`${t.viewCount} >= 0`),
+  ],
+);

@@ -6,6 +6,7 @@
       "!!**/node_modules",
       "!!**/.next",
       "!!**/migrations",
+      "!!**/__fixtures__",
       "!!docs/ui/prototype",
       "!!docs/ui/prototype-v2",
       "!!pnpm-lock.yaml",

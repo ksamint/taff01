@@ -1,0 +1,128 @@
+{
+  "snapshot": {
+    "version": 1,
+    "localDate": "2026-10-08",
+    "timeZone": "Asia/Hong_Kong",
+    "workspace": {
+      "name": "Northwind"
+    },
+    "tag": {
+      "kind": "shareholder",
+      "org": "Harbour Capital",
+      "label": "Series A"
+    },
+    "recipient": {
+      "name": "Pat Lee"
+    },
+    "projects": [
+      {
+        "projectId": "5b9b4d46-0000-4000-8000-00005b9b4d46",
+        "name": "Checkout v2",
+        "stage": "in_service",
+        "leadName": "Alex Chen",
+        "dueAt": "2026-10-15T09:00:00.000Z",
+        "deliveryProgress": 60,
+        "risk": {
+          "level": "medium",
+          "reasons": [
+            "blocked"
+          ],
+          "plannedEnd": "2026-10-15",
+          "forecastEnd": "2026-10-15",
+          "slipDays": 0,
+          "deliveryPercent": 69
+        },
+        "finance": {
+          "currency": "HKD",
+          "contractAmount": "1280000.00",
+          "collectedAmount": "512000.00",
+          "collectedPercent": 40
+        },
+        "counts": {
+          "total": 12,
+          "open": 9,
+          "done": 3,
+          "inReview": 2,
+          "blocked": 1,
+          "dueToday": 2,
+          "overdue": 0,
+          "completedToday": 1,
+          "movedToday": 2
+        },
+        "agentRuns": {
+          "completedToday": 1,
+          "pendingReview": 2
+        },
+        "completedToday": [
+          {
+            "taskId": "89f9304f-0000-4000-8000-000089f9304f",
+            "number": 135,
+            "title": "Task NW-135",
+            "status": "done",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-06T09:00:00.000Z"
+          }
+        ],
+        "movedToday": [
+          {
+            "taskId": "89f93053-0000-4000-8000-000089f93053",
+            "number": 139,
+            "title": "Task NW-139",
+            "status": "in_progress",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-10T09:00:00.000Z"
+          },
+          {
+            "taskId": "89f9306a-0000-4000-8000-000089f9306a",
+            "number": 141,
+            "title": "Task NW-141",
+            "status": "needs_review",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-08T09:00:00.000Z"
+          }
+        ],
+        "dueToday": [
+          {
+            "taskId": "89f9306a-0000-4000-8000-000089f9306a",
+            "number": 141,
+            "title": "Task NW-141",
+            "status": "needs_review",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-08T09:00:00.000Z"
+          },
+          {
+            "taskId": "89f9306b-0000-4000-8000-000089f9306b",
+            "number": 142,
+            "title": "Task NW-142",
+            "status": "needs_review",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-08T09:00:00.000Z"
+          }
+        ],
+        "overdue": [],
+        "blocked": [
+          {
+            "taskId": "89f9306d-0000-4000-8000-000089f9306d",
+            "number": 144,
+            "title": "Task NW-144",
+            "status": "in_progress",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-09T09:00:00.000Z"
+          }
+        ]
+      }
+    ],
+    "totals": {
+      "projects": 1,
+      "open": 9,
+      "inReview": 2,
+      "blocked": 1,
+      "dueToday": 2,
+      "overdue": 0,
+      "completedToday": 1,
+      "movedToday": 2
+    },
+    "truncated": false
+  },
+  "contentHash": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+}
