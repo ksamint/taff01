@@ -5,7 +5,8 @@
 > change: [ADR 0028](adr/0028-organization-wide-agent-grants.md) (proposed
 > defaults; build on them unless redirected). Nothing below is implemented.
 > This goal sequences the next three releases and moves the JavaScript-to-
-> TypeScript goal (`agent-goal-js-to-ts.md`) to v0.2.20.
+> TypeScript goal (`agent-goal-js-to-ts.md`) to v0.2.20. The task-level plan
+> for v0.2.18 and v0.2.19 is `agent-goal-access-matrix-and-renders.md`.
 
 Paste everything below this line as the goal.
 
@@ -74,7 +75,7 @@ How to proceed, in order, without blocking the feature work below:
 | --- | --- | --- |
 | v0.2.17 | shareholder summaries, merged, awaiting the operator's deploy and closeout | 85–89 (done) |
 | v0.2.18 | PR #81 landed; ADR 0028 organization-wide grants; MCP API update; Twin enrolled in every organization; `Cache-Control: private` fix | A |
-| v0.2.19 | access matrix in the admin area (workspace admins and system administrators); CHANGELOG backfill | B |
+| v0.2.19 | access matrix in the admin area (workspace admins and system administrators); summary text and image renders with a Rust render service and agent read tools (ADR 0029); CHANGELOG backfill | B, task cards in `agent-goal-access-matrix-and-renders.md` |
 | v0.2.20 | JavaScript-to-TypeScript (T0–T3 of `agent-goal-js-to-ts.md`); small open items C1–C6 | C |
 | no release | PR #82 hardening rebased and merged on its own evidence; Rust phase 0 and 1 | D, E |
 

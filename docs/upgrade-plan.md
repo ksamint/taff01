@@ -111,7 +111,7 @@ access design [ADR 0028](adr/0028-organization-wide-agent-grants.md).
 | --- | --- | --- | --- |
 | 1 | v0.2.17 | Operator deploy, tag and closeout of the merged candidate. | `release-closeout.md`. |
 | 2 | v0.2.18 | Land PR #81 (migration → 0039); ADR 0028 policy and enrollment (0040); MCP `workspaceId` on every tool, `workspaces.list`; Twin enrolled in every organization; SSR `Cache-Control: private`. | Access-change matrix after role loss; `pnpm mcp:smoke` 34 tools; `ssr-session.spec.ts` three locales. |
-| 3 | v0.2.19 | Access matrix: `/orgs/access` and `/admin/access`; generated `docs/spec/permissions-matrix.md`; CHANGELOG backfill v0.2.15–16. | `e2e/access.spec.ts` three locales; Today ≤ 200 KiB; local visual baselines. |
+| 3 | v0.2.19 | Access matrix: `/orgs/access` and `/admin/access`; generated `docs/spec/permissions-matrix.md`; summary text and image renders (Rust `taff-render` service, migration 0041, `SUMMARY_RENDER_URL`), MCP `summaries.*` read tools with scope `summaries:read` (ADR 0029); CHANGELOG backfill v0.2.15–16. | `e2e/access.spec.ts` and `summaries.spec.ts` three locales; `pnpm rust:gate` render goldens; Today ≤ 200 KiB; four image builds. |
 | 4 | v0.2.20 | JavaScript-to-TypeScript T0–T3; small open items C1–C6. | Table below. |
 | — | no release | PR #82 rebased (0041) and merged on its evidence; Rust phase 0 (PR #84 rebased, local `pnpm rust:gate`) and phase 1. | `cargo fmt/clippy/test/deny`, fixture diff clean. |
 
