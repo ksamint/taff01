@@ -14,6 +14,12 @@ Before credential-dependent work, read
 blocker without changing permissions or requesting repeated desktop sign-in.
 Never commit secrets.
 
+Product requirements live in `docs/spec/<module>.md`, one living spec per
+module written with the `module-spec` skill (`.claude/skills/module-spec/`).
+Change the spec in the same commit as the behaviour it describes: ADRs record
+decisions, specs record the current contract. Vulnerability reports follow
+`SECURITY.md`.
+
 For a requested brand treatment, resolve its latest guide, tokens, and official
 assets through https://apuch.art/ before styling.
 
