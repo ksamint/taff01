@@ -25,6 +25,9 @@ export type Action =
   | "task:status"
   | "task:schedule"
   | "task:review"
+  | "token:policy"
+  | "token:grant"
+  | "token:grant_revoke"
   | "token:manage"
   | "token:connect"
   | "token:revoke"
@@ -114,6 +117,16 @@ export function can(
   resource: Resource,
 ): boolean {
   if (!actor) return false;
+  if (action === "token:policy")
+    return actor.kind === "person" && actor.systemAdmin === true;
+  if (action === "token:grant" || action === "token:grant_revoke")
+    return (
+      actor.kind === "person" &&
+      (actor.systemAdmin === true ||
+        ("workspaceId" in resource &&
+          actor.workspaceId === resource.workspaceId &&
+          actor.role === "admin"))
+    );
   if (action === "workspace:default")
     return (
       actor.kind === "person" &&

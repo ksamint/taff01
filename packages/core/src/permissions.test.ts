@@ -29,6 +29,36 @@ const agent: Actor = {
 const task = { workspaceId: "workspace", ownerId: "owner", workerId: "agent" };
 describe("permissions", () => {
   it.each<[string, Actor | null, Action, Resource, boolean]>([
+    ...((): [string, Actor, Action, Resource, boolean][] => {
+      const rows: [string, Actor, Action, Resource, boolean][] = [];
+      for (const [name, actor] of Object.entries({
+        admin: { ...person, role: "admin" as const },
+        member: person,
+        guest: { ...person, role: "guest" as const },
+        system: { ...person, systemAdmin: true },
+        agent: { ...agent, systemAdmin: true },
+        outsider: {
+          ...person,
+          role: "admin" as const,
+          workspaceId: "elsewhere",
+        },
+      })) {
+        for (const action of [
+          "token:policy",
+          "token:grant",
+          "token:grant_revoke",
+        ] as const)
+          rows.push([
+            `${name} ${action}`,
+            actor,
+            action,
+            { workspaceId: "workspace" },
+            name === "system" ||
+              (name === "admin" && action !== "token:policy"),
+          ]);
+      }
+      return rows;
+    })(),
     ...([
       [
         "admin moves stage",

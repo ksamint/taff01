@@ -66,6 +66,11 @@ const signedRoutes = [
 ];
 const messages: { to: string; text: string }[] = [];
 const delivered = new Map<string, string>();
+const policyRoutes = [
+  ["PUT", "/api/agent-tokens/:id/organization-policy"],
+  ["POST", "/api/agent-token-workspaces/:id/restore"],
+  ["GET", "/api/admin/agent-tokens"],
+] as const;
 const organizationRoutes = [
   ["PATCH", "/api/users/:id/default-workspace"],
   ["GET", "/api/admin/workspaces"],
@@ -1581,6 +1586,49 @@ describe.skipIf(!databaseUrl)(
     });
 
     it.each(
+      policyRoutes.flatMap(([method, path]) =>
+        actors.map((actor) => ({ method, path, actor })),
+      ),
+    )(
+      "token policy $method $path × $actor",
+      async ({ method, path, actor }) => {
+        const f = await fixture();
+        const restore = path.includes("agent-token-workspaces");
+        const grants = restore
+          ? await core.listAgentTokenWorkspaces(
+              owner(),
+              f.token.id,
+              workspaceId,
+            )
+          : [];
+        const response = await app.request(
+          path.replace(":id", restore ? grants[0].id : f.token.id),
+          {
+            method,
+            headers: {
+              origin,
+              "Content-Type": "application/json",
+              ...(actor === "agent"
+                ? { Authorization: `Bearer ${agentToken}` }
+                : { cookie: cookies[actor] }),
+            },
+            ...(method === "PUT"
+              ? {
+                  body: JSON.stringify({
+                    version: f.token.version,
+                    policy: "all_organizations",
+                  }),
+                }
+              : {}),
+          },
+        );
+        expect(response.status).toBe(
+          actor === "agent" ? 401 : restore && actor === "owner" ? 200 : 403,
+        );
+      },
+    );
+
+    it.each(
       organizationRoutes.flatMap(([method, path]) =>
         actors.map((actor) => ({ method, path, actor })),
       ),
@@ -2229,6 +2277,7 @@ describe.skipIf(!databaseUrl)(
         path.split("?")[0].replace(/:[^/]+/g, ":id");
       const covered = new Set([
         ...routes.map((row) => `${row.method} ${normalize(row.path)}`),
+        ...policyRoutes.map(([method, path]) => `${method} ${normalize(path)}`),
         ...organizationRoutes.map(
           ([method, path]) => `${method} ${normalize(path)}`,
         ),
