@@ -4,8 +4,14 @@ Read `instruction_v0.md` before changing this repository. It contains the origin
 product, architecture, stack, security, performance, and checkpoint requirements.
 The final line is the original repository creation request, not a recurring action.
 
-Use the lean-delivery skill for every task. Use orchestrate-development only for
-multi-day features.
+Delivery rule (no skill is required for it; the `lean-delivery` skill named
+here before 2026-11-06 never existed and the requirement is waived): make the
+smallest change that meets the user's latest command, ship it with its tests
+and its spec change, record the milestone, push, continue. Use the
+`orchestrate-development` skill (ksaskill01) only for multi-day features and
+the `module-spec` skill (`.claude/skills/module-spec/`) for specs. A skill
+named in a goal that cannot be found is reported in the milestone as
+missing, never a blocker.
 
 At the start of local Codex work on the M1 Pro, run
 `python3 /Users/gf-m1pro/.codex/skills/op-automation/scripts/check_access.py`.
