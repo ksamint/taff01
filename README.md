@@ -39,7 +39,11 @@ local Docker Compose builds it automatically (see `.env.example`).
 ends the affected refresh family; current authority remains locked through
 writes. Bounded shutdown, SQL deadlines and persisted noeviction queues follow
 the [agent access](docs/spec/agent-access.md) and
-[runtime recovery](docs/spec/runtime.md) contracts. Production activation is pending.
+[runtime recovery](docs/spec/runtime.md) contracts. Typed tooling and the built
+service worker follow the [tooling contract](docs/spec/tooling.md). OAuth setup
+retains its return context, [Me panels](docs/spec/client-navigation.md) show localized progress, and rules-based
+[Brief workload answers](docs/spec/brief.md) use current task ownership counts.
+Production activation is pending.
 
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.

@@ -786,6 +786,126 @@ describe.skipIf(!url)(
         );
         expect(theirs.labels?.tasks).toEqual([]);
       });
+      it("counts only current unfinished leaf ownership, including work outside projects", async () => {
+        if (alice.kind !== "user") throw new Error("Expected person fixture");
+        const workspace = await core.createWorkspace(alice, {
+          name: "Workload scope",
+        });
+        const me = await core.getMe(alice.userId);
+        const self = me.workspaces.find((item) => item.id === workspace.id)!;
+        const make = (title: string, parentId?: string) =>
+          core.createTask(alice, {
+            workspaceId: workspace.id,
+            ownerId: self.memberId,
+            workerId: null,
+            title,
+            ...(parentId ? { parentId } : {}),
+          });
+        const parent = await make("Container");
+        await make("Child", parent.id);
+        await make("Standalone");
+        const done = await make("Finished");
+        await core.updateTaskStatus(alice, done.id, { status: "done" });
+        const answer = askAnswerSchema.parse(
+          await core.ask(
+            alice,
+            {
+              question: "Who has the heaviest load?",
+              workspaceId: workspace.id,
+            },
+            { labels: true },
+          ),
+        );
+        expect(answer).toMatchObject({
+          intent: "load",
+          source: "rules",
+          text: null,
+          items: [
+            {
+              kind: "member",
+              id: self.memberId,
+              memberId: self.memberId,
+              workspaceId: workspace.id,
+              openTasks: 2,
+            },
+          ],
+        });
+        expect(answer.labels?.members).toContainEqual({
+          id: self.memberId,
+          workspaceId: workspace.id,
+          name: me.user.name,
+        });
+        await expect(
+          core.ask(outsider, {
+            question: "workload",
+            workspaceId: workspace.id,
+          }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+        expect(
+          (await core.ask(outsider, { question: "workload" })).items.map(
+            (item) => item.workspaceId,
+          ),
+        ).not.toContain(workspace.id);
+      });
+      it("retains workspace-read role ceilings and rejects missing scope or revoked credentials for workload", async () => {
+        const input = { question: "Who is busiest?", workspaceId: w };
+        const expected = await core.ask(alice, input);
+        for (const reader of [bob, guest, otherAgent]) {
+          const answer = await core.ask(reader, input);
+          expect(answer.items).toEqual(expected.items);
+          expect(answer.items.every((item) => item.workspaceId === w)).toBe(
+            true,
+          );
+        }
+        await expect(
+          core.ask(otherAgent, {
+            question: "workload",
+            workspaceId: outsiderW,
+          }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+        const noRead = await core.createAgentToken(alice, {
+          workspaceId: w,
+          memberId: agentId,
+          name: "No workload read",
+          scopes: ["calendar:write"],
+        });
+        const noReadActor = (await core.authenticateAgentToken(noRead.token))!;
+        await expect(core.ask(noReadActor, input)).rejects.toMatchObject({
+          code: "forbidden",
+        });
+        const temporaryAgent = await core.createWorkspaceAgent(alice, w, {
+          name: "Workload read ceiling",
+          kind: "agent",
+        });
+        const lifetime = await core.createAgentToken(alice, {
+          workspaceId: w,
+          memberId: temporaryAgent.id,
+          name: "Workload lifetime",
+          scopes: ["tasks:read"],
+        });
+        const actor = (await core.authenticateAgentToken(lifetime.token))!;
+        expect((await core.ask(actor, input)).items).toEqual(expected.items);
+        for (const decision of ["deny", "ask"] as const) {
+          await core.setAgentPermission(alice, temporaryAgent.id, {
+            capability: "tasks.read",
+            decision,
+          });
+          await expect(core.ask(actor, input)).rejects.toMatchObject({
+            code: "forbidden",
+          });
+        }
+        await core.setAgentPermission(alice, temporaryAgent.id, {
+          capability: "tasks.read",
+          decision: "allow",
+        });
+        expect((await core.ask(actor, input)).items).toEqual(expected.items);
+        await core.revokeAgentToken(alice, lifetime.id);
+        expect(await core.authenticateAgentToken(lifetime.token)).toBeNull();
+        await expect(core.ask(actor, input)).rejects.toMatchObject({
+          code: "forbidden",
+        });
+        await core.revokeAgentToken(alice, noRead.id);
+      });
       it("spans only the caller's memberships", async () => {
         const all = await core.getBrief(alice, { scope: "all" });
         expect(all.workspaceIds).toContain(w);

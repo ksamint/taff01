@@ -29,7 +29,7 @@ import {
 } from "@taff/schemas";
 import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 import type { AiProvider } from "./ai-provider";
-import { answerAsk } from "./ask";
+import { answerAsk, askIntent } from "./ask";
 import { type BriefSource, buildBrief } from "./brief";
 import { CoreError, type Principal } from "./index";
 import { type Action, type Actor, can, type Resource } from "./permissions";
@@ -117,6 +117,7 @@ export function createAssistantOperations({
     p: Principal,
     scope: BriefScope,
     workspaceId?: string,
+    includeWorkload = false,
   ): Promise<BriefSource> {
     const ids = await memberships(p, scope, workspaceId);
     const actors: Actor[] = [];
@@ -134,6 +135,7 @@ export function createAssistantOperations({
       pendingGrants: [],
       suggestions: [],
       myTasks: [],
+      workloadTasks: includeWorkload ? [] : undefined,
       agentRuns: [],
     };
     for (const actor of actors) {
@@ -238,24 +240,43 @@ export function createAssistantOperations({
             proposerId: row.proposerId,
             agentId: row.proposerKind === "agent" ? row.proposerId : undefined,
           });
-      const mine = await db
+      const workspaceTasks = await db
         .select({
           id: tasks.id,
           projectId: tasks.projectId,
           status: tasks.status,
           dueAt: tasks.dueAt,
+          ownerId: tasks.ownerId,
+          workerId: tasks.workerId,
+          parentId: tasks.parentId,
         })
         .from(tasks)
         .where(
           and(
             eq(tasks.workspaceId, w),
-            ne(tasks.status, "done"),
             sql`${tasks.archivedAt} IS NULL`,
-            or(eq(tasks.ownerId, actor.id), eq(tasks.workerId, actor.id)),
+            ...(includeWorkload
+              ? []
+              : [
+                  ne(tasks.status, "done"),
+                  or(eq(tasks.ownerId, actor.id), eq(tasks.workerId, actor.id)),
+                ]),
           ),
         )
         .orderBy(asc(tasks.number));
-      for (const task of mine)
+      for (const task of workspaceTasks) {
+        source.workloadTasks?.push({
+          workspaceId: w,
+          taskId: task.id,
+          ownerId: task.ownerId,
+          parentId: task.parentId,
+          status: task.status,
+        });
+        if (
+          task.status === "done" ||
+          (task.ownerId !== actor.id && task.workerId !== actor.id)
+        )
+          continue;
         source.myTasks.push({
           workspaceId: w,
           taskId: task.id,
@@ -263,6 +284,7 @@ export function createAssistantOperations({
           status: task.status,
           dueDate: task.dueAt ? localDate(task.dueAt, timeZone) : null,
         });
+      }
       const runRows = await db
         .select({
           runId: runs.id,
@@ -416,7 +438,7 @@ export function createAssistantOperations({
       labels: await loadLabels(source, {
         taskIds: answer.items.map((item: AskItem) => item.taskId),
         agentIds: answer.items.map(
-          (item: AskItem) => item.proposerId ?? item.agentId,
+          (item: AskItem) => item.proposerId ?? item.memberId ?? item.agentId,
         ),
       }),
     };
@@ -431,6 +453,7 @@ export function createAssistantOperations({
       p,
       body.workspaceId ? "workspace" : "all",
       body.workspaceId,
+      askIntent(body.question) === "load",
     );
     const answer = answerAsk(body.question, source, buildBrief(source));
     // The model path (D6): only with a configured provider AND a workspace

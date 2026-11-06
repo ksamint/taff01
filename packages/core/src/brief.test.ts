@@ -1,5 +1,6 @@
-import { briefSchema } from "@taff/schemas";
+import { askItemSchema, briefSchema, taskStatusSchema } from "@taff/schemas";
 import { describe, expect, it } from "vitest";
+import loadGolden from "./__fixtures__/ask-load.json";
 import { answerAsk, askIntent } from "./ask";
 import { type BriefSource, buildBrief } from "./brief";
 import { buildPlanModel } from "./plan-model";
@@ -254,6 +255,11 @@ describe("Ask taff rules fallback", () => {
     ["本周有什么到期？", "due_this_week"],
     ["What are the agents working on?", "agent_status"],
     ["智能體在做甚麼？", "agent_status"],
+    ["Who has the heaviest load?", "load"],
+    ["邊個負荷最重？", "load"],
+    ["谁最忙？", "load"],
+    ["Which agent has the heaviest workload?", "load"],
+    ["Upload a file", "unknown"],
     ["Tell me a joke", "unknown"],
   ])("%s → %s", (question, intent) => {
     expect(askIntent(question)).toBe(intent);
@@ -317,6 +323,29 @@ describe("Ask taff rules fallback", () => {
       [id(41), id(71), "running"],
       [id(44), id(72), "paused"],
     ]);
+  });
+  it("ranks unfinished leaf-task ownership by workspace from the portable load golden", () => {
+    const data = source({
+      workspaceIds: loadGolden.workspaceIds,
+      workloadTasks: loadGolden.tasks.map((task) => ({
+        ...task,
+        status: taskStatusSchema.parse(task.status),
+      })),
+    });
+    expect(
+      answerAsk("Who has the heaviest workload?", data, buildBrief(data)),
+    ).toEqual({ intent: "load", items: loadGolden.expected });
+    expect(answerAsk("workload", source({ workloadTasks: [] }), brief)).toEqual(
+      { intent: "load", items: [] },
+    );
+  });
+  it("requires workload rows to carry source counts", () => {
+    for (const item of loadGolden.expected)
+      expect(askItemSchema.safeParse(item).success).toBe(true);
+    expect(
+      askItemSchema.safeParse({ kind: "member", workspaceId: W, id: id(20) })
+        .success,
+    ).toBe(false);
   });
   it("says unknown instead of inventing an answer", () => {
     expect(answerAsk("write me a poem", data, brief)).toEqual({

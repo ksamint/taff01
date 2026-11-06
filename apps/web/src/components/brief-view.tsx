@@ -52,7 +52,14 @@ import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
 
-const TRY = ["atRisk", "needsMe", "blocked", "dueThisWeek", "agents"] as const;
+const TRY = [
+  "atRisk",
+  "needsMe",
+  "blocked",
+  "dueThisWeek",
+  "agents",
+  "load",
+] as const;
 
 /** Translates a phrase, formatting nested phrases and civil dates. */
 function useSay() {

@@ -340,6 +340,25 @@ export function answerView(answer: AskAnswer): {
     const task = taskName(labels, item.taskId) ?? { key: "brief.someTask" };
     const key = `${item.kind}:${item.id}:${index}`;
     switch (item.kind) {
+      case "member":
+        return {
+          key,
+          item,
+          title: {
+            key: "ask.item.load",
+            values: {
+              member: labels.member(item.memberId) ?? { key: "unknownMember" },
+              count: item.openTasks!,
+            },
+          },
+          detail: {
+            key: "ask.item.loadWorkspace",
+            values: {
+              workspace: labels.workspace(item.workspaceId)?.name ?? "—",
+            },
+          },
+          href: null,
+        };
       case "project":
         return {
           key,

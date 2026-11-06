@@ -1201,7 +1201,8 @@
       "needsMe": "有甚麼需要我確認？",
       "blocked": "有甚麼被阻礙？",
       "dueThisWeek": "本週有甚麼到期？",
-      "agents": "智能體正在做甚麼？"
+      "agents": "智能體正在做甚麼？",
+      "load": "邊個負荷最重？"
     },
     "thinking": "正在分析所有項目…",
     "question": "你問：{{question}}",
@@ -1223,9 +1224,12 @@
         "blocked": "沒有被阻礙的工作。",
         "needs_me": "沒有等你處理的事項。",
         "due_this_week": "未來 7 天沒有你的任務到期。",
-        "agent_status": "目前沒有智能體在工作。"
+        "agent_status": "目前沒有智能體在工作。",
+        "load": "沒有已分配的未完成任務。"
       },
-      "unknown": "我可以回答風險、被阻礙的工作、等你處理的事項、本週到期的任務，以及智能體的工作。試試下面的問題。"
+      "unknown": "我可以回答風險、受阻事項、需要你處理的工作、本週到期、智能體動態和工作負荷。試試下面的問題。",
+      "load_one": "{{count}} 位成員有未完成任務。",
+      "load_other": "{{count}} 位成員有未完成任務。"
     },
     "item": {
       "project": "{{project}} · {{level}}",
@@ -1236,7 +1240,10 @@
       "due": "{{date}} 到期",
       "blockedTask": "「{{task}}」：{{agent}}正在等待權限",
       "blockedAgent": "{{agent}}正在等待權限",
-      "agent": "{{agent}} · {{status}} · {{task}}"
+      "agent": "{{agent}} · {{status}} · {{task}}",
+      "load_one": "{{member}} · {{count}} 項未完成任務",
+      "load_other": "{{member}} · {{count}} 項未完成任務",
+      "loadWorkspace": "{{workspace}}"
     }
   },
   "mind": {

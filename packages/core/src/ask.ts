@@ -9,6 +9,10 @@ import { civilDate, dayNumber } from "./plan-model";
  * invented prose. English, Traditional and Simplified Chinese phrasings.
  */
 const INTENTS: [AskIntent, RegExp][] = [
+  [
+    "load",
+    /\b(?:workload|load|overloaded|busy|busiest|heaviest)\b|負荷|负荷|最忙|誰.*忙|谁.*忙|邊個.*忙/i,
+  ],
   ["blocked", /block|stuck|阻|卡住|卡關|卡关|等授權|等授权/i],
   [
     "needs_me",
@@ -43,6 +47,47 @@ export function answerAsk(
 ): { intent: AskIntent; items: AskItem[] } {
   const intent = askIntent(question);
   switch (intent) {
+    case "load": {
+      const allowed = new Set(source.workspaceIds);
+      const tasks = (source.workloadTasks ?? []).filter((task) =>
+        allowed.has(task.workspaceId),
+      );
+      const parents = new Set(
+        tasks
+          .filter((task) => task.parentId)
+          .map((task) => `${task.workspaceId}:${task.parentId}`),
+      );
+      const owners = new Map<
+        string,
+        { workspaceId: string; memberId: string; openTasks: number }
+      >();
+      for (const task of tasks) {
+        if (
+          task.status === "done" ||
+          parents.has(`${task.workspaceId}:${task.taskId}`)
+        )
+          continue;
+        const key = `${task.workspaceId}:${task.ownerId}`;
+        const owner = owners.get(key) ?? {
+          workspaceId: task.workspaceId,
+          memberId: task.ownerId,
+          openTasks: 0,
+        };
+        owner.openTasks++;
+        owners.set(key, owner);
+      }
+      return {
+        intent,
+        items: [...owners.values()]
+          .sort(
+            (a, b) =>
+              b.openTasks - a.openTasks ||
+              byText(a.workspaceId, b.workspaceId) ||
+              byText(a.memberId, b.memberId),
+          )
+          .map((owner) => ({ kind: "member", id: owner.memberId, ...owner })),
+      };
+    }
     case "at_risk":
       return {
         intent,

@@ -482,3 +482,31 @@ describe("human proposal attribution", () => {
     expect(view.title.values?.agent).toEqual({ key: "brief.proposal.someone" });
   });
 });
+
+it("renders workload counts and membership labels without inventing a task or navigation target", () => {
+  const memberId = id(90);
+  const view = answerView({
+    intent: "load",
+    source: "rules",
+    text: null,
+    labels: {
+      ...labels,
+      members: [{ id: memberId, workspaceId: W, name: "Bob Lee" }],
+    },
+    items: [
+      { kind: "member", id: memberId, memberId, workspaceId: W, openTasks: 4 },
+    ],
+  });
+  expect(view.heading).toEqual({
+    key: "ask.answer.load",
+    values: { count: 1 },
+  });
+  expect(view.items[0]).toMatchObject({
+    title: { key: "ask.item.load", values: { member: "Bob Lee", count: 4 } },
+    href: null,
+  });
+  expect(
+    answerView({ intent: "load", source: "rules", text: null, items: [] })
+      .heading,
+  ).toEqual({ key: "ask.answer.none.load" });
+});

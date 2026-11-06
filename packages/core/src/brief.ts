@@ -63,6 +63,14 @@ export type BriefSource = {
     status: TaskStatus;
     dueDate: string | null;
   }[];
+  /** Non-archived tasks in the reader's memberships, including done children. */
+  workloadTasks?: {
+    workspaceId: string;
+    taskId: string;
+    ownerId: string;
+    parentId: string | null;
+    status: TaskStatus;
+  }[];
   /** Agent runs that are running or paused. */
   agentRuns: {
     workspaceId: string;

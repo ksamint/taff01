@@ -256,6 +256,7 @@ export const askIntentSchema = zodEnum([
   "needs_me",
   "due_this_week",
   "agent_status",
+  "load",
   "unknown",
 ]);
 export const askInputSchema = strictObject({
@@ -264,7 +265,15 @@ export const askInputSchema = strictObject({
   workspaceId: optional(idSchema),
 });
 export const askItemSchema = object({
-  kind: zodEnum(["project", "task", "review", "grant", "suggestion", "agent"]),
+  kind: zodEnum([
+    "project",
+    "task",
+    "review",
+    "grant",
+    "suggestion",
+    "agent",
+    "member",
+  ]),
   workspaceId: idSchema,
   id: idSchema,
   projectId: optional(nullable(idSchema)),
@@ -272,13 +281,22 @@ export const askItemSchema = object({
   runId: optional(idSchema),
   agentId: optional(idSchema),
   proposerId: optional(idSchema),
+  memberId: optional(idSchema),
+  openTasks: optional(nonnegativeInteger),
   level: optional(riskLevelSchema),
   reasons: optional(array(riskReasonSchema)),
   slipDays: optional(nonnegativeInteger),
   forecastEnd: optional(nullable(civilDateSchema)),
   dueDate: optional(civilDateSchema),
   status: optional(union([taskStatusSchema, runStatusSchema])),
-});
+}).check(
+  refine(
+    (item) =>
+      item.kind !== "member" ||
+      (item.memberId !== undefined && item.openTasks !== undefined),
+    "Workload rows require a member and task count",
+  ),
+);
 export const askAnswerSchema = object({
   intent: askIntentSchema,
   items: array(askItemSchema),

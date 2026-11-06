@@ -79,3 +79,33 @@ test("desktop Me shows localized progress while a lazy panel chunk loads", async
   }
   await expect(page.getByTestId("brief-view")).toBeVisible();
 });
+
+test("Brief workload questions show only source task counts in the reader's language", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const me = await freshAccount(page, locale);
+  const workspace = me.workspaces[0];
+  for (const title of ["Workload one", "Workload two"]) {
+    const response = await page.request.post("/api/tasks", {
+      headers: { Origin: process.env.AUTH_URL! },
+      data: {
+        workspaceId: workspace.id,
+        ownerId: workspace.memberId,
+        workerId: null,
+        title,
+      },
+    });
+    expect(response.status()).toBe(201);
+  }
+  await page.goto("/brief");
+  await page.getByTestId("ask-try-load").click();
+  await expect(page.locator('[data-intent="load"]')).toBeVisible();
+  await expect(page.getByTestId("ask-item")).toHaveCount(1);
+  await expect(page.getByTestId("ask-item")).toContainText(me.user.name);
+  await expect(page.getByTestId("ask-item")).toContainText("2");
+  await expect(page.getByTestId("ask-text")).toHaveCount(0);
+  await expect(page.getByTestId("ask-answer")).toContainText(
+    messages[locale].ask.rules,
+  );
+});
