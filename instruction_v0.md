@@ -10,11 +10,17 @@ Taff is an open-source (MIT), performance-first, AI-native task and calendar app
 - Every mutation runs in one transaction, writes an `activity` row with the actor, and emits Postgres `NOTIFY taff_changes`. The WebSocket hub in `apps/api/realtime` fans that out; the web app invalidates TanStack Query caches on receipt.
 - Permissions go through one function: `can(actor, action, resource)` in `packages/core/permissions`. Add a table-driven test for every new rule.
 
-## Stack (fixed — propose changes in an ADR, don't just swap)
+## Stack (backend migrating to Rust — see ADR 0026)
 
-Node 24 (26 once it is LTS on 2026-10-28) · pnpm 12 · Turborepo 2 · TypeScript 7 · Next.js 16 App Router · React 19 · Tailwind 4 · shadcn/ui on the TABLE AI design tokens · TanStack Query 5 (IndexedDB persist) · @schedule-x/react 4 · i18next 26 · date-fns 4 + rrule · Hono 4 + @hono/node-server 2 · better-auth 1.7 · @modelcontextprotocol/server + client 2 (Streamable HTTP, spec 2026-07-28) · ws · pino 10 · Drizzle ORM + `postgres` driver · PostgreSQL 18 · Valkey 9 + BullMQ 6 · Biome 2 · Vitest 5 · Playwright · Docker Compose + Caddy 2.
+Frontend (unchanged): TypeScript 7 · Next.js 16 App Router · React 19 · Tailwind 4 · shadcn/ui on the TABLE AI design tokens · TanStack Query 5 (IndexedDB persist) · @schedule-x/react 4 · i18next 26 · date-fns 4 · Biome 2 · Vitest 5 · Playwright · pnpm 12 · Turborepo 2.
 
-Versions were reviewed on 2026-10-08 (`docs/adr/0004-stack-version-review.md`); the follow-up schedule is in `docs/upgrade-plan.md`.
+Backend (migrating from TypeScript to Rust, phased, parity-gated): Rust (edition 2024) · `axum` (replacing Hono) · `sqlx`/`tokio` (replacing Drizzle ORM + `postgres` driver) · `chrono`/`chrono-tz` + `rrule` (calendar recurrence) · `tracing` (replacing pino) · serde + a JSON-Schema validator consuming the generated schema from `packages/schemas` (single source of truth) · PostgreSQL 18 · Valkey 9. Until each module cutover completes, `packages/core` stays the database/session/permission authority and both run side by side.
+
+The Rust foundation currently has no session, permission, API or database-authority cutover. Node remains authoritative; the stateless summary image renderer follows ADR 0029 independently.
+
+`pnpm rust:fixtures` regenerates the Rust contract and every parity fixture from the TypeScript source of truth (the local gate fails on a stale fixture); never hand-duplicate a shape.
+
+Versions were reviewed on 2026-10-08 (`docs/adr/0004-stack-version-review.md`); the follow-up schedule is in `docs/upgrade-plan.md`. The Rust migration decision and phases are in `docs/adr/0026-backend-migration-to-rust.md`.
 
 ## UI and UX source of truth
 

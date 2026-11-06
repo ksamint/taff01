@@ -1,0 +1,293 @@
+{
+  "accepted": [
+    {
+      "name": "weekly_reorder",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "byday=FR,MO;freq=weekly;interval=2;wkst=MO",
+      "startAt": "2026-10-09T09:00:00.000Z",
+      "canonical": "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,FR;WKST=MO"
+    },
+    {
+      "name": "monthly_last_day",
+      "wall": "2026-01-31T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=MONTHLY;BYMONTHDAY=-1",
+      "startAt": "2026-01-31T09:00:00.000Z",
+      "canonical": "FREQ=MONTHLY;BYMONTHDAY=-1"
+    },
+    {
+      "name": "daily_until",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;UNTIL=20261010T090000Z",
+      "startAt": "2026-10-09T09:00:00.000Z",
+      "canonical": "FREQ=DAILY;UNTIL=20261010T090000Z"
+    },
+    {
+      "name": "yearly_leap",
+      "wall": "2024-02-29T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=YEARLY;COUNT=2",
+      "startAt": "2024-02-29T09:00:00.000Z",
+      "canonical": "FREQ=YEARLY;COUNT=2"
+    },
+    {
+      "name": "daily_interval",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;INTERVAL=2;COUNT=5",
+      "startAt": "2026-10-09T09:00:00.000Z",
+      "canonical": "FREQ=DAILY;INTERVAL=2;COUNT=5"
+    },
+    {
+      "name": "prefix_lowercase",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "rrule:freq=daily",
+      "startAt": "2026-10-09T09:00:00.000Z",
+      "canonical": "FREQ=DAILY"
+    },
+    {
+      "name": "until_equals_start",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;UNTIL=20261009T090000Z",
+      "startAt": "2026-10-09T09:00:00.000Z",
+      "canonical": "FREQ=DAILY;UNTIL=20261009T090000Z"
+    },
+    {
+      "name": "weekly_newyork_evening",
+      "wall": "2026-10-09T22:30",
+      "zone": "America/New_York",
+      "rrule": "FREQ=WEEKLY;BYDAY=FR",
+      "startAt": "2026-10-10T02:30:00.000Z",
+      "canonical": "FREQ=WEEKLY;BYDAY=FR"
+    },
+    {
+      "name": "weekly_tokyo_after_midnight",
+      "wall": "2026-10-10T00:30",
+      "zone": "Asia/Tokyo",
+      "rrule": "FREQ=WEEKLY;BYDAY=SA",
+      "startAt": "2026-10-09T15:30:00.000Z",
+      "canonical": "FREQ=WEEKLY;BYDAY=SA"
+    },
+    {
+      "name": "monthly_first_tokyo",
+      "wall": "2026-02-01T00:30",
+      "zone": "Asia/Tokyo",
+      "rrule": "FREQ=MONTHLY;BYMONTHDAY=1",
+      "startAt": "2026-01-31T15:30:00.000Z",
+      "canonical": "FREQ=MONTHLY;BYMONTHDAY=1"
+    },
+    {
+      "name": "yearly_fixed_offset",
+      "wall": "2027-01-01T00:15",
+      "zone": "+08:00",
+      "rrule": "FREQ=YEARLY;BYMONTH=1;BYMONTHDAY=1",
+      "startAt": "2026-12-31T16:15:00.000Z",
+      "canonical": "FREQ=YEARLY;BYMONTHDAY=1;BYMONTH=1"
+    },
+    {
+      "name": "fixed_offset_compact",
+      "wall": "2026-10-10T00:30",
+      "zone": "+0800",
+      "rrule": "FREQ=WEEKLY;BYDAY=SA",
+      "startAt": "2026-10-09T16:30:00.000Z",
+      "canonical": "FREQ=WEEKLY;BYDAY=SA"
+    },
+    {
+      "name": "alias_zone",
+      "wall": "2026-10-09T09:00",
+      "zone": "Asia/Calcutta",
+      "rrule": "FREQ=DAILY",
+      "startAt": "2026-10-09T03:30:00.000Z",
+      "canonical": "FREQ=DAILY"
+    },
+    {
+      "name": "lord_howe_gap_anchor",
+      "wall": "2026-10-04T02:15",
+      "zone": "Australia/Lord_Howe",
+      "rrule": "FREQ=WEEKLY;BYDAY=SU",
+      "startAt": "2026-10-03T15:45:00.000Z",
+      "canonical": "FREQ=WEEKLY;BYDAY=SU"
+    }
+  ],
+  "rejected": [
+    {
+      "name": "reject_0",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=SECONDLY",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_1",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=HOURLY",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_2",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;INTERVAL=0",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_3",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;COUNT=1001",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_4",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;COUNT=2;UNTIL=20261010T090000Z",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_5",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;BYDAY=MO",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_6",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=WEEKLY;BYDAY=1FR",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_7",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=MONTHLY;BYMONTHDAY=1,15",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_8",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=MONTHLY;BYMONTHDAY=0",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_9",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=MONTHLY;BYSETPOS=-1",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_10",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;BYHOUR=9,10",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_11",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=WEEKLY;WKST=BAD",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_12",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY\nDTSTART=20261009T090000Z",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_13",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;FREQ=WEEKLY",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_14",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=YEARLY;BYMONTH=2;BYMONTHDAY=30",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_15",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=WEEKLY;BYDAY=MO",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_16",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;UNTIL=20260230T090000Z",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_17",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;UNTIL=20200101T000000Z",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_18",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;UNTIL=20261009T085959Z",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_19",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "RRULE:RRULE:FREQ=DAILY",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_20",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;INTERVAL=+2",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_21",
+      "wall": "2026-10-09T09:00",
+      "zone": "UTC",
+      "rrule": "FREQ=DAILY;INTERVAL=",
+      "startAt": "2026-10-09T09:00:00.000Z"
+    },
+    {
+      "name": "reject_byday_wrong_zone",
+      "wall": "2026-10-10T00:30",
+      "zone": "Asia/Tokyo",
+      "rrule": "FREQ=WEEKLY;BYDAY=FR",
+      "startAt": "2026-10-09T15:30:00.000Z"
+    },
+    {
+      "name": "reject_bymonthday_wrong_zone",
+      "wall": "2026-02-01T00:30",
+      "zone": "Asia/Tokyo",
+      "rrule": "FREQ=MONTHLY;BYMONTHDAY=31",
+      "startAt": "2026-01-31T15:30:00.000Z"
+    },
+    {
+      "name": "reject_unknown_zone",
+      "wall": "2026-10-09T09:00",
+      "zone": "Mars/Olympus",
+      "rrule": "FREQ=DAILY",
+      "startAt": null
+    }
+  ]
+}

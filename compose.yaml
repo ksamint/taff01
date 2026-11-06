@@ -1,5 +1,17 @@
 name: taff01
 services:
+  render:
+    image: ${TAFF_IMAGE_RENDER:-taff-render}:${TAFF_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.render
+    ports: ["127.0.0.1:${SUMMARY_RENDER_PORT:-3002}:3002"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3002/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
   postgres:
     image: postgres:18-alpine
     environment:

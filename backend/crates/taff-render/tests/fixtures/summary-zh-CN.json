@@ -1,0 +1,140 @@
+{
+  "snapshot": {
+    "version": 1,
+    "localDate": "2026-10-08",
+    "timeZone": "Asia/Hong_Kong",
+    "workspace": {
+      "name": "Northwind"
+    },
+    "tag": {
+      "kind": "shareholder",
+      "org": "Harbour Capital",
+      "label": "Series A"
+    },
+    "recipient": {
+      "name": "Pat Lee"
+    },
+    "projects": [
+      {
+        "projectId": "5b9b4d46-0000-4000-8000-00005b9b4d46",
+        "name": "Checkout v2",
+        "stage": "in_service",
+        "leadName": "Alex Chen",
+        "dueAt": "2026-10-15T09:00:00.000Z",
+        "deliveryProgress": 60,
+        "risk": {
+          "level": "medium",
+          "reasons": [
+            "blocked"
+          ],
+          "plannedEnd": "2026-10-15",
+          "forecastEnd": "2026-10-15",
+          "slipDays": 0,
+          "deliveryPercent": 69
+        },
+        "finance": {
+          "currency": "HKD",
+          "contractAmount": "1280000.00",
+          "collectedAmount": "512000.00",
+          "collectedPercent": 40
+        },
+        "counts": {
+          "total": 12,
+          "open": 9,
+          "done": 3,
+          "inReview": 2,
+          "blocked": 1,
+          "dueToday": 2,
+          "overdue": 0,
+          "completedToday": 1,
+          "movedToday": 2
+        },
+        "agentRuns": {
+          "completedToday": 1,
+          "pendingReview": 2
+        },
+        "completedToday": [
+          {
+            "taskId": "89f9304f-0000-4000-8000-000089f9304f",
+            "number": 135,
+            "title": "Task NW-135",
+            "status": "done",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-06T09:00:00.000Z"
+          }
+        ],
+        "movedToday": [
+          {
+            "taskId": "89f93053-0000-4000-8000-000089f93053",
+            "number": 139,
+            "title": "Task NW-139",
+            "status": "in_progress",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-10T09:00:00.000Z"
+          },
+          {
+            "taskId": "89f9306a-0000-4000-8000-000089f9306a",
+            "number": 141,
+            "title": "Task NW-141",
+            "status": "needs_review",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-08T09:00:00.000Z"
+          }
+        ],
+        "dueToday": [
+          {
+            "taskId": "89f9306a-0000-4000-8000-000089f9306a",
+            "number": 141,
+            "title": "Task NW-141",
+            "status": "needs_review",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-08T09:00:00.000Z"
+          },
+          {
+            "taskId": "89f9306b-0000-4000-8000-000089f9306b",
+            "number": 142,
+            "title": "Task NW-142",
+            "status": "needs_review",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-08T09:00:00.000Z"
+          }
+        ],
+        "overdue": [],
+        "blocked": [
+          {
+            "taskId": "89f9306d-0000-4000-8000-000089f9306d",
+            "number": 144,
+            "title": "Task NW-144",
+            "status": "in_progress",
+            "ownerName": "Mia Wong",
+            "dueAt": "2026-10-09T09:00:00.000Z"
+          }
+        ]
+      }
+    ],
+    "totals": {
+      "projects": 1,
+      "open": 9,
+      "inReview": 2,
+      "blocked": 1,
+      "dueToday": 2,
+      "overdue": 0,
+      "completedToday": 1,
+      "movedToday": 2
+    },
+    "truncated": false
+  },
+  "watermark": {
+    "text": "Pat Lee · Harbour Capital · 2026-10-08 · preview",
+    "recipientName": "Pat Lee",
+    "org": "Harbour Capital",
+    "localDate": "2026-10-08",
+    "summaryId": null,
+    "contentHash": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+  },
+  "contentHash": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21",
+  "createdAt": "2026-10-08T12:00:00.000Z",
+  "locale": "zh-CN",
+  "text": "每日进度\nNorthwind · Harbour Capital\n2026-10-08\n\nCheckout v2\n服务中\n负责人:Alex Chen\n2026年10月15日 到期\n记录进度 60%\n需留意\n未完成任务: 9 · 今日完成: 1 · 今日有进展: 2 · 今日到期: 2 · 已逾期: 0 ·\n被阻碍: 1 · 待审批: 2\n已收 HK$512,000.00 / 合同 HK$1,280,000.00\n智能体:今日完成 1 个 · 2 个待审批\n今日完成 (1)\n• #135 Task NW-135 · Mia Wong · 2026年10月6日 到期\n今日有进展 (2)\n• #139 Task NW-139 · Mia Wong · 2026年10月10日 到期\n• #141 Task NW-141 · Mia Wong · 2026年10月8日 到期\n今日到期 (2)\n• #141 Task NW-141 · Mia Wong · 2026年10月8日 到期\n• #142 Task NW-142 · Mia Wong · 2026年10月8日 到期\n被阻碍 (1)\n• #144 Task NW-144 · Mia Wong · 2026年10月9日 到期\n\n项目: 1 · 未完成任务: 9 · 今日完成: 1 · 今日有进展: 2 · 今日到期: 2 ·\n已逾期: 0 · 被阻碍: 1 · 待审批: 2\n生成于 2026年10月8日 20:00 · Asia/Hong_Kong\nPat Lee · Harbour Capital · 2026-10-08 · preview\n内容哈希\n405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21\n",
+  "formattedCreatedAt": "2026年10月8日 20:00"
+}

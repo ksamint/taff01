@@ -1,0 +1,18 @@
+[package]
+name = "taff-domain"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json = { workspace = true, features = ["float_roundtrip"] }
+chrono.workspace = true
+chrono-tz.workspace = true
+thiserror.workspace = true
+anyhow.workspace = true
+sha2.workspace = true
+hex.workspace = true
+ryu-js = "1.0.3"

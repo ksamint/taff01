@@ -1,0 +1,28 @@
+[workspace]
+resolver = "3"
+members = ["crates/taff-core", "crates/taff-domain", "crates/taff-db", "crates/taff-render"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+rust-version = "1.97"
+repository = "https://github.com/ksamint/taff01"
+
+[workspace.dependencies]
+# Licences are enforced by deny.toml (see ADR 0026).
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "tls-rustls-ring-native-roots", "postgres", "uuid", "chrono", "json", "derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+axum = "0.8"
+chrono = { version = "0.4", features = ["serde", "clock"] }
+chrono-tz = "0.10"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+jsonschema = "0.28"
+thiserror = "2"
+anyhow = "1"
+sha2 = "0.10"
+hex = "0.4"

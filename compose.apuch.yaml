@@ -1,6 +1,8 @@
 # ins-ag5pnvc0: isolated Taff services behind the existing HTTPS proxy.
 # Use with compose.prod.yaml; PostgreSQL lives on ins-nx2vm7pc.
 services:
+  render:
+    image: ${TAFF_IMAGE_RENDER:-taff-render}:${TAFF_TAG:-latest}
   postgres:
     profiles: [local-database]
   migrate:
@@ -29,6 +31,7 @@ services:
       dockerfile: deploy/Dockerfile.server
       args: { TARGET: worker }
     environment:
+      SUMMARY_RENDER_URL: ${SUMMARY_RENDER_URL:-http://render:3002}
       DATABASE_URL: ${DATABASE_URL:?Set the private external PostgreSQL URL}
       NODE_EXTRA_CA_CERTS: /run/secrets/postgresql-ca.crt
     volumes:

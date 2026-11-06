@@ -1,0 +1,22 @@
+[package]
+name = "taff-render"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+axum.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+jsonschema.workspace = true
+resvg = "0.47"
+usvg = "0.47"
+tiny-skia = "0.12"
+fontdb = "0.23"
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[dev-dependencies]
+image_hasher = "3"
+tower = { version = "0.5", features = ["util"] }

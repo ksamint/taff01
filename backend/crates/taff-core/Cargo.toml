@@ -1,0 +1,17 @@
+[package]
+name = "taff-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+taff-domain = { path = "../taff-domain" }
+taff-db = { path = "../taff-db" }
+
+[dev-dependencies]
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+jsonschema.workspace = true

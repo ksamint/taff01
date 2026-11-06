@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1.7
+FROM rust:1.97.1-alpine AS build
+RUN apk add --no-cache musl-dev
+WORKDIR /repo
+COPY backend ./backend
+COPY packages/schemas/generated ./packages/schemas/generated
+RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/repo/backend/target \
+    cd backend && cargo build --release --locked -p taff-render && cp target/release/taff-render /taff-render
+
+FROM alpine:3.23
+RUN addgroup -S renderer && adduser -S -G renderer renderer
+COPY --from=build /taff-render /usr/local/bin/taff-render
+COPY backend/fonts/*-OFL.txt /licenses/
+USER renderer
+EXPOSE 3002
+HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD wget -qO- http://127.0.0.1:3002/health || exit 1
+CMD ["/usr/local/bin/taff-render"]

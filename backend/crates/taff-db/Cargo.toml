@@ -1,0 +1,18 @@
+[package]
+name = "taff-db"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+sqlx.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+serde.workspace = true
+taff-domain = { path = "../taff-domain" }
+
+[dev-dependencies]
+tokio.workspace = true
+serde_json.workspace = true

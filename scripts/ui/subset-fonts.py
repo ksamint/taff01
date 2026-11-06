@@ -162,3 +162,29 @@ css.write_text(css_text)
 manifest = dict(tcPartition={"method": "content-vocabulary-cooccurrence-v1", "glyphLimit": 80, "businessSources": business_paths}, scSourceUrl=SC_URL, scSourceSha256=SC_SHA, symbolSourceUrl=SYMBOL_URL, symbolSourceSha256=SYMBOL_SHA, subsets=records)
 (FONTS / "v021-subsets.json").write_text(json.dumps(manifest, indent=2) + "\n")
 print(json.dumps(manifest, indent=2))
+
+# The stateless Rust renderer consumes the same glyph vocabulary as the web.
+if "--ttf" in sys.argv[3:]:
+    from fontTools.varLib.instancer import instantiateVariableFont
+    render_fonts = Path("backend/fonts")
+    render_fonts.mkdir(parents=True, exist_ok=True)
+    vocabulary = set().union(*(set(TTFont(path).getBestCmap()) for path in FONTS.glob("*-ui*.woff2")))
+    for name, origin in (("NotoSansSC", sc_source), ("NotoSansTC", source), ("Manrope", FONTS / "Manrope.ttf")):
+        font = TTFont(origin, recalcTimestamp=False)
+        if "fvar" in font:
+            font = instantiateVariableFont(font, {"wght": 400}, inplace=True)
+        points = vocabulary & set(font.getBestCmap())
+        if name == "Manrope":
+            points |= set(TTFont(FONTS / "Manrope-latin.woff2").getBestCmap())
+        options = subset.Options()
+        options.name_IDs = ["*"]
+        options.name_legacy = True
+        options.name_languages = ["*"]
+        options.layout_features = ["*"]
+        options.recalc_timestamp = False
+        worker = subset.Subsetter(options=options)
+        worker.populate(unicodes=points)
+        worker.subset(font)
+        font.flavor = None
+        font.save(render_fonts / f"{name}.ttf")
+        (render_fonts / f"{name}-OFL.txt").write_bytes((FONTS / f"{name}-OFL.txt").read_bytes())

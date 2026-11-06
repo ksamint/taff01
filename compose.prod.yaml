@@ -1,6 +1,17 @@
 # Production: docker compose --env-file .env.production -f compose.prod.yaml up -d
 name: taff
 services:
+  render:
+    image: ${TAFF_IMAGE_RENDER:-taff-render}:${TAFF_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.render
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3002/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
   postgres:
     image: postgres:18-alpine
     restart: unless-stopped
@@ -82,7 +93,9 @@ services:
       AUTH_URL: ${AUTH_URL}
       AUTH_SECRET: ${AUTH_SECRET}
       TOKEN_PEPPER: ${TOKEN_PEPPER}
+      SUMMARY_RENDER_URL: ${SUMMARY_RENDER_URL:-http://render:3002}
     depends_on:
+      render: { condition: service_healthy }
       migrate: { condition: service_completed_successfully }
       valkey: { condition: service_healthy }
   web:
