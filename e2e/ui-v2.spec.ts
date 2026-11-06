@@ -13,7 +13,7 @@ import {
 import { runListSchema } from "../packages/schemas/src/run-read";
 import { navigateColdFonts } from "../scripts/ui/cold-font-layout";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
-import { prepareTime } from "../scripts/ui/prepare-time.mjs";
+import { prepareTime } from "../scripts/ui/prepare-time.mts";
 import { prepareView } from "../scripts/ui/prepare-view";
 import { messages } from "./support/messages";
 

@@ -2,21 +2,25 @@
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { chromium, expect } from "@playwright/test";
+import { type APIResponse, chromium, expect } from "@playwright/test";
 import { tsImport } from "tsx/esm/api";
+import type { Me, Member, Task } from "../../packages/schemas/src/base.ts";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
 import { prepareFonts } from "./prepare-fonts.ts";
-import { prepareTime } from "./prepare-time.mjs";
+import { prepareTime } from "./prepare-time.mts";
 
-const { prepareView } = await tsImport("./prepare-view.ts", import.meta.url);
+const { prepareView } = (await tsImport(
+  "./prepare-view.ts",
+  import.meta.url,
+)) as typeof import("./prepare-view.ts");
 
-const { inboxSchema } = await tsImport(
+const { inboxSchema } = (await tsImport(
   "../../packages/schemas/src/inbox-read.ts",
   import.meta.url,
-);
+)) as typeof import("../../packages/schemas/src/inbox-read.ts");
 
 const out = path.resolve(process.argv[2] ?? "docs/ui/screenshots/ui-parity");
-const theme = process.env.UI_THEME ?? "light";
+const theme = (process.env.UI_THEME ?? "light") as "light" | "dark";
 assert(["light", "dark"].includes(theme), "UI_THEME must be light or dark");
 const base = process.env.AUTH_URL ?? "http://localhost:3000";
 const screen = process.env.UI_SCREEN ?? "all";
@@ -58,7 +62,7 @@ try {
   for (const [device, viewport] of [
     ["phone", { width: 390, height: 844 }],
     ["desktop", { width: 1280, height: 800 }],
-  ]) {
+  ] as const) {
     for (const locale of ["zh-HK", "zh-CN", "en"]) {
       const context = await browser.newContext({
         viewport,
@@ -73,7 +77,7 @@ try {
         const page = await context.newPage();
         await page.clock.setFixedTime(new Date("2026-10-08T11:20:00Z"));
         await page.addInitScript(prepareTime);
-        const login = await page.request.post(
+        const login: APIResponse = await page.request.post(
           `${base}/api/auth/sign-in/email`,
           {
             data: { email, password },
@@ -83,7 +87,7 @@ try {
         assert.equal(login.status(), 200, "Demo sign-in failed");
         const profile = await page.request.get(`${base}/api/me`);
         assert.equal(profile.status(), 200);
-        const me = await profile.json();
+        const me: Me = await profile.json();
         const workspace = me.workspaces.find(
           (item) => item.id === prototypeId("workspace", "nw"),
         );
@@ -114,8 +118,8 @@ try {
         );
         assert.equal(tasksResponse.status(), 200);
         assert.equal(membersResponse.status(), 200);
-        const tasks = await tasksResponse.json();
-        const members = await membersResponse.json();
+        const tasks: Task[] = await tasksResponse.json();
+        const members: Member[] = await membersResponse.json();
         const agent = members.find(
           (member) =>
             member.id === prototypeId("member", "nw", 11) &&
@@ -137,11 +141,11 @@ try {
           `${base}/api/digests?workspaceId=${workspace.id}`,
         );
         assert.equal(digestResponse.status(), 200);
-        const digest = (await digestResponse.json()).items.find(
-          (row) => row.id === prototypeId("digest", "nw", 1),
-        );
+        const digest = (
+          (await digestResponse.json()) as { items: { id: string }[] }
+        ).items.find((row) => row.id === prototypeId("digest", "nw", 1));
         assert(digest, "Seed must include the recipient's daily digest");
-        const first = async (kind) => {
+        const first = async (kind: string): Promise<string> => {
           const response = await page.request.get(
             `${base}/api/${kind}?workspaceId=${workspace.id}`,
           );
@@ -201,7 +205,7 @@ try {
           const response = await page.goto(`${base}${route}`, {
             waitUntil: "networkidle",
           });
-          assert.equal(response.status(), 200, `${view} did not load`);
+          assert.equal(response!.status(), 200, `${view} did not load`);
           await expect(page.locator("main.content")).not.toHaveAttribute(
             "inert",
             "",
@@ -214,8 +218,10 @@ try {
             ).toHaveCount(5);
           }
           let openedReview = false;
-          let originalInbox;
-          let reviewItem;
+          let originalInbox: ReturnType<typeof inboxSchema.parse> | undefined;
+          let reviewItem:
+            | ReturnType<typeof inboxSchema.parse>["items"][number]
+            | undefined;
           try {
             if (
               view === "task-detail" ||
@@ -231,7 +237,7 @@ try {
               ).toBeVisible();
             }
             if (view === "review" && device === "desktop") {
-              const inboxResponse = await page.request.get(
+              const inboxResponse: APIResponse = await page.request.get(
                 `${base}/api/inbox?workspaceId=${workspace.id}`,
               );
               assert.equal(inboxResponse.status(), 200);
@@ -251,7 +257,7 @@ try {
               );
               const read = page.waitForResponse(
                 (response) =>
-                  response.url() === `${base}/api/inbox/${reviewItem.id}` &&
+                  response.url() === `${base}/api/inbox/${reviewItem!.id}` &&
                   response.request().method() === "PATCH",
               );
               openedReview = true;
@@ -331,7 +337,7 @@ try {
               theme,
             );
             await prepareView(page, view);
-            await page.evaluate(prepareFonts, "loaded");
+            await page.evaluate(prepareFonts, "loaded" as const);
             await page.mouse.move(0, 0);
             await page.screenshot({
               path: path.join(out, `${device}-${locale}-${view}.png`),
@@ -366,8 +372,8 @@ try {
             });
           } finally {
             if (openedReview) {
-              const restored = await page.request.patch(
-                `${base}/api/inbox/${reviewItem.id}`,
+              const restored: APIResponse = await page.request.patch(
+                `${base}/api/inbox/${reviewItem!.id}`,
                 { headers: { Origin: base }, data: { read: false } },
               );
               assert.equal(
@@ -375,19 +381,19 @@ try {
                 200,
                 "Restoring review unread failed",
               );
-              const afterResponse = await page.request.get(
+              const afterResponse: APIResponse = await page.request.get(
                 `${base}/api/inbox?workspaceId=${workspace.id}`,
               );
               assert.equal(afterResponse.status(), 200);
               const after = inboxSchema.parse(await afterResponse.json());
               assert.equal(
-                after.items.find((item) => item.id === reviewItem.id)?.readAt,
+                after.items.find((item) => item.id === reviewItem!.id)?.readAt,
                 null,
                 "Review item must be unread again",
               );
               assert.equal(
                 after.unreadCount,
-                originalInbox.unreadCount,
+                originalInbox!.unreadCount,
                 "Unread count must be restored",
               );
             }
@@ -398,7 +404,7 @@ try {
           await page.keyboard.press("Control+k");
           await expect(page.getByRole("dialog")).toBeVisible();
           await page.waitForLoadState("networkidle");
-          await page.evaluate(prepareFonts, "loaded");
+          await page.evaluate(prepareFonts, "loaded" as const);
           await page.mouse.move(0, 0);
           await page.screenshot({
             path: path.join(out, `${device}-${locale}-search.png`),

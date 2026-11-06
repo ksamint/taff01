@@ -25,8 +25,8 @@
     "licence:check": "node node_modules/tsx/dist/cli.mjs scripts/licence-gate.mts",
     "perf:lcp": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/perf-lcp.mts",
     "perf:lighthouse": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/perf-lighthouse.mts",
-    "ui:prototype-shots": "node scripts/ui/prototype-shots.mjs",
-    "ui:app-shots": "node --env-file=.env scripts/ui/app-shots.mjs",
+    "ui:prototype-shots": "node scripts/ui/prototype-shots.mts",
+    "ui:app-shots": "node --env-file=.env scripts/ui/app-shots.mts",
     "rust:fixtures": "node --env-file-if-exists=.env node_modules/tsx/dist/cli.mjs scripts/rust-fixtures.mts",
     "rust:gate": "node node_modules/tsx/dist/cli.mjs scripts/rust-gate.mts",
     "schema:gen": "node node_modules/tsx/dist/cli.mjs apps/api/scripts/summary-schema-gen.mts"

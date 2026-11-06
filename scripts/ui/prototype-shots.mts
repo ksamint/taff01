@@ -12,13 +12,14 @@ import {
   writeFile,
 } from "node:fs/promises";
 import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium, expect } from "@playwright/test";
+import { chromium, expect, type Locator } from "@playwright/test";
 
 if (process.argv.includes("--v2")) {
   // Prototype v2 (docs/ui/prototype-v2) has its own capture driver.
-  await import("./prototype-shots-v2.mjs");
+  await import("./prototype-shots-v2.mts");
   process.exit();
 }
 
@@ -55,7 +56,7 @@ assert(
   !dark || out !== approvedLight,
   "Dark captures must not replace approved light references",
 );
-const mime = {
+const mime: Record<string, string> = {
   ".html": "text/html",
   ".js": "text/javascript",
   ".css": "text/css",
@@ -66,7 +67,7 @@ const mime = {
 };
 const server = createServer(async (req, res) => {
   try {
-    const url = new URL(req.url, "http://localhost");
+    const url = new URL(req.url!, "http://localhost");
     if (url.pathname === "/favicon.ico") {
       res.writeHead(204);
       res.end();
@@ -91,7 +92,8 @@ const server = createServer(async (req, res) => {
     res.end("Not found");
   }
 });
-const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
+const hash = (bytes: string | NodeJS.ArrayBufferView) =>
+  createHash("sha256").update(bytes).digest("hex");
 const labels = {
   zh: {
     today: "今天",
@@ -186,8 +188,8 @@ const extraScreens = [
   "quick-add",
 ];
 const records = [];
-const externalRequests = [];
-const resources = new Set();
+const externalRequests: string[] = [];
+const resources = new Set<string>();
 let browser;
 await mkdir(out, { recursive: true });
 await rm(path.join(out, "manifest.json"), { force: true });
@@ -197,11 +199,11 @@ await writeFile(
   JSON.stringify({ status: "running" }, null, 2) + "\n",
 );
 try {
-  await new Promise((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
     server.listen(0, "127.0.0.1", resolve);
   });
-  const origin = `http://127.0.0.1:${server.address().port}`;
+  const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   browser = await chromium.launch({
     executablePath: process.env.CHROMIUM_PATH,
   });
@@ -210,7 +212,7 @@ try {
       device === "phone"
         ? { width: 390, height: 844 }
         : { width: 1280, height: 800 };
-    for (const lang of ["zh", "en"]) {
+    for (const lang of ["zh", "en"] as const) {
       const l = labels[lang];
       const screens = extra
         ? device === "phone"
@@ -230,7 +232,7 @@ try {
           serviceWorkers: "block",
         });
         const page = await context.newPage();
-        const errors = [];
+        const errors: string[] = [];
         page.on("pageerror", (error) => errors.push(error.message));
         page.on("console", (message) => {
           if (message.type() === "error") errors.push(message.text());
@@ -257,9 +259,12 @@ try {
         // schedules them before an editor prop update has committed. Preserve
         // short focus, scrolling, persistence and UI transition timers.
         await page.addInitScript(() => {
-          const schedule = window.setTimeout.bind(window);
-          window.setTimeout = (handler, delay = 0, ...args) =>
-            schedule(handler, delay >= 1000 ? 2147483647 : delay, ...args);
+          const schedule = (window as Window).setTimeout.bind(window);
+          (window as Window).setTimeout = (
+            handler: TimerHandler,
+            delay = 0,
+            ...args: unknown[]
+          ) => schedule(handler, delay >= 1000 ? 2147483647 : delay, ...args);
         });
         await page.goto(`${origin}/team-tasks.dc.html?reset`, {
           waitUntil: "networkidle",
@@ -270,15 +275,24 @@ try {
         // Public prototype editor API: retain the supported slow simulation speed.
         // Clock remains paused except bounded UI transition/focus ticks below.
         await page.evaluate(() =>
-          window.__dcSetProps(window.__dcRootName(), { agentSpeed: 20 }),
+          (
+            window as typeof window & {
+              __dcSetProps(name: string, props: { agentSpeed: number }): void;
+            }
+          ).__dcSetProps(
+            (
+              window as typeof window & { __dcRootName(): string }
+            ).__dcRootName(),
+            { agentSpeed: 20 },
+          ),
         );
         await page.clock.runFor(400);
         const phone = page.locator('[data-reference-surface="phone"]');
-        const click = async (locator) => {
+        const click = async (locator: Locator) => {
           await locator.click({ timeout: 5000 });
           await page.clock.runFor(450);
         };
-        const tab = async (key) =>
+        const tab = async (key: keyof typeof labels.zh) =>
           click(
             phone
               .getByRole("button", { name: labels.zh[key], exact: true })
@@ -333,7 +347,7 @@ try {
           renderedTheme,
         );
         if (device === "phone") {
-          const select = async (key) =>
+          const select = async (key: keyof typeof labels.zh) =>
             click(
               phone
                 .getByRole("button", {
@@ -341,7 +355,8 @@ try {
                 })
                 .last(),
             );
-          if (phoneScreens.slice(0, 5).includes(screen)) await select(screen);
+          if (phoneScreens.slice(0, 5).includes(screen))
+            await select(screen as keyof typeof labels.zh);
           if (["calendar-week", "calendar-month"].includes(screen)) {
             await select("calendar");
             await click(
@@ -475,8 +490,8 @@ try {
                   `[data-reference-view="${screen === "review" ? "task-detail" : ["calendar-week", "calendar-month"].includes(screen) ? "calendar" : screen === "projects-list" ? "projects" : screen === "projects" && device === "desktop" ? "board" : screen}"]`,
                 );
         await expect(view).toBeVisible();
-        await expect(surface).toContainText(expected, { timeout: 5000 });
-        await expect(view).toContainText(expected);
+        await expect(surface).toContainText(expected!, { timeout: 5000 });
+        await expect(view).toContainText(expected!);
         if (screen === "calendar-month")
           assert(
             (await view.locator("[data-day]").count()) >= 35,
@@ -526,16 +541,44 @@ try {
           fonts.some((f) => f.family === "Manrope" && f.status === "loaded"),
           "Manrope font not loaded",
         );
-        const seedTasks = await page.evaluate(() =>
-          JSON.parse(localStorage.getItem("teamtasks.demo.v2")).tasks.map(
-            ({ id, status, agentState, progress }) => ({
-              id,
-              status,
-              agentState,
-              progress,
-            }),
-          ),
-        );
+        const seedTasksValue: unknown = await page.evaluate(() => {
+          const stored: unknown = JSON.parse(
+            localStorage.getItem("teamtasks.demo.v2")!,
+          );
+          if (
+            typeof stored !== "object" ||
+            stored === null ||
+            !("tasks" in stored) ||
+            !Array.isArray(stored.tasks)
+          )
+            throw new Error("Invalid prototype task fixture");
+          return stored.tasks.map((task: unknown) => {
+            if (
+              typeof task !== "object" ||
+              task === null ||
+              !("id" in task) ||
+              !("status" in task) ||
+              !("agentState" in task) ||
+              !("progress" in task)
+            )
+              throw new Error("Invalid prototype task fixture");
+            const { id, status, agentState, progress } = task;
+            return { id, status, agentState, progress };
+          });
+        });
+        assert(Array.isArray(seedTasksValue), "Invalid prototype task fixture");
+        const seedTasks = seedTasksValue.map((task: unknown) => {
+          assert(
+            typeof task === "object" &&
+              task !== null &&
+              "id" in task &&
+              "status" in task &&
+              "agentState" in task &&
+              "progress" in task,
+            "Invalid prototype task fixture",
+          );
+          return task;
+        });
         assert.deepEqual(
           seedTasks.find((t) => t.id === "NW-138"),
           { id: "NW-138", status: "doing", agentState: "working", progress: 2 },
@@ -596,7 +639,7 @@ try {
   }
   assert.equal(records.length, extra ? 14 : dark ? 6 : 38);
   const assets = [];
-  async function collect(dir) {
+  async function collect(dir: string) {
     for (const item of await readdir(dir, { withFileTypes: true })) {
       const p = path.join(dir, item.name);
       if (item.isDirectory()) await collect(p);
@@ -611,10 +654,10 @@ try {
     }
   }
   await collect(root);
-  const scriptPath = path.join(repo, "scripts/ui/prototype-shots.mjs");
+  const scriptPath = path.join(repo, "scripts/ui/prototype-shots.mts");
   const scriptBytes = await readFile(scriptPath);
   assets.push({
-    file: "scripts/ui/prototype-shots.mjs",
+    file: "scripts/ui/prototype-shots.mts",
     bytes: scriptBytes.length,
     sha256: hash(scriptBytes),
   });

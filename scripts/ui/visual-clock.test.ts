@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vitest";
 
-const preload = "./scripts/ui/visual-clock.mjs";
+const preload = "./scripts/ui/visual-clock.mts";
 function run(source: string, enabled = true) {
   const env = { ...process.env };
   delete env.TAFF_VISUAL_API_CLOCK;
@@ -98,7 +98,7 @@ test("ordinary browser and MCP API launch configuration never preloads the clock
     'env: { ...server.env, TAFF_VISUAL_API_CLOCK: "ui-v2" }',
   );
   expect(visual).toContain(
-    "node --env-file=.env --import ./scripts/ui/visual-clock.mjs --import tsx apps/api/src/index.ts",
+    "node --env-file=.env --import ./scripts/ui/visual-clock.mts --import tsx apps/api/src/index.ts",
   );
 });
 
@@ -126,7 +126,11 @@ test("single-process TS entry retains the visual HTTP clock preload", () => {
       ],
       { env, encoding: "utf8", timeout: 10_000 },
     );
-    expect(result.stderr).toBe("");
+    // Node 26 deprecates the module.register hook used by the installed tsx.
+    // Accept only its exact diagnostic; other loader errors still fail here.
+    expect(result.stderr).toMatch(
+      /^(?:\(node:\d+\) \[DEP0205\] DeprecationWarning: `module\.register\(\)` is deprecated\. Use `module\.registerHooks\(\)` instead\.\n\(Use `node --trace-deprecation \.\.\.` to show where the warning was created\)\n)?$/,
+    );
     expect(result.status).toBe(0);
     expect(result.stdout).toContain(
       "concurrent scoped and ordinary reads verified",

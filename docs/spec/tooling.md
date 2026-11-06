@@ -36,6 +36,14 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
   execute directly as native .mts modules, retaining their existing flags,
   environment checks, cleanup and owned-container boundaries.
 
+### UI capture drivers (TT-4)
+
+- TT-4.1 Every owned capture driver and clock helper shall execute as native
+  .mts modules with typed Playwright boundaries and checked capture selection.
+- TT-4.2 Renaming shall retain the capture matrix, paths, timers, fonts and
+  screenshots. Browser-returned fixture data shall cross an unknown boundary
+  and be narrowed before use. Approved references shall not change.
+
 ## Non-functional
 
 - No new dependency; Node 24–26 remains supported. Library errors retain their
@@ -53,6 +61,7 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal |
+| TT-4 | Native before/after capture PNG hashes; capture-runtime, capture-selection and visual-clock tests |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions

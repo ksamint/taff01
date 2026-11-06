@@ -4,9 +4,10 @@
 import assert from "node:assert/strict";
 import { mkdir, readdir, readFile, realpath, rm } from "node:fs/promises";
 import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { chromium } from "@playwright/test";
+import { chromium, type Locator, type Page } from "@playwright/test";
 
 const repo = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -26,7 +27,7 @@ const out = path.resolve(
 );
 const entry = "/prototype-v2/Team%20Tasks.dc.html";
 
-const mime = {
+const mime: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript",
   ".css": "text/css",
@@ -38,7 +39,7 @@ const mime = {
 };
 const server = createServer(async (req, res) => {
   try {
-    const url = new URL(req.url, "http://localhost");
+    const url = new URL(req.url!, "http://localhost");
     const file = await realpath(
       path.resolve(root, `.${decodeURIComponent(url.pathname)}`),
     );
@@ -60,10 +61,28 @@ const server = createServer(async (req, res) => {
 });
 
 // Bilingual label: every locator is chosen by visible text or accessible name.
-const L = (zh, en) => ({ zh, en });
+type Label = { zh: string | RegExp; en: string | RegExp };
+type Driver = {
+  page: Page;
+  pause(): Promise<void>;
+  click(locator: Locator): Promise<void>;
+  tab(label: Label): Promise<void>;
+  button(label: Label): Promise<void>;
+  roleTab(label: Label): Promise<void>;
+  text(label: Label): Promise<void>;
+  nav(label: Label): Promise<void>;
+  more(label: Label): Promise<void>;
+};
+type ScreenSpec = {
+  home?: boolean;
+  module?: boolean;
+  steps?(driver: Driver): Promise<unknown>;
+  expect?: Label;
+};
+const L = (zh: string | RegExp, en: string | RegExp): Label => ({ zh, en });
 
 // Steps receive a driver `d` bound to one page, frame and language.
-const phoneScreens = {
+const phoneScreens: Record<string, ScreenSpec> = {
   home: { home: true, expect: L("開始", "Start") },
   today: { expect: L("待你處理", "Needs you") },
   "calendar-day": {
@@ -232,7 +251,7 @@ const phoneScreens = {
   },
 };
 
-const desktopScreens = {
+const desktopScreens: Record<string, ScreenSpec> = {
   home: { home: true, expect: L("開始", "Start") },
   today: { expect: L("待你處理", "Needs you") },
   calendar: {
@@ -350,11 +369,11 @@ const externalRequests = new Set();
 let browser;
 await mkdir(out, { recursive: true });
 try {
-  await new Promise((resolve, reject) => {
+  await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
     server.listen(0, "127.0.0.1", resolve);
   });
-  const origin = `http://127.0.0.1:${server.address().port}`;
+  const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
   try {
     browser = await chromium.launch();
   } catch {
@@ -366,7 +385,7 @@ try {
     if (file.endsWith(".png") && (!only || file.includes(only)))
       await rm(path.join(out, file));
 
-  for (const lang of ["zh", "en"]) {
+  for (const lang of ["zh", "en"] as const) {
     for (const theme of ["light", "dark"]) {
       const context = await browser.newContext({
         viewport: { width: 1920, height: 1080 },
@@ -383,12 +402,15 @@ try {
       // Freeze the agent simulation and toast timers (>= 1 s) so every capture
       // shows the seeded state; short UI, focus and persistence ticks still run.
       await context.addInitScript(() => {
-        const schedule = window.setTimeout.bind(window);
-        window.setTimeout = (handler, delay = 0, ...rest) =>
-          schedule(handler, delay >= 1000 ? 2147483647 : delay, ...rest);
+        const schedule = (window as Window).setTimeout.bind(window);
+        (window as Window).setTimeout = (
+          handler: TimerHandler,
+          delay = 0,
+          ...rest: unknown[]
+        ) => schedule(handler, delay >= 1000 ? 2147483647 : delay, ...rest);
       });
       const page = await context.newPage();
-      const errors = [];
+      const errors: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
       // The canvas renders the H5 screen and the web window side by side;
       // their fixed inline sizes are the only stable hooks.
@@ -472,7 +494,7 @@ try {
       for (const [layout, screens] of [
         ["phone", phoneScreens],
         ["desktop", desktopScreens],
-      ]) {
+      ] as const) {
         const frame = frames[layout];
         for (const [screen, spec] of Object.entries(screens)) {
           const file = `${layout}-${screen}-${lang}-${theme}.png`;
@@ -485,14 +507,14 @@ try {
           }, saved);
           await page.goto(`${origin}${entry}`, { waitUntil: "networkidle" });
           await settle();
-          const pick = (label) => label[lang];
-          const name = (label) => {
+          const pick = (label: Label) => label[lang];
+          const name = (label: Label) => {
             const v = pick(label);
             return typeof v === "string"
               ? { name: v, exact: true }
               : { name: v };
           };
-          const d = {
+          const d: Driver = {
             page,
             pause: () => settle(350),
             click: async (locator) => {
@@ -537,8 +559,10 @@ try {
                 .first()
                 .waitFor({ timeout: 5000 });
           } catch (error) {
-            skipped.push({ file, reason: error.message.split("\n")[0] });
-            console.warn(`Skipped ${file}: ${error.message.split("\n")[0]}`);
+            const message =
+              error instanceof Error ? error.message : String(error);
+            skipped.push({ file, reason: message.split("\n")[0] });
+            console.warn(`Skipped ${file}: ${message.split("\n")[0]}`);
             continue;
           }
           const bytes = await frame.screenshot({

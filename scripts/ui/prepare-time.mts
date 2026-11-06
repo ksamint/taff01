@@ -1,12 +1,28 @@
+type CaptureInstant = {
+  epochMilliseconds: number;
+  toZonedDateTimeISO(zone: string): unknown;
+};
+type CaptureTemporal = {
+  Instant: { from(iso: string): CaptureInstant };
+  Now: {
+    timeZoneId(): string;
+    instant(): CaptureInstant;
+    zonedDateTimeISO(zone?: string): unknown;
+  };
+};
+
 // Native Temporal reads the system clock independently of Playwright's Date clock.
 export function prepareTime() {
   // Temporal's polyfill copies own Intl descriptors; Clock puts them one level up.
-  const formatter = Intl.DateTimeFormat;
+  const formatter = Intl.DateTimeFormat as { prototype: Intl.DateTimeFormat };
   if (!Object.getOwnPropertyDescriptor(formatter.prototype, "format")) {
     const inherited = Object.getPrototypeOf(formatter.prototype);
     if (Object.getOwnPropertyDescriptor(inherited, "format"))
       formatter.prototype = inherited;
   }
+  const Temporal = (
+    globalThis as typeof globalThis & { Temporal?: CaptureTemporal }
+  ).Temporal;
   if (typeof Temporal === "undefined") return;
   const instant = Temporal.Instant.from("2026-10-08T11:20:00Z");
   const timeZoneId = Temporal.Now.timeZoneId;

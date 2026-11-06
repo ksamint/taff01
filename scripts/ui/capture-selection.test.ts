@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 import {
   assertCapturePaths,
   resolveCaptureSelection,
-} from "./capture-selection.mjs";
+} from "./capture-selection.mts";
 
 test("default native capture retains all 26 screens, 106 cases and 128 PNGs", () => {
   const selection = resolveCaptureSelection();

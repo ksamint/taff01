@@ -127,7 +127,7 @@ the milestone report.
 ### Visual API calendar clock
 
 Only `playwright.visual.config.ts` starts its dedicated API with
-`TAFF_VISUAL_API_CLOCK=ui-v2 node --import ./scripts/ui/visual-clock.mjs …`.
+`TAFF_VISUAL_API_CLOCK=ui-v2 node --import ./scripts/ui/visual-clock.mts …`.
 The preload fails closed without that flag and refuses server reuse. Brief and
 project Timeline GET requests calculate their real seeded data at
 2026-10-08T11:20:00Z, matching the browser capture clock. AsyncLocalStorage keeps

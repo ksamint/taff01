@@ -5,13 +5,19 @@
 // keyboard tab cycle with a visible focus ring at every stop. Nothing is
 // excluded: a failure is reported with its route, selector and measurement.
 //
-//   DEMO_PASSWORD=… node --env-file=.env scripts/ui/a11y-audit.mjs [out-dir]
+//   DEMO_PASSWORD=… node --env-file=.env scripts/ui/a11y-audit.mts [out-dir]
 import assert from "node:assert/strict";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { chromium, expect } from "@playwright/test";
+import {
+  type APIResponse,
+  chromium,
+  expect,
+  type Page,
+} from "@playwright/test";
+import type { Me } from "../../packages/schemas/src/base.ts";
 import { prototypeId } from "../../packages/schemas/src/prototype-data.ts";
-import { prepareTime } from "./prepare-time.mjs";
+import { prepareTime } from "./prepare-time.mts";
 
 const out = path.resolve(process.argv[2] ?? "a11y-audit");
 const base = process.env.AUTH_URL ?? "http://localhost:3000";
@@ -26,15 +32,42 @@ const locales = process.env.A11Y_LOCALES?.split(",") ?? [
 ];
 const MAX_STOPS = 600;
 
-const nw = (kind, key) => prototypeId(kind, "nw", key);
+const nw = (
+  kind: Parameters<typeof prototypeId>[0],
+  key: Parameters<typeof prototypeId>[2],
+) => prototypeId(kind, "nw", key);
 const project = prototypeId("project", "nw");
 const task = nw("task", 145);
 const reviewTask = nw("task", 141);
 const agent = nw("member", 11);
 
 /** Route states per §7; `desktop` / `phone` restrict a state to one column. */
-function routes({ company, contact, digest }) {
-  const openTask = (id) => async (page) => {
+type AuditRoute = {
+  view: string;
+  route: string;
+  signedOut?: boolean;
+  phone?: boolean;
+  desktop?: boolean;
+  act?: (page: Page) => Promise<void>;
+};
+type AuditContext = {
+  view: string;
+  route: string;
+  device: string;
+  locale: string;
+  theme: string;
+  dialog?: boolean;
+};
+function routes({
+  company,
+  contact,
+  digest,
+}: {
+  company: string;
+  contact: string;
+  digest: string;
+}): AuditRoute[] {
+  const openTask = (id: string) => async (page: Page) => {
     await page
       .locator(`a.task-title-link[href="/tasks/${id}"]`)
       .first()
@@ -97,14 +130,15 @@ function routes({ company, contact, digest }) {
 }
 
 // Runs in the page: text, target and focus-ring measurements.
-function measure({ phone }) {
-  const parse = (value) => {
+function measure({ phone }: { phone: boolean }) {
+  type Color = [number, number, number, number];
+  const parse = (value: string): Color | null => {
     const match = value.match(/rgba?\(([^)]+)\)/);
     if (!match) return null;
     const [r, g, b, a = "1"] = match[1].split(/[,\s/]+/).filter(Boolean);
     return [Number(r), Number(g), Number(b), Number(a)];
   };
-  const over = (top, bottom) => {
+  const over = (top: Color, bottom: Color): Color => {
     const a = top[3];
     return [
       top[0] * a + bottom[0] * (1 - a),
@@ -113,34 +147,35 @@ function measure({ phone }) {
       1,
     ];
   };
-  const luminance = ([r, g, b]) => {
+  const luminance = ([r, g, b]: Color) => {
     const c = [r, g, b].map((v) => {
       const s = v / 255;
       return s <= 0.03928 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
     });
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
   };
-  const ratio = (a, b) => {
+  const ratio = (a: Color, b: Color) => {
     const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
     return (x + 0.05) / (y + 0.05);
   };
-  const describe = (element) => {
+  const describe = (element: Element) => {
     const parts = [];
     for (
-      let node = element;
+      let node: Element | null = element;
       node && parts.length < 4;
       node = node.parentElement
     ) {
       let part = node.tagName.toLowerCase();
-      if (node.dataset?.testid) part += `[data-testid=${node.dataset.testid}]`;
+      if ((node as HTMLElement).dataset?.testid)
+        part += `[data-testid=${(node as HTMLElement).dataset.testid}]`;
       else if (node.classList.length)
         part += `.${[...node.classList].slice(0, 2).join(".")}`;
       parts.unshift(part);
-      if (node.dataset?.testid) break;
+      if ((node as HTMLElement).dataset?.testid) break;
     }
     return parts.join(" > ");
   };
-  const visible = (element) => {
+  const visible = (element: Element) => {
     // Content of a closed <details> or a content-visibility subtree is unrendered.
     if (!element.checkVisibility({ visibilityProperty: true })) return false;
     if (element.closest("[inert]")) return false;
@@ -148,15 +183,15 @@ function measure({ phone }) {
     // Visually-hidden (sr-only) content is clipped to ≤1px and never painted.
     return rect.width > 1 && rect.height > 1;
   };
-  const transparent = (element) => {
-    for (let node = element; node; node = node.parentElement)
+  const transparent = (element: Element) => {
+    for (let node: Element | null = element; node; node = node.parentElement)
       if (Number(getComputedStyle(node).opacity) === 0) return true;
     return false;
   };
   /** Composited background, or null when an image/gradient paints it. */
-  const background = (element) => {
+  const background = (element: Element) => {
     const layers = [];
-    for (let node = element; node; node = node.parentElement) {
+    for (let node: Element | null = element; node; node = node.parentElement) {
       const style = getComputedStyle(node);
       if (style.backgroundImage !== "none") return null;
       const color = parse(style.backgroundColor);
@@ -171,7 +206,19 @@ function measure({ phone }) {
     return result;
   };
 
-  const text = { observations: 0, contrastFailures: [], small: [], manual: 0 };
+  const text: {
+    observations: number;
+    contrastFailures: {
+      element: string;
+      ratio: number;
+      color: string;
+      background: string;
+      size: number;
+      text: string;
+    }[];
+    small: { element: string; size: number; text: string }[];
+    manual: number;
+  } = { observations: 0, contrastFailures: [], small: [], manual: 0 };
   for (const element of document.body.querySelectorAll("*")) {
     if (
       ["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE", "svg"].includes(
@@ -180,7 +227,7 @@ function measure({ phone }) {
     )
       continue;
     const own = [...element.childNodes].some(
-      (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+      (node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim(),
     );
     if (!own || !visible(element) || transparent(element)) continue;
     // WCAG 1.4.3 exempts text of inactive (disabled) controls.
@@ -192,7 +239,7 @@ function measure({ phone }) {
       text.small.push({
         element: describe(element),
         size,
-        text: element.textContent.trim().slice(0, 40),
+        text: element.textContent!.trim().slice(0, 40),
       });
     const bg = background(element);
     const fg = parse(style.color);
@@ -210,7 +257,7 @@ function measure({ phone }) {
         color: style.color,
         background: `rgb(${bg.slice(0, 3).map(Math.round).join(",")})`,
         size,
-        text: element.textContent.trim().slice(0, 40),
+        text: element.textContent!.trim().slice(0, 40),
       });
   }
 
@@ -234,7 +281,7 @@ function measure({ phone }) {
       style.display === "inline" &&
       parent &&
       [...parent.childNodes].some(
-        (node) => node.nodeType === Node.TEXT_NODE && node.textContent.trim(),
+        (node) => node.nodeType === Node.TEXT_NODE && node.textContent!.trim(),
       )
     )
       continue;
@@ -246,7 +293,7 @@ function measure({ phone }) {
       if (
         after.content !== "none" &&
         after.position === "absolute" &&
-        ["top", "right", "bottom", "left"].every(
+        (["top", "right", "bottom", "left"] as const).every(
           (side) => after[side] === "0px",
         )
       ) {
@@ -260,7 +307,7 @@ function measure({ phone }) {
         }
       }
     }
-    for (const label of element.labels ?? []) {
+    for (const label of (element as HTMLInputElement).labels ?? []) {
       const rect = label.getBoundingClientRect();
       width = Math.max(width, rect.width);
       height = Math.max(height, rect.height);
@@ -277,8 +324,12 @@ function measure({ phone }) {
 
 // Runs in the page after each Tab: identity and ring of the focused node.
 function focusStop() {
-  window.__auditIds ??= new WeakMap();
-  window.__auditNext ??= 1;
+  const state = window as typeof window & {
+    __auditIds?: WeakMap<Element, number>;
+    __auditNext?: number;
+  };
+  state.__auditIds ??= new WeakMap();
+  state.__auditNext ??= 1;
   const element = document.activeElement;
   if (
     !element ||
@@ -286,14 +337,14 @@ function focusStop() {
     element === document.documentElement
   )
     return { id: 0 };
-  if (!window.__auditIds.has(element))
-    window.__auditIds.set(element, window.__auditNext++);
-  const drawn = (style) =>
+  if (!state.__auditIds.has(element))
+    state.__auditIds.set(element, state.__auditNext++);
+  const drawn = (style: CSSStyleDeclaration) =>
     (style.outlineStyle !== "none" &&
       Number.parseFloat(style.outlineWidth) > 0) ||
     (style.boxShadow !== "none" && style.boxShadow !== "");
   // A stretched link may draw its ring on its ::after box instead.
-  const ring = (node) =>
+  const ring = (node: Element) =>
     drawn(getComputedStyle(node)) ||
     (node === element &&
       ["::before", "::after"].some((pseudo) => {
@@ -303,19 +354,19 @@ function focusStop() {
   // Composite controls draw the ring on their wrapper via :focus-within.
   let ringed = false;
   for (
-    let node = element, depth = 0;
+    let node: Element | null = element, depth = 0;
     node && depth < 3;
     node = node.parentElement, depth++
   )
     if (ring(node)) ringed = true;
   const rect = element.getBoundingClientRect();
   let name = element.tagName.toLowerCase();
-  if (element.dataset?.testid)
-    name += `[data-testid=${element.dataset.testid}]`;
+  if ((element as HTMLElement).dataset?.testid)
+    name += `[data-testid=${(element as HTMLElement).dataset.testid}]`;
   else if (element.classList.length)
     name += `.${[...element.classList].slice(0, 2).join(".")}`;
   return {
-    id: window.__auditIds.get(element),
+    id: state.__auditIds.get(element)!,
     ringed,
     hidden: rect.width < 1 || rect.height < 1,
     element: name,
@@ -348,7 +399,7 @@ const NAMED_ROLES = new Set([
   "tabpanel",
 ]);
 
-async function audit(page, context) {
+async function audit(page: Page, context: AuditContext) {
   const cdp = await page.context().newCDPSession(page);
   const { nodes } = await cdp.send("Accessibility.getFullAXTree");
   const missingNames = [];
@@ -369,7 +420,7 @@ async function audit(page, context) {
             "function(){return this.outerHTML ? this.outerHTML.slice(0,160) : this.nodeName}",
           returnByValue: true,
         });
-        element = result.value;
+        element = result.value as string;
       } catch {
         element = "(detached)";
       }
@@ -385,7 +436,7 @@ async function audit(page, context) {
   // Dialog states keep their open focus; page states start at the document.
   if (!context.dialog)
     await page.evaluate(() => {
-      document.activeElement?.blur?.();
+      (document.activeElement as HTMLElement | null)?.blur?.();
       window.getSelection()?.removeAllRanges();
     });
   const stops = [];
@@ -429,15 +480,15 @@ await mkdir(out, { recursive: true });
 const browser = await chromium.launch({
   executablePath: process.env.CHROMIUM_PATH,
 });
-const results = [];
+const results: Awaited<ReturnType<typeof audit>>[] = [];
 const errors = [];
 try {
   for (const [device, viewport] of [
     ["phone", { width: 390, height: 844 }],
     ["desktop", { width: 1280, height: 800 }],
-  ]) {
+  ] as const) {
     for (const locale of locales) {
-      for (const theme of ["light", "dark"]) {
+      for (const theme of ["light", "dark"] as const) {
         const options = {
           viewport,
           deviceScaleFactor: 1,
@@ -451,7 +502,7 @@ try {
         const page = await signedIn.newPage();
         await page.clock.setFixedTime(new Date("2026-10-08T11:20:00Z"));
         await page.addInitScript(prepareTime);
-        const login = await page.request.post(
+        const login: APIResponse = await page.request.post(
           `${base}/api/auth/sign-in/email`,
           {
             data: { email, password },
@@ -459,7 +510,7 @@ try {
           },
         );
         assert.equal(login.status(), 200, "Demo sign-in failed");
-        const me = await (await page.request.get(`${base}/api/me`)).json();
+        const me: Me = await (await page.request.get(`${base}/api/me`)).json();
         const workspaceId = prototypeId("workspace", "nw");
         assert(me.workspaces.some((item) => item.id === workspaceId));
         assert.equal(
@@ -471,7 +522,7 @@ try {
           ).status(),
           200,
         );
-        const list = async (kind) => {
+        const list = async (kind: string): Promise<{ id: string }[]> => {
           const response = await page.request.get(
             `${base}/api/${kind}?workspaceId=${workspaceId}`,
           );
@@ -485,10 +536,20 @@ try {
           digest: nw("digest", 1),
         };
         assert(ids.company && ids.contact, "Seed must include CRM rows");
-        const prefs = ({ userId, workspaceId, locale, theme }) => {
+        const prefs = ({
+          userId,
+          workspaceId,
+          locale,
+          theme,
+        }: {
+          userId?: string;
+          workspaceId?: string;
+          locale: string;
+          theme: string;
+        }) => {
           if (userId) {
-            sessionStorage.setItem(`taff:workspace:${userId}`, workspaceId);
-            localStorage.setItem("taff:last-workspace", workspaceId);
+            sessionStorage.setItem(`taff:workspace:${userId}`, workspaceId!);
+            localStorage.setItem("taff:last-workspace", workspaceId!);
           }
           localStorage.setItem("taff-locale", locale);
           localStorage.setItem("taff-theme", theme);
@@ -524,7 +585,7 @@ try {
             const response = await target.goto(`${base}${state.route}`, {
               waitUntil: "networkidle",
             });
-            assert.equal(response.status(), 200, `${state.view} did not load`);
+            assert.equal(response!.status(), 200, `${state.view} did not load`);
             if (!state.signedOut)
               await expect(target.locator("main.content")).toBeVisible();
             await state.act?.(target);
@@ -561,12 +622,23 @@ try {
 } finally {
   await browser.close();
 }
-const sum = (key) =>
-  results.reduce(
-    (total, row) =>
-      total + (Array.isArray(row[key]) ? row[key].length : row[key]),
-    0,
-  );
+const sum = (
+  key:
+    | "contrastFailures"
+    | "smallTargets"
+    | "smallText"
+    | "missingNames"
+    | "missingFocusRings"
+    | "hiddenFocusStops"
+    | "focusStops"
+    | "interactive"
+    | "textObservations"
+    | "manualBackgrounds",
+) =>
+  results.reduce((total, row) => {
+    const value = row[key];
+    return total + (Array.isArray(value) ? value.length : value);
+  }, 0);
 const summary = {
   measuredContexts: results.length,
   renderErrors: errors.length,

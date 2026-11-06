@@ -28,7 +28,7 @@ export const captureScreens = [
 ];
 
 const projects = ["phone-en", "phone-zh-HK", "desktop-en", "desktop-zh-HK"];
-const extraNames = {
+const extraNames: Record<string, string[]> = {
   projects: ["projects-list"],
   review: ["review-deliverable"],
   calendar: ["calendar-week", "calendar-month"],
@@ -76,7 +76,10 @@ export function resolveCaptureSelection(input = "") {
   };
 }
 
-export function assertCapturePaths(selection, paths) {
+export function assertCapturePaths(
+  selection: ReturnType<typeof resolveCaptureSelection>,
+  paths: readonly string[],
+) {
   const actual = [...paths].sort();
   if (JSON.stringify(actual) !== JSON.stringify(selection.expectedPaths))
     throw new Error(

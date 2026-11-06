@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { expect, test } from "vitest";
 
 test("plain Node capture CLI loads shared schema helpers before credential validation", () => {
-  const result = spawnSync(process.execPath, ["scripts/ui/app-shots.mjs"], {
+  const result = spawnSync(process.execPath, ["scripts/ui/app-shots.mts"], {
     env: { ...process.env, DEMO_PASSWORD: "", UI_SCREEN: "all" },
     encoding: "utf8",
     timeout: 10_000,
