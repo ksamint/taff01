@@ -36,6 +36,15 @@ source as a process gap in the milestone and fix the capture step below.
    Node fixtures with a clean diff (`pnpm rust:gate`). Source: the command output, with pass and fail
    counts, recorded in the release milestone. A check that cannot run is
    listed there as not run, never as passed.
+   For v0.2.20, also complete the supplemental checks required by
+   [tooling TT-3](spec/tooling.md#operator-scripts-tt-3) and the
+   [Access and Completion plan, C6 and D](agent-goal-access-and-completion.md):
+   `node scripts/valkey-rehearsal.mts` must pass its seven isolated checks;
+   `pnpm mcp:smoke` must pass refresh rotation and family-reuse revocation;
+   and the local Linux Playwright comparison must pass all six C6 cases using
+   `pnpm e2e --config playwright.delivery-visual.config.ts --update-snapshots=none`
+   with its configured `PW_TEST_CONNECT_WS_ENDPOINT`. Record their output and
+   counts beside this release's generic gate evidence.
 2. Replaced services: image ids equal the recorded ones, running, healthy;
    container ids and startedAt equal the post-replacement record (no restart
    since acceptance).
