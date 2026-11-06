@@ -338,7 +338,11 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
         },
       }),
     );
-    await page.getByTestId("run-details").locator(":scope > summary").click();
+    // The new review cycle remounts its native disclosure after submission.
+    await expect(page.getByTestId("run-status")).toHaveText(
+      labels[locale].review,
+    );
+    await openDisclosure(page, "run-details");
     await page.getByTestId("run-refresh").click();
     await expect(page.getByTestId("run-status")).toHaveText(
       labels[locale].review,
