@@ -23,6 +23,7 @@ describe("MCP round trip helpers", () => {
       "../src/mcp-timeline.ts",
       "../src/mcp-crm.ts",
       "../src/mcp-insights.ts",
+      "../src/mcp-summaries.ts",
     ]
       .map((path) => readFileSync(new URL(path, import.meta.url), "utf8"))
       .join("\n");
@@ -39,6 +40,7 @@ describe("MCP round trip helpers", () => {
 
   it("asks for every scope the round trip uses", () => {
     expect(ROUND_TRIP_SCOPES).toEqual([
+      "summaries:read",
       "tasks:read",
       "tasks:write",
       "calendar:write",
