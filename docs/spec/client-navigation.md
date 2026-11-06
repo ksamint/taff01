@@ -20,6 +20,14 @@ Status: v0.2.20 candidate; browser acceptance pending.
 - CN-1.2 Loading feedback shall retain the existing route, permission and
   design token behavior.
 
+### Concurrent optimistic edits (CN-2)
+
+- CN-2.1 When an optimistic mutation fails, rollback shall invert only its
+  own changed fields and rows while retaining later pending edits.
+- CN-2.2 Two overlapping failures in either order shall restore the baseline
+  without resurrecting a failed layer, including shared calendar rows and
+  newly created caches. Baselines shall be captured after query cancellation.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -32,6 +40,7 @@ Status: v0.2.20 candidate; browser acceptance pending.
 
 | Requirement | Evidence |
 | --- | --- |
+| CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
 
 ## Open decisions
