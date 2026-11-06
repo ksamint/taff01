@@ -363,6 +363,8 @@ describe("mcp", () => {
       name: "CI",
       scopes: ["tasks:read"],
       id: "optimistic:k",
+      organizationPolicy: "explicit",
+      version: 1,
       createdBy: "me",
       prefix: "",
       createdAt: NOW,
