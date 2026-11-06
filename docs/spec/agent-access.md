@@ -103,6 +103,13 @@ Status: v0.2.20 candidate; production acceptance pending.
   browser shall read current session authority without reusing a speculative
   preload's earlier role or error response.
 
+- AA-5.7 Both Twin signed receipt formats shall accept an optional UUID
+  `controller_identity_id`, retain it in signature/hash verification and audit,
+  and reject malformed values or unsigned changes. Archived receipts without
+  the field remain valid. This identity claim shall not select a Taff principal
+  or grant access: the existing controller/workspace mapping, current verifier,
+  membership, token scopes and capabilities remain authoritative.
+
 ## Non-functional
 
 - Mutations use one transaction, actor audit and PostgreSQL change notification.
@@ -128,6 +135,7 @@ Status: v0.2.20 candidate; production acceptance pending.
 | AA-5.3 | authorization.integration.test.ts; token-policy.integration.test.ts |
 | AA-5.4 | access-matrix.integration.test.ts; permissions.test.ts; scripts/permissions-matrix.test.ts |
 | AA-5.5 | workspace-discovery.integration.test.ts; token-policy.integration.test.ts |
+| AA-5.7 | trusted-review.test.ts; approved-agent-operation.test.ts; integration-audit.test.ts; authorization.integration.test.ts |
 | Three-locale management | e2e/token-grants.spec.ts; acceptance pending |
 
 ## Open decisions

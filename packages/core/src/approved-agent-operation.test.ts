@@ -36,6 +36,42 @@ function signed(overrides = {}) {
   };
 }
 describe("approved original-agent operations", () => {
+  it("binds an optional Twin controller identity without replacing the controller", () => {
+    const controller_identity_id = randomUUID();
+    const { receipt, signature } = signed({ controller_identity_id });
+    expect(
+      verifyAgentOperation(receipt, signature, key, tokenHash),
+    ).toMatchObject({
+      controller_id: "robot:controller",
+      controller_identity_id,
+    });
+    const changed = JSON.stringify({
+      ...JSON.parse(receipt.operation_json),
+      controller_identity_id: randomUUID(),
+    });
+    expect(() =>
+      verifyAgentOperation(
+        { ...receipt, operation_json: changed },
+        signature,
+        key,
+        tokenHash,
+      ),
+    ).toThrow();
+    for (const changes of [
+      { controller_identity_id: "not-a-uuid" },
+      { controller_identity_id, unrecognized_identity: randomUUID() },
+    ]) {
+      const invalid = signed(changes);
+      expect(() =>
+        verifyAgentOperation(
+          invalid.receipt,
+          invalid.signature,
+          key,
+          tokenHash,
+        ),
+      ).toThrow();
+    }
+  });
   it("verifies exact UTF-8 bytes without reserializing Unicode or integral floats", () => {
     const { receipt } = signed({
       arguments: {

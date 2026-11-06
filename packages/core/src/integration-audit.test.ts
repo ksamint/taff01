@@ -44,6 +44,7 @@ describe("integration audit permission snapshots", () => {
       source: "private_wechat",
       receipt_id: "receipt",
       controller_id: "controller",
+      controller_identity_id: "11111111-1111-4111-8111-111111111111",
       workspace_id: "workspace",
       expires_at: new Date().toISOString(),
       tool: "tasks.create",
@@ -60,6 +61,9 @@ describe("integration audit permission snapshots", () => {
     );
     const query = new PgDialect().sqlToQuery(execute.mock.calls[0][0]);
     const context = JSON.parse(String(query.params[0]));
+    expect(context.controller_identity_id).toBe(
+      operation.controller_identity_id,
+    );
     expect(context.permissions).toEqual([
       { capability: "tasks.write", decision: "ask" },
     ]);

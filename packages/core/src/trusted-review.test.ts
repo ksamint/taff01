@@ -40,6 +40,33 @@ const operation = () => ({
   },
 });
 describe("trusted review signatures", () => {
+  it("binds an optional Twin controller identity and retains legacy controller mapping", () => {
+    const controller_identity_id = randomUUID();
+    const { receipt, signature } = signedReview({
+      ...operation(),
+      controller_identity_id,
+    });
+    expect(verifyReviewReceipt(receipt, signature, key)).toMatchObject({
+      controller_id: "controller",
+      controller_identity_id,
+    });
+    expect(() =>
+      verifyReviewReceipt(
+        { ...receipt, controller_identity_id: randomUUID() },
+        signature,
+        key,
+      ),
+    ).toThrow();
+    for (const changes of [
+      { controller_identity_id: "not-a-uuid" },
+      { controller_identity_id, unrecognized_identity: randomUUID() },
+    ]) {
+      const invalid = signedReview({ ...operation(), ...changes });
+      expect(() =>
+        verifyReviewReceipt(invalid.receipt, invalid.signature, key),
+      ).toThrow();
+    }
+  });
   it("binds the complete human decision and canonicalizes key order", () => {
     const { receipt, signature } = signedReview(operation());
     expect(verifyReviewReceipt(receipt, signature, key)).toEqual(receipt);

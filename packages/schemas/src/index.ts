@@ -845,6 +845,7 @@ export const trustedReviewReceiptSchema = strictObject({
   source: literal("private_wechat"),
   receipt_id: idSchema,
   controller_id: string().check(minLength(1), maxLength(200)),
+  controller_identity_id: optional(idSchema),
   workspace_id: idSchema,
   run_id: idSchema,
   expires_at: iso.datetime(),
@@ -874,6 +875,7 @@ export const approvedAgentOperationSchema = strictObject({
   source: literal("private_wechat"),
   receipt_id: idSchema,
   controller_id: string().check(minLength(1), maxLength(200)),
+  controller_identity_id: optional(idSchema),
   workspace_id: idSchema,
   expires_at: iso.datetime(),
   tool: zodEnum([

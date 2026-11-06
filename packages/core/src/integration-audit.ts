@@ -57,6 +57,7 @@ export async function setIntegrationAudit(
     operation_hash: operation.operation_hash,
     source: operation.source,
     controller_id: operation.controller_id,
+    controller_identity_id: operation.controller_identity_id,
     member_id: actor.id,
     kind: actor.kind,
     role: actor.role,
