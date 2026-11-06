@@ -106,7 +106,17 @@ export const createAgentTokenSchema = strictObject({
   name: string().check(trim(), minLength(1), maxLength(100)),
   scopes: array(scopeSchema).check(minLength(1)),
 });
+export const tokenOrganizationPolicySchema = zodEnum([
+  "explicit",
+  "all_organizations",
+]);
+export const tokenOrganizationPolicyInputSchema = strictObject({
+  version: versionSchema,
+  policy: tokenOrganizationPolicySchema,
+});
 export const agentTokenSchema = object({
+  organizationPolicy: _default(tokenOrganizationPolicySchema, "explicit"),
+  version: _default(versionSchema, 1),
   id: idSchema,
   workspaceId: idSchema,
   memberId: idSchema,
@@ -627,6 +637,10 @@ export const mcpContextGetArgs = extend(strictObject({}), {
   workspaceId: optional(idSchema),
 });
 export const mcpContextSchema = object({
+  authorizedWorkspaces: _default(
+    array(object({ workspaceId: idSchema, name: string() })),
+    [],
+  ),
   now: calendarInstantSchema,
   workspace: object({
     id: idSchema,
@@ -889,6 +903,21 @@ export const approvedAgentEnvelopeSchema = strictObject({
   operation_hash: string().check(regex(/^[a-f0-9]{64}$/)),
 });
 
+export const agentTokenWorkspaceSchema = object({
+  id: idSchema,
+  tokenId: idSchema,
+  workspaceId: idSchema,
+  memberId: idSchema,
+  grantedBy: idSchema,
+  scopes: array(scopeSchema),
+  origin: zodEnum(["manual", "policy"]),
+  revokedAt: nullable(iso.datetime()),
+  revokedBy: nullable(idSchema),
+  createdAt: iso.datetime(),
+  updatedAt: iso.datetime(),
+});
+export const agentTokenWorkspaceListSchema = array(agentTokenWorkspaceSchema);
+export type AgentTokenWorkspace = Infer<typeof agentTokenWorkspaceSchema>;
 export const agentTokenWorkspaceInputSchema = strictObject({
   workspaceId: idSchema,
   memberId: idSchema,

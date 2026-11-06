@@ -392,6 +392,11 @@ export const agentTokens = pgTable(
     memberId: uuid("member_id").notNull(),
     createdBy: uuid("created_by").notNull(),
     name: text("name").notNull(),
+    organizationPolicy: text("organization_policy")
+      .$type<"explicit" | "all_organizations">()
+      .notNull()
+      .default("explicit"),
+    version: integer("version").notNull().default(1),
     // sha256(token + TOKEN_PEPPER); the raw token is shown once and never stored.
     hash: text("hash").notNull().unique(),
     prefix: text("prefix").notNull(),
@@ -405,6 +410,10 @@ export const agentTokens = pgTable(
     ...dates,
   },
   (t) => [
+    check(
+      "agent_tokens_organization_policy",
+      sql`${t.organizationPolicy} IN ('explicit', 'all_organizations')`,
+    ),
     index("agent_tokens_workspace_idx").on(t.workspaceId, t.createdAt),
     foreignKey({
       columns: [t.workspaceId, t.memberId],
@@ -435,11 +444,20 @@ export const agentTokenWorkspaces = pgTable(
       .references(() => workspaces.id, { onDelete: "cascade" }),
     memberId: uuid("member_id").notNull(),
     grantedBy: uuid("granted_by").notNull(),
+    origin: text("origin")
+      .$type<"manual" | "policy">()
+      .notNull()
+      .default("manual"),
+    revokedBy: uuid("revoked_by"),
     scopes: text("scopes").array().notNull(),
     revokedAt: timestamp("revoked_at", { withTimezone: true }),
     ...dates,
   },
   (t) => [
+    check(
+      "agent_token_workspaces_origin",
+      sql`${t.origin} IN ('manual', 'policy')`,
+    ),
     unique("agent_token_workspaces_token_workspace").on(
       t.tokenId,
       t.workspaceId,

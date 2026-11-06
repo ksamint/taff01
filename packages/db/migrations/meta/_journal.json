@@ -281,6 +281,13 @@
       "when": 1793232000005,
       "tag": "0039_agent_token_workspaces",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1793232000006,
+      "tag": "0040_token_organization_policy",
+      "breakpoints": true
     }
   ]
 }
