@@ -3,7 +3,7 @@ import { defineConfig, devices } from "@playwright/test";
 if (
   !(globalThis as { __TAFF_ARTIFACT_GUARD__?: boolean }).__TAFF_ARTIFACT_GUARD__
 )
-  throw new Error("Use e2e/live/run.mjs to suppress raw live artifacts");
+  throw new Error("Use e2e/live/run.mts to suppress raw live artifacts");
 if (process.env.DEBUG || process.env.PWDEBUG || process.env.DEBUG_FILE)
   throw new Error("Debug logging is forbidden for public verification");
 if (process.env.RELEASE_BASE_URL !== "https://taff.apuch.cn")

@@ -1,7 +1,8 @@
 // Public acceptance permits summaries, never Playwright's raw DOM/error artifact.
 // Required in the runner and inherited by its forked workers through execArgv.
-const fs = require("node:fs");
-const path = require("node:path");
+import fs from "node:fs";
+import path from "node:path";
+
 const writeFile = fs.promises.writeFile.bind(fs.promises);
 fs.promises.writeFile = async function (target, ...args) {
   const name =
@@ -13,4 +14,6 @@ fs.promises.writeFile = async function (target, ...args) {
   if (path.basename(name) === "error-context.md") return;
   return writeFile(target, ...args);
 };
-globalThis.__TAFF_ARTIFACT_GUARD__ = true;
+(
+  globalThis as typeof globalThis & { __TAFF_ARTIFACT_GUARD__?: boolean }
+).__TAFF_ARTIFACT_GUARD__ = true;

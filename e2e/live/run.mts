@@ -1,8 +1,8 @@
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { freshLiveReport, validateLiveArgs } from "./safety.mjs";
+import { freshLiveReport, validateLiveArgs } from "./safety.mts";
 
-const local = (name) => fileURLToPath(new URL(name, import.meta.url));
+const local = (name: string) => fileURLToPath(new URL(name, import.meta.url));
 const args = validateLiveArgs(process.argv.slice(2));
 process.env.RELEASE_REPORT_DIR = freshLiveReport(
   process.env.RELEASE_REPORT_DIR ?? local("reports"),
@@ -17,8 +17,8 @@ console.log(
 const child = spawn(
   process.execPath,
   [
-    "--require",
-    local("artifact-guard.cjs"),
+    "--import",
+    local("artifact-guard.mts"),
     local("../../node_modules/@playwright/test/cli.js"),
     "test",
     "--config",

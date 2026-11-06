@@ -1,5 +1,11 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, it } from "vitest";
@@ -10,7 +16,7 @@ import {
   ownsGrant,
   retriesSetupNavigation,
   validateLiveArgs,
-} from "../e2e/live/safety.mjs";
+} from "../e2e/live/safety.mts";
 
 it("allows targeting while rejecting every artifact/config/parallelism override", () => {
   expect(
@@ -81,7 +87,7 @@ it("discovers all 147 applicable public cases without credentials or browser act
   try {
     const discovery = spawnSync(
       process.execPath,
-      ["e2e/live/run.mjs", "--list"],
+      ["e2e/live/run.mts", "--list"],
       {
         cwd: new URL("..", import.meta.url),
         env: {
@@ -151,4 +157,44 @@ it("retries a setup navigation only after a slow or dropped load", () => {
   for (const category of ["timeout", "econnreset", "browser_network_error"])
     expect(retriesSetupNavigation(category)).toBe(true);
   expect(retriesSetupNavigation("transport_or_local_error")).toBe(false);
+});
+
+it("native ESM artifact preload blocks raw contexts in the runner and forked workers", () => {
+  const parent = mkdtempSync(join(tmpdir(), "taff-live-guard-"));
+  try {
+    const fixture = join(parent, "fixture.mjs");
+    writeFileSync(
+      fixture,
+      `
+      import assert from "node:assert/strict";
+      import { fork } from "node:child_process";
+      import { once } from "node:events";
+      import { mkdir, writeFile } from "node:fs/promises";
+      import { join } from "node:path";
+      assert.equal(globalThis.__TAFF_ARTIFACT_GUARD__, true);
+      const child = process.argv.includes("--child");
+      const dir = join(${JSON.stringify(parent)}, child ? "child" : "parent");
+      await mkdir(dir);
+      await writeFile(join(dir, "error-context.md"), "private raw artifact");
+      await writeFile(join(dir, "safe.json"), "{}");
+      if (!child) {
+        const worker = fork(import.meta.filename, ["--child"], { stdio: "inherit" });
+        const [code] = await once(worker, "exit");
+        assert.equal(code, 0);
+      }
+    `,
+    );
+    const result = spawnSync(
+      process.execPath,
+      ["--import", "./e2e/live/artifact-guard.mts", fixture],
+      { encoding: "utf8" },
+    );
+    expect(result.status, result.stderr).toBe(0);
+    for (const name of ["parent", "child"]) {
+      expect(existsSync(join(parent, name, "error-context.md"))).toBe(false);
+      expect(readFileSync(join(parent, name, "safe.json"), "utf8")).toBe("{}");
+    }
+  } finally {
+    rmSync(parent, { recursive: true });
+  }
 });

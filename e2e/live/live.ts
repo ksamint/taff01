@@ -32,7 +32,7 @@ import {
   cleanupNotificationBaseline,
   notificationBaseline,
 } from "./notification-cleanup";
-import { failureCategory, retriesSetupNavigation } from "./safety.mjs";
+import { failureCategory, retriesSetupNavigation } from "./safety.mts";
 import { cleanupSuggestion } from "./suggestion-cleanup";
 
 const execute = promisify(execFile);
@@ -1213,7 +1213,7 @@ export const test = base.extend<{ liveSafety: void }>({
               );
               for (const frame of [...scoped, ...frames]) {
                 const match = frame.match(
-                  /(?:\(|\s)([^()\s]+\.(?:ts|tsx|js|mjs|cjs)):(\d+):(\d+)\)?$/,
+                  /(?:\(|\s)([^()\s]+\.(?:ts|tsx|mts|js|mjs|cjs)):(\d+):(\d+)\)?$/,
                 );
                 if (match) {
                   error.location = {

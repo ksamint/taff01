@@ -9,7 +9,7 @@ copies: checks restore the verification account's profile and agent settings.
 Use the repository Node/pnpm versions. Supply `TAFF_VERIFY_USERNAME`,
 `TAFF_VERIFY_PASSWORD`, and `TAFF_VERIFY_EMAIL` at runtime. With this Mac's existing
 1Password wrapper, set each variable to the corresponding `op://` reference and
-invoke `op-automation run -- node e2e/live/run.mjs`. The item is **Taff production
+invoke `op-automation run -- node e2e/live/run.mts`. The item is **Taff production
 verification account** in **Codex Automation**. Never store resolved values.
 
 Also supply these runtime inputs:
@@ -23,7 +23,7 @@ Also supply these runtime inputs:
   a fresh `run-*` child, including discovery and startup failures.
 
 Discovery without credentials: `RELEASE_BASE_URL=https://taff.apuch.cn node
- e2e/live/run.mjs --list`. Target regressions with `--grep 'keyboard|evidence|Restricted'`
+ e2e/live/run.mts --list`. Target regressions with `--grep 'keyboard|evidence|Restricted'`
 and `--repeat-each=3 --project=phone-en`. Failed deploy checks get one explicit
 retry under the deployment goal; the default here is zero automatic retries so
 first-attempt evidence is retained. Within a case, a setup page load that times out

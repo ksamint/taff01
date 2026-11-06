@@ -20,7 +20,7 @@ const files = new Set([
   "oauth-member.spec.ts",
 ]);
 /** Targeting only: callers cannot override artifact safety or serialization. */
-export function validateLiveArgs(args) {
+export function validateLiveArgs(args: string[]) {
   for (let index = 0; index < args.length; index++) {
     const argument = args[index];
     if (argument === "--list") continue;
@@ -47,11 +47,15 @@ export function validateLiveArgs(args) {
   return args;
 }
 /** Never reuse an acceptance summary, including discovery/startup failures. */
-export function freshLiveReport(parent) {
+export function freshLiveReport(parent: string) {
   mkdirSync(parent, { recursive: true, mode: 0o700 });
   return mkdtempSync(join(parent, "run-"));
 }
-export function ownsGrant(grant, baseline, entries) {
+export function ownsGrant(
+  grant: { id: string; taskId?: string | null; status: string },
+  baseline: readonly { id: string }[],
+  entries: readonly { kind: string; id: string }[],
+) {
   return (
     entries.some(
       (entry) =>
@@ -64,9 +68,18 @@ export function ownsGrant(grant, baseline, entries) {
 }
 
 /** Fixed categories only: never copy request URLs, errors, DOM, or credentials. */
-export function failureCategory(error) {
-  const message = String(error?.message ?? "");
-  if (error?.name === "TimeoutError" || /Timeout \d+ms exceeded/.test(message))
+export function failureCategory(error: unknown) {
+  const details =
+    error !== null && (typeof error === "object" || typeof error === "function")
+      ? error
+      : undefined;
+  const message = String(
+    details && "message" in details ? (details.message ?? "") : "",
+  );
+  if (
+    (details && "name" in details && details.name === "TimeoutError") ||
+    /Timeout \d+ms exceeded/.test(message)
+  )
     return "timeout";
   for (const code of ["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "ENOTFOUND"])
     if (message.includes(code)) return code.toLowerCase();
@@ -74,6 +87,6 @@ export function failureCategory(error) {
   return "transport_or_local_error";
 }
 /** A setup page load may repeat after a slow or dropped load, never after a local error. */
-export function retriesSetupNavigation(category) {
+export function retriesSetupNavigation(category: string) {
   return category !== "transport_or_local_error";
 }

@@ -21,6 +21,15 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
   and no ts-ignore directives. Existing runtime behavior and live artifact
   redaction shall remain unchanged when adding types.
 
+### Private live runner (TT-2)
+
+- TT-2.1 The live runner and safety helpers shall execute as native Node .mts
+  modules. The artifact guard shall preload through --import and remain
+  inherited by forked workers.
+- TT-2.2 The runner shall retain its targeting allow-list, serialization and
+  categorical private diagnostics. Its preload shall suppress raw
+  error-context.md writes while allowing the existing safe receipts.
+
 ## Non-functional
 
 - No new dependency; Node 24–26 remains supported. Library errors retain their
@@ -36,6 +45,7 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
 | Requirement | Evidence |
 | --- | --- |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
+| TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions

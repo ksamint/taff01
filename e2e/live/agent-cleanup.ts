@@ -1,5 +1,5 @@
 import type { AgentProfile, Grant } from "../../packages/schemas/src/index";
-import { ownsGrant } from "./safety.mjs";
+import { ownsGrant } from "./safety.mts";
 
 type GrantState = Pick<Grant, "id" | "taskId" | "status">;
 type Settings = Pick<
