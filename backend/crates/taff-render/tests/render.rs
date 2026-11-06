@@ -49,6 +49,24 @@ fn rejects_invalid_schema_and_metadata_without_rendering() {
     assert_eq!(render_summary(&input), Err("invalid_input"));
 }
 
+#[test]
+fn renders_user_supplied_cjk_names_outside_the_ui_vocabulary() {
+    let input: Value = serde_json::from_str(include_str!("fixtures/summary-zh-CN.json")).unwrap();
+    for glyph in ["侍", "饕", "餮", "鑫"] {
+        let mut with_glyph = input.clone();
+        with_glyph["text"] = json!(format!(
+            "{glyph}\n{}",
+            input["contentHash"].as_str().unwrap()
+        ));
+        let mut blank = with_glyph.clone();
+        blank["text"] = json!(format!(" \n{}", input["contentHash"].as_str().unwrap()));
+        assert!(
+            render_summary(&with_glyph).unwrap() != render_summary(&blank).unwrap(),
+            "missing rendered glyph {glyph}"
+        );
+    }
+}
+
 #[tokio::test]
 async fn http_rejects_invalid_payload_and_returns_png() {
     use axum::{

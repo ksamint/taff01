@@ -5,7 +5,7 @@ services:
     build:
       context: .
       dockerfile: deploy/Dockerfile.render
-    ports: ["127.0.0.1:${SUMMARY_RENDER_PORT:-3002}:3002"]
+    ports: ["127.0.0.1:56302:3002"]
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3002/health"]

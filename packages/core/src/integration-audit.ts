@@ -8,13 +8,19 @@ import {
 } from "@taff/db";
 import {
   type ApprovedAgentOperation,
+  capabilitySchema,
   integrationAuditQuerySchema,
   integrationPermissionQuerySchema,
   type TrustedReviewReceipt,
 } from "@taff/schemas";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { CoreError, type Principal } from "./index";
-import type { Action, Actor, Resource } from "./permissions";
+import {
+  type Action,
+  type Actor,
+  DEFAULT_PERMISSIONS,
+  type Resource,
+} from "./permissions";
 
 function permissionSnapshot(actor: Actor | null) {
   return {
@@ -150,6 +156,15 @@ export function createIntegrationAudit(deps: {
           member_id: memberId,
           active: actor !== null,
           ...permissionSnapshot(actor),
+          permissions: actor
+            ? capabilitySchema.options.map((capability) => ({
+                capability,
+                decision:
+                  actor.permissions?.find(
+                    (row) => row.capability === capability,
+                  )?.decision ?? DEFAULT_PERMISSIONS[capability],
+              }))
+            : [],
           // A receipt never grants capabilities or human review authority.
           enforcement:
             "current_native_scopes_capabilities_grants_and_resource_permissions",
