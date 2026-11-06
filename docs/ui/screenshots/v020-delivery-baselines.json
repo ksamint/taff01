@@ -1,7 +1,7 @@
 {
   "sourceBase": "e5ffa19d0a0efeca95d77a0f72891287234fb828",
-  "captureObservedUtc": "2026-11-06T10:51:01.630639+00:00",
-  "specSha256": "50e64209982e93aa3ea929fb6b0205a621b22919520fc0662ec6989e79817a36",
+  "captureObservedUtc": "2026-11-06T11:00:21.836005+00:00",
+  "specSha256": "08170d2e412ae27ec31835e009c5d32c7fa0352b6cc60a835c9059b87d971c31",
   "configSha256": "365c998bfe8c7d6e89cc3f940716e2de0c767d30b15cc044e337002683cf5860",
   "browser": {
     "playwright": "1.64.1",
@@ -32,12 +32,27 @@
   "capture": {
     "cases": 6,
     "references": 36,
-    "themes": ["light"],
-    "locales": ["en", "zh-CN", "zh-HK"],
-    "viewports": [[390, 844], [1280, 800]],
-    "result": "6 passed",
+    "themes": [
+      "light"
+    ],
+    "locales": [
+      "en",
+      "zh-CN",
+      "zh-HK"
+    ],
+    "viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        1280,
+        800
+      ]
+    ],
+    "result": "6 passed (17.2s); desktop sidebar readiness asserted",
     "visualReview": "All 36 inspected; no unintended clipping or missing glyphs found",
-    "comparison": "required without snapshot updates on the committed source"
+    "comparison": "First comparison found two premature desktop system-page references without the sidebar; corrected capture requires no-update comparison on committed source"
   },
   "references": [
     {
@@ -114,8 +129,8 @@
     },
     {
       "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-system.png",
-      "sha256": "a954624e0b0c6fa809c097a4fd7211b6063b499c22cd075833b6ebbfc80255e1",
-      "bytes": 27112,
+      "sha256": "5040c5303a916c5efaa67a3d871a273b5e9b85151357ee8672ae75cb4721fec4",
+      "bytes": 38781,
       "detectedType": "png",
       "width": 1280,
       "height": 800
@@ -162,8 +177,8 @@
     },
     {
       "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-system.png",
-      "sha256": "8039747ee1376e6d3dfcbbbb68a7d70c1c9f8050369888ed65bd4daa5d163046",
-      "bytes": 28511,
+      "sha256": "80624a1c8954796ca8cde68776a12978610e01a78681a78c882e7b4f61d587c9",
+      "bytes": 40104,
       "detectedType": "png",
       "width": 1280,
       "height": 800

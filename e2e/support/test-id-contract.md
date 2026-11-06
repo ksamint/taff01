@@ -760,6 +760,7 @@ several do). “Also rendered by” lists the other files.
 | `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
 | `combobox — name: m.organization.roleFor.replace("{{name}}", "Access member")` | 1 | access.spec.ts |
 | `combobox — name: m.organization.roleFor.replace("{{name}}", admin.user.name)` | 1 | access.spec.ts |
+| `complementary` | 2 | delivery-visual.spec.ts |
 | `dialog` | 72 | access.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, delivery-visual.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
@@ -777,6 +778,7 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: project.name` | 2 | persistence.spec.ts |
 | `link` | 3 | agent-creation.spec.ts, calendar.spec.ts, ui-v2.spec.ts |
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
+| `link — name: /M7 reviewer/` | 2 | delivery-visual.spec.ts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
 | `link — name: agent.name` | 1 | access.spec.ts |
 | `link — name: childTitle` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |

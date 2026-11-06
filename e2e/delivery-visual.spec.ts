@@ -104,6 +104,12 @@ test("summary and access screens", async ({ page }, info) => {
     });
 
     await page.goto("/orgs/access");
+    if (info.project.name.startsWith("desktop"))
+      await expect(
+        page
+          .getByRole("complementary")
+          .getByRole("link", { name: /M7 reviewer/ }),
+      ).toBeVisible();
     const matrix = page.getByTestId("access-matrix");
     for (const tab of ["people", "agents", "tokens"] as const) {
       await page.getByRole("tab", { name: m.access[tab], exact: true }).click();
@@ -149,6 +155,12 @@ test("summary and access screens", async ({ page }, info) => {
       route.fulfill({ json: system }),
     );
     await page.goto("/admin/access");
+    if (info.project.name.startsWith("desktop"))
+      await expect(
+        page
+          .getByRole("complementary")
+          .getByRole("link", { name: /M7 reviewer/ }),
+      ).toBeVisible();
     const systemMatrix = page.getByTestId("system-access-matrix");
     await expect(systemMatrix.locator("tbody tr").first()).toBeVisible();
     await page.evaluate(prepareFonts, undefined);
