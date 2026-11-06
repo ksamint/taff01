@@ -30,6 +30,12 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
   categorical private diagnostics. Its preload shall suppress raw
   error-context.md writes while allowing the existing safe receipts.
 
+### Operator scripts (TT-3)
+
+- TT-3.1 The local production-stack runner and isolated Valkey rehearsal shall
+  execute directly as native .mts modules, retaining their existing flags,
+  environment checks, cleanup and owned-container boundaries.
+
 ## Non-functional
 
 - No new dependency; Node 24–26 remains supported. Library errors retain their
@@ -46,6 +52,7 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
 | --- | --- |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
+| TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions

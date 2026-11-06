@@ -4,7 +4,7 @@
 // with NODE_ENV=production, as deploy/Dockerfile.server and
 // deploy/Dockerfile.web run them.
 //
-//   node --env-file-if-exists=.env scripts/release-stack.mjs [options]
+//   node --env-file-if-exists=.env scripts/release-stack.mts [options]
 //
 // Options:
 //   --build      run `pnpm build` and `pnpm build:server` first
@@ -18,7 +18,12 @@
 // (http://127.0.0.1:<API_PORT>). Next bakes the /api and /mcp rewrite target
 // into the build, so the script refuses to start a build made for another
 // API_INTERNAL_URL. Ctrl-C (SIGINT/SIGTERM) stops every child.
-import { execFileSync, spawn } from "node:child_process";
+import {
+  type ChildProcess,
+  type ExecFileSyncOptions,
+  execFileSync,
+  spawn,
+} from "node:child_process";
 import { cpSync, existsSync, readFileSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -37,8 +42,11 @@ const env = {
   NEXT_TELEMETRY_DISABLED: "1",
 };
 const prod = { ...env, NODE_ENV: "production" };
-const run = (command, argv, options = {}) =>
-  execFileSync(command, argv, { cwd: root, stdio: "inherit", ...options });
+const run = (
+  command: string,
+  argv: string[],
+  options: ExecFileSyncOptions = {},
+) => execFileSync(command, argv, { cwd: root, stdio: "inherit", ...options });
 
 if (args.has("--build")) {
   run("pnpm", ["build"], { env });
@@ -78,8 +86,13 @@ if (args.has("--seed"))
     { env },
   );
 
-const children = [];
-function start(name, argv, extra, cwd = root) {
+const children: ChildProcess[] = [];
+function start(
+  name: string,
+  argv: string[],
+  extra: NodeJS.ProcessEnv,
+  cwd = root,
+) {
   const child = spawn(process.execPath, argv, {
     cwd,
     env: { ...prod, ...extra },
@@ -111,7 +124,7 @@ start(
   resolve(standalone, "apps/web"),
 );
 
-async function waitFor(url) {
+async function waitFor(url: string) {
   for (let i = 0; i < 120; i++) {
     try {
       if ((await fetch(url)).ok) return;
@@ -127,6 +140,8 @@ try {
     `[release-stack] ready: web http://localhost:${webPort} → API ${apiUrl}`,
   );
 } catch (error) {
-  console.error(`[release-stack] ${error.message}`);
+  console.error(
+    `[release-stack] ${error instanceof Error ? error.message : String(error)}`,
+  );
   stop(1);
 }
