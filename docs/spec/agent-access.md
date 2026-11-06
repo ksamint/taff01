@@ -79,6 +79,11 @@ Status: v0.2.20 candidate; production acceptance pending.
   stable through their authorization decision and write. Agent mutations and
   permission writers shall serialize on the agent's authority row.
 
+- AA-4.7 When consent has no eligible agent, the browser shall link to
+  organization management and offer a return to the same validated consent
+  request, retaining client, redirect, PKCE, state and requested scopes.
+  The return link shall never accept an external or unrelated destination.
+
 ### Permission boundaries (AA-5)
 
 - AA-5.1 Every management operation shall enforce can() in core. Management
@@ -94,7 +99,7 @@ Status: v0.2.20 candidate; production acceptance pending.
   grants, or its single OAuth workspace, and recheck current authority before
   returning each workspace's kind, effective scopes and grant origin.
 
-- AA-5.4 When identity is retried or a workspace live connection opens, the
+- AA-5.6 When identity is retried or a workspace live connection opens, the
   browser shall read current session authority without reusing a speculative
   preload's earlier role or error response.
 
@@ -117,6 +122,7 @@ Status: v0.2.20 candidate; production acceptance pending.
 | AA-3 | token-policy.test.ts; token-policy.integration.test.ts |
 | AA-4 | authorization.integration.test.ts; oauth integration tests |
 | AA-4.4–4.6 | oauth.integration.test.ts; authorization.integration.test.ts; MCP OAuth refresh-family smoke |
+| AA-4.7 | oauth-guidance.test.ts; oauth-return.test.ts; e2e/completion.spec.ts (browser pending) |
 | AA-5.1 | permissions.test.ts; app.test.ts |
 | AA-5.2 | e2e/ssr-session.spec.ts |
 | AA-5.3 | authorization.integration.test.ts; token-policy.integration.test.ts |

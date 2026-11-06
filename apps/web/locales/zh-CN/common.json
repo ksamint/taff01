@@ -1390,7 +1390,9 @@
     "approve": "允许访问",
     "deny": "拒绝",
     "noSupervisedAgent": "请联系组织管理员，成为智能体的主管。",
-    "adminOnlyScope": "仅组织管理员可授予此权限。"
+    "adminOnlyScope": "仅组织管理员可授予此权限。",
+    "manageOrganizations": "管理组织与智能体",
+    "returnToConsent": "返回授权"
   },
   "summary": {
     "nav": "股东摘要",

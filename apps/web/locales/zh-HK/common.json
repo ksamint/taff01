@@ -1390,7 +1390,9 @@
     "approve": "允許存取",
     "deny": "拒絕",
     "noSupervisedAgent": "請聯絡組織管理員，成為智能體的主管。",
-    "adminOnlyScope": "僅組織管理員可授予此權限。"
+    "adminOnlyScope": "僅組織管理員可授予此權限。",
+    "manageOrganizations": "管理組織與智能體",
+    "returnToConsent": "返回授權"
   },
   "summary": {
     "nav": "股東摘要",

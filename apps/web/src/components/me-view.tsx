@@ -32,13 +32,14 @@ import { AiSettingsSection } from "./ai-settings";
 import { useWorkspace } from "./app-shell";
 import { EmailVerification } from "./email-verification";
 import { OrganizationChooser } from "./organization-chooser";
+import { RouteLoading } from "./route-loading";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
 
 const MeDesktop = dynamic(
   () => import("./me-desktop").then((module) => module.MeDesktop),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => <RouteLoading /> },
 );
 
 const LANGUAGES: Locale[] = ["en", "zh-HK", "zh-CN"];

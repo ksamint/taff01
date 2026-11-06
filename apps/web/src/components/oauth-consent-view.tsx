@@ -11,6 +11,7 @@ import {
   scopeSchema,
 } from "@taff/schemas";
 import { useQuery } from "@tanstack/react-query";
+import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -108,6 +109,13 @@ export function OAuthConsentView() {
       {!consent.data.workspaces.length ? (
         <p className="alert" role="alert" data-testid="oauth-no-workspace">
           {t("oauth.noSupervisedAgent")}
+          <br />
+          <Link
+            href={`/orgs?oauthReturn=${encodeURIComponent(`/oauth/authorize?${query}`)}`}
+            data-testid="oauth-manage-organizations"
+          >
+            {t("oauth.manageOrganizations")}
+          </Link>
         </p>
       ) : (
         <form
@@ -165,6 +173,13 @@ export function OAuthConsentView() {
           ) : (
             <p className="alert" role="alert" data-testid="oauth-no-agent">
               {t("oauth.noAgent")}
+              <br />
+              <Link
+                href={`/orgs?oauthReturn=${encodeURIComponent(`/oauth/authorize?${query}`)}`}
+                data-testid="oauth-manage-organizations"
+              >
+                {t("oauth.manageOrganizations")}
+              </Link>
             </p>
           )}
           <fieldset className="mcp-scopes">

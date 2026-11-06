@@ -41,26 +41,27 @@ import {
   useInviteDateFormat,
   useWorkspaceInvites,
 } from "./organization-dialogs";
+import { RouteLoading } from "./route-loading";
 import { Button } from "./ui/button";
 
 const InboxView = dynamic(
   () => import("./inbox-view").then((module) => module.InboxView),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => <RouteLoading /> },
 );
 const AgentProfileView = dynamic(
   () =>
     import("./agent-profile-view").then((module) => module.AgentProfileView),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => <RouteLoading /> },
 );
 const NotificationsView = dynamic(
   () =>
     import("./notifications-view").then((module) => module.NotificationsView),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => <RouteLoading /> },
 );
 
 const BriefView = dynamic(
   () => import("./brief-view").then((module) => module.BriefView),
-  { ssr: false, loading: () => null },
+  { ssr: false, loading: () => <RouteLoading /> },
 );
 
 const TABS = ["inbox", "brief", "agents", "settings"] as const;

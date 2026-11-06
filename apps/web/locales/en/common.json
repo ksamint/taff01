@@ -1390,7 +1390,9 @@
     "approve": "Allow access",
     "deny": "Deny",
     "noSupervisedAgent": "Ask an organization admin to make you the supervisor of an agent.",
-    "adminOnlyScope": "Only organization admins may grant this scope."
+    "adminOnlyScope": "Only organization admins may grant this scope.",
+    "manageOrganizations": "Manage organizations and agents",
+    "returnToConsent": "Return to authorization"
   },
   "summary": {
     "nav": "Shareholder summaries",

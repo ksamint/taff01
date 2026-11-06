@@ -23,6 +23,7 @@ import {
   useDefaultWorkspace,
   useRevokeWorkspaceInvite,
 } from "../lib/mutations/organizations";
+import { oauthReturnPath } from "../lib/oauth-return";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
 import { showToast } from "../lib/toast";
@@ -101,8 +102,14 @@ function TeamAgentDetails({
 
 export function OrganizationsView() {
   const [teamOnly, setTeamOnly] = useState(false);
+  const [oauthReturn, setOAuthReturn] = useState<string | null>(null);
   useEffect(() => {
     const sync = () => {
+      setOAuthReturn(
+        oauthReturnPath(
+          new URLSearchParams(window.location.search).get("oauthReturn"),
+        ),
+      );
       setTeamOnly(window.location.hash === "#team");
       if (window.location.hash === "#create") setDialog("create");
     };
@@ -176,9 +183,13 @@ export function OrganizationsView() {
   return (
     <div className={`organizations-view${teamOnly ? " team-only" : ""}`}>
       <header className="organization-toolbar">
-        <Link className="button button-quiet" href="/me">
+        <Link
+          className="button button-quiet"
+          href={oauthReturn ?? "/me"}
+          data-testid={oauthReturn ? "oauth-return-consent" : undefined}
+        >
           <ArrowLeft size={16} aria-hidden="true" />
-          {t("mcp.back")}
+          {t(oauthReturn ? "oauth.returnToConsent" : "mcp.back")}
         </Link>
       </header>
       <section className="page-heading">
