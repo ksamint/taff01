@@ -32,6 +32,8 @@ export function optimisticAgentToken(
     id,
     createdBy,
     prefix: "",
+    version: 1,
+    organizationPolicy: "explicit",
     createdAt: now,
     revokedAt: null,
     lastUsedAt: null,

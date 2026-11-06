@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (400 distinct, 2018 uses)
+## Test ids (404 distinct, 2030 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -149,6 +149,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `board-column-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `contact-search` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
+| `grant-confirm` | 3 | mcp-view.tsx | token-grants.spec.ts |
 | `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx, relations-view.tsx | me.spec.ts |
 | `open-search` | 3 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts |
 | `project-audience-option` | 1 | project-audience-tags.tsx | summaries.spec.ts |
@@ -231,7 +232,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `grant-allow` | 7 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `grant-revoke` | 8 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `grant-revoke` | 9 | mcp-view.tsx | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, token-grants.spec.ts |
 
 ### inbox-view.tsx
 
@@ -258,16 +259,19 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
+| `grant-restore` | 3 |  | token-grants.spec.ts |
 | `issued-token` | 15 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `mcp-connected-apps` | 2 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `mcp-endpoint` | 4 |  | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `mcp-no-agents` | 1 |  | agent-creation.spec.ts |
 | `token-agent` | 4 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `token-card` | 7 |  | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `token-card` | 9 |  | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, token-grants.spec.ts |
 | `token-name` | 6 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `token-policy-switch` | 2 |  | token-grants.spec.ts |
 | `token-regenerate` | 2 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `token-revoke` | 6 |  | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `token-submit` | 7 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `token-workspace-grant` | 1 |  | token-grants.spec.ts |
 
 ### me-desktop.tsx
 
@@ -689,12 +693,13 @@ several do). “Also rendered by” lists the other files.
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
 | `alert` | 36 | agent-creation.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `button` | 9 | calendar.spec.ts, live/release/checklist.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts |
+| `button` | 10 | calendar.spec.ts, live/release/checklist.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
 | `button — name: locale === "en" ? m.en : locale === "zh-HK" ? m.me.languageHK : m.me.languageCN` | 1 | me.spec.ts |
 | `button — name: m.actions.undo` | 6 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts |
+| `button — name: m.mcp.cancel` | 2 | token-grants.spec.ts |
 | `button — name: m.mcp.copyConfig` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.mcp.dismiss` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
@@ -715,7 +720,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `combobox` | 1 | cold-font-layout.spec.ts |
 | `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
-| `dialog` | 66 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
+| `dialog` | 67 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
@@ -872,6 +877,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="timeline-dependency"][data-from="*"][data-to="*"]` | 4 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-row"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-time-grid-date]` | 1 | calendar-accessibility.spec.ts |
+| `[data-workspace-id="*"]` | 3 | token-grants.spec.ts |
 | `#add-agent-reason` | 1 | agent-creation.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#default-workspace` | 1 | organization-default.spec.ts |
@@ -976,6 +982,11 @@ Keys read from `apps/web/locales/*/common.json` through
 | `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |
 | `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
+| `mcp.cancel` | 2 | token-grants.spec.ts |
+| `mcp.grantActive` | 2 | token-grants.spec.ts |
+| `mcp.policy.manual` | 3 | token-grants.spec.ts |
+| `mcp.policy.policy` | 1 | token-grants.spec.ts |
+| `mcp.revoked` | 3 | token-grants.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |
 | `me.languageCN` | 1 | me.spec.ts |

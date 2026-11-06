@@ -16,6 +16,8 @@ const old: AgentToken = {
   createdBy: "00000000-0000-4000-8000-000000000004",
   name: "Claude Desktop",
   prefix: "taff_abcdefg",
+  version: 1,
+  organizationPolicy: "explicit",
   scopes: ["tasks:read", "calendar:write"],
   createdAt: NOW,
   revokedAt: null,

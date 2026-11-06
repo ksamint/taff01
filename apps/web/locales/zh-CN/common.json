@@ -378,7 +378,20 @@
     "targetAgent": "智能体成员 ID",
     "saveGrant": "保存授权",
     "revokeGrant": "撤销授权",
-    "grantActive": "有效"
+    "grantActive": "有效",
+    "policy": {
+      "allOrganizations": "所有组织",
+      "manual": "手动",
+      "policy": "策略",
+      "revokedBy": "撤销者：{{name}}",
+      "restore": "恢复",
+      "restoreTitle": "恢复工作区访问权限？",
+      "restoreHint": "恢复此令牌对 {{workspace}} 的访问权限。",
+      "confirmTitle": "更改组织访问策略？",
+      "enrollHint": "为此令牌授权下列 {{count}} 个有效组织。新组织也将自动授权。已撤销的授权需单独恢复。",
+      "explicitHint": "撤销仍然有效的策略授权，保留手动授权。以下为当前 {{count}} 个组织。",
+      "confirm": "确认更改策略"
+    }
   },
   "taskDetail": {
     "back": "返回今天",

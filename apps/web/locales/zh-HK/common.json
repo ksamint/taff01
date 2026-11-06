@@ -378,7 +378,20 @@
     "targetAgent": "智能體成員 ID",
     "saveGrant": "儲存授權",
     "revokeGrant": "撤銷授權",
-    "grantActive": "有效"
+    "grantActive": "有效",
+    "policy": {
+      "allOrganizations": "所有組織",
+      "manual": "手動",
+      "policy": "策略",
+      "revokedBy": "撤銷者：{{name}}",
+      "restore": "恢復",
+      "restoreTitle": "恢復工作區存取權限？",
+      "restoreHint": "恢復此權杖對 {{workspace}} 的存取權限。",
+      "confirmTitle": "更改組織存取策略？",
+      "enrollHint": "為此權杖授權下列 {{count}} 個有效組織。新組織亦會自動授權。已撤銷的授權需要恢復。",
+      "explicitHint": "撤銷仍然有效的策略授權，保留手動授權。以下為目前 {{count}} 個組織。",
+      "confirm": "確認更改策略"
+    }
   },
   "taskDetail": {
     "back": "返回今天",

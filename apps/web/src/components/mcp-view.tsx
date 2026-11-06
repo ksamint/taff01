@@ -3,7 +3,9 @@ import "../styles/mcp.css";
 
 import {
   type AgentToken,
+  type AgentTokenWorkspace,
   agentTokenListSchema,
+  agentTokenWorkspaceListSchema,
   createAgentTokenSchema,
   type IssuedAgentToken,
   type Locale,
@@ -11,7 +13,7 @@ import {
   type Scope,
   scopeSchema,
 } from "@taff/schemas";
-import { useIsMutating, useQuery } from "@tanstack/react-query";
+import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowLeft,
   Check,
@@ -814,23 +816,79 @@ function TokenWorkspaces({
   workspaceId: string;
 }) {
   const { t } = useTranslation();
+  const { me, confirmed } = useWorkspace();
+  const client = useQueryClient();
+  const [confirm, setConfirm] = useState<
+    { kind: "restore"; grant: AgentTokenWorkspace } | { kind: "policy" } | null
+  >(null);
   const [target, setTarget] = useState(workspaceId);
   const [memberId, setMemberId] = useState(token.memberId);
   const [scopes, setScopes] = useState<Scope[]>(["tasks:read"]);
   const [busy, setBusy] = useState(false);
   const grants = useQuery({
     queryKey: ["token-workspaces", token.id, workspaceId],
+    queryFn: async () =>
+      agentTokenWorkspaceListSchema.parse(
+        await request(
+          `/api/agent-tokens/${token.id}/workspaces?workspaceId=${workspaceId}`,
+        ),
+      ),
+  });
+  const organizations = useQuery({
+    queryKey: ["admin-workspaces"],
+    enabled: me.user.systemAdmin === true && confirm?.kind === "policy",
     queryFn: () =>
       request<
         Array<{
-          workspaceId: string;
-          memberId: string;
-          scopes: Scope[];
-          revokedAt: string | null;
+          id: string;
+          name: string;
+          personalOwnerId: string | null;
+          archivedAt: string | null;
         }>
-      >(`/api/agent-tokens/${token.id}/workspaces?workspaceId=${workspaceId}`),
+      >("/api/admin/workspaces"),
   });
+  const eligible = organizations.data?.filter(
+    (item) => !item.personalOwnerId && !item.archivedAt,
+  );
+  async function applyConfirmation() {
+    if (!confirm || !confirmed || busy) return;
+    setBusy(true);
+    try {
+      if (confirm.kind === "restore") {
+        await request(
+          `/api/agent-token-workspaces/${confirm.grant.id}/restore`,
+          { method: "POST" },
+        );
+      } else {
+        await request(`/api/agent-tokens/${token.id}/organization-policy`, {
+          method: "PUT",
+          body: JSON.stringify({
+            version: token.version,
+            policy:
+              token.organizationPolicy === "explicit"
+                ? "all_organizations"
+                : "explicit",
+          }),
+        });
+        await client.invalidateQueries({
+          queryKey: agentTokensKey(workspaceId),
+        });
+      }
+      await grants.refetch();
+      setConfirm(null);
+    } catch (error) {
+      showToast(t(errorKey(error)));
+    } finally {
+      setBusy(false);
+    }
+  }
   async function save(revoked: boolean) {
+    if (!confirmed || busy) return;
+    const existing = grants.data?.find((grant) => grant.workspaceId === target);
+    if (!revoked && existing?.revokedAt) {
+      setConfirm({ kind: "restore", grant: existing });
+      return;
+    }
     setBusy(true);
     try {
       await request(`/api/agent-tokens/${token.id}/workspaces`, {
@@ -853,20 +911,60 @@ function TokenWorkspaces({
     <section aria-label={t("mcp.workspaceGrants")}>
       <h4>{t("mcp.workspaceGrants")}</h4>
       {grants.isError && <p role="alert">{t(errorKey(grants.error))}</p>}
-      {grants.data?.map((grant) => (
-        <Button
-          key={grant.workspaceId}
-          type="button"
-          onClick={() => {
-            setTarget(grant.workspaceId);
-            setMemberId(grant.memberId);
-            setScopes(grant.scopes);
-          }}
-        >
-          {grant.workspaceId} · {grant.scopes.join(", ")} ·{" "}
-          {grant.revokedAt ? t("mcp.revoked") : t("mcp.grantActive")}
-        </Button>
-      ))}
+      {me.user.systemAdmin && (
+        <Label className="mcp-row">
+          {t("mcp.policy.allOrganizations")}
+          <Switch
+            data-testid="token-policy-switch"
+            checked={token.organizationPolicy === "all_organizations"}
+            disabled={busy || !confirmed || !!token.revokedAt}
+            onChange={() => setConfirm({ kind: "policy" })}
+          />
+        </Label>
+      )}
+      <ul className="mcp-rows">
+        {grants.data?.map((grant) => (
+          <li
+            key={grant.id}
+            className="mcp-row"
+            data-testid="token-workspace-grant"
+            data-workspace-id={grant.workspaceId}
+          >
+            <Button
+              type="button"
+              className="button-quiet mcp-row-copy"
+              onClick={() => {
+                setTarget(grant.workspaceId);
+                setMemberId(grant.memberId);
+                setScopes(grant.scopes);
+              }}
+            >
+              <span>
+                {grant.workspaceId} · {grant.scopes.join(", ")}
+              </span>
+              <span>
+                {t(`mcp.policy.${grant.origin}`)} ·{" "}
+                {grant.revokedAt ? t("mcp.revoked") : t("mcp.grantActive")}
+              </span>
+              {grant.revokedBy && (
+                <span>
+                  {t("mcp.policy.revokedBy", { name: grant.revokedBy })}
+                </span>
+              )}
+            </Button>
+            {grant.revokedAt && (
+              <Button
+                type="button"
+                data-testid="grant-restore"
+                disabled={busy || !confirmed || !!token.revokedAt}
+                onClick={() => setConfirm({ kind: "restore", grant })}
+              >
+                {t("mcp.policy.restore")}
+              </Button>
+            )}
+          </li>
+        ))}
+      </ul>
       <Label>
         {t("mcp.targetWorkspace")}
         <Input
@@ -899,14 +997,86 @@ function TokenWorkspaces({
       ))}
       <Button
         type="button"
-        disabled={busy || !scopes.length}
+        disabled={busy || !confirmed || !!token.revokedAt || !scopes.length}
         onClick={() => void save(false)}
       >
         {t("mcp.saveGrant")}
       </Button>
-      <Button type="button" disabled={busy} onClick={() => void save(true)}>
+      <Button
+        type="button"
+        data-testid="grant-revoke"
+        disabled={busy || !confirmed}
+        onClick={() => void save(true)}
+      >
         {t("mcp.revokeGrant")}
       </Button>
+      {confirm && (
+        <SheetDialog
+          title={t(
+            confirm.kind === "restore"
+              ? "mcp.policy.restoreTitle"
+              : "mcp.policy.confirmTitle",
+          )}
+          onClose={() => {
+            if (!busy) setConfirm(null);
+          }}
+        >
+          {confirm.kind === "restore" ? (
+            <p>
+              {t("mcp.policy.restoreHint", {
+                workspace: confirm.grant.workspaceId,
+              })}
+            </p>
+          ) : (
+            <>
+              <p>
+                {t(
+                  token.organizationPolicy === "explicit"
+                    ? "mcp.policy.enrollHint"
+                    : "mcp.policy.explicitHint",
+                  { count: eligible?.length ?? 0 },
+                )}
+              </p>
+              {organizations.isPending && <p>{t("loading")}</p>}
+              {organizations.isError && (
+                <p role="alert">{t(errorKey(organizations.error))}</p>
+              )}
+              <ul>
+                {eligible?.map((organization) => (
+                  <li key={organization.id}>{organization.name}</li>
+                ))}
+              </ul>
+            </>
+          )}
+          <div className="mcp-actions mcp-confirm-actions">
+            <Button
+              type="button"
+              className="button-quiet"
+              disabled={busy}
+              onClick={() => setConfirm(null)}
+            >
+              {t("mcp.cancel")}
+            </Button>
+            <Button
+              type="button"
+              className="button-primary"
+              data-testid="grant-confirm"
+              disabled={
+                busy ||
+                !confirmed ||
+                (confirm.kind === "policy" && !organizations.isSuccess)
+              }
+              onClick={() => void applyConfirmation()}
+            >
+              {t(
+                confirm.kind === "restore"
+                  ? "mcp.policy.restore"
+                  : "mcp.policy.confirm",
+              )}
+            </Button>
+          </div>
+        </SheetDialog>
+      )}
     </section>
   );
 }

@@ -378,7 +378,20 @@
     "targetAgent": "Agent member ID",
     "saveGrant": "Save authorization",
     "revokeGrant": "Revoke authorization",
-    "grantActive": "Active"
+    "grantActive": "Active",
+    "policy": {
+      "allOrganizations": "All organizations",
+      "manual": "Manual",
+      "policy": "Policy",
+      "revokedBy": "Revoked by {{name}}",
+      "restore": "Restore",
+      "restoreTitle": "Restore workspace access?",
+      "restoreHint": "Restore this token’s access to {{workspace}}.",
+      "confirmTitle": "Change organization access?",
+      "enrollHint": "Enroll this token in {{count}} active organizations listed below. New organizations will also enroll automatically. Revoked grants stay revoked until restored.",
+      "explicitHint": "Revoke active policy grants. Manual grants stay active. The {{count}} current organizations are listed below.",
+      "confirm": "Confirm policy change"
+    }
   },
   "taskDetail": {
     "back": "Back to Today",
