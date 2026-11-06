@@ -1367,3 +1367,60 @@ describe("organization policy REST boundaries", () => {
       expect(spy).not.toHaveBeenCalled();
   });
 });
+
+describe("access matrix REST boundaries", () => {
+  it("forwards workspace and system reads with the session identity", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const workspace = vi
+      .spyOn(core, "getAccessMatrix")
+      .mockResolvedValue({} as never);
+    const system = vi
+      .spyOn(core, "getSystemAccessMatrix")
+      .mockResolvedValue({} as never);
+    expect(
+      (await app.request(`/api/workspaces/${id}/access-matrix`)).status,
+    ).toBe(200);
+    expect(workspace).toHaveBeenCalledWith({ kind: "user", userId: id }, id);
+    expect((await app.request("/api/admin/access-matrix")).status).toBe(200);
+    expect(system).toHaveBeenCalledWith({ kind: "user", userId: id });
+  });
+  it("rejects malformed workspace identifiers before invoking core and preserves forbidden", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const workspace = vi
+      .spyOn(core, "getAccessMatrix")
+      .mockRejectedValue(new CoreError("forbidden", 403));
+    expect(
+      (await app.request("/api/workspaces/invalid/access-matrix")).status,
+    ).toBe(400);
+    expect(workspace).not.toHaveBeenCalled();
+    expect(
+      (await app.request(`/api/workspaces/${id}/access-matrix`)).status,
+    ).toBe(403);
+    vi.spyOn(core, "getSystemAccessMatrix").mockRejectedValue(
+      new CoreError("forbidden", 403),
+    );
+    expect((await app.request("/api/admin/access-matrix")).status).toBe(403);
+  });
+  it.each([`/api/workspaces/${id}/access-matrix`, "/api/admin/access-matrix"])(
+    "refuses an agent bearer on %s",
+    async (path) => {
+      vi.spyOn(core, "getSession").mockResolvedValue({
+        response: null,
+        headers: new Headers(),
+      });
+      expect(
+        (
+          await app.request(path, {
+            headers: { Authorization: "Bearer test-agent-token" },
+          })
+        ).status,
+      ).toBe(401);
+    },
+  );
+});

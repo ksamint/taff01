@@ -888,6 +888,17 @@ export function createApp(
       ),
     ),
   );
+  app.get("/api/workspaces/:id/access-matrix", async (c) =>
+    c.json(
+      await core.getAccessMatrix(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+      ),
+    ),
+  );
+  app.get("/api/admin/access-matrix", async (c) =>
+    c.json(await core.getSystemAccessMatrix(userPrincipal(c.get("userId")))),
+  );
   app.get("/api/admin/agent-tokens", async (c) =>
     c.json(
       await core.listSystemAgentTokens(
