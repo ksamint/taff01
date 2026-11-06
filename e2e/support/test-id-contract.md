@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (414 distinct, 2062 uses)
+## Test ids (416 distinct, 2066 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -24,6 +24,8 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `access-forbidden` | 1 |  | access.spec.ts |
 | `access-grant-confirm` | 2 | crm/contact-links.tsx | access.spec.ts |
+| `access-matrix` | 1 |  | delivery-visual.spec.ts |
+| `system-access-matrix` | 1 |  | delivery-visual.spec.ts |
 
 ### agent-profile-view.tsx
 
@@ -593,8 +595,8 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `summary-hash` | 2 |  | summaries.spec.ts |
 | `summary-preview-note` | 1 |  | summaries.spec.ts |
-| `summary-project` | 2 |  | summaries.spec.ts |
-| `summary-view` | 1 |  | summaries.spec.ts |
+| `summary-project` | 3 |  | delivery-visual.spec.ts, summaries.spec.ts |
+| `summary-view` | 2 |  | delivery-visual.spec.ts, summaries.spec.ts |
 | `summary-watermark` | 3 |  | summaries.spec.ts |
 
 ### summary-render-actions.tsx
@@ -724,7 +726,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
 | `button — name: locale === "en" ? m.en : locale === "zh-HK" ? m.me.languageHK : m.me.languageCN` | 1 | me.spec.ts |
 | `button — name: m.access.confirm` | 1 | access.spec.ts |
-| `button — name: m.access.explain` | 1 | access.spec.ts |
+| `button — name: m.access.explain` | 2 | access.spec.ts, delivery-visual.spec.ts |
 | `button — name: m.actions.undo` | 6 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts |
 | `button — name: m.mcp.cancel` | 3 | access.spec.ts, token-grants.spec.ts |
 | `button — name: m.mcp.confirmRevoke` | 1 | access.spec.ts |
@@ -758,13 +760,14 @@ several do). “Also rendered by” lists the other files.
 | `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
 | `combobox — name: m.organization.roleFor.replace("{{name}}", "Access member")` | 1 | access.spec.ts |
 | `combobox — name: m.organization.roleFor.replace("{{name}}", admin.user.name)` | 1 | access.spec.ts |
-| `dialog` | 71 | access.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
+| `dialog` | 72 | access.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, delivery-visual.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: m.crm.contacts.add` | 3 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `heading` | 6 | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
+| `heading — name: m.agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
 | `heading — name: m.organization.team` | 1 | me.spec.ts |
@@ -806,6 +809,7 @@ several do). “Also rendered by” lists the other files.
 | `tab — name: m.access.apps` | 1 | access.spec.ts |
 | `tab — name: m.access.people` | 2 | access.spec.ts |
 | `tab — name: m.access.tokens` | 1 | access.spec.ts |
+| `tab — name: m.access[tab]` | 1 | delivery-visual.spec.ts |
 | `tabpanel` | 2 | brief.spec.ts, live/brief.spec.ts |
 
 ## Label locators
@@ -983,10 +987,11 @@ Keys read from `apps/web/locales/*/common.json` through
 
 | Key | Uses | Used in |
 | --- | ---: | --- |
+| `access.*` | 1 | delivery-visual.spec.ts |
 | `access.agents` | 6 | access.spec.ts |
 | `access.apps` | 3 | access.spec.ts |
 | `access.confirm` | 3 | access.spec.ts |
-| `access.explain` | 3 | access.spec.ts |
+| `access.explain` | 4 | access.spec.ts, delivery-visual.spec.ts |
 | `access.people` | 6 | access.spec.ts |
 | `access.selfDemotionHint` | 3 | access.spec.ts |
 | `access.tokens` | 3 | access.spec.ts |
@@ -994,6 +999,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `actions.undo` | 18 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
+| `agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
 | `ask.answer.unknown` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `ask.rules` | 13 | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |

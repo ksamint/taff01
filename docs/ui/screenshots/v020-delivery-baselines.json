@@ -1,0 +1,332 @@
+{
+  "sourceBase": "e5ffa19d0a0efeca95d77a0f72891287234fb828",
+  "captureObservedUtc": "2026-11-06T10:51:01.630639+00:00",
+  "specSha256": "50e64209982e93aa3ea929fb6b0205a621b22919520fc0662ec6989e79817a36",
+  "configSha256": "365c998bfe8c7d6e89cc3f940716e2de0c767d30b15cc044e337002683cf5860",
+  "browser": {
+    "playwright": "1.64.1",
+    "chromium": "156.0.8078.80",
+    "revision": 1248,
+    "platform": "linux",
+    "elfMachine": 183,
+    "binaryArchitecture": "aarch64",
+    "reportedNavigatorPlatform": "Linux x86_64"
+  },
+  "runner": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "26.12.1"
+  },
+  "container": {
+    "reference": "mcr.microsoft.com/playwright:v1.64.1-noble",
+    "manifestDigest": "sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f",
+    "platform": "linux/arm64",
+    "node": "26.13.0"
+  },
+  "database": {
+    "engine": "PostgreSQL18.6",
+    "locale": "en_US.UTF-8",
+    "timezone": "UTC",
+    "data": "isolated seeded fixture; disposable reviewers"
+  },
+  "capture": {
+    "cases": 6,
+    "references": 36,
+    "themes": ["light"],
+    "locales": ["en", "zh-CN", "zh-HK"],
+    "viewports": [[390, 844], [1280, 800]],
+    "result": "6 passed",
+    "visualReview": "All 36 inspected; no unintended clipping or missing glyphs found",
+    "comparison": "required without snapshot updates on the committed source"
+  },
+  "references": [
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/access-agents.png",
+      "sha256": "b62edeaeeccb6f537028fa84e1c877628f8f99501a3781464fcd245a4e8f9f76",
+      "bytes": 70802,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/access-explain.png",
+      "sha256": "aff4628170be6536028bfc2afdbb924aa6f040969e01a1d5b914fe22b9ea549c",
+      "bytes": 53264,
+      "detectedType": "png",
+      "width": 640,
+      "height": 650
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/access-people.png",
+      "sha256": "37e54396c7f4b38c83bfe1bc23dd8a19bf09d800fb5279c5c9dc7217bb6ba5e3",
+      "bytes": 32895,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/access-system.png",
+      "sha256": "83fb17355e47104251bc7cae17d3ed2c7e54d746cb0624e60aefb6236a382907",
+      "bytes": 41981,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/access-tokens.png",
+      "sha256": "3fb105e5c29564000b016d3078c64b432659ea218af3cee8a2c998ec3f9d71b8",
+      "bytes": 44594,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/summary.png",
+      "sha256": "e833878471f0366ebed3d76021744bda29faedbe13f5caa409f42d78b2f54a76",
+      "bytes": 159990,
+      "detectedType": "png",
+      "width": 596,
+      "height": 1017
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-agents.png",
+      "sha256": "5dcf976ab735480ee594349c68b02990f5416441015ef40693950b7d07c53034",
+      "bytes": 69087,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-explain.png",
+      "sha256": "750041756a7a87bba6aeb3099741bcc75dd0715b5f0bb8d45e0065077541e167",
+      "bytes": 63725,
+      "detectedType": "png",
+      "width": 640,
+      "height": 650
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-people.png",
+      "sha256": "38117365f878141f089032404b65c6129ba67eaff2807788546d031259c3d81e",
+      "bytes": 31378,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-system.png",
+      "sha256": "a954624e0b0c6fa809c097a4fd7211b6063b499c22cd075833b6ebbfc80255e1",
+      "bytes": 27112,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-tokens.png",
+      "sha256": "ea43c11572653d5cbc4ca348fa692589a591d35bd479abfd3aef5c8ed6932ca2",
+      "bytes": 44160,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/summary.png",
+      "sha256": "a5efb96a704f203341eb1b64f6abc4dd06caec2c612ba51647e8838f9ba17724",
+      "bytes": 159322,
+      "detectedType": "png",
+      "width": 558,
+      "height": 1099
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-agents.png",
+      "sha256": "600ae01ed4672ec47856a2cebc49e7c6e0eb772cc8251f5ddd079eefeb217ae4",
+      "bytes": 70641,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-explain.png",
+      "sha256": "73a2a4468a04c2445ab3d907945d029952aeec4d1341e454aae4504abc52f223",
+      "bytes": 67390,
+      "detectedType": "png",
+      "width": 640,
+      "height": 650
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-people.png",
+      "sha256": "eefda886b255ae5ec3e6f1db658de3f6c3b60493cbf9a9f908d5800e42ea43be",
+      "bytes": 31096,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-system.png",
+      "sha256": "8039747ee1376e6d3dfcbbbb68a7d70c1c9f8050369888ed65bd4daa5d163046",
+      "bytes": 28511,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-tokens.png",
+      "sha256": "8af0b23a0ec078a14896b2d75a959bea7b208fc49a1cb38452765ce410a8b1fb",
+      "bytes": 44415,
+      "detectedType": "png",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/summary.png",
+      "sha256": "a55d40393158e8dcf0064b537d23ce709f63cbb832ec100f17c532ede42c14e7",
+      "bytes": 161694,
+      "detectedType": "png",
+      "width": 558,
+      "height": 1099
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-en/access-agents.png",
+      "sha256": "50f48e6ae3e9f0ca36d63173a542bb80f924964e2ebf40762ce0cec9b72c3226",
+      "bytes": 45497,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-en/access-explain.png",
+      "sha256": "d28702b6fbe731e2564d85ea124e2cc4001045e84ecd66f9c1e63e2a44cb49ab",
+      "bytes": 34729,
+      "detectedType": "png",
+      "width": 390,
+      "height": 666
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-en/access-people.png",
+      "sha256": "9132829733c727633495aa773847f6f7e532e113530036f415a68646c19a3393",
+      "bytes": 20251,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-en/access-system.png",
+      "sha256": "4416ef98d6e923f2486bb9d1f8c2091349453a1846550b7979bd195dabc817da",
+      "bytes": 22715,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-en/access-tokens.png",
+      "sha256": "3c3e26a04d4f61de82f301f6f68f91ce190ed0db0b57700da037257333e7f702",
+      "bytes": 23363,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-en/summary.png",
+      "sha256": "c661c3aa234465a36faa13c0e7b10011cfbce00609733aa4df3f15a4e417e97b",
+      "bytes": 150845,
+      "detectedType": "png",
+      "width": 390,
+      "height": 1328
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-CN/access-agents.png",
+      "sha256": "238c85014253ca1e5a7e56747607b2e88f70c631c219b101e658a548d7db1a24",
+      "bytes": 45693,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-CN/access-explain.png",
+      "sha256": "6a030dce2d3d866480b1dc2c6152f46cf2b096e58c9538aa6a72ea49a2f05a47",
+      "bytes": 48579,
+      "detectedType": "png",
+      "width": 390,
+      "height": 641
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-CN/access-people.png",
+      "sha256": "cc58258718f504f4f8b28bffc15c2650293e417b20054e013f19690409fab0aa",
+      "bytes": 20485,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-CN/access-system.png",
+      "sha256": "475c0273650ec668a14743836d8d251d8bcbd0b917f5a540faa332cc5ff01dc8",
+      "bytes": 21863,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-CN/access-tokens.png",
+      "sha256": "0d2e5ada6918be90a70b3f273649fe5faee9a0168b3cf6bde08620bb04abb18d",
+      "bytes": 22698,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-CN/summary.png",
+      "sha256": "a747082ec7ae3236ea326ed28a47bd9a500445c0c83a6305d65523a155f85699",
+      "bytes": 159139,
+      "detectedType": "png",
+      "width": 390,
+      "height": 1415
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-HK/access-agents.png",
+      "sha256": "c0979acd5e0f00a16b5aecb990cb6b1f77cc580cd32b85ecfbbb5086cfd152dd",
+      "bytes": 46955,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-HK/access-explain.png",
+      "sha256": "3e9d7eca7e8c0dd191c3910e69e2edc1a71c48b8c5188c4c176627b4ce38b447",
+      "bytes": 50202,
+      "detectedType": "png",
+      "width": 390,
+      "height": 641
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-HK/access-people.png",
+      "sha256": "59dc80c4ea91c9f7b94042cb1601fc772a17fc491ae0d7ff96341227d4d984b3",
+      "bytes": 20185,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-HK/access-system.png",
+      "sha256": "0b306721581e2073f19f143a12f54f050a90475cb63762506d737ea96a622d02",
+      "bytes": 23074,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-HK/access-tokens.png",
+      "sha256": "63a69c7ff7d7cb7492c1f2c77817ccdc1f7114f7028d8ff9f12d3dc0319a2c38",
+      "bytes": 22895,
+      "detectedType": "png",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/delivery-visual.spec.ts/phone-zh-HK/summary.png",
+      "sha256": "eb3ce25e66f1e7e77f8449965456e2e66aedf6b65e11a4274b2919e0f1bdc23a",
+      "bytes": 161642,
+      "detectedType": "png",
+      "width": 390,
+      "height": 1415
+    }
+  ]
+}

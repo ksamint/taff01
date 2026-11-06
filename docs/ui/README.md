@@ -212,3 +212,38 @@ rendered text using its computed font stack, reuses faces, and swaps fully loade
 faces in CSS order. It changes no product CSS or font-display setting. The
 corrected A/B supersedes the earlier race-affected paragraph-wrap interpretation:
 all twelve parent/current-font captures have identical geometry and PNG bytes.
+
+### Summary and access references (v0.2.20)
+
+`playwright.delivery-visual.config.ts` compares the summary document, workspace
+People/Agents/Tokens tabs, token explanation drawer, and system access page.
+It uses all three locales at 390×844 and 1280×800, with 36 light references
+under `e2e/__screenshots__/delivery-visual.spec.ts/`. Other visual suites retain
+their existing references.
+
+Start a separate, migrated local production web/API stack and use a disposable
+loopback PostgreSQL database. On local Linux with the lockfile's Playwright
+Chromium installed, run:
+
+```sh
+node --env-file=.env node_modules/@playwright/test/cli.js test --config playwright.delivery-visual.config.ts
+```
+
+On macOS, use a local Linux browser server of the exact lockfile version and
+set `PW_TEST_CONNECT_WS_ENDPOINT` to its loopback WebSocket URL. The config
+exposes only host loopback services to that browser; database fixtures run on
+the host. Use a native ARM64 Linux image on Apple silicon to avoid emulation
+contending with other acceptance checks. See the [official Playwright server
+instructions](https://playwright.dev/docs/docker#remote-connection). The test
+checks the browser's Linux platform, independently of the test runner OS.
+
+Use `--update-snapshots` only for deliberate capture and inspect all changed
+images before committing. The test creates a disposable reviewer and token,
+reads real workspace access, and temporarily promotes only that guarded test
+account for the system page. Its table is restricted to the current test's real
+rows. Report content comes from the renderer's reviewed locale fixtures, with
+a fixed summary ID and generation date. Tokens are revoked and the temporary
+system role is removed in teardown. Service workers are blocked for these
+layout comparisons; offline behavior has its own browser tests. Fonts use the
+existing capture-readiness helper. The capture manifest records browser,
+source base, test/config hashes, and every reference hash.
