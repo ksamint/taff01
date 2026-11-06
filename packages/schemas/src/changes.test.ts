@@ -52,3 +52,5 @@ describe("change routing boundaries", () => {
     },
   );
 });
+
+it.each(["agent_token_workspaces.insert","agent_token_workspaces.update","agent_token_workspaces.delete"])("accepts grant notification %s",action=>expect(changeEventSchema.safeParse({...event,action}).success).toBe(true));
