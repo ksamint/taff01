@@ -17,6 +17,7 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
 
 - TT-1.1 The local typecheck shall check all six packages plus root scripts,
   e2e sources and Playwright/Vitest configuration under strict TypeScript.
+  Every package shall accept typed extension imports across the shared tooling boundary.
 - TT-1.2 Checked tooling shall use erasable TypeScript syntax, no explicit any
   and no ts-ignore directives. Existing runtime behavior and live artifact
   redaction shall remain unchanged when adding types.
