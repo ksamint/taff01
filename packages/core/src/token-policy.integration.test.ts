@@ -54,7 +54,14 @@ describe.skipIf(!url)("organization token access matrix", () => {
     sysId = await signup("Policy system");
     ownerId = await signup("Policy owner");
     guestId = await signup("Policy guest");
-    ownedWorkspaces.push(...(await c!.db.select({id:workspaces.id}).from(workspaces).where(inArray(workspaces.personalOwnerId,[sysId,ownerId,guestId]))).map(w=>w.id));
+    ownedWorkspaces.push(
+      ...(
+        await c!.db
+          .select({ id: workspaces.id })
+          .from(workspaces)
+          .where(inArray(workspaces.personalOwnerId, [sysId, ownerId, guestId]))
+      ).map((w) => w.id),
+    );
     system = userPrincipal(sysId);
     owner = userPrincipal(ownerId);
     guest = userPrincipal(guestId);
@@ -95,15 +102,27 @@ describe.skipIf(!url)("organization token access matrix", () => {
     });
   });
   afterAll(async () => {
-    if (c && sysId) await c.db.transaction(async tx => {
-      await tx.execute(sql`select set_config('taff.actor_id','system:test-cleanup',true)`);
-      if (tokenId) await tx.delete(agentTokens).where(eq(agentTokens.id,tokenId));
-      await tx.delete(members).where(and(eq(members.kind,"agent"),eq(members.name,twinName)));
-      const userIds = [sysId,ownerId,guestId].filter(Boolean);
-      await tx.update(user).set({systemAdmin:false}).where(inArray(user.id,userIds));
-      await tx.delete(user).where(inArray(user.id,userIds));
-      if (ownedWorkspaces.length) await tx.delete(workspaces).where(inArray(workspaces.id,ownedWorkspaces));
-    });
+    if (c && sysId)
+      await c.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id','system:test-cleanup',true)`,
+        );
+        if (tokenId)
+          await tx.delete(agentTokens).where(eq(agentTokens.id, tokenId));
+        await tx
+          .delete(members)
+          .where(and(eq(members.kind, "agent"), eq(members.name, twinName)));
+        const userIds = [sysId, ownerId, guestId].filter(Boolean);
+        await tx
+          .update(user)
+          .set({ systemAdmin: false })
+          .where(inArray(user.id, userIds));
+        await tx.delete(user).where(inArray(user.id, userIds));
+        if (ownedWorkspaces.length)
+          await tx
+            .delete(workspaces)
+            .where(inArray(workspaces.id, ownedWorkspaces));
+      });
     await core?.close();
     await c?.close();
   });
