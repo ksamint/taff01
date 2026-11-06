@@ -87,6 +87,7 @@ test("an admin signs in on the consent page, approves an MCP client and the clie
   if (!agent) throw new Error("The agent was not created");
   await page.reload();
   await page.getByTestId("oauth-workspace").selectOption(workspace.id);
+  await page.getByTestId("oauth-agent").selectOption(agent.id);
   await expect(page.getByTestId("oauth-agent")).toHaveValue(agent.id);
   await expect(page.getByTestId("oauth-scope-tasks:read")).toBeChecked();
   await expect(page.getByTestId("oauth-scope-tasks:write")).toBeChecked();
