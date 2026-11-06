@@ -150,7 +150,7 @@ export function renderSummaryText(
         const shown = project[key].slice(0, itemLimit);
         for (const task of shown)
           lines.push(
-            `• #${task.number} ${clean(task.title)}${task.ownerName ? ` · ${clean(task.ownerName)}` : ""}${task.dueAt ? ` · ${t("summary.due", { date: date(task.dueAt) })}` : ""}`,
+            `• #${task.number} ${clean(task.title, 200)}${task.ownerName ? ` · ${clean(task.ownerName)}` : ""}${task.dueAt ? ` · ${t("summary.due", { date: date(task.dueAt) })}` : ""}`,
           );
         const omitted = project.counts[key] - shown.length;
         if (omitted > 0) lines.push(`…(+${omitted})`);

@@ -10,6 +10,7 @@ import { timelineSchema } from "../packages/schemas/src/plan";
 import { verifyTestEmail } from "./support/email-verification";
 import type { TestLocale } from "./support/messages";
 import { selectLocale } from "./support/preferences";
+import { delayRealtimeHandshake } from "./support/realtime-handshake";
 
 // ADR 0021: every person of the workspace reads contract amount and collected
 // (finance:read); guests and agents see delivery % only. Only admins edit.
@@ -61,9 +62,12 @@ test("finance is hidden from a guest and follows a role change made before the l
   // A second, verified person joins as a guest.
   const context = await browser.newContext({
     baseURL: process.env.AUTH_URL,
+    // The fixture owns document CSP; service-worker navigation bypasses page routes.
+    serviceWorkers: "block",
     locale: locale === "en" ? "en-US" : locale,
     viewport: page.viewportSize(),
   });
+  let handshake: Awaited<ReturnType<typeof delayRealtimeHandshake>> | undefined;
   try {
     const member = await context.newPage();
     const email = `finance-${crypto.randomUUID()}@example.test`;
@@ -117,14 +121,7 @@ test("finance is hidden from a guest and follows a role change made before the l
     expect(read.risk.deliveryPercent).toEqual(expect.any(Number));
 
     // Hold the member's live connection until the role has changed.
-    let connect!: () => void;
-    const gate = new Promise<void>((resolve) => {
-      connect = resolve;
-    });
-    await member.routeWebSocket(/\/api\/realtime/, async (socket) => {
-      await gate;
-      socket.connectToServer();
-    });
+    handshake = await delayRealtimeHandshake(member, workspace.id);
     await member.goto("/");
     await expect(member.getByTestId("today-heading")).toBeVisible();
     await selectLocale(member, locale);
@@ -139,8 +136,9 @@ test("finance is hidden from a guest and follows a role change made before the l
     await expect(member.getByTestId("timeline-finance")).toHaveCount(0);
 
     // Promoted before the connection opens: the open page shows finance.
+    await handshake.requested;
     await setRole("member");
-    connect();
+    handshake.release();
     await expect(member.getByTestId("timeline-finance")).toBeVisible();
     const asMember = timelineSchema.parse(
       await (
@@ -163,6 +161,7 @@ test("finance is hidden from a guest and follows a role change made before the l
     await expect(member.getByTestId("timeline-view")).toBeVisible();
     await expect(member.getByTestId("timeline-finance")).toHaveCount(0);
   } finally {
+    await handshake?.close();
     await context.close();
   }
 });

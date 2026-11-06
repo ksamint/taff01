@@ -136,7 +136,7 @@ it("annotates every tool: reads are read-only, additions and updates are marked"
     name: string;
     annotations?: Record<string, boolean>;
   }[] = (await call("tools/list", {})).result.tools;
-  expect(listed.map((tool) => tool.name).sort()).toEqual([...MCP_TOOLS]);
+  expect(listed.map((tool) => tool.name).sort()).toEqual(MCP_TOOLS);
   for (const tool of listed) {
     const expected = additive.includes(tool.name)
       ? { readOnlyHint: false, destructiveHint: false, idempotentHint: false }

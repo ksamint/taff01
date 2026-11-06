@@ -56,6 +56,7 @@ describe("change routing boundaries", () => {
 it.each([
   "agent_token_workspaces.insert",
   "agent_token_workspaces.update",
+  "agent_token_workspaces.delete",
   "summary_renders.insert",
   "summary.render_failed",
 ])("accepts grant and render notification %s", (action) =>

@@ -54,6 +54,13 @@ describe("summary text", () => {
       );
     });
   }
+  it("retains a complete maximum-length task title instead of silently shortening it", () => {
+    const source = structuredClone(snapshot);
+    source.projects[0].completedToday[0].title = "x".repeat(200);
+    expect(render("en", source).replaceAll("\n", "")).toContain(
+      "x".repeat(200),
+    );
+  });
   it("wraps Latin and CJK by display width without splitting surrogate pairs", () => {
     expect(wrapSummaryLine("a".repeat(73)).split("\n")).toEqual([
       "a".repeat(72),

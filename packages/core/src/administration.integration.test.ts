@@ -29,7 +29,8 @@ const names = [
   `Test org C ${nonce}`,
 ];
 const username = `u${nonce.replaceAll("-", "").slice(0, 20)}`;
-const shortPassword = randomUUID().slice(0, 6);
+// Keep the six-character boundary value distinct from UUID audit metadata.
+const shortPassword = `p!${randomUUID().slice(0, 4)}`;
 const phones = [phone(), phone()];
 const input = {
   workspaceNames: names,

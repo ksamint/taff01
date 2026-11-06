@@ -94,6 +94,10 @@ Status: v0.2.20 candidate; production acceptance pending.
   grants, or its single OAuth workspace, and recheck current authority before
   returning each workspace's kind, effective scopes and grant origin.
 
+- AA-5.4 When identity is retried or a workspace live connection opens, the
+  browser shall read current session authority without reusing a speculative
+  preload's earlier role or error response.
+
 ## Non-functional
 
 - Mutations use one transaction, actor audit and PostgreSQL change notification.
