@@ -183,9 +183,10 @@ sample users/tasks to the local app database.
 `pnpm typecheck` checks all six packages plus root scripts, e2e sources and
 Playwright/Vitest configuration. The converted operator and capture drivers execute as
 native `.mts` modules on Node 24–26. Web dev/build explicitly generates the
-service worker from TypeScript; `apps/web/postcss.config.mjs` is the single owned
-JavaScript exception required by the installed Next configuration loader.
-Vendored `docs/ui/` assets retain their original format.
+service worker from TypeScript. The repository holds no owned JavaScript:
+PostCSS reads `apps/web/postcss.config.json`, and `pnpm test` enforces
+TypeScript and Rust as the only source languages (ADR 0030). Vendored
+`docs/ui/` assets retain their original format.
 
 `pnpm build` builds the web production bundle; `pnpm perf:budget` then measures
 the Today page's gzipped JavaScript against the 200 KiB budget, and

@@ -91,3 +91,22 @@ and task names are user data and cannot be constrained to UI labels; a glyph
 regression checks names such as 侍天 and 饕餮. This adds no client font payload.
 Local Docker publishes the internal port3002 only on loopback56302, avoiding
 an existing local service on3002. Production has no published renderer port.
+
+## Amendment 1 — 2026-11-06: designed layout
+
+Status: proposed. The v0.2.19 image is the text render rasterized line by
+line in grayscale (milestone 105). Decisions 1 and 2 are refined:
+
+1. A pure TypeScript `buildSummaryLayout` turns the snapshot into
+   display-ready strings and numbers in the recipient's locale and zone
+   (`summaryLayoutSchema`, emitted as JSON Schema). Both renders consume it,
+   so text and image cannot drift and Rust still formats nothing.
+2. `taff-render` draws the layout as a colour document from the TABLE AI
+   tokens (header band, KPI tiles, project cards with risk badges and
+   labelled progress and finance bars, sections, footer with a short hash and
+   the full hash in a PNG `tEXt` chunk), with shaped text measurement
+   (`rustybuzz`, MIT) instead of a character-count wrap.
+3. Renderer versions `text-2` and `image-2`; the `image-1` input stays
+   accepted for one release; stored renders are never rewritten.
+
+Plan: `docs/agent-goal-v0.2.21-report-design-and-ports.md` R1–R6.

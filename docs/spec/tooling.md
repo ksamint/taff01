@@ -53,9 +53,18 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 - TT-5.2 A separate WebWorker typecheck shall cover the source without DOM
   globals. Public cache rules, private navigation exclusions, the version
   query, registration and response headers shall remain unchanged.
-- TT-5.3 PostCSS configuration shall remain the sole owned JavaScript source
-  exemption because the installed Next 16.4.2 find-config loader does not
-  include a TypeScript extension. Vendored documentation assets remain unchanged.
+- TT-5.3 PostCSS configuration shall be the JSON file
+  `apps/web/postcss.config.json`, read by both the webpack build and the
+  Turbopack dev server. Its compiled stylesheets shall equal those of the
+  former JavaScript configuration. Vendored documentation assets remain unchanged.
+
+### Language policy (TT-6)
+
+- TT-6.1 Tracked source files shall be TypeScript or Rust (ADR 0030). No
+  owned JavaScript shall be committed, including configuration; build output
+  stays git-ignored.
+- TT-6.2 The remaining Python files shall be only those listed in ADR 0030,
+  each removed from the policy test's allow-list in the commit that ports it.
 
 ## Non-functional
 
@@ -77,6 +86,8 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal on pinned production 9.1.2; native persisted-state proof in [milestone 104](../milestones/104-v0.2.20.md) |
 | TT-4 | Native before/after capture PNG hashes; capture-runtime, capture-selection and visual-clock tests |
 | TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; same headers passed on native deployment; milestones 100 and [104](../milestones/104-v0.2.20.md) |
+| TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
+| TT-6 | scripts/language-policy.test.ts |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions
@@ -87,3 +98,4 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 
 - [TypeScript task cards](../agent-goal-js-to-ts.md)
 - [Runtime contract](runtime.md)
+- [ADR 0030](../adr/0030-typescript-and-rust-only.md)

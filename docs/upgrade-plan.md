@@ -114,6 +114,7 @@ access design [ADR 0028](adr/0028-organization-wide-agent-grants.md).
 | 3 | v0.2.19 | Access matrix: `/orgs/access` and `/admin/access`; generated `docs/spec/permissions-matrix.md`; summary text and image renders (Rust `taff-render` service, migration 0041, `SUMMARY_RENDER_URL`), MCP `summaries.*` read tools with scope `summaries:read` (ADR 0029); CHANGELOG backfill v0.2.15–16. | `e2e/access.spec.ts` and `summaries.spec.ts` three locales; `pnpm rust:gate` render goldens; Today ≤ 200 KiB; four image builds. |
 | 4 | v0.2.20 | JavaScript-to-TypeScript T0–T3; small open items C1–C6. | Table below. |
 | — | no release | PR #82 rebased (0041) and merged on its evidence; Rust phase 0 (PR #84 rebased, local `pnpm rust:gate`) and phase 1. | `cargo fmt/clippy/test/deny`, fixture diff clean. |
+| 5 | v0.2.21 | Designed summary report: shared display layout, colour Rust image (`image-2`), structured text (`text-2`); Python ports P1–P4 (ADR 0030). Plan: [agent-goal-v0.2.21-report-design-and-ports.md](agent-goal-v0.2.21-report-design-and-ports.md). | Three locale image and text goldens reviewed; `pnpm rust:gate`; policy test allow-list shrinks; neighbour check dual-run identical. |
 
 ## Tooling move: TypeScript-only sources (v0.2.20)
 

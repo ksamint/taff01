@@ -12,6 +12,8 @@ Taff is an open-source (MIT), performance-first, AI-native task and calendar app
 
 ## Stack (backend migrating to Rust — see ADR 0026)
 
+Languages: TypeScript and Rust only (ADR 0030). No new JavaScript, Python or shell; configuration is JSON, YAML, TOML or TypeScript.
+
 Frontend (unchanged): TypeScript 7 · Next.js 16 App Router · React 19 · Tailwind 4 · shadcn/ui on the TABLE AI design tokens · TanStack Query 5 (IndexedDB persist) · @schedule-x/react 4 · i18next 26 · date-fns 4 · Biome 2 · Vitest 5 · Playwright · pnpm 12 · Turborepo 2.
 
 Backend (migrating from TypeScript to Rust, phased, parity-gated): Rust (edition 2024) · `axum` (replacing Hono) · `sqlx`/`tokio` (replacing Drizzle ORM + `postgres` driver) · `chrono`/`chrono-tz` + `rrule` (calendar recurrence) · `tracing` (replacing pino) · serde + a JSON-Schema validator consuming the generated schema from `packages/schemas` (single source of truth) · PostgreSQL 18 · Valkey 9. Until each module cutover completes, `packages/core` stays the database/session/permission authority and both run side by side.

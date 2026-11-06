@@ -188,7 +188,9 @@ optimization and does not block this release’s acceptance.
 
 ## Decisions and remaining scope
 
-1. `apps/web/postcss.config.mjs` stays JavaScript. Next 16.4.2's
+1. Superseded 2026-11-06 by ADR 0030: the loader reads `postcss.config.json`
+   first, so the file is now JSON and no owned JavaScript remains.
+   Original text: `apps/web/postcss.config.mjs` stays JavaScript. Next 16.4.2's
    `dist/lib/find-config.js` reads only `.json`, `.js`, `.mjs` and `.cjs`;
    a `postcss.config.ts` would be ignored silently and Tailwind would stop
    compiling. Record it as the one documented exception. Default: keep.

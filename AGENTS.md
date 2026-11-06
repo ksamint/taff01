@@ -21,6 +21,9 @@ Before credential-dependent work, read
 blocker without changing permissions or requesting repeated desktop sign-in.
 Never commit secrets.
 
+Write new source in TypeScript or Rust only (ADR 0030); configuration is
+data or TypeScript. `scripts/language-policy.test.ts` fails on anything else.
+
 Product requirements live in `docs/spec/<module>.md`, one living spec per
 module written with the `module-spec` skill (`.claude/skills/module-spec/`).
 Change the spec in the same commit as the behaviour it describes: ADRs record
