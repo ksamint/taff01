@@ -1,22 +1,24 @@
-# Agent goal: TypeScript-only sources — retire the last JavaScript files, release as v0.2.18
+# Agent goal: TypeScript-only sources — v0.2.20
 
-> Status 2026-11-05: plan written after the v0.2.17 review
-> (`docs/milestones/91-js-to-ts-plan.md`). No code change yet. The owner
-> reviews asynchronously; the three open decisions below have proposed
-> defaults, so build on those unless redirected.
+> Status 2026-11-06: T0 and T1 are implemented on the isolated v0.2.20
+> hardening branch. T2 source/build work is implemented; PWA/header acceptance
+> is pending. T3 versions/changelog are prepared; final integration, checks
+> on the final source and release closeout remain pending. See
+> [milestone 100](milestones/100-v0.2.20-implementation.md).
 >
-> **2026-11-05 (later):** sequenced as v0.2.20 after the access work; read
-> `agent-goal-access-and-completion.md` §2. Replace "v0.2.18" below with
-> "v0.2.20" and "after the v0.2.17 closeout" with "after the v0.2.19 closeout".
+> Sequencing follows `agent-goal-access-and-completion.md`: release after
+> v0.2.19. PR #82 hardening ships in the same candidate, including additive
+> migration 0042 and the runtime/storage changes in `spec/runtime.md`.
 
 Paste everything below this line as the goal.
 
 ---
 
-Work in `ksamint/taff01` on a branch from `main` **after the v0.2.17
-production closeout is recorded** (`docs/deploy.md` checkpoint, tag
-`v0.2.17`); the v0.2.17 gate evidence belongs to its own SHA and is not
-re-run for this change. Read first: `AGENTS.md`, `instruction_v0.md`,
+Work in `ksamint/taff01` on an isolated branch from `main`. Development may
+proceed while prior releases are validated; v0.2.20 activation follows the
+v0.2.19 production closeout (`docs/deploy.md` checkpoint and tag `v0.2.19`).
+Each release retains its own exact-source gate evidence.
+Read first: `AGENTS.md`, `instruction_v0.md`,
 `docs/release-closeout.md` (check 1 is the local gate), `docs/deploy.md`
 "Release candidate v0.2.17" (the checkpoint format), ADR 0024 (Node 26).
 
@@ -24,10 +26,17 @@ Standing rules: no new dependency; `strict` TypeScript with no `any` and no
 `@ts-ignore`; conventional commits; tests ship with the code; never commit
 secrets; no `.github/` workflows; no CI, no runners.
 
-## What exists
+## Original inventory and final source audit
 
-The repository has 456 TypeScript files and 13 JavaScript files (2,802
-lines) that are code. Everything under `docs/ui/prototype*/` (vendored React
+The original plan counted 456 TypeScript files and 13 JavaScript files
+(2,802 lines). PR #82 also added `scripts/valkey-rehearsal.mjs`; it was
+converted to `valkey-rehearsal.mts` with the root operator scripts.
+The final tracked JavaScript inventory outside `docs/ui/` is exactly
+`apps/web/postcss.config.mjs`. Twelve owned operator/capture modules now use
+`.mts`; the service worker uses `src/sw/sw.ts` and generates ignored `public/sw.js`.
+Dated audits, capture manifests, deployment history and the original table
+below retain their historical source paths.
+Everything under `docs/ui/prototype*/` (vendored React
 builds, the design-system bundle and the static prototype's `support.js` and
 `taff-store.js`) is a documentation asset, excluded from Biome, and stays as
 it is.
@@ -52,7 +61,7 @@ it is.
 
 - **Node runs `.mts` directly.** The engines field is `>=24 <27` and
   production is Node 26 (ADR 0024); both strip types natively.
-  `scripts/ui/app-shots.mjs` already imports `./prepare-fonts.ts` and
+  Before conversion, `scripts/ui/app-shots.mjs` already imported `./prepare-fonts.ts` and
   `prepare-view.ts` this way and `capture-runtime.test.ts` spawns it with a
   plain `node`, so the pattern is already inside the gate. Keep the syntax
   erasable (no `enum`, `namespace`, parameter properties or `import =`);
@@ -92,7 +101,7 @@ never been type-checked by the gate. Before renaming anything:
    (`fix(scripts):` / `fix(e2e):`), without changing behaviour. Record the
    count in the milestone; if it is above 40, stop and report before fixing.
 
-## T1 — Rename the eleven scripts (one commit per directory)
+## T1 — Rename the owned scripts (one commit per directory)
 
 1. `git mv` each `.mjs` to `.mts`; add parameter and return types from the
    callers; type `page.evaluate` results with `unknown` and narrow; keep every
@@ -144,26 +153,38 @@ never been type-checked by the gate. Before renaming anything:
    green in en, zh-CN and zh-HK; `curl -I /sw.js` on the candidate stack
    shows `Cache-Control: no-cache` and `Service-Worker-Allowed: /`.
 
-## T3 — Release v0.2.18
+## T3 — Release v0.2.20
 
-1. Bump `apps/api`, `apps/web` and `apps/worker` to 0.2.18 (lockstep, as
-   every release). `CHANGELOG.md`: "v0.2.18 — TypeScript-only sources": the
-   runtime delta is the service worker now built from TypeScript; API and
-   worker images carry no code change; no migration, no environment variable,
-   no new dependency.
-2. `docs/deploy.md`: "Release candidate v0.2.18" in the v0.2.17 format:
-   source SHA, scope, "no migration", routing unchanged, assets (only
-   `sw.js` is regenerated), the local gate results, live acceptance (health,
-   `/sw.js` headers, one signed-in page load that registers the worker,
-   `/mcp` 401), rollback = v0.2.17 images.
-3. Run the whole local gate from `docs/release-closeout.md` check 1 on the
-   release SHA; record pass and fail counts; a check that cannot run is
-   listed as not run. The 13 failures the owner accepted for v0.2.17 are
-   expected to repeat unless fixed; list them as pre-existing, never as
-   passing. Milestone `docs/milestones/NN-v0.2.18.md` (≤ 40 lines), push to
-   `main`, then the deploy operator's native steps and closeout.
+1. Align `apps/api`, `apps/web` and `apps/worker` at 0.2.20. The changelog
+   covers typed tooling and the service-worker build alongside the cumulative
+   OAuth/runtime hardening and C1–C6 completion work that actually lands.
+   Migration 0042 and persisted Valkey configuration belong to PR #82;
+   the TypeScript conversion itself adds no migration or dependency name.
+2. After final integration, add the v0.2.20 checkpoint to `docs/deploy.md`
+   using `docs/release-closeout.md`: exact validated source, cumulative scope,
+   migration/storage changes, generated assets, actual gate results and
+   required live acceptance. Rollback uses the accepted v0.2.19 artifacts;
+   preserve additive data and queued jobs per the existing runtime contract.
+3. Run the complete exact-source local gate from `docs/release-closeout.md`
+   check 1. Record pass/fail/skip/not-run counts in a milestone of ≤40 lines.
+   Prior release exceptions stay with their own source; this candidate needs
+   its own gate. Push and native release follow only after that gate and the
+   preceding release closeouts.
 
-## Open decisions (defaults proposed)
+### Current completion audit
+
+| Card | Implemented source/evidence | Remaining acceptance |
+| --- | --- | --- |
+| T0 | Strict six-package/root check, erasable syntax and no-any/no-ignore rules; baseline 28 diagnostics in 14 files | Repeat on final integrated source |
+| T1 | Twelve native modules, declarations removed, callers updated; live fork guard/discovery, stack/Valkey, UI tests and 8 PNG parity checks | Full final-source gate |
+| T2 | Typed worker, explicit build/dev chain, separate worker check, ignored output; canonical emitted-code parity | PWA in all three locales and production worker headers |
+| T3 | All three app versions 0.2.20, changelog/spec and source inventory | C5/C6 integration/decision, exact-source full gate, deploy checkpoint and native closeout |
+
+The runtime slot is serialized behind v0.2.18/v0.2.19 acceptance. Pending
+checks are not passes. C5's route-group move awaits the owner's decision;
+the legacy shared-page measurement remains 187.5 KiB, not a 50 KiB result.
+
+## Decisions and remaining scope
 
 1. `apps/web/postcss.config.mjs` stays JavaScript. Next 16.4.2's
    `dist/lib/find-config.js` reads only `.json`, `.js`, `.mjs` and `.cjs`;
@@ -172,14 +193,13 @@ never been type-checked by the gate. Before renaming anything:
 2. Native type stripping versus tsx for the direct `node *.mts` entries.
    Default: native, because the gate already depends on it (T1 note) and it
    adds no loader to the operator's commands.
-3. Ship as v0.2.18 after the v0.2.17 closeout rather than folding into the
-   v0.2.17 candidate. Default: separate release, so the recorded v0.2.17
-   evidence stays tied to its SHA.
+3. Ship as v0.2.20 after the v0.2.19 closeout. Each release retains its own
+   exact-source validation and deployment evidence.
 
 ## Validation before every push
 
 `pnpm lint && pnpm typecheck && pnpm licence:check && pnpm test && pnpm build && pnpm build:server && pnpm perf:budget && pnpm e2e && pnpm mcp:smoke`,
 then `release:stack --migrate --seed --worker` and `release:checklist` for
 T3. Count the JavaScript files at the end:
-`git ls-files | grep -E '\.(js|mjs|cjs|jsx)$' | grep -v '^docs/ui/'` must
+`git ls-files | rg '\.(js|mjs|cjs|jsx)$' | rg -v '^docs/ui/'` must
 print `apps/web/postcss.config.mjs` and nothing else.

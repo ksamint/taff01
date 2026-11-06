@@ -35,7 +35,7 @@ text and PNG files, with three read-only MCP tools under `summaries:read`.
 The internal Rust renderer uses the same generated schema and bundled fonts;
 local Docker Compose builds it automatically (see `.env.example`).
 
-**v0.2.20 (candidate) — authorization and runtime recovery.** OAuth replay
+**v0.2.20 (candidate) — typed tooling and runtime hardening.** OAuth replay
 ends the affected refresh family; current authority remains locked through
 writes. Bounded shutdown, SQL deadlines and persisted noeviction queues follow
 the [agent access](docs/spec/agent-access.md) and
@@ -179,6 +179,13 @@ that dedicated database. Mobile Playwright runs en, zh-CN and zh-HK, verifies re
 signup and assignment, language persistence and optimistic rollback. It requires
 the seeded demo password and starts the development services if needed. It adds
 sample users/tasks to the local app database.
+
+`pnpm typecheck` checks all six packages plus root scripts, e2e sources and
+Playwright/Vitest configuration. The converted operator and capture drivers execute as
+native `.mts` modules on Node 24–26. Web dev/build explicitly generates the
+service worker from TypeScript; `apps/web/postcss.config.mjs` is the single owned
+JavaScript exception required by the installed Next configuration loader.
+Vendored `docs/ui/` assets retain their original format.
 
 `pnpm build` builds the web production bundle; `pnpm perf:budget` then measures
 the Today page's gzipped JavaScript against the 200 KiB budget, and

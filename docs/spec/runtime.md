@@ -59,7 +59,7 @@ Status: v0.2.20 candidate; no production activation in this change.
 | RT-1 | apps/api/src/shutdown.test.ts; runtime-faults.mts |
 | RT-2.1 | statement-timeout.integration.test.ts |
 | RT-2.2, RT-2.4 | runtime-faults.mts; tracked dependency patches |
-| RT-2.3 | scripts/apuch-compose.test.ts; scripts/valkey-rehearsal.mjs |
+| RT-2.3 | scripts/apuch-compose.test.ts; scripts/valkey-rehearsal.mts |
 | RT-2.5 | Dockerfiles; non-root image smoke; release closeout |
 
 ## Open decisions

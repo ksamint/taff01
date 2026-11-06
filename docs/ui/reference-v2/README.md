@@ -13,8 +13,8 @@ pnpm ui:prototype-shots --v2 --only=phone-mcp         # files whose name contain
 pnpm ui:prototype-shots --v2 /tmp/shots               # another output directory
 ```
 
-The script (`scripts/ui/prototype-shots.mjs`, which hands `--v2` to
-`scripts/ui/prototype-shots-v2.mjs`) works like this:
+The script (`scripts/ui/prototype-shots.mts`, which hands `--v2` to
+`scripts/ui/prototype-shots-v2.mts`) works like this:
 
 - It serves `docs/ui` on an ephemeral loopback port, because the prototype
   loads fonts from `../prototype/vendor/`. It opens

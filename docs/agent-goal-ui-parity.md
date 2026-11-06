@@ -30,8 +30,8 @@ Step 0, before any UI work: make the prototype viewable offline. It loads
 React 18.3.1 UMD from unpkg; vendor `react.production.min.js` and
 `react-dom.production.min.js` (MIT) into `docs/ui/prototype/vendor/` and
 point `support.js` at them. Add `pnpm ui:prototype-shots` (from
-`scripts/ui/prototype-shots.mjs`, serving the folder statically) and
-`pnpm ui:app-shots` (from `scripts/ui/app-shots.mjs`) as scripts. Capture the
+`scripts/ui/prototype-shots.mts`, serving the folder statically) and
+`pnpm ui:app-shots` (from `scripts/ui/app-shots.mts`) as scripts. Capture the
 prototype's five tabs plus task detail, review, agent profile, MCP, search,
 organisation sheet and the desktop board in zh and en at 390×844 and
 1280×800, commit them under `docs/ui/reference/`, and walk the prototype

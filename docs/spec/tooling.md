@@ -3,7 +3,7 @@
 Living specification for scripts, browser tests and operator tooling.
 Change it in the same commit as the behavior it describes.
 
-Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
+Status: v0.2.20 candidate; T0/T1 implemented, T2 runtime and T3 release acceptance pending.
 
 ## Users and roles
 
@@ -39,7 +39,7 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
 
 ### UI capture drivers (TT-4)
 
-- TT-4.1 Every owned capture driver and clock helper shall execute as native
+- TT-4.1 The converted capture drivers and clock helpers shall execute as native
   .mts modules with typed Playwright boundaries and checked capture selection.
 - TT-4.2 Renaming shall retain the capture matrix, paths, timers, fonts and
   screenshots. Browser-returned fixture data shall cross an unknown boundary
@@ -54,11 +54,13 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
   globals. Public cache rules, private navigation exclusions, the version
   query, registration and response headers shall remain unchanged.
 - TT-5.3 PostCSS configuration shall remain the sole owned JavaScript source
-  exemption because Next's configuration loader does not accept TypeScript.
+  exemption because the installed Next 16.4.2 find-config loader does not
+  include a TypeScript extension. Vendored documentation assets remain unchanged.
 
 ## Non-functional
 
-- No new dependency; Node 24–26 remains supported. Library errors retain their
+- No new dependency name; web declares the same esbuild version already used
+  at the root. Node 24–26 remains supported. Library errors retain their
   existing public properties after parameter-property syntax is removed.
 - Browser capture calls shall retain their existing font and clock behavior.
 
@@ -79,7 +81,8 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
 
 ## Open decisions
 
-- Runtime PWA/header acceptance follows the serialized local release gate.
+- Runtime PWA/header acceptance and the complete final-source release gate
+  remain pending; all prior checkpoint counts stay attributed to their source.
 
 ## Sources
 

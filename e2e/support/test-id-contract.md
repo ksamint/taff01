@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (409 distinct, 2044 uses)
+## Test ids (414 distinct, 2061 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -90,13 +90,15 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `ask-answer` | 4 |  | brief.spec.ts, live/brief.spec.ts |
+| `ask-answer` | 5 |  | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |
 | `ask-heading` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `ask-input` | 4 |  | brief.spec.ts, live/brief.spec.ts |
-| `ask-item` | 4 |  | brief.spec.ts, live/brief.spec.ts |
+| `ask-item` | 7 |  | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |
 | `ask-send` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `ask-text` | 1 |  | completion.spec.ts |
 | `ask-try-atRisk` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `ask-try-blocked` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `ask-try-load` | 1 |  | completion.spec.ts |
 | `brief-action` | 7 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-action-open` | 8 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-close` | 4 |  | brief.spec.ts, live/brief.spec.ts |
@@ -113,7 +115,7 @@ several do). “Also rendered by” lists the other files.
 | `brief-stat-dueToday` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-stat-toConfirm` | 2 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-stats` | 3 |  | brief.spec.ts, live/brief.spec.ts, ui-v2.spec.ts |
-| `brief-view` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `brief-view` | 3 |  | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |
 
 ### calendar-engine.tsx
 
@@ -285,7 +287,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `me-advanced` | 4 | me-view.tsx | live/v021-feature-gaps.spec.ts, me.spec.ts, v021-feature-gaps.spec.ts |
 | `me-organization` | 5 | me-view.tsx | me.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
-| `me-tab-brief` | 2 |  | brief.spec.ts, live/brief.spec.ts |
+| `me-tab-brief` | 4 |  | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |
 | `me-tab-inbox` | 4 |  | brief.spec.ts, live/brief.spec.ts |
 | `open-mcp` | 4 | me-view.tsx | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts |
 
@@ -383,6 +385,8 @@ several do). “Also rendered by” lists the other files.
 | `oauth-client` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-consent` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-invalid` | 1 |  | mcp-oauth.spec.ts |
+| `oauth-manage-organizations` | 1 |  | completion.spec.ts |
+| `oauth-no-agent` | 2 |  | completion.spec.ts |
 | `oauth-redirect` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-scope-files:write` | 4 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-scope-locked-files:write` | 2 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
@@ -409,6 +413,7 @@ several do). “Also rendered by” lists the other files.
 | `accept-invitation` | 5 |  | live/live.ts, planning.spec.ts |
 | `agent-create` | 6 |  | agent-creation.spec.ts, release/support.ts |
 | `agent-name` | 6 |  | agent-creation.spec.ts, release/support.ts |
+| `oauth-return-consent` | 1 |  | completion.spec.ts |
 | `open-access-matrix` | 1 |  | access.spec.ts |
 | `open-summaries-admin` | 1 |  | summaries.spec.ts |
 | `team-add-agent` | 8 |  | agent-creation.spec.ts, release/support.ts |
@@ -437,13 +442,13 @@ several do). “Also rendered by” lists the other files.
 | `board-task` | 21 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `manage-project` | 5 |  | project-profile.spec.ts, summaries.spec.ts |
-| `new-project` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
-| `project-filter` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
+| `new-project` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-filter` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, release/checklist.spec.ts |
 | `project-filters` | 9 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts |
 | `project-label` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-lead` | 2 |  | project-profile.spec.ts |
 | `project-lead-select` | 5 |  | project-profile.spec.ts |
-| `project-name` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-name` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-select` | 1 |  | support/task-fields.ts |
 | `project-sort` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-stage` | 1 |  | project-profile.spec.ts |
@@ -795,7 +800,7 @@ several do). “Also rendered by” lists the other files.
 | `row` | 3 | access.spec.ts |
 | `rowheader — name: client.client_name` | 1 | access.spec.ts |
 | `rowheader — name: token.name` | 2 | access.spec.ts |
-| `status` | 1 | sms-auth.spec.ts |
+| `status` | 2 | completion.spec.ts, sms-auth.spec.ts |
 | `switch` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `tab — name: m.access.agents` | 1 | access.spec.ts |
 | `tab — name: m.access.apps` | 1 | access.spec.ts |
@@ -868,6 +873,7 @@ read (`data-event-id`, `data-date`).
 | `.mcp-state[data-state="active"]` | 6 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="revoked"]` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.me-agent-card` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `.me-desk-panel` | 1 | completion.spec.ts |
 | `.me-profile-copy strong` | 1 | me.spec.ts |
 | `.notifications-body` | 1 | notifications.spec.ts |
 | `.organization-choices` | 1 | scripts/ui/app-shots.mts |
@@ -911,6 +917,7 @@ read (`data-event-id`, `data-date`).
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
 | `[data-agent-id="*"]` | 1 | access.spec.ts |
+| `[data-intent="load"]` | 1 | completion.spec.ts |
 | `[data-source]` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `[data-testid="contact-link"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="contact-row"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
@@ -989,7 +996,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
 | `ask.answer.unknown` | 6 | brief.spec.ts, live/brief.spec.ts |
-| `ask.rules` | 12 | brief.spec.ts, live/brief.spec.ts |
+| `ask.rules` | 13 | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |
 | `ask.suggestion.blocked` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `ask.suggestion.needsMe` | 3 | live/brief.spec.ts |
 | `audience.chip` | 1 | summaries.spec.ts |
@@ -1037,7 +1044,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `home.headline1` | 7 | home-layout.spec.ts, landing.spec.ts, ui-v2.spec.ts |
 | `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |
 | `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
-| `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
+| `loading` | 4 | completion.spec.ts, i18n.spec.ts, ui-v2.spec.ts |
 | `mcp.cancel` | 5 | access.spec.ts, token-grants.spec.ts |
 | `mcp.confirmRevoke` | 3 | access.spec.ts |
 | `mcp.grantActive` | 8 | access.spec.ts, token-grants.spec.ts |
@@ -1083,6 +1090,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `oauth.approve` | 1 | mcp-oauth.spec.ts |
 | `oauth.invalid` | 1 | mcp-oauth.spec.ts |
 | `oauth.noAgent` | 1 | agent-creation.spec.ts |
+| `oauth.returnToConsent` | 1 | completion.spec.ts |
 | `organization.accept` | 5 | planning.spec.ts |
 | `organization.adminRequired` | 1 | agent-creation.spec.ts |
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |

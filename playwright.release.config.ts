@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 // R1 release checklist (plan §6.0). It runs against an already running stack
-// — a local production-mode stack (scripts/release-stack.mjs) or the live
+// — a local production-mode stack (scripts/release-stack.mts) or the live
 // origin — and never starts servers itself. See docs/deploy.md, "Release
 // candidate checks".
 const baseURL = process.env.RELEASE_BASE_URL ?? "http://localhost:3000";
