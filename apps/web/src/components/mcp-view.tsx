@@ -39,6 +39,7 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
+import { TokenPolicyControl } from "./token-policy-control";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -57,6 +58,13 @@ export const TOOLS: readonly (readonly [string, string])[] = [
   ["tasks.comments.list", "readComments"],
   ["tasks.comments.add", "addComment"],
   ["projects.list", "readProjects"],
+  ["projects.create", "createProject"],
+  ["projects.edit", "editProject"],
+  ["context.get", "readContext"],
+  ["workspaces.list", "readWorkspaces"],
+  ["summaries.list", "listSummaries"],
+  ["summaries.get", "readSummary"],
+  ["summaries.image", "summaryImage"],
   ["search.query", "search"],
   ["quickadd.parse", "parseDraft"],
   ["calendar.list", "calendarList"],
@@ -441,7 +449,9 @@ export function McpView({ origin }: { origin?: string }) {
                   </div>
                   <fieldset className="mcp-scopes">
                     <legend className="mcp-label">{t("mcp.scopes")}</legend>
-                    {SCOPES.map((scope) => (
+                    {SCOPES.filter(
+                      (scope) => scope !== "summaries:read" || isAdmin,
+                    ).map((scope) => (
                       <label key={scope} className="mcp-scope">
                         <span className="mcp-row-copy">
                           <span className="mcp-row-title">
@@ -818,9 +828,7 @@ function TokenWorkspaces({
   const { t } = useTranslation();
   const { me, confirmed } = useWorkspace();
   const client = useQueryClient();
-  const [confirm, setConfirm] = useState<
-    { kind: "restore"; grant: AgentTokenWorkspace } | { kind: "policy" } | null
-  >(null);
+  const [confirm, setConfirm] = useState<AgentTokenWorkspace | null>(null);
   const [target, setTarget] = useState(workspaceId);
   const [memberId, setMemberId] = useState(token.memberId);
   const [scopes, setScopes] = useState<Scope[]>(["tasks:read"]);
@@ -834,46 +842,13 @@ function TokenWorkspaces({
         ),
       ),
   });
-  const organizations = useQuery({
-    queryKey: ["admin-workspaces"],
-    enabled: me.user.systemAdmin === true && confirm?.kind === "policy",
-    queryFn: () =>
-      request<
-        Array<{
-          id: string;
-          name: string;
-          personalOwnerId: string | null;
-          archivedAt: string | null;
-        }>
-      >("/api/admin/workspaces"),
-  });
-  const eligible = organizations.data?.filter(
-    (item) => !item.personalOwnerId && !item.archivedAt,
-  );
   async function applyConfirmation() {
     if (!confirm || !confirmed || busy) return;
     setBusy(true);
     try {
-      if (confirm.kind === "restore") {
-        await request(
-          `/api/agent-token-workspaces/${confirm.grant.id}/restore`,
-          { method: "POST" },
-        );
-      } else {
-        await request(`/api/agent-tokens/${token.id}/organization-policy`, {
-          method: "PUT",
-          body: JSON.stringify({
-            version: token.version,
-            policy:
-              token.organizationPolicy === "explicit"
-                ? "all_organizations"
-                : "explicit",
-          }),
-        });
-        await client.invalidateQueries({
-          queryKey: agentTokensKey(workspaceId),
-        });
-      }
+      await request(`/api/agent-token-workspaces/${confirm.id}/restore`, {
+        method: "POST",
+      });
       await grants.refetch();
       setConfirm(null);
     } catch (error) {
@@ -886,7 +861,7 @@ function TokenWorkspaces({
     if (!confirmed || busy) return;
     const existing = grants.data?.find((grant) => grant.workspaceId === target);
     if (!revoked && existing?.revokedAt) {
-      setConfirm({ kind: "restore", grant: existing });
+      setConfirm(existing);
       return;
     }
     setBusy(true);
@@ -901,6 +876,7 @@ function TokenWorkspaces({
         }),
       });
       await grants.refetch();
+      await client.invalidateQueries({ queryKey: agentTokensKey(workspaceId) });
     } catch (error) {
       showToast(t(errorKey(error)));
     } finally {
@@ -912,15 +888,7 @@ function TokenWorkspaces({
       <h4>{t("mcp.workspaceGrants")}</h4>
       {grants.isError && <p role="alert">{t(errorKey(grants.error))}</p>}
       {me.user.systemAdmin && (
-        <Label className="mcp-row">
-          {t("mcp.policy.allOrganizations")}
-          <Switch
-            data-testid="token-policy-switch"
-            checked={token.organizationPolicy === "all_organizations"}
-            disabled={busy || !confirmed || !!token.revokedAt}
-            onChange={() => setConfirm({ kind: "policy" })}
-          />
-        </Label>
+        <TokenPolicyControl token={token} disabled={busy} />
       )}
       <ul className="mcp-rows">
         {grants.data?.map((grant) => (
@@ -957,7 +925,7 @@ function TokenWorkspaces({
                 type="button"
                 data-testid="grant-restore"
                 disabled={busy || !confirmed || !!token.revokedAt}
-                onClick={() => setConfirm({ kind: "restore", grant })}
+                onClick={() => setConfirm(grant)}
               >
                 {t("mcp.policy.restore")}
               </Button>
@@ -979,7 +947,14 @@ function TokenWorkspaces({
           onChange={(event) => setMemberId(event.target.value)}
         />
       </Label>
-      {SCOPES.map((scope) => (
+      {SCOPES.filter(
+        (scope) =>
+          scope !== "summaries:read" ||
+          me.user.systemAdmin ||
+          me.workspaces.some(
+            (item) => item.id === target && item.role === "admin",
+          ),
+      ).map((scope) => (
         <Label key={scope}>
           <input
             type="checkbox"
@@ -1012,42 +987,14 @@ function TokenWorkspaces({
       </Button>
       {confirm && (
         <SheetDialog
-          title={t(
-            confirm.kind === "restore"
-              ? "mcp.policy.restoreTitle"
-              : "mcp.policy.confirmTitle",
-          )}
+          title={t("mcp.policy.restoreTitle")}
           onClose={() => {
             if (!busy) setConfirm(null);
           }}
         >
-          {confirm.kind === "restore" ? (
-            <p>
-              {t("mcp.policy.restoreHint", {
-                workspace: confirm.grant.workspaceId,
-              })}
-            </p>
-          ) : (
-            <>
-              <p>
-                {t(
-                  token.organizationPolicy === "explicit"
-                    ? "mcp.policy.enrollHint"
-                    : "mcp.policy.explicitHint",
-                  { count: eligible?.length ?? 0 },
-                )}
-              </p>
-              {organizations.isPending && <p>{t("loading")}</p>}
-              {organizations.isError && (
-                <p role="alert">{t(errorKey(organizations.error))}</p>
-              )}
-              <ul>
-                {eligible?.map((organization) => (
-                  <li key={organization.id}>{organization.name}</li>
-                ))}
-              </ul>
-            </>
-          )}
+          <p>
+            {t("mcp.policy.restoreHint", { workspace: confirm.workspaceId })}
+          </p>
           <div className="mcp-actions mcp-confirm-actions">
             <Button
               type="button"
@@ -1061,18 +1008,10 @@ function TokenWorkspaces({
               type="button"
               className="button-primary"
               data-testid="grant-confirm"
-              disabled={
-                busy ||
-                !confirmed ||
-                (confirm.kind === "policy" && !organizations.isSuccess)
-              }
+              disabled={busy || !confirmed}
               onClick={() => void applyConfirmation()}
             >
-              {t(
-                confirm.kind === "restore"
-                  ? "mcp.policy.restore"
-                  : "mcp.policy.confirm",
-              )}
+              {t("mcp.policy.restore")}
             </Button>
           </div>
         </SheetDialog>

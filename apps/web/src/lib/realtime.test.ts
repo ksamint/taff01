@@ -49,7 +49,15 @@ beforeEach(() => {
   vi.stubGlobal("window", browser);
   vi.stubGlobal("WebSocket", Socket);
   client = new QueryClient();
-  for (const key of ["tasks", "me", "agent-tokens", "inbox", "unrelated"])
+  for (const key of [
+    "tasks",
+    "me",
+    "agent-tokens",
+    "access-matrix",
+    "system-access-matrix",
+    "inbox",
+    "unrelated",
+  ])
     client.setQueryData([key, workspaceId], []);
 });
 afterEach(() => {
@@ -74,6 +82,13 @@ describe("workspace realtime lifecycle", () => {
     expect(client.getQueryState(["tasks", workspaceId])?.isInvalidated).toBe(
       true,
     );
+    expect(
+      client.getQueryState(["access-matrix", workspaceId])?.isInvalidated,
+    ).toBe(true);
+    expect(
+      client.getQueryState(["system-access-matrix", workspaceId])
+        ?.isInvalidated,
+    ).toBe(true);
     expect(
       client.getQueryState(["unrelated", workspaceId])?.isInvalidated,
     ).toBe(false);

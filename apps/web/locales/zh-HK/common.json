@@ -274,7 +274,8 @@
       "tasks:write": "建立與更新任務",
       "calendar:write": "修改日程",
       "inbox:review": "提交審核",
-      "files:write": "附加交付物"
+      "files:write": "附加交付物",
+      "summaries:read": "讀取摘要"
     },
     "createToken": "建立權杖",
     "noTokens": "還沒有權杖。",
@@ -325,7 +326,14 @@
       "readContact": "讀取聯繫人及其關聯",
       "readRelations": "讀取關係圖（不含電話與電郵）",
       "readBrief": "讀取簡報（只含代碼與數字，不含財務）",
-      "proposeChange": "提出拆分或改期建議，由人決定是否採用"
+      "proposeChange": "提出拆分或改期建議，由人決定是否採用",
+      "createProject": "建立專案",
+      "editProject": "編輯專案",
+      "readContext": "讀取工作區內容",
+      "readWorkspaces": "列出授權工作區",
+      "listSummaries": "列出摘要",
+      "readSummary": "讀取摘要文字",
+      "summaryImage": "讀取摘要圖片"
     },
     "back": "返回",
     "copyEndpoint": "複製端點",
@@ -1431,7 +1439,9 @@
     "print": "列印或儲存為 PDF",
     "confidential": "機密文件,致 {{name}}。",
     "unavailableTitle": "此連結已無法使用",
-    "unavailableHint": "連結可能已過期或被撤銷。請向分享者索取新連結。"
+    "unavailableHint": "連結可能已過期或被撤銷。請向分享者索取新連結。",
+    "copyText": "複製文字",
+    "saveImage": "儲存圖片"
   },
   "audience": {
     "open": "股東摘要",
@@ -1494,5 +1504,25 @@
     "revokeConfirm": "撤銷此連結?持有連結的人會即時失去存取權。",
     "revoked": "連結已撤銷",
     "none": "暫未有連結。"
+  },
+  "access": {
+    "title": "工作區權限",
+    "open": "管理權限",
+    "systemTitle": "組織權限",
+    "people": "成員",
+    "agents": "智能體",
+    "tokens": "權杖",
+    "apps": "應用",
+    "role": "角色",
+    "origin": "來源",
+    "state": "狀態",
+    "actions": "操作",
+    "explain": "查看權限依據",
+    "archived": "已封存",
+    "updated": "權限已更新",
+    "selfDemotion": "更改自己的角色？",
+    "selfDemotionHint": "你可能無法再使用這些管理功能。其他管理員可以恢復你的角色。",
+    "confirm": "確認",
+    "name": "名稱"
   }
 }

@@ -52,6 +52,9 @@ const FAMILIES = [
   "project-audience-tags",
   "summaries",
   "summary-shares",
+  "access-matrix",
+  "system-access-matrix",
+  "access-explanation",
 ];
 
 export function connectWorkspace(

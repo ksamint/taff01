@@ -274,7 +274,8 @@
       "tasks:write": "创建与更新任务",
       "calendar:write": "修改日程",
       "inbox:review": "提交审核",
-      "files:write": "附加交付物"
+      "files:write": "附加交付物",
+      "summaries:read": "读取摘要"
     },
     "createToken": "创建令牌",
     "noTokens": "还没有令牌。",
@@ -325,7 +326,14 @@
       "readContact": "读取联系人及其关联",
       "readRelations": "读取关系图（不含电话与邮箱）",
       "readBrief": "读取简报（只含代码与数字，不含财务）",
-      "proposeChange": "提出拆分或改期建议，由人决定是否采用"
+      "proposeChange": "提出拆分或改期建议，由人决定是否采用",
+      "createProject": "创建项目",
+      "editProject": "编辑项目",
+      "readContext": "读取工作区上下文",
+      "readWorkspaces": "列出授权工作区",
+      "listSummaries": "列出摘要",
+      "readSummary": "读取摘要文本",
+      "summaryImage": "读取摘要图片"
     },
     "back": "返回",
     "copyEndpoint": "复制端点",
@@ -1431,7 +1439,9 @@
     "print": "打印或保存为 PDF",
     "confidential": "机密文件,致 {{name}}。",
     "unavailableTitle": "该链接已无法使用",
-    "unavailableHint": "链接可能已过期或被撤销。请向分享者索取新链接。"
+    "unavailableHint": "链接可能已过期或被撤销。请向分享者索取新链接。",
+    "copyText": "复制文本",
+    "saveImage": "保存图片"
   },
   "audience": {
     "open": "股东摘要",
@@ -1494,5 +1504,25 @@
     "revokeConfirm": "撤销此链接?持有链接的人会立即失去访问权限。",
     "revoked": "链接已撤销",
     "none": "暂无链接。"
+  },
+  "access": {
+    "title": "工作区权限",
+    "open": "管理权限",
+    "systemTitle": "组织权限",
+    "people": "成员",
+    "agents": "智能体",
+    "tokens": "令牌",
+    "apps": "应用",
+    "role": "角色",
+    "origin": "来源",
+    "state": "状态",
+    "actions": "操作",
+    "explain": "查看权限依据",
+    "archived": "已归档",
+    "updated": "权限已更新",
+    "selfDemotion": "更改自己的角色？",
+    "selfDemotionHint": "你可能无法再使用这些管理功能。其他管理员可以恢复你的角色。",
+    "confirm": "确认",
+    "name": "名称"
   }
 }

@@ -274,7 +274,8 @@
       "tasks:write": "Create and update tasks",
       "calendar:write": "Change events",
       "inbox:review": "Submit for review",
-      "files:write": "Attach deliverables"
+      "files:write": "Attach deliverables",
+      "summaries:read": "Read summaries"
     },
     "createToken": "Create token",
     "noTokens": "No tokens yet.",
@@ -325,7 +326,14 @@
       "readContact": "Read a contact and its links",
       "readRelations": "Read the relations graph (no phone or email)",
       "readBrief": "Read the brief (codes and numbers, no finance)",
-      "proposeChange": "Propose a split or reschedule for a person to apply"
+      "proposeChange": "Propose a split or reschedule for a person to apply",
+      "createProject": "Create a project",
+      "editProject": "Edit a project",
+      "readContext": "Read workspace context",
+      "readWorkspaces": "List authorized workspaces",
+      "listSummaries": "List summaries",
+      "readSummary": "Read summary text",
+      "summaryImage": "Read summary image"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",
@@ -1431,7 +1439,9 @@
     "print": "Print or save as PDF",
     "confidential": "Confidential. Prepared for {{name}}.",
     "unavailableTitle": "This link is no longer available",
-    "unavailableHint": "It may have expired or been revoked. Ask the person who shared it for a new link."
+    "unavailableHint": "It may have expired or been revoked. Ask the person who shared it for a new link.",
+    "copyText": "Copy text",
+    "saveImage": "Save image"
   },
   "audience": {
     "open": "Shareholder summaries",
@@ -1494,5 +1504,25 @@
     "revokeConfirm": "Revoke this link? Anyone holding it loses access immediately.",
     "revoked": "Link revoked",
     "none": "No links yet."
+  },
+  "access": {
+    "title": "Workspace access",
+    "open": "Manage access",
+    "systemTitle": "Organization access",
+    "people": "People",
+    "agents": "Agents",
+    "tokens": "Tokens",
+    "apps": "Apps",
+    "role": "Role",
+    "origin": "Origin",
+    "state": "Status",
+    "actions": "Actions",
+    "explain": "Explain access",
+    "archived": "Archived",
+    "updated": "Access updated",
+    "selfDemotion": "Change your own role?",
+    "selfDemotionHint": "You may lose access to these controls. Another administrator can restore your role.",
+    "confirm": "Confirm",
+    "name": "Name"
   }
 }
