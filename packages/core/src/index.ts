@@ -76,8 +76,18 @@ export {
   createLoggingEmailTransport,
 } from "./email";
 export { ACCESS_TOKEN_SECONDS, OAuthError } from "./oauth";
+export {
+  buildSummaryLayout,
+  estimateSummaryImageHeight,
+  fitSummaryLayout,
+  IMAGE_HEIGHT_BUDGET,
+} from "./summary-layout";
 export { summaryTranslate } from "./summary-messages";
-export { renderSummaryText } from "./summary-text";
+export {
+  renderSummaryLayoutText,
+  renderSummaryText,
+  SUMMARY_TEXT_VERSION,
+} from "./summary-text";
 export type { SmsProvider } from "./tencent-sms";
 export {
   createTencentSmsProvider,

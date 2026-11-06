@@ -1,0 +1,169 @@
+{
+  "layout": {
+    "version": 1,
+    "locale": "en",
+    "header": {
+      "title": "Daily progress",
+      "audience": "Shareholder · Harbour Capital",
+      "workspace": "Northwind",
+      "date": "2026-10-08"
+    },
+    "kpis": [
+      {
+        "key": "projects",
+        "label": "Projects",
+        "value": "1",
+        "tone": "neutral"
+      },
+      {
+        "key": "open",
+        "label": "Open tasks",
+        "value": "9",
+        "tone": "neutral"
+      },
+      {
+        "key": "completedToday",
+        "label": "Completed today",
+        "value": "1",
+        "tone": "neutral"
+      },
+      {
+        "key": "dueToday",
+        "label": "Due today",
+        "value": "2",
+        "tone": "neutral"
+      },
+      {
+        "key": "overdue",
+        "label": "Overdue",
+        "value": "0",
+        "tone": "neutral"
+      },
+      {
+        "key": "blocked",
+        "label": "Blocked",
+        "value": "1",
+        "tone": "warning"
+      },
+      {
+        "key": "inReview",
+        "label": "In review",
+        "value": "2",
+        "tone": "neutral"
+      }
+    ],
+    "projects": [
+      {
+        "name": "Checkout v2",
+        "stage": "In service",
+        "risk": {
+          "level": "medium",
+          "label": "Watch",
+          "reasons": [
+            "A task is blocked"
+          ]
+        },
+        "meta": [
+          "Lead: Alex Chen",
+          "Due Oct 15, 2026"
+        ],
+        "progress": {
+          "percent": 60,
+          "label": "Progress 60%"
+        },
+        "finance": {
+          "percent": 40,
+          "label": "Collected HK$512,000.00 of HK$1,280,000.00"
+        },
+        "agentRuns": "Agent runs: 1 finished today · 2 waiting for review",
+        "sections": [
+          {
+            "key": "completedToday",
+            "title": "Completed today",
+            "count": "1",
+            "items": [
+              {
+                "number": "#135",
+                "title": "Task NW-135",
+                "detail": "Mia Wong · Due Oct 6, 2026",
+                "overdue": false
+              }
+            ],
+            "more": null
+          },
+          {
+            "key": "movedToday",
+            "title": "Moved today",
+            "count": "2",
+            "items": [
+              {
+                "number": "#139",
+                "title": "Task NW-139",
+                "detail": "Mia Wong · Due Oct 10, 2026",
+                "overdue": false
+              },
+              {
+                "number": "#141",
+                "title": "Task NW-141",
+                "detail": "Mia Wong · Due Oct 8, 2026",
+                "overdue": false
+              }
+            ],
+            "more": null
+          },
+          {
+            "key": "dueToday",
+            "title": "Due today",
+            "count": "2",
+            "items": [
+              {
+                "number": "#141",
+                "title": "Task NW-141",
+                "detail": "Mia Wong · Due Oct 8, 2026",
+                "overdue": false
+              },
+              {
+                "number": "#142",
+                "title": "Task NW-142",
+                "detail": "Mia Wong · Due Oct 8, 2026",
+                "overdue": false
+              }
+            ],
+            "more": null
+          },
+          {
+            "key": "blocked",
+            "title": "Blocked",
+            "count": "1",
+            "items": [
+              {
+                "number": "#144",
+                "title": "Task NW-144",
+                "detail": "Mia Wong · Due Oct 9, 2026",
+                "overdue": false
+              }
+            ],
+            "more": null
+          }
+        ]
+      }
+    ],
+    "moreProjects": null,
+    "footer": {
+      "generated": "Generated Oct 8, 2026, 8:00 PM · Asia/Hong_Kong",
+      "watermark": "Pat Lee · Harbour Capital · 2026-10-08 · preview",
+      "hashLabel": "Hash",
+      "hashShort": "405ddea3…3c21",
+      "hashFull": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+    }
+  },
+  "watermark": {
+    "text": "Pat Lee · Harbour Capital · 2026-10-08 · preview",
+    "recipientName": "Pat Lee",
+    "org": "Harbour Capital",
+    "localDate": "2026-10-08",
+    "summaryId": null,
+    "contentHash": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+  },
+  "contentHash": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+}

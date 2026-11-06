@@ -48,7 +48,7 @@ describe("summary text", () => {
       }));
       const text = render(locale, source);
       expect(text.length).toBeLessThanOrEqual(4000);
-      expect(text).toMatch(/…\(\+\d+\)/);
+      expect(text).toMatch(/\+\d+ more|另有 \d+ (项|項)/);
       expect(text.replaceAll("\n", "").endsWith(fixture.contentHash)).toBe(
         true,
       );
@@ -57,7 +57,8 @@ describe("summary text", () => {
   it("retains a complete maximum-length task title instead of silently shortening it", () => {
     const source = structuredClone(snapshot);
     source.projects[0].completedToday[0].title = "x".repeat(200);
-    expect(render("en", source).replaceAll("\n", "")).toContain(
+    // Continuation lines are indented; joining them restores the title.
+    expect(render("en", source).replaceAll(/\n */g, "")).toContain(
       "x".repeat(200),
     );
   });

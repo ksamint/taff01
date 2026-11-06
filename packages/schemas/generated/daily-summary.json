@@ -1,662 +1,421 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "type": "object",
-  "properties": {
-    "snapshot": {
+  "anyOf": [
+    {
       "type": "object",
       "properties": {
-        "version": {
-          "type": "number",
-          "const": 1
-        },
-        "localDate": {
-          "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-        },
-        "timeZone": {
-          "type": "string"
-        },
-        "workspace": {
+        "layout": {
           "type": "object",
           "properties": {
-            "name": {
-              "type": "string"
+            "version": {
+              "type": "number",
+              "const": 1
+            },
+            "locale": {
+              "type": "string",
+              "enum": [
+                "en",
+                "zh-CN",
+                "zh-HK"
+              ]
+            },
+            "header": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "audience": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 220
+                },
+                "workspace": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 140
+                },
+                "date": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                }
+              },
+              "required": [
+                "title",
+                "audience",
+                "workspace",
+                "date"
+              ],
+              "additionalProperties": false
+            },
+            "kpis": {
+              "maxItems": 7,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string",
+                    "enum": [
+                      "projects",
+                      "open",
+                      "completedToday",
+                      "dueToday",
+                      "overdue",
+                      "blocked",
+                      "inReview"
+                    ]
+                  },
+                  "label": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 60
+                  },
+                  "value": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 20
+                  },
+                  "tone": {
+                    "type": "string",
+                    "enum": [
+                      "neutral",
+                      "warning",
+                      "danger"
+                    ]
+                  }
+                },
+                "required": [
+                  "key",
+                  "label",
+                  "value",
+                  "tone"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "projects": {
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 140
+                  },
+                  "stage": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "risk": {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "low",
+                          "medium",
+                          "high"
+                        ]
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 60
+                      },
+                      "reasons": {
+                        "maxItems": 4,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 120
+                        }
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "label",
+                      "reasons"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "meta": {
+                    "maxItems": 3,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    }
+                  },
+                  "progress": {
+                    "type": "object",
+                    "properties": {
+                      "percent": {
+                        "type": "number"
+                      },
+                      "label": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      }
+                    },
+                    "required": [
+                      "percent",
+                      "label"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "finance": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "percent": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "label": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 240
+                          }
+                        },
+                        "required": [
+                          "percent",
+                          "label"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "agentRuns": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 240
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "sections": {
+                    "maxItems": 5,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "key": {
+                          "type": "string",
+                          "enum": [
+                            "completedToday",
+                            "movedToday",
+                            "dueToday",
+                            "overdue",
+                            "blocked"
+                          ]
+                        },
+                        "title": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "count": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 20
+                        },
+                        "items": {
+                          "maxItems": 20,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "number": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 20
+                              },
+                              "title": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 220
+                              },
+                              "detail": {
+                                "type": "string",
+                                "maxLength": 300
+                              },
+                              "overdue": {
+                                "type": "boolean"
+                              }
+                            },
+                            "required": [
+                              "number",
+                              "title",
+                              "detail",
+                              "overdue"
+                            ],
+                            "additionalProperties": false
+                          }
+                        },
+                        "more": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "minLength": 1,
+                              "maxLength": 100
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "key",
+                        "title",
+                        "count",
+                        "items",
+                        "more"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": [
+                  "name",
+                  "stage",
+                  "risk",
+                  "meta",
+                  "progress",
+                  "finance",
+                  "agentRuns",
+                  "sections"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "moreProjects": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "footer": {
+              "type": "object",
+              "properties": {
+                "generated": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "watermark": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 400
+                },
+                "hashLabel": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 40
+                },
+                "hashShort": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{8}…[a-f0-9]{4}$"
+                },
+                "hashFull": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              },
+              "required": [
+                "generated",
+                "watermark",
+                "hashLabel",
+                "hashShort",
+                "hashFull"
+              ],
+              "additionalProperties": false
             }
           },
           "required": [
-            "name"
-          ]
+            "version",
+            "locale",
+            "header",
+            "kpis",
+            "projects",
+            "moreProjects",
+            "footer"
+          ],
+          "additionalProperties": false
         },
-        "tag": {
+        "watermark": {
           "type": "object",
           "properties": {
-            "kind": {
-              "type": "string",
-              "enum": [
-                "shareholder"
-              ]
+            "text": {
+              "type": "string"
+            },
+            "recipientName": {
+              "type": "string"
             },
             "org": {
               "type": "string"
             },
-            "label": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "kind",
-            "org",
-            "label"
-          ]
-        },
-        "recipient": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "name"
-          ]
-        },
-        "projects": {
-          "maxItems": 100,
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "projectId": {
-                "type": "string",
-                "format": "uuid",
-                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-              },
-              "name": {
-                "type": "string"
-              },
-              "stage": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "enum": [
-                      "lead",
-                      "proposal_sent",
-                      "contract_signed",
-                      "in_service",
-                      "closed"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "leadName": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "dueAt": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "format": "date-time",
-                    "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "deliveryProgress": {
-                "type": "number"
-              },
-              "risk": {
-                "type": "object",
-                "properties": {
-                  "level": {
-                    "type": "string",
-                    "enum": [
-                      "low",
-                      "medium",
-                      "high"
-                    ]
-                  },
-                  "reasons": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "enum": [
-                        "dependency_conflict",
-                        "slip",
-                        "blocked",
-                        "behind"
-                      ]
-                    }
-                  },
-                  "plannedEnd": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "forecastEnd": {
-                    "anyOf": [
-                      {
-                        "type": "string",
-                        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "slipDays": {
-                    "type": "number"
-                  },
-                  "deliveryPercent": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "level",
-                  "reasons",
-                  "plannedEnd",
-                  "forecastEnd",
-                  "slipDays",
-                  "deliveryPercent"
-                ]
-              },
-              "finance": {
-                "anyOf": [
-                  {
-                    "type": "object",
-                    "properties": {
-                      "currency": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "pattern": "^[A-Z]{3}$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "contractAmount": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ]
-                      },
-                      "collectedAmount": {
-                        "type": "string",
-                        "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
-                      },
-                      "collectedPercent": {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      }
-                    },
-                    "required": [
-                      "currency",
-                      "contractAmount",
-                      "collectedAmount",
-                      "collectedPercent"
-                    ]
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "counts": {
-                "type": "object",
-                "properties": {
-                  "total": {
-                    "type": "number"
-                  },
-                  "open": {
-                    "type": "number"
-                  },
-                  "done": {
-                    "type": "number"
-                  },
-                  "inReview": {
-                    "type": "number"
-                  },
-                  "blocked": {
-                    "type": "number"
-                  },
-                  "dueToday": {
-                    "type": "number"
-                  },
-                  "overdue": {
-                    "type": "number"
-                  },
-                  "completedToday": {
-                    "type": "number"
-                  },
-                  "movedToday": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "total",
-                  "open",
-                  "done",
-                  "inReview",
-                  "blocked",
-                  "dueToday",
-                  "overdue",
-                  "completedToday",
-                  "movedToday"
-                ]
-              },
-              "agentRuns": {
-                "type": "object",
-                "properties": {
-                  "completedToday": {
-                    "type": "number"
-                  },
-                  "pendingReview": {
-                    "type": "number"
-                  }
-                },
-                "required": [
-                  "completedToday",
-                  "pendingReview"
-                ]
-              },
-              "completedToday": {
-                "maxItems": 20,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "taskId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                    },
-                    "number": {
-                      "type": "number"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "todo",
-                        "in_progress",
-                        "needs_review",
-                        "done"
-                      ]
-                    },
-                    "ownerName": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "dueAt": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "format": "date-time",
-                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "taskId",
-                    "number",
-                    "title",
-                    "status",
-                    "ownerName",
-                    "dueAt"
-                  ]
-                }
-              },
-              "movedToday": {
-                "maxItems": 20,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "taskId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                    },
-                    "number": {
-                      "type": "number"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "todo",
-                        "in_progress",
-                        "needs_review",
-                        "done"
-                      ]
-                    },
-                    "ownerName": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "dueAt": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "format": "date-time",
-                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "taskId",
-                    "number",
-                    "title",
-                    "status",
-                    "ownerName",
-                    "dueAt"
-                  ]
-                }
-              },
-              "dueToday": {
-                "maxItems": 20,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "taskId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                    },
-                    "number": {
-                      "type": "number"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "todo",
-                        "in_progress",
-                        "needs_review",
-                        "done"
-                      ]
-                    },
-                    "ownerName": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "dueAt": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "format": "date-time",
-                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "taskId",
-                    "number",
-                    "title",
-                    "status",
-                    "ownerName",
-                    "dueAt"
-                  ]
-                }
-              },
-              "overdue": {
-                "maxItems": 20,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "taskId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                    },
-                    "number": {
-                      "type": "number"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "todo",
-                        "in_progress",
-                        "needs_review",
-                        "done"
-                      ]
-                    },
-                    "ownerName": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "dueAt": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "format": "date-time",
-                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "taskId",
-                    "number",
-                    "title",
-                    "status",
-                    "ownerName",
-                    "dueAt"
-                  ]
-                }
-              },
-              "blocked": {
-                "maxItems": 20,
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "taskId": {
-                      "type": "string",
-                      "format": "uuid",
-                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
-                    },
-                    "number": {
-                      "type": "number"
-                    },
-                    "title": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string",
-                      "enum": [
-                        "todo",
-                        "in_progress",
-                        "needs_review",
-                        "done"
-                      ]
-                    },
-                    "ownerName": {
-                      "type": [
-                        "string",
-                        "null"
-                      ]
-                    },
-                    "dueAt": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "format": "date-time",
-                          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ]
-                    }
-                  },
-                  "required": [
-                    "taskId",
-                    "number",
-                    "title",
-                    "status",
-                    "ownerName",
-                    "dueAt"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "projectId",
-              "name",
-              "stage",
-              "leadName",
-              "dueAt",
-              "deliveryProgress",
-              "risk",
-              "finance",
-              "counts",
-              "agentRuns",
-              "completedToday",
-              "movedToday",
-              "dueToday",
-              "overdue",
-              "blocked"
-            ]
-          }
-        },
-        "totals": {
-          "type": "object",
-          "properties": {
-            "projects": {
-              "type": "number"
-            },
-            "open": {
-              "type": "number"
-            },
-            "inReview": {
-              "type": "number"
-            },
-            "blocked": {
-              "type": "number"
-            },
-            "dueToday": {
-              "type": "number"
-            },
-            "overdue": {
-              "type": "number"
-            },
-            "completedToday": {
-              "type": "number"
-            },
-            "movedToday": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "projects",
-            "open",
-            "inReview",
-            "blocked",
-            "dueToday",
-            "overdue",
-            "completedToday",
-            "movedToday"
-          ]
-        },
-        "truncated": {
-          "type": "boolean"
-        }
-      },
-      "required": [
-        "version",
-        "localDate",
-        "timeZone",
-        "workspace",
-        "tag",
-        "recipient",
-        "projects",
-        "totals",
-        "truncated"
-      ]
-    },
-    "watermark": {
-      "type": "object",
-      "properties": {
-        "text": {
-          "type": "string"
-        },
-        "recipientName": {
-          "type": "string"
-        },
-        "org": {
-          "type": "string"
-        },
-        "localDate": {
-          "type": "string",
-          "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
-        },
-        "summaryId": {
-          "anyOf": [
-            {
+            "localDate": {
               "type": "string",
-              "format": "uuid",
-              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
             },
-            {
-              "type": "null"
+            "summaryId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
             }
+          },
+          "required": [
+            "text",
+            "recipientName",
+            "org",
+            "localDate",
+            "summaryId",
+            "contentHash"
           ]
         },
         "contentHash": {
@@ -665,50 +424,724 @@
         }
       },
       "required": [
-        "text",
-        "recipientName",
-        "org",
-        "localDate",
-        "summaryId",
+        "layout",
+        "watermark",
         "contentHash"
-      ]
+      ],
+      "additionalProperties": false
     },
-    "contentHash": {
-      "type": "string",
-      "pattern": "^[a-f0-9]{64}$"
-    },
-    "createdAt": {
-      "type": "string",
-      "format": "date-time",
-      "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
-    },
-    "locale": {
-      "type": "string",
-      "enum": [
-        "en",
-        "zh-CN",
-        "zh-HK"
-      ]
-    },
-    "text": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 4000
-    },
-    "formattedCreatedAt": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 200
+    {
+      "type": "object",
+      "properties": {
+        "snapshot": {
+          "type": "object",
+          "properties": {
+            "version": {
+              "type": "number",
+              "const": 1
+            },
+            "localDate": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "timeZone": {
+              "type": "string"
+            },
+            "workspace": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "tag": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "shareholder"
+                  ]
+                },
+                "org": {
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "kind",
+                "org",
+                "label"
+              ]
+            },
+            "recipient": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name"
+              ]
+            },
+            "projects": {
+              "maxItems": 100,
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "projectId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "stage": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "lead",
+                          "proposal_sent",
+                          "contract_signed",
+                          "in_service",
+                          "closed"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "leadName": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "dueAt": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "format": "date-time",
+                        "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "deliveryProgress": {
+                    "type": "number"
+                  },
+                  "risk": {
+                    "type": "object",
+                    "properties": {
+                      "level": {
+                        "type": "string",
+                        "enum": [
+                          "low",
+                          "medium",
+                          "high"
+                        ]
+                      },
+                      "reasons": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "enum": [
+                            "dependency_conflict",
+                            "slip",
+                            "blocked",
+                            "behind"
+                          ]
+                        }
+                      },
+                      "plannedEnd": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "forecastEnd": {
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
+                      "slipDays": {
+                        "type": "number"
+                      },
+                      "deliveryPercent": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "level",
+                      "reasons",
+                      "plannedEnd",
+                      "forecastEnd",
+                      "slipDays",
+                      "deliveryPercent"
+                    ]
+                  },
+                  "finance": {
+                    "anyOf": [
+                      {
+                        "type": "object",
+                        "properties": {
+                          "currency": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^[A-Z]{3}$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "contractAmount": {
+                            "anyOf": [
+                              {
+                                "type": "string",
+                                "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
+                              },
+                              {
+                                "type": "null"
+                              }
+                            ]
+                          },
+                          "collectedAmount": {
+                            "type": "string",
+                            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
+                          },
+                          "collectedPercent": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "currency",
+                          "contractAmount",
+                          "collectedAmount",
+                          "collectedPercent"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "counts": {
+                    "type": "object",
+                    "properties": {
+                      "total": {
+                        "type": "number"
+                      },
+                      "open": {
+                        "type": "number"
+                      },
+                      "done": {
+                        "type": "number"
+                      },
+                      "inReview": {
+                        "type": "number"
+                      },
+                      "blocked": {
+                        "type": "number"
+                      },
+                      "dueToday": {
+                        "type": "number"
+                      },
+                      "overdue": {
+                        "type": "number"
+                      },
+                      "completedToday": {
+                        "type": "number"
+                      },
+                      "movedToday": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "total",
+                      "open",
+                      "done",
+                      "inReview",
+                      "blocked",
+                      "dueToday",
+                      "overdue",
+                      "completedToday",
+                      "movedToday"
+                    ]
+                  },
+                  "agentRuns": {
+                    "type": "object",
+                    "properties": {
+                      "completedToday": {
+                        "type": "number"
+                      },
+                      "pendingReview": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "completedToday",
+                      "pendingReview"
+                    ]
+                  },
+                  "completedToday": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "number": {
+                          "type": "number"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "todo",
+                            "in_progress",
+                            "needs_review",
+                            "done"
+                          ]
+                        },
+                        "ownerName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "dueAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "number",
+                        "title",
+                        "status",
+                        "ownerName",
+                        "dueAt"
+                      ]
+                    }
+                  },
+                  "movedToday": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "number": {
+                          "type": "number"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "todo",
+                            "in_progress",
+                            "needs_review",
+                            "done"
+                          ]
+                        },
+                        "ownerName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "dueAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "number",
+                        "title",
+                        "status",
+                        "ownerName",
+                        "dueAt"
+                      ]
+                    }
+                  },
+                  "dueToday": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "number": {
+                          "type": "number"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "todo",
+                            "in_progress",
+                            "needs_review",
+                            "done"
+                          ]
+                        },
+                        "ownerName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "dueAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "number",
+                        "title",
+                        "status",
+                        "ownerName",
+                        "dueAt"
+                      ]
+                    }
+                  },
+                  "overdue": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "number": {
+                          "type": "number"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "todo",
+                            "in_progress",
+                            "needs_review",
+                            "done"
+                          ]
+                        },
+                        "ownerName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "dueAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "number",
+                        "title",
+                        "status",
+                        "ownerName",
+                        "dueAt"
+                      ]
+                    }
+                  },
+                  "blocked": {
+                    "maxItems": 20,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        },
+                        "number": {
+                          "type": "number"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "todo",
+                            "in_progress",
+                            "needs_review",
+                            "done"
+                          ]
+                        },
+                        "ownerName": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "dueAt": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "format": "date-time",
+                              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "number",
+                        "title",
+                        "status",
+                        "ownerName",
+                        "dueAt"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "projectId",
+                  "name",
+                  "stage",
+                  "leadName",
+                  "dueAt",
+                  "deliveryProgress",
+                  "risk",
+                  "finance",
+                  "counts",
+                  "agentRuns",
+                  "completedToday",
+                  "movedToday",
+                  "dueToday",
+                  "overdue",
+                  "blocked"
+                ]
+              }
+            },
+            "totals": {
+              "type": "object",
+              "properties": {
+                "projects": {
+                  "type": "number"
+                },
+                "open": {
+                  "type": "number"
+                },
+                "inReview": {
+                  "type": "number"
+                },
+                "blocked": {
+                  "type": "number"
+                },
+                "dueToday": {
+                  "type": "number"
+                },
+                "overdue": {
+                  "type": "number"
+                },
+                "completedToday": {
+                  "type": "number"
+                },
+                "movedToday": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "projects",
+                "open",
+                "inReview",
+                "blocked",
+                "dueToday",
+                "overdue",
+                "completedToday",
+                "movedToday"
+              ]
+            },
+            "truncated": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "version",
+            "localDate",
+            "timeZone",
+            "workspace",
+            "tag",
+            "recipient",
+            "projects",
+            "totals",
+            "truncated"
+          ]
+        },
+        "watermark": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "recipientName": {
+              "type": "string"
+            },
+            "org": {
+              "type": "string"
+            },
+            "localDate": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+            },
+            "summaryId": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "contentHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "text",
+            "recipientName",
+            "org",
+            "localDate",
+            "summaryId",
+            "contentHash"
+          ]
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z))$"
+        },
+        "locale": {
+          "type": "string",
+          "enum": [
+            "en",
+            "zh-CN",
+            "zh-HK"
+          ]
+        },
+        "text": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4000
+        },
+        "formattedCreatedAt": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        }
+      },
+      "required": [
+        "snapshot",
+        "watermark",
+        "contentHash",
+        "createdAt",
+        "locale",
+        "text",
+        "formattedCreatedAt"
+      ],
+      "additionalProperties": false
     }
-  },
-  "required": [
-    "snapshot",
-    "watermark",
-    "contentHash",
-    "createdAt",
-    "locale",
-    "text",
-    "formattedCreatedAt"
-  ],
-  "additionalProperties": false
+  ]
 }

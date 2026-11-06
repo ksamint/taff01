@@ -1450,7 +1450,13 @@
     "unavailableTitle": "该链接已无法使用",
     "unavailableHint": "链接可能已过期或被撤销。请向分享者索取新链接。",
     "copyText": "复制文本",
-    "saveImage": "保存图片"
+    "saveImage": "保存图片",
+    "progress": "进度 {{percent}}",
+    "collectedShare": "已收 {{percent}}",
+    "more": "另有 {{count}} 项",
+    "moreProjects": "另有 {{count}} 个项目",
+    "hashLabel": "哈希",
+    "riskLabel": "风险"
   },
   "audience": {
     "open": "股东摘要",

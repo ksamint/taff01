@@ -1,7 +1,12 @@
 import { createHash } from "node:crypto";
 import {
+  buildSummaryLayout,
   type createCore,
+  estimateSummaryImageHeight,
+  fitSummaryLayout,
+  IMAGE_HEIGHT_BUDGET,
   renderSummaryText,
+  SUMMARY_TEXT_VERSION,
   summaryTranslate,
 } from "@taff/core";
 import {
@@ -76,24 +81,32 @@ export function createSummaryProcessor(
           return await core.storeSummaryRender({
             ...data,
             body: text,
-            rendererVersion: "text-1",
+            rendererVersion: SUMMARY_TEXT_VERSION,
           });
-        const formattedCreatedAt = new Intl.DateTimeFormat(summary.locale, {
-          dateStyle: "medium",
-          timeStyle: "short",
-          timeZone: summary.timeZone,
-        }).format(new Date(summary.createdAt));
+        // image-2: the same display layout as the text, fitted so the PNG
+        // stays inside the renderer's height and 400 KB caps.
+        const t = summaryTranslate(summary.locale);
+        const layout = fitSummaryLayout(
+          (limits) =>
+            buildSummaryLayout(
+              summary.snapshot,
+              summary.watermark,
+              summary.contentHash,
+              summary.createdAt,
+              summary.locale,
+              t,
+              limits,
+            ),
+          (candidate) =>
+            estimateSummaryImageHeight(candidate) <= IMAGE_HEIGHT_BUDGET,
+        );
         const response = await fetch(new URL("/render/summary", renderUrl), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            snapshot: summary.snapshot,
+            layout,
             watermark: summary.watermark,
             contentHash: summary.contentHash,
-            createdAt: summary.createdAt,
-            locale: summary.locale,
-            text,
-            formattedCreatedAt,
           }),
           signal: AbortSignal.timeout(10_000),
         });
@@ -102,6 +115,11 @@ export function createSummaryProcessor(
           !response.headers.get("content-type")?.startsWith("image/png")
         )
           throw new Error("Summary renderer failed");
+        // A renderer older than image-2 rejects the layout body, so a stored
+        // PNG always names the version that drew it.
+        const imageVersion = response.headers.get("x-taff-renderer");
+        if (imageVersion !== "image-2")
+          throw new Error("Unexpected summary renderer version");
         // Bound memory even if an internal renderer returns an invalid/oversized stream.
         const reader = response.body?.getReader();
         if (!reader) throw new Error("Empty summary image");
@@ -122,7 +140,7 @@ export function createSummaryProcessor(
         return await core.storeSummaryRender({
           ...data,
           data: Buffer.concat(chunks).toString("base64"),
-          rendererVersion: "png-1",
+          rendererVersion: imageVersion,
         });
       } catch (error) {
         await core.recordSummaryRenderFailure(data.summaryId, data.format);

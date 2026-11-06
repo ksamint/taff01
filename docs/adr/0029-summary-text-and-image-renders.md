@@ -94,7 +94,13 @@ an existing local service on3002. Production has no published renderer port.
 
 ## Amendment 1 — 2026-11-06: designed layout
 
-Status: proposed. The v0.2.19 image is the text render rasterized line by
+Status: accepted and implemented on `main` (milestone 106); release v0.2.21 pending.
+The image is an 8-bit palette PNG (NeuQuant via `color_quant`, MIT, already
+in the lockfile) because colour RGB averaged 112 bytes per pixel row; the
+worker fits layouts under a 3,400-pixel estimate so the densest image stays
+under 400 KB (worst case 3,088 px, 296 KB). Weights are drawn with a hairline
+stroke because the bundled font subsets are single-weight; shaping comes from
+usvg's own text layout, so no `rustybuzz` dependency was added. The v0.2.19 image is the text render rasterized line by
 line in grayscale (milestone 105). Decisions 1 and 2 are refined:
 
 1. A pure TypeScript `buildSummaryLayout` turns the snapshot into

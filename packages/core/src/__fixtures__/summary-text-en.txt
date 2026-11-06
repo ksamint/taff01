@@ -1,31 +1,26 @@
-Daily progress
-Northwind · Harbour Capital
-2026-10-08
+Daily progress · Shareholder · Harbour Capital
+Northwind · 2026-10-08
+────────────────────────────
+Projects 1 · Open tasks 9 · Completed today 1 · Due today 2 · Overdue 0
+Blocked 1 · In review 2
 
-Checkout v2
-In service
-Lead: Alex Chen
-Due Oct 15, 2026
-Recorded progress 60%
-Watch
-Open tasks: 9 · Completed today: 1 · Moved today: 2 · Due today: 2 ·
-Overdue: 0 · Blocked: 1 · In review: 2
-Collected HK$512,000.00 of HK$1,280,000.00
+▌Checkout v2 · In service · Watch
+A task is blocked
+Lead: Alex Chen · Due Oct 15, 2026
+Progress 60% · Collected HK$512,000.00 of HK$1,280,000.00
 Agent runs: 1 finished today · 2 waiting for review
 Completed today (1)
-• #135 Task NW-135 · Mia Wong · Due Oct 6, 2026
+  #135 Task NW-135 · Mia Wong · Due Oct 6, 2026
 Moved today (2)
-• #139 Task NW-139 · Mia Wong · Due Oct 10, 2026
-• #141 Task NW-141 · Mia Wong · Due Oct 8, 2026
+  #139 Task NW-139 · Mia Wong · Due Oct 10, 2026
+  #141 Task NW-141 · Mia Wong · Due Oct 8, 2026
 Due today (2)
-• #141 Task NW-141 · Mia Wong · Due Oct 8, 2026
-• #142 Task NW-142 · Mia Wong · Due Oct 8, 2026
+  #141 Task NW-141 · Mia Wong · Due Oct 8, 2026
+  #142 Task NW-142 · Mia Wong · Due Oct 8, 2026
 Blocked (1)
-• #144 Task NW-144 · Mia Wong · Due Oct 9, 2026
+  #144 Task NW-144 · Mia Wong · Due Oct 9, 2026
 
-Projects: 1 · Open tasks: 9 · Completed today: 1 · Moved today: 2 · Due
-today: 2 · Overdue: 0 · Blocked: 1 · In review: 2
+────────────────────────────
 Generated Oct 8, 2026, 8:00 PM · Asia/Hong_Kong
 Pat Lee · Harbour Capital · 2026-10-08 · preview
-Content hash
-405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21
+Hash 405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21

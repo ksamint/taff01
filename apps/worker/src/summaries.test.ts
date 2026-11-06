@@ -1,3 +1,4 @@
+import { summaryImageLayoutInputSchema } from "@taff/schemas";
 import { describe, expect, it, vi } from "vitest";
 import { createSummaryProcessor, SUMMARY_JOB_NAMES } from "./summaries";
 
@@ -200,11 +201,11 @@ describe("summary render jobs", () => {
         summaryId: id,
         format: "txt",
         body: expect.stringContaining("Pat · Northwind"),
-        rendererVersion: "text-1",
+        rendererVersion: "text-2",
       }),
     );
   });
-  it("posts snapshot metadata to the image service and stores only a bounded PNG response", async () => {
+  it("posts the fitted display layout to the image service and stores only a bounded image-2 PNG", async () => {
     const { createServer } = await import("node:http");
     const png = Buffer.from(
       "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jDioAAAAASUVORK5CYII=",
@@ -215,10 +216,18 @@ describe("summary render jobs", () => {
       for await (const chunk of req) chunks.push(chunk);
       const data = JSON.parse(Buffer.concat(chunks).toString());
       expect(req.url).toBe("/render/summary");
-      expect(data.snapshot.recipient.name).toBe("Pat");
-      expect(data.formattedCreatedAt).toContain("9:00");
-      expect(data.text).toContain("Pat · Northwind");
-      res.writeHead(200, { "Content-Type": "image/png" });
+      expect(Object.keys(data).sort()).toEqual([
+        "contentHash",
+        "layout",
+        "watermark",
+      ]);
+      expect(summaryImageLayoutInputSchema.parse(data)).toEqual(data);
+      expect(data.layout.footer.generated).toContain("9:00");
+      expect(data.watermark.text).toContain("Pat · Northwind");
+      res.writeHead(200, {
+        "Content-Type": "image/png",
+        "x-taff-renderer": "image-2",
+      });
       res.end(png);
     });
     await new Promise<void>((resolve) =>
@@ -238,7 +247,7 @@ describe("summary render jobs", () => {
         summaryId: id,
         format: "png",
         data: png.toString("base64"),
-        rendererVersion: "png-1",
+        rendererVersion: "image-2",
       });
     } finally {
       await new Promise<void>((resolve, reject) =>
@@ -270,5 +279,34 @@ describe("summary render jobs", () => {
         data: { summaryId: "invalid", format: "svg" },
       }),
     ).rejects.toThrow();
+  });
+  it("refuses a PNG from a renderer that does not report image-2", async () => {
+    const { createServer } = await import("node:http");
+    const server = createServer((_req, res) => {
+      res.writeHead(200, { "Content-Type": "image/png" });
+      res.end(Buffer.from("89504e470d0a1a0a", "hex"));
+    });
+    await new Promise<void>((resolve) =>
+      server.listen(0, "127.0.0.1", resolve),
+    );
+    try {
+      const address = server.address();
+      if (!address || typeof address === "string")
+        throw new Error("Missing test server address");
+      const { core, queue } = fixture();
+      await expect(
+        createSummaryProcessor(
+          core,
+          queue,
+          `http://127.0.0.1:${address.port}`,
+        )({ name: "summary-render", data: { summaryId: id, format: "png" } }),
+      ).rejects.toThrow("Unexpected summary renderer version");
+      expect(core.storeSummaryRender).not.toHaveBeenCalled();
+      expect(core.recordSummaryRenderFailure).toHaveBeenCalledWith(id, "png");
+    } finally {
+      await new Promise<void>((resolve, reject) =>
+        server.close((error) => (error ? reject(error) : resolve())),
+      );
+    }
   });
 });

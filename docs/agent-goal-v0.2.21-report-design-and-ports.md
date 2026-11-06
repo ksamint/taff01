@@ -5,6 +5,11 @@
 > [ADR 0029 amendment 1](adr/0029-summary-text-and-image-renders.md#amendment-1--2026-11-06-designed-layout)
 > and [ADR 0030](adr/0030-typescript-and-rust-only.md). Nothing below is
 > implemented. Build on the stated defaults unless redirected.
+>
+> **2026-11-06: R1–R4 and R6 done** (`docs/milestones/106-report-design.md`):
+> shared layout, `text-2`, colour palette `image-2` with `image-1`
+> compatibility, worker on the layout, spec DS-8.2/8.3/8.7. Remaining: R5
+> (web page from the layout), P1–P4 (Python ports), release.
 
 Paste everything below this line as the goal.
 

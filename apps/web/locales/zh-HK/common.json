@@ -1450,7 +1450,13 @@
     "unavailableTitle": "此連結已無法使用",
     "unavailableHint": "連結可能已過期或被撤銷。請向分享者索取新連結。",
     "copyText": "複製文字",
-    "saveImage": "儲存圖片"
+    "saveImage": "儲存圖片",
+    "progress": "進度 {{percent}}",
+    "collectedShare": "已收 {{percent}}",
+    "more": "另有 {{count}} 項",
+    "moreProjects": "另有 {{count}} 個項目",
+    "hashLabel": "雜湊",
+    "riskLabel": "風險"
   },
   "audience": {
     "open": "股東摘要",

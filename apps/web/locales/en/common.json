@@ -1450,7 +1450,13 @@
     "unavailableTitle": "This link is no longer available",
     "unavailableHint": "It may have expired or been revoked. Ask the person who shared it for a new link.",
     "copyText": "Copy text",
-    "saveImage": "Save image"
+    "saveImage": "Save image",
+    "progress": "Progress {{percent}}",
+    "collectedShare": "Collected {{percent}}",
+    "more": "+{{count}} more",
+    "moreProjects": "+{{count}} more projects",
+    "hashLabel": "Hash",
+    "riskLabel": "Risk"
   },
   "audience": {
     "open": "Shareholder summaries",

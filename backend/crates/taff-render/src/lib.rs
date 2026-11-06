@@ -6,17 +6,22 @@ use image::{
 use serde_json::Value;
 use std::sync::{Arc, OnceLock};
 
+mod designed;
+
+pub const IMAGE_V1: &str = "image-1";
+pub const IMAGE_V2: &str = "image-2";
+
 const MAX_BYTES: usize = 400 * 1024;
 const SCHEMA: &str = include_str!("../../../../packages/schemas/generated/daily-summary.json");
 
-fn escape(text: &str) -> String {
+pub(crate) fn escape(text: &str) -> String {
     text.replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;")
         .replace('\'', "&apos;")
 }
-fn fonts() -> Arc<fontdb::Database> {
+pub(crate) fn fonts() -> Arc<fontdb::Database> {
     static FONTS: OnceLock<Arc<fontdb::Database>> = OnceLock::new();
     FONTS
         .get_or_init(|| {
@@ -70,6 +75,11 @@ fn wrap(text: &str) -> Vec<String> {
 
 /// Pixels only. No database, credentials, filesystem input or external SVG resources.
 pub fn render_summary(input: &Value) -> Result<Vec<u8>, &'static str> {
+    render_versioned(input).map(|(png, _)| png)
+}
+
+/// Renders either input version and names the renderer that produced it.
+pub fn render_versioned(input: &Value) -> Result<(Vec<u8>, &'static str), &'static str> {
     static VALIDATOR: OnceLock<jsonschema::Validator> = OnceLock::new();
     let validator = VALIDATOR.get_or_init(|| {
         jsonschema::validator_for(&serde_json::from_str::<Value>(SCHEMA).unwrap()).unwrap()
@@ -77,6 +87,119 @@ pub fn render_summary(input: &Value) -> Result<Vec<u8>, &'static str> {
     if !validator.is_valid(input) {
         return Err("invalid_input");
     }
+    if input.get("layout").is_some() {
+        render_designed(input).map(|png| (png, IMAGE_V2))
+    } else {
+        render_text(input).map(|png| (png, IMAGE_V1))
+    }
+}
+
+/// image-2: colour document from the shared display layout.
+fn render_designed(input: &Value) -> Result<Vec<u8>, &'static str> {
+    let parsed: designed::Input =
+        serde_json::from_value(input.clone()).map_err(|_| "invalid_input")?;
+    if parsed.watermark.content_hash != parsed.content_hash
+        || parsed.layout.footer.hash_full != parsed.content_hash
+    {
+        return Err("invalid_input");
+    }
+    let (svg, height) = designed::layout_svg(&parsed)?;
+    let options = usvg::Options {
+        fontdb: fonts(),
+        ..Default::default()
+    };
+    let tree = usvg::Tree::from_str(&svg, &options).map_err(|_| "render_failed")?;
+    let (width, height) = (designed::WIDTH as u32, height as u32);
+    let mut pixmap = tiny_skia::Pixmap::new(width, height).ok_or("render_too_large")?;
+    resvg::render(
+        &tree,
+        tiny_skia::Transform::identity(),
+        &mut pixmap.as_mut(),
+    );
+    let png = encode_palette_png(pixmap.data(), width, height)?;
+    let png = with_text_chunk(png, "taff:content-hash", &parsed.content_hash);
+    if png.len() > MAX_BYTES {
+        return Err("render_too_large");
+    }
+    Ok(png)
+}
+
+/// Flat document colours quantize losslessly to the eye: an 8-bit palette
+/// (NeuQuant, deterministic) is about a third of the RGB size, which keeps a
+/// long report under the 400 KB delivery cap.
+fn encode_palette_png(rgba: &[u8], width: u32, height: u32) -> Result<Vec<u8>, &'static str> {
+    let quantizer = color_quant::NeuQuant::new(10, 256, rgba);
+    let palette = quantizer.color_map_rgb();
+    let indices: Vec<u8> = rgba
+        .chunks_exact(4)
+        .map(|pixel| quantizer.index_of(pixel) as u8)
+        .collect();
+    let mut png = Vec::new();
+    let mut encoder = png::Encoder::new(&mut png, width, height);
+    encoder.set_color(png::ColorType::Indexed);
+    encoder.set_depth(png::BitDepth::Eight);
+    encoder.set_palette(palette);
+    encoder.set_compression(png::Compression::High);
+    encoder.set_filter(png::Filter::Adaptive);
+    let mut writer = encoder.write_header().map_err(|_| "render_failed")?;
+    writer
+        .write_image_data(&indices)
+        .map_err(|_| "render_failed")?;
+    writer.finish().map_err(|_| "render_failed")?;
+    Ok(png)
+}
+
+/// Inserts a PNG `tEXt` chunk right after IHDR (8-byte signature + 25-byte IHDR).
+pub fn with_text_chunk(png: Vec<u8>, keyword: &str, value: &str) -> Vec<u8> {
+    let mut data = keyword.as_bytes().to_vec();
+    data.push(0);
+    data.extend_from_slice(value.as_bytes());
+    let mut chunk = (data.len() as u32).to_be_bytes().to_vec();
+    let mut typed = b"tEXt".to_vec();
+    typed.extend_from_slice(&data);
+    chunk.extend_from_slice(&typed);
+    chunk.extend_from_slice(&crc32(&typed).to_be_bytes());
+    let mut out = png[..33].to_vec();
+    out.extend_from_slice(&chunk);
+    out.extend_from_slice(&png[33..]);
+    out
+}
+
+/// Reads a `tEXt` value back; used by tests and by callers that audit a PNG.
+pub fn text_chunk(png: &[u8], keyword: &str) -> Option<String> {
+    let mut at = 8;
+    while at + 12 <= png.len() {
+        let length = u32::from_be_bytes(png[at..at + 4].try_into().ok()?) as usize;
+        let kind = &png[at + 4..at + 8];
+        let data = png.get(at + 8..at + 8 + length)?;
+        if kind == b"tEXt" {
+            let split = data.iter().position(|byte| *byte == 0)?;
+            if &data[..split] == keyword.as_bytes() {
+                return String::from_utf8(data[split + 1..].to_vec()).ok();
+            }
+        }
+        at += 12 + length;
+    }
+    None
+}
+
+fn crc32(bytes: &[u8]) -> u32 {
+    let mut crc = 0xffff_ffffu32;
+    for byte in bytes {
+        crc ^= u32::from(*byte);
+        for _ in 0..8 {
+            crc = if crc & 1 == 1 {
+                (crc >> 1) ^ 0xedb8_8320
+            } else {
+                crc >> 1
+            };
+        }
+    }
+    !crc
+}
+
+/// image-1: the rasterized text render, accepted for one release (DS-8.7).
+fn render_text(input: &Value) -> Result<Vec<u8>, &'static str> {
     let hash = input["contentHash"].as_str().unwrap();
     let text = input["text"].as_str().unwrap();
     if input["watermark"]["contentHash"] != input["contentHash"]
@@ -175,13 +298,17 @@ pub fn render_summary(input: &Value) -> Result<Vec<u8>, &'static str> {
 }
 async fn render(
     Json(input): Json<Value>,
-) -> Result<([(&'static str, &'static str); 2], Vec<u8>), (StatusCode, &'static str)> {
-    tokio::task::spawn_blocking(move || render_summary(&input))
+) -> Result<([(&'static str, &'static str); 3], Vec<u8>), (StatusCode, &'static str)> {
+    tokio::task::spawn_blocking(move || render_versioned(&input))
         .await
         .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "render_failed"))?
-        .map(|png| {
+        .map(|(png, version)| {
             (
-                [("content-type", "image/png"), ("cache-control", "no-store")],
+                [
+                    ("content-type", "image/png"),
+                    ("cache-control", "no-store"),
+                    ("x-taff-renderer", version),
+                ],
                 png,
             )
         })

@@ -1,0 +1,169 @@
+{
+  "layout": {
+    "version": 1,
+    "locale": "zh-HK",
+    "header": {
+      "title": "每日進度",
+      "audience": "股東 · Harbour Capital",
+      "workspace": "Northwind",
+      "date": "2026-10-08"
+    },
+    "kpis": [
+      {
+        "key": "projects",
+        "label": "項目",
+        "value": "1",
+        "tone": "neutral"
+      },
+      {
+        "key": "open",
+        "label": "未完成任務",
+        "value": "9",
+        "tone": "neutral"
+      },
+      {
+        "key": "completedToday",
+        "label": "今日完成",
+        "value": "1",
+        "tone": "neutral"
+      },
+      {
+        "key": "dueToday",
+        "label": "今日到期",
+        "value": "2",
+        "tone": "neutral"
+      },
+      {
+        "key": "overdue",
+        "label": "已逾期",
+        "value": "0",
+        "tone": "neutral"
+      },
+      {
+        "key": "blocked",
+        "label": "被阻礙",
+        "value": "1",
+        "tone": "warning"
+      },
+      {
+        "key": "inReview",
+        "label": "待審批",
+        "value": "2",
+        "tone": "neutral"
+      }
+    ],
+    "projects": [
+      {
+        "name": "Checkout v2",
+        "stage": "服務中",
+        "risk": {
+          "level": "medium",
+          "label": "需留意",
+          "reasons": [
+            "有任務被阻礙"
+          ]
+        },
+        "meta": [
+          "負責人:Alex Chen",
+          "2026年10月15日 到期"
+        ],
+        "progress": {
+          "percent": 60,
+          "label": "進度 60%"
+        },
+        "finance": {
+          "percent": 40,
+          "label": "已收 HK$512,000.00 / 合約 HK$1,280,000.00"
+        },
+        "agentRuns": "智能體:今日完成 1 個 · 2 個待審批",
+        "sections": [
+          {
+            "key": "completedToday",
+            "title": "今日完成",
+            "count": "1",
+            "items": [
+              {
+                "number": "#135",
+                "title": "Task NW-135",
+                "detail": "Mia Wong · 2026年10月6日 到期",
+                "overdue": false
+              }
+            ],
+            "more": null
+          },
+          {
+            "key": "movedToday",
+            "title": "今日有進展",
+            "count": "2",
+            "items": [
+              {
+                "number": "#139",
+                "title": "Task NW-139",
+                "detail": "Mia Wong · 2026年10月10日 到期",
+                "overdue": false
+              },
+              {
+                "number": "#141",
+                "title": "Task NW-141",
+                "detail": "Mia Wong · 2026年10月8日 到期",
+                "overdue": false
+              }
+            ],
+            "more": null
+          },
+          {
+            "key": "dueToday",
+            "title": "今日到期",
+            "count": "2",
+            "items": [
+              {
+                "number": "#141",
+                "title": "Task NW-141",
+                "detail": "Mia Wong · 2026年10月8日 到期",
+                "overdue": false
+              },
+              {
+                "number": "#142",
+                "title": "Task NW-142",
+                "detail": "Mia Wong · 2026年10月8日 到期",
+                "overdue": false
+              }
+            ],
+            "more": null
+          },
+          {
+            "key": "blocked",
+            "title": "被阻礙",
+            "count": "1",
+            "items": [
+              {
+                "number": "#144",
+                "title": "Task NW-144",
+                "detail": "Mia Wong · 2026年10月9日 到期",
+                "overdue": false
+              }
+            ],
+            "more": null
+          }
+        ]
+      }
+    ],
+    "moreProjects": null,
+    "footer": {
+      "generated": "生成於 2026年10月8日 下午8:00 · Asia/Hong_Kong",
+      "watermark": "Pat Lee · Harbour Capital · 2026-10-08 · preview",
+      "hashLabel": "雜湊",
+      "hashShort": "405ddea3…3c21",
+      "hashFull": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+    }
+  },
+  "watermark": {
+    "text": "Pat Lee · Harbour Capital · 2026-10-08 · preview",
+    "recipientName": "Pat Lee",
+    "org": "Harbour Capital",
+    "localDate": "2026-10-08",
+    "summaryId": null,
+    "contentHash": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+  },
+  "contentHash": "405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21"
+}
