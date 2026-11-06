@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   agentTokenWorkspaceSchema,
+  oauthDecisionSchema,
+  scopeSchema,
   tokenOrganizationPolicyInputSchema,
   tokenOrganizationPolicySchema,
 } from "./index";
@@ -42,4 +44,20 @@ describe("token organization policy", () => {
         .success,
     ).toBe(false);
   });
+});
+
+it("accepts every published scope in administrator OAuth consent", () => {
+  expect(
+    oauthDecisionSchema.safeParse({
+      request: {
+        response_type: "code",
+        client_id: "client",
+        redirect_uri: "https://example.test/callback",
+        code_challenge: "a".repeat(43),
+        code_challenge_method: "S256",
+      },
+      decision: "approve",
+      scopes: scopeSchema.options,
+    }).success,
+  ).toBe(true);
 });

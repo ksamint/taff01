@@ -96,7 +96,12 @@ export const oauthDecisionSchema = strictObject({
   decision: zodEnum(["approve", "deny"]),
   workspaceId: optional(idSchema),
   memberId: optional(idSchema),
-  scopes: optional(array(scopeSchema).check(minLength(1), maxLength(5))),
+  scopes: optional(
+    array(scopeSchema).check(
+      minLength(1),
+      maxLength(scopeSchema.options.length),
+    ),
+  ),
 });
 export const oauthRedirectSchema = object({ redirectTo: string() });
 

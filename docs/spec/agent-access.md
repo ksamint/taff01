@@ -3,7 +3,7 @@
 Living product specification for agent credentials, workspace grants and organization
 policy (ADR 0022, 0023, 0028). Change this file with the behavior it describes.
 
-Status: v0.2.18 candidate; production acceptance pending.
+Status: v0.2.19 candidate; production acceptance pending.
 
 ## Users and roles
 
@@ -52,6 +52,12 @@ Status: v0.2.18 candidate; production acceptance pending.
   policy toggles until explicitly restored by an authorized person.
 - AA-3.5 Switching to explicit shall revoke policy grants and preserve manual
   grants. Each touched workspace shall receive an audit row and notification.
+- AA-3.6 When the current home workspace administrator changes token scopes,
+  the system shall copy those scopes to active policy grants and increment the
+  token version. Manual grants and revoked policy grants shall remain unchanged.
+  Reapplying all_organizations shall reconcile active policy grants to token
+  scopes. Every updated target row shall retain its original grantor and audit
+  the person making the scope or policy change.
 
 ### OAuth roles (AA-4)
 
@@ -72,6 +78,9 @@ Status: v0.2.18 candidate; production acceptance pending.
   directives. Public shares shall retain their independent access checks.
 - AA-5.3 Authority tests shall exercise issue, extend, restore, list and revoke
   at the lowest reachable role and after that role loses authority.
+- AA-5.4 Workspace administrators and system administrators shall inspect current
+  access through the [access matrix contract](access-matrix.md). Baseline action
+  rows shall derive from can() and the runtime action registry.
 
 ## Non-functional
 
@@ -94,6 +103,7 @@ Status: v0.2.18 candidate; production acceptance pending.
 | AA-5.1 | permissions.test.ts; app.test.ts |
 | AA-5.2 | e2e/ssr-session.spec.ts |
 | AA-5.3 | authorization.integration.test.ts; token-policy.integration.test.ts |
+| AA-5.4 | access-matrix.integration.test.ts; permissions.test.ts; scripts/permissions-matrix.test.ts |
 | Three-locale management | e2e/token-grants.spec.ts; acceptance pending |
 
 ## Open decisions

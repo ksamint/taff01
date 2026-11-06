@@ -64,6 +64,7 @@ import {
 import { ADDITIVE, READ_ONLY, UPDATE } from "./mcp-annotations";
 import { registerCrmTools } from "./mcp-crm";
 import { registerInsightTools } from "./mcp-insights";
+import { registerSummaryTools } from "./mcp-summaries";
 import { registerTimelineTools } from "./mcp-timeline";
 
 type AgentPrincipal = Extract<Principal, { kind: "agent" }>;
@@ -102,13 +103,16 @@ export function createMcpServer(
   logger?: ErrorLogger,
 ) {
   const server = new McpServer({ name: "taff", version: apiPackage.version });
-  const run = async (fn: () => Promise<unknown>) => {
+  const runResult = async (fn: () => Promise<CallToolResult>) => {
     try {
-      return ok(await fn());
+      return await fn();
     } catch (error) {
       return failure(error, state, logger);
     }
   };
+  const run = (fn: () => Promise<unknown>) =>
+    runResult(async () => ok(await fn()));
+  registerSummaryTools(server, core, tokenPrincipal, run, runResult, state);
   server.registerTool(
     "workspaces.list",
     {

@@ -63,6 +63,9 @@ export const MCP_READ_ONLY_TOOLS = [
   "relations.get",
   "runs.get",
   "search.query",
+  "summaries.get",
+  "summaries.image",
+  "summaries.list",
   "tasks.comments.list",
   "tasks.list",
   "timeline.get",
@@ -128,6 +131,7 @@ export type McpRoundTripOptions = {
 };
 
 export const ROUND_TRIP_SCOPES = [
+  "summaries:read",
   "tasks:read",
   "tasks:write",
   "calendar:write",
@@ -236,6 +240,27 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
       context.members.some((member) => member.id === agentId) &&
       context.projects.some((item) => item.id === project.id),
   );
+  const summaryList = text(
+    await client.callTool({ name: "summaries.list", arguments: {} }),
+  );
+  check(
+    "summaries.list accepts an authorized read scope",
+    Array.isArray(summaryList?.items),
+  );
+  // Exercise missing-render parity without creating recipient-specific production summaries.
+  for (const name of ["summaries.get", "summaries.image"] as const) {
+    const missing = await client.callTool({
+      name,
+      arguments: { summaryId: "00000000-0000-4000-8000-000000000000" },
+    });
+    check(
+      `${name} returns not_found for an absent summary`,
+      missing.isError === true &&
+        missing.content.some(
+          (block) => block.type === "text" && block.text === "not_found",
+        ),
+    );
+  }
   const calendarStart = new Date(Date.now() + 3_600_000).toISOString();
   const calendarEnd = new Date(Date.now() + 7_200_000).toISOString();
   const initialCalendar = {

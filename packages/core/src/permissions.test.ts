@@ -5,7 +5,9 @@ import {
   type Actor,
   can,
   canGrantOAuthScopes,
+  exportPermissionRows,
   OAUTH_SCOPE_CEILING,
+  PERMISSION_ACTIONS,
   type Resource,
 } from "./permissions";
 
@@ -1396,9 +1398,77 @@ describe("role-based OAuth approval", () => {
     },
   );
   it("exports precisely the role ceilings", () => {
-    expect(OAUTH_SCOPE_CEILING.admin).toHaveLength(5);
+    expect(OAUTH_SCOPE_CEILING.admin).toHaveLength(6);
+    expect(OAUTH_SCOPE_CEILING.admin).toContain("summaries:read");
+    expect(OAUTH_SCOPE_CEILING.member).not.toContain("summaries:read");
     expect(OAUTH_SCOPE_CEILING.member).toHaveLength(4);
     expect(OAUTH_SCOPE_CEILING.member).not.toContain("files:write");
     expect(OAUTH_SCOPE_CEILING.guest).toEqual([]);
   });
+});
+
+describe("published permission rows", () => {
+  it("covers the action registry exactly once", () =>
+    expect(exportPermissionRows().map((row) => row.action)).toEqual([
+      ...PERMISSION_ACTIONS,
+    ]));
+  it.each(exportPermissionRows())(
+    "publishes $action decisions for every baseline role",
+    (row) => {
+      expect(Object.keys(row)).toEqual([
+        "action",
+        "admin",
+        "member",
+        "guest",
+        "agent",
+      ]);
+      if (["token:policy"].includes(row.action))
+        expect(row).toMatchObject({
+          admin: false,
+          member: false,
+          guest: false,
+          agent: false,
+        });
+      if (
+        [
+          "workspace:manage",
+          "token:grant",
+          "token:grant_revoke",
+          "agent:manage",
+        ].includes(row.action)
+      )
+        expect(row).toMatchObject({
+          admin: true,
+          member: false,
+          guest: false,
+          agent: false,
+        });
+      if (row.action === "workspace:read")
+        expect(row).toMatchObject({
+          admin: true,
+          member: true,
+          guest: true,
+          agent: true,
+        });
+    },
+  );
+});
+
+it("summary scope permits only same-workspace agent reads", () => {
+  const reader: Actor = { ...agent, scopes: ["summaries:read"] };
+  expect(can(reader, "summary:read", { workspaceId: "workspace" })).toBe(true);
+  expect(can(reader, "summary:read", { workspaceId: "other" })).toBe(false);
+  for (const action of [
+    "summary:share",
+    "summary:preview",
+    "summary:revoke",
+    "audience:read",
+    "audience:manage",
+  ] as const)
+    expect(can(reader, action, { workspaceId: "workspace" })).toBe(false);
+  expect(
+    can({ ...reader, scopes: [] }, "summary:read", {
+      workspaceId: "workspace",
+    }),
+  ).toBe(false);
 });

@@ -109,7 +109,11 @@ import { createSuggestionOperations } from "./suggestions";
 import { createSummaryOperations } from "./summaries";
 import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
-import { createTokenPolicyOperations, lockTokenPolicy } from "./token-policy";
+import {
+  createTokenPolicyOperations,
+  lockTokenPolicy,
+  reconcilePolicyGrantScopes,
+} from "./token-policy";
 import { createWorkspaceLifecycle } from "./workspace-lifecycle";
 
 export class CoreError extends Error {
@@ -1346,9 +1350,11 @@ export function createCore(options: {
           .set({
             memberId: row.memberId,
             scopes: row.scopes,
+            version: token.version + 1,
             updatedAt: new Date(),
           })
           .where(eq(agentTokens.id, tokenId));
+        await reconcilePolicyGrantScopes(tx, tokenId, row.scopes);
       }
       return row;
     });

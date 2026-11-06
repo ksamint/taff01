@@ -183,6 +183,8 @@ export function can(
   )
     return actor.kind === "person" && actor.role === "admin";
   if (action === "audience:read") return actor.kind === "person";
+  if (action === "summary:read" && actor.kind === "agent")
+    return !!actor.scopes?.includes("summaries:read");
   if (action === "summary:read")
     return (
       actor.kind === "person" &&
@@ -458,6 +460,7 @@ export const OAUTH_SCOPE_CEILING: Record<
   Scope[]
 > = {
   admin: [
+    "summaries:read",
     "tasks:read",
     "tasks:write",
     "calendar:write",

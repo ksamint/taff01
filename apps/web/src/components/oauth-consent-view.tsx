@@ -169,36 +169,42 @@ export function OAuthConsentView() {
           )}
           <fieldset className="mcp-scopes">
             <legend className="mcp-label">{t("mcp.scopes")}</legend>
-            {scopeSchema.options.map((scope) => (
-              <label key={scope} className="mcp-scope">
-                <span className="mcp-row-copy">
-                  <span className="mcp-row-title">
-                    {t(`mcp.scope.${scope}`, { nsSeparator: false })}
-                  </span>
-                  <code className="mcp-row-sub mcp-mono">{scope}</code>
-                  {!workspace?.allowedScopes.includes(scope) && (
-                    <span
-                      className="mcp-row-sub"
-                      data-testid={`oauth-scope-locked-${scope}`}
-                    >
-                      {t("oauth.adminOnlyScope")}
+            {scopeSchema.options
+              .filter(
+                (scope) =>
+                  scope !== "summaries:read" ||
+                  workspace?.allowedScopes.includes(scope),
+              )
+              .map((scope) => (
+                <label key={scope} className="mcp-scope">
+                  <span className="mcp-row-copy">
+                    <span className="mcp-row-title">
+                      {t(`mcp.scope.${scope}`, { nsSeparator: false })}
                     </span>
-                  )}
-                </span>
-                <Switch
-                  data-testid={`oauth-scope-${scope}`}
-                  checked={scopes.includes(scope)}
-                  disabled={!workspace?.allowedScopes.includes(scope)}
-                  onChange={(event) =>
-                    setScopes((current) =>
-                      event.target.checked
-                        ? [...current, scope]
-                        : current.filter((item) => item !== scope),
-                    )
-                  }
-                />
-              </label>
-            ))}
+                    <code className="mcp-row-sub mcp-mono">{scope}</code>
+                    {!workspace?.allowedScopes.includes(scope) && (
+                      <span
+                        className="mcp-row-sub"
+                        data-testid={`oauth-scope-locked-${scope}`}
+                      >
+                        {t("oauth.adminOnlyScope")}
+                      </span>
+                    )}
+                  </span>
+                  <Switch
+                    data-testid={`oauth-scope-${scope}`}
+                    checked={scopes.includes(scope)}
+                    disabled={!workspace?.allowedScopes.includes(scope)}
+                    onChange={(event) =>
+                      setScopes((current) =>
+                        event.target.checked
+                          ? [...current, scope]
+                          : current.filter((item) => item !== scope),
+                      )
+                    }
+                  />
+                </label>
+              ))}
           </fieldset>
           {failure !== null && (
             <p className="alert" role="alert">

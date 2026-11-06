@@ -96,6 +96,27 @@ export async function lockTokenPolicy(tx: Transaction) {
     sql`select pg_advisory_xact_lock(hashtextextended('taff:token-policy',0))`,
   );
 }
+/** Caller holds the policy namespace lock; grant provenance and tombstones stay untouched. */
+export async function reconcilePolicyGrantScopes(
+  tx: Transaction,
+  tokenId: string,
+  scopes: string[],
+) {
+  await tx
+    .update(agentTokenWorkspaces)
+    .set({ scopes, updatedAt: new Date() })
+    .where(
+      and(
+        eq(agentTokenWorkspaces.tokenId, tokenId),
+        eq(agentTokenWorkspaces.origin, "policy"),
+        isNull(agentTokenWorkspaces.revokedAt),
+        sql`${agentTokenWorkspaces.scopes} IS DISTINCT FROM ARRAY[${sql.join(
+          scopes.map((scope) => sql`${scope}`),
+          sql`, `,
+        )}]::text[]`,
+      ),
+    );
+}
 async function enroll(
   tx: Transaction,
   token: typeof agentTokens.$inferSelect,
@@ -242,6 +263,8 @@ export function createTokenPolicyOperations({
         })
         .where(eq(agentTokens.id, tokenId))
         .returning();
+      if (updated.organizationPolicy === "all_organizations")
+        await reconcilePolicyGrantScopes(tx, updated.id, updated.scopes);
       await enroll(tx, updated, undefined, acting.userId!);
       // Return the public token shape; credentials and refresh hashes never leave core.
       return {

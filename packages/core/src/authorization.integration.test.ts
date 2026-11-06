@@ -70,6 +70,7 @@ const policyRoutes = [
   ["PUT", "/api/agent-tokens/:id/organization-policy"],
   ["POST", "/api/agent-token-workspaces/:id/restore"],
   ["GET", "/api/admin/agent-tokens"],
+  ["GET", "/api/admin/access-matrix"],
 ] as const;
 const organizationRoutes = [
   ["PATCH", "/api/users/:id/default-workspace"],
@@ -286,6 +287,11 @@ async function review(f: Fixture) {
 const routes: RequestCase[] = [
   {
     method: "GET",
+    path: "/api/workspaces/:workspace/access-matrix",
+    member: "deny",
+  },
+  {
+    method: "GET",
     path: "/api/admin/audit/search?workspaceId=:workspace",
     member: "deny",
   },
@@ -437,6 +443,20 @@ const routes: RequestCase[] = [
     path: "/api/summaries/:summary",
     prepare: summarized,
     member: "deny",
+  },
+  {
+    method: "GET",
+    path: "/api/summaries/:summary/render?format=txt",
+    member: "deny",
+    prepare: async (f) => {
+      await summarized(f);
+      await core.storeSummaryRender({
+        summaryId: f.summary!.id,
+        format: "txt",
+        body: "Matrix watermarked render",
+        rendererVersion: "test",
+      });
+    },
   },
   {
     method: "GET",
@@ -1346,7 +1366,11 @@ describe.skipIf(!databaseUrl)(
         },
         ...(row.body ? { body: JSON.stringify(row.body(f)) } : {}),
       });
-      const body = await response.json();
+      const body = response.headers
+        .get("content-type")
+        ?.includes("application/json")
+        ? await response.json()
+        : { text: await response.text() };
       if (row.actor === "other-workspace" && row.foreign === "own-workspace") {
         expect(response.status).toBe(200);
         expect(body.today?.workspaceId).not.toBe(workspaceId);
@@ -1372,6 +1396,7 @@ describe.skipIf(!databaseUrl)(
     const implicitWorkspaceTools = new Set([
       "context.get",
       "workspaces.list",
+      "summaries.list",
       "tasks.list",
       "projects.list",
       "projects.create",
@@ -1411,9 +1436,22 @@ describe.skipIf(!databaseUrl)(
         });
         f.run = (await core.getRun(owner(), f.run!.id)).run;
       }
+      if (["summaries.get", "summaries.image"].includes(name)) {
+        await summarized(f);
+        if (name === "summaries.image")
+          await core.storeSummaryRender({
+            summaryId: f.summary!.id,
+            format: "png",
+            data: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lXcAAAAASUVORK5CYII=",
+            rendererVersion: "matrix-test",
+          });
+      }
       const args: Record<string, Record<string, unknown>> = {
         "context.get": {},
         "workspaces.list": {},
+        "summaries.list": {},
+        "summaries.get": { summaryId: f.summary?.id },
+        "summaries.image": { summaryId: f.summary?.id },
         "tasks.list": {},
         "tasks.create": {
           ownerId,
