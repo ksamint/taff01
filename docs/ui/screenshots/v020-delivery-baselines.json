@@ -32,24 +32,9 @@
   "capture": {
     "cases": 6,
     "references": 36,
-    "themes": [
-      "light"
-    ],
-    "locales": [
-      "en",
-      "zh-CN",
-      "zh-HK"
-    ],
-    "viewports": [
-      [
-        390,
-        844
-      ],
-      [
-        1280,
-        800
-      ]
-    ],
+    "themes": ["light"],
+    "locales": ["en", "zh-CN", "zh-HK"],
+    "viewports": [[390, 844], [1280, 800]],
     "result": "6 passed (17.2s); desktop sidebar readiness asserted",
     "visualReview": "All 36 inspected; no unintended clipping or missing glyphs found",
     "comparison": "First comparison found two premature desktop system-page references without the sidebar; corrected capture requires no-update comparison on committed source"
