@@ -12,7 +12,9 @@ import {
   workspaceSchema,
 } from "../packages/schemas/src/index";
 import {
+  calendarLaneBoxes,
   openCalendarTools,
+  waitForCalendarMotion,
   waitForCalendarSave,
   waitForCalendarView,
 } from "./support/calendar";
@@ -198,6 +200,7 @@ async function moveEvent(page: Page, id: string, dy: number) {
   await page.mouse.up();
 }
 async function safeBox(locator: Locator) {
+  await waitForCalendarMotion(locator);
   await locator.evaluate((element) =>
     element.scrollIntoView({
       block: "center",
@@ -764,8 +767,7 @@ test("calendar real agent lane separates concurrent human time and preserves nat
   await safeBox(agentEvent);
   await expect
     .poll(async () => {
-      const human = await humanEvent.boundingBox();
-      const agent = await agentEvent.boundingBox();
+      const { human, agent } = await calendarLaneBoxes(humanEvent, agentEvent);
       return (
         human !== null &&
         agent !== null &&
@@ -775,8 +777,10 @@ test("calendar real agent lane separates concurrent human time and preserves nat
       );
     })
     .toBe(true);
-  const humanBox = await humanEvent.boundingBox();
-  const agentBox = await agentEvent.boundingBox();
+  const { human: humanBox, agent: agentBox } = await calendarLaneBoxes(
+    humanEvent,
+    agentEvent,
+  );
   if (!humanBox || !agentBox)
     throw new Error("Missing separated lane geometry");
   expect(Math.abs(humanBox.y - agentBox.y)).toBeLessThan(1);

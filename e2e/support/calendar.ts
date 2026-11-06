@@ -1,4 +1,51 @@
-import { expect, type Page } from "@playwright/test";
+import { expect, type Locator, type Page } from "@playwright/test";
+
+/** ScheduleX slides each lane by a percentage of its own width. */
+export async function waitForCalendarMotion(event: Locator) {
+  await expect
+    .poll(() =>
+      event.evaluate((element) => {
+        for (
+          let node: Element | null = element;
+          node;
+          node = node.parentElement
+        )
+          if (
+            node
+              .getAnimations()
+              .some(
+                (animation) =>
+                  Number.isFinite(
+                    animation.effect?.getComputedTiming().iterations,
+                  ) &&
+                  (animation.pending || animation.playState === "running"),
+              )
+          )
+            return false;
+        return true;
+      }),
+    )
+    .toBe(true);
+}
+
+/** Separate protocol calls can straddle frames and report a false overlap. */
+export async function calendarLaneBoxes(human: Locator, agent: Locator) {
+  const humanElement = await human.elementHandle();
+  const agentElement = await agent.elementHandle();
+  if (!humanElement || !agentElement)
+    throw new Error("Missing calendar lane events");
+  try {
+    return await humanElement.evaluate((humanNode, agentNode) => {
+      const box = (node: Element) => {
+        const { x, y, width, height } = node.getBoundingClientRect();
+        return { x, y, width, height };
+      };
+      return { human: box(humanNode), agent: box(agentNode) };
+    }, agentElement);
+  } finally {
+    await Promise.all([humanElement.dispose(), agentElement.dispose()]);
+  }
+}
 
 export async function openCalendarTools(page: Page) {
   const summary = page.getByTestId("calendar-tools");
