@@ -5,11 +5,13 @@ import {
   connectDatabase,
   dailySummaries,
   members,
+  summaryRenders,
 } from "@taff/db";
 import {
   dailySummaryListSchema,
   dailySummarySchema,
   sharedSummarySchema,
+  summaryRenderSchema,
   summaryShareSchema,
 } from "@taff/schemas";
 import { and, eq, sql } from "drizzle-orm";
@@ -625,5 +627,165 @@ describe.skipIf(!url)("shareholder daily summaries (ADR 0027)", () => {
     await refused(() => core.listDueSummaryJobs("not-a-date"), {
       code: "invalid_input",
     });
+  });
+  it("stores both immutable render formats idempotently and applies summary and public-share authorization", async () => {
+    const { summaryId } = await setup("Render recipient");
+    const source = await core.getSummaryForRender(summaryId);
+    const body = `${source.watermark.text}\n${source.contentHash}`;
+    const text = summaryRenderSchema.parse(
+      await core.storeSummaryRender({
+        summaryId,
+        format: "txt",
+        body,
+        rendererVersion: "test-v1",
+      }),
+    );
+    expect(text).toMatchObject({
+      body,
+      data: null,
+      byteSize: Buffer.byteLength(body),
+      contentHash: source.contentHash,
+    });
+    expect(
+      await core.storeSummaryRender({
+        summaryId,
+        format: "txt",
+        body: "ignored duplicate",
+        rendererVersion: "test-v2",
+      }),
+    ).toEqual(text);
+    const data =
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lXcAAAAASUVORK5CYII=";
+    const png = await core.storeSummaryRender({
+      summaryId,
+      format: "png",
+      data,
+      rendererVersion: "test-v1",
+    });
+    expect(png.data).toBe(data);
+    expect(png.body).toBeNull();
+    expect(await core.getSummaryRender(gina, summaryId, "txt")).toEqual(text);
+    for (const p of [bob, outsider, agent])
+      await refused(() => core.getSummaryRender(p, summaryId, "png"));
+    await expect(
+      connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id',${aliceId},true)`,
+        );
+        await tx
+          .update(summaryRenders)
+          .set({ body: "tamper" })
+          .where(eq(summaryRenders.id, text.id));
+      }),
+    ).rejects.toThrow();
+    const share = await core.createSummaryShare(alice, summaryId);
+    const shared = await core.getSharedSummaryRender(share.token, "png");
+    expect(shared.data).toBe(data);
+    expect(shared).not.toHaveProperty("summaryId");
+    expect(shared).not.toHaveProperty("workspaceId");
+    await core.revokeSummaryShare(alice, share.id);
+    await refused(
+      () => core.getSharedSummaryRender(share.token, "png"),
+      notFound,
+    );
+    await refused(
+      () => core.getSharedSummaryRender("unknown", "txt"),
+      notFound,
+    );
+    expect(
+      (await core.listMissingSummaryRenders()).filter(
+        (job) => job.summaryId === summaryId,
+      ),
+    ).toEqual([]);
+    await core.recordSummaryRenderFailure(summaryId, "png");
+    const [failure] = await connection.db
+      .select()
+      .from(activity)
+      .where(
+        and(
+          eq(activity.resourceId, summaryId),
+          eq(activity.action, "summary.render_failed"),
+        ),
+      );
+    expect(failure.details).toEqual({ format: "png" });
+  });
+  it("validates render payloads and allows only the current summaries:read agent scope", async () => {
+    const { summaryId } = await setup("Scoped render recipient");
+    for (const input of [
+      {
+        summaryId,
+        format: "txt",
+        body: "x".repeat(4001),
+        rendererVersion: "v1",
+      },
+      {
+        summaryId,
+        format: "png",
+        data: Buffer.from("not png").toString("base64"),
+        rendererVersion: "v1",
+      },
+      {
+        summaryId,
+        format: "txt",
+        body: "text",
+        data: "cG5n",
+        rendererVersion: "v1",
+      },
+    ] as const)
+      await expect(core.storeSummaryRender(input)).rejects.toThrow();
+    expect(
+      (await core.listMissingSummaryRenders(undefined, ["txt"])).filter(
+        (job) => job.summaryId === summaryId,
+      ),
+    ).toEqual([{ summaryId, format: "txt" }]);
+    await core.recordSummaryRenderFailure(summaryId, "png");
+    expect(
+      (await core.listMissingSummaryRenders()).filter(
+        (job) => job.summaryId === summaryId,
+      ),
+    ).toEqual([{ summaryId, format: "txt" }]);
+    expect(
+      (
+        await core.listMissingSummaryRenders(
+          new Date(Date.now() + 25 * 3600000).toISOString(),
+        )
+      ).filter((job) => job.summaryId === summaryId),
+    ).toEqual([
+      { summaryId, format: "txt" },
+      { summaryId, format: "png" },
+    ]);
+    if (agent.kind !== "agent") throw new Error("agent fixture required");
+    const issued = await core.createAgentToken(alice, {
+      workspaceId: w,
+      memberId: agent.memberId,
+      name: "summary-only reader",
+      scopes: ["summaries:read"],
+    });
+    const reader = (await core.authenticateAgentToken(issued.token))!;
+    expect((await core.getDailySummary(reader, summaryId)).id).toBe(summaryId);
+    expect(
+      (await core.listDailySummaries(reader, w)).items.map((s) => s.id),
+    ).toContain(summaryId);
+    await refused(async () =>
+      core.previewDailySummary(reader, {
+        recipientId: (await core.getDailySummary(alice, summaryId)).recipientId,
+      }),
+    );
+    await refused(() => core.createSummaryShare(reader, summaryId));
+    await refused(() => core.listAudienceTags(reader, w));
+    await core.setAgentTokenWorkspace(alice, issued.id, {
+      workspaceId: w,
+      memberId: agent.memberId,
+      scopes: ["summaries:read"],
+      revoked: true,
+    });
+    await refused(() => core.getDailySummary(reader, summaryId));
+    await refused(() => core.listDailySummaries(reader, w));
+    await core.setAgentTokenWorkspace(alice, issued.id, {
+      workspaceId: w,
+      memberId: agent.memberId,
+      scopes: ["tasks:read"],
+    });
+    await refused(() => core.getDailySummary(reader, summaryId));
   });
 });

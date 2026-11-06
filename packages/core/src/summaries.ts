@@ -77,6 +77,7 @@ import {
   summaryContentHash,
   summaryWatermark,
 } from "./summary-model";
+import { createSummaryRenderOperations } from "./summary-renders";
 
 type PlanSource = (
   actor: Actor,
@@ -729,7 +730,12 @@ export function createSummaryOperations({
   ): Promise<DailySummaryList> {
     parse(idSchema, workspaceId);
     const filter = parse(dailySummaryListQuerySchema, query);
-    const actor = await requireMember(db, p, workspaceId, "workspace:read");
+    const actor = await requireMember(
+      db,
+      p,
+      workspaceId,
+      p.kind === "agent" ? "summary:read" : "workspace:read",
+    );
     const admin = can(actor, "summary:read", { workspaceId });
     if (
       !admin &&
@@ -1096,6 +1102,14 @@ export function createSummaryOperations({
   }
 
   return {
+    ...createSummaryRenderOperations({
+      db,
+      tokenPepper,
+      getDailySummary,
+      readSharedSummary,
+      getSummaryForRender: async (id) =>
+        summaryDTO((await readSummary(db, id)).summary),
+    }),
     listAudienceTags,
     createAudienceTag,
     updateAudienceTag,

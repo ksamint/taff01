@@ -299,6 +299,7 @@ export const summaryShareTokenSchema = string().check(
  * malformed, unknown, expired and revoked tokens all answer the same 404.
  */
 export const sharedSummaryRequestSchema = strictObject({
+  format: optional(zodEnum(["json", "txt", "png"])),
   token: string().check(minLength(1), maxLength(200)),
 });
 /** What a share link shows: the summary, never its internal ids. */
@@ -363,3 +364,41 @@ export type SummaryJob = Infer<typeof summaryJobSchema>;
 export type SummaryJobCursor = Infer<typeof summaryJobCursorSchema>;
 export type DueSummaryJobs = Infer<typeof dueSummaryJobsSchema>;
 export type SummaryJobResult = Infer<typeof summaryJobResultSchema>;
+
+export const summaryRenderFormatSchema = zodEnum(["txt", "png"]);
+export const summaryRenderSchema = object({
+  id: idSchema,
+  workspaceId: idSchema,
+  summaryId: idSchema,
+  format: summaryRenderFormatSchema,
+  body: nullable(string()),
+  data: nullable(string()),
+  byteSize: positiveInteger,
+  rendererVersion: string(),
+  contentHash: hexHash,
+  createdAt: iso.datetime(),
+});
+export const storeSummaryRenderInputSchema = strictObject({
+  summaryId: idSchema,
+  format: summaryRenderFormatSchema,
+  body: optional(string().check(minLength(1), maxLength(4000))),
+  data: optional(
+    string().check(
+      minLength(1),
+      maxLength(546136),
+      regex(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/),
+    ),
+  ),
+  rendererVersion: string().check(trim(), minLength(1), maxLength(100)),
+}).check(
+  refine((input) =>
+    input.format === "txt"
+      ? input.body !== undefined && input.data === undefined
+      : input.data !== undefined && input.body === undefined,
+  ),
+);
+export type SummaryRender = Infer<typeof summaryRenderSchema>;
+export type SummaryRenderFormat = Infer<typeof summaryRenderFormatSchema>;
+export type StoreSummaryRenderInput = Infer<
+  typeof storeSummaryRenderInputSchema
+>;

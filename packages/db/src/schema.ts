@@ -3,6 +3,7 @@ import {
   bigint,
   boolean,
   check,
+  customType,
   date,
   foreignKey,
   index,
@@ -353,6 +354,9 @@ export const activity = pgTable(
   (t) => [
     index("activity_workspace_created_idx").on(t.workspaceId, t.createdAt),
     index("activity_workspace_trace_idx").on(t.workspaceId, t.traceId),
+    index("activity_summary_render_failure_idx")
+      .on(t.resourceId, t.createdAt)
+      .where(sql`${t.action}='summary.render_failed'`),
     check(
       "activity_trace_format",
       sql`${t.traceId} IS NULL OR ${t.traceId} ~ '^[a-f0-9]{32}$'`,
@@ -410,6 +414,10 @@ export const agentTokens = pgTable(
     ...dates,
   },
   (t) => [
+    check(
+      "agent_tokens_scopes_known",
+      sql`${t.scopes} <@ ARRAY['tasks:read','tasks:write','calendar:write','inbox:review','files:write','summaries:read']::text[]`,
+    ),
     check(
       "agent_tokens_organization_policy",
       sql`${t.organizationPolicy} IN ('explicit', 'all_organizations')`,
@@ -1784,6 +1792,7 @@ export const dailySummaries = pgTable(
       .notNull(),
   },
   (t) => [
+    index("daily_summaries_created_idx").on(t.createdAt, t.id),
     unique("daily_summaries_workspace_id_unique").on(t.workspaceId, t.id),
     unique("daily_summaries_recipient_day").on(t.recipientId, t.localDate),
     index("daily_summaries_workspace_tag_date_idx").on(
@@ -1846,5 +1855,45 @@ export const summaryShares = pgTable(
     }),
     check("summary_shares_hash", sql`${t.tokenHash} ~ '^[a-f0-9]{64}$'`),
     check("summary_shares_views", sql`${t.viewCount} >= 0`),
+  ],
+);
+
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType: () => "bytea",
+});
+export const summaryRenders = pgTable(
+  "summary_renders",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    summaryId: uuid("summary_id").notNull(),
+    format: text("format").$type<"txt" | "png">().notNull(),
+    body: text("body"),
+    bytes: bytea("bytes"),
+    byteSize: integer("byte_size").notNull(),
+    rendererVersion: text("renderer_version").notNull(),
+    contentHash: text("content_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    unique("summary_renders_summary_format").on(t.summaryId, t.format),
+    foreignKey({
+      columns: [t.workspaceId, t.summaryId],
+      foreignColumns: [dailySummaries.workspaceId, dailySummaries.id],
+      name: "summary_renders_summary_fk",
+    }).onDelete("cascade"),
+    check("summary_renders_format", sql`${t.format} IN ('txt','png')`),
+    check("summary_renders_size", sql`${t.byteSize} > 0`),
+    check(
+      "summary_renders_renderer",
+      sql`length(btrim(${t.rendererVersion})) BETWEEN 1 AND 100`,
+    ),
+    check("summary_renders_hash", sql`${t.contentHash} ~ '^[a-f0-9]{64}$'`),
+    check(
+      "summary_renders_shape",
+      sql`(${t.format}='txt' AND ${t.body} IS NOT NULL AND ${t.bytes} IS NULL AND char_length(${t.body})<=4000 AND ${t.byteSize}=octet_length(${t.body})) OR (${t.format}='png' AND ${t.body} IS NULL AND ${t.bytes} IS NOT NULL AND ${t.byteSize}=octet_length(${t.bytes}) AND ${t.byteSize}<=409600)`,
+    ),
   ],
 );

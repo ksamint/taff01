@@ -15,6 +15,7 @@ const env = z
     AUTH_URL: z.url(),
     AUTH_SECRET: z.string().min(32),
     TOKEN_PEPPER: z.string().min(16),
+    SUMMARY_RENDER_URL: z.url().optional(),
   })
   .parse(process.env);
 const core = createCore({
@@ -41,7 +42,7 @@ queue.on("error", (error) =>
   logger.error({ errorName: error.name }, "Queue connection error"),
 );
 const digests = createDigestProcessor(core, queue);
-const summaries = createSummaryProcessor(core, queue);
+const summaries = createSummaryProcessor(core, queue, env.SUMMARY_RENDER_URL);
 const worker = new Worker(
   "taff",
   (job) => (SUMMARY_JOB_NAMES.has(job.name) ? summaries(job) : digests(job)),

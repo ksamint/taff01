@@ -288,6 +288,13 @@
       "when": 1793232000006,
       "tag": "0040_token_organization_policy",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1793232000007,
+      "tag": "0041_summary_renders",
+      "breakpoints": true
     }
   ]
 }
