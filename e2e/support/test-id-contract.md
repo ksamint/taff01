@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (404 distinct, 2030 uses)
+## Test ids (404 distinct, 2031 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -510,7 +510,7 @@ several do). “Also rendered by” lists the other files.
 | `run-pause` | 9 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts |
 | `run-refresh` | 3 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `run-resume` | 6 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `run-status` | 23 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts |
+| `run-status` | 24 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, realtime.spec.ts, release/checklist.spec.ts |
 
 ### schedule-editor.tsx
 
