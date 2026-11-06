@@ -12,3 +12,4 @@
 - Fresh-database fixture correction: UUID-only organization ordering fails when a seed ID changes; explicit English business-name ordering with ID tie-breaks passes the two-case regression. Product ordering and real rows/controls are unchanged.
 - Only three desktop system-table references changed; all 33 others matched byte-for-byte. The three changed images were inspected, and manifest hashes plus original/updated fileye bytes were retained.
 - C6 setup reuses the release fixture’s server-directed 429 backoff; sign-up still must return 200 and product limits stay intact. Stale-build and normal-rate-limit attempts remain in focused evidence; final no-update comparison is required on committed source.
+- Clean committed fixture `fcbcfe6` passed all six Linux comparisons in 50.2s with reference updates disabled and normal server-directed sign-up pacing; the complete final-source v0.2.20 gate remains pending.
