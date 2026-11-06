@@ -49,6 +49,8 @@ import {
   taskCommentInputSchema,
   taskFilterSchema,
   todayBootstrapQuerySchema,
+  tokenOrganizationPolicyInputSchema,
+  tokenOrganizationPolicySchema,
   updateNotificationPreferencesSchema,
   updateTaskSchema,
   updateTaskStatusSchema,
@@ -883,6 +885,33 @@ export function createApp(
         userPrincipal(c.get("userId")),
         idSchema.parse(c.req.param("id")),
         inboxItemInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.get("/api/admin/agent-tokens", async (c) =>
+    c.json(
+      await core.listSystemAgentTokens(
+        userPrincipal(c.get("userId")),
+        c.req.query("policy") === undefined
+          ? undefined
+          : tokenOrganizationPolicySchema.parse(c.req.query("policy")),
+      ),
+    ),
+  );
+  app.put("/api/agent-tokens/:id/organization-policy", async (c) =>
+    c.json(
+      await core.setTokenOrganizationPolicy(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
+        tokenOrganizationPolicyInputSchema.parse(await c.req.json()),
+      ),
+    ),
+  );
+  app.post("/api/agent-token-workspaces/:id/restore", async (c) =>
+    c.json(
+      await core.restoreTokenWorkspaceGrant(
+        userPrincipal(c.get("userId")),
+        idSchema.parse(c.req.param("id")),
       ),
     ),
   );

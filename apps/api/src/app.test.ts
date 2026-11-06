@@ -216,6 +216,8 @@ describe("REST adapter boundaries", () => {
       memberId: id,
       createdBy: id,
       name: "Claude Desktop",
+      organizationPolicy: "explicit" as const,
+      version: 1,
       prefix: "taff_abcdefg",
       scopes: ["tasks:read" as const],
       createdAt: now.toISOString(),
@@ -1236,5 +1238,132 @@ describe("token workspace authorization REST boundaries", () => {
     );
     expect(response.status).toBe(401);
     expect(read).not.toHaveBeenCalled();
+  });
+});
+
+describe("organization policy REST boundaries", () => {
+  it("validates policy and forwards the session identity and version", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const set = vi
+      .spyOn(core, "setTokenOrganizationPolicy")
+      .mockResolvedValue({} as never);
+    const path = `/api/agent-tokens/${id}/organization-policy`;
+    for (const body of [
+      { version: 1, policy: "all_organizations", userId: id },
+      { version: 1, policy: "unknown" },
+      { policy: "all_organizations" },
+      { version: 0, policy: "explicit" },
+    ]) {
+      expect(
+        (
+          await app.request(path, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          })
+        ).status,
+      ).toBe(400);
+    }
+    expect(set).not.toHaveBeenCalled();
+    const body = { version: 1, policy: "all_organizations" };
+    expect(
+      (
+        await app.request(path, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        })
+      ).status,
+    ).toBe(200);
+    expect(set).toHaveBeenCalledWith({ kind: "user", userId: id }, id, body);
+    set.mockRejectedValueOnce(new CoreError("forbidden", 403));
+    expect(
+      (
+        await app.request(path, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        })
+      ).status,
+    ).toBe(403);
+    set.mockRejectedValueOnce(new CoreError("conflict", 409));
+    expect(
+      (
+        await app.request(path, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        })
+      ).status,
+    ).toBe(409);
+  });
+  it("restores grants and filters system token reads through core", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: session,
+      headers: new Headers(),
+    });
+    const restore = vi
+      .spyOn(core, "restoreTokenWorkspaceGrant")
+      .mockResolvedValue({} as never);
+    expect(
+      (
+        await app.request(`/api/agent-token-workspaces/${id}/restore`, {
+          method: "POST",
+        })
+      ).status,
+    ).toBe(200);
+    expect(restore).toHaveBeenCalledWith({ kind: "user", userId: id }, id);
+    expect(
+      (
+        await app.request("/api/agent-token-workspaces/invalid/restore", {
+          method: "POST",
+        })
+      ).status,
+    ).toBe(400);
+    const list = vi.spyOn(core, "listSystemAgentTokens").mockResolvedValue([]);
+    expect(
+      (await app.request("/api/admin/agent-tokens?policy=all_organizations"))
+        .status,
+    ).toBe(200);
+    expect(list).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      "all_organizations",
+    );
+    list.mockClear();
+    expect(
+      (await app.request("/api/admin/agent-tokens?policy=unknown")).status,
+    ).toBe(400);
+    expect(list).not.toHaveBeenCalled();
+    list.mockRejectedValueOnce(new CoreError("forbidden", 403));
+    expect((await app.request("/api/admin/agent-tokens")).status).toBe(403);
+  });
+  it("rejects agent bearers on all management endpoints without invoking core", async () => {
+    vi.spyOn(core, "getSession").mockResolvedValue({
+      response: null,
+      headers: new Headers(),
+    });
+    const authenticate = vi.spyOn(core, "authenticateAgentToken");
+    const set = vi.spyOn(core, "setTokenOrganizationPolicy");
+    const restore = vi.spyOn(core, "restoreTokenWorkspaceGrant");
+    const list = vi.spyOn(core, "listSystemAgentTokens");
+    for (const [path, method] of [
+      [`/api/agent-tokens/${id}/organization-policy`, "PUT"],
+      [`/api/agent-token-workspaces/${id}/restore`, "POST"],
+      ["/api/admin/agent-tokens", "GET"],
+    ]) {
+      expect(
+        (
+          await app.request(path!, {
+            method,
+            headers: { Authorization: "Bearer taff_agent" },
+          })
+        ).status,
+      ).toBe(401);
+    }
+    for (const spy of [authenticate, set, restore, list])
+      expect(spy).not.toHaveBeenCalled();
   });
 });
