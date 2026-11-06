@@ -23,3 +23,6 @@ e2e/live/reports/
 
 # Rust backend
 backend/target/
+
+# Generated from apps/web/src/sw/sw.ts before dev/build.
+apps/web/public/sw.js

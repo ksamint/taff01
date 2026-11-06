@@ -1,3 +1,7 @@
+/// <reference lib="webworker" />
+
+declare const self: ServiceWorkerGlobalScope;
+
 // The build stamps its version into the registration URL; a new build gets a
 // fresh cache and the activate step drops the old one.
 const VERSION = new URL(self.location.href).searchParams.get("v") || "dev";
@@ -51,7 +55,9 @@ self.addEventListener("fetch", (event) => {
     return;
   if (request.mode === "navigate") {
     // Every private document goes to the server. Offline always shows a neutral shell.
-    event.respondWith(fetch(request).catch(() => caches.match(OFFLINE)));
+    event.respondWith(
+      fetch(request).catch(() => caches.match(OFFLINE) as Promise<Response>),
+    );
     return;
   }
   if (url.search || !PUBLIC.test(url.pathname)) return;
@@ -86,3 +92,5 @@ self.addEventListener("fetch", (event) => {
     }),
   );
 });
+
+export {};

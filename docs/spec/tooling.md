@@ -44,6 +44,17 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
   screenshots. Browser-returned fixture data shall cross an unknown boundary
   and be narrowed before use. Approved references shall not change.
 
+### Service worker source (TT-5)
+
+- TT-5.1 The web dev/build commands shall explicitly compile the typed service
+  worker to the ignored public/sw.js using the existing esbuild version,
+  IIFE/ES2022, without minification or source maps.
+- TT-5.2 A separate WebWorker typecheck shall cover the source without DOM
+  globals. Public cache rules, private navigation exclusions, the version
+  query, registration and response headers shall remain unchanged.
+- TT-5.3 PostCSS configuration shall remain the sole owned JavaScript source
+  exemption because Next's configuration loader does not accept TypeScript.
+
 ## Non-functional
 
 - No new dependency; Node 24–26 remains supported. Library errors retain their
@@ -62,11 +73,12 @@ Status: v0.2.20 candidate; script/e2e baseline typecheck implemented.
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal |
 | TT-4 | Native before/after capture PNG hashes; capture-runtime, capture-selection and visual-clock tests |
+| TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test; /sw.js headers on candidate stack |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions
 
-- Legacy script renames and the service-worker build follow the same local gate.
+- Runtime PWA/header acceptance follows the serialized local release gate.
 
 ## Sources
 
