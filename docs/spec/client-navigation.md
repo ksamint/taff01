@@ -28,6 +28,14 @@ Status: v0.2.20 candidate; browser acceptance pending.
   without resurrecting a failed layer, including shared calendar rows and
   newly created caches. Baselines shall be captured after query cancellation.
 
+### Project management after phone filters (CN-3)
+
+- CN-3.1 When an administrator opens the phone project filters and changes a
+  task filter, the project creation control shall remain available and open
+  the existing project form in en, zh-CN and zh-HK.
+- CN-3.2 Project management controls shall continue to use the current
+  canManageProjects read; this regression does not grant new authority.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -40,6 +48,7 @@ Status: v0.2.20 candidate; browser acceptance pending.
 
 | Requirement | Evidence |
 | --- | --- |
+| CN-3 | e2e/project-filter-completion.spec.ts (browser pending) |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
 
