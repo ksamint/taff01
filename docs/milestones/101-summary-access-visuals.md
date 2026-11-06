@@ -8,3 +8,7 @@
 - Capture: six cases passed in 17.2s; all 36 images inspected. fileye detects PNGs, records dimensions and SHA-256; original bytes are retained. No warnings.
 - First comparison caught premature sidebar capture on two desktop system references; sidebar readiness is now asserted. Comparison without snapshot updates is required on the committed source before acceptance. Full v0.2.20 checks and deployment remain pending.
 - C5 routing and the public page's separate JavaScript target are unchanged by this work.
+
+- Fresh-database fixture correction: UUID-only organization ordering fails when a seed ID changes; explicit English business-name ordering with ID tie-breaks passes the two-case regression. Product ordering and real rows/controls are unchanged.
+- Only three desktop system-table references changed; all 33 others matched byte-for-byte. The three changed images were inspected, and manifest hashes plus original/updated fileye bytes were retained.
+- C6 setup reuses the release fixture’s server-directed 429 backoff; sign-up still must return 200 and product limits stay intact. Stale-build and normal-rate-limit attempts remain in focused evidence; final no-update comparison is required on committed source.

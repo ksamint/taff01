@@ -1,7 +1,7 @@
 {
-  "sourceBase": "e5ffa19d0a0efeca95d77a0f72891287234fb828",
-  "captureObservedUtc": "2026-11-06T11:00:21.836005+00:00",
-  "specSha256": "08170d2e412ae27ec31835e009c5d32c7fa0352b6cc60a835c9059b87d971c31",
+  "sourceBase": "962b236b90fe8bab0d2e352c6fc6db352019085a",
+  "captureObservedUtc": "2026-11-06T12:48:32.203025+00:00",
+  "specSha256": "50028c2ba19f8d80e10f816ebf1fbcc65abd69eb5d63f376fc1fd1208f9edaa8",
   "configSha256": "365c998bfe8c7d6e89cc3f940716e2de0c767d30b15cc044e337002683cf5860",
   "browser": {
     "playwright": "1.64.1",
@@ -35,9 +35,9 @@
     "themes": ["light"],
     "locales": ["en", "zh-CN", "zh-HK"],
     "viewports": [[390, 844], [1280, 800]],
-    "result": "6 passed (17.2s); desktop sidebar readiness asserted",
+    "result": "Six corrected-fixture cases compared all 36 references: 33 matched, three desktop system images changed ordering and were inspected.",
     "visualReview": "All 36 inspected; no unintended clipping or missing glyphs found",
-    "comparison": "First comparison found two premature desktop system-page references without the sidebar; corrected capture requires no-update comparison on committed source"
+    "comparison": "No-update comparison required on clean committed source; canonical final v20 gate remains pending."
   },
   "references": [
     {
@@ -66,8 +66,8 @@
     },
     {
       "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/access-system.png",
-      "sha256": "83fb17355e47104251bc7cae17d3ed2c7e54d746cb0624e60aefb6236a382907",
-      "bytes": 41981,
+      "sha256": "131dbafa010eac72429ef15c7efa812dd7539fbaa32ea432838b1c4a2d22fef5",
+      "bytes": 41988,
       "detectedType": "png",
       "width": 1280,
       "height": 800
@@ -114,8 +114,8 @@
     },
     {
       "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-system.png",
-      "sha256": "5040c5303a916c5efaa67a3d871a273b5e9b85151357ee8672ae75cb4721fec4",
-      "bytes": 38781,
+      "sha256": "38819b81453c51457a394ef20eb72b4abed0eb35f3d1dae01fd741425c9ef45f",
+      "bytes": 38777,
       "detectedType": "png",
       "width": 1280,
       "height": 800
@@ -162,8 +162,8 @@
     },
     {
       "path": "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-system.png",
-      "sha256": "80624a1c8954796ca8cde68776a12978610e01a78681a78c882e7b4f61d587c9",
-      "bytes": 40104,
+      "sha256": "7a09aa0b9651168412d59072f78cbd1eb13f18f6be11af5cf655d83fe4a0e5a4",
+      "bytes": 40098,
       "detectedType": "png",
       "width": 1280,
       "height": 800
@@ -328,5 +328,23 @@
       "width": 390,
       "height": 1415
     }
-  ]
+  ],
+  "referenceUpdate": {
+    "previousCapture": {
+      "sourceBase": "e5ffa19d0a0efeca95d77a0f72891287234fb828",
+      "captureObservedUtc": "2026-11-06T11:00:21.836005+00:00",
+      "specSha256": "08170d2e412ae27ec31835e009c5d32c7fa0352b6cc60a835c9059b87d971c31"
+    },
+    "changedReferences": [
+      "e2e/__screenshots__/delivery-visual.spec.ts/desktop-en/access-system.png",
+      "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-CN/access-system.png",
+      "e2e/__screenshots__/delivery-visual.spec.ts/desktop-zh-HK/access-system.png"
+    ],
+    "unchangedReferences": 33,
+    "reason": "Fixture organization columns use explicit English name collation, with IDs only for identical-name ties; real rows and controls are preserved.",
+    "orderingHelper": "e2e/support/delivery-order.ts",
+    "orderingHelperSha256": "b070f67374cc64f1f1dd8f4bbafa450d814de3d3e84051d55255ba02eec3cecb",
+    "visualReview": "The three updated desktop system images were inspected; only organization column order changed, with no clipping or missing glyphs. Original and updated bytes retained in fileye content-addressed storage.",
+    "comparison": "Corrected fixture matched 33 prior references; three changed desktop system references were adopted. No-update comparison on clean committed source is required before acceptance."
+  }
 }

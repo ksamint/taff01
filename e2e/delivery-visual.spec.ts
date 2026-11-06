@@ -11,6 +11,8 @@ import {
   systemAccessMatrixSchema,
 } from "../packages/schemas/src/index";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
+import { authPost } from "./release/support";
+import { orderVisualOrganizations } from "./support/delivery-order";
 import { messages, type TestLocale } from "./support/messages";
 
 // Real app pages and real access reads; only the report content is fixed to
@@ -30,14 +32,16 @@ test("summary and access screens", async ({ page }, info) => {
       ? "zh-HK"
       : "en";
   const m = messages[locale];
-  const signedUp = await page.request.post("/api/auth/sign-up/email", {
-    headers: { Origin: process.env.AUTH_URL! },
-    data: {
+  const signedUp = await authPost(
+    page.request,
+    "/api/auth/sign-up/email",
+    {
       name: "M7 reviewer",
       email: `m7-${crypto.randomUUID()}@example.test`,
       password: process.env.DEMO_PASSWORD,
     },
-  });
+    process.env.AUTH_URL!,
+  );
   expect(signedUp.status()).toBe(200);
   expect(
     (
@@ -148,7 +152,7 @@ test("summary and access screens", async ({ page }, info) => {
       await (await page.request.get("/api/admin/access-matrix")).json(),
     );
     // Stable fixture columns across PostgreSQL collation providers.
-    system.organizations.sort((left, right) => left.id.localeCompare(right.id));
+    system.organizations = orderVisualOrganizations(system.organizations);
     // Keep real organization/grant rows; exclude previous captures' tokens.
     system.tokens = system.tokens.filter((token) => token.id === issued.id);
     await page.route("**/api/admin/access-matrix", (route) =>

@@ -100,14 +100,15 @@ export async function readMe(request: APIRequestContext) {
 }
 
 /** Better Auth rate-limits auth routes per client; retry after a 429. */
-async function authPost(
+export async function authPost(
   request: APIRequestContext,
   path: string,
   data: Record<string, unknown>,
+  origin = baseURL,
 ) {
   for (let attempt = 0; ; attempt++) {
     const response = await request.post(path, {
-      headers: { Origin: baseURL },
+      headers: { Origin: origin },
       data,
     });
     if (response.status() !== 429 || attempt >= 6) return response;
