@@ -9,8 +9,10 @@ import {
   dailySummaryListQuerySchema,
   idSchema,
   projectAudienceTagsInputSchema,
+  type SummaryRender,
   sharedSummaryRequestSchema,
   summaryPreviewInputSchema,
+  summaryRenderFormatSchema,
   summaryShareInputSchema,
   workspaceQuerySchema,
 } from "@taff/schemas";
@@ -21,6 +23,22 @@ import type { RateLimiter } from "../rate-limit";
 type Core = ReturnType<typeof createCore>;
 const sha256 = (value: string) =>
   createHash("sha256").update(value).digest("hex");
+
+function renderAttachment(
+  c: Context<AppEnv>,
+  render: Pick<SummaryRender, "format" | "body" | "data">,
+) {
+  c.header("Cache-Control", "private, no-store");
+  c.header(
+    "Content-Disposition",
+    `attachment; filename="summary.${render.format}"`,
+  );
+  if (render.format === "txt") return c.text(render.body!);
+  return c.body(new Uint8Array(Buffer.from(render.data!, "base64")), 200, {
+    "Content-Type": "image/png",
+    "X-Content-Type-Options": "nosniff",
+  });
+}
 
 /**
  * REST adapter for shareholder summaries (ADR 0027): validation and the
@@ -109,6 +127,16 @@ export function registerSummaryRoutes(app: Hono<AppEnv>, core: Core) {
   app.get("/api/summaries/:id", async (c) =>
     c.json(await core.getDailySummary(me(c), id(c))),
   );
+  app.get("/api/summaries/:id/render", async (c) =>
+    renderAttachment(
+      c,
+      await core.getSummaryRender(
+        me(c),
+        id(c),
+        summaryRenderFormatSchema.parse(c.req.query("format")),
+      ),
+    ),
+  );
   app.get("/api/summaries/:id/shares", async (c) =>
     c.json(await core.listSummaryShares(me(c), id(c))),
   );
@@ -143,7 +171,9 @@ export function registerPublicSummaryRoutes(
     c.header("Cache-Control", "private, no-store");
     c.header("X-Robots-Tag", "noindex, nofollow");
     c.header("Referrer-Policy", "no-referrer");
-    const { token } = sharedSummaryRequestSchema.parse(await c.req.json());
+    const { token, format } = sharedSummaryRequestSchema.parse(
+      await c.req.json(),
+    );
     let peer = "unknown";
     try {
       peer = getConnInfo(c).remote.address ?? peer;
@@ -159,6 +189,11 @@ export function registerPublicSummaryRoutes(
       .hit(`share:token:${sha256(token)}`)
       .catch(() => deny);
     if (!byToken.allowed) return c.json({ error: "rate_limited" }, 429);
+    if (format && format !== "json")
+      return renderAttachment(
+        c,
+        await core.getSharedSummaryRender(token, format),
+      );
     return c.json(await core.readSharedSummary(token));
   });
 }

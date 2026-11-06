@@ -7,6 +7,7 @@ import { errorKey } from "../lib/api";
 import { useDailySummaries, useDailySummary } from "../lib/summary-queries";
 import { useWorkspace } from "./app-shell";
 import { SummaryDocument, type Translate } from "./summary-document";
+import { SummaryRenderActions } from "./summary-render-actions";
 import { SummarySharePanel } from "./summary-share-panel";
 import { Button } from "./ui/button";
 
@@ -108,12 +109,25 @@ export function SummaryView({ id }: { id: string }) {
             t={t as Translate}
             taskHref={(taskId) => `/tasks/${taskId}`}
             actions={
-              <Button
-                data-testid="summary-print"
-                onClick={() => window.print()}
-              >
-                <Printer size={16} aria-hidden="true" /> {t("summary.print")}
-              </Button>
+              <>
+                <SummaryRenderActions
+                  source={{ summaryId: summary.id }}
+                  labels={{
+                    copy: t("summary.copyText"),
+                    save: t("summary.saveImage"),
+                    copied: t("mcp.copied"),
+                    copyFailed: t("organization.copyFailed"),
+                    unavailable: t("errors.not_found"),
+                    failed: t("errors.internal_error"),
+                  }}
+                />
+                <Button
+                  data-testid="summary-print"
+                  onClick={() => window.print()}
+                >
+                  <Printer size={16} aria-hidden="true" /> {t("summary.print")}
+                </Button>
+              </>
             }
           />
           {workspace.role === "admin" &&

@@ -360,3 +360,93 @@ describe("public share-link read", () => {
     expect(logged.join("")).not.toContain("a".repeat(43));
   });
 });
+
+describe("summary render delivery", () => {
+  const png = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jDioAAAAASUVORK5CYII=",
+    "base64",
+  );
+  const stored = {
+    id,
+    workspaceId: id,
+    summaryId: id,
+    format: "txt" as const,
+    body: "Daily progress\nPat\n",
+    data: null,
+    byteSize: 19,
+    rendererVersion: "1",
+    contentHash: "a".repeat(64),
+    createdAt: now.toISOString(),
+  };
+  it("requires a human session, validates format and serves private text attachments", async () => {
+    const read = vi.spyOn(core, "getSummaryRender").mockResolvedValue(stored);
+    expect(
+      (await app.request(`/api/summaries/${id}/render?format=txt`)).status,
+    ).toBe(401);
+    signIn();
+    expect(
+      (await app.request(`/api/summaries/${id}/render?format=svg`)).status,
+    ).toBe(400);
+    expect(read).not.toHaveBeenCalled();
+    const response = await app.request(
+      `/api/summaries/${id}/render?format=txt`,
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toContain("text/plain");
+    expect(response.headers.get("cache-control")).toBe("private, no-store");
+    expect(response.headers.get("content-disposition")).toBe(
+      'attachment; filename="summary.txt"',
+    );
+    expect(await response.text()).toBe(stored.body);
+    expect(read).toHaveBeenCalledWith(person, id, "txt");
+  });
+  it("delivers native PNG bytes on private and shared reads without leaking the share credential", async () => {
+    signIn();
+    vi.spyOn(core, "getSummaryRender").mockResolvedValue({
+      ...stored,
+      format: "png",
+      body: null,
+      data: png.toString("base64"),
+      byteSize: png.length,
+    });
+    const shared = vi.spyOn(core, "getSharedSummaryRender").mockResolvedValue({
+      ...stored,
+      format: "png",
+      body: null,
+      data: png.toString("base64"),
+      byteSize: png.length,
+    });
+    for (const response of [
+      await app.request(`/api/summaries/${id}/render?format=png`),
+      await send("/api/shared-summary", "POST", { token, format: "png" }),
+    ]) {
+      expect(response.status).toBe(200);
+      expect(response.headers.get("content-type")).toBe("image/png");
+      expect(response.headers.get("content-disposition")).not.toContain(token);
+      expect(Buffer.from(await response.arrayBuffer())).toEqual(png);
+    }
+    expect(shared).toHaveBeenCalledWith(token, "png");
+    expect(logged.join("\n")).not.toContain(token);
+  });
+  it("preserves public miss parity and rate limits for every format", async () => {
+    const read = vi
+      .spyOn(core, "getSharedSummaryRender")
+      .mockRejectedValue(new CoreError("not_found", 404));
+    for (const format of ["txt", "png"])
+      for (const value of [token, "tsum_short", "unknown"]) {
+        const response = await send("/api/shared-summary", "POST", {
+          token: value,
+          format,
+        });
+        expect(response.status).toBe(404);
+        expect(await response.json()).toEqual({ error: "not_found" });
+      }
+    read.mockClear();
+    shareAllowed = () => false;
+    expect(
+      (await send("/api/shared-summary", "POST", { token, format: "png" }))
+        .status,
+    ).toBe(429);
+    expect(read).not.toHaveBeenCalled();
+  });
+});

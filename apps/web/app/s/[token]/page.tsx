@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PrintButton } from "../../../src/components/print-button";
 import { SummaryDocument } from "../../../src/components/summary-document";
+import { SummaryRenderActions } from "../../../src/components/summary-render-actions";
 import { htmlLang } from "../../../src/lib/i18n";
 import { serverTranslator } from "../../../src/lib/server-translate";
 
@@ -56,7 +57,22 @@ export default async function Page({
         createdAt={summary.createdAt}
         locale={summary.locale}
         t={t}
-        actions={<PrintButton label={t("summary.print")} />}
+        actions={
+          <>
+            <SummaryRenderActions
+              source={{ shareToken: token }}
+              labels={{
+                copy: t("summary.copyText"),
+                save: t("summary.saveImage"),
+                copied: t("mcp.copied"),
+                copyFailed: t("organization.copyFailed"),
+                unavailable: t("errors.not_found"),
+                failed: t("errors.internal_error"),
+              }}
+            />
+            <PrintButton label={t("summary.print")} />
+          </>
+        }
       />
     </main>
   );

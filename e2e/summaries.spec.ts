@@ -1,6 +1,7 @@
 import { execFile } from "node:child_process";
+import { readFile } from "node:fs/promises";
 import { promisify } from "node:util";
-import { expect, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 import { htmlLang } from "../apps/web/src/lib/i18n";
 import {
   audienceRecipientListSchema,
@@ -19,6 +20,25 @@ test.use({ actionTimeout: 15000 });
 
 const fill = (text: string, values: Record<string, string | number>) =>
   text.replace(/\{\{(\w+)\}\}/g, (_, key: string) => String(values[key]));
+
+async function checkRenders(page: Page, hash: string) {
+  await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.getByTestId("summary-copy-text").click();
+  await expect
+    .poll(() =>
+      page.evaluate(async () =>
+        (await navigator.clipboard.readText()).replace(/\s/g, ""),
+      ),
+    )
+    .toContain(hash);
+  const pending = page.waitForEvent("download");
+  await page.getByTestId("summary-save-image").click();
+  const download = await pending;
+  expect(download.suggestedFilename()).toMatch(/^taff-summary-.*\.png$/);
+  expect(await download.failure()).toBeNull();
+  const bytes = await readFile((await download.path())!);
+  expect([...bytes.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
+}
 
 test("an admin tags, previews, shares and revokes a shareholder summary", async ({
   page,
@@ -154,6 +174,7 @@ test("an admin tags, previews, shares and revokes a shareholder summary", async 
       `^Pat Lee · ${org} · \\d{4}-\\d{2}-\\d{2} · ${summaryId.slice(0, 8)}$`,
     ),
   );
+  await checkRenders(page, hash!);
   await page.getByTestId("summary-share-new").click();
   const link = await page.getByTestId("summary-share-link").inputValue();
   expect(link).toMatch(/\/s\/tsum_[A-Za-z0-9_-]{43}$/);
@@ -184,6 +205,8 @@ test("an admin tags, previews, shares and revokes a shareholder summary", async 
     expect(
       await outside.locator('meta[name="robots"]').getAttribute("content"),
     ).toContain("noindex");
+
+    await checkRenders(outside, hash!);
 
     // Revoke with the confirm step; the same link now shows unavailable.
     const row = page

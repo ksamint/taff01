@@ -1,4 +1,5 @@
 import { eq, sql } from "drizzle-orm";
+import { createSummaryProcessor } from "../../apps/worker/src/summaries.ts";
 import { createCore } from "../../packages/core/src/index.ts";
 import { connectDatabase } from "../../packages/db/src/index.ts";
 import { audienceRecipients } from "../../packages/db/src/schema.ts";
@@ -30,6 +31,22 @@ try {
   );
   if (result.status !== "generated" || !result.summaryId)
     throw new Error("Actual summary generation required");
+  const render = createSummaryProcessor(
+    core,
+    {
+      add: async () => {
+        throw new Error("Render fixture never enqueues jobs");
+      },
+    },
+    process.env.SUMMARY_RENDER_URL,
+  );
+  if (!process.env.SUMMARY_RENDER_URL)
+    throw new Error("SUMMARY_RENDER_URL required for image acceptance");
+  for (const format of ["txt", "png"] as const)
+    await render({
+      name: "summary-render",
+      data: { summaryId: result.summaryId, format },
+    });
   console.log(JSON.stringify({ summaryId: result.summaryId }));
 } finally {
   await core.close();
