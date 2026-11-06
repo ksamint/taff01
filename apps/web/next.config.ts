@@ -44,6 +44,11 @@ const config: NextConfig = {
         ],
       },
       {
+        source:
+          "/:path((?!s(?:/|$)|_next(?:/|$)|api(?:/|$)|locales(?:/|$)|.*\\.[^/]+$).*)",
+        headers: [{ key: "Cache-Control", value: "private, no-store" }],
+      },
+      {
         source: "/sw.js",
         headers: [
           { key: "Cache-Control", value: "no-cache" },

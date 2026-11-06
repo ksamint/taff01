@@ -24,7 +24,10 @@ source as a process gap in the milestone and fix the capture step below.
    ci, no github runner forever, we run locally push deploy directly since we
    are ts and rust"). The gate is `pnpm lint`, `pnpm typecheck`,
    `pnpm licence:check`, `pnpm test`, `pnpm build`, `pnpm build:server`,
-   `pnpm perf:budget`, `pnpm e2e` (en, zh-CN, zh-HK), `release:stack` then
+   `pnpm perf:budget`, `pnpm e2e` (en, zh-CN, zh-HK), and
+   `SSR_PRODUCTION=1 pnpm e2e e2e/ssr-session.spec.ts --grep "production SSR HTML is private"` against
+   the local production stack (Next's development server always sends only
+   `no-store`), `release:stack` then
    `release:checklist`, `pnpm mcp:smoke` against that stack, and the three
    image builds (`deploy/Dockerfile.server` with `TARGET=api` and
    `TARGET=worker`, `deploy/Dockerfile.web`). Once `backend/` exists, add

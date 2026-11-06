@@ -33,6 +33,28 @@ async function account(
   return meSchema.parse(await (await request.get("/api/me")).json());
 }
 
+// Next dev emits no-store; the production gate separately requires private.
+test("production SSR HTML is private on authenticated app routes", async ({
+  page,
+}, info) => {
+  test.skip(
+    process.env.SSR_PRODUCTION !== "1",
+    "Requires the production Next server",
+  );
+  await account(
+    page.request,
+    info.project.name as TestLocale,
+    "SSR cache policy",
+  );
+  for (const route of ["/", "/projects", "/calendar", "/me/mcp"]) {
+    const response = await page.request.get(route);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("text/html");
+    expect(response.headers()["cache-control"]).toContain("private");
+    expect(response.headers()["cache-control"]).toContain("no-store");
+  }
+});
+
 test("server account identity stays private and read-only until the browser confirms its current account", async ({
   page,
   browser,
@@ -141,7 +163,6 @@ test("server account identity stays private and read-only until the browser conf
     const response = await page.goto("/", { waitUntil: "commit" });
     expect(response).not.toBeNull();
     const html = await response!.text();
-    expect(response!.headers()["cache-control"]).toContain("private");
     expect(response!.headers()["cache-control"]).toContain("no-store");
     expect(html).toContain("SSR Alice");
     expect(html).toContain(privateTitle);
@@ -344,7 +365,10 @@ for (const route of ["/projects", "/calendar"]) {
       await request.continue();
     });
     try {
-      await page.goto(route, { waitUntil: "domcontentloaded" });
+      const response = await page.goto(route, {
+        waitUntil: "domcontentloaded",
+      });
+      expect(response?.headers()["cache-control"]).toContain("no-store");
       await expect(page.locator("main.content")).toHaveAttribute("inert", "");
       if (route === "/projects")
         await expect(page.locator(".projects-title-text")).toHaveText(
