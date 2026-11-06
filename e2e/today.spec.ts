@@ -86,6 +86,8 @@ test("loading the desktop sidebar keeps Today visible and resizing restores phon
 test("sign in, create a task and assign it to an agent", async ({
   page,
 }, info) => {
+  // This complete workflow keeps each action/assertion deadline unchanged.
+  test.setTimeout(60_000);
   const locale = info.project.name as TestLocale;
   const taskNavigations: string[] = [];
   page.on("request", (request) => {

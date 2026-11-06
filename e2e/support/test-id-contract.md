@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (416 distinct, 2066 uses)
+## Test ids (416 distinct, 2067 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -382,7 +382,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `oauth-agent` | 6 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
+| `oauth-agent` | 7 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-approve` | 4 |  | live/oauth-member.spec.ts, mcp-oauth.spec.ts |
 | `oauth-client` | 1 |  | mcp-oauth.spec.ts |
 | `oauth-consent` | 1 |  | mcp-oauth.spec.ts |
