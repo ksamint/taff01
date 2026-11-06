@@ -4,7 +4,7 @@ Living product specification for the module shipped in v0.2.17 (ADR 0027, milest
 states the current contract; the ADR holds the decisions and their reasons. Change this file in the same
 commit as the behaviour it describes.
 
-Status: v0.2.19 candidate; release and deployment acceptance pending.
+Status: summaries shipped in v0.2.17; the v0.2.19 text/PNG delivery and scoped MCP additions are deployed at `d10c0a8`. Exact-source acceptance and native closeout are recorded in [milestone 102](../milestones/102-v0.2.19.md).
 
 ## Users and roles
 
@@ -174,6 +174,7 @@ slipped as a list; a second audience kind.
 | DS-8.6 | apps/api/src/summaries.test.ts; e2e/summaries.spec.ts |
 | DS-9 | permissions.test.ts; mcp-summaries.test.ts; authorization.integration.test.ts |
 | DS-9.4 | token-policy.integration.test.ts |
+| v0.2.19 release | [Milestone 102](../milestones/102-v0.2.19.md): Node 2151, Rust 25 including mandatory SQL/fixtures, browser 306, production SSR 3, checklist 32 and MCP 67 checks/37 tools; native renderer health and read-only boundaries passed |
 
 ## Open decisions
 

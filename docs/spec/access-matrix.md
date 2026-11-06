@@ -3,7 +3,7 @@
 Living product specification for workspace and system access visibility (ADR 0028,
 release v0.2.19). Change this file with the behavior it describes.
 
-Status: v0.2.19 candidate; deployment acceptance pending.
+Status: shipped in v0.2.19, deployed source `d10c0a8`; exact-source local and native acceptance are recorded in [milestone 102](../milestones/102-v0.2.19.md).
 
 ## Users and roles
 
@@ -82,12 +82,11 @@ reads use the same current membership checks as other administration operations.
 | Human REST boundaries | apps/api/src/app.test.ts; packages/core/src/authorization.integration.test.ts |
 | AM-3.1–2 | packages/core/src/permissions.test.ts |
 | AM-3.3 | scripts/permissions-matrix.test.ts; lint --check command |
-| Web rendering and role/capability changes | e2e/access.spec.ts; implementation acceptance pending |
+| Web rendering and role/capability changes | e2e/access.spec.ts; accepted three-locale gate and native read-only matrix acceptance in [milestone 102](../milestones/102-v0.2.19.md) |
 
 ## Open decisions
 
-None for read models. UI and render delivery acceptance remains pending until
-its release tests complete.
+None for read models. v0.2.19 UI acceptance is complete: 306 browser cases passed, three production SSR cases and 32 production checklist cases passed; native workspace visibility and the current system-administrator boundary passed. See [milestone 102](../milestones/102-v0.2.19.md).
 
 ## Sources
 
