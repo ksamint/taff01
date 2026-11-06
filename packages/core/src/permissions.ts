@@ -8,66 +8,68 @@ import type {
   TaskStatus,
 } from "@taff/schemas";
 
-export type Action =
-  | "workspace:archive"
-  | "workspace:default"
-  | "workspace:create"
-  | "workspace:join"
-  | "workspace:manage"
-  | "project:manage"
-  | "project:stage"
-  | "task:edit"
-  | "task:owner"
-  | "task:comment"
-  | "workspace:read"
-  | "task:create"
-  | "task:assign"
-  | "task:status"
-  | "task:schedule"
-  | "task:review"
-  | "token:policy"
-  | "token:grant"
-  | "token:grant_revoke"
-  | "token:manage"
-  | "token:connect"
-  | "token:revoke"
-  | "profile:read"
-  | "profile:update"
-  | "notification:read"
-  | "notification:update"
-  | "digest:read"
-  | "run:start"
-  | "run:control"
-  | "run:submit"
-  | "run:request_review"
-  | "files:attach"
-  | "agent:manage"
-  | "grant:request"
-  | "grant:decide"
-  | "inbox:read"
-  | "inbox:update"
-  | "capability:use"
-  | "review:comment"
-  | "task:finish"
-  | "dependency:edit"
-  | "finance:read"
-  | "finance:manage"
-  | "contact:read"
-  | "contact:details"
-  | "contact:manage"
-  | "crm:archive"
-  | "crm:audit"
-  | "suggestion:create"
-  | "suggestion:decide"
-  | "suggestion:undo"
-  | "mind:write"
-  | "mind:archive"
-  | "audience:read"
-  | "audience:manage"
-  | "summary:read"
-  | "summary:preview"
-  | "summary:share"
-  | "summary:revoke";
+export const PERMISSION_ACTIONS = [
+  "workspace:archive",
+  "workspace:default",
+  "workspace:create",
+  "workspace:join",
+  "workspace:manage",
+  "project:manage",
+  "project:stage",
+  "task:edit",
+  "task:owner",
+  "task:comment",
+  "workspace:read",
+  "task:create",
+  "task:assign",
+  "task:status",
+  "task:schedule",
+  "task:review",
+  "token:policy",
+  "token:grant",
+  "token:grant_revoke",
+  "token:manage",
+  "token:connect",
+  "token:revoke",
+  "profile:read",
+  "profile:update",
+  "notification:read",
+  "notification:update",
+  "digest:read",
+  "run:start",
+  "run:control",
+  "run:submit",
+  "run:request_review",
+  "files:attach",
+  "agent:manage",
+  "grant:request",
+  "grant:decide",
+  "inbox:read",
+  "inbox:update",
+  "capability:use",
+  "review:comment",
+  "task:finish",
+  "dependency:edit",
+  "finance:read",
+  "finance:manage",
+  "contact:read",
+  "contact:details",
+  "contact:manage",
+  "crm:archive",
+  "crm:audit",
+  "suggestion:create",
+  "suggestion:decide",
+  "suggestion:undo",
+  "mind:write",
+  "mind:archive",
+  "audience:read",
+  "audience:manage",
+  "summary:read",
+  "summary:preview",
+  "summary:share",
+  "summary:revoke",
+] as const;
+export type Action = (typeof PERMISSION_ACTIONS)[number];
 export type Resource =
   | {
       workspaceId: string;
@@ -475,4 +477,57 @@ export function canGrantOAuthScopes(
     can(actor, "token:connect", resource) &&
     scopes.every((scope) => OAUTH_SCOPE_CEILING[actor.role].includes(scope))
   );
+}
+
+/** Baseline: unrelated owner, agent is its own worker, default capabilities, no temporary grants. */
+export function exportPermissionRows() {
+  const base: Actor = {
+    id: "person",
+    userId: "user",
+    workspaceId: "workspace",
+    name: "Person",
+    kind: "person",
+    role: "member",
+  };
+  const actors = {
+    admin: { ...base, role: "admin" as const },
+    member: base,
+    guest: { ...base, role: "guest" as const },
+    agent: {
+      ...base,
+      id: "agent",
+      userId: null,
+      kind: "agent" as const,
+      scopes: OAUTH_SCOPE_CEILING.admin,
+      reviewPolicy: "always_review" as const,
+    },
+  };
+  return PERMISSION_ACTIONS.map((action) => {
+    const resource: Resource = [
+      "workspace:default",
+      "workspace:create",
+      "workspace:join",
+      "profile:read",
+      "profile:update",
+      "notification:read",
+      "notification:update",
+    ].includes(action)
+      ? { userId: "user" }
+      : {
+          workspaceId: "workspace",
+          ownerId: "other",
+          workerId: "agent",
+          agentId: "agent",
+          supervisorId: null,
+          to: "in_progress",
+          capability: "tasks.write",
+        };
+    return {
+      action,
+      admin: can(actors.admin, action, resource),
+      member: can(actors.member, action, resource),
+      guest: can(actors.guest, action, resource),
+      agent: can(actors.agent, action, resource),
+    };
+  });
 }

@@ -86,6 +86,7 @@ export {
 } from "./tencent-sms";
 
 import { and, desc, eq, gt, isNull, max, or, sql } from "drizzle-orm";
+import { createAccessMatrixOperations } from "./access-matrix";
 import { createAdministrationOperations } from "./administration";
 import type { AiProvider } from "./ai-provider";
 import { createAssistantOperations } from "./assistant";
@@ -1776,6 +1777,12 @@ export function createCore(options: {
     getSession,
     getMe,
     listMembers,
+    ...createAccessMatrixOperations({
+      db,
+      requireMember,
+      getAgentProfile: runOperations.getAgentProfile,
+      toAgentToken,
+    }),
     createWorkspaceAgent,
     listTasks,
     createTask,

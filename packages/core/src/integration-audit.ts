@@ -1,8 +1,10 @@
 import {
   activity,
   agentTokens,
+  agentTokenWorkspaces,
   type Database,
   type Transaction,
+  workspaces,
 } from "@taff/db";
 import {
   type ApprovedAgentOperation,
@@ -110,20 +112,34 @@ export function createIntegrationAudit(deps: {
         const [token] = await tx
           .select()
           .from(agentTokens)
-          .where(
-            and(
-              eq(agentTokens.id, query.tokenId),
-              eq(agentTokens.workspaceId, query.workspaceId),
-            ),
-          );
+          .where(eq(agentTokens.id, query.tokenId));
         if (!token) throw new CoreError("not_found", 404);
+        let memberId = token.memberId;
+        if (token.workspaceId !== query.workspaceId) {
+          const [grant] = await tx
+            .select()
+            .from(agentTokenWorkspaces)
+            .where(
+              and(
+                eq(agentTokenWorkspaces.tokenId, token.id),
+                eq(agentTokenWorkspaces.workspaceId, query.workspaceId),
+              ),
+            );
+          const [workspace] = await tx
+            .select()
+            .from(workspaces)
+            .where(eq(workspaces.id, query.workspaceId));
+          if (!grant || token.oauthClientId || workspace?.personalOwnerId)
+            throw new CoreError("not_found", 404);
+          memberId = grant.memberId;
+        }
         const actor = await deps.loadActor(
           tx,
           {
             kind: "agent",
             tokenId: token.id,
-            memberId: token.memberId,
-            workspaceId: token.workspaceId,
+            memberId,
+            workspaceId: query.workspaceId,
             scopes: [],
           },
           query.workspaceId,
@@ -131,7 +147,7 @@ export function createIntegrationAudit(deps: {
         return {
           adapter: "taff_native",
           token_id: token.id,
-          member_id: token.memberId,
+          member_id: memberId,
           active: actor !== null,
           ...permissionSnapshot(actor),
           // A receipt never grants capabilities or human review authority.

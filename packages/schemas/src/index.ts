@@ -54,6 +54,7 @@ import {
 } from "./primitives";
 import { projectStageSchema } from "./project-read";
 import { runSchema, runStatusSchema } from "./run-read";
+import { dailySummaryListQuerySchema } from "./summaries";
 
 export * from "./assistant";
 export * from "./base";
@@ -924,3 +925,60 @@ export const agentTokenWorkspaceInputSchema = strictObject({
   scopes: array(scopeSchema).check(minLength(1)),
   revoked: optional(boolean()),
 });
+
+export const permissionRowSchema = object({
+  action: string(),
+  admin: boolean(),
+  member: boolean(),
+  guest: boolean(),
+  agent: boolean(),
+});
+export const accessMatrixTokenSchema = extend(agentTokenSchema, {
+  grants: array(agentTokenWorkspaceSchema),
+});
+export const accessMatrixSchema = object({
+  workspaceId: idSchema,
+  people: array(memberSchema),
+  agents: array(agentProfileSchema),
+  tokens: array(accessMatrixTokenSchema),
+  oauthGrants: array(extend(agentTokenSchema, { clientName: string() })),
+  pendingGrants: array(grantSchema),
+  actions: array(permissionRowSchema),
+});
+export const systemAccessMatrixSchema = object({
+  organizations: array(
+    object({
+      id: idSchema,
+      name: string(),
+      archivedAt: nullable(iso.datetime()),
+    }),
+  ),
+  tokens: array(accessMatrixTokenSchema),
+});
+export type AccessMatrix = Infer<typeof accessMatrixSchema>;
+export type SystemAccessMatrix = Infer<typeof systemAccessMatrixSchema>;
+
+export const integrationPermissionExplanationSchema = object({
+  adapter: literal("taff_native"),
+  token_id: idSchema,
+  member_id: idSchema,
+  active: boolean(),
+  scopes: array(scopeSchema),
+  permissions: array(agentPermissionInputSchema),
+  review_policy: nullable(reviewPolicySchema),
+});
+
+export const mcpSummariesListArgs = extend(dailySummaryListQuerySchema, {
+  workspaceId: optional(idSchema),
+});
+export const mcpSummariesGetArgs = strictObject({
+  summaryId: idSchema,
+  workspaceId: optional(idSchema),
+  format: _default(zodEnum(["json", "txt"]), "json"),
+});
+export const mcpSummariesImageArgs = strictObject({
+  summaryId: idSchema,
+  workspaceId: optional(idSchema),
+});
+
+export * from "./summary-image";

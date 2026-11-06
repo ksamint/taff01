@@ -35,6 +35,7 @@ export const taskStatusSchema = zodEnum([
 export const idSchema = uuid();
 /** MCP token scopes, as shown on the MCP page. */
 export const scopeSchema = zodEnum([
+  "summaries:read",
   "tasks:read",
   "tasks:write",
   "calendar:write",
