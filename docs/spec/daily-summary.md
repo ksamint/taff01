@@ -148,6 +148,9 @@ tag archive.
 - Today's initial JavaScript stays within 200 KiB (192.5 KiB at v0.2.17).
 - The public page's JavaScript target is 50 KiB; it is 187.5 KiB at v0.2.17 because it shares the root
   layout (open decision 1).
+  For v0.2.20, the owner did not confirm the route-group move, so the plan’s conditional default
+  retains current routing and its measured 187.7 KiB. The unmet target remains an unresolved
+  optimization and does not block this release’s acceptance.
 - Migrations 0038–0041 are additive. SUMMARY_RENDER_URL enables internal PNG rendering; client
   dependencies are unchanged.
 
@@ -178,7 +181,8 @@ slipped as a list; a second audience kind.
 
 ## Open decisions
 
-1. A second root layout for public pages, to reach the 50 KiB target (owner, milestone 89).
+1. A second root layout for public pages, to reach the 50 KiB target (owner, milestone 89); v0.2.20
+   retains the current layout under the plan’s conditional default.
 2. An Inbox row needs the `inbox_items.kind` CHECK rewritten, which the additive-only deploy rule forbids
 without owner approval.
 3. Behind Caddy the per-address limit is a global 30 per minute until the API trusts a forwarded header.

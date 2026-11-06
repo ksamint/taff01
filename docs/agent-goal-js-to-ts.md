@@ -178,11 +178,13 @@ never been type-checked by the gate. Before renaming anything:
 | T0 | Strict six-package/root check, erasable syntax and no-any/no-ignore rules; baseline 28 diagnostics in 14 files | Repeat on final integrated source |
 | T1 | Twelve native modules, declarations removed, callers updated; live fork guard/discovery, stack/Valkey, UI tests and 8 PNG parity checks | Full final-source gate |
 | T2 | Typed worker, explicit build/dev chain, separate worker check, ignored output; canonical emitted-code parity | PWA in all three locales and production worker headers |
-| T3 | All three app versions 0.2.20, changelog/spec and source inventory | C5/C6 integration/decision, exact-source full gate, deploy checkpoint and native closeout |
+| T3 | All three app versions 0.2.20, changelog/spec and source inventory | C6 final comparison, exact-source full gate, deploy checkpoint and native closeout; C5 conditional default recorded |
 
-The runtime slot is serialized behind v0.2.18/v0.2.19 acceptance. Pending
-checks are not passes. C5's route-group move awaits the owner's decision;
-the legacy shared-page measurement remains 187.5 KiB, not a 50 KiB result.
+The final integrated gate remains pending; pending checks are not passes.
+For C5, the owner did not confirm the route-group move, so this release
+follows the conditional default and retains current routing. The measured
+valid shared page is 187.7 KiB; the 50 KiB target remains an unresolved
+optimization and does not block this release’s acceptance.
 
 ## Decisions and remaining scope
 
