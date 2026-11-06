@@ -3,7 +3,7 @@
 Living product specification for Node API/worker recovery and deployment
 configuration (PR #82). Change this file with the behavior it describes.
 
-Status: v0.2.20 candidate; no production activation in this change.
+Status: shipped in v0.2.20, source `596272a`; persisted Valkey activation and native acceptance are recorded in [milestone 104](../milestones/104-v0.2.20.md).
 
 ## Users and roles
 
@@ -59,12 +59,12 @@ Status: v0.2.20 candidate; no production activation in this change.
 | RT-1 | apps/api/src/shutdown.test.ts; runtime-faults.mts |
 | RT-2.1 | statement-timeout.integration.test.ts |
 | RT-2.2, RT-2.4 | runtime-faults.mts; tracked dependency patches |
-| RT-2.3 | scripts/apuch-compose.test.ts; scripts/valkey-rehearsal.mts |
+| RT-2.3 | scripts/apuch-compose.test.ts; scripts/valkey-rehearsal.mts seven checks on 9.1.2; actual native RDB restore and cold AOF restart parity in [milestone 104](../milestones/104-v0.2.20.md) |
 | RT-2.5 | Dockerfiles; non-root image smoke; release closeout |
 
 ## Open decisions
 
-- Production activation and observation follow the v0.2.20 release, after v0.2.19.
+- Production activation completed after v0.2.19: pinned Valkey 9.1.2, dedicated volume, AOF/everysec/noeviction, actual queued/delayed/scheduler state preserved before writers resumed. See [milestone 104](../milestones/104-v0.2.20.md). Normal operation remains subject to the documented rollback data boundary.
 
 ## Sources
 

@@ -3,7 +3,7 @@
 Living product specification for agent credentials, workspace grants and organization
 policy (ADR 0022, 0023, 0028). Change this file with the behavior it describes.
 
-Status: v0.2.20 candidate; production acceptance pending.
+Status: shipped in v0.2.20, deployed source `596272a`; final local and native acceptance are recorded in [milestone 104](../milestones/104-v0.2.20.md).
 
 ## Users and roles
 
@@ -129,19 +129,19 @@ Status: v0.2.20 candidate; production acceptance pending.
 | AA-3 | token-policy.test.ts; token-policy.integration.test.ts |
 | AA-4 | authorization.integration.test.ts; oauth integration tests |
 | AA-4.4–4.6 | oauth.integration.test.ts; authorization.integration.test.ts; MCP OAuth refresh-family smoke |
-| AA-4.7 | oauth-guidance.test.ts; oauth-return.test.ts; e2e/completion.spec.ts (browser pending) |
+| AA-4.7 | oauth-guidance.test.ts; oauth-return.test.ts; e2e/completion.spec.ts; three-locale accepted release gate in [milestone 104](../milestones/104-v0.2.20.md) |
 | AA-5.1 | permissions.test.ts; app.test.ts |
 | AA-5.2 | e2e/ssr-session.spec.ts |
 | AA-5.3 | authorization.integration.test.ts; token-policy.integration.test.ts |
 | AA-5.4 | access-matrix.integration.test.ts; permissions.test.ts; scripts/permissions-matrix.test.ts |
 | AA-5.5 | workspace-discovery.integration.test.ts; token-policy.integration.test.ts |
 | AA-5.7 | trusted-review.test.ts; approved-agent-operation.test.ts; integration-audit.test.ts; authorization.integration.test.ts |
-| Three-locale management | e2e/token-grants.spec.ts; acceptance pending |
+| Three-locale management | e2e/token-grants.spec.ts; full 318-case browser gate and 32-case production checklist passed; [milestone 104](../milestones/104-v0.2.20.md) |
 
 ## Open decisions
 
 ADR 0028 defaults apply: policy grants use the token's scopes and never enroll
-personal workspaces. Twin policy activation follows deployment closeout.
+personal workspaces. Existing Twin policy/scope activation completed in v0.2.18–19; v0.2.20 verified its current token/hash/four scopes and all fresh grant rows unchanged. Optional controller_identity_id remains metadata under the existing controller/verifier/authority checks; no native signed business write is claimed. See [milestone 104](../milestones/104-v0.2.20.md).
 
 ## Sources
 

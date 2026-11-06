@@ -3,7 +3,7 @@
 Living specification for scripts, browser tests and operator tooling.
 Change it in the same commit as the behavior it describes.
 
-Status: v0.2.20 candidate; T0/T1 implemented and T2 runtime acceptance passed; T3 release acceptance pending.
+Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source release and native worker-header acceptance are recorded in [milestone 104](../milestones/104-v0.2.20.md).
 
 ## Users and roles
 
@@ -66,7 +66,7 @@ Status: v0.2.20 candidate; T0/T1 implemented and T2 runtime acceptance passed; T
 
 ## Out of scope
 
-- Production activation, vendored documentation assets and public layout changes.
+- New deployment infrastructure, vendored documentation assets and public layout changes.
 
 ## Acceptance
 
@@ -74,15 +74,14 @@ Status: v0.2.20 candidate; T0/T1 implemented and T2 runtime acceptance passed; T
 | --- | --- |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
-| TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal |
+| TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal on pinned production 9.1.2; native persisted-state proof in [milestone 104](../milestones/104-v0.2.20.md) |
 | TT-4 | Native before/after capture PNG hashes; capture-runtime, capture-selection and visual-clock tests |
-| TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; milestone 100 |
+| TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; same headers passed on native deployment; milestones 100 and [104](../milestones/104-v0.2.20.md) |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions
 
-- The complete final-source release gate remains pending; all prior
-  checkpoint counts stay attributed to their source.
+- Final-source acceptance completed: 2202 Node tests, 25 Rust tests, 318 browser cases, six Linux visual cases/36 references, seven persistence checks, three production SSR cases, checklist 32 and MCP 69 checks/37 tools including refresh-family revocation. Historical checkpoint counts retain their source; see [milestone 104](../milestones/104-v0.2.20.md).
 
 ## Sources
 
