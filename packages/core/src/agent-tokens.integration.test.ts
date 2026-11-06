@@ -241,7 +241,11 @@ describe.skipIf(!url)("agent token restore (undo revoke)", () => {
         password: `test-${randomUUID()}`,
       },
     });
-    const target = (await core.getMe(other.user.id)).workspaces[0].id;
+    const target = (
+      await core.createWorkspace(userPrincipal(other.user.id), {
+        name: `Grant target ${randomUUID()}`,
+      })
+    ).id;
     let targetAgent = "";
     await connection.db.transaction(async (tx) => {
       await tx.execute(
