@@ -1,0 +1,21 @@
+# PR #82 hardening integration — v0.2.20 candidate (2026-11-06)
+
+- Source delta: `2b773c3`, rebased onto v0.2.19 `cebb57c`; no separate release or production activation.
+- Additive refresh history is migration **0042**, after grants 0039, policy 0040 and summary renders 0041; prior migrations retained.
+- OAuth replay verifies client/PKCE before revocation; reused refresh credentials end their family, including concurrent rotation descendants.
+- Approve/exchange/refresh/restore hold supervision stable; agent capability writes and signed operations serialize on authority rows.
+- Workspace discovery queries token-bound candidates and retains v0.2.19 kind, workspaceId, scope and origin fields; policy/grant scope propagation unchanged.
+- Runtime SQL defaults to a 20-second statement deadline; explicit URL settings and maintenance connections retain their policies.
+- API shutdown drains HTTP/realtime and closes every limiter including share reads; worker drain retains both digest/summary schedulers and render jobs. Deadline 25s within Compose 30s grace.
+- Valkey noeviction, AOF everysec and dedicated persistence ship with v0.2.20 only; no shared or production Valkey was changed.
+- Postgres.js backport retains Unlicense; Better Auth logging patch retains MIT; Nodemailer 10.1.4 retains MIT-0. Frozen install and licence gate passed.
+- Living contracts: [agent access](../spec/agent-access.md), [runtime recovery](../spec/runtime.md). Earlier architecture/fault evidence under `docs/audit/` and `docs/audits/` remains historical, excluded from image context.
+- Preserved: summaries:read sixth scope, 37-tool registry, active policy grants and scope propagation, access matrix, summary render queue and service-worker rendering behavior.
+- Merge repairs: corrected imported TEST_DATABASE_URL example; regenerated test-id contract and updated discovery assertions to the current DTO.
+- Validation: frozen install, lint, six-package typecheck, licence gate, production web/server builds and budget passed; 2,174/2,174 unit/integration tests in 130 files passed with no skips.
+- Official production MCP smoke passed refresh-family descendant revocation and reauthorization; release checklist 32/32 passed.
+- MCP/OAuth/token-grant browser checks: 18/18 in en, zh-CN and zh-HK. Own exact-source Rust renderer ran on 3302; Rust fixtures/gate passed with a clean generated diff and no authority cutover.
+- Isolated Valkey rehearsal 7/7 passed; runtime fault probes passed ESM/CJS lost transactions, API/worker recovery, OOM/outage rejection, persisted jobs, graceful shutdown and sanitized logs.
+- Today initial JavaScript 197,139 gzip bytes (192.5 KiB), below 200 KiB.
+- Before any push/release: integrate the parent v0.2.19 layout/browser-fixture fixes and run the complete release gate, including full browser suite and four image builds. This branch is not pushed or deployed; no CI or runner was used.
+- Activating Valkey persistence in v0.2.20 must preserve existing queue state through verified backup/restore; no production Valkey operation was performed here.

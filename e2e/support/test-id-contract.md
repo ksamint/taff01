@@ -713,7 +713,7 @@ several do). “Also rendered by” lists the other files.
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
 | `alert` | 36 | agent-creation.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `button` | 10 | calendar.spec.ts, live/release/checklist.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
+| `button` | 11 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
@@ -745,6 +745,8 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].run.keep` | 1 | optimistic-m4.spec.ts |
 | `button — name: messages[locale].signOut` | 1 | support/preferences.ts |
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
+| `button — name: text.revokeGrant` | 1 | mcp.spec.ts |
+| `button — name: text.saveGrant` | 1 | mcp.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `checkbox — name: "summaries:read"` | 1 | access.spec.ts |
 | `combobox` | 1 | cold-font-layout.spec.ts |
@@ -789,6 +791,7 @@ several do). “Also rendered by” lists the other files.
 | `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
+| `region — name: text.workspaceGrants` | 1 | mcp.spec.ts |
 | `row` | 3 | access.spec.ts |
 | `rowheader — name: client.client_name` | 1 | access.spec.ts |
 | `rowheader — name: token.name` | 2 | access.spec.ts |
@@ -810,6 +813,8 @@ several do). “Also rendered by” lists the other files.
 | `m.sms.code` | 5 | sms-auth.spec.ts |
 | `m.usernameOptional` | 1 | username-auth.spec.ts |
 | `messages[locale].accountIdentifier` | 2 | sms-auth.spec.ts, username-auth.spec.ts |
+| `text.targetAgent` | 1 | mcp.spec.ts |
+| `text.targetWorkspace` | 1 | mcp.spec.ts |
 
 ## Schedule-X internals
 

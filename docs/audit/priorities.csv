@@ -1,0 +1,91 @@
+level,rule_id,service,subject,evidence_file,evidence_row,detail,suppressed
+P0,P0-1,api,ANY /mcp,routes.csv,api|apps/api/src/app.ts|122,write route without guard,true
+P0,P0-1,api,DELETE /api/${path}/:id/contacts/:contactId,routes.csv,api|apps/api/src/routes/crm.ts|172,write route without guard,true
+P0,P0-1,api,DELETE /api/companies/:id,routes.csv,api|apps/api/src/routes/crm.ts|95,write route without guard,true
+P0,P0-1,api,DELETE /api/contacts/:id,routes.csv,api|apps/api/src/routes/crm.ts|140,write route without guard,true
+P0,P0-1,api,DELETE /api/mind/edges/:id,routes.csv,api|apps/api/src/routes/mind.ts|104,write route without guard,true
+P0,P0-1,api,DELETE /api/mind/nodes/:id/sources/:sourceId,routes.csv,api|apps/api/src/routes/mind.ts|76,write route without guard,true
+P0,P0-1,api,PATCH /api/companies/:id,routes.csv,api|apps/api/src/routes/crm.ts|86,write route without guard,true
+P0,P0-1,api,PATCH /api/contacts/:id,routes.csv,api|apps/api/src/routes/crm.ts|131,write route without guard,true
+P0,P0-1,api,PATCH /api/contacts/:id/company,routes.csv,api|apps/api/src/routes/crm.ts|148,write route without guard,true
+P0,P0-1,api,PATCH /api/mind/edges/:id,routes.csv,api|apps/api/src/routes/mind.ts|95,write route without guard,true
+P0,P0-1,api,PATCH /api/mind/nodes/:id,routes.csv,api|apps/api/src/routes/mind.ts|47,write route without guard,true
+P0,P0-1,api,PATCH /api/mind/sources/:id,routes.csv,api|apps/api/src/routes/mind.ts|117,write route without guard,true
+P0,P0-1,api,PATCH /api/profile,routes.csv,api|apps/api/src/app.ts|932,write route without guard,true
+P0,P0-1,api,POST /api/ask,routes.csv,api|apps/api/src/routes/assistant.ts|39,write route without guard,true
+P0,P0-1,api,POST /api/companies,routes.csv,api|apps/api/src/routes/crm.ts|72,write route without guard,true
+P0,P0-1,api,POST /api/contacts,routes.csv,api|apps/api/src/routes/crm.ts|117,write route without guard,true
+P0,P0-1,api,POST /api/crm/undo,routes.csv,api|apps/api/src/routes/crm.ts|52,write route without guard,true
+P0,P0-1,api,POST /api/me/email-verification/request,routes.csv,api|apps/api/src/app.ts|369,write route without guard,true
+P0,P0-1,api,POST /api/mind/nodes/:id/task,routes.csv,api|apps/api/src/routes/mind.ts|56,write route without guard,true
+P0,P0-1,api,POST /api/trusted-reviews,routes.csv,api|apps/api/src/app.ts|322,write route without guard,true
+P0,P0-1,api,POST /api/trusted-reviews/status,routes.csv,api|apps/api/src/app.ts|314,write route without guard,true
+P0,P0-1,api,POST /api/workspaces/:id/mind/edges,routes.csv,api|apps/api/src/routes/mind.ts|85,write route without guard,true
+P0,P0-1,api,POST /api/workspaces/:id/mind/nodes,routes.csv,api|apps/api/src/routes/mind.ts|37,write route without guard,true
+P0,P0-1,api,POST /api/workspaces/:id/mind/sources,routes.csv,api|apps/api/src/routes/mind.ts|107,write route without guard,true
+P0,P0-1,api,PUT /api/mind/nodes/:id/sources/:sourceId,routes.csv,api|apps/api/src/routes/mind.ts|66,write route without guard,true
+P0,P0-1,web,ANY /locales/{locale},routes.csv,web|apps/web/app/locales/[locale]/route.ts|1,write route without guard,true
+P0,P0-1,web,ANY /manifest.webmanifest,routes.csv,web|apps/web/app/manifest.webmanifest/route.ts|1,write route without guard,true
+P0,P0-1,web,ANY /offline,routes.csv,web|apps/web/app/offline/route.ts|1,write route without guard,true
+P1,P1-1,api,DELETE /api/${path}/:id/contacts/:contactId,routes.csv,api|apps/api/src/routes/crm.ts|172,write route with no audit point in file,true
+P1,P1-1,api,DELETE /api/companies/:id,routes.csv,api|apps/api/src/routes/crm.ts|95,write route with no audit point in file,true
+P1,P1-1,api,DELETE /api/contacts/:id,routes.csv,api|apps/api/src/routes/crm.ts|140,write route with no audit point in file,true
+P1,P1-1,api,DELETE /api/dependencies/:id,routes.csv,api|apps/api/src/routes/timeline.ts|87,write route with no audit point in file,true
+P1,P1-1,api,DELETE /api/milestones/:id,routes.csv,api|apps/api/src/routes/timeline.ts|68,write route with no audit point in file,true
+P1,P1-1,api,DELETE /api/mind/edges/:id,routes.csv,api|apps/api/src/routes/mind.ts|104,write route with no audit point in file,true
+P1,P1-1,api,DELETE /api/mind/nodes/:id/sources/:sourceId,routes.csv,api|apps/api/src/routes/mind.ts|76,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/companies/:id,routes.csv,api|apps/api/src/routes/crm.ts|86,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/contacts/:id,routes.csv,api|apps/api/src/routes/crm.ts|131,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/contacts/:id/company,routes.csv,api|apps/api/src/routes/crm.ts|148,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/milestones/:id,routes.csv,api|apps/api/src/routes/timeline.ts|58,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/mind/edges/:id,routes.csv,api|apps/api/src/routes/mind.ts|95,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/mind/nodes/:id,routes.csv,api|apps/api/src/routes/mind.ts|47,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/mind/sources/:id,routes.csv,api|apps/api/src/routes/mind.ts|117,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/tasks/:id/plan,routes.csv,api|apps/api/src/routes/timeline.ts|31,write route with no audit point in file,true
+P1,P1-1,api,PATCH /api/workspaces/:id/ai,routes.csv,api|apps/api/src/routes/assistant.ts|110,write route with no audit point in file,true
+P1,P1-1,api,POST /api/ask,routes.csv,api|apps/api/src/routes/assistant.ts|39,write route with no audit point in file,true
+P1,P1-1,api,POST /api/companies,routes.csv,api|apps/api/src/routes/crm.ts|72,write route with no audit point in file,true
+P1,P1-1,api,POST /api/contacts,routes.csv,api|apps/api/src/routes/crm.ts|117,write route with no audit point in file,true
+P1,P1-1,api,POST /api/crm/undo,routes.csv,api|apps/api/src/routes/crm.ts|52,write route with no audit point in file,true
+P1,P1-1,api,POST /api/dependencies,routes.csv,api|apps/api/src/routes/timeline.ts|78,write route with no audit point in file,true
+P1,P1-1,api,POST /api/mind/nodes/:id/task,routes.csv,api|apps/api/src/routes/mind.ts|56,write route with no audit point in file,true
+P1,P1-1,api,POST /api/oauth/consent,routes.csv,api|apps/api/src/oauth.ts|161,write route with no audit point in file,
+P1,P1-1,api,POST /api/oauth/register,routes.csv,api|apps/api/src/oauth.ts|84,write route with no audit point in file,
+P1,P1-1,api,POST /api/oauth/revoke,routes.csv,api|apps/api/src/oauth.ts|142,write route with no audit point in file,true
+P1,P1-1,api,POST /api/oauth/token,routes.csv,api|apps/api/src/oauth.ts|112,write route with no audit point in file,true
+P1,P1-1,api,POST /api/projects/:id/milestones,routes.csv,api|apps/api/src/routes/timeline.ts|48,write route with no audit point in file,true
+P1,P1-1,api,POST /api/projects/:id/payments,routes.csv,api|apps/api/src/routes/timeline.ts|103,write route with no audit point in file,true
+P1,P1-1,api,POST /api/suggestions,routes.csv,api|apps/api/src/routes/assistant.ts|57,write route with no audit point in file,true
+P1,P1-1,api,POST /api/suggestions/:id/apply,routes.csv,api|apps/api/src/routes/assistant.ts|75,write route with no audit point in file,true
+P1,P1-1,api,POST /api/suggestions/:id/dismiss,routes.csv,api|apps/api/src/routes/assistant.ts|93,write route with no audit point in file,true
+P1,P1-1,api,POST /api/suggestions/:id/undo,routes.csv,api|apps/api/src/routes/assistant.ts|84,write route with no audit point in file,true
+P1,P1-1,api,POST /api/workspaces/:id/mind/edges,routes.csv,api|apps/api/src/routes/mind.ts|85,write route with no audit point in file,true
+P1,P1-1,api,POST /api/workspaces/:id/mind/nodes,routes.csv,api|apps/api/src/routes/mind.ts|37,write route with no audit point in file,true
+P1,P1-1,api,POST /api/workspaces/:id/mind/sources,routes.csv,api|apps/api/src/routes/mind.ts|107,write route with no audit point in file,true
+P1,P1-1,api,PUT /api/${path}/:id/contacts/:contactId,routes.csv,api|apps/api/src/routes/crm.ts|161,write route with no audit point in file,true
+P1,P1-1,api,PUT /api/mind/nodes/:id/sources/:sourceId,routes.csv,api|apps/api/src/routes/mind.ts|66,write route with no audit point in file,true
+P1,P1-1,web,ANY /locales/{locale},routes.csv,web|apps/web/app/locales/[locale]/route.ts|1,write route with no audit point in file,true
+P1,P1-1,web,ANY /manifest.webmanifest,routes.csv,web|apps/web/app/manifest.webmanifest/route.ts|1,write route with no audit point in file,true
+P1,P1-1,web,ANY /offline,routes.csv,web|apps/web/app/offline/route.ts|1,write route with no audit point in file,true
+P1,P1-2,db,amount#type,models.csv,db|project_payments|amount;db|project_payments|amount,"type variants: numeric / numeric(14,2)",true
+P1,P1-2,db,duration_ms#type,models.csv,db|mcp_calls|duration_ms;db|run_events|duration_ms;db|runs|duration_ms,type variants: bigint / integer,
+P1,P1-2,db,revoked_at#type,models.csv,db|agent_token_workspaces|revoked_at;db|agent_token_workspaces|revoked_at;db|agent_tokens|revoked_at,type variants: timestamp / timestamptz,true
+P2,P2-1,api,apiUrl,cross_calls.csv,api|apps/api/scripts/mcp-round-trip.ts|223,unresolved target service,true
+P2,P2-1,api,apiUrl,cross_calls.csv,api|apps/api/scripts/mcp-round-trip.ts|1015,unresolved target service,true
+P2,P2-1,api,c.req.raw,cross_calls.csv,api|apps/api/src/app.ts|177,unresolved target service,true
+P2,P2-1,core,https://sms.tencentcloudapi.com/,cross_calls.csv,core|packages/core/src/tencent-sms.ts|101,unresolved target service,
+P2,P2-1,core,input,cross_calls.csv,core|packages/core/src/ai-provider.ts|40,unresolved target service,
+P2,P2-1,web,localeUrl,cross_calls.csv,web|apps/web/src/components/providers.tsx|108,unresolved target service,true
+P2,P2-1,web,request,cross_calls.csv,web|apps/web/public/sw.js|54,unresolved target service,true
+P2,P2-1,worker,daily-digest,cross_calls.csv,worker|apps/worker/src/digests.ts|35,unresolved target service,true
+P2,P2-1,worker,taff,cross_calls.csv,worker|apps/worker/src/index.ts|39,unresolved target service,true
+P2,P2-2,api,apps/api/src,tree.csv,api|apps/api/src,"loc=6768, no responsibility line",
+P2,P2-2,core,packages/core/src,tree.csv,core|packages/core/src,"loc=35138, no responsibility line",
+P2,P2-2,db,packages/db/src,tree.csv,db|packages/db/src,"loc=1978, no responsibility line",
+P2,P2-2,schemas,packages/schemas/src,tree.csv,schemas|packages/schemas/src,"loc=5099, no responsibility line",
+P2,P2-2,web,apps/web/locales,tree.csv,web|apps/web/locales,"loc=4122, no responsibility line",
+P2,P2-2,web,apps/web/src,tree.csv,web|apps/web/src,"loc=43614, no responsibility line",
+P2,P2-2,web,apps/web/src/components,tree.csv,web|apps/web/src/components,"loc=20241, no responsibility line",
+P2,P2-2,web,apps/web/src/lib,tree.csv,web|apps/web/src/lib,"loc=12587, no responsibility line",
+P2,P2-2,web,apps/web/src/lib/mutations,tree.csv,web|apps/web/src/lib/mutations,"loc=5114, no responsibility line",
+P2,P2-2,web,apps/web/src/styles,tree.csv,web|apps/web/src/styles,"loc=10786, no responsibility line",

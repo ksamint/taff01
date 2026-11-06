@@ -1,4 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
+import en from "../apps/web/locales/en/common.json";
+import zhCN from "../apps/web/locales/zh-CN/common.json";
+import zhHK from "../apps/web/locales/zh-HK/common.json";
 import { selectLocale } from "./support/preferences";
 
 const labels = {
@@ -56,4 +59,40 @@ test("an admin issues an agent token once and sees it in the list", async ({
       .filter({ has: page.getByRole("heading", { name, exact: true }) }),
   ).toBeVisible();
   await expect(page.getByTestId("issued-token")).toHaveCount(0);
+
+  const targetResponse = await page.request.post("/api/workspaces", {
+    data: { name: `Grant target ${locale} ${Date.now()}` },
+  });
+  expect(targetResponse.status()).toBe(201);
+  const target = await targetResponse.json();
+  const agentResponse = await page.request.post(
+    `/api/workspaces/${target.id}/members`,
+    {
+      data: { name: "Read-only target", kind: "agent" },
+    },
+  );
+  expect(agentResponse.status()).toBe(201);
+  const agent = await agentResponse.json();
+  const text = { en, "zh-CN": zhCN, "zh-HK": zhHK }[locale].mcp;
+  await card.locator("summary").click();
+  const grants = card.getByRole("region", { name: text.workspaceGrants });
+  await grants.getByLabel(text.targetWorkspace).fill(target.id);
+  await grants.getByLabel(text.targetAgent).fill(agent.id);
+  const saved = page.waitForResponse(
+    (response) =>
+      response.request().method() === "PUT" &&
+      response.url().includes("/workspaces"),
+  );
+  await grants
+    .getByRole("button", { name: text.saveGrant, exact: true })
+    .click();
+  expect((await saved).status()).toBe(200);
+  const grant = grants.getByRole("button").filter({ hasText: target.id });
+  await expect(grant).toContainText(text.grantActive);
+  await expect(grant).toContainText("tasks:read");
+  await expect(grant).not.toContainText("tasks:write");
+  await grants
+    .getByRole("button", { name: text.revokeGrant, exact: true })
+    .click();
+  await expect(grant).toContainText(text.revoked);
 });

@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.2.20 — candidate hardening
+
+- Reused OAuth codes require the original client and PKCE proof before revocation; replayed refresh credentials end the affected access/refresh family.
+- Current supervision and agent permissions remain stable through authorized writes; workspace discovery queries only token-bound candidates.
+- Runtime recovery adds bounded shutdown, 20-second SQL statement defaults, persisted noeviction Valkey configuration and tracked dependency fixes. Production activation is pending.
+- Additive migration 0042 stores peppered consumed refresh hashes without changing existing credentials, grants or scopes.
+
 ## v0.2.19 — access matrices and summary renders
 
 - Workspace/system access matrices reuse current permission checks and existing management operations, with explanations and reversible controls.

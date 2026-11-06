@@ -35,6 +35,12 @@ text and PNG files, with three read-only MCP tools under `summaries:read`.
 The internal Rust renderer uses the same generated schema and bundled fonts;
 local Docker Compose builds it automatically (see `.env.example`).
 
+**v0.2.20 (candidate) — authorization and runtime recovery.** OAuth replay
+ends the affected refresh family; current authority remains locked through
+writes. Bounded shutdown, SQL deadlines and persisted noeviction queues follow
+the [agent access](docs/spec/agent-access.md) and
+[runtime recovery](docs/spec/runtime.md) contracts. Production activation is pending.
+
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.
 

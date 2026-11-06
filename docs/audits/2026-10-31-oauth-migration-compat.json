@@ -1,0 +1,10 @@
+{
+  "baseline": "55718da",
+  "migration": "0039_oauth_refresh_history",
+  "tokenRowUnchanged": true,
+  "workspaceGrantsUnchanged": true,
+  "existingAccessAuthenticated": true,
+  "existingRefreshRotated": true,
+  "reusedOriginalRefreshRevokedDescendant": true,
+  "pass": true
+}

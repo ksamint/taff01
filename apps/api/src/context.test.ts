@@ -2,6 +2,7 @@ import { CoreError, createCore } from "@taff/core";
 import pino from "pino";
 import { afterAll, afterEach, expect, it, vi } from "vitest";
 import apiPackage from "../package.json";
+import { MCP_TOOLS } from "../scripts/mcp-round-trip";
 import { createApp } from "./app";
 
 const core = createCore({
@@ -135,7 +136,7 @@ it("annotates every tool: reads are read-only, additions and updates are marked"
     name: string;
     annotations?: Record<string, boolean>;
   }[] = (await call("tools/list", {})).result.tools;
-  expect(listed).toHaveLength(34);
+  expect(listed.map((tool) => tool.name).sort()).toEqual([...MCP_TOOLS]);
   for (const tool of listed) {
     const expected = additive.includes(tool.name)
       ? { readOnlyHint: false, destructiveHint: false, idempotentHint: false }
@@ -148,7 +149,7 @@ it("annotates every tool: reads are read-only, additions and updates are marked"
     });
   }
   expect(listed.filter((tool) => tool.annotations?.readOnlyHint).length).toBe(
-    34 - additive.length - update.length,
+    MCP_TOOLS.length - additive.length - update.length,
   );
 });
 

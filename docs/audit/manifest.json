@@ -1,0 +1,184 @@
+{
+  "project": "Taff internal architecture audit",
+  "generated_at_utc": "2026-10-31T07:26:02Z",
+  "generated_at_local": "2026-10-31 15:26:02 +0800",
+  "extractor_version": "1.0.0",
+  "git": {
+    "sha": "55718da1637ef92c76b72e1c80f1b531aa9f6a64",
+    "sha_short": "55718da",
+    "branch": "fix/audit-stability-20261031",
+    "describe": "v0.2.15-14-g55718da",
+    "dirty_tree": true
+  },
+  "pr": {
+    "number": null,
+    "source": null,
+    "url": null
+  },
+  "services": {
+    "api": {
+      "path": "apps/api",
+      "detected_by": "cli",
+      "languages": {
+        "ts": 8111
+      },
+      "framework_hints": ["hono"],
+      "version": "0.2.14",
+      "version_source": "package.json",
+      "files_scanned": 30,
+      "files_skipped": 15,
+      "skip_reasons": {
+        "test_file_counted_not_extracted": 12,
+        "unsupported_ext": 3
+      },
+      "rows_per_csv": {
+        "routes": 134,
+        "models": 0,
+        "permissions": 111,
+        "audit_points": 4,
+        "cross_calls": 31
+      }
+    },
+    "web": {
+      "path": "apps/web",
+      "detected_by": "cli",
+      "languages": {
+        "tsx": 20576,
+        "ts": 12746,
+        "js": 87,
+        "mjs": 1
+      },
+      "framework_hints": ["nextjs", "nextjs_app"],
+      "version": "0.2.14",
+      "version_source": "package.json",
+      "files_scanned": 180,
+      "files_skipped": 87,
+      "skip_reasons": {
+        "unsupported_ext": 38,
+        "test_file_counted_not_extracted": 29,
+        "excluded_glob": 20
+      },
+      "rows_per_csv": {
+        "routes": 25,
+        "models": 0,
+        "permissions": 0,
+        "audit_points": 0,
+        "cross_calls": 117
+      }
+    },
+    "worker": {
+      "path": "apps/worker",
+      "detected_by": "cli",
+      "languages": {
+        "ts": 194
+      },
+      "framework_hints": ["bullmq"],
+      "version": "0.2.14",
+      "version_source": "package.json",
+      "files_scanned": 3,
+      "files_skipped": 3,
+      "skip_reasons": {
+        "unsupported_ext": 2,
+        "test_file_counted_not_extracted": 1
+      },
+      "rows_per_csv": {
+        "routes": 3,
+        "models": 0,
+        "permissions": 0,
+        "audit_points": 4,
+        "cross_calls": 6
+      }
+    },
+    "core": {
+      "path": "packages/core",
+      "detected_by": "cli",
+      "languages": {
+        "ts": 35138
+      },
+      "framework_hints": ["bullmq", "drizzle"],
+      "version": "0.2.11",
+      "version_source": "package.json",
+      "files_scanned": 87,
+      "files_skipped": 49,
+      "skip_reasons": {
+        "test_file_counted_not_extracted": 45,
+        "excluded_glob": 2,
+        "unsupported_ext": 2
+      },
+      "rows_per_csv": {
+        "routes": 0,
+        "models": 0,
+        "permissions": 198,
+        "audit_points": 83,
+        "cross_calls": 65
+      }
+    },
+    "db": {
+      "path": "packages/db",
+      "detected_by": "cli",
+      "languages": {
+        "ts": 1984,
+        "sql": 1495
+      },
+      "framework_hints": ["drizzle"],
+      "version": "0.2.11",
+      "version_source": "package.json",
+      "files_scanned": 48,
+      "files_skipped": 6,
+      "skip_reasons": {
+        "test_file_counted_not_extracted": 4,
+        "unsupported_ext": 2
+      },
+      "rows_per_csv": {
+        "routes": 0,
+        "models": 880,
+        "permissions": 0,
+        "audit_points": 55,
+        "cross_calls": 0
+      }
+    },
+    "schemas": {
+      "path": "packages/schemas",
+      "detected_by": "cli",
+      "languages": {
+        "ts": 5099
+      },
+      "framework_hints": [],
+      "version": "0.2.11",
+      "version_source": "package.json",
+      "files_scanned": 32,
+      "files_skipped": 12,
+      "skip_reasons": {
+        "test_file_counted_not_extracted": 10,
+        "unsupported_ext": 2
+      },
+      "rows_per_csv": {
+        "routes": 0,
+        "models": 0,
+        "permissions": 0,
+        "audit_points": 0,
+        "cross_calls": 0
+      }
+    }
+  },
+  "totals": {
+    "rows_per_csv": {
+      "routes": 162,
+      "models": 880,
+      "permissions": 309,
+      "audit_points": 146,
+      "cross_calls": 219,
+      "links": 114
+    },
+    "priorities": {
+      "P1": 3,
+      "P2": 12
+    },
+    "cross_calls_low_confidence": 9
+  },
+  "patterns": {
+    "bundled": "/Users/af/.codex/skills/repo-architecture-audit/scripts/patterns.json",
+    "local": "/Users/af/cpro01/taff01-stability-20261031/docs/audit/patterns.local.json",
+    "rules_local": null
+  }
+}

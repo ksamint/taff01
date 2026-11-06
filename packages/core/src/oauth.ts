@@ -9,6 +9,7 @@ import {
   members,
   oauthClients,
   oauthCodes,
+  oauthRefreshHistory,
   type Transaction,
   workspaces,
 } from "@taff/db";
@@ -248,9 +249,8 @@ export function createOAuthOperations({
     scopes: Scope[],
   ) {
     const [agent] = await q
-      .select({ id: members.id, supervisorId: agentProfiles.supervisorId })
+      .select({ id: members.id })
       .from(members)
-      .leftJoin(agentProfiles, eq(agentProfiles.id, members.id))
       .where(
         and(
           eq(members.id, memberId),
@@ -261,7 +261,13 @@ export function createOAuthOperations({
     // Check membership first so foreign users cannot probe agent existence.
     await requireMember(q, principal, workspaceId, "workspace:read");
     if (!agent) throw new CoreError("invalid_input", 400);
-    const resource = { workspaceId, supervisorId: agent.supervisorId };
+    // Hold supervision stable through issuance, exchange, or refresh.
+    const [profile] = await q
+      .select({ supervisorId: agentProfiles.supervisorId })
+      .from(agentProfiles)
+      .where(eq(agentProfiles.id, agent.id))
+      .for("share");
+    const resource = { workspaceId, supervisorId: profile?.supervisorId };
     const actor = await requireMember(
       q,
       principal,
@@ -299,24 +305,27 @@ export function createOAuthOperations({
     }
     if (!body.workspaceId || !body.memberId || !body.scopes)
       throw new CoreError("invalid_input", 400);
-    const actor = await requireApproval(
-      db,
-      principal,
-      body.workspaceId,
-      body.memberId,
-      body.scopes,
-    );
+    const { workspaceId, memberId, scopes } = body;
     const code = secret("taffcode_");
-    await db.insert(oauthCodes).values({
-      hash: hash(code),
-      clientId: request.client_id,
-      workspaceId: body.workspaceId,
-      memberId: body.memberId,
-      createdBy: actor.id,
-      scopes: [...new Set(body.scopes)],
-      redirectUri: request.redirect_uri,
-      codeChallenge: request.code_challenge,
-      expiresAt: new Date(Date.now() + CODE_MS),
+    await mutation(principal, async (tx) => {
+      const actor = await requireApproval(
+        tx,
+        principal,
+        workspaceId,
+        memberId,
+        scopes,
+      );
+      await tx.insert(oauthCodes).values({
+        hash: hash(code),
+        clientId: request.client_id,
+        workspaceId,
+        memberId,
+        createdBy: actor.id,
+        scopes: [...new Set(scopes)],
+        redirectUri: request.redirect_uri,
+        codeChallenge: request.code_challenge,
+        expiresAt: new Date(Date.now() + CODE_MS),
+      });
     });
     target.searchParams.set("code", code);
     return { redirectTo: target.toString() };
@@ -346,19 +355,19 @@ export function createOAuthOperations({
       throw new OAuthError("invalid_grant", "Invalid authorization code");
     };
     if (!code) return fail();
-    if (code.usedAt) {
-      // A replayed code may be stolen: end the grant it produced (RFC 6749 §4.1.2).
-      if (code.tokenId)
-        await revokeRow(code.tokenId, code.memberId, code.workspaceId);
-      return fail();
-    }
+    // Verify the client and PKCE proof before a replay can revoke its grant.
     if (
-      code.expiresAt.getTime() <= Date.now() ||
       code.clientId !== body.client_id ||
       code.redirectUri !== body.redirect_uri ||
       !sameText(s256(body.code_verifier), code.codeChallenge)
     )
       return fail();
+    if (code.usedAt) {
+      if (code.tokenId)
+        await revokeRow(code.tokenId, code.memberId, code.workspaceId);
+      return fail();
+    }
+    if (code.expiresAt.getTime() <= Date.now()) return fail();
     const [approver] = await db
       .select({ userId: members.userId })
       .from(members)
@@ -378,14 +387,14 @@ export function createOAuthOperations({
     const refresh = secret("taffr_");
     const person = userPrincipal(approver.userId);
     try {
-      return await mutation(person, async (tx) => {
+      const result = await mutation(person, async (tx) => {
         // Single use even under concurrent exchanges.
         const claimed = await tx
           .update(oauthCodes)
           .set({ usedAt: new Date() })
           .where(and(eq(oauthCodes.id, code.id), isNull(oauthCodes.usedAt)))
           .returning({ id: oauthCodes.id });
-        if (!claimed.length) return fail();
+        if (!claimed.length) return null;
         // The approver must still manage tokens when the code is redeemed.
         await requireApproval(
           tx,
@@ -417,6 +426,15 @@ export function createOAuthOperations({
           .where(eq(oauthCodes.id, code.id));
         return issued(access, refresh, code.scopes);
       });
+      if (result) return result;
+      // The losing concurrent redemption observes the winner only after commit.
+      const [used] = await db
+        .select({ tokenId: oauthCodes.tokenId })
+        .from(oauthCodes)
+        .where(eq(oauthCodes.id, code.id));
+      if (used?.tokenId)
+        await revokeRow(used.tokenId, code.memberId, code.workspaceId);
+      return fail();
     } catch (error) {
       if (error instanceof CoreError) return fail();
       throw error;
@@ -429,13 +447,14 @@ export function createOAuthOperations({
     const fail = () => {
       throw new OAuthError("invalid_grant", "Invalid refresh token");
     };
+    const presentedHash = hash(body.refresh_token);
     const [found] = await db
       .select({ token: agentTokens })
       .from(agentTokens)
       .innerJoin(workspaces, eq(workspaces.id, agentTokens.workspaceId))
       .where(
         and(
-          eq(agentTokens.refreshHash, hash(body.refresh_token)),
+          eq(agentTokens.refreshHash, presentedHash),
           eq(agentTokens.oauthClientId, body.client_id),
           isNull(agentTokens.revokedAt),
           gt(agentTokens.refreshExpiresAt, new Date()),
@@ -443,7 +462,25 @@ export function createOAuthOperations({
         ),
       );
     const row = found?.token;
-    if (!row) return fail();
+    if (!row) {
+      const [replayed] = await db
+        .select({ token: agentTokens })
+        .from(oauthRefreshHistory)
+        .innerJoin(agentTokens, eq(agentTokens.id, oauthRefreshHistory.tokenId))
+        .where(
+          and(
+            eq(oauthRefreshHistory.hash, presentedHash),
+            eq(agentTokens.oauthClientId, body.client_id),
+          ),
+        );
+      if (replayed)
+        await revokeRow(
+          replayed.token.id,
+          replayed.token.memberId,
+          replayed.token.workspaceId,
+        );
+      return fail();
+    }
     const access = secret("taff_");
     const refresh = secret("taffr_");
     const now = Date.now();
@@ -490,12 +527,24 @@ export function createOAuthOperations({
         .where(
           and(
             eq(agentTokens.id, row.id),
-            eq(agentTokens.refreshHash, hash(body.refresh_token!)),
+            eq(agentTokens.refreshHash, presentedHash),
             isNull(agentTokens.revokedAt),
           ),
         )
         .returning({ id: agentTokens.id });
-      if (!rotated.length) return fail();
+      if (!rotated.length) {
+        // A concurrent rotation consumed this credential; commit revocation before failing.
+        await tx
+          .update(agentTokens)
+          .set({ revokedAt: new Date(), updatedAt: new Date() })
+          .where(
+            and(eq(agentTokens.id, row.id), isNull(agentTokens.revokedAt)),
+          );
+        return null;
+      }
+      await tx
+        .insert(oauthRefreshHistory)
+        .values({ hash: presentedHash, tokenId: row.id });
       return issued(access, refresh, row.scopes);
     });
     return result ?? fail();

@@ -14,8 +14,10 @@ minimumReleaseAgeExclude:
   - drizzle-orm@0.45.4
   - playwright-core@1.64.0
   - playwright@1.64.0
-  - nodemailer@10.1.0
 
 # The legacy drizzle-kit loader must not retain the vulnerable serve API.
 overrides:
   "@esbuild-kit/core-utils>esbuild": "0.25.12"
+patchedDependencies:
+  '@better-auth/core@1.7.10': patches/@better-auth__core@1.7.10.patch
+  postgres@3.4.9: patches/postgres@3.4.9.patch

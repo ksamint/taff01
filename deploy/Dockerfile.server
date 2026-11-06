@@ -10,6 +10,7 @@ COPY apps/web/package.json apps/web/
 COPY packages/core/package.json packages/core/
 COPY packages/db/package.json packages/db/
 COPY packages/schemas/package.json packages/schemas/
+COPY patches ./patches
 RUN pnpm install --frozen-lockfile
 COPY . .
 RUN pnpm build:server
@@ -20,8 +21,9 @@ WORKDIR /app
 ARG TARGET=api
 COPY --from=build /repo/dist/runtime/${TARGET}/node_modules ./node_modules
 COPY --from=build /repo/dist/server ./dist
-COPY --from=build /repo/dist/server/migrations ./migrations
+# Source checkouts may use umask 077; the unprivileged migrator still needs read access.
+COPY --from=build --chmod=0555 /repo/dist/server/migrations ./migrations
 RUN mkdir -m 0700 /app/.taff-mail && chown node:node /app/.taff-mail
 USER node
 ENV TAFF_TARGET=${TARGET}
-CMD ["sh", "-c", "node dist/${TAFF_TARGET}.mjs"]
+CMD ["sh", "-c", "exec node dist/${TAFF_TARGET}.mjs"]

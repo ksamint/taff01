@@ -21,7 +21,11 @@ export function createWorkspaceLifecycle({
   mutation,
 }: {
   db: Database;
-  mutation<T>(p: Principal, run: (tx: Transaction) => Promise<T>): Promise<T>;
+  mutation<T>(
+    p: Principal,
+    run: (tx: Transaction) => Promise<T>,
+    lifecycle?: "archive",
+  ): Promise<T>;
 }) {
   async function identity(
     tx: Database | Transaction,
@@ -114,44 +118,48 @@ export function createWorkspaceLifecycle({
   }
   async function archiveWorkspace(p: Principal, id: string) {
     idSchema.parse(id);
-    return mutation(p, async (tx) => {
-      await tx.execute(
-        sql`select pg_advisory_xact_lock(hashtextextended('taff:system-administration',0))`,
-      );
-      const actor = await identity(tx, p);
-      const [membership] = await tx
-        .select()
-        .from(members)
-        .where(
-          and(eq(members.workspaceId, id), eq(members.userId, actor.userId!)),
+    return mutation(
+      p,
+      async (tx) => {
+        await tx.execute(
+          sql`select pg_advisory_xact_lock(hashtextextended('taff:system-administration',0))`,
         );
-      if (
-        !can(
-          { ...actor, role: membership?.role ?? "member", workspaceId: id },
-          "workspace:archive",
-          { workspaceId: id },
+        const actor = await identity(tx, p);
+        const [membership] = await tx
+          .select()
+          .from(members)
+          .where(
+            and(eq(members.workspaceId, id), eq(members.userId, actor.userId!)),
+          );
+        if (
+          !can(
+            { ...actor, role: membership?.role ?? "member", workspaceId: id },
+            "workspace:archive",
+            { workspaceId: id },
+          )
         )
-      )
-        throw new CoreError("forbidden", 403);
-      const [row] = await tx
-        .select()
-        .from(workspaces)
-        .where(eq(workspaces.id, id))
-        .for("update");
-      if (!row) throw new CoreError("not_found", 404);
-      if (row.personalOwnerId) throw new CoreError("conflict", 409);
-      if (!row.archivedAt) {
-        await tx
-          .update(workspaces)
-          .set({ archivedAt: new Date(), updatedAt: new Date() })
-          .where(eq(workspaces.id, id));
-        await tx
-          .update(user)
-          .set({ defaultWorkspaceId: null, updatedAt: new Date() })
-          .where(eq(user.defaultWorkspaceId, id));
-      }
-      return { id, archived: true };
-    });
+          throw new CoreError("forbidden", 403);
+        const [row] = await tx
+          .select()
+          .from(workspaces)
+          .where(eq(workspaces.id, id))
+          .for("update");
+        if (!row) throw new CoreError("not_found", 404);
+        if (row.personalOwnerId) throw new CoreError("conflict", 409);
+        if (!row.archivedAt) {
+          await tx
+            .update(workspaces)
+            .set({ archivedAt: new Date(), updatedAt: new Date() })
+            .where(eq(workspaces.id, id));
+          await tx
+            .update(user)
+            .set({ defaultWorkspaceId: null, updatedAt: new Date() })
+            .where(eq(user.defaultWorkspaceId, id));
+        }
+        return { id, archived: true };
+      },
+      "archive",
+    );
   }
   async function listWorkspaceAdministration(p: Principal) {
     const actor = await identity(db, p);

@@ -1,0 +1,274 @@
+{
+  "status": "exploratory; not release acceptance; superseded by final runtime run",
+  "started": "2026-10-31T05:14:51.538Z",
+  "calls": 21600,
+  "errors": 0,
+  "design": "three rounds, 300-call contiguous sequential blocks per revision, alternating revision order by round",
+  "issue": "Nonstationary host load: VM CPU 521.9% at 05:18:11 UTC and 770% later; no benchmark database lock waits observed. Short counterbalanced blocks planned for final runtime after workspace locks and refresh history changes.",
+  "comparison": [
+    {
+      "method": "tools/list",
+      "concurrency": 1,
+      "baseline": {
+        "p50": 7.168208999999479,
+        "p95": 19.620708999980707,
+        "p99": 27.46945799997775,
+        "count": 900,
+        "errors": 0,
+        "throughput": 104.3833688721574
+      },
+      "candidate": {
+        "p50": 6.760708000001614,
+        "p95": 14.142875000019558,
+        "p99": 16.661250000004657,
+        "count": 900,
+        "errors": 0,
+        "throughput": 123.88153257216243
+      },
+      "p95ChangePercent": -27.918634336641635,
+      "thresholdPass": true
+    },
+    {
+      "method": "workspaces.list",
+      "concurrency": 1,
+      "baseline": {
+        "p50": 77.57483300002059,
+        "p95": 207.92766600000323,
+        "p99": 780.9547920000041,
+        "count": 900,
+        "errors": 0,
+        "throughput": 8.751935309681185
+      },
+      "candidate": {
+        "p50": 27.872332999999344,
+        "p95": 104.86441700000432,
+        "p99": 257.83191700000316,
+        "count": 900,
+        "errors": 0,
+        "throughput": 24.18753791396569
+      },
+      "p95ChangePercent": -49.566876300144344,
+      "thresholdPass": true
+    },
+    {
+      "method": "context.get",
+      "concurrency": 1,
+      "baseline": {
+        "p50": 25.200417000000016,
+        "p95": 51.66341699997429,
+        "p99": 90.71854199998779,
+        "count": 900,
+        "errors": 0,
+        "throughput": 34.213276795640034
+      },
+      "candidate": {
+        "p50": 32.91316699999152,
+        "p95": 101.5704160000023,
+        "p99": 182.99116700000013,
+        "count": 900,
+        "errors": 0,
+        "throughput": 23.36784786419998
+      },
+      "p95ChangePercent": 96.60026745821486,
+      "thresholdPass": false
+    },
+    {
+      "method": "tasks.list",
+      "concurrency": 1,
+      "baseline": {
+        "p50": 16.215499999991152,
+        "p95": 28.334374999976717,
+        "p99": 42.41437500000757,
+        "count": 900,
+        "errors": 0,
+        "throughput": 55.509248448710245
+      },
+      "candidate": {
+        "p50": 17.439165999996476,
+        "p95": 31.7827919999836,
+        "p99": 45.95145799999591,
+        "count": 900,
+        "errors": 0,
+        "throughput": 51.72316155529193
+      },
+      "p95ChangePercent": 12.17043608694286,
+      "thresholdPass": false
+    },
+    {
+      "method": "tools/list",
+      "concurrency": 10,
+      "baseline": {
+        "p50": 20.97987500000454,
+        "p95": 38.279959000006784,
+        "p99": 46.80770800000755,
+        "count": 900,
+        "errors": 0,
+        "throughput": 430.7283693874614
+      },
+      "candidate": {
+        "p50": 18.643665999989025,
+        "p95": 24.55175000001327,
+        "p99": 37.16233399999328,
+        "count": 900,
+        "errors": 0,
+        "throughput": 516.8219070469934
+      },
+      "p95ChangePercent": -35.862653353393306,
+      "thresholdPass": true
+    },
+    {
+      "method": "workspaces.list",
+      "concurrency": 10,
+      "baseline": {
+        "p50": 193.55945800000336,
+        "p95": 331.34720800002106,
+        "p99": 450.4321249999921,
+        "count": 900,
+        "errors": 0,
+        "throughput": 47.856412892376404
+      },
+      "candidate": {
+        "p50": 76.05562499997905,
+        "p95": 132.40412500000093,
+        "p99": 161.99808299998404,
+        "count": 900,
+        "errors": 0,
+        "throughput": 118.40454872007848
+      },
+      "p95ChangePercent": -60.04066978587834,
+      "thresholdPass": true
+    },
+    {
+      "method": "context.get",
+      "concurrency": 10,
+      "baseline": {
+        "p50": 79.04295800000546,
+        "p95": 144.20662499999162,
+        "p99": 172.1797089999891,
+        "count": 900,
+        "errors": 0,
+        "throughput": 110.67395980499792
+      },
+      "candidate": {
+        "p50": 77.14304200001061,
+        "p95": 199.40979099998367,
+        "p99": 342.36066700000083,
+        "count": 900,
+        "errors": 0,
+        "throughput": 102.37366858245214
+      },
+      "p95ChangePercent": 38.28060326631684,
+      "thresholdPass": false
+    },
+    {
+      "method": "tasks.list",
+      "concurrency": 10,
+      "baseline": {
+        "p50": 56.96162500002538,
+        "p95": 101.49358300000313,
+        "p99": 114.05054099998961,
+        "count": 900,
+        "errors": 0,
+        "throughput": 160.008441334216
+      },
+      "candidate": {
+        "p50": 57.54391700000269,
+        "p95": 93.3695000000007,
+        "p99": 242.25558399999863,
+        "count": 900,
+        "errors": 0,
+        "throughput": 155.83477429391476
+      },
+      "p95ChangePercent": -8.004528719812932,
+      "thresholdPass": true
+    },
+    {
+      "method": "tools/list",
+      "concurrency": 30,
+      "baseline": {
+        "p50": 103.26212499997928,
+        "p95": 165.14745799999218,
+        "p99": 176.89675000001444,
+        "count": 900,
+        "errors": 0,
+        "throughput": 276.2313300120303
+      },
+      "candidate": {
+        "p50": 75.95491700001003,
+        "p95": 141.80200000002515,
+        "p99": 199.20450000005076,
+        "count": 900,
+        "errors": 0,
+        "throughput": 342.5181422783237
+      },
+      "p95ChangePercent": -14.136129179758939,
+      "thresholdPass": true
+    },
+    {
+      "method": "workspaces.list",
+      "concurrency": 30,
+      "baseline": {
+        "p50": 550.2080839999835,
+        "p95": 777.625166999991,
+        "p99": 888.6877080000122,
+        "count": 900,
+        "errors": 0,
+        "throughput": 51.346403003356514
+      },
+      "candidate": {
+        "p50": 226.91887500000303,
+        "p95": 343.0785410000244,
+        "p99": 400.9879169999913,
+        "count": 900,
+        "errors": 0,
+        "throughput": 125.65762204437061
+      },
+      "p95ChangePercent": -55.8812451603655,
+      "thresholdPass": true
+    },
+    {
+      "method": "context.get",
+      "concurrency": 30,
+      "baseline": {
+        "p50": 230.9916249999951,
+        "p95": 298.1284999999916,
+        "p99": 314.9809590000077,
+        "count": 900,
+        "errors": 0,
+        "throughput": 123.95782317271654
+      },
+      "candidate": {
+        "p50": 253.783666000003,
+        "p95": 417.0905830000411,
+        "p99": 429.09075000003213,
+        "count": 900,
+        "errors": 0,
+        "throughput": 111.36147451429856
+      },
+      "p95ChangePercent": 39.90295560473178,
+      "thresholdPass": false
+    },
+    {
+      "method": "tasks.list",
+      "concurrency": 30,
+      "baseline": {
+        "p50": 190.40641699999105,
+        "p95": 320.8924999999581,
+        "p99": 349.5888330000016,
+        "count": 900,
+        "errors": 0,
+        "throughput": 150.9960791826246
+      },
+      "candidate": {
+        "p50": 182.81124999996973,
+        "p95": 270.66737500000454,
+        "p99": 311.23320799999055,
+        "count": 900,
+        "errors": 0,
+        "throughput": 159.359489393158
+      },
+      "p95ChangePercent": -15.651697998538483,
+      "thresholdPass": true
+    }
+  ]
+}

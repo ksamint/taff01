@@ -2,6 +2,16 @@ import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 
+it("makes restricted source migrations readable by the unprivileged image user", () => {
+  const dockerfile = readFileSync("deploy/Dockerfile.server", "utf8");
+  expect(dockerfile).toContain(
+    "COPY --from=build --chmod=0555 /repo/dist/server/migrations ./migrations",
+  );
+  expect(readFileSync("deploy/Dockerfile.web", "utf8")).toContain(
+    "COPY --from=build --chmod=0555 /repo/apps/web/public ./apps/web/public",
+  );
+});
+
 it("builds the base Compose worker with its own production dependencies", () => {
   const config = JSON.parse(
     execFileSync(
@@ -29,6 +39,28 @@ it("builds the base Compose worker with its own production dependencies", () => 
   expect(config.services.worker.image).toBe("taff-worker-test:test");
   expect(config.services.worker.build.args.TARGET).toBe("worker");
   expect(config.services.worker.command).toEqual(["node", "dist/worker.mjs"]);
+  expect(config.services.valkey.command).toEqual([
+    "valkey-server",
+    "--save",
+    "",
+    "--appendonly",
+    "yes",
+    "--appendfsync",
+    "everysec",
+    "--maxmemory",
+    "256mb",
+    "--maxmemory-policy",
+    "noeviction",
+  ]);
+  expect(config.services.valkey.volumes).toContainEqual(
+    expect.objectContaining({
+      type: "volume",
+      source: "valkey_data",
+      target: "/data",
+    }),
+  );
+  for (const service of ["api", "worker"])
+    expect(config.services[service].stop_grace_period).toBe("30s");
 });
 
 it("keeps Taff isolated while using the private PostgreSQL server and shared TLS proxy", () => {

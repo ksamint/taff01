@@ -1,0 +1,13 @@
+diff --git a/dist/db/adapter/factory.mjs b/dist/db/adapter/factory.mjs
+index c03dc326fc0efe3eb138e93162b746d32b82d646..c5eac3a35910717b7837c3182b8170e91e90a0e1 100644
+--- a/dist/db/adapter/factory.mjs
++++ b/dist/db/adapter/factory.mjs
+@@ -389,7 +389,7 @@ const createAdapterFactory = ({ adapter: customAdapter, config: cfg }) => (optio
+ 				where,
+ 				limit: joinConfig.limit
+ 			});
+-			console.error(error);
++			logger.error("Database query failed");
+ 			throw error;
+ 		}
+ 		return result;

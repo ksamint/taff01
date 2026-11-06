@@ -1,0 +1,16 @@
+[
+  {
+    "revision": "baseline",
+    "before": 10,
+    "after40Unrelated": 90,
+    "exitCode": 1,
+    "expected": "regression assertion fails"
+  },
+  {
+    "revision": "candidate",
+    "before": 11,
+    "after40Unrelated": 11,
+    "exitCode": 0,
+    "expected": "passes"
+  }
+]

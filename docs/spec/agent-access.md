@@ -3,7 +3,7 @@
 Living product specification for agent credentials, workspace grants and organization
 policy (ADR 0022, 0023, 0028). Change this file with the behavior it describes.
 
-Status: v0.2.19 candidate; production acceptance pending.
+Status: v0.2.20 candidate; production acceptance pending.
 
 ## Users and roles
 
@@ -69,6 +69,15 @@ Status: v0.2.19 candidate; production acceptance pending.
 - AA-4.3 A member shall restore only an OAuth revocation they made while they
   retain approval authority. Administrator revocation shall not be undone by
   a member.
+- AA-4.4 When a consumed authorization code is replayed, the server shall
+  revoke its grant only after verifying the original client, redirect and
+  PKCE proof. Concurrent valid redemption shall end the winning grant.
+- AA-4.5 When the original client reuses a consumed refresh credential,
+  the server shall commit revocation of its descendant access and refresh
+  credentials. Another client shall not revoke that grant through replay.
+- AA-4.6 Approval, exchange, refresh and member restore shall hold supervision
+  stable through their authorization decision and write. Agent mutations and
+  permission writers shall serialize on the agent's authority row.
 
 ### Permission boundaries (AA-5)
 
@@ -81,6 +90,9 @@ Status: v0.2.19 candidate; production acceptance pending.
 - AA-5.4 Workspace administrators and system administrators shall inspect current
   access through the [access matrix contract](access-matrix.md). Baseline action
   rows shall derive from can() and the runtime action registry.
+- AA-5.5 Workspace discovery shall query only the token's active materialized
+  grants, or its single OAuth workspace, and recheck current authority before
+  returning each workspace's kind, effective scopes and grant origin.
 
 ## Non-functional
 
@@ -100,10 +112,12 @@ Status: v0.2.19 candidate; production acceptance pending.
 | AA-1, AA-2 | authorization.integration.test.ts; mcp-workspaces.test.ts |
 | AA-3 | token-policy.test.ts; token-policy.integration.test.ts |
 | AA-4 | authorization.integration.test.ts; oauth integration tests |
+| AA-4.4–4.6 | oauth.integration.test.ts; authorization.integration.test.ts; MCP OAuth refresh-family smoke |
 | AA-5.1 | permissions.test.ts; app.test.ts |
 | AA-5.2 | e2e/ssr-session.spec.ts |
 | AA-5.3 | authorization.integration.test.ts; token-policy.integration.test.ts |
 | AA-5.4 | access-matrix.integration.test.ts; permissions.test.ts; scripts/permissions-matrix.test.ts |
+| AA-5.5 | workspace-discovery.integration.test.ts; token-policy.integration.test.ts |
 | Three-locale management | e2e/token-grants.spec.ts; acceptance pending |
 
 ## Open decisions

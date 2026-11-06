@@ -267,7 +267,8 @@ export function createRunOperations({
     const [profile] = await tx
       .select()
       .from(agentProfiles)
-      .where(eq(agentProfiles.id, run.agentId));
+      .where(eq(agentProfiles.id, run.agentId))
+      .for("share");
     const actor = await requireMember(tx, principal, run.workspaceId, action, {
       ...resource,
       supervisorId: profile?.supervisorId,
@@ -957,8 +958,15 @@ export function createRunOperations({
     agentId: string,
     input: AgentProfileInput,
   ): Promise<AgentProfile> {
+    parse(idSchema, agentId);
     const body = parse(agentProfileInputSchema, input);
+    if (principal.kind !== "user") throw new CoreError("forbidden", 403);
     await mutation(principal, async (tx) => {
+      await tx
+        .select({ id: members.id })
+        .from(members)
+        .where(eq(members.id, agentId))
+        .for("no key update");
       const member = await agentMember(tx, agentId);
       await requireMember(tx, principal, member.workspaceId, "agent:manage");
       if (body.supervisorId) {
@@ -988,8 +996,15 @@ export function createRunOperations({
     agentId: string,
     input: AgentPermissionInput,
   ): Promise<AgentProfile> {
+    parse(idSchema, agentId);
     const body = parse(agentPermissionInputSchema, input);
+    if (principal.kind !== "user") throw new CoreError("forbidden", 403);
     await mutation(principal, async (tx) => {
+      await tx
+        .select({ id: members.id })
+        .from(members)
+        .where(eq(members.id, agentId))
+        .for("no key update");
       const member = await agentMember(tx, agentId);
       await requireMember(tx, principal, member.workspaceId, "agent:manage");
       await tx
@@ -1146,6 +1161,7 @@ export function createRunOperations({
     grantId: string,
     input: DecideGrant,
   ): Promise<Grant> {
+    if (principal.kind !== "user") throw new CoreError("forbidden", 403);
     parse(idSchema, grantId);
     const body = parse(decideGrantSchema, input);
     const expiresAt = body.expiresAt ? new Date(body.expiresAt) : null;
@@ -1162,6 +1178,12 @@ export function createRunOperations({
         .from(grants)
         .where(eq(grants.id, grantId));
       if (!candidate) throw new CoreError("not_found", 404);
+      // Match agent mutations: authority row, then task, then grant.
+      await tx
+        .select({ id: members.id })
+        .from(members)
+        .where(eq(members.id, candidate.agentId))
+        .for("no key update");
       if (candidate.taskId) await lockTask(tx, candidate.taskId);
       const [grant] = await tx
         .select()
@@ -1171,7 +1193,8 @@ export function createRunOperations({
       const [profile] = await tx
         .select()
         .from(agentProfiles)
-        .where(eq(agentProfiles.id, grant.agentId));
+        .where(eq(agentProfiles.id, grant.agentId))
+        .for("share");
       const actor = await requireMember(
         tx,
         principal,
