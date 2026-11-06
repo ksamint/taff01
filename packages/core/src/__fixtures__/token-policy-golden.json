@@ -1,0 +1,100 @@
+[
+  {
+    "input": {
+      "token": {
+        "id": "token",
+        "name": "Twin",
+        "organizationPolicy": "all_organizations",
+        "revokedAt": null
+      },
+      "workspaces": [
+        {
+          "id": "org",
+          "personalOwnerId": null,
+          "archivedAt": null
+        }
+      ],
+      "grants": [],
+      "members": []
+    },
+    "output": {
+      "insertGrants": [
+        {
+          "workspaceId": "org",
+          "memberId": null
+        }
+      ],
+      "createMembers": [
+        {
+          "workspaceId": "org",
+          "name": "Twin"
+        }
+      ],
+      "revokeGrantIds": []
+    }
+  },
+  {
+    "input": {
+      "token": {
+        "id": "token",
+        "name": "Twin",
+        "organizationPolicy": "all_organizations",
+        "revokedAt": null
+      },
+      "workspaces": [
+        {
+          "id": "org",
+          "personalOwnerId": null,
+          "archivedAt": null
+        }
+      ],
+      "grants": [
+        {
+          "id": "revoked",
+          "workspaceId": "org",
+          "origin": "policy",
+          "revokedAt": "2026-11-06T00:00:00Z"
+        }
+      ],
+      "members": []
+    },
+    "output": {
+      "insertGrants": [],
+      "createMembers": [],
+      "revokeGrantIds": []
+    }
+  },
+  {
+    "input": {
+      "token": {
+        "id": "token",
+        "name": "Twin",
+        "organizationPolicy": "explicit",
+        "revokedAt": null
+      },
+      "workspaces": [
+        {
+          "id": "org",
+          "personalOwnerId": null,
+          "archivedAt": null
+        }
+      ],
+      "grants": [
+        {
+          "id": "active",
+          "workspaceId": "org",
+          "origin": "policy",
+          "revokedAt": null
+        }
+      ],
+      "members": []
+    },
+    "output": {
+      "insertGrants": [],
+      "createMembers": [],
+      "revokeGrantIds": [
+        "active"
+      ]
+    }
+  }
+]

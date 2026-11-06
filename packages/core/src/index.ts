@@ -106,6 +106,7 @@ import { createSuggestionOperations } from "./suggestions";
 import { createSummaryOperations } from "./summaries";
 import { createTimelineOperations } from "./timeline";
 import { createTodayBootstrap } from "./today-bootstrap";
+import { createTokenPolicyOperations, lockTokenPolicy } from "./token-policy";
 import { createWorkspaceLifecycle } from "./workspace-lifecycle";
 
 export class CoreError extends Error {
@@ -159,6 +160,8 @@ function toAgentToken(
 ): AgentToken {
   return {
     id: row.id,
+    organizationPolicy: row.organizationPolicy,
+    version: row.version,
     workspaceId: row.workspaceId,
     memberId: row.memberId,
     createdBy: row.createdBy,
@@ -509,6 +512,7 @@ export function createCore(options: {
       })),
     };
   }
+  const tokenPolicy = createTokenPolicyOperations({ db, mutation });
   const workspaceLifecycle = createWorkspaceLifecycle({ db, mutation });
   async function listMembers(
     principal: Principal,
@@ -553,6 +557,12 @@ export function createCore(options: {
       planning.operations.listProjects(principal, workspaceId),
     ]);
     return {
+      authorizedWorkspaces:
+        principal.kind === "agent"
+          ? (await listAgentWorkspaces(principal)).map(
+              ({ workspaceId, name }) => ({ workspaceId, name }),
+            )
+          : [],
       now: new Date().toISOString(),
       workspace: {
         ...workspace,
@@ -1184,14 +1194,39 @@ export function createCore(options: {
   async function listAgentWorkspaces(principal: Principal) {
     if (principal.kind !== "agent") throw new CoreError("forbidden", 403);
     const rows = await db
-      .select({ id: workspaces.id, name: workspaces.name })
-      .from(workspaces);
+      .select({
+        id: workspaces.id,
+        name: workspaces.name,
+        personalOwnerId: workspaces.personalOwnerId,
+      })
+      .from(workspaces)
+      .orderBy(workspaces.id);
     const result = [];
     for (const row of rows) {
       try {
         const p = await resolveAgentWorkspace(principal, row.id);
-        if (p.kind === "agent")
-          result.push({ ...row, memberId: p.memberId, scopes: p.scopes });
+        if (p.kind === "agent") {
+          const [grant] = await db
+            .select()
+            .from(agentTokenWorkspaces)
+            .where(
+              and(
+                eq(agentTokenWorkspaces.tokenId, p.tokenId),
+                eq(agentTokenWorkspaces.workspaceId, row.id),
+              ),
+            );
+          result.push({
+            id: row.id,
+            workspaceId: row.id,
+            name: row.name,
+            kind: row.personalOwnerId
+              ? ("personal" as const)
+              : ("organization" as const),
+            memberId: p.memberId,
+            scopes: p.scopes,
+            origin: grant?.origin ?? "manual",
+          });
+        }
       } catch (error) {
         if (!(error instanceof CoreError) || error.status !== 403) throw error;
       }
@@ -1206,7 +1241,12 @@ export function createCore(options: {
     parse(idSchema, tokenId);
     parse(idSchema, workspaceId);
     if (principal.kind !== "user") throw new CoreError("forbidden", 403);
-    await requireMember(db, principal, workspaceId, "token:manage");
+    await tokenPolicy.requireTokenGrantActor(
+      db,
+      principal,
+      workspaceId,
+      "token:grant",
+    );
     const [token] = await db
       .select()
       .from(agentTokens)
@@ -1233,6 +1273,7 @@ export function createCore(options: {
     const body = parse(agentTokenWorkspaceInputSchema, input);
     if (principal.kind !== "user") throw new CoreError("forbidden", 403);
     return mutation(principal, async (tx) => {
+      await lockTokenPolicy(tx);
       const [token] = await tx
         .select()
         .from(agentTokens)
@@ -1240,14 +1281,30 @@ export function createCore(options: {
         .for("update");
       if (!token || token.oauthClientId || token.revokedAt)
         throw new CoreError("forbidden", 403);
-      const actor = await requireMember(
+      const actor = await tokenPolicy.requireTokenGrantActor(
         tx,
         principal,
         body.workspaceId,
-        "token:manage",
+        body.revoked ? "token:grant_revoke" : "token:grant",
       );
+      const [targetWorkspace] = await tx
+        .select()
+        .from(workspaces)
+        .where(eq(workspaces.id, body.workspaceId));
+      if (
+        !targetWorkspace ||
+        targetWorkspace.archivedAt ||
+        (targetWorkspace.personalOwnerId &&
+          body.workspaceId !== token.workspaceId)
+      )
+        throw new CoreError("forbidden", 403);
       if (!body.revoked)
-        await requireMember(tx, principal, token.workspaceId, "token:manage");
+        await tokenPolicy.requireTokenGrantActor(
+          tx,
+          principal,
+          token.workspaceId,
+          "token:grant",
+        );
       const [member] = await tx
         .select()
         .from(members)
@@ -1266,6 +1323,7 @@ export function createCore(options: {
         grantedBy: actor.id,
         scopes: body.scopes,
         revokedAt: body.revoked ? new Date() : null,
+        revokedBy: body.revoked ? actor.id : null,
         updatedAt: new Date(),
       };
       const [row] = await tx
@@ -1725,6 +1783,9 @@ export function createCore(options: {
     scheduleTask,
     updateProfile,
     ...workspaceLifecycle,
+    setTokenOrganizationPolicy: tokenPolicy.setTokenOrganizationPolicy,
+    restoreTokenWorkspaceGrant: tokenPolicy.restoreTokenWorkspaceGrant,
+    listSystemAgentTokens: tokenPolicy.listSystemAgentTokens,
     createAgentToken,
     listAgentTokens,
     revokeAgentToken,

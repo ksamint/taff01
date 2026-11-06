@@ -72,6 +72,7 @@ import { emailMessage } from "./email-messages";
 import { CoreError, hashToken, type Principal } from "./index";
 import { type Action, type Actor, can, type Resource } from "./permissions";
 import { localDate, parseQuickAddText } from "./quick-add";
+import { enrollPolicyTokens, lockTokenPolicy } from "./token-policy";
 
 function parse<T>(schema: { parse(v: unknown): T }, v: unknown): T {
   try {
@@ -698,6 +699,7 @@ export function createPlanningOperations({
         .limit(1);
       if (!can(identity ?? null, "workspace:create", { userId: p.userId }))
         throw new CoreError("forbidden", 403);
+      await lockTokenPolicy(tx);
       const copied: (typeof members.$inferSelect)[] = [];
       for (const id of body.agentIds ?? []) {
         const [agent] = await tx
@@ -735,6 +737,7 @@ export function createPlanningOperations({
           role: "member",
         });
       await ensureDefaultAgent(tx, workspace.id);
+      await enrollPolicyTokens(tx, workspace.id);
       return {
         id: workspace.id,
         name: workspace.name,

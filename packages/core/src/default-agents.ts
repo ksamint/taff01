@@ -1,6 +1,41 @@
 import { type Database, members, type Transaction, workspaces } from "@taff/db";
 import { and, eq, sql } from "drizzle-orm";
 
+export async function ensureNamedAgent(
+  tx: Transaction,
+  workspaceId: string,
+  name: string,
+) {
+  await tx
+    .select({ id: workspaces.id })
+    .from(workspaces)
+    .where(eq(workspaces.id, workspaceId))
+    .for("update");
+  const [existing] = await tx
+    .select()
+    .from(members)
+    .where(
+      and(
+        eq(members.workspaceId, workspaceId),
+        eq(members.kind, "agent"),
+        eq(members.name, name),
+      ),
+    );
+  if (existing) return existing;
+  return (
+    await tx
+      .insert(members)
+      .values({
+        workspaceId,
+        name,
+        kind: "agent",
+        role: "member",
+        userId: null,
+      })
+      .returning()
+  )[0];
+}
+
 export const DEFAULT_AGENT_NAME = "默认智能体 / Default agent";
 
 /** Caller supplies its transaction/audit actor. Never issues credentials. */
@@ -17,13 +52,7 @@ export async function ensureDefaultAgent(tx: Transaction, workspaceId: string) {
     .where(and(eq(members.workspaceId, workspaceId), eq(members.kind, "agent")))
     .limit(1);
   if (existing) return false;
-  await tx.insert(members).values({
-    workspaceId,
-    name: DEFAULT_AGENT_NAME,
-    kind: "agent",
-    role: "member",
-    userId: null,
-  });
+  await ensureNamedAgent(tx, workspaceId, DEFAULT_AGENT_NAME);
   return true;
 }
 
