@@ -55,6 +55,7 @@ it("advertises read-only context and binds it to the authenticated token; reject
   );
   vi.spyOn(core, "recordMcpCall").mockResolvedValue();
   const read = vi.spyOn(core, "getContext").mockResolvedValue({
+    authorizedWorkspaces: [{ workspaceId: id, name: "Verification" }],
     now: "2026-10-16T08:00:00Z",
     workspace: {
       id,

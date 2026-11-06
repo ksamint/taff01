@@ -125,7 +125,7 @@ export function createMcpServer(
     {
       title: "Read workspace context",
       description:
-        "Read the current instant, workspace display time zone (the token creator's saved user profile), calling member, default human owner, members and projects. Call before resolving relative dates such as today, tomorrow 3pm, Friday or next Monday, or names such as Alice. Resolve wall times in workspace.timeZone, then send ISO instants; never assume the client clock or UTC is the workspace zone. No data is changed.",
+        "Omitting workspaceId uses the token home workspace. Returns authorizedWorkspaces for workspace selection. Read the current instant, workspace display time zone (the token creator's saved user profile), calling member, default human owner, members and projects. Call before resolving relative dates such as today, tomorrow 3pm, Friday or next Monday, or names such as Alice. Resolve wall times in workspace.timeZone, then send ISO instants; never assume the client clock or UTC is the workspace zone. No data is changed.",
       inputSchema: toolSchema(mcpContextGetArgs),
       annotations: READ_ONLY,
     },

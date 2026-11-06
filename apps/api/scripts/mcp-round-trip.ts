@@ -43,43 +43,10 @@ import {
   timelineSchema,
 } from "@taff/schemas";
 
+import { MCP_TOOL_ARGS, type McpToolName } from "../src/mcp-tool-args";
+
 /** Every tool the MCP server lists, sorted. */
-export const MCP_TOOLS = [
-  "brief.get",
-  "calendar.list",
-  "calendar.schedule",
-  "calendar.set",
-  "companies.list",
-  "contacts.get",
-  "contacts.list",
-  "context.get",
-  "dependencies.add",
-  "dependencies.remove",
-  "files.attach",
-  "grants.request",
-  "inbox.request_review",
-  "projects.create",
-  "projects.edit",
-  "projects.list",
-  "quickadd.parse",
-  "relations.get",
-  "runs.control",
-  "runs.event",
-  "runs.get",
-  "runs.start",
-  "runs.submit",
-  "search.query",
-  "suggestions.create",
-  "tasks.comments.add",
-  "tasks.comments.list",
-  "tasks.create",
-  "tasks.edit",
-  "tasks.list",
-  "tasks.plan",
-  "tasks.update",
-  "timeline.get",
-  "workspaces.list",
-] as const;
+export const MCP_TOOLS = Object.keys(MCP_TOOL_ARGS).sort() as McpToolName[];
 
 /** Tools that only read; every other tool changes data (ADR 0021 follow-up). */
 export const MCP_READ_ONLY_TOOLS = [
