@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.18 — organization access
+
+- Personal MCP tokens can select explicitly authorized workspaces and discover them through context.
+- System administrators can enroll a token in active organizations and future organizations without rotation; personal workspaces are excluded.
+- Workspace administrators can inspect grant origin, revoke access and explicitly restore it.
+- Authenticated SSR application pages use private, no-store caching.
+
 ## v0.2.17 — release candidate, 2026-11-05
 
 Shareholder daily summaries (ADR 0027).

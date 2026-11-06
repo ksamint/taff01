@@ -3026,3 +3026,27 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Live acceptance creates no owner data: the usual health, OAuth discovery and `/mcp` 401 checks; `POST /api/shared-summary` with a random well-formed token answers 404 `not_found` with `private, no-store`; `/s/<random token>` shows the unavailable page with `noindex`; unauthenticated `GET /api/summaries?workspaceId=…` answers 401; a signed-in admin opens `/orgs/summaries` without writing. The deployer creates no tag, recipient or share; the owner creates the first tag after the lock is released.
 - Known limits (ADR 0027 notes): public page JavaScript 187.5 KiB against a 50 KiB target; behind the proxy the share-read address limit is a global 30 per minute; no Inbox row; visual baselines for the new screens are pending.
 - Rollback: v0.2.16 source `749811497ce1cc053d098c61570b43101b14b2d6`, its retained images and env backup. Keep 0038's tables and rows; v0.2.16 code never reads them.
+
+### Release candidate v0.2.18 — organization access
+
+- Source: the locally validated head of `feat/v0.2.18-organization-access`;
+  deployment and closeout follow [the checklist](release-closeout.md).
+- Additive migrations: `0039_agent_token_workspaces` (PR #81 renumbered after
+  shareholder summaries), `0040_token_organization_policy` (policy, grant
+  origin/revoker, optimistic token version). No new environment variable or
+  proxy/Compose change; only API/web/worker advance to 0.2.18.
+- Personal tokens retain credentials. Effective workspace selection and
+  `context.get.authorizedWorkspaces` expose current grants. Policy enrollment
+  excludes personal and archived workspaces; administrator revocations remain
+  sticky until explicitly restored.
+- Local acceptance includes the full gate, six grant-management browser cases
+  and three production SSR private-cache cases across en/zh-CN/zh-HK. Record
+  final counts and exact source in the release milestone before deployment.
+- Live acceptance: health, OAuth discovery and `/mcp` challenge; read-only
+  `workspaces.list` with the operator's existing token. The deployer does not
+  activate policy as part of image replacement.
+- After closeout the operator sets `all_organizations` on Twin's existing
+  token with `PUT /api/agent-tokens/:id/organization-policy`, supplying the
+  current version. No rotation. Twin integration follows its own repository plan.
+- Rollback retains the additive schema/data and prior API/web/worker images;
+  preserve PostgreSQL, Valkey, Caddy and neighboring applications.
