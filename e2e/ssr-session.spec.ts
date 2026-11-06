@@ -8,6 +8,15 @@ import { messages, type TestLocale } from "./support/account";
 
 test.use({ timezoneId: "Asia/Tokyo" });
 
+// Fulfilled local documents need Chrome's loopback permission before hydration.
+test.beforeEach(async ({ context }) => {
+  const origin = new URL(process.env.AUTH_URL!);
+  if (["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname))
+    await context.grantPermissions(["local-network-access"], {
+      origin: origin.origin,
+    });
+});
+
 async function account(
   request: APIRequestContext,
   locale: TestLocale,
@@ -163,6 +172,9 @@ test("server account identity stays private and read-only until the browser conf
     const response = await page.goto("/", { waitUntil: "commit" });
     expect(response).not.toBeNull();
     const html = await response!.text();
+    await expect(
+      page.locator('head link[rel="preload"][href="/api/me"]'),
+    ).toHaveCount(0);
     expect(response!.headers()["cache-control"]).toContain("no-store");
     expect(html).toContain("SSR Alice");
     expect(html).toContain(privateTitle);
