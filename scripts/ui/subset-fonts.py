@@ -173,7 +173,9 @@ if "--ttf" in sys.argv[3:]:
         font = TTFont(origin, recalcTimestamp=False)
         if "fvar" in font:
             font = instantiateVariableFont(font, {"wght": 400}, inplace=True)
-        points = vocabulary & set(font.getBestCmap())
+        # Reports include arbitrary organization/person/task names, beyond UI labels.
+        points = {point for point in font.getBestCmap() if point in vocabulary
+                  or 0x3400 <= point <= 0x9FFF or 0x20000 <= point <= 0x323AF}
         if name == "Manrope":
             points |= set(TTFont(FONTS / "Manrope-latin.woff2").getBestCmap())
         options = subset.Options()
@@ -187,4 +189,5 @@ if "--ttf" in sys.argv[3:]:
         worker.subset(font)
         font.flavor = None
         font.save(render_fonts / f"{name}.ttf")
+        assert set(TTFont(render_fonts / f"{name}.ttf").getBestCmap()) == points
         (render_fonts / f"{name}-OFL.txt").write_bytes((FONTS / f"{name}-OFL.txt").read_bytes())

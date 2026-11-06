@@ -82,3 +82,12 @@ get a write path a person lacks; three locales; no secret in any render.
 2. Whether to also keep an SVG render (smaller, text-selectable) for the web
    page's "Save image" instead of PNG only.
 3. Retention of renders: same as summaries (keep; archive by tag).
+
+## Implementation calibration (2026-11-06)
+
+The server font subsets retain the available CJK character coverage of the same
+pinned source fonts in addition to the web vocabulary. Organization, recipient
+and task names are user data and cannot be constrained to UI labels; a glyph
+regression checks names such as 侍天 and 饕餮. This adds no client font payload.
+Local Docker publishes the internal port3002 only on loopback56302, avoiding
+an existing local service on3002. Production has no published renderer port.
