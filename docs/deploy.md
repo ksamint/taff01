@@ -3050,3 +3050,23 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
   current version. No rotation. Twin integration follows its own repository plan.
 - Rollback retains the additive schema/data and prior API/web/worker images;
   preserve PostgreSQL, Valkey, Caddy and neighboring applications.
+
+### Release candidate v0.2.19 — access matrix and renders
+
+- Source: locally validated head of `feat/v0.2.19-access-matrix-and-renders`;
+  deploy and close out using [the checklist](release-closeout.md).
+- Additive migration `0041_summary_renders`: immutable text/bytea image storage,
+  known-scope CHECK extension and bounded retry-scan indexes. Renders are retained
+  with summaries. No existing summary row is rewritten.
+- Four images: API/web/worker plus internal `taff-render`. New environment value
+  `SUMMARY_RENDER_URL=http://render:3002`; no Caddy route or public renderer port.
+  Replace only those application services; preserve database, Valkey and neighbors.
+- Worker generates text in-process and calls Rust for PNG with a 10-second timeout.
+  Capture renderer health and both summary schedulers before declaring readiness.
+- Live acceptance uses existing authorized read-only data: matrix visibility,
+  health/OAuth/MCP boundaries, text/image delivery if an owner-created summary
+  exists. Never manufacture owner summaries or shares during deployment.
+- Local acceptance includes 1080px PNGs under 400KB, three locale text/image
+  goldens, immutable storage, public 404 parity, 37 MCP tools and scope revocation.
+- Rollback: restore previous API/web/worker images/env; stop only the new renderer
+  if required. Keep additive schema/renders/data, PostgreSQL, Valkey and routing.

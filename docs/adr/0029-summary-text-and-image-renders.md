@@ -1,6 +1,6 @@
 # 0029 — Daily summary as text and image, rendered in Rust, readable by agents
 
-Date: 2026-11-05. Status: proposed (owner: "the daily report in txt, image
+Date: 2026-11-05. Status: accepted for implementation (owner: "the daily report in txt, image
 (use rust solution) format is on", "let fenshen using mcp visit all
 authorized workspace and projects and all"). Follows ADR 0027 (summary model
 and watermark), ADR 0026 (Rust migration, phase 1 foundation) and ADR 0028

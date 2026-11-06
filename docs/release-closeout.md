@@ -13,7 +13,7 @@ source as a process gap in the milestone and fix the capture step below.
 | Pre-deploy snapshot of every container: id, image, created, startedAt, health | Under the lock, before backups | Docker inspect, sanitized for `scripts/deploy/neighbor_preservation.py` |
 | Exclusive database dump and env backup, mode 0600 | Before migration | Deployment log |
 | Migrator exit code and migration journal | Migration | Deployment log |
-| Replaced api/web/worker: container id, image id, startedAt, restartCount | Right after replacement | Docker inspect, recorded beside the image ids |
+| Replaced api/web/worker/render: container id, image id, startedAt, restartCount | Right after replacement | Docker inspect, recorded beside the image ids |
 | Local checklist, live acceptance, MCP smoke counts | Before and after replacement | Playwright and smoke output |
 | Worker scheduler readiness: the `Worker ready` line, logged only after every job scheduler (`daily-digest-scan`, `daily-summary-scan`) is registered | Right after replacement | Worker container log since its startedAt |
 
@@ -28,11 +28,12 @@ source as a process gap in the milestone and fix the capture step below.
    `SSR_PRODUCTION=1 pnpm e2e e2e/ssr-session.spec.ts --grep "production SSR HTML is private"` against
    the local production stack (Next's development server always sends only
    `no-store`), `release:stack` then
-   `release:checklist`, `pnpm mcp:smoke` against that stack, and the three
+   `release:checklist`, `pnpm mcp:smoke` against that stack, and the four
    image builds (`deploy/Dockerfile.server` with `TARGET=api` and
-   `TARGET=worker`, `deploy/Dockerfile.web`). Once `backend/` exists, add
+   `TARGET=worker`, `deploy/Dockerfile.web`, `deploy/Dockerfile.render`). Once `backend/` exists, add
    `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings` and
-   `cargo test --locked`. Source: the command output, with pass and fail
+   `cargo test --locked`, `cargo deny check licenses` and regeneration of all
+   Node fixtures with a clean diff (`pnpm rust:gate`). Source: the command output, with pass and fail
    counts, recorded in the release milestone. A check that cannot run is
    listed there as not run, never as passed.
 2. Replaced services: image ids equal the recorded ones, running, healthy;

@@ -28,6 +28,13 @@ progress summary in their language, in the app or by an expiring link
 organization policy and explicit grant restoration; see the
 [agent access spec](docs/spec/agent-access.md).
 
+**v0.2.19 (candidate) — access matrices and summary renders.** Workspace admins
+manage people, agents, tokens and apps at `/orgs/access`; system administrators
+inspect organization policy at `/admin/access`. Daily summaries include immutable
+text and PNG files, with three read-only MCP tools under `summaries:read`.
+The internal Rust renderer uses the same generated schema and bundled fonts;
+local Docker Compose builds it automatically (see `.env.example`).
+
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.
 
@@ -102,7 +109,7 @@ Keep the local URLs and ports unless you also update the corresponding service
 configuration. Never use the example secret values in production.
 
 ```sh
-docker compose up -d --wait
+docker compose up -d --build --wait
 # Once, on a fresh cluster, create the isolated test database:
 docker compose exec -T postgres psql -U taff -d taff -c 'CREATE DATABASE taff_test'
 pnpm db:migrate

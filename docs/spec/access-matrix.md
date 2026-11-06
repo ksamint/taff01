@@ -1,0 +1,94 @@
+# Spec: access matrix
+
+Living product specification for workspace and system access visibility (ADR 0028,
+release v0.2.19). Change this file with the behavior it describes.
+
+Status: v0.2.19 candidate; deployment acceptance pending.
+
+## Users and roles
+
+| Role | Can |
+| --- | --- |
+| Workspace administrator | Inspect people, agents, token grants, OAuth approvals and pending capability requests in their workspace |
+| System administrator | Inspect organization grant states across personal agent tokens |
+| Member, guest, outsider, agent | No access to either management matrix |
+
+A system administrator also has materialized administrator memberships; workspace
+reads use the same current membership checks as other administration operations.
+
+## Requirements
+
+### Workspace matrix (AM-1)
+
+- AM-1.1 When a current workspace administrator requests the matrix, the system
+  shall return people and their roles, agent profiles with effective capability
+  defaults, review policy and supervisor, and pending capability grants.
+- AM-1.2 The workspace matrix shall include personal tokens issued in or granted
+  to the target workspace, with grants restricted to that workspace, including
+  manual or policy origin, revocation time and revoking member identity.
+- AM-1.3 The workspace matrix shall include OAuth approvals bound to that
+  workspace and their application names.
+- AM-1.4 When an administrator loses workspace administration, subsequent matrix
+  requests shall be denied. Members, guests, outsiders and agent tokens shall
+  receive no management matrix.
+- AM-1.5 When an administrator explains a token granted from another workspace,
+  the system shall resolve the target grant member and its current effective
+  authority. A revoked grant shall have no active scopes.
+
+### System matrix (AM-2)
+
+- AM-2.1 When a current system administrator requests the matrix, the system shall
+  return organizations, including archive state, and personal tokens with their
+  materialized organization grants and policy.
+- AM-2.2 The system matrix shall exclude personal workspaces from organization
+  rows and grant cells. OAuth approvals shall not appear as organization tokens.
+- AM-2.3 When the caller loses system administration, subsequent system matrix
+  reads shall be denied even if workspace administrator memberships remain.
+
+### Permission publication (AM-3)
+
+- AM-3.1 Workspace matrix action rows and the published permission document shall
+  derive from the same runtime action registry and can() evaluations consumed
+  by the permission tests.
+- AM-3.2 The published baseline shall identify its resource assumptions. It shall
+  not claim to cover every owner, supervisor, lead, recipient or temporary grant
+  condition.
+- AM-3.3 When the permission document differs from generated rows, lint and its
+  document staleness test shall fail.
+
+## Non-functional
+
+- REST management routes require a signed-in human session. Authorization lives
+  in core and is checked on every read.
+- Matrices and permission explanations never expose token or refresh hashes,
+  refresh credentials or raw credentials.
+- The existing grant, membership and capability mutation operations remain the
+  authority for changes made from the matrix UI.
+
+## Out of scope
+
+- New permission tiers, implicit token access, public matrices and management
+  operations by agents.
+
+## Acceptance
+
+| Requirement | Evidence |
+| --- | --- |
+| AM-1, AM-2 | packages/core/src/access-matrix.integration.test.ts |
+| Human REST boundaries | apps/api/src/app.test.ts; packages/core/src/authorization.integration.test.ts |
+| AM-3.1–2 | packages/core/src/permissions.test.ts |
+| AM-3.3 | scripts/permissions-matrix.test.ts; lint --check command |
+| Web rendering and role/capability changes | e2e/access.spec.ts; implementation acceptance pending |
+
+## Open decisions
+
+None for read models. UI and render delivery acceptance remains pending until
+its release tests complete.
+
+## Sources
+
+- [Organization policy ADR](../adr/0028-organization-wide-agent-grants.md)
+- [Release plan](../agent-goal-access-matrix-and-renders.md)
+- [Agent access contract](agent-access.md)
+- [Generated permission baseline](permissions-matrix.md)
+- [Release closeout](../release-closeout.md)

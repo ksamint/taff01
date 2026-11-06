@@ -1,6 +1,6 @@
 # 0028 — Organization-wide agent token grants
 
-Date: 2026-11-05. Status: proposed (owner: "grant access to fenshen01 so
+Date: 2026-11-05. Status: accepted for implementation (owner: "grant access to fenshen01 so
 fenshen01 can access all org"). Follows ADR 0022/0023 (MCP OAuth and roles),
 the organization grant model of PR #81 (milestone 82 in that branch) and
 ADR 0026 constraint 3 (new backend logic stays in `packages/core` TypeScript).
