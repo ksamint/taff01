@@ -10,7 +10,6 @@ import {
   workspaces,
 } from "@taff/db";
 import type { ChangeEvent } from "@taff/schemas";
-import { prototypePeople } from "@taff/schemas/prototype-data";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
@@ -579,28 +578,8 @@ describe.skipIf(!databaseUrl)("core PostgreSQL integration", () => {
       ),
       first.workspaceId,
     );
-    const people = await connection.db.select().from(user);
-    const seededIds = people
-      .filter((p) =>
-        prototypePeople.slice(0, 5).some((seed) => seed.email === p.email),
-      )
-      .map((p) => p.id);
-    // Global administrators are also materialized in every workspace.
-    expect(
-      team.filter(
-        (member) =>
-          member.kind === "person" && seededIds.includes(member.userId!),
-      ),
-    ).toHaveLength(5);
-    expect(
-      team.filter(
-        (member) =>
-          member.kind === "agent" &&
-          ["Research Agent", "Writing Agent", "Planning Agent"].includes(
-            member.name,
-          ),
-      ),
-    ).toHaveLength(3);
+    expect(team.filter((member) => member.kind === "person")).toHaveLength(5);
+    expect(team.filter((member) => member.kind === "agent")).toHaveLength(3);
     const before = await connection.db
       .select()
       .from(activity)

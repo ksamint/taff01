@@ -13,10 +13,17 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (404 distinct, 2030 uses)
+## Test ids (409 distinct, 2044 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
+
+### access-matrix.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `access-forbidden` | 1 |  | access.spec.ts |
+| `access-grant-confirm` | 2 | crm/contact-links.tsx | access.spec.ts |
 
 ### agent-profile-view.tsx
 
@@ -31,7 +38,7 @@ several do). “Also rendered by” lists the other files.
 | `agent-settings-details` | 6 |  | agent-creation.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `agent-supervisor` | 4 |  | agent-creation.spec.ts, agent-review.spec.ts |
 | `grant-card` | 6 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `permission-web.search-*` | 7 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `permission-web.search-*` | 8 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx | access.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `permission-web.search-ask` | 4 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 
 ### ai-settings.tsx
@@ -149,7 +156,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `board-column-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `contact-search` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
-| `grant-confirm` | 3 | mcp-view.tsx | token-grants.spec.ts |
+| `grant-confirm` | 5 | mcp-view.tsx, token-policy-control.tsx | access.spec.ts, token-grants.spec.ts |
 | `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx, relations-view.tsx | me.spec.ts |
 | `open-search` | 3 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts |
 | `project-audience-option` | 1 | project-audience-tags.tsx | summaries.spec.ts |
@@ -166,7 +173,7 @@ several do). “Also rendered by” lists the other files.
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 35 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
+| `workspace-*` | 36 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | access.spec.ts, agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -265,9 +272,8 @@ several do). “Also rendered by” lists the other files.
 | `mcp-endpoint` | 4 |  | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `mcp-no-agents` | 1 |  | agent-creation.spec.ts |
 | `token-agent` | 4 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `token-card` | 9 |  | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, token-grants.spec.ts |
+| `token-card` | 10 |  | access.spec.ts, live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, token-grants.spec.ts |
 | `token-name` | 6 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `token-policy-switch` | 2 |  | token-grants.spec.ts |
 | `token-regenerate` | 2 |  | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `token-revoke` | 6 |  | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `token-submit` | 7 |  | agent-creation.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
@@ -403,6 +409,7 @@ several do). “Also rendered by” lists the other files.
 | `accept-invitation` | 5 |  | live/live.ts, planning.spec.ts |
 | `agent-create` | 6 |  | agent-creation.spec.ts, release/support.ts |
 | `agent-name` | 6 |  | agent-creation.spec.ts, release/support.ts |
+| `open-access-matrix` | 1 |  | access.spec.ts |
 | `open-summaries-admin` | 1 |  | summaries.spec.ts |
 | `team-add-agent` | 8 |  | agent-creation.spec.ts, release/support.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mjs, ui-v2.spec.ts |
@@ -585,6 +592,13 @@ several do). “Also rendered by” lists the other files.
 | `summary-view` | 1 |  | summaries.spec.ts |
 | `summary-watermark` | 3 |  | summaries.spec.ts |
 
+### summary-render-actions.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `summary-copy-text` | 1 |  | summaries.spec.ts |
+| `summary-save-image` | 1 |  | summaries.spec.ts |
+
 ### summary-share-panel.tsx
 
 | Test id | Uses | Also rendered by | Used in |
@@ -682,6 +696,12 @@ several do). “Also rendered by” lists the other files.
 | `today-heading` | 69 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
 
+### token-policy-control.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `token-policy-switch` | 5 |  | access.spec.ts, token-grants.spec.ts |
+
 ## Role and name locators
 
 `getByRole(role, { name })`. Native semantics the suites also rely on:
@@ -698,13 +718,21 @@ several do). “Also rendered by” lists the other files.
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
 | `button — name: locale === "en" ? m.en : locale === "zh-HK" ? m.me.languageHK : m.me.languageCN` | 1 | me.spec.ts |
+| `button — name: m.access.confirm` | 1 | access.spec.ts |
+| `button — name: m.access.explain` | 1 | access.spec.ts |
 | `button — name: m.actions.undo` | 6 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts |
-| `button — name: m.mcp.cancel` | 2 | token-grants.spec.ts |
+| `button — name: m.mcp.cancel` | 3 | access.spec.ts, token-grants.spec.ts |
+| `button — name: m.mcp.confirmRevoke` | 1 | access.spec.ts |
 | `button — name: m.mcp.copyConfig` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.mcp.dismiss` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `button — name: m.mcp.policy.restore` | 1 | access.spec.ts |
+| `button — name: m.mcp.revokeAccess` | 1 | access.spec.ts |
+| `button — name: m.mcp.revokeGrant` | 1 | access.spec.ts |
+| `button — name: m.mcp.saveGrant` | 1 | access.spec.ts |
+| `button — name: m.mcp.undo` | 2 | access.spec.ts |
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.invite` | 9 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `button — name: m.planning.close` | 6 | live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
+| `button — name: m.planning.close` | 7 | access.spec.ts, live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.projects.archive` | 1 | project-profile.spec.ts |
 | `button — name: m.run.cancel` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.sms.send` | 2 | sms-auth.spec.ts |
@@ -718,9 +746,12 @@ several do). “Also rendered by” lists the other files.
 | `button — name: messages[locale].signOut` | 1 | support/preferences.ts |
 | `button — name: messages[locale].taskDetail.back` | 1 | calendar.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
+| `checkbox — name: "summaries:read"` | 1 | access.spec.ts |
 | `combobox` | 1 | cold-font-layout.spec.ts |
 | `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
-| `dialog` | 67 | agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
+| `combobox — name: m.organization.roleFor.replace("{{name}}", "Access member")` | 1 | access.spec.ts |
+| `combobox — name: m.organization.roleFor.replace("{{name}}", admin.user.name)` | 1 | access.spec.ts |
+| `dialog` | 71 | access.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, calendar.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
@@ -737,6 +768,7 @@ several do). “Also rendered by” lists the other files.
 | `link` | 3 | agent-creation.spec.ts, calendar.spec.ts, ui-v2.spec.ts |
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
+| `link — name: agent.name` | 1 | access.spec.ts |
 | `link — name: childTitle` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `link — name: controlled.title` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `link — name: dragged.title` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -753,10 +785,19 @@ several do). “Also rendered by” lists the other files.
 | `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
+| `region — name: m.access.agents` | 1 | access.spec.ts |
+| `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
+| `row` | 3 | access.spec.ts |
+| `rowheader — name: client.client_name` | 1 | access.spec.ts |
+| `rowheader — name: token.name` | 2 | access.spec.ts |
 | `status` | 1 | sms-auth.spec.ts |
 | `switch` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `tab — name: m.access.agents` | 1 | access.spec.ts |
+| `tab — name: m.access.apps` | 1 | access.spec.ts |
+| `tab — name: m.access.people` | 2 | access.spec.ts |
+| `tab — name: m.access.tokens` | 1 | access.spec.ts |
 | `tabpanel` | 2 | brief.spec.ts, live/brief.spec.ts |
 
 ## Label locators
@@ -817,7 +858,7 @@ read (`data-event-id`, `data-date`).
 | `.loading` | 2 | ui-v2.spec.ts |
 | `.mcp-call` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-config` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `.mcp-form` | 1 | agent-creation.spec.ts |
+| `.mcp-form` | 3 | access.spec.ts, agent-creation.spec.ts |
 | `.mcp-scopes label.mcp-scope` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="active"]` | 6 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `.mcp-state[data-state="revoked"]` | 4 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -864,6 +905,7 @@ read (`data-event-id`, `data-date`).
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
+| `[data-agent-id="*"]` | 1 | access.spec.ts |
 | `[data-source]` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `[data-testid="contact-link"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="contact-row"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
@@ -877,7 +919,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="timeline-dependency"][data-from="*"][data-to="*"]` | 4 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-row"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-time-grid-date]` | 1 | calendar-accessibility.spec.ts |
-| `[data-workspace-id="*"]` | 3 | token-grants.spec.ts |
+| `[data-workspace-id="*"]` | 4 | access.spec.ts, token-grants.spec.ts |
 | `#add-agent-reason` | 1 | agent-creation.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#default-workspace` | 1 | organization-default.spec.ts |
@@ -917,6 +959,7 @@ read (`data-event-id`, `data-date`).
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |
 | `option[value="*"]` | 9 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, mcp-oauth.spec.ts, planning.spec.ts, project-profile.spec.ts, v021-feature-gaps.spec.ts |
+| `select[data-capability="web.search"]` | 1 | access.spec.ts |
 | `select[id="grant-expiry-*"]` | 1 | agent-review.spec.ts |
 
 ## Locale message lookups
@@ -927,6 +970,13 @@ Keys read from `apps/web/locales/*/common.json` through
 
 | Key | Uses | Used in |
 | --- | ---: | --- |
+| `access.agents` | 6 | access.spec.ts |
+| `access.apps` | 3 | access.spec.ts |
+| `access.confirm` | 3 | access.spec.ts |
+| `access.explain` | 3 | access.spec.ts |
+| `access.people` | 6 | access.spec.ts |
+| `access.selfDemotionHint` | 3 | access.spec.ts |
+| `access.tokens` | 3 | access.spec.ts |
 | `accountIdentifier` | 5 | sms-auth.spec.ts, username-auth.spec.ts |
 | `actions.undo` | 18 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
@@ -973,7 +1023,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.auth` | 6 | sms-auth.spec.ts, username-auth.spec.ts |
 | `errors.conflict` | 11 | calendar.spec.ts, planning.spec.ts |
 | `errors.email_verification_required` | 5 | planning.spec.ts |
-| `errors.forbidden` | 11 | agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
+| `errors.forbidden` | 14 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
 | `errors.internal_error` | 2 | calendar.spec.ts |
 | `errors.invalid_input` | 14 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
@@ -982,11 +1032,18 @@ Keys read from `apps/web/locales/*/common.json` through
 | `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |
 | `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
 | `loading` | 3 | i18n.spec.ts, ui-v2.spec.ts |
-| `mcp.cancel` | 2 | token-grants.spec.ts |
-| `mcp.grantActive` | 2 | token-grants.spec.ts |
-| `mcp.policy.manual` | 3 | token-grants.spec.ts |
+| `mcp.cancel` | 5 | access.spec.ts, token-grants.spec.ts |
+| `mcp.confirmRevoke` | 3 | access.spec.ts |
+| `mcp.grantActive` | 8 | access.spec.ts, token-grants.spec.ts |
+| `mcp.policy.manual` | 6 | access.spec.ts, token-grants.spec.ts |
 | `mcp.policy.policy` | 1 | token-grants.spec.ts |
-| `mcp.revoked` | 3 | token-grants.spec.ts |
+| `mcp.policy.restore` | 3 | access.spec.ts |
+| `mcp.revokeAccess` | 3 | access.spec.ts |
+| `mcp.revoked` | 12 | access.spec.ts, token-grants.spec.ts |
+| `mcp.revokeGrant` | 3 | access.spec.ts |
+| `mcp.saveGrant` | 3 | access.spec.ts |
+| `mcp.undo` | 6 | access.spec.ts |
+| `mcp.workspaceGrants` | 3 | access.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |
 | `me.languageCN` | 1 | me.spec.ts |
@@ -1025,8 +1082,9 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
 | `organization.emailDelivery.logged` | 5 | planning.spec.ts |
 | `organization.invite` | 25 | planning.spec.ts |
+| `organization.roleFor` | 6 | access.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
-| `planning.close` | 17 | me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
+| `planning.close` | 20 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
 | `projects.archive` | 2 | project-profile.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |
