@@ -101,9 +101,16 @@ describe("integration audit permission snapshots", () => {
     );
     expect(explanation).toMatchObject({
       active: true,
-      permissions: context.permissions,
       grants: context.grants,
     });
+    expect(explanation.permissions).toHaveLength(16);
+    expect(explanation.permissions).toEqual(
+      expect.arrayContaining([
+        { capability: "tasks.write", decision: "ask" },
+        { capability: "tasks.read", decision: "allow" },
+        { capability: "deploy.prod", decision: "deny" },
+      ]),
+    );
     expect(JSON.stringify(explanation)).not.toContain(grant.reason);
     expect(JSON.stringify(explanation)).not.toContain(permission.agentId);
     expect(JSON.stringify(explanation)).not.toContain(token.hash);

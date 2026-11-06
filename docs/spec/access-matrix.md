@@ -31,6 +31,10 @@ reads use the same current membership checks as other administration operations.
 - AM-1.4 When an administrator loses workspace administration, subsequent matrix
   requests shall be denied. Members, guests, outsiders and agent tokens shall
   receive no management matrix.
+- AM-1.6 Token explanations include every effective capability decision, merging
+  configured overrides with the same defaults used by `can()`. Revoked tokens
+  expose no effective permissions. Durable audit snapshots keep their original
+  explicit-row representation.
 - AM-1.5 When an administrator explains a token granted from another workspace,
   the system shall resolve the target grant member and its current effective
   authority. A revoked grant shall have no active scopes.
