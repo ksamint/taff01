@@ -3,7 +3,7 @@
 Living specification for Brief's deterministic question router (ADR 0016,
 frontend v2 M17). Change this file in the same commit as its behavior.
 
-Status: v0.2.20 candidate; workload database/browser acceptance pending.
+Status: v0.2.20 candidate; focused workload database and three-locale browser acceptance passed; final release gate pending.
 
 ## Users and roles
 
@@ -49,8 +49,8 @@ Status: v0.2.20 candidate; workload database/browser acceptance pending.
 | Requirement | Evidence |
 | --- | --- |
 | BR-1.1–1.4 | brief.test.ts; portable __fixtures__/ask-load.json; brief-model.test.ts; i18n.test.ts |
-| BR-1.2,1.5; authorization | assistant.integration.test.ts workload case (database run pending) |
-| Three-locale rendering | e2e/completion.spec.ts workload case (browser pending) |
+| BR-1.2,1.5; authorization | assistant.integration.test.ts; assistant/Brief focused set 73 tests passed against isolated PostgreSQL |
+| Three-locale rendering | e2e/completion.spec.ts workload case passed in en, zh-CN and zh-HK; milestone 100 |
 
 ## Open decisions
 

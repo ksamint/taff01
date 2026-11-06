@@ -2,6 +2,10 @@ import { expect, test } from "@playwright/test";
 import { freshAccount } from "./support/account";
 import { messages, type TestLocale } from "./support/messages";
 
+// These cases intercept consent/chunk requests; a production service worker
+// can serve a cached chunk without reaching page.route. PWA has its own cases.
+test.use({ serviceWorkers: "block" });
+
 test("no-agent OAuth guidance returns from organization management with the same request", async ({
   page,
 }, info) => {
