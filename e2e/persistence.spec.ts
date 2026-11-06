@@ -13,6 +13,15 @@ import { holdRequest } from "./support/routes";
 import { openQuickAdd } from "./support/tasks";
 
 test.use({ actionTimeout: 15000 });
+// Fulfilled local documents need Chrome's loopback permission before hydration.
+test.beforeEach(async ({ context }) => {
+  const origin = new URL(process.env.AUTH_URL!);
+  if (["localhost", "127.0.0.1", "[::1]"].includes(origin.hostname))
+    await context.grantPermissions(["local-network-access"], {
+      origin: origin.origin,
+    });
+});
+
 async function readCache(page: Page): Promise<ReadSnapshot | null> {
   return page.evaluate(async () => {
     if (

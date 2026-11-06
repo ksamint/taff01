@@ -911,6 +911,7 @@ read (`data-event-id`, `data-date`).
 | `dialog.task-detail-sheet .review-comments li` | 1 | planning.spec.ts |
 | `form input[autocomplete="username"]` | 1 | username-auth.spec.ts |
 | `head link[rel="preload"][as="font"][href="/fonts/NotoSansTC-ui-common.woff2"]` | 1 | i18n.spec.ts |
+| `head link[rel="preload"][href="/api/me"]` | 1 | ssr-session.spec.ts |
 | `main.content` | 14 | live/platform.spec.ts, scripts/ui/a11y-audit.mjs, scripts/ui/app-shots.mjs, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 | `main.loading` | 2 | i18n.spec.ts |
 | `meta[name="robots"]` | 1 | summaries.spec.ts |

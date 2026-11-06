@@ -73,6 +73,10 @@ Status: v0.2.18 candidate; production acceptance pending.
 - AA-5.3 Authority tests shall exercise issue, extend, restore, list and revoke
   at the lowest reachable role and after that role loses authority.
 
+- AA-5.4 When identity is retried or a workspace live connection opens, the
+  browser shall read current session authority without reusing a speculative
+  preload's earlier role or error response.
+
 ## Non-functional
 
 - Mutations use one transaction, actor audit and PostgreSQL change notification.

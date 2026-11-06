@@ -85,18 +85,7 @@ export default async function RootLayout({
             fetchPriority="low"
           />
         )}
-        {/* Browser confirmation gates protected reads and writes; it starts
-            with the HTML instead of after the JavaScript has run. Only for a
-            session the server already saw: a preloaded 401 would otherwise be
-            reused by the first read after signing in. */}
-        {initialMe && (
-          <link
-            rel="preload"
-            href="/api/me"
-            as="fetch"
-            crossOrigin="anonymous"
-          />
-        )}
+        {/* Confirmation must read current authority; fetch preloads can reuse errors or stale roles. */}
       </head>
       <body suppressHydrationWarning>
         <script
