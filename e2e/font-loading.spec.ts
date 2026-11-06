@@ -62,7 +62,7 @@ test("English Relations loads its arrow without the remaining CJK font", async (
   );
   await expect(page.getByTestId("relations-node").first()).toBeVisible();
   await prepareView(page, "relations");
-  await page.evaluate(prepareFonts);
+  await page.evaluate(prepareFonts, undefined);
   const resources = await page.evaluate(() => ({
     text: document.body.innerText,
     fonts: performance
@@ -130,7 +130,7 @@ test("Northwind English Relations downloads bounded CJK pages for its real busin
   );
   await expect(page.getByTestId("relations-node").first()).toBeVisible();
   await prepareView(page, "relations");
-  await page.evaluate(prepareFonts);
+  await page.evaluate(prepareFonts, undefined);
   const resources = await page.evaluate(() => ({
     text: document.body.innerText,
     fonts: [

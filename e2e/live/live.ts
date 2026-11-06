@@ -4,18 +4,25 @@ import { basename, join } from "node:path";
 import { promisify } from "node:util";
 import {
   type APIRequestContext,
+  type APIResponse,
   type Browser,
   type BrowserContext,
   test as base,
   expect,
   type Page,
+  type Response,
   type TestInfo,
 } from "@playwright/test";
+import type { TestError } from "@playwright/test/reporter";
 import {
+  type AgentProfile,
   agentProfileSchema,
   grantSchema,
+  type Me,
   memberListSchema,
   meSchema,
+  type Run,
+  type Task,
 } from "../../packages/schemas/src/index";
 import { notificationPreferencesSchema } from "../../packages/schemas/src/notification-preferences";
 import { messages } from "../support/messages";
@@ -56,8 +63,8 @@ type State = {
   pageErrors: number;
   httpFailures: { method: string; path: string; status: number }[];
   workspaceId?: string;
-  profiles: Map<string, any>;
-  preferences?: any;
+  profiles: Map<string, AgentProfile>;
+  preferences?: ReturnType<typeof notificationPreferencesSchema.parse>;
   primaryProfile?: { locale: string; tz: string };
   themes: Map<Page, string | null>;
 };
@@ -103,16 +110,24 @@ export function credentialAccount() {
 }
 let cleanupStep = "cleanup.begin";
 class SafeApiFailure extends Error {
+  readonly step: string;
+  readonly httpStatus: number | undefined;
+  readonly errorCode: string;
+  readonly location: string;
   constructor(
-    readonly step: string,
-    readonly httpStatus: number | undefined,
-    readonly errorCode: string,
-    readonly location = "e2e/live.ts#checked",
+    step: string,
+    httpStatus: number | undefined,
+    errorCode: string,
+    location = "e2e/live.ts#checked",
   ) {
     super("API operation failed; sanitized diagnostic only");
+    this.step = step;
+    this.httpStatus = httpStatus;
+    this.errorCode = errorCode;
+    this.location = location;
   }
 }
-async function checked(response: any, label: string) {
+async function checked(response: APIResponse, label: string) {
   cleanupStep = label;
   if (!response.ok()) {
     let code = "api_error";
@@ -157,7 +172,7 @@ async function setupNavigation(page: Page, path: "/" | "/orgs") {
   });
 }
 
-async function captureProfileAndTheme(page: Page, me?: any) {
+async function captureProfileAndTheme(page: Page, me?: Me) {
   if (!state) return;
   const identity =
     me ??
@@ -177,7 +192,7 @@ async function captureProfileAndTheme(page: Page, me?: any) {
 }
 // Idempotent cleanup reads only: retry a dropped connection or a gateway
 // 502/503/504 twice with a short backoff. Writes never retry.
-async function getWithRetry(request: any, url: string) {
+async function getWithRetry(request: APIRequestContext, url: string) {
   for (let attempt = 1; ; attempt++) {
     try {
       const response = await request.get(url);
@@ -192,7 +207,10 @@ async function getWithRetry(request: any, url: string) {
     }
   }
 }
-async function cleanupHttp(step: string, operation: () => Promise<any>) {
+async function cleanupHttp(
+  step: string,
+  operation: () => Promise<APIResponse>,
+) {
   cleanupStep = step;
   try {
     return await checked(await operation(), step);
@@ -302,7 +320,11 @@ export async function verificationAgent(page: Page, workspaceId: string) {
     );
   return agent;
 }
-async function captureResponse(method: string, url: string, response: any) {
+async function captureResponse(
+  method: string,
+  url: string,
+  response: Pick<APIResponse | Response, "status" | "json">,
+) {
   if (!state || method !== "POST" || response.status() !== 201) return;
   const path = new URL(url, origin).pathname;
   let kind: string | undefined;
@@ -330,7 +352,12 @@ async function captureResponse(method: string, url: string, response: any) {
   else if (/^\/api\/mind\/nodes\/[^/]+\/task$/.test(path))
     kind = "mind-validation-task";
   if (!kind) return;
-  let value: any;
+  let value: {
+    id?: string;
+    workspaceId?: string;
+    taskId?: string;
+    task?: { id?: string; workspaceId?: string };
+  };
   try {
     value = await response.json();
   } catch {
@@ -360,9 +387,9 @@ async function captureResponse(method: string, url: string, response: any) {
 function instrument(context: BrowserContext) {
   context.on("page", watchPage);
   for (const page of context.pages()) watchPage(page);
-  const request = context.request as any;
+  const request = context.request;
   const post = request.post.bind(request);
-  request.post = async (url: string, options: any) => {
+  request.post = async (url, options) => {
     const response = await post(url, options);
     await captureResponse("POST", url, response);
     return response;
@@ -414,7 +441,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
           });
   }
 
-  const notes: any[] = [];
+  const notes: unknown[] = [];
   let failed = 0;
   const perform = async (kind: string, id: string, fn: () => Promise<void>) => {
     cleanupStep = `${kind}.begin`;
@@ -573,7 +600,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
         request.get(`/api/runs?workspaceId=${current.workspaceId}`),
       );
       for (const run of runs.filter(
-        (item: any) =>
+        (item: Pick<Run, "taskId" | "status">) =>
           item.taskId === task.id &&
           ["running", "paused", "needs_review", "changes_requested"].includes(
             item.status,
@@ -649,7 +676,11 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
               `/api/tasks?workspaceId=${current.workspaceId}&parentId=${e.id}`,
             ),
         );
-        if (remainingChildren.some((child: any) => child.status !== "done"))
+        if (
+          remainingChildren.some(
+            (child: Pick<Task, "status">) => child.status !== "done",
+          )
+        )
           throw new SafeApiFailure(
             "task.confirm-descendants-done",
             undefined,
@@ -687,7 +718,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
           : e.kind === "mind-nodes"
             ? map.nodes
             : map.sources;
-      const item = list.find((row: any) => row.id === e.id);
+      const item = list.find((row: { id: string }) => row.id === e.id);
       if (e.kind === "mind-edges") {
         if (!item) {
           notes.push({
@@ -749,7 +780,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
       const list = await cleanupHttp("milestone.list-current-project", () =>
         request.get(`/api/projects/${e.projectId}/milestones`),
       );
-      const item = list.find((row: any) => row.id === e.id);
+      const item = list.find((row: { id: string }) => row.id === e.id);
       if (!item) {
         notes.push({ kind: e.kind, id: e.id, status: "not-active-retained" });
         return;
@@ -791,7 +822,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
         );
         const item =
           kind === "projects"
-            ? data.find((x: any) => x.id === e.id)
+            ? data.find((x: { id: string }) => x.id === e.id)
             : kind === "contacts"
               ? (data.contact ?? data)
               : (data.company ?? data);
@@ -820,7 +851,7 @@ async function cleanUp(request: APIRequestContext, info: TestInfo) {
       continue;
     }
     const invite = (await response.json()).find(
-      (item: any) => item.id === e.id,
+      (item: { id: string }) => item.id === e.id,
     );
     if (invite?.status === "accepted") {
       e.retained = true;
@@ -1058,7 +1089,7 @@ export async function inviteRecipient(
       ],
       { env: proofEnvironment, maxBuffer: 8192, timeout: 30000 },
     );
-    let proof: any;
+    let proof: { ok?: unknown; token?: unknown };
     try {
       proof = JSON.parse(result.stdout);
     } catch {
@@ -1156,7 +1187,9 @@ export const test = base.extend<{ liveSafety: void }>({
       instrument(context);
       watchPage(page);
       const original = browser.newContext.bind(browser);
-      (browser as any).newContext = async (...args: any[]) => {
+      browser.newContext = async (
+        ...args: Parameters<Browser["newContext"]>
+      ) => {
         const next = await original(...args);
         instrument(next);
         return next;
@@ -1170,7 +1203,7 @@ export const test = base.extend<{ liveSafety: void }>({
           // Playwright 1.64 otherwise writes error-context.md containing live DOM/tokens.
           // Preserve error count/status while dropping all raw diagnostic payloads.
           for (const rawError of info.errors) {
-            const error = rawError as any;
+            const error: TestError & { errorContext?: unknown } = rawError;
             if (!error.location) {
               const frames = String(error.stack ?? "")
                 .split("\n")
@@ -1203,9 +1236,9 @@ export const test = base.extend<{ liveSafety: void }>({
             delete error.value;
             delete error.snippet;
             delete error.cause;
-            delete (error as any).errorContext;
+            delete error.errorContext;
           }
-          (browser as any).newContext = original;
+          browser.newContext = original;
           state = undefined;
         }
       }

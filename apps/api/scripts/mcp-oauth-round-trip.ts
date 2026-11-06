@@ -42,7 +42,10 @@ class MemoryProvider implements OAuthClientProvider {
   saved?: OAuthTokens;
   verifier = "";
   authorizationUrl?: URL;
-  constructor(private trustResource: boolean) {}
+  private trustResource: boolean;
+  constructor(trustResource: boolean) {
+    this.trustResource = trustResource;
+  }
   get redirectUrl() {
     return REDIRECT;
   }

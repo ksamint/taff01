@@ -11,7 +11,7 @@
     "dev": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/dev.ts",
     "build": "node --env-file=.env node_modules/turbo/bin/turbo build",
     "lint": "biome check . && node node_modules/tsx/dist/cli.mjs scripts/permissions-matrix.mts --check",
-    "typecheck": "turbo typecheck",
+    "typecheck": "turbo typecheck && tsc -p tsconfig.scripts.json",
     "test": "node --env-file-if-exists=.env node_modules/vitest/vitest.mjs run",
     "db:generate": "pnpm --filter @taff/db generate",
     "db:migrate": "node --env-file=.env node_modules/tsx/dist/cli.mjs packages/core/src/migrate.ts",

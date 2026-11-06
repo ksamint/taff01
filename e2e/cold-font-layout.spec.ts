@@ -56,7 +56,7 @@ test("cold navigation drains held fonts and preserves caller routes on success a
             "intentional readiness failure",
           );
         else expect((await navigation)?.status()).toBe(200);
-        await page.evaluate(prepareFonts);
+        await page.evaluate(prepareFonts, undefined);
         expect(requests).toBeGreaterThan(before);
         expect(
           await page.evaluate(() =>

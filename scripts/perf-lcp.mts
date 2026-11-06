@@ -28,9 +28,11 @@ const email =
   route === "today"
     ? (process.env.DEMO_EMAIL ?? "alex@taff.local")
     : `lcp-${randomUUID()}@example.test`;
-const password = route === "today" ? process.env.DEMO_PASSWORD : randomUUID();
+const suppliedPassword =
+  route === "today" ? process.env.DEMO_PASSWORD : randomUUID();
 let accountReady = route === "today";
-if (!password) throw new Error("DEMO_PASSWORD is required");
+if (!suppliedPassword) throw new Error("DEMO_PASSWORD is required");
+const password = suppliedPassword;
 const executablePath = process.env.CHROMIUM_PATH;
 const locale = process.env.LCP_LOCALE ?? "en";
 if (!Number.isInteger(runs) || runs < 1)
@@ -184,7 +186,7 @@ async function measure(): Promise<number> {
     }[] = [];
     if (process.env.LCP_TRACE) {
       cdp.on("Tracing.dataCollected", (event) => {
-        traceEvents.push(...(event as { value: typeof traceEvents }).value);
+        traceEvents.push(...(event.value as unknown as typeof traceEvents));
       });
       await cdp.send("Tracing.start", {
         categories: "devtools.timeline,blink.user_timing",

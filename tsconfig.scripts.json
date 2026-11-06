@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
+    "types": ["node"]
+  },
+  "include": [
+    "scripts/**/*.ts",
+    "scripts/**/*.mts",
+    "e2e/**/*.ts",
+    "e2e/**/*.mts",
+    "playwright*.config.ts",
+    "vitest.config.mts"
+  ]
+}

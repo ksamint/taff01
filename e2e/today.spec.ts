@@ -1,5 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
-import type { Me, Task } from "@taff/schemas";
+import type { Me, Task } from "../packages/schemas/src/index";
 import { freshAccount, messages } from "./support/account";
 import { selectLocale, signOutFromMe } from "./support/preferences";
 import { closeTaskField, openTaskField } from "./support/task-fields";

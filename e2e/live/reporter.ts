@@ -4,14 +4,15 @@ import type {
   FullConfig,
   FullResult,
   Reporter,
+  Suite,
   TestCase,
   TestError,
   TestResult,
 } from "@playwright/test/reporter";
 export default class SafeReporter implements Reporter {
-  rows: any[] = [];
+  rows: unknown[] = [];
   started = new Date().toISOString();
-  onBegin(config: FullConfig, suite: any) {
+  onBegin(config: FullConfig, suite: Suite) {
     console.log(
       JSON.stringify({
         discovered: suite.allTests().length,
@@ -20,7 +21,7 @@ export default class SafeReporter implements Reporter {
       }),
     );
   }
-  safeLocation(location: any) {
+  safeLocation(location: TestError["location"]) {
     return location &&
       typeof location.file === "string" &&
       Number.isSafeInteger(location.line) &&

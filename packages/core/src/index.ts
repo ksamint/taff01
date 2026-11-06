@@ -117,17 +117,18 @@ import {
 import { createWorkspaceLifecycle } from "./workspace-lifecycle";
 
 export class CoreError extends Error {
-  constructor(
-    public code:
-      | "unauthorized"
-      | "forbidden"
-      | "not_found"
-      | "invalid_input"
-      | "conflict"
-      | "email_verification_required",
-    public status: number,
-  ) {
+  code:
+    | "unauthorized"
+    | "forbidden"
+    | "not_found"
+    | "invalid_input"
+    | "conflict"
+    | "email_verification_required";
+  status: number;
+  constructor(code: CoreError["code"], status: number) {
     super(code);
+    this.code = code;
+    this.status = status;
   }
 }
 function parse<T>(validate: { parse(input: unknown): T }, input: unknown): T {

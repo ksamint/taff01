@@ -421,5 +421,11 @@ test("calendar loads its Temporal fallback when the browser has no native implem
   await expect(page.getByTestId("calendar-scene")).toBeVisible();
   await expect(page.locator(".sx__calendar")).toBeVisible();
   await expect(page.getByTestId("calendar-previous")).toBeEnabled();
-  expect(await page.evaluate(() => typeof globalThis.Temporal)).toBe("object");
+  expect(
+    await page.evaluate(
+      () =>
+        typeof (globalThis as typeof globalThis & { Temporal?: unknown })
+          .Temporal,
+    ),
+  ).toBe("object");
 });

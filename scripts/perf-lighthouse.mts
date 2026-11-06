@@ -7,7 +7,7 @@ import { createRequire } from "node:module";
 import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { chromium } from "@playwright/test";
+import { type APIResponse, chromium } from "@playwright/test";
 import lighthouse, { type Puppeteer } from "lighthouse";
 import { lighthouseReport } from "./lighthouse-report";
 import {
@@ -131,7 +131,7 @@ try {
   );
   for (const locale of locales) {
     phase = `${locale} profile and warm-up`;
-    const changed = await context.request.patch(
+    const changed: APIResponse = await context.request.patch(
       `${origin.origin}/api/profile`,
       {
         headers: { Origin: origin.origin },

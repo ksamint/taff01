@@ -46,12 +46,12 @@ test("capture fonts keep late text and punctuation stable across load orders", a
         await page.setContent(
           `<html lang="${locale}"><head><base href="https://font.test/"><style>${css}body{margin:20px;font-family:var(--font-sans)}p{width:350px;font-size:14px;line-height:1.6;text-wrap:pretty}</style></head><body><p id="paragraph">${late ? "載入中" : text}</p></body></html>`,
         );
-        await page.evaluate(prepareFonts);
+        await page.evaluate(prepareFonts, undefined);
         if (late)
           await page.locator("#paragraph").evaluate((el, value) => {
             el.textContent = value;
           }, text);
-        await page.evaluate(prepareFonts);
+        await page.evaluate(prepareFonts, undefined);
         const measure = () =>
           page.locator("#paragraph").evaluate((element) => {
             const node = element.firstChild!;
@@ -68,7 +68,7 @@ test("capture fonts keep late text and punctuation stable across load orders", a
         expect(geometry).toEqual(canonical);
         const faceCount = await page.evaluate(() => document.fonts.size);
         for (let repeat = 0; repeat < 2; repeat++) {
-          await page.evaluate(prepareFonts);
+          await page.evaluate(prepareFonts, undefined);
           expect(await page.evaluate(() => document.fonts.size)).toBe(
             faceCount,
           );

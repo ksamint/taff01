@@ -1,8 +1,6 @@
-import { eq, sql } from "drizzle-orm";
 import { createSummaryProcessor } from "../../apps/worker/src/summaries.ts";
 import { createCore } from "../../packages/core/src/index.ts";
 import { connectDatabase } from "../../packages/db/src/index.ts";
-import { audienceRecipients } from "../../packages/db/src/schema.ts";
 
 // Bounded trusted fixture (ADR 0027): make one recipient due now and run the
 // real daily job, exactly as the worker's minute scan would.

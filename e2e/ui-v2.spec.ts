@@ -45,7 +45,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
     });
     expect(loaded?.status()).toBe(200);
-    await page.evaluate(prepareFonts);
+    await page.evaluate(prepareFonts, undefined);
     await expect(page).toHaveScreenshot("home.png", { animations: "disabled" });
     return;
   }
@@ -173,7 +173,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
   );
   expect(loaded?.status()).toBe(200);
-  await page.evaluate(prepareFonts);
+  await page.evaluate(prepareFonts, undefined);
   await expect(page.locator("main.content")).toBeVisible();
   await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
   // One count everywhere (ADR 0014): unresolved reviews and blockers.
@@ -412,7 +412,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       }
       await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       await prepareView(page, screen);
-      await page.evaluate(prepareFonts, "loaded");
+      await page.evaluate(prepareFonts, "loaded" as const);
       if (desktop && (screen === "projects" || screen === "type"))
         await assertDesktopBoardActions();
       await page.mouse.move(0, 0);
@@ -524,7 +524,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   }
   // Workspace text can appear after the first font preparation. Prepare only
   // its now-selected faces so optional display cannot leave a fallback title.
-  await page.evaluate(prepareFonts, "loaded");
+  await page.evaluate(prepareFonts, "loaded" as const);
   await expect(shell).toHaveScreenshot(desktop ? "sidebar.png" : "tabbar.png", {
     animations: "disabled",
   });

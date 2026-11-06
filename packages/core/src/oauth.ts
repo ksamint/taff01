@@ -47,19 +47,21 @@ const DEFAULT_SCOPES: Scope[] = ["tasks:read", "tasks:write"];
 
 /** An RFC 6749 §5.2 error for the token, registration and revocation endpoints. */
 export class OAuthError extends Error {
-  constructor(
-    public error:
-      | "invalid_request"
-      | "invalid_client"
-      | "invalid_grant"
-      | "unsupported_grant_type"
-      | "invalid_client_metadata"
-      | "invalid_redirect_uri"
-      | "invalid_target",
-    public description: string,
-    public status = 400,
-  ) {
+  error:
+    | "invalid_request"
+    | "invalid_client"
+    | "invalid_grant"
+    | "unsupported_grant_type"
+    | "invalid_client_metadata"
+    | "invalid_redirect_uri"
+    | "invalid_target";
+  description: string;
+  status: number;
+  constructor(error: OAuthError["error"], description: string, status = 400) {
     super(error);
+    this.error = error;
+    this.description = description;
+    this.status = status;
   }
 }
 
