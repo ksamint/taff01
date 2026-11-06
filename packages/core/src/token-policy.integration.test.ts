@@ -8,7 +8,7 @@ import {
   user,
   workspaces,
 } from "@taff/db";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
 import { createCore, type Principal, userPrincipal } from "./index";
@@ -37,6 +37,8 @@ describe.skipIf(!url)("organization token access matrix", () => {
     guestId: string,
     tokenId: string,
     version: number;
+  const twinName = `Twin policy test ${randomUUID()}`;
+  const ownedWorkspaces: string[] = [];
   beforeAll(async () => {
     await migrateDatabase(url!);
     async function signup(name: string) {
@@ -52,6 +54,7 @@ describe.skipIf(!url)("organization token access matrix", () => {
     sysId = await signup("Policy system");
     ownerId = await signup("Policy owner");
     guestId = await signup("Policy guest");
+    ownedWorkspaces.push(...(await c!.db.select({id:workspaces.id}).from(workspaces).where(inArray(workspaces.personalOwnerId,[sysId,ownerId,guestId]))).map(w=>w.id));
     system = userPrincipal(sysId);
     owner = userPrincipal(ownerId);
     guest = userPrincipal(guestId);
@@ -66,8 +69,9 @@ describe.skipIf(!url)("organization token access matrix", () => {
     org = (
       await core!.createWorkspace(owner, { name: `Policy org ${randomUUID()}` })
     ).id;
+    ownedWorkspaces.push(org);
     const twin = await core!.createWorkspaceAgent(owner, personal, {
-      name: "Twin policy test",
+      name: twinName,
       kind: "agent",
     });
     const issued = await core!.createAgentToken(owner, {
@@ -91,19 +95,15 @@ describe.skipIf(!url)("organization token access matrix", () => {
     });
   });
   afterAll(async () => {
-    if (c && sysId)
-      await c.db.transaction(async (tx) => {
-        await tx.execute(sql`select set_config('taff.actor_id',${sysId},true)`);
-        if (tokenId)
-          await tx
-            .update(agentTokens)
-            .set({ revokedAt: new Date() })
-            .where(eq(agentTokens.id, tokenId));
-        await tx
-          .update(user)
-          .set({ systemAdmin: false })
-          .where(eq(user.id, sysId));
-      });
+    if (c && sysId) await c.db.transaction(async tx => {
+      await tx.execute(sql`select set_config('taff.actor_id','system:test-cleanup',true)`);
+      if (tokenId) await tx.delete(agentTokens).where(eq(agentTokens.id,tokenId));
+      await tx.delete(members).where(and(eq(members.kind,"agent"),eq(members.name,twinName)));
+      const userIds = [sysId,ownerId,guestId].filter(Boolean);
+      await tx.update(user).set({systemAdmin:false}).where(inArray(user.id,userIds));
+      await tx.delete(user).where(inArray(user.id,userIds));
+      if (ownedWorkspaces.length) await tx.delete(workspaces).where(inArray(workspaces.id,ownedWorkspaces));
+    });
     await core?.close();
     await c?.close();
   });
@@ -154,6 +154,7 @@ describe.skipIf(!url)("organization token access matrix", () => {
     const next = await core!.createWorkspace(owner, {
       name: `Future policy org ${randomUUID()}`,
     });
+    ownedWorkspaces.push(next.id);
     expect(
       (await core!.resolveAgentWorkspace(agent, next.id)).workspaceId,
     ).toBe(next.id);
