@@ -1,7 +1,10 @@
 # Changelog
 
-## v0.2.20 — candidate hardening
+## v0.2.20 — candidate typed tooling and hardening
 
+- Owned scripts run as strictly checked native TypeScript; the service worker is generated from a separately checked source before web dev/build. PostCSS remains the documented JavaScript configuration exception.
+- OAuth setup links to organization management and returns with its original request; desktop Me panels show localized loading feedback.
+- Brief workload questions rank current unfinished task ownership counts in all three locales, with source IDs/numbers and current workspace-read authority.
 - Reused OAuth codes require the original client and PKCE proof before revocation; replayed refresh credentials end the affected access/refresh family.
 - Current supervision and agent permissions remain stable through authorized writes; workspace discovery queries only token-bound candidates.
 - Runtime recovery adds bounded shutdown, 20-second SQL statement defaults, persisted noeviction Valkey configuration and tracked dependency fixes. Production activation is pending.
