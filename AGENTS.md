@@ -4,8 +4,7 @@ Read `instruction_v0.md` before changing this repository. It contains the origin
 product, architecture, stack, security, performance, and checkpoint requirements.
 The final line is the original repository creation request, not a recurring action.
 
-Use the lean-delivery skill for every task. Use orchestrate-development only for
-multi-day features.
+Use orchestrate-development only for multi-day features.
 
 At the start of local Codex work on the M1 Pro, run
 `python3 /Users/gf-m1pro/.codex/skills/op-automation/scripts/check_access.py`.
