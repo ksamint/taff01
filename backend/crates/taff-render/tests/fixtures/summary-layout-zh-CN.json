@@ -4,9 +4,10 @@
     "locale": "zh-CN",
     "header": {
       "title": "每日进度",
-      "audience": "股东 · Harbour Capital",
+      "audience": "股东 · Harbour Capital · Series A",
       "workspace": "Northwind",
-      "date": "2026-10-08"
+      "recipient": "致 Pat Lee",
+      "date": "2026年10月8日星期四"
     },
     "kpis": [
       {
@@ -54,6 +55,7 @@
     ],
     "projects": [
       {
+        "projectId": "5b9b4d46-0000-4000-8000-00005b9b4d46",
         "name": "Checkout v2",
         "stage": "服务中",
         "risk": {
@@ -83,6 +85,7 @@
             "count": "1",
             "items": [
               {
+                "taskId": "89f9304f-0000-4000-8000-000089f9304f",
                 "number": "#135",
                 "title": "Task NW-135",
                 "detail": "Mia Wong · 2026年10月6日 到期",
@@ -97,12 +100,14 @@
             "count": "2",
             "items": [
               {
+                "taskId": "89f93053-0000-4000-8000-000089f93053",
                 "number": "#139",
                 "title": "Task NW-139",
                 "detail": "Mia Wong · 2026年10月10日 到期",
                 "overdue": false
               },
               {
+                "taskId": "89f9306a-0000-4000-8000-000089f9306a",
                 "number": "#141",
                 "title": "Task NW-141",
                 "detail": "Mia Wong · 2026年10月8日 到期",
@@ -117,12 +122,14 @@
             "count": "2",
             "items": [
               {
+                "taskId": "89f9306a-0000-4000-8000-000089f9306a",
                 "number": "#141",
                 "title": "Task NW-141",
                 "detail": "Mia Wong · 2026年10月8日 到期",
                 "overdue": false
               },
               {
+                "taskId": "89f9306b-0000-4000-8000-000089f9306b",
                 "number": "#142",
                 "title": "Task NW-142",
                 "detail": "Mia Wong · 2026年10月8日 到期",
@@ -137,6 +144,7 @@
             "count": "1",
             "items": [
               {
+                "taskId": "89f9306d-0000-4000-8000-000089f9306d",
                 "number": "#144",
                 "title": "Task NW-144",
                 "detail": "Mia Wong · 2026年10月9日 到期",
@@ -149,7 +157,9 @@
       }
     ],
     "moreProjects": null,
+    "empty": null,
     "footer": {
+      "confidential": "机密文件,致 Pat Lee。",
       "generated": "生成于 2026年10月8日 20:00 · Asia/Hong_Kong",
       "watermark": "Pat Lee · Harbour Capital · 2026-10-08 · preview",
       "hashLabel": "哈希",

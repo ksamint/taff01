@@ -1,6 +1,7 @@
 import type {
   DailySummarySnapshot,
   SummaryLayout,
+  SummaryTranslate,
   SummaryWatermark,
 } from "@taff/schemas";
 import {
@@ -9,10 +10,7 @@ import {
   type SummaryLocale,
 } from "./summary-layout";
 
-export type SummaryTranslate = (
-  key: string,
-  values?: Record<string, string | number>,
-) => string;
+export type { SummaryTranslate } from "@taff/schemas";
 export const SUMMARY_TEXT_LIMIT = 4000;
 export const SUMMARY_TEXT_VERSION = "text-2";
 const COLUMNS = 72;
@@ -73,10 +71,12 @@ export function renderSummaryLayoutText(layout: SummaryLayout): string {
   const join = cjk ? "、" : ", ";
   const lines: string[] = [
     ...joinTokens([layout.header.title, layout.header.audience]),
-    ...joinTokens([layout.header.workspace, layout.header.date]),
+    ...joinTokens([layout.header.workspace, layout.header.recipient]),
+    ...joinTokens([layout.header.date]),
     RULE,
     ...joinTokens(layout.kpis.map((kpi) => `${kpi.label} ${kpi.value}`)),
   ];
+  if (layout.empty) lines.push("", ...joinTokens([layout.empty]));
   for (const project of layout.projects) {
     lines.push("");
     const name = cjk ? `【${project.name}】` : `▌${project.name}`;
@@ -106,7 +106,10 @@ export function renderSummaryLayoutText(layout: SummaryLayout): string {
   lines.push(
     "",
     RULE,
-    ...wrapSummaryLine(layout.footer.generated).split("\n"),
+    ...(layout.footer.generated
+      ? wrapSummaryLine(layout.footer.generated).split("\n")
+      : []),
+    ...wrapSummaryLine(layout.footer.confidential).split("\n"),
     ...wrapSummaryLine(layout.footer.watermark).split("\n"),
     `${layout.footer.hashLabel} ${layout.footer.hashFull}`,
   );

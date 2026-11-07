@@ -63,8 +63,15 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 - TT-6.1 Tracked source files shall be TypeScript or Rust (ADR 0030). No
   owned JavaScript shall be committed, including configuration; build output
   stays git-ignored.
-- TT-6.2 The remaining Python files shall be only those listed in ADR 0030,
-  each removed from the policy test's allow-list in the commit that ports it.
+- TT-6.2 The only remaining Python file shall be `scripts/ui/subset-fonts.py`
+  (ADR 0030 port status); it leaves the policy test's allow-list in the commit
+  that ports it.
+- TT-6.3 The neighbour check, the live e-mail proof bridge and the audit-pack
+  checker shall run as TypeScript: `scripts/deploy/neighbor-preservation.mts`
+  (same report and exit code as before), `e2e/live/email-proof.mts` (called in
+  process; same remote command; stdout never logged) and
+  `scripts/audit-contract.test.ts` (references read from the audit's pinned
+  source commit).
 
 ## Non-functional
 
@@ -87,7 +94,8 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-4 | Native before/after capture PNG hashes; capture-runtime, capture-selection and visual-clock tests |
 | TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; same headers passed on native deployment; milestones 100 and [104](../milestones/104-v0.2.20.md) |
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
-| TT-6 | scripts/language-policy.test.ts |
+| TT-6.1, TT-6.2 | scripts/language-policy.test.ts |
+| TT-6.3 | scripts/neighbor-preservation.test.ts (10, incl. CLI exit code; 6,000-case differential run in [milestone 107](../milestones/107-report-web-and-ports.md)); scripts/live-email-proof.test.ts (4); scripts/audit-contract.test.ts (5) |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions

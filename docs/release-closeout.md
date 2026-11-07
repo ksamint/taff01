@@ -10,7 +10,7 @@ source as a process gap in the milestone and fix the capture step below.
 
 | Evidence | When | Source |
 | --- | --- | --- |
-| Pre-deploy snapshot of every container: id, image, created, startedAt, health | Under the lock, before backups | Docker inspect, sanitized for `scripts/deploy/neighbor_preservation.py` |
+| Pre-deploy snapshot of every container: id, image, created, startedAt, health | Under the lock, before backups | Docker inspect, sanitized for `scripts/deploy/neighbor-preservation.mts` |
 | Exclusive database dump and env backup, mode 0600 | Before migration | Deployment log |
 | Migrator exit code and migration journal | Migration | Deployment log |
 | Replaced api/web/worker/render: container id, image id, startedAt, restartCount | Right after replacement | Docker inspect, recorded beside the image ids |
@@ -48,7 +48,7 @@ source as a process gap in the milestone and fix the capture step below.
 2. Replaced services: image ids equal the recorded ones, running, healthy;
    container ids and startedAt equal the post-replacement record (no restart
    since acceptance).
-3. Preserved services: `neighbor_preservation.py` against the pre-deploy
+3. Preserved services: `node scripts/deploy/neighbor-preservation.mts` against the pre-deploy
    snapshot reports no unexplained drift (Caddy, Valkey, PostgreSQL start time,
    neighbors).
 4. Public checks named by the release (health, and for MCP OAuth the

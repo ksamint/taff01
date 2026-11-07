@@ -54,6 +54,7 @@ pub struct Layout {
     projects: Vec<Project>,
     #[serde(rename = "moreProjects")]
     more_projects: Option<String>,
+    empty: Option<String>,
     pub footer: Footer,
 }
 #[derive(Deserialize)]
@@ -61,6 +62,7 @@ struct Header {
     title: String,
     audience: String,
     workspace: String,
+    recipient: String,
     date: String,
 }
 #[derive(Deserialize)]
@@ -113,7 +115,8 @@ struct Item {
 }
 #[derive(Deserialize)]
 pub struct Footer {
-    generated: String,
+    confidential: String,
+    generated: Option<String>,
     watermark: String,
     #[serde(rename = "hashLabel")]
     hash_label: String,
@@ -351,8 +354,19 @@ pub fn layout_svg(input: &Input) -> Result<(String, f32), &'static str> {
         "start",
     );
     y += 42.0 + 16.0;
-    let place = format!("{} · {}", layout.header.workspace, layout.header.date);
+    let place = format!("{} · {}", layout.header.workspace, layout.header.recipient);
     y += p.paragraph(MARGIN, y, &place, 24.0, 400, INK_VARIANT, CONTENT, 34.0, 2);
+    y += p.paragraph(
+        MARGIN,
+        y,
+        &layout.header.date,
+        24.0,
+        600,
+        INK,
+        CONTENT,
+        34.0,
+        1,
+    );
     y += 36.0;
     let band = y;
     y += 28.0;
@@ -560,6 +574,9 @@ pub fn layout_svg(input: &Input) -> Result<(String, f32), &'static str> {
             return Err("render_too_large");
         }
     }
+    if let Some(empty) = &layout.empty {
+        y += p.paragraph(MARGIN, y, empty, 22.0, 400, INK_VARIANT, CONTENT, 32.0, 2) + 16.0;
+    }
     if let Some(more) = &layout.more_projects {
         y += p.paragraph(MARGIN, y, more, 21.0, 600, GOLD_DEEP, CONTENT, 34.0, 1) + 16.0;
     }
@@ -568,12 +585,25 @@ pub fn layout_svg(input: &Input) -> Result<(String, f32), &'static str> {
     y += 8.0;
     p.rect(MARGIN, y, CONTENT, 1.0, 0.0, OUTLINE, None);
     y += 20.0;
+    if let Some(generated) = &layout.footer.generated {
+        y += p.paragraph(
+            MARGIN,
+            y,
+            generated,
+            19.0,
+            400,
+            INK_VARIANT,
+            CONTENT,
+            28.0,
+            2,
+        );
+    }
     y += p.paragraph(
         MARGIN,
         y,
-        &layout.footer.generated,
+        &layout.footer.confidential,
         19.0,
-        400,
+        600,
         INK_VARIANT,
         CONTENT,
         28.0,

@@ -6,13 +6,9 @@ const forbidden =
   /\.(js|mjs|cjs|jsx|py|sh|bash|rb|go|java|kt|php|pl|lua|swift|cs)$/;
 const vendoredDocs = /^docs\/ui\/prototype(-v2)?\//;
 // Remove a path here in the same commit that ports it; this list only shrinks.
-const pendingPythonPorts = new Set([
-  "docs/audit/verify.py",
-  "e2e/live/email-proof.py",
-  "scripts/deploy/neighbor_preservation.py",
-  "scripts/deploy/test_neighbor_preservation.py",
-  "scripts/ui/subset-fonts.py",
-]);
+// subset-fonts.py stays until a permissive Rust subsetter keeps variable-font
+// and OpenType layout tables (ADR 0030, milestone 107).
+const pendingPythonPorts = new Set(["scripts/ui/subset-fonts.py"]);
 
 function tracked(): string[] {
   return execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" })

@@ -187,7 +187,7 @@ fn designed_layout_wraps_long_names_and_renders_cjk_user_glyphs() {
 }
 
 /// Worst case the TypeScript fit can send (IMAGE_HEIGHT_BUDGET = 3400 with
-/// IMAGE_GEOMETRY): one project, five sections of 3, 3, 3, 3 and 2 two-line items, every
+/// IMAGE_GEOMETRY): one project, five sections of 3, 3, 3, 2 and 2 two-line items, every
 /// optional line present. It must render, inside both caps.
 #[test]
 fn designed_layout_stays_within_caps_at_the_fitted_budget() {
@@ -195,6 +195,7 @@ fn designed_layout_stays_within_caps_at_the_fitted_budget() {
     let project = &mut input["layout"]["projects"][0];
     project["name"] = json!("Checkout platform ".repeat(7).trim_end());
     let item = json!({
+        "taskId": "00000000-0000-4000-8000-000000009999",
         "number": "#9999",
         "title": "Reconcile settlement batches across regional acquirers and verify ".repeat(3).trim_end(),
         "detail": "Mia Wong · Due Oct 8, 2026",
@@ -214,7 +215,7 @@ fn designed_layout_stays_within_caps_at_the_fitted_budget() {
         .map(|(index, key)| {
             let mut section = section.clone();
             section["key"] = json!(key);
-            section["items"] = json!(vec![item.clone(); if index == 4 { 2 } else { 3 }]);
+            section["items"] = json!(vec![item.clone(); if index >= 3 { 2 } else { 3 }]);
             section["more"] = json!("+6 more");
             section
         })
@@ -223,7 +224,7 @@ fn designed_layout_stays_within_caps_at_the_fitted_budget() {
     input["layout"]["moreProjects"] = json!("+99 more projects");
     let bytes = render_summary(&input).unwrap();
     let image = image::load_from_memory(&bytes).unwrap();
-    let estimate = 348 + 308 + 216 + 504 + 5 * (80 + 30) + 14 * 96 + 50;
+    let estimate = 382 + 308 + 272 + 504 + 5 * (80 + 30) + 13 * 96 + 50;
     assert!(estimate <= 3400);
     assert!(
         image.height() <= estimate,

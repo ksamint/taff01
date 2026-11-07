@@ -30,23 +30,29 @@
                 "audience": {
                   "type": "string",
                   "minLength": 1,
-                  "maxLength": 220
+                  "maxLength": 340
                 },
                 "workspace": {
                   "type": "string",
                   "minLength": 1,
                   "maxLength": 140
                 },
+                "recipient": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 160
+                },
                 "date": {
                   "type": "string",
                   "minLength": 1,
-                  "maxLength": 40
+                  "maxLength": 60
                 }
               },
               "required": [
                 "title",
                 "audience",
                 "workspace",
+                "recipient",
                 "date"
               ],
               "additionalProperties": false
@@ -103,6 +109,11 @@
               "items": {
                 "type": "object",
                 "properties": {
+                  "projectId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
                   "name": {
                     "type": "string",
                     "minLength": 1,
@@ -154,7 +165,7 @@
                     "additionalProperties": false
                   },
                   "meta": {
-                    "maxItems": 3,
+                    "maxItems": 4,
                     "type": "array",
                     "items": {
                       "type": "string",
@@ -252,6 +263,11 @@
                           "items": {
                             "type": "object",
                             "properties": {
+                              "taskId": {
+                                "type": "string",
+                                "format": "uuid",
+                                "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                              },
                               "number": {
                                 "type": "string",
                                 "minLength": 1,
@@ -271,6 +287,7 @@
                               }
                             },
                             "required": [
+                              "taskId",
                               "number",
                               "title",
                               "detail",
@@ -304,6 +321,7 @@
                   }
                 },
                 "required": [
+                  "projectId",
                   "name",
                   "stage",
                   "risk",
@@ -328,13 +346,37 @@
                 }
               ]
             },
-            "footer": {
-              "type": "object",
-              "properties": {
-                "generated": {
+            "empty": {
+              "anyOf": [
+                {
                   "type": "string",
                   "minLength": 1,
                   "maxLength": 200
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "footer": {
+              "type": "object",
+              "properties": {
+                "confidential": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 200
+                },
+                "generated": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 200
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 },
                 "watermark": {
                   "type": "string",
@@ -356,6 +398,7 @@
                 }
               },
               "required": [
+                "confidential",
                 "generated",
                 "watermark",
                 "hashLabel",
@@ -372,6 +415,7 @@
             "kpis",
             "projects",
             "moreProjects",
+            "empty",
             "footer"
           ],
           "additionalProperties": false

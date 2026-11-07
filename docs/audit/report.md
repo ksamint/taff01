@@ -11,7 +11,7 @@ PYTHONHASHSEED=0 python3 /Users/af/.codex/skills/repo-architecture-audit/scripts
   --out docs/audit --project-name "Taff internal architecture audit" \
   --services api=apps/api,web=apps/web,worker=apps/worker,core=packages/core,db=packages/db,schemas=packages/schemas \
   --service-alias "core=@taff/core,db=@taff/db,schemas=@taff/schemas"
-python3 docs/audit/verify.py
+node node_modules/vitest/vitest.mjs run scripts/audit-contract.test.ts
 ```
 
 Local patterns recognize Hono calls (including templates retained verbatim), Drizzle tables/columns, queue processors/scheduler/job names, requireMember/can/session points, shared mutation context, SQL activity/NOTIFY and trigger registrations. No bundled extractor was changed; subsequent reviewed application fixes are recorded below. `.local`, hidden directories, secrets, credentials, build outputs and DB snapshot metadata are excluded. Six explicit module roots also exclude operator files outside apps/packages.
@@ -66,7 +66,7 @@ Reviewed false positives are retained in `annotations.json` and suppressed in pr
 
 ## Validation and limits
 
-- `verify.py` asserts module map, all emitted file:line references, excluded paths, all 49 Drizzle declarations, three queue entry registrations, SQL trigger recognition and INTERNAL/noindex HTML.
+- `scripts/audit-contract.test.ts` (formerly `verify.py`, ADR 0030) asserts module map, all emitted file:line references, excluded paths, all 49 Drizzle declarations, three queue entry registrations, SQL trigger recognition and INTERNAL/noindex HTML.
 - `snapshot.json` pins evidence-source hashes and the current tracked apps/packages diff digest. Two consecutive extractor runs with PYTHONHASHSEED=0 produced identical digests for all eight CSVs (`idempotence.json`). The bundled extractor iterates guard-name sets without a tie-breaker, so a fixed Python hash seed is necessary for stable row order. This is a dirty working-tree snapshot, not final release-SHA acceptance.
 - Regex extraction cannot compose inherited Hono middleware, expand loop path values, trace imported helpers/closures, infer runtime roles, prove transaction coverage, reconstruct ALTER history or join queue producers/consumers semantically. The three phone-auth registrations in a loop are missed; CRM template registrations are retained with ${path}, not expanded. No secrets or .local data were read.
 - Inventory extraction used no credentials, production, runtime DB, integration tests, deployment or browser QA; subsequent archive-fix tests used the owned local integration fixture. Root agent owns functional/security tests and final integration. Offline page was checked structurally; its chart layout has not been visually inspected.

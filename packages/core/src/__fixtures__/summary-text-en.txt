@@ -1,5 +1,6 @@
-Daily progress · Shareholder · Harbour Capital
-Northwind · 2026-10-08
+Daily progress · Shareholder · Harbour Capital · Series A
+Northwind · Prepared for Pat Lee
+Thursday, October 8, 2026
 ────────────────────────────
 Projects 1 · Open tasks 9 · Completed today 1 · Due today 2 · Overdue 0
 Blocked 1 · In review 2
@@ -22,5 +23,6 @@ Blocked (1)
 
 ────────────────────────────
 Generated Oct 8, 2026, 8:00 PM · Asia/Hong_Kong
+Confidential. Prepared for Pat Lee.
 Pat Lee · Harbour Capital · 2026-10-08 · preview
 Hash 405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21

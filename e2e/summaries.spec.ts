@@ -168,6 +168,16 @@ test("an admin tags, previews, shares and revokes a shareholder summary", async 
   const hash = await view.getAttribute("data-hash");
   expect(hash).toMatch(/^[a-f0-9]{64}$/);
   await expect(view.getByTestId("summary-hash")).toContainText(hash!);
+  // The page draws the same display layout as the text and image renders.
+  await expect(
+    view.getByTestId("summary-totals").locator("[data-total]"),
+  ).toHaveCount(7);
+  await expect(
+    view.getByTestId("summary-progress").getByRole("progressbar"),
+  ).toHaveAttribute("aria-valuemin", "0");
+  await expect(view.getByTestId("summary-footer")).toContainText(
+    m.summary.confidential.replace("{{name}}", "Pat Lee"),
+  );
   await expect(view.getByTestId("summary-watermark")).toHaveAttribute(
     "data-text",
     new RegExp(

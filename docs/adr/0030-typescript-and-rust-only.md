@@ -57,6 +57,19 @@ server) reads `postcss.config.json` as well. A JSON file is data, not code.
    a Python file removes it from the test's allow-list in the same commit, so
    the list only shrinks.
 
+## Status of the ports (2026-11-07, milestone 107)
+
+- Ported: the neighbour check (6,000 random cases, identical full reports
+  against the Python original before deletion), the e-mail proof bridge
+  (identical remote command bytes), the audit checker (same 12 findings
+  against the audit's pinned, dirty-tree source commit).
+- Kept: `scripts/ui/subset-fonts.py`. The web fonts are subsets of variable
+  Noto Sans fonts that keep `fvar`, `gvar`, `HVAR`, `avar`, `STAT`, `GSUB` and
+  `GPOS`. The only published permissive Rust subsetter, `allsorts` 0.17,
+  keeps just `cmap`, `head`, `hhea`, `hmtx`, `maxp`, `name`, `OS/2` and
+  `post`, so a port would drop the weight axis and layout features. It stays
+  until a Rust subsetter keeps those tables; the policy test lists only it.
+
 ## Consequences
 
 - The repository holds no owned JavaScript. Next's webpack build and

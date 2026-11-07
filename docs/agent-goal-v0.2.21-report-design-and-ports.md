@@ -10,6 +10,10 @@
 > shared layout, `text-2`, colour palette `image-2` with `image-1`
 > compatibility, worker on the layout, spec DS-8.2/8.3/8.7. Remaining: R5
 > (web page from the layout), P1–P4 (Python ports), release.
+>
+> **2026-11-07: R5, P1–P3 done; P4 kept by the ADR 0030 fallback**
+> (`docs/milestones/107-report-web-and-ports.md`). Remaining: the six
+> `summary.png` visual references (pinned Linux pipeline) and the release.
 
 Paste everything below this line as the goal.
 

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (416 distinct, 2067 uses)
+## Test ids (419 distinct, 2070 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -593,9 +593,12 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
+| `summary-footer` | 1 |  | summaries.spec.ts |
 | `summary-hash` | 2 |  | summaries.spec.ts |
 | `summary-preview-note` | 1 |  | summaries.spec.ts |
+| `summary-progress` | 1 |  | summaries.spec.ts |
 | `summary-project` | 3 |  | delivery-visual.spec.ts, summaries.spec.ts |
+| `summary-totals` | 1 |  | summaries.spec.ts |
 | `summary-view` | 2 |  | delivery-visual.spec.ts, summaries.spec.ts |
 | `summary-watermark` | 3 |  | summaries.spec.ts |
 
@@ -797,6 +800,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
+| `progressbar` | 1 | summaries.spec.ts |
 | `region — name: m.access.agents` | 1 | access.spec.ts |
 | `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
@@ -937,6 +941,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="timeline-dependency"][data-from="*"][data-to="*"]` | 4 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-row"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-time-grid-date]` | 1 | calendar-accessibility.spec.ts |
+| `[data-total]` | 1 | summaries.spec.ts |
 | `[data-workspace-id="*"]` | 4 | access.spec.ts, token-grants.spec.ts |
 | `#add-agent-reason` | 1 | agent-creation.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
@@ -1141,6 +1146,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `status.in_progress` | 2 | optimistic-m4.spec.ts |
 | `status.needs_review` | 2 | optimistic-m4.spec.ts |
 | `status.todo` | 4 | optimistic-m4.spec.ts |
+| `summary.confidential` | 1 | summaries.spec.ts |
 | `summary.heading` | 1 | summaries.spec.ts |
 | `summary.preview` | 1 | summaries.spec.ts |
 | `summary.print` | 1 | summaries.spec.ts |

@@ -4,7 +4,7 @@ Living product specification for the module shipped in v0.2.17 (ADR 0027, milest
 states the current contract; the ADR holds the decisions and their reasons. Change this file in the same
 commit as the behaviour it describes.
 
-Status: v0.2.21 designed renders (DS-8.2, DS-8.3, DS-8.7) are on `main` and not yet released. Summaries shipped in v0.2.17; the v0.2.19 text/PNG delivery and scoped MCP additions are deployed at `d10c0a8`. Exact-source acceptance and native closeout are recorded in [milestone 102](../milestones/102-v0.2.19.md).
+Status: v0.2.21 designed renders (DS-5.2, DS-8.2, DS-8.3, DS-8.7) are on `main` and not yet released. Summaries shipped in v0.2.17; the v0.2.19 text/PNG delivery and scoped MCP additions are deployed at `d10c0a8`. Exact-source acceptance and native closeout are recorded in [milestone 102](../milestones/102-v0.2.19.md).
 
 ## Users and roles
 
@@ -79,7 +79,10 @@ Each statement is testable. "Shall" is a hard requirement.
   existing summaries after the project is untagged or the tag archived.
 - DS-5.2 `/summaries` shall list the newest 31 summaries with a `truncated` flag; `/summaries/[id]` shall
   render the document with the watermark on screen and in print, the hash in the footer, and a print
-  action. Me links to it; admins manage audiences at `/orgs/summaries`.
+  action. Me links to it; admins manage audiences at `/orgs/summaries`. The in-app, admin preview and
+  public pages shall draw the same display layout as the text and image renders (DS-8.2): audience
+  chip with the tag label, full localized date, "prepared for" line, KPI tiles, project cards with risk
+  badge and accessible progress and finance bars, counted sections, and a confidential footer.
 - DS-5.3 Dates and times shall be formatted in the reader's locale and zone; all strings exist in en,
   zh-CN and zh-HK.
 
@@ -181,7 +184,7 @@ slipped as a list; a second audience kind.
 | DS-7 access operations | `packages/core/src/authorization.integration.test.ts` |
 | DS-3.1, DS-3.3 | `apps/worker/src/summaries.test.ts` |
 | DS-6.5, DS-6.6 | `apps/api/src/summaries.test.ts` (7 cases) |
-| DS-1.3, DS-1.4, DS-5.2, DS-5.3, DS-6.4 | `e2e/summaries.spec.ts` in en, zh-CN and zh-HK |
+| DS-1.3, DS-1.4, DS-5.2, DS-5.3, DS-6.4 | `e2e/summaries.spec.ts` in en, zh-CN and zh-HK (layout tiles, progress bar, confidential footer); summary visual references to be recaptured by the pinned Linux pipeline |
 | DS-3.1 end to end | live run recorded in `docs/milestones/87-daily-summary-delivery.md` |
 | DS-8.1, DS-8.5 | apps/worker/src/summaries.test.ts; summaries.integration.test.ts |
 | DS-8.2 | summary-layout.test.ts (7 cases); summary-text.test.ts; three locale text goldens |

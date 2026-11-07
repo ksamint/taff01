@@ -1,7 +1,5 @@
-import { execFile } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
-import { promisify } from "node:util";
 import {
   type APIRequestContext,
   type APIResponse,
@@ -28,6 +26,7 @@ import { notificationPreferencesSchema } from "../../packages/schemas/src/notifi
 import { messages } from "../support/messages";
 
 import { agentBaseline, cleanupAgentBaseline } from "./agent-cleanup";
+import { readEmailProof } from "./email-proof.mts";
 import {
   cleanupNotificationBaseline,
   notificationBaseline,
@@ -35,7 +34,6 @@ import {
 import { failureCategory, retriesSetupNavigation } from "./safety.mts";
 import { cleanupSuggestion } from "./suggestion-cleanup";
 
-const execute = promisify(execFile);
 const origin = process.env.RELEASE_BASE_URL ?? "https://taff.apuch.cn";
 const workspaceName = "Taff verification";
 process.env.RELEASE_SKIP_RATE_LIMIT = "1";
@@ -1080,21 +1078,12 @@ export async function inviteRecipient(
         "TAFF_VERIFY_API_ID",
       ].flatMap((key) => (process.env[key] ? [[key, process.env[key]!]] : [])),
     );
-    const result = await execute(
-      "python3",
-      [
-        new URL("./email-proof.py", import.meta.url).pathname,
-        email,
-        String(after),
-      ],
-      { env: proofEnvironment, maxBuffer: 8192, timeout: 30000 },
+    // In process: the token stays in this process's memory and is never logged.
+    const proof: { ok: boolean; token?: string } = await readEmailProof(
+      email,
+      String(after),
+      proofEnvironment,
     );
-    let proof: { ok?: unknown; token?: unknown };
-    try {
-      proof = JSON.parse(result.stdout);
-    } catch {
-      throw new Error("BLOCKED: scoped email proof unavailable");
-    }
     if (!proof.ok || typeof proof.token !== "string")
       throw new Error(
         "BLOCKED: requested recipient proof absent from private fallback sink",
@@ -1105,7 +1094,7 @@ export async function inviteRecipient(
       }),
       "recipient verification",
     );
-    proof.token = "";
+    if (proof.ok) proof.token = "";
     const issued = await checked(
       await admin.request.post(`/api/workspaces/${workspaceId}/invites`, {
         data: { email, role: "member" },
