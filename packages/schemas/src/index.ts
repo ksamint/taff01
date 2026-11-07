@@ -832,6 +832,22 @@ export const integrationAuditQuerySchema = strictObject({
   receipt_id: optional(idSchema),
   ...integrationCorrelationFields,
 });
+/** One audit row as the admin search returns it (JSON: dates as ISO strings). */
+export const integrationAuditEntrySchema = object({
+  id: idSchema,
+  actorId: string(),
+  traceId: nullable(string()),
+  workspaceId: nullable(idSchema),
+  action: string(),
+  resourceId: string(),
+  details: unknown(),
+  createdAt: iso.datetime({ offset: true }),
+});
+export const integrationAuditResultSchema = object({
+  entries: array(integrationAuditEntrySchema).check(maxLength(200)),
+  truncated: boolean(),
+});
+export type IntegrationAuditEntry = Infer<typeof integrationAuditEntrySchema>;
 export const integrationPermissionQuerySchema = strictObject({
   workspaceId: idSchema,
   tokenId: idSchema,

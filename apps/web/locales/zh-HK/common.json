@@ -1598,5 +1598,31 @@
     "currencyLocked": "已有收款記錄，貨幣不可更改",
     "appendOnly": "已記錄的收款不可編輯或刪除。",
     "readOnly": "僅管理員可更改財務資料。"
+  },
+  "audit": {
+    "title": "審計日誌",
+    "open": "審計日誌",
+    "hint": "本工作區最近 200 條已記錄的更改。可按整合標識篩選，追蹤單次操作。",
+    "filter": "篩選條件",
+    "kinds": {
+      "trace_id": "追蹤 ID",
+      "request_id": "請求 ID",
+      "approval_id": "審批 ID",
+      "receipt_id": "回條 ID"
+    },
+    "value": "標識",
+    "apply": "套用",
+    "clear": "清除篩選",
+    "invalid": "此標識不符合所選篩選條件的格式。",
+    "time": "時間",
+    "actor": "操作者",
+    "action": "更改",
+    "resource": "記錄",
+    "trace": "追蹤",
+    "details": "詳情",
+    "none": "沒有相符的更改。",
+    "truncated": "只顯示最近 200 條更改；篩選可查看較早的記錄。",
+    "followTrace": "查看追蹤 {{trace}}",
+    "filtered": "按{{kind}}篩選：{{value}}"
   }
 }

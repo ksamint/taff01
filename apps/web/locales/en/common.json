@@ -1598,5 +1598,31 @@
     "currencyLocked": "The currency can't change after payments are recorded",
     "appendOnly": "Recorded payments can't be edited or deleted.",
     "readOnly": "Only administrators can change finance."
+  },
+  "audit": {
+    "title": "Audit log",
+    "open": "Audit log",
+    "hint": "The newest 200 recorded changes in this workspace. Filter by an integration identifier to follow one operation.",
+    "filter": "Filter by",
+    "kinds": {
+      "trace_id": "Trace ID",
+      "request_id": "Request ID",
+      "approval_id": "Approval ID",
+      "receipt_id": "Receipt ID"
+    },
+    "value": "Identifier",
+    "apply": "Apply",
+    "clear": "Clear filter",
+    "invalid": "This identifier isn't valid for the chosen filter.",
+    "time": "Time",
+    "actor": "Actor",
+    "action": "Change",
+    "resource": "Record",
+    "trace": "Trace",
+    "details": "Details",
+    "none": "No changes match.",
+    "truncated": "Showing the newest 200 changes; filter to see older ones.",
+    "followTrace": "Show trace {{trace}}",
+    "filtered": "Filtered by {{kind}}: {{value}}"
   }
 }

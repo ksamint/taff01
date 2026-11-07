@@ -133,6 +133,15 @@ export function AccessMatrix() {
           )}
         </>
       )}
+      {admin && (
+        <Link
+          className="text-link"
+          href="/orgs/audit"
+          data-testid="access-audit-link"
+        >
+          {t("audit.open")}
+        </Link>
+      )}
       {me.user.systemAdmin && (
         <Link className="text-link" href="/admin/access">
           {t("access.systemTitle")}

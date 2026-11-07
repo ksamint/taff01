@@ -297,6 +297,15 @@ export function OrganizationsView() {
           {t("access.open")}
         </Link>
       )}
+      {workspace.role === "admin" && (
+        <Link
+          className="button button-quiet"
+          href="/orgs/audit"
+          data-testid="open-audit-log"
+        >
+          {t("audit.open")}
+        </Link>
+      )}
       <section className="team-directory" id="team">
         <header className="organization-toolbar">
           <Link className="button button-quiet" href="/me">

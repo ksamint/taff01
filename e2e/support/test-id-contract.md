@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (437 distinct, 2111 uses)
+## Test ids (448 distinct, 2126 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -69,6 +69,21 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `share-page` | 1 |  | summaries.spec.ts |
+
+### audit-view.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `audit-apply` | 2 |  | audit.spec.ts |
+| `audit-clear` | 1 |  | audit.spec.ts |
+| `audit-empty` | 1 |  | audit.spec.ts |
+| `audit-filtered` | 1 |  | audit.spec.ts |
+| `audit-forbidden` | 1 |  | audit.spec.ts |
+| `audit-invalid` | 1 |  | audit.spec.ts |
+| `audit-kind` | 1 |  | audit.spec.ts |
+| `audit-row` | 3 |  | audit.spec.ts, zz-shot.spec.ts |
+| `audit-value` | 2 |  | audit.spec.ts |
+| `audit-view` | 1 |  | audit.spec.ts |
 
 ### auth.tsx
 
@@ -179,7 +194,7 @@ several do). “Also rendered by” lists the other files.
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 38 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | access.spec.ts, agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
+| `workspace-*` | 40 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | access.spec.ts, agent-creation.spec.ts, audit.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -190,7 +205,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-evidence-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-link-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-edit` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
-| `project-finance-edit` | 4 | project-finance-panel.tsx | project-finance.spec.ts, zz-shot.spec.ts |
+| `project-finance-edit` | 3 | project-finance-panel.tsx | project-finance.spec.ts |
 | `stakeholder-edit` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `stakeholder-remove` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `stakeholder-roles` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
@@ -420,6 +435,7 @@ several do). “Also rendered by” lists the other files.
 | `agent-name` | 6 |  | agent-creation.spec.ts, release/support.ts |
 | `oauth-return-consent` | 1 |  | completion.spec.ts |
 | `open-access-matrix` | 1 |  | access.spec.ts |
+| `open-audit-log` | 2 |  | audit.spec.ts |
 | `open-summaries-admin` | 1 |  | summaries.spec.ts |
 | `team-add-agent` | 8 |  | agent-creation.spec.ts, release/support.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
@@ -440,16 +456,16 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `project-finance` | 4 |  | project-finance.spec.ts, zz-shot.spec.ts |
+| `project-finance` | 3 |  | project-finance.spec.ts |
 | `project-finance-collected` | 1 |  | project-finance.spec.ts |
 | `project-finance-contract` | 1 |  | project-finance.spec.ts |
 | `project-finance-contract-input` | 2 |  | project-finance.spec.ts |
 | `project-finance-currency` | 2 |  | project-finance.spec.ts |
 | `project-finance-error` | 1 |  | project-finance.spec.ts |
-| `project-finance-form` | 3 |  | project-finance.spec.ts, zz-shot.spec.ts |
+| `project-finance-form` | 2 |  | project-finance.spec.ts |
 | `project-finance-record` | 3 |  | project-finance.spec.ts |
 | `project-finance-save` | 2 |  | project-finance.spec.ts |
-| `project-payment` | 4 |  | project-finance.spec.ts, zz-shot.spec.ts |
+| `project-payment` | 3 |  | project-finance.spec.ts |
 | `project-payment-amount` | 2 |  | project-finance.spec.ts |
 | `project-payment-error` | 1 |  | project-finance.spec.ts |
 | `project-payment-form` | 1 |  | project-finance.spec.ts |
@@ -726,7 +742,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-v2.spec.ts |
-| `today-heading` | 70 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 71 |  | agent-review.spec.ts, audit.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
 
 ### token-policy-control.tsx
@@ -793,7 +809,7 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: m.crm.contacts.add` | 3 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
-| `heading` | 6 | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
+| `heading` | 7 | audit.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
 | `heading — name: m.agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
@@ -957,6 +973,7 @@ read (`data-event-id`, `data-date`).
 | `[data-role="member"]` | 2 | access.spec.ts |
 | `[data-source]` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `[data-testid="access-permission-row"][data-action="workspace:manage"]` | 1 | access.spec.ts |
+| `[data-testid="audit-row"][data-action="projects.insert"][data-resource="*"]` | 1 | audit.spec.ts |
 | `[data-testid="contact-link"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="contact-row"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="desktop-new-task"]` | 1 | ui-v2.spec.ts |
@@ -1048,6 +1065,9 @@ Keys read from `apps/web/locales/*/common.json` through
 | `audience.kind.shareholder` | 1 | summaries.spec.ts |
 | `audience.linkOnly` | 1 | summaries.spec.ts |
 | `audience.tagsSaved` | 1 | summaries.spec.ts |
+| `audit.invalid` | 1 | audit.spec.ts |
+| `audit.none` | 1 | audit.spec.ts |
+| `audit.title` | 1 | audit.spec.ts |
 | `brief.action.split_other` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `brief.nav` | 12 | brief.spec.ts, live/brief.spec.ts |
 | `brief.proposal.intro` | 6 | live/brief.spec.ts |

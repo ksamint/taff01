@@ -16,7 +16,12 @@ import type {
   ReviewRun,
   Run,
 } from "@taff/schemas";
-import { runArtifactSchema, runSchema, taskSchema } from "@taff/schemas";
+import {
+  integrationAuditResultSchema,
+  runArtifactSchema,
+  runSchema,
+  taskSchema,
+} from "@taff/schemas";
 import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import {
@@ -260,6 +265,11 @@ describe.skipIf(!databaseUrl)("M3 PostgreSQL", () => {
       workspaceId,
       trace_id: "a".repeat(32),
     });
+    // The web parses the JSON form of this result with the shared schema.
+    expect(
+      integrationAuditResultSchema.parse(JSON.parse(JSON.stringify(audit)))
+        .entries,
+    ).toHaveLength(audit.entries.length);
     expect(
       audit.entries.some(
         (row) => row.action === "trusted_review_receipts.insert",

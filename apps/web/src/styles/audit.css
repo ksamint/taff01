@@ -1,0 +1,65 @@
+/* Workspace audit log (milestone 36 endpoints). Tokens only. */
+.audit-hint {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.audit-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-sm);
+  margin: var(--space-md) 0;
+}
+.audit-filter .field {
+  display: grid;
+  gap: 4px;
+  min-width: 160px;
+  flex: 1 1 200px;
+}
+.audit-filter select {
+  min-height: 44px;
+}
+.audit-filter-buttons {
+  display: flex;
+  gap: var(--space-sm);
+}
+.audit-table th,
+.audit-table td {
+  min-width: 0;
+  padding: 8px 12px;
+  font-size: 13px;
+  vertical-align: top;
+}
+.audit-table th[scope="row"] {
+  font-weight: 400;
+  white-space: nowrap;
+}
+.audit-table code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.audit-table details {
+  margin-top: 4px;
+}
+.audit-table summary {
+  cursor: pointer;
+  color: var(--accent-text);
+}
+.audit-table pre {
+  max-width: 420px;
+  margin: 4px 0 0;
+  padding: 8px;
+  overflow: auto;
+  border-radius: var(--radius-control);
+  background: var(--bg-container);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.audit-trace {
+  min-height: 32px;
+  padding: 2px 8px;
+}

@@ -1598,5 +1598,31 @@
     "currencyLocked": "已有收款记录，币种不可更改",
     "appendOnly": "已记录的收款不可编辑或删除。",
     "readOnly": "仅管理员可更改财务信息。"
+  },
+  "audit": {
+    "title": "审计日志",
+    "open": "审计日志",
+    "hint": "本工作区最近 200 条已记录的更改。可按集成标识筛选，追踪单次操作。",
+    "filter": "筛选条件",
+    "kinds": {
+      "trace_id": "追踪 ID",
+      "request_id": "请求 ID",
+      "approval_id": "审批 ID",
+      "receipt_id": "回执 ID"
+    },
+    "value": "标识",
+    "apply": "应用",
+    "clear": "清除筛选",
+    "invalid": "该标识不符合所选筛选条件的格式。",
+    "time": "时间",
+    "actor": "操作者",
+    "action": "更改",
+    "resource": "记录",
+    "trace": "追踪",
+    "details": "详情",
+    "none": "没有匹配的更改。",
+    "truncated": "仅显示最近 200 条更改；筛选可查看更早的记录。",
+    "followTrace": "查看追踪 {{trace}}",
+    "filtered": "按{{kind}}筛选：{{value}}"
   }
 }
