@@ -37,4 +37,4 @@ Branch `claude/nifty-pascal-tm5d5d` after [106](106-report-design.md). Not relea
 | Lint, licence gate, six package and root typechecks | clean |
 | Web build, `build:server`, Today JS | passed; 197,395 bytes gzipped |
 | `e2e/summaries.spec.ts` (renderer live) | 3 passed |
-| Full `pnpm e2e`, three locales | running at this commit; recorded before merge |
+| Full `pnpm e2e`, three locales | 318 passed, 0 failed, 3 dev-only skips (en, zh-CN 107; zh-HK 106 + 1) |
