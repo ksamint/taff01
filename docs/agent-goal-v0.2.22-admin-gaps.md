@@ -1,7 +1,7 @@
 # Agent goal: v0.2.22 — admin screens for finance, audit and permissions
 
 > Status 2026-11-07: written from the GUI alignment review of v0.2.21
-> (milestone 109). Each gap is a back-end capability that shipped without a
+> (milestone 111). **G1–G3 done** (milestone 111); release preparation remains. Each gap is a back-end capability that shipped without a
 > screen. No migration and no new dependency; one new access flag.
 
 Paste everything below this line as the goal.
