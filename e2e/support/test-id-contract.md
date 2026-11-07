@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (419 distinct, 2070 uses)
+## Test ids (421 distinct, 2074 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -25,6 +25,8 @@ several do). “Also rendered by” lists the other files.
 | `access-forbidden` | 1 |  | access.spec.ts |
 | `access-grant-confirm` | 2 | crm/contact-links.tsx | access.spec.ts |
 | `access-matrix` | 1 |  | delivery-visual.spec.ts |
+| `access-permission-row` | 3 |  | access.spec.ts, zz-shot.spec.ts |
+| `access-permissions-baseline` | 1 |  | access.spec.ts |
 | `system-access-matrix` | 1 |  | delivery-visual.spec.ts |
 
 ### agent-profile-view.tsx
@@ -814,6 +816,7 @@ several do). “Also rendered by” lists the other files.
 | `tab — name: m.access.agents` | 1 | access.spec.ts |
 | `tab — name: m.access.apps` | 1 | access.spec.ts |
 | `tab — name: m.access.people` | 2 | access.spec.ts |
+| `tab — name: m.access.permissions` | 2 | access.spec.ts, zz-shot.spec.ts |
 | `tab — name: m.access.tokens` | 1 | access.spec.ts |
 | `tab — name: m.access[tab]` | 1 | delivery-visual.spec.ts |
 | `tabpanel` | 2 | brief.spec.ts, live/brief.spec.ts |
@@ -863,6 +866,7 @@ read (`data-event-id`, `data-date`).
 
 | Selector | Uses | Used in |
 | --- | ---: | --- |
+| `.access-group th` | 1 | access.spec.ts |
 | `.agent-profile-controls` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.agent-profile-heading p` | 1 | agent-creation.spec.ts |
 | `.agent-profile-overview` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
@@ -928,7 +932,10 @@ read (`data-event-id`, `data-date`).
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
 | `[data-agent-id="*"]` | 1 | access.spec.ts |
 | `[data-intent="load"]` | 1 | completion.spec.ts |
+| `[data-role="admin"]` | 1 | access.spec.ts |
+| `[data-role="member"]` | 2 | access.spec.ts |
 | `[data-source]` | 2 | brief.spec.ts, live/brief.spec.ts |
+| `[data-testid="access-permission-row"][data-action="workspace:manage"]` | 1 | access.spec.ts |
 | `[data-testid="contact-link"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="contact-row"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="desktop-new-task"]` | 1 | ui-v2.spec.ts |
@@ -995,13 +1002,17 @@ Keys read from `apps/web/locales/*/common.json` through
 | Key | Uses | Used in |
 | --- | ---: | --- |
 | `access.*` | 1 | delivery-visual.spec.ts |
-| `access.agents` | 6 | access.spec.ts |
-| `access.apps` | 3 | access.spec.ts |
-| `access.confirm` | 3 | access.spec.ts |
-| `access.explain` | 4 | access.spec.ts, delivery-visual.spec.ts |
-| `access.people` | 6 | access.spec.ts |
-| `access.selfDemotionHint` | 3 | access.spec.ts |
-| `access.tokens` | 3 | access.spec.ts |
+| `access.agents` | 8 | access.spec.ts |
+| `access.apps` | 4 | access.spec.ts |
+| `access.confirm` | 4 | access.spec.ts |
+| `access.denied` | 4 | access.spec.ts |
+| `access.explain` | 5 | access.spec.ts, delivery-visual.spec.ts |
+| `access.group.finance` | 4 | access.spec.ts |
+| `access.people` | 8 | access.spec.ts |
+| `access.permissions` | 5 | access.spec.ts, zz-shot.spec.ts |
+| `access.permissionsBaseline` | 4 | access.spec.ts |
+| `access.selfDemotionHint` | 4 | access.spec.ts |
+| `access.tokens` | 4 | access.spec.ts |
 | `accountIdentifier` | 5 | sms-auth.spec.ts, username-auth.spec.ts |
 | `actions.undo` | 18 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
@@ -1049,7 +1060,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.auth` | 6 | sms-auth.spec.ts, username-auth.spec.ts |
 | `errors.conflict` | 11 | calendar.spec.ts, planning.spec.ts |
 | `errors.email_verification_required` | 5 | planning.spec.ts |
-| `errors.forbidden` | 14 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
+| `errors.forbidden` | 15 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
 | `errors.internal_error` | 2 | calendar.spec.ts |
 | `errors.invalid_input` | 14 | agent-creation.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
@@ -1058,18 +1069,18 @@ Keys read from `apps/web/locales/*/common.json` through
 | `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |
 | `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
 | `loading` | 4 | completion.spec.ts, i18n.spec.ts, ui-v2.spec.ts |
-| `mcp.cancel` | 5 | access.spec.ts, token-grants.spec.ts |
-| `mcp.confirmRevoke` | 3 | access.spec.ts |
-| `mcp.grantActive` | 8 | access.spec.ts, token-grants.spec.ts |
-| `mcp.policy.manual` | 6 | access.spec.ts, token-grants.spec.ts |
+| `mcp.cancel` | 6 | access.spec.ts, token-grants.spec.ts |
+| `mcp.confirmRevoke` | 4 | access.spec.ts |
+| `mcp.grantActive` | 10 | access.spec.ts, token-grants.spec.ts |
+| `mcp.policy.manual` | 7 | access.spec.ts, token-grants.spec.ts |
 | `mcp.policy.policy` | 1 | token-grants.spec.ts |
-| `mcp.policy.restore` | 3 | access.spec.ts |
-| `mcp.revokeAccess` | 3 | access.spec.ts |
-| `mcp.revoked` | 12 | access.spec.ts, token-grants.spec.ts |
-| `mcp.revokeGrant` | 3 | access.spec.ts |
-| `mcp.saveGrant` | 3 | access.spec.ts |
-| `mcp.undo` | 6 | access.spec.ts |
-| `mcp.workspaceGrants` | 3 | access.spec.ts |
+| `mcp.policy.restore` | 4 | access.spec.ts |
+| `mcp.revokeAccess` | 4 | access.spec.ts |
+| `mcp.revoked` | 15 | access.spec.ts, token-grants.spec.ts |
+| `mcp.revokeGrant` | 4 | access.spec.ts |
+| `mcp.saveGrant` | 4 | access.spec.ts |
+| `mcp.undo` | 8 | access.spec.ts |
+| `mcp.workspaceGrants` | 4 | access.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |
 | `me.languageCN` | 1 | me.spec.ts |
@@ -1109,9 +1120,9 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
 | `organization.emailDelivery.logged` | 5 | planning.spec.ts |
 | `organization.invite` | 25 | planning.spec.ts |
-| `organization.roleFor` | 6 | access.spec.ts |
+| `organization.roleFor` | 8 | access.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
-| `planning.close` | 20 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
+| `planning.close` | 21 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
 | `projects.archive` | 2 | project-profile.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |

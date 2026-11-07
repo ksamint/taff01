@@ -2,6 +2,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { setLocalTestSystemAdmin } from "../packages/core/src/testing/system-admin";
 import {
+  accessMatrixSchema,
   agentProfileSchema,
   issuedAgentTokenSchema,
   issuedWorkspaceInviteSchema,
@@ -367,4 +368,45 @@ test("system access matrix shares the token policy confirmation and shows organi
       ).toBe(true);
     await setLocalTestSystemAdmin(process.env.DATABASE_URL!, me.user.id, false);
   }
+});
+
+test("workspace admin reads the baseline permission rows the matrix returns", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const m = messages[locale];
+  const me = await freshAccount(page, locale);
+  const workspace = me.workspaces[0];
+  const matrix = accessMatrixSchema.parse(
+    await (
+      await page.request.get(`/api/workspaces/${workspace.id}/access-matrix`)
+    ).json(),
+  );
+  await page.goto("/orgs/access");
+  await page
+    .getByRole("tab", { name: m.access.permissions, exact: true })
+    .click();
+  await expect(page.getByTestId("access-permissions-baseline")).toHaveText(
+    m.access.permissionsBaseline,
+  );
+  await expect(page.getByTestId("access-permission-row")).toHaveCount(
+    matrix.actions.length,
+  );
+  const manage = page.locator(
+    '[data-testid="access-permission-row"][data-action="workspace:manage"]',
+  );
+  await expect(manage.locator('[data-role="admin"]')).toHaveAttribute(
+    "data-allowed",
+    "true",
+  );
+  await expect(manage.locator('[data-role="member"]')).toHaveAttribute(
+    "data-allowed",
+    "false",
+  );
+  await expect(manage.locator('[data-role="member"]')).toContainText(
+    m.access.denied,
+  );
+  await expect(
+    page.locator(".access-group th", { hasText: m.access.group.finance }),
+  ).toBeVisible();
 });

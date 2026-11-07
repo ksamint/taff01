@@ -27,13 +27,15 @@ import { TokenPolicyControl } from "./token-policy-control";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
 
-const tabs = ["people", "agents", "tokens", "apps"] as const;
+const tabs = ["people", "agents", "tokens", "apps", "permissions"] as const;
 function MatrixTable({
   children,
   label,
+  compact = false,
 }: {
   children: ReactNode;
   label: string;
+  compact?: boolean;
 }) {
   return (
     <div
@@ -42,7 +44,11 @@ function MatrixTable({
       aria-label={label}
       tabIndex={0}
     >
-      <table className="access-table">{children}</table>
+      <table
+        className={compact ? "access-table access-compact" : "access-table"}
+      >
+        {children}
+      </table>
     </div>
   );
 }
@@ -122,6 +128,7 @@ export function AccessMatrix() {
               {tab === "agents" && <Agents data={matrix.data} />}
               {tab === "tokens" && <TokenGrants data={matrix.data} />}
               {tab === "apps" && <Apps data={matrix.data} />}
+              {tab === "permissions" && <Permissions data={matrix.data} />}
             </section>
           )}
         </>
@@ -134,6 +141,73 @@ export function AccessMatrix() {
     </div>
   );
 }
+const ROLES = ["admin", "member", "guest", "agent"] as const;
+
+/**
+ * The baseline can() rows the matrix already returns (AM-3.1), grouped by
+ * resource. Codes stay visible so they match docs/spec/permissions-matrix.md.
+ */
+function Permissions({ data }: { data: Matrix }) {
+  const { t } = useTranslation();
+  const groups = new Map<string, Matrix["actions"]>();
+  for (const row of data.actions) {
+    const prefix = row.action.split(":")[0];
+    groups.set(prefix, [...(groups.get(prefix) ?? []), row]);
+  }
+  return (
+    <>
+      <p className="access-note" data-testid="access-permissions-baseline">
+        {t("access.permissionsBaseline")}
+      </p>
+      <MatrixTable label={t("access.permissions")} compact>
+        <thead>
+          <tr>
+            <th scope="col">{t("access.action")}</th>
+            {ROLES.map((role) => (
+              <th key={role} scope="col">
+                {t(`access.${role}`)}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        {[...groups].map(([prefix, rows]) => (
+          <tbody key={prefix}>
+            <tr className="access-group">
+              <th colSpan={ROLES.length + 1} scope="colgroup">
+                {t(`access.group.${prefix}`, { defaultValue: prefix })}
+              </th>
+            </tr>
+            {rows.map((row) => (
+              <tr
+                key={row.action}
+                data-testid="access-permission-row"
+                data-action={row.action}
+              >
+                <th scope="row">
+                  <code>{row.action}</code>
+                </th>
+                {ROLES.map((role) => (
+                  <td
+                    key={role}
+                    data-role={role}
+                    data-allowed={row[role]}
+                    className={row[role] ? "access-yes" : "access-no"}
+                  >
+                    <span aria-hidden="true">{row[role] ? "✓" : "—"}</span>
+                    <span className="sr-only">
+                      {t(row[role] ? "access.allowed" : "access.denied")}
+                    </span>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        ))}
+      </MatrixTable>
+    </>
+  );
+}
+
 function People({ data }: { data: Matrix }) {
   const { t } = useTranslation();
   const { workspace, confirmed } = useWorkspace();

@@ -59,6 +59,10 @@ reads use the same current membership checks as other administration operations.
   condition.
 - AM-3.3 When the permission document differs from generated rows, lint and its
   document staleness test shall fail.
+- AM-3.4 The workspace matrix page shall show the rows it returns in a
+  Permissions tab: grouped by resource with localized group names, the action
+  code, an allowed or not-allowed mark with a screen-reader label for admin,
+  member, guest and agent, and the AM-3.2 baseline note above the table.
 
 ## Non-functional
 
@@ -82,6 +86,7 @@ reads use the same current membership checks as other administration operations.
 | Human REST boundaries | apps/api/src/app.test.ts; packages/core/src/authorization.integration.test.ts |
 | AM-3.1–2 | packages/core/src/permissions.test.ts |
 | AM-3.3 | scripts/permissions-matrix.test.ts; lint --check command |
+| AM-3.4 | e2e/access.spec.ts "workspace admin reads the baseline permission rows" in en, zh-CN and zh-HK |
 | Web rendering and role/capability changes | e2e/access.spec.ts; accepted three-locale gate and native read-only matrix acceptance in [milestone 102](../milestones/102-v0.2.19.md) |
 
 ## Open decisions
