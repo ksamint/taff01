@@ -11,6 +11,7 @@ import {
   systemAccessMatrixSchema,
 } from "@taff/schemas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Check, Minus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { type ReactNode, useState } from "react";
@@ -202,7 +203,11 @@ function Permissions({ data }: { data: Matrix }) {
                     data-allowed={row[role]}
                     className={row[role] ? "access-yes" : "access-no"}
                   >
-                    <span aria-hidden="true">{row[role] ? "✓" : "—"}</span>
+                    {row[role] ? (
+                      <Check size={16} aria-hidden="true" />
+                    ) : (
+                      <Minus size={16} aria-hidden="true" />
+                    )}
                     <span className="sr-only">
                       {t(row[role] ? "access.allowed" : "access.denied")}
                     </span>
