@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.21 — candidate designed daily report
+
+- Daily summaries share one display layout across the web page, the text and the image, so all three show the same facts and wording: audience and tag, "prepared for", full date, KPIs, risk, progress, finance, agent runs, counted sections, confidentiality and hash.
+- The image (`image-2`) is a colour document in the TABLE AI tokens with KPI tiles, risk badges, labelled progress and finance bars and a short-hash footer; the full hash is in the PNG metadata. Long reports are fitted under a 3,400 px estimate and name what they omit.
+- The text (`text-2`) is structured plain text for chat apps that never splits a label from its value.
+- The renderer still accepts the previous input for one release and reports its version; the worker stores only `image-2` PNGs. Existing renders are unchanged.
+- TypeScript and Rust are the only source languages (ADR 0030): the PostCSS configuration is JSON, and the neighbour check, live e-mail proof and audit checks run as TypeScript. The font subsetter remains Python until a Rust subsetter keeps variable-font tables.
+- No migration, no new environment value, no new dependency name.
+
 ## v0.2.20 — candidate typed tooling and hardening
 
 - Owned scripts run as strictly checked native TypeScript; the service worker is generated from a separately checked source before web dev/build. PostCSS remains the documented JavaScript configuration exception.

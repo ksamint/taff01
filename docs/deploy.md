@@ -3127,3 +3127,27 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Native read-only health/auth/SMS/OAuth/MCP/cache-denial/matrix/summaries/token UI and typed-service-worker header checks passed with secure cookies, zero exceptions/business writes/token issues. One actual existing ToolServer 3 credential workspaces.list read passed at 14:32:22Z, with normal protocol tools/list37; current returned three organizations/manual home+two policy grants each retain exactly tasks:read/tasks:write/calendar:write/summaries:read. Credential/config/grant set unchanged; dynamic returned grants were used, no prep-time count frozen. No real signed business writes, source/pin/recipient/summary creation, SMS or messages; owner downloads/sign-in remain usage checks.
 - C5 uses the documented conditional default: current routing retained, prior valid share192158gzipbytes(187.7KiB)>50KiB remains an unresolved optimization, not a claimed success. Counterpart Twin c8f4ffb/schema46 completed its separate closeout and17m12s observation; optional identity metadata does not broaden controller/verifier authority.
 - Receipt and accepted SHA-only marker are written; keeper released14:38:58Z and removed its owner file. Independent nonblocking flock14:39:31Z proved four apps and persisted Valkey unchanged/restart0/API+renderer+Valkey healthy. Roll back apps to retained v0.2.19 while keeping healthy new persisted Valkey/data. Once any writer may have resumed, NEVER restore pre-cutover RDB blindly: fence again, verify fresh current RDB/AOF/recovery and only then resume. Preserve additive0042/schema/data/volumes and backups; no down-v/flush.
+
+### Release candidate v0.2.21 — designed daily report
+
+- Source: the `main` commit that carries milestones 105–107 (fast-forwarded from
+  `claude/nifty-pascal-tm5d5d`); record its full SHA. Deploy and close out using
+  [the checklist](release-closeout.md); check 3 now runs
+  `node scripts/deploy/neighbor-preservation.mts`.
+- No migration (journal stays 43), no new environment value, no proxy or route
+  change. Four images as in v0.2.19: API, web, worker and internal `taff-render`.
+- Order: replace `taff-render` first and confirm `/health`; the new worker sends
+  the layout input and stores a PNG only when the renderer answers
+  `x-taff-renderer: image-2`. The renderer still accepts the v0.2.20 input, so a
+  worker that is briefly older keeps rendering.
+- Existing stored renders are not rewritten; summaries generated after the
+  release use `text-2` and `image-2`.
+- Live acceptance stays read-only: health, OAuth discovery, `/mcp` 401, signed-in
+  summaries page and matrix, renderer health from inside the network, and a
+  text/image download only if an owner-created summary exists. Never create a
+  tag, recipient, summary or share during deployment.
+- Visual references: the six `summary.png` delivery-visual images must be
+  recaptured on the pinned Playwright build-1248 Linux pipeline before the
+  comparison; the access references are unchanged.
+- Rollback: v0.2.20 source `596272a`, its four retained images and env backup.
+  No schema change to keep; renders written by v0.2.21 stay readable by v0.2.20.

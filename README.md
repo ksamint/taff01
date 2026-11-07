@@ -45,6 +45,13 @@ retains its return context, [Me panels](docs/spec/client-navigation.md) show loc
 [Brief workload answers](docs/spec/brief.md) use current task ownership counts.
 Production activation is pending.
 
+**v0.2.21 (candidate) — designed daily report.** The web page, the text and
+the colour image of a daily summary come from one display layout, with KPI
+tiles, risk badges, labelled progress and finance bars and a confidential,
+hashed footer ([daily summary contract](docs/spec/daily-summary.md), DS-8).
+TypeScript and Rust are the only source languages
+([ADR 0030](docs/adr/0030-typescript-and-rust-only.md)).
+
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.
 
