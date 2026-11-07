@@ -1572,5 +1572,31 @@
       "audience": "受眾",
       "summary": "總結"
     }
+  },
+  "projectFinance": {
+    "title": "財務",
+    "contract": "合約金額",
+    "currency": "貨幣",
+    "client": "客戶公司",
+    "noClient": "未關聯客戶公司",
+    "noContract": "尚未填寫合約金額",
+    "collected": "已收",
+    "edit": "編輯財務",
+    "save": "儲存",
+    "cancel": "取消",
+    "saved": "財務已更新",
+    "payments": "收款記錄",
+    "noPayments": "暫無收款記錄",
+    "recordPayment": "記錄收款",
+    "amount": "金額",
+    "paidOn": "收款日期",
+    "note": "備註（可選）",
+    "recorded": "收款已記錄",
+    "invalidAmount": "請輸入最多兩位小數的金額",
+    "positiveAmount": "請輸入大於零的金額",
+    "currencyRequired": "請先選擇貨幣",
+    "currencyLocked": "已有收款記錄，貨幣不可更改",
+    "appendOnly": "已記錄的收款不可編輯或刪除。",
+    "readOnly": "僅管理員可更改財務資料。"
   }
 }

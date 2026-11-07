@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (421 distinct, 2074 uses)
+## Test ids (437 distinct, 2111 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -25,7 +25,7 @@ several do). “Also rendered by” lists the other files.
 | `access-forbidden` | 1 |  | access.spec.ts |
 | `access-grant-confirm` | 2 | crm/contact-links.tsx | access.spec.ts |
 | `access-matrix` | 1 |  | delivery-visual.spec.ts |
-| `access-permission-row` | 3 |  | access.spec.ts, zz-shot.spec.ts |
+| `access-permission-row` | 2 |  | access.spec.ts |
 | `access-permissions-baseline` | 1 |  | access.spec.ts |
 | `system-access-matrix` | 1 |  | delivery-visual.spec.ts |
 
@@ -179,7 +179,7 @@ several do). “Also rendered by” lists the other files.
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 36 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | access.spec.ts, agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
+| `workspace-*` | 38 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx | access.spec.ts, agent-creation.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -190,6 +190,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-evidence-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-link-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-edit` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
+| `project-finance-edit` | 4 | project-finance-panel.tsx | project-finance.spec.ts, zz-shot.spec.ts |
 | `stakeholder-edit` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `stakeholder-remove` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `stakeholder-roles` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
@@ -434,6 +435,26 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `project-audience-tag` | 1 |  | summaries.spec.ts |
+
+### project-finance-panel.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `project-finance` | 4 |  | project-finance.spec.ts, zz-shot.spec.ts |
+| `project-finance-collected` | 1 |  | project-finance.spec.ts |
+| `project-finance-contract` | 1 |  | project-finance.spec.ts |
+| `project-finance-contract-input` | 2 |  | project-finance.spec.ts |
+| `project-finance-currency` | 2 |  | project-finance.spec.ts |
+| `project-finance-error` | 1 |  | project-finance.spec.ts |
+| `project-finance-form` | 3 |  | project-finance.spec.ts, zz-shot.spec.ts |
+| `project-finance-record` | 3 |  | project-finance.spec.ts |
+| `project-finance-save` | 2 |  | project-finance.spec.ts |
+| `project-payment` | 4 |  | project-finance.spec.ts, zz-shot.spec.ts |
+| `project-payment-amount` | 2 |  | project-finance.spec.ts |
+| `project-payment-error` | 1 |  | project-finance.spec.ts |
+| `project-payment-form` | 1 |  | project-finance.spec.ts |
+| `project-payment-note` | 1 |  | project-finance.spec.ts |
+| `project-payment-save` | 2 |  | project-finance.spec.ts |
 
 ### projects-scene.tsx
 
@@ -697,7 +718,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-row` | 5 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-save` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-start` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline-view` | 7 |  | finance-visibility.spec.ts, live/platform.spec.ts, live/timeline.spec.ts, timeline.spec.ts |
+| `timeline-view` | 8 |  | finance-visibility.spec.ts, live/platform.spec.ts, live/timeline.spec.ts, project-finance.spec.ts, timeline.spec.ts |
 
 ### today-view.tsx
 
@@ -705,7 +726,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-v2.spec.ts |
-| `today-heading` | 69 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 70 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
 
 ### token-policy-control.tsx
@@ -816,7 +837,7 @@ several do). “Also rendered by” lists the other files.
 | `tab — name: m.access.agents` | 1 | access.spec.ts |
 | `tab — name: m.access.apps` | 1 | access.spec.ts |
 | `tab — name: m.access.people` | 2 | access.spec.ts |
-| `tab — name: m.access.permissions` | 2 | access.spec.ts, zz-shot.spec.ts |
+| `tab — name: m.access.permissions` | 1 | access.spec.ts |
 | `tab — name: m.access.tokens` | 1 | access.spec.ts |
 | `tab — name: m.access[tab]` | 1 | delivery-visual.spec.ts |
 | `tabpanel` | 2 | brief.spec.ts, live/brief.spec.ts |
@@ -1009,7 +1030,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `access.explain` | 5 | access.spec.ts, delivery-visual.spec.ts |
 | `access.group.finance` | 4 | access.spec.ts |
 | `access.people` | 8 | access.spec.ts |
-| `access.permissions` | 5 | access.spec.ts, zz-shot.spec.ts |
+| `access.permissions` | 4 | access.spec.ts |
 | `access.permissionsBaseline` | 4 | access.spec.ts |
 | `access.selfDemotionHint` | 4 | access.spec.ts |
 | `access.tokens` | 4 | access.spec.ts |
@@ -1123,6 +1144,10 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.roleFor` | 8 | access.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 21 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
+| `projectFinance.invalidAmount` | 1 | project-finance.spec.ts |
+| `projectFinance.noContract` | 1 | project-finance.spec.ts |
+| `projectFinance.positiveAmount` | 1 | project-finance.spec.ts |
+| `projectFinance.readOnly` | 1 | project-finance.spec.ts |
 | `projects.archive` | 2 | project-profile.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |

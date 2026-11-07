@@ -281,6 +281,7 @@ test("failed optimistic creation and assignment restore the previous list", asyn
         canManageRoles: true,
         canEditPlan: true,
         canReadFinance: true,
+        canManageFinance: true,
         canReadCrm: true,
         canManageCrm: true,
         canArchiveCrm: true,

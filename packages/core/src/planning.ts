@@ -247,6 +247,7 @@ export function createPlanningOperations({
       // Plans follow task:schedule per task; this says whether any edit is possible.
       canEditPlan: actor.kind === "person" && actor.role !== "guest",
       canReadFinance: can(actor, "finance:read", { workspaceId: w }),
+      canManageFinance: can(actor, "finance:manage", { workspaceId: w }),
       canReadCrm: can(actor, "contact:read", { workspaceId: w }),
       canManageCrm: can(actor, "contact:manage", { workspaceId: w }),
       canArchiveCrm: can(actor, "crm:archive", { workspaceId: w }),

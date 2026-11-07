@@ -59,6 +59,7 @@ import {
 import { useTimeline } from "../lib/timeline-queries";
 import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
+import { ProjectFinancePanel } from "./project-finance-panel";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
 
@@ -495,6 +496,7 @@ function ProjectTimeline({ project }: { project: Project }) {
           t={t}
         />
       ) : null}
+      <ProjectFinancePanel project={project} />
       {linkMode && (
         <div
           className="timeline-link-hint"

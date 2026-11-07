@@ -1572,5 +1572,31 @@
       "audience": "Audiences",
       "summary": "Summaries"
     }
+  },
+  "projectFinance": {
+    "title": "Finance",
+    "contract": "Contract amount",
+    "currency": "Currency",
+    "client": "Client company",
+    "noClient": "No client company",
+    "noContract": "No contract amount yet",
+    "collected": "Collected",
+    "edit": "Edit finance",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "Finance updated",
+    "payments": "Payments",
+    "noPayments": "No payments recorded yet",
+    "recordPayment": "Record payment",
+    "amount": "Amount",
+    "paidOn": "Paid on",
+    "note": "Note (optional)",
+    "recorded": "Payment recorded",
+    "invalidAmount": "Enter an amount with up to two decimals",
+    "positiveAmount": "Enter an amount above zero",
+    "currencyRequired": "Choose a currency first",
+    "currencyLocked": "The currency can't change after payments are recorded",
+    "appendOnly": "Recorded payments can't be edited or deleted.",
+    "readOnly": "Only administrators can change finance."
   }
 }

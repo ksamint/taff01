@@ -328,6 +328,16 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
     });
     expect(moved).toMatchObject({ status: "in_progress", version: 2 });
   });
+  it("lets only administrators manage finance while every non-guest person reads it", async () => {
+    expect(await core.getWorkspaceAccess(alice, w)).toMatchObject({
+      canReadFinance: true,
+      canManageFinance: true,
+    });
+    expect(await core.getWorkspaceAccess(bob, w)).toMatchObject({
+      canReadFinance: true,
+      canManageFinance: false,
+    });
+  });
   it("guests read but cannot write, assigned agents share the same field/comment path", async () => {
     const task = await create("Permission target", { workerId: agentId });
     expect((await core.getTask(guest, task.id)).id).toBe(task.id);
@@ -338,6 +348,7 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
       canManageRoles: false,
       canEditPlan: false,
       canReadFinance: false,
+      canManageFinance: false,
       canReadCrm: false,
       canManageCrm: false,
       canArchiveCrm: false,

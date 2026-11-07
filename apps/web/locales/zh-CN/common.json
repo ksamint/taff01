@@ -1572,5 +1572,31 @@
       "audience": "受众",
       "summary": "总结"
     }
+  },
+  "projectFinance": {
+    "title": "财务",
+    "contract": "合同金额",
+    "currency": "币种",
+    "client": "客户公司",
+    "noClient": "未关联客户公司",
+    "noContract": "尚未填写合同金额",
+    "collected": "已收",
+    "edit": "编辑财务",
+    "save": "保存",
+    "cancel": "取消",
+    "saved": "财务已更新",
+    "payments": "收款记录",
+    "noPayments": "暂无收款记录",
+    "recordPayment": "记录收款",
+    "amount": "金额",
+    "paidOn": "收款日期",
+    "note": "备注（可选）",
+    "recorded": "收款已记录",
+    "invalidAmount": "请输入最多两位小数的金额",
+    "positiveAmount": "请输入大于零的金额",
+    "currencyRequired": "请先选择币种",
+    "currencyLocked": "已有收款记录，币种不可更改",
+    "appendOnly": "已记录的收款不可编辑或删除。",
+    "readOnly": "仅管理员可更改财务信息。"
   }
 }

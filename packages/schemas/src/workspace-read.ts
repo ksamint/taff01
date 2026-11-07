@@ -9,6 +9,8 @@ export const workspaceAccessSchema = object({
   canManageRoles: boolean(),
   canEditPlan: boolean(),
   canReadFinance: boolean(),
+  /** Contract amount, currency, client company and payments (ADR 0021). */
+  canManageFinance: boolean(),
   canReadCrm: boolean(),
   canManageCrm: boolean(),
   canArchiveCrm: boolean(),
