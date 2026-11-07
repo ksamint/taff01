@@ -3151,3 +3151,12 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
   comparison; the access references are unchanged.
 - Rollback: v0.2.20 source `596272a`, its four retained images and env backup.
   No schema change to keep; renders written by v0.2.21 stay readable by v0.2.20.
+
+### Designed daily reports v0.2.21 upgrade checkpoint — 2026-11-07 UTC
+
+- Merged/deployed `cc449c698378a334f64264a7250565a9ed0eaba4`; annotated `v0.2.21` verified on origin. [Milestone 110](milestones/110-v0.2.21.md); [release closeout](release-closeout.md), no CI/runners.
+- Exact-source gate: Node2231/138, Rust29/SQL parity/fixtures/fmt/clippy/deny, browser318/0fail/3 expected development skips, productionSSR3, checklist32, MCP69/37 tools, pinned Linux visual6 with six reviewed summary references/access references unchanged, lint/typecheck/licences/frozen install/builds/four amd64 images. Today197276/204800 gzip bytes.
+- Accepted archive352961053 bytes SHA256 `e242efd6cd3f5794ef0af79a908fad74dec049f2f898bd19644f4d71d4f00f96`; all immutable identities/non-root reads verified. Native configs API586b3a24/worker56543a5a/webafa60dce/renderd291d9c7. Private receipt retains full identities.
+- Native keeper, exclusive0600 env backup and verified7839483-byte DB dump preceded activation. Renderer healthy first, then only API/worker/web replaced; migrator exit0/journal43 unchanged/PostgreSQL start retained. Four apps stable/restart0, API+renderer healthy, worker schedulers ready. All29 neighbors including persisted Valkey/Caddy, route and env exceptTAFF_TAG retained.
+- Read-only live health/auth/OAuth/MCP/private-share denial/summaries/matrix/token pages passed with secure cookies and zero browser exceptions/business writes/agent-token issues. No visible owner summary on verification account, so no actual download fabricated. No summary/tag/recipient/share/source/pin, SMS, real message, credential or grant operation. Existing public-share JS/owner-pending connector checks remain.
+- Rollback restores retained v0.2.20 `596272a` four images/env while preserving data, healthy persisted Valkey/PostgreSQL/Caddy and neighbors. No rollback needed. Native receipt, SHA-only marker, keeper release and independent lock probe follow the checklist.
