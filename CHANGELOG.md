@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.2.22 — candidate admin screens
+
+- Workspace access gains a Permissions tab: what admins, members, guests and agents may do by default, grouped by area, from the same rows the permission tests use.
+- Projects gain a finance panel on the timeline. Every non-guest person reads the contract amount, the collected amount and percent and the payments; administrators set the contract, currency and client company and record append-only payments. A contract needs a currency and the currency locks once money is received.
+- Workspace administrators gain an audit log at `/orgs/audit`: the newest 200 recorded changes with actor names, filterable by trace, request, approval or receipt id.
+- Web font subsets gain the glyphs the new Chinese strings use; none removed.
+- No migration, no new environment value, no new dependency, no MCP or agent change.
+
 ## v0.2.21 — candidate designed daily report
 
 - Daily summaries share one display layout across the web page, the text and the image, so all three show the same facts and wording: audience and tag, "prepared for", full date, KPIs, risk, progress, finance, agent runs, counted sections, confidentiality and hash.

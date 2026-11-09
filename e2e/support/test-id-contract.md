@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (448 distinct, 2126 uses)
+## Test ids (448 distinct, 2125 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -81,7 +81,7 @@ several do). “Also rendered by” lists the other files.
 | `audit-forbidden` | 1 |  | audit.spec.ts |
 | `audit-invalid` | 1 |  | audit.spec.ts |
 | `audit-kind` | 1 |  | audit.spec.ts |
-| `audit-row` | 3 |  | audit.spec.ts, zz-shot.spec.ts |
+| `audit-row` | 2 |  | audit.spec.ts |
 | `audit-value` | 2 |  | audit.spec.ts |
 | `audit-view` | 1 |  | audit.spec.ts |
 

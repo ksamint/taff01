@@ -52,6 +52,11 @@ hashed footer ([daily summary contract](docs/spec/daily-summary.md), DS-8).
 TypeScript and Rust are the only source languages
 ([ADR 0030](docs/adr/0030-typescript-and-rust-only.md)).
 
+**v0.2.22 (candidate) — admin screens.** Workspace administrators see the
+default permissions per role at `/orgs/access`, manage project finance from
+the timeline ([project finance](docs/spec/project-finance.md)) and read the
+workspace [audit log](docs/spec/audit.md) at `/orgs/audit`.
+
 See [CHANGELOG.md](CHANGELOG.md) and the milestone reports `11-*` to `19-*`.
 The history below describes the v1 milestones.
 
