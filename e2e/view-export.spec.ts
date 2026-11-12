@@ -69,7 +69,7 @@ test("a person exports, sends, copies and saves project and workspace images", a
 }, info) => {
   test.setTimeout(120_000);
   const locale = info.project.name as TestLocale;
-  const m = messages[locale].viewExport;
+  const m = messages[locale];
   await stubShareSheet(page);
   const me = await freshAccount(page, locale);
   const workspace = me.workspaces[0];
@@ -96,7 +96,7 @@ test("a person exports, sends, copies and saves project and workspace images", a
   // The project view: preview, send, copy, save.
   await page.goto(`/projects/${project.id}`);
   await expect(page.getByTestId("open-quick")).toBeEnabled();
-  const dialog = await openExport(page, m.title);
+  const dialog = await openExport(page, m.viewExport.title);
   await page.getByTestId("view-export-send").click();
   await expect
     .poll(() =>
@@ -113,7 +113,7 @@ test("a person exports, sends, copies and saves project and workspace images", a
     ]);
   await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.getByTestId("view-export-copy").click();
-  await expect(page.getByTestId("toast")).toContainText(m.copied);
+  await expect(page.getByTestId("toast")).toContainText(m.viewExport.copied);
   await save(page, "project");
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
@@ -122,7 +122,7 @@ test("a person exports, sends, copies and saves project and workspace images", a
   // The workspace overview (all projects) exports every active project.
   await page.goto("/projects?all=1");
   await expect(page.getByTestId("open-quick")).toBeEnabled();
-  await openExport(page, m.title);
+  await openExport(page, m.viewExport.title);
   await save(page, "workspace");
 
   // The API answers only with the caller's own rights and a valid query.

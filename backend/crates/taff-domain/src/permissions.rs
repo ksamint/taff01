@@ -256,6 +256,8 @@ pub enum Action {
     SummaryShare,
     #[serde(rename = "summary:revoke")]
     SummaryRevoke,
+    #[serde(rename = "view:export")]
+    ViewExport,
     #[serde(rename = "token:policy")]
     TokenPolicy,
     #[serde(rename = "token:grant")]
@@ -433,6 +435,10 @@ pub fn can_at(actor: Option<&Actor>, action: Action, resource: &Resource, now: i
         return actor.kind == MemberKind::Person && actor.role == Role::Admin;
     }
     if action == Action::AudienceRead {
+        return actor.kind == MemberKind::Person;
+    }
+    // Exported view images (ADR 0031): members and admins; guests stop above.
+    if action == Action::ViewExport {
         return actor.kind == MemberKind::Person;
     }
     if action == Action::SummaryRead {

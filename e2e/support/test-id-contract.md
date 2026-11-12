@@ -1116,7 +1116,6 @@ Keys read from `apps/web/locales/*/common.json` through
 | `brief.toast.applied` | 12 | brief.spec.ts, live/brief.spec.ts |
 | `brief.toast.undone` | 15 | brief.spec.ts, live/brief.spec.ts |
 | `calendar.title` | 1 | calendar.spec.ts |
-| `copied` | 1 | view-export.spec.ts |
 | `crm.companies.delete` | 10 | crm.spec.ts, live/crm.spec.ts |
 | `crm.contacts.add` | 11 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `crm.contacts.delete` | 10 | crm.spec.ts, live/crm.spec.ts |
@@ -1257,8 +1256,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `timeline.depRemoved` | 12 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.rescheduled` | 12 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.resized` | 6 | live/timeline.spec.ts, timeline.spec.ts |
-| `title` | 2 | view-export.spec.ts |
 | `today` | 25 | live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
-| `viewExport` | 1 | view-export.spec.ts |
+| `viewExport.copied` | 1 | view-export.spec.ts |
+| `viewExport.title` | 2 | view-export.spec.ts |
