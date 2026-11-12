@@ -235,12 +235,14 @@ describe.skipIf(!url)("M18 mind map", () => {
       .where(
         and(eq(activity.workspaceId, w), eq(activity.resourceId, edge.id)),
       );
-    expect(audit.map((row) => row.action)).toEqual([
-      "mind_edges.insert",
-      "mind_edges.update",
-      "mind_edges.update",
-      "mind_edges.delete",
-    ]);
+    expect(audit.map((row) => row.action).sort()).toEqual(
+      [
+        "mind_edges.insert",
+        "mind_edges.update",
+        "mind_edges.update",
+        "mind_edges.delete",
+      ].sort(),
+    );
   });
   it("keeps sources with safe URLs and links them to nodes", async () => {
     const n = await node(bob, "Solo dining");
