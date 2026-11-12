@@ -140,6 +140,22 @@ test("summary and access screens", async ({ page }, info) => {
     });
     await page.keyboard.press("Escape");
 
+    await page
+      .getByRole("tab", { name: m.access.permissions, exact: true })
+      .click();
+    await expect(matrix.locator("tbody tr").first()).toBeVisible();
+    await page.evaluate(prepareFonts, undefined);
+    await expect(page).toHaveScreenshot("access-permissions.png", {
+      animations: "disabled",
+    });
+
+    await page.goto("/orgs");
+    await expect(page.getByTestId("open-audit-log")).toBeVisible();
+    await page.evaluate(prepareFonts, undefined);
+    await expect(page).toHaveScreenshot("organizations.png", {
+      animations: "disabled",
+    });
+
     await setLocalTestSystemAdmin(process.env.DATABASE_URL!, me.user.id, true);
     await expect
       .poll(

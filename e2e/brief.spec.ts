@@ -7,12 +7,13 @@ import {
   type Brief,
   briefSchema,
   issuedAgentTokenSchema,
-  memberListSchema,
+  memberSchema,
   meSchema,
   type Task,
   taskListSchema,
   taskSchema,
 } from "../packages/schemas/src/index";
+import { freshAccount } from "./support/account";
 import { messages, type TestLocale } from "./support/messages";
 import { selectLocale } from "./support/preferences";
 
@@ -191,14 +192,14 @@ test("a person reviews an agent's proposal in the brief before anything changes"
   test.setTimeout(120000);
   const locale = info.project.name as TestLocale;
   const m = messages[locale];
-  const { workspace } = await signIn(page, locale);
-  const members = memberListSchema.parse(
-    await (
-      await page.request.get(`/api/members?workspaceId=${workspace.id}`)
-    ).json(),
+  const me = await freshAccount(page, locale);
+  const workspace = me.workspaces[0]!;
+  const response = await page.request.post(
+    `/api/workspaces/${workspace.id}/members`,
+    { data: { name: "Brief agent", kind: "agent" } },
   );
-  const agent = members.find((member) => member.kind === "agent");
-  if (!agent) throw new Error("The seeded workspace needs an agent");
+  expect(response.status()).toBe(201);
+  const agent = memberSchema.parse(await response.json());
   const create = async (title: string): Promise<Task> => {
     const response = await page.request.post("/api/tasks", {
       data: {
