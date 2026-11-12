@@ -1499,7 +1499,11 @@
     "projectTags": "股東標籤",
     "projectTagsHint": "已標記的項目會出現在該機構的每日摘要中。",
     "tagsSaved": "股東標籤已儲存",
-    "adminOnly": "只有管理員可以管理股東摘要。"
+    "adminOnly": "只有管理員可以管理股東摘要。",
+    "editTag": "編輯標籤",
+    "editRecipient": "編輯收件人",
+    "noContact": "不關聯聯絡人",
+    "unavailableContact": "目前聯絡人（無法使用）"
   },
   "share": {
     "title": "分享連結",
@@ -1571,7 +1575,10 @@
       "mind": "心智圖",
       "audience": "受眾",
       "summary": "總結"
-    }
+    },
+    "pendingGrants": "待處理請求",
+    "noPendingGrants": "沒有待處理的能力授權請求。",
+    "request": "請求"
   },
   "projectFinance": {
     "title": "財務",

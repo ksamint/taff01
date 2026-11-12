@@ -11,6 +11,12 @@ graph data and isolation scope.
 
 ## Status
 
+**v0.2.23 (candidate) — grant decisions and audience editing.** Pending requests
+are actionable from the access matrix; administrators can edit audience tags and
+recipients after creation. Existing permissions and immutable summaries remain
+the contract; see [access matrix](docs/spec/access-matrix.md) and
+[daily summaries](docs/spec/daily-summary.md).
+
 **v0.2.0 — frontend v2.** The UI follows prototype v2 (ADR 0014):
 - **Phone:** four tabs (今天 · 日曆 · 項目 · 我的).
 - **Desktop:** a sidebar with ⌘K.
@@ -52,7 +58,7 @@ hashed footer ([daily summary contract](docs/spec/daily-summary.md), DS-8).
 TypeScript and Rust are the only source languages
 ([ADR 0030](docs/adr/0030-typescript-and-rust-only.md)).
 
-**v0.2.22 (candidate) — admin screens.** Workspace administrators see the
+**v0.2.22 (deployed) — admin screens.** Workspace administrators see the
 default permissions per role at `/orgs/access`, manage project finance from
 the timeline ([project finance](docs/spec/project-finance.md)) and read the
 workspace [audit log](docs/spec/audit.md) at `/orgs/audit`.

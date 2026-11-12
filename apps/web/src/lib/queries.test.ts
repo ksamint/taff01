@@ -17,6 +17,15 @@ vi.mock("@tanstack/react-query", async (importOriginal) => ({
   useQueryClient: vi.fn(),
 }));
 
+it("refreshes pending matrix requests after grant mutations even without realtime", async () => {
+  const client = new QueryClient();
+  const key = ["access-matrix", "workspace"];
+  client.setQueryData(key, { pendingGrants: [{ id: "grant" }] });
+  await invalidateM3(client);
+  expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+  client.clear();
+});
+
 it("keeps a snooze optimistic when a late Inbox observer mounts, then reconciles its rollback", async () => {
   const client = new QueryClient();
   const key = inboxKey("workspace");

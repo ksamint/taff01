@@ -151,6 +151,12 @@ test("summary and access screens", async ({ page }, info) => {
 
     await page.goto("/orgs");
     await expect(page.getByTestId("open-audit-log")).toBeVisible();
+    if (info.project.name.startsWith("desktop"))
+      await expect(
+        page
+          .getByRole("complementary")
+          .getByRole("link", { name: /M7 reviewer/ }),
+      ).toBeVisible();
     await page.evaluate(prepareFonts, undefined);
     await expect(page).toHaveScreenshot("organizations.png", {
       animations: "disabled",

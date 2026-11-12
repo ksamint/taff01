@@ -1,8 +1,6 @@
 # Spec: shareholder daily summary
 
-Living product specification for the module shipped in v0.2.17 (ADR 0027, milestones 85–89). This file
-states the current contract; the ADR holds the decisions and their reasons. Change this file in the same
-commit as the behaviour it describes.
+Living product specification for the module shipped in v0.2.17 (ADR 0027, milestones 85–89). This file states the current contract; the ADR holds the decisions and their reasons. Change this file in the same commit as the behaviour it describes.
 
 Status: v0.2.21 designed renders (DS-5.2, DS-8.2, DS-8.3, DS-8.7) are on `main` and not yet released. Summaries shipped in v0.2.17; the v0.2.19 text/PNG delivery and scoped MCP additions are deployed at `d10c0a8`. Exact-source acceptance and native closeout are recorded in [milestone 102](../milestones/102-v0.2.19.md).
 
@@ -31,6 +29,8 @@ Each statement is testable. "Shall" is a hard requirement.
   zh-CN and `股東 · {organization}` in zh-HK.
 - DS-1.4 A project may carry many tags and a tag many projects. Setting a project's tags replaces the
   whole set; the UI's Undo sends the previous set. Tasks are never tagged directly.
+- DS-1.5 When an admin edits a tag at `/orgs/summaries`, the UI shall save its organization and label
+  through the versioned update; an empty label shall clear it. A rejected save shall keep the draft open.
 
 ### Recipients (DS-2)
 
@@ -40,6 +40,10 @@ Each statement is testable. "Shall" is a hard requirement.
 - DS-2.2 A recipient may link an existing CRM contact and may link one Taff account; a tag shall hold at
   most one recipient per account.
 - DS-2.3 Only admins shall list recipients, because recipients name people outside the workspace.
+- DS-2.4 When an admin edits a recipient, the UI shall allow changing its name, account, CRM contact,
+  language, time zone, local delivery time and finance/people switches, and clearing either optional
+  link. It shall validate with the shared schemas, keep rejected drafts open and leave saved summary
+  snapshots unchanged. Cancel or Escape shall discard the draft and restore focus to the edit button.
 
 ### Generation (DS-3)
 
@@ -119,34 +123,13 @@ tag archive.
 
 ### Stored renders (DS-8)
 
-- DS-8.1 Every generated summary shall enqueue text and PNG renders. Without SUMMARY_RENDER_URL only PNG
-  generation shall be disabled; text remains on.
-- DS-8.2 Both renders shall come from one display layout built in TypeScript, where every date, number,
-  currency and plural is formatted in the recipient's locale and zone; the renderer formats nothing.
-  Text (`text-2`) shall be plain text with no Markdown or emoji: a title and audience line, a KPI line,
-  one block per project (heading with stage and risk, risk reasons, lead and due, progress and finance,
-  agent runs, counted sections with indented items), then the generation time, watermark and the full
-  content hash last. It shall wrap at 72 Latin or 36 full-width columns between `label value` tokens,
-  stay at most 4,000 characters and name omitted items and projects with localized "+N more" lines.
-- DS-8.3 The PNG (`image-2`) shall be 1080 pixels wide, a colour document in the TABLE AI tokens: a
-  header band with title, audience chip, workspace and date; seven KPI tiles, the overdue and blocked
-  tiles toned when non-zero; one card per project with a risk badge (low success, medium warning, high
-  error), labelled progress and finance bars, agent runs, and sections with count pills; a footer with
-  generation time, watermark text and a short hash, the full hash in a `tEXt` chunk
-  `taff:content-hash`; and a repeated diagonal watermark. Text shall be measured with shaped glyph
-  advances and wrap without splitting a word, titles clamped to two lines with an ellipsis. The worker
-  shall fit the layout below a 3,400-pixel estimate, so the image stays under 16,000 pixels and 400 KB.
-- DS-8.4 A render shall be immutable and unique per summary and format. Its source hash shall be copied
-  from the stored summary; no live project data shall be consulted to render an existing summary.
-- DS-8.5 Failed renders shall receive three queue attempts and a sanitized audit entry. Scans shall retry
-  missing renders from the last seven days, at most once per day after failure, with format filtering
-  before the batch cap.
-- DS-8.7 The renderer shall accept the earlier text input (`image-1`) for one release and report the
-  version it drew in an `x-taff-renderer` header; the worker shall store only PNGs reported as
-  `image-2`. Stored renders are never rewritten; summaries generated before v0.2.21 keep their renders.
-- DS-8.6 Authenticated and public delivery shall preserve access checks and private, no-store caching
-  across JSON, text and PNG. Public tokens shall travel only in the request body; unavailable formats
-  retain 404 parity.
+- DS-8.1 Every generated summary shall enqueue text and PNG renders. Without SUMMARY_RENDER_URL only PNG generation shall be disabled; text remains on.
+- DS-8.2 Both renders shall come from one display layout built in TypeScript, where every date, number, currency and plural is formatted in the recipient's locale and zone; the renderer formats nothing. Text (`text-2`) shall be plain text with no Markdown or emoji: a title and audience line, a KPI line, one block per project (heading with stage and risk, risk reasons, lead and due, progress and finance, agent runs, counted sections with indented items), then the generation time, watermark and the full content hash last. It shall wrap at 72 Latin or 36 full-width columns between `label value` tokens, stay at most 4,000 characters and name omitted items and projects with localized "+N more" lines.
+- DS-8.3 The PNG (`image-2`) shall be 1080 pixels wide, a colour document in the TABLE AI tokens: a header band with title, audience chip, workspace and date; seven KPI tiles, the overdue and blocked tiles toned when non-zero; one card per project with a risk badge (low success, medium warning, high error), labelled progress and finance bars, agent runs, and sections with count pills; a footer with generation time, watermark text and a short hash, the full hash in a `tEXt` chunk `taff:content-hash`; and a repeated diagonal watermark. Text shall be measured with shaped glyph advances and wrap without splitting a word, titles clamped to two lines with an ellipsis. The worker shall fit the layout below a 3,400-pixel estimate, so the image stays under 16,000 pixels and 400 KB.
+- DS-8.4 A render shall be immutable and unique per summary and format. Its source hash shall be copied from the stored summary; no live project data shall be consulted to render an existing summary.
+- DS-8.5 Failed renders shall receive three queue attempts and a sanitized audit entry. Scans shall retry missing renders from the last seven days, at most once per day after failure, with format filtering before the batch cap.
+- DS-8.7 The renderer shall accept the earlier text input (`image-1`) for one release and report the version it drew in an `x-taff-renderer` header; the worker shall store only PNGs reported as `image-2`. Stored renders are never rewritten; summaries generated before v0.2.21 keep their renders.
+- DS-8.6 Authenticated and public delivery shall preserve access checks and private, no-store caching across JSON, text and PNG. Public tokens shall travel only in the request body; unavailable formats retain 404 parity.
 
 ### Agent reads (DS-9)
 
@@ -182,6 +165,7 @@ slipped as a list; a second audience kind.
 | DS-4.1–4.6 | `packages/core/src/summary-model.test.ts` (10 cases, golden file `__fixtures__/summary-golden.json`) |
 | DS-1, DS-2, DS-3, DS-5.1, DS-6.1–6.3, DS-7 | `packages/core/src/summaries.integration.test.ts` (5 cases) and the summary rows of `permissions.test.ts` |
 | DS-7 access operations | `packages/core/src/authorization.integration.test.ts` |
+| DS-1.5, DS-2.4 | `e2e/audience-editing.spec.ts` in en, zh-CN and zh-HK (edits, validation, rejected save, optional links, immutable snapshot, keyboard cancel and demotion) |
 | DS-3.1, DS-3.3 | `apps/worker/src/summaries.test.ts` |
 | DS-6.5, DS-6.6 | `apps/api/src/summaries.test.ts` (7 cases) |
 | DS-1.3, DS-1.4, DS-5.2, DS-5.3, DS-6.4 | `e2e/summaries.spec.ts` in en, zh-CN and zh-HK (layout tiles, progress bar, confidential footer); summary visual references to be recaptured by the pinned Linux pipeline |
