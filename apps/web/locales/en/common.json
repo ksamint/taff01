@@ -1499,7 +1499,11 @@
     "projectTags": "Shareholder tags",
     "projectTagsHint": "Tagged projects appear in that organization's daily summary.",
     "tagsSaved": "Shareholder tags saved",
-    "adminOnly": "Only administrators manage shareholder summaries."
+    "adminOnly": "Only administrators manage shareholder summaries.",
+    "editTag": "Edit tag",
+    "editRecipient": "Edit recipient",
+    "noContact": "No contact",
+    "unavailableContact": "Current contact (unavailable)"
   },
   "share": {
     "title": "Share links",

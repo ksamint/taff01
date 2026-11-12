@@ -3,7 +3,9 @@ import {
   type AudienceRecipient,
   type AudienceTag,
   audienceRecipientInputSchema,
+  audienceRecipientUpdateSchema,
   audienceTagInputSchema,
+  audienceTagUpdateSchema,
   type Locale,
   type SummaryPreview,
 } from "@taff/schemas";
@@ -12,6 +14,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
+import { useContacts } from "../lib/crm-queries";
 import { locales } from "../lib/i18n";
 import { useMembers } from "../lib/queries";
 import {
@@ -44,6 +47,7 @@ export function SummariesAdmin() {
   const tags = useAudienceTags(workspace.id, admin);
   const update = useUpdateAudienceTag(workspace.id);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [editing, setEditing] = useState<AudienceTag | null>(null);
   const selected =
     tags.data?.find((tag) => tag.id === selectedId) ??
     tags.data?.find((tag) => !tag.archived) ??
@@ -109,6 +113,14 @@ export function SummariesAdmin() {
                   )}
                   <Button
                     className="button-quiet"
+                    data-testid="audience-tag-edit"
+                    disabled={update.isPending}
+                    onClick={() => setEditing(tag)}
+                  >
+                    {t("audience.editTag")}
+                  </Button>
+                  <Button
+                    className="button-quiet"
                     data-testid="audience-tag-archive"
                     disabled={update.isPending}
                     onClick={() =>
@@ -126,42 +138,72 @@ export function SummariesAdmin() {
             </ul>
           </section>
           {selected && <TagPanel key={selected.id} tag={selected} />}
+          {editing && (
+            <SheetDialog
+              title={t("audience.editTag")}
+              onClose={() => setEditing(null)}
+            >
+              <TagForm
+                workspaceId={workspace.id}
+                tag={editing}
+                onClose={() => setEditing(null)}
+              />
+            </SheetDialog>
+          )}
         </>
       )}
     </div>
   );
 }
 
-function TagForm({ workspaceId }: { workspaceId: string }) {
+function TagForm({
+  workspaceId,
+  tag,
+  onClose,
+}: {
+  workspaceId: string;
+  tag?: AudienceTag;
+  onClose?: () => void;
+}) {
   const { t } = useTranslation();
   const create = useCreateAudienceTag(workspaceId);
-  const [org, setOrg] = useState("");
-  const [label, setLabel] = useState("");
+  const update = useUpdateAudienceTag(workspaceId);
+  const save = tag ? update : create;
+  const prefix = tag ? "audience-tag-edit" : "audience-tag";
+  const [org, setOrg] = useState(tag?.org ?? "");
+  const [label, setLabel] = useState(tag?.label ?? "");
   const [invalid, setInvalid] = useState(false);
   return (
     <form
       className="summary-inline-form"
-      data-testid="audience-tag-new"
+      data-testid={tag ? "audience-tag-form" : "audience-tag-new"}
       onSubmit={(event) => {
         event.preventDefault();
-        const parsed = audienceTagInputSchema.safeParse({
-          org,
-          ...(label.trim() ? { label } : {}),
-        });
+        const body = { org, label };
+        const parsed = tag
+          ? audienceTagUpdateSchema.safeParse({ ...body, version: tag.version })
+          : audienceTagInputSchema.safeParse(body);
         setInvalid(!parsed.success);
-        if (parsed.success)
-          create.mutate(parsed.data, {
-            onSuccess: () => {
-              setOrg("");
-              setLabel("");
-            },
-          });
+        if (parsed.success) {
+          if (tag)
+            update.mutate(
+              { ...body, id: tag.id, version: tag.version },
+              { onSuccess: onClose },
+            );
+          else
+            create.mutate(body, {
+              onSuccess: () => {
+                setOrg("");
+                setLabel("");
+              },
+            });
+        }
       }}
     >
       <div className="field">
-        <Label htmlFor="audience-tag-org">{t("audience.org")}</Label>
+        <Label htmlFor={`${prefix}-org`}>{t("audience.org")}</Label>
         <Input
-          id="audience-tag-org"
+          id={`${prefix}-org`}
           data-testid="audience-tag-org"
           value={org}
           maxLength={100}
@@ -169,9 +211,9 @@ function TagForm({ workspaceId }: { workspaceId: string }) {
         />
       </div>
       <div className="field">
-        <Label htmlFor="audience-tag-label">{t("audience.label")}</Label>
+        <Label htmlFor={`${prefix}-label`}>{t("audience.label")}</Label>
         <Input
-          id="audience-tag-label"
+          id={`${prefix}-label`}
           data-testid="audience-tag-label"
           value={label}
           maxLength={100}
@@ -181,14 +223,25 @@ function TagForm({ workspaceId }: { workspaceId: string }) {
       <Button
         type="submit"
         className="button-primary"
-        data-testid="audience-tag-create"
-        disabled={create.isPending || !org.trim()}
+        data-testid={tag ? "audience-tag-save" : "audience-tag-create"}
+        disabled={save.isPending || !org.trim()}
       >
-        {t(create.isPending ? "working" : "audience.createTag")}
+        {t(
+          save.isPending
+            ? "working"
+            : tag
+              ? "crm.form.save"
+              : "audience.createTag",
+        )}
       </Button>
-      {(invalid || create.error) && (
+      {onClose && (
+        <Button type="button" onClick={onClose}>
+          {t("crm.form.cancel")}
+        </Button>
+      )}
+      {(invalid || save.error) && (
         <p className="alert" role="alert">
-          {t(invalid ? "errors.invalid_input" : errorKey(create.error))}
+          {t(invalid ? "errors.invalid_input" : errorKey(save.error))}
         </p>
       )}
     </form>
@@ -204,6 +257,7 @@ function TagPanel({ tag }: { tag: AudienceTag }) {
   const summaries = useDailySummaries(workspace.id, { tagId: tag.id });
   const preview = useSummaryPreview();
   const [shown, setShown] = useState<SummaryPreview | null>(null);
+  const [editing, setEditing] = useState<AudienceRecipient | null>(null);
   const members = useMembers(workspace.id);
   const accountName = (userId: string | null) =>
     userId
@@ -288,6 +342,14 @@ function TagPanel({ tag }: { tag: AudienceTag }) {
               </label>
               <Button
                 className="button-quiet"
+                data-testid="audience-recipient-edit"
+                disabled={update.isPending}
+                onClick={() => setEditing(row)}
+              >
+                {t("audience.editRecipient")}
+              </Button>
+              <Button
+                className="button-quiet"
                 data-testid="audience-recipient-toggle"
                 onClick={() => toggle(row, { enabled: !row.enabled })}
               >
@@ -329,6 +391,18 @@ function TagPanel({ tag }: { tag: AudienceTag }) {
           ))}
         </ul>
       </section>
+      {editing && (
+        <SheetDialog
+          title={t("audience.editRecipient")}
+          onClose={() => setEditing(null)}
+        >
+          <RecipientForm
+            tagId={tag.id}
+            recipient={editing}
+            onClose={() => setEditing(null)}
+          />
+        </SheetDialog>
+      )}
       {shown && (
         <SheetDialog
           title={t("audience.preview")}
@@ -353,66 +427,98 @@ function TagPanel({ tag }: { tag: AudienceTag }) {
   );
 }
 
-function RecipientForm({ tagId }: { tagId: string }) {
+function RecipientForm({
+  tagId,
+  recipient,
+  onClose,
+}: {
+  tagId: string;
+  recipient?: AudienceRecipient;
+  onClose?: () => void;
+}) {
   const { me, workspace } = useWorkspace();
   const { t } = useTranslation();
   const create = useCreateAudienceRecipient(workspace.id, tagId);
+  const update = useUpdateAudienceRecipient(tagId);
+  const save = recipient ? update : create;
+  const prefix = recipient ? "audience-recipient-edit" : "audience-recipient";
   const members = useMembers(workspace.id);
+  const contacts = useContacts(workspace.id);
   const people = (members.data ?? []).filter(
     (member) => member.kind === "person" && member.userId,
   );
-  const [name, setName] = useState("");
-  const [userId, setUserId] = useState("");
-  const [locale, setLocale] = useState<Locale>(me.user.locale);
-  const [timeZone, setTimeZone] = useState(me.user.tz);
-  const [deliverAt, setDeliverAt] = useState("18:00");
-  const [includeFinance, setIncludeFinance] = useState(false);
-  const [showPeople, setShowPeople] = useState(true);
+  const [name, setName] = useState(recipient?.name ?? "");
+  const [userId, setUserId] = useState(recipient?.userId ?? "");
+  const [contactId, setContactId] = useState(recipient?.contactId ?? "");
+  const [locale, setLocale] = useState<Locale>(
+    recipient?.locale ?? me.user.locale,
+  );
+  const [timeZone, setTimeZone] = useState(recipient?.timeZone ?? me.user.tz);
+  const [deliverAt, setDeliverAt] = useState(recipient?.deliverAt ?? "18:00");
+  const [includeFinance, setIncludeFinance] = useState(
+    recipient?.includeFinance ?? false,
+  );
+  const [showPeople, setShowPeople] = useState(recipient?.showPeople ?? true);
   const [invalid, setInvalid] = useState(false);
   return (
     <form
       className="summary-inline-form"
-      data-testid="audience-recipient-new"
+      data-testid={
+        recipient ? "audience-recipient-form" : "audience-recipient-new"
+      }
       onSubmit={(event) => {
         event.preventDefault();
-        const parsed = audienceRecipientInputSchema.safeParse({
+        const body = {
           name,
-          userId: userId || null,
+          ...(!recipient || userId !== (recipient.userId ?? "")
+            ? { userId: userId || null }
+            : {}),
+          contactId: contactId || null,
           locale,
           timeZone,
           deliverAt,
           includeFinance,
           showPeople,
-        });
+        };
+        const parsed = recipient
+          ? audienceRecipientUpdateSchema.safeParse({
+              ...body,
+              version: recipient.version,
+            })
+          : audienceRecipientInputSchema.safeParse(body);
         setInvalid(!parsed.success);
-        if (parsed.success)
-          create.mutate(parsed.data, {
-            onSuccess: () => {
-              setName("");
-              setUserId("");
-            },
-          });
+        if (parsed.success) {
+          if (recipient)
+            update.mutate(
+              { ...body, id: recipient.id, version: recipient.version },
+              { onSuccess: onClose },
+            );
+          else
+            create.mutate(body, {
+              onSuccess: () => {
+                setName("");
+                setUserId("");
+                setContactId("");
+              },
+            });
+        }
       }}
     >
       <div className="field">
-        <Label htmlFor="audience-recipient-name">
-          {t("audience.recipientName")}
-        </Label>
+        <Label htmlFor={`${prefix}-name`}>{t("audience.recipientName")}</Label>
         <Input
-          id="audience-recipient-name"
-          data-testid="audience-recipient-name"
+          id={`${prefix}-name`}
+          data-testid={`${prefix}-name`}
           value={name}
           maxLength={100}
           onChange={(event) => setName(event.target.value)}
         />
       </div>
       <div className="field">
-        <Label htmlFor="audience-recipient-account">
-          {t("audience.account")}
-        </Label>
+        <Label htmlFor={`${prefix}-account`}>{t("audience.account")}</Label>
         <select
-          id="audience-recipient-account"
-          data-testid="audience-recipient-account"
+          id={`${prefix}-account`}
+          data-testid={`${prefix}-account`}
           value={userId}
           onChange={(event) => {
             setUserId(event.target.value);
@@ -421,6 +527,9 @@ function RecipientForm({ tagId }: { tagId: string }) {
           }}
         >
           <option value="">{t("audience.linkOnly")}</option>
+          {userId && !people.some((person) => person.userId === userId) && (
+            <option value={userId}>{userId}</option>
+          )}
           {people.map((member) => (
             <option key={member.id} value={member.userId ?? ""}>
               {member.name}
@@ -429,12 +538,38 @@ function RecipientForm({ tagId }: { tagId: string }) {
         </select>
       </div>
       <div className="field">
-        <Label htmlFor="audience-recipient-locale">
-          {t("audience.locale")}
-        </Label>
+        <Label htmlFor={`${prefix}-contact`}>{t("search.contact")}</Label>
         <select
-          id="audience-recipient-locale"
-          data-testid="audience-recipient-locale"
+          id={`${prefix}-contact`}
+          data-testid="audience-recipient-contact"
+          value={contactId}
+          disabled={contacts.isPending || !!contacts.error}
+          onChange={(event) => setContactId(event.target.value)}
+        >
+          <option value="">{t("audience.noContact")}</option>
+          {contactId &&
+            !contacts.data?.some((contact) => contact.id === contactId) && (
+              <option value={contactId}>
+                {t("audience.unavailableContact")}
+              </option>
+            )}
+          {contacts.data?.map((contact) => (
+            <option key={contact.id} value={contact.id}>
+              {contact.name}
+            </option>
+          ))}
+        </select>
+        {contacts.error && (
+          <p className="alert" role="alert">
+            {t(errorKey(contacts.error))}
+          </p>
+        )}
+      </div>
+      <div className="field">
+        <Label htmlFor={`${prefix}-locale`}>{t("audience.locale")}</Label>
+        <select
+          id={`${prefix}-locale`}
+          data-testid={`${prefix}-locale`}
           value={locale}
           onChange={(event) => setLocale(event.target.value as Locale)}
         >
@@ -446,24 +581,20 @@ function RecipientForm({ tagId }: { tagId: string }) {
         </select>
       </div>
       <div className="field">
-        <Label htmlFor="audience-recipient-zone">
-          {t("audience.timeZone")}
-        </Label>
+        <Label htmlFor={`${prefix}-zone`}>{t("audience.timeZone")}</Label>
         <Input
-          id="audience-recipient-zone"
-          data-testid="audience-recipient-zone"
+          id={`${prefix}-zone`}
+          data-testid={`${prefix}-zone`}
           value={timeZone}
           maxLength={64}
           onChange={(event) => setTimeZone(event.target.value)}
         />
       </div>
       <div className="field">
-        <Label htmlFor="audience-recipient-time">
-          {t("audience.deliverAt")}
-        </Label>
+        <Label htmlFor={`${prefix}-time`}>{t("audience.deliverAt")}</Label>
         <Input
-          id="audience-recipient-time"
-          data-testid="audience-recipient-time"
+          id={`${prefix}-time`}
+          data-testid={`${prefix}-time`}
           type="time"
           step={60}
           value={deliverAt}
@@ -489,14 +620,27 @@ function RecipientForm({ tagId }: { tagId: string }) {
       <Button
         type="submit"
         className="button-primary"
-        data-testid="audience-recipient-create"
-        disabled={create.isPending || !name.trim()}
+        data-testid={
+          recipient ? "audience-recipient-save" : "audience-recipient-create"
+        }
+        disabled={save.isPending || !name.trim()}
       >
-        {t(create.isPending ? "working" : "audience.createRecipient")}
+        {t(
+          save.isPending
+            ? "working"
+            : recipient
+              ? "crm.form.save"
+              : "audience.createRecipient",
+        )}
       </Button>
-      {(invalid || create.error) && (
+      {onClose && (
+        <Button type="button" onClick={onClose}>
+          {t("crm.form.cancel")}
+        </Button>
+      )}
+      {(invalid || save.error) && (
         <p className="alert" role="alert">
-          {t(invalid ? "errors.invalid_input" : errorKey(create.error))}
+          {t(invalid ? "errors.invalid_input" : errorKey(save.error))}
         </p>
       )}
     </form>

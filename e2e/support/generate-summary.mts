@@ -4,7 +4,7 @@ import { connectDatabase } from "../../packages/db/src/index.ts";
 
 // Bounded trusted fixture (ADR 0027): make one recipient due now and run the
 // real daily job, exactly as the worker's minute scan would.
-const [recipientId] = process.argv.slice(2);
+const [recipientId, mode] = process.argv.slice(2);
 if (!recipientId) throw new Error("recipientId required");
 const connection = connectDatabase(process.env.DATABASE_URL!);
 const core = createCore({
@@ -29,22 +29,24 @@ try {
   );
   if (result.status !== "generated" || !result.summaryId)
     throw new Error("Actual summary generation required");
-  const render = createSummaryProcessor(
-    core,
-    {
-      add: async () => {
-        throw new Error("Render fixture never enqueues jobs");
+  if (mode !== "--snapshot-only") {
+    const render = createSummaryProcessor(
+      core,
+      {
+        add: async () => {
+          throw new Error("Render fixture never enqueues jobs");
+        },
       },
-    },
-    process.env.SUMMARY_RENDER_URL,
-  );
-  if (!process.env.SUMMARY_RENDER_URL)
-    throw new Error("SUMMARY_RENDER_URL required for image acceptance");
-  for (const format of ["txt", "png"] as const)
-    await render({
-      name: "summary-render",
-      data: { summaryId: result.summaryId, format },
-    });
+      process.env.SUMMARY_RENDER_URL,
+    );
+    if (!process.env.SUMMARY_RENDER_URL)
+      throw new Error("SUMMARY_RENDER_URL required for image acceptance");
+    for (const format of ["txt", "png"] as const)
+      await render({
+        name: "summary-render",
+        data: { summaryId: result.summaryId, format },
+      });
+  }
   console.log(JSON.stringify({ summaryId: result.summaryId }));
 } finally {
   await core.close();

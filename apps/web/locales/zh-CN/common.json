@@ -1499,7 +1499,11 @@
     "projectTags": "股东标签",
     "projectTagsHint": "已标记的项目会出现在该机构的每日摘要中。",
     "tagsSaved": "股东标签已保存",
-    "adminOnly": "只有管理员可以管理股东摘要。"
+    "adminOnly": "只有管理员可以管理股东摘要。",
+    "editTag": "编辑标签",
+    "editRecipient": "编辑收件人",
+    "noContact": "不关联联系人",
+    "unavailableContact": "当前联系人（不可用）"
   },
   "share": {
     "title": "分享链接",
