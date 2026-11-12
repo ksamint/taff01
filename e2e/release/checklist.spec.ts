@@ -899,6 +899,7 @@ test("[item 6] Search and organizations", async ({ page, browser }, info) => {
   // ⌘K (Ctrl+K off macOS) and open a result.
   await page.goto("/");
   await expect(page.getByTestId("today-heading")).toBeVisible();
+  await expect(page.getByTestId("open-quick")).toBeEnabled();
   await page.keyboard.press("ControlOrMeta+k");
   await expect(page.getByTestId("search-input")).toBeVisible();
   await page.getByTestId("search-input").fill(title);

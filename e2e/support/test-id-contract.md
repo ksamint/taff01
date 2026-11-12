@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (462 distinct, 2162 uses)
+## Test ids (462 distinct, 2163 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -57,7 +57,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `inbox-badge` | 2 |  | optimistic-m4.spec.ts |
-| `open-quick` | 18 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts |
+| `open-quick` | 19 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts |
 
 ### apps/web/app/s/[token]/not-found.tsx
 
