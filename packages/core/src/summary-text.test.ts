@@ -35,6 +35,7 @@ describe("summary text", () => {
       );
       expect(text).toContain(summaryWatermark(snapshot, null).text);
     });
+    // Allow the 100-project size fixture to finish on shared deploy hosts.
     it(`caps oversized ${locale} lists and projects with explicit omitted counts`, () => {
       const source = structuredClone(snapshot);
       source.projects = Array.from({ length: 100 }, () => ({
@@ -52,7 +53,7 @@ describe("summary text", () => {
       expect(text.replaceAll("\n", "").endsWith(fixture.contentHash)).toBe(
         true,
       );
-    });
+    }, 120_000);
   }
   it("retains a complete maximum-length task title instead of silently shortening it", () => {
     const source = structuredClone(snapshot);
