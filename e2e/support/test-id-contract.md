@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (448 distinct, 2125 uses)
+## Test ids (448 distinct, 2126 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -435,7 +435,7 @@ several do). “Also rendered by” lists the other files.
 | `agent-name` | 6 |  | agent-creation.spec.ts, release/support.ts |
 | `oauth-return-consent` | 1 |  | completion.spec.ts |
 | `open-access-matrix` | 1 |  | access.spec.ts |
-| `open-audit-log` | 2 |  | audit.spec.ts |
+| `open-audit-log` | 3 |  | audit.spec.ts, delivery-visual.spec.ts |
 | `open-summaries-admin` | 1 |  | summaries.spec.ts |
 | `team-add-agent` | 8 |  | agent-creation.spec.ts, release/support.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
@@ -853,7 +853,7 @@ several do). “Also rendered by” lists the other files.
 | `tab — name: m.access.agents` | 1 | access.spec.ts |
 | `tab — name: m.access.apps` | 1 | access.spec.ts |
 | `tab — name: m.access.people` | 2 | access.spec.ts |
-| `tab — name: m.access.permissions` | 1 | access.spec.ts |
+| `tab — name: m.access.permissions` | 2 | access.spec.ts, delivery-visual.spec.ts |
 | `tab — name: m.access.tokens` | 1 | access.spec.ts |
 | `tab — name: m.access[tab]` | 1 | delivery-visual.spec.ts |
 | `tabpanel` | 2 | brief.spec.ts, live/brief.spec.ts |
@@ -1047,7 +1047,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `access.explain` | 5 | access.spec.ts, delivery-visual.spec.ts |
 | `access.group.finance` | 4 | access.spec.ts |
 | `access.people` | 8 | access.spec.ts |
-| `access.permissions` | 4 | access.spec.ts |
+| `access.permissions` | 5 | access.spec.ts, delivery-visual.spec.ts |
 | `access.permissionsBaseline` | 4 | access.spec.ts |
 | `access.selfDemotionHint` | 4 | access.spec.ts |
 | `access.tokens` | 4 | access.spec.ts |
