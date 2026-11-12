@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2.23 — candidate grant decisions and audience editing
+## v0.2.23 — grant decisions and audience editing
 
 - Workspace access shows pending grant requests with agent, capability, scope and reason; existing expiry, allow and deny controls refresh the matrix after a decision.
 - Workspace administrators edit audience organization/label and recipient identity, contact, language, time zone and delivery time using the existing versioned APIs. Existing summary snapshots remain unchanged.
