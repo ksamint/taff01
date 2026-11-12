@@ -1,1 +1,3181 @@
+# Deployment
 
+Taff ships as three images built from this repository plus PostgreSQL 18,
+Valkey 9 and Caddy 2, wired by `compose.prod.yaml`. One host with Docker
+Compose runs everything; the same images work on any container platform.
+
+## Images
+
+| Image | Dockerfile | Runs |
+| --- | --- | --- |
+| `taff-api` | `deploy/Dockerfile.server` (`TARGET=api`) | `node dist/api.mjs`: REST, `/mcp`, WebSocket hub. The same image runs `node dist/migrate.mjs` before the API starts. |
+| `taff-worker` | `deploy/Dockerfile.server` (`TARGET=worker`) | `node dist/worker.mjs`: BullMQ digest scans and retries. |
+| `taff-web` | `deploy/Dockerfile.web` | Next.js standalone server on port 3000. |
+
+`pnpm build:server` bundles the API, worker and migrator with esbuild; workspace
+packages are inlined and npm packages come from a flat production
+`node_modules` produced by `pnpm deploy` under `dist/runtime/{api,worker}`.
+The API can also run locally as `node --env-file=.env dist/runtime/api/api.mjs`.
+The production dependency trees reject Lighthouse and axe-core; Docker build
+context excludes local dependency trees, build outputs and environment files.
+The web image bakes
+`API_INTERNAL_URL=http://api:3001` into its rewrites; behind Caddy the `/api`
+and `/mcp` paths go straight to the API and never reach Next.js.
+Compose also supplies that URL at runtime for the authenticated server render.
+Its `/api/bootstrap/today` read supplies authenticated Today data without
+renewing sessions; `/api/bootstrap` remains the Me-only fallback. The browser's
+`/api/me` request confirms identity before writes and receives any renewal
+cookie. Matching confirmation retains server reads for reconciliation;
+account or access changes purge them. See [ADR 0012](adr/0012-authenticated-today-bootstrap.md).
+If the internal
+API is unavailable, the web page retains its client loading and retry behavior.
+
+## First deployment
+
+1. Install Docker with Compose on the host and point DNS at it.
+2. Clone the repository and create `.env.production` from
+   `.env.production.example`. `AUTH_URL` is the public origin
+   (`https://taff.example.com`), `SITE_ADDRESS` the host Caddy should serve
+   (automatic HTTPS) or `:80` behind another TLS terminator. Generate
+   `AUTH_SECRET`, `TOKEN_PEPPER` and `POSTGRES_PASSWORD` with
+   `openssl rand -hex 32`.
+3. Build and start:
+
+   ```sh
+   docker compose --env-file .env.production -f compose.prod.yaml build
+   docker compose --env-file .env.production -f compose.prod.yaml up -d
+   ```
+
+   `migrate` runs first and exits; `api`, `worker` and `web` start once it
+   succeeds; Caddy publishes 80 and 443.
+4. Open `AUTH_URL`, create the first account, then open Me → MCP server to
+   issue agent tokens. The MCP endpoint is `AUTH_URL/mcp` with
+   `Authorization: Bearer <token>`.
+
+## Upgrades
+
+```sh
+git pull
+docker compose --env-file .env.production -f compose.prod.yaml build
+docker compose --env-file .env.production -f compose.prod.yaml up -d
+```
+
+Every release closes out with [the closeout checklist](release-closeout.md).
+
+Migrations are additive and run before the new API starts. Take a backup
+first: `umask 077; docker compose --env-file .env.production -f compose.prod.yaml exec -T postgres pg_dump -U taff taff > backup.sql`. Keep the dump private.
+
+The task-reference upgrade applies both 0021 and 0022 before replacing the API.
+0022 assigns missing task numbers for previous API images, preserving task
+creation during the upgrade and after an image rollback. Keep both additive
+migrations and their data when restoring images; see [ADR 0011](adr/0011-task-number-image-rollback.md).
+
+## Apuch server layout
+
+The requested deployment uses a separate Docker Compose project, `taff`, on
+`ins-ag5pnvc0` (private `10.206.103.6`, public `146.56.215.142`). PostgreSQL
+stays on `ins-nx2vm7pc` at `10.206.103.13:5432`; use a dedicated `taff` role
+and database, with no access to the other applications' databases.
+
+Copy `.env.production.example` to a private, mode-0600 `.env.production`.
+Set `AUTH_URL=https://taff.apuch.cn` and a URL-encoded password in
+`DATABASE_URL`, using the certificate DNS name `postgres01.internal.apuch.art`
+and retaining `sslmode=verify-full`. The migrator, API and worker map this name
+to `10.206.103.13` with Compose `extra_hosts`, so both certificate identity and
+private routing are preserved. Keep the DNS name in the URL: the installed
+Postgres.js client does not set TLS `servername` for an IP literal, which can
+make Node verify `localhost` instead of the requested database host.
+Copy only the public
+`/srv/postgresql/tls/ca.crt` from the PostgreSQL host to
+`/srv/taff/secrets/postgresql-ca.crt` and set `POSTGRES_CA_FILE` accordingly.
+The app, worker and migrator mount this CA read-only and trust it via
+`NODE_EXTRA_CA_CERTS`; the PostgreSQL host requires TLS.
+Generate independent `AUTH_SECRET` and `TOKEN_PEPPER` values.
+`POSTGRES_PASSWORD` is unused by this layout but remains required while Compose
+parses the base file. Set `TAFF_TAG` to the exact released Git SHA.
+
+```sh
+docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.yaml build --builder default
+docker compose --env-file .env.production -f compose.prod.yaml -f compose.apuch.yaml up -d
+```
+
+The explicit default builder uses this host's existing Tencent registry mirror.
+It leaves the builder selected for neighboring projects unchanged.
+
+If the host cannot reach GitHub, relay a Git bundle from the clean, validated
+workspace over the existing SSH connection. This transfers tracked Git objects
+and history, not working-tree files or runtime secrets:
+
+```sh
+test -z "$(git status --porcelain)"
+git bundle create /tmp/taff-release.bundle HEAD
+openssl dgst -sha256 /tmp/taff-release.bundle
+```
+
+Create the destination file without overwriting an existing artifact. Verify
+the same SHA-256 on the host, run `git bundle verify` from an existing Git
+checkout, then clone the bundle with `--no-checkout` into the new release path.
+Check out the pinned 40-character SHA with `--detach`, verify `HEAD` and a clean
+tree, and set `origin` back to `https://github.com/ksamint/taff01.git`.
+The controller must check the remote default branch and the recorded local gate
+for the exact SHA (closeout check 1; GitHub CI is retired) from the connected
+workspace while holding the host deployment lock, both before building and
+again before container startup. The host's direct GitHub connection
+is not used for these checks. Retain the same isolated Compose build, migration,
+readiness, HTTPS/DNS smoke and scoped rollback procedure.
+
+The override disables the bundled PostgreSQL service and removes published
+ports. Only Taff's Caddy container joins the existing `tableai-can01-edge`
+network, with alias `taff-caddy`. API, worker, web and Valkey use Taff's own
+network. The override builds a separate worker image.
+
+The host already serves other applications on ports 80/443 through Traefik.
+After verifying Taff's containers and migrations, install
+`deploy/taff-traefik.yaml` as a new file in
+`/srv/tiansight/traefik/dynamic/`; the existing watcher picks it up without a
+proxy restart. It routes only `taff.apuch.cn` and uses the existing `dnspod`
+certificate resolver. Add the DNSPod A record `taff.apuch.cn → 146.56.215.142`.
+Verify HTTPS, `/api/health`, sign-in and a task write through the public origin.
+
+For a first-deployment rollback, remove only the new Taff route file and DNS
+record, then stop this Compose project. Preserve the PostgreSQL database,
+role and volumes. For upgrades, retain the previous image tags and restore
+those tags if health checks fail; additive migrations remain in place.
+
+`ins-aj5kmjag` hosts Neo4j Community at private `10.206.103.5:7687`.
+The current app has no Neo4j driver or graph data model, so no graph connection
+is claimed or configured. Graph functionality and its isolation need an explicit
+scope decision before changing that shared service.
+
+### Deployed checkpoint — 2026-10-09
+
+The first public checkpoint at `https://taff.apuch.cn` served release
+`ef7f52c3052db173d2e56ec7828d0ed400092c8e` from
+`/srv/taff/releases/ef7f52c3052db173d2e56ec7828d0ed400092c8e` on
+`ins-ag5pnvc0`. Its separate `taff` project runs web, API, worker, Caddy and
+Valkey; the one-shot migrator exited successfully. The private runtime env and
+public PostgreSQL CA live under `/srv/taff/secrets/`. No Taff container publishes
+a host port. Only Taff's Caddy joins the shared edge network.
+
+DNSPod's A record points to `146.56.215.142` with a 600-second TTL. The route
+file is `/srv/tiansight/traefik/dynamic/taff.yaml`. Trusted HTTPS, public health,
+signup, sign-in/out, task create/read/update, rejected foreign origins and
+WebSocket-driven UI updates passed through the public origin. PostgreSQL uses
+the dedicated `taff` database and role on `ins-nx2vm7pc`; authenticated app
+connections used TLS 1.3. All six neighboring containers retained their IDs,
+start times and health, and PostgreSQL was not restarted. The deployment lock
+was released after verification. Neo4j integration remains pending the graph
+scope decision above.
+
+The exact deployed commit passed local validation and both required GitHub CI
+runs: [feature 37923784208](https://github.com/ksamint/taff01/actions/runs/37923784208)
+and [main 37924781365](https://github.com/ksamint/taff01/actions/runs/37924781365).
+The later documentation checkpoint does not change the running release.
+
+### Live SMS upgrade checkpoint — 2026-10-10
+
+The public site now serves `41ae94ffbcf466a0f4f0cddd8aca4456621138e3`.
+Its unchanged all-nine validation passed 428 unit/integration tests, 96
+production browser cases and MCP smoke. Both exact-SHA CI runs passed:
+[main 37954047982](https://github.com/ksamint/taff01/actions/runs/37954047982)
+and [feature 37954048010](https://github.com/ksamint/taff01/actions/runs/37954048010).
+Today initial JavaScript is 191,578 gzip bytes; Lighthouse EN/CN/HK performance
+is 98/98/98, accessibility 96 and best practices 100. Separate default
+three-run LCP medians are 544/544/560 ms.
+
+The upgrade used the existing deployment lock and publisher, with a dedicated
+Taff database backup and an exclusive private environment backup. The additive
+0019 migration completed before only API, worker and web were replaced. Existing
+route/DNS, database/role, Caddy and Valkey were retained. Eight neighboring
+services and Caddy/Valkey preserved their image identities, start times and
+health; PostgreSQL was unchanged, with nine Taff connections using TLS.
+The deployment lock was released after verification.
+
+Public checks passed for existing email login, task writes, Secure/HttpOnly
+cookies, foreign-origin rejection, mobile Today, realtime and sign-out/sign-in.
+SMS availability is true. The mobile blank-phone SMS form check passed without
+JavaScript errors. Provider read-only checks confirmed the approved sign,
+approved one-parameter template and package-query readiness. Exactly one
+explicitly authorized application SMS request was accepted, and carrier status
+was confirmed as `SUCCESS`. Real OTP login has not yet been verified: the
+original code expired before local session verification completed. No additional
+SMS was sent; delivery success does not establish successful login.
+
+For a live-release rollback, restore the backed-up environment and verified
+previous image identities, then recreate only API, worker and web. Retain the
+route, DNS, database/role, additive migration/data, Caddy, Valkey and neighboring
+services. First-deployment route/DNS removal is not a live-upgrade rollback.
+
+### Prototype UI release candidate for review — 2026-10-11
+
+Candidate `828443e23c2e08a1f1936aa1dbb23380db496b52` passed all nine local
+checks, strict Lighthouse and three-run LCP in EN/CN/HK. Both required CI runs
+are green: [feature 38075126595](https://github.com/ksamint/taff01/actions/runs/38075126595)
+and [main 38075126547](https://github.com/ksamint/taff01/actions/runs/38075126547).
+The reviewed native visual baselines are integrated and the final Git bundle
+is staged and verified on the host. Full counts, performance samples, source
+and bundle identities are in the
+[candidate checkpoint](milestones/10-ui-parity.md#candidate-validation-and-staging-checkpoint--2026-10-11)
+and [sanitized review evidence](ui/review-2026-10-11/release-candidate.json).
+
+This is a pre-deployment checkpoint. The publisher has not started and the
+live runtime remains `55b315b743a18113bed864191eb74c6f1d997d9b`, confirmed
+during staging. The candidate's backups, migration, container replacement and
+upgraded public acceptance have not run. Two fresh authenticated reads found
+zero agents and review items in the verification workspace, so the required
+real Inbox approval is blocked pending a usable fixture or an explicit change
+to that acceptance requirement. No production fixture was seeded.
+
+Resume with fresh current-main and exact-SHA CI checks under the deployment
+lock, dedicated database/exclusive env backups, default-builder builds, one-shot
+0021/0022 and scoped API/worker/web replacement. Complete the required EN/zh-HK
+phone/desktop public checks and preservation checks before appending the actual
+Prototype UI upgrade checkpoint and releasing the lock. Rollback keeps the
+additive migrations/data and restores the exclusive env backup and verified
+previous API/worker/web image identities; recreate only those three services.
+
+### Prototype UI upgrade checkpoint — 2026-10-11
+
+Released `828443e23c2e08a1f1936aa1dbb23380db496b52` over the actual running
+`55b315b743a18113bed864191eb74c6f1d997d9b`. Under the native deployment lock,
+the release was an ancestor of remote `main` (`21a3372`) and its non-`docs/`
+diff was empty. Both exact-source CI runs passed:
+[feature 38075126595](https://github.com/ksamint/taff01/actions/runs/38075126595)
+and [main 38075126547](https://github.com/ksamint/taff01/actions/runs/38075126547).
+The nine local checks passed 492 tests in 46 files, 123 browser cases and MCP
+smoke. Initial Today JavaScript is 195,718 gzip bytes. Strict Lighthouse
+EN/CN/HK performance is 100/99/99, accessibility 96 throughout and best
+practices 100 throughout. Three-run LCP medians are 704/780/772 ms.
+
+The dedicated Taff custom-format database backup was verified with
+`pg_restore --list` (123,726 bytes), and the prior private environment was
+backed up exclusively with mode 0600. The staged bundle hash and prerequisite
+bundle were verified before the detached, clean checkout and explicit default
+builder. The one-shot migrator exited 0; the journal contains the exact 0021
+and 0022 hashes. No task number or workspace key is NULL, no workspace has
+duplicate task numbers, and the legacy-write numbering trigger is installed.
+Only API, worker and web were replaced, using their recorded immutable images.
+The API is healthy and the worker reports ready.
+
+Public acceptance passed in English and Traditional Chinese (Hong Kong), at
+390×844 phone and 1280×800 desktop viewports: existing email login,
+sign-out/sign-in, Today timeline/due list/FAB, real Quick Add references in
+Today/Projects/detail/search, desktop pointer board drag, phone touch column
+scrolling, calendar list and schedule editor, Inbox tabs/unread count and an
+existing real digest row, Me language/appearance, two-browser realtime updates,
+Secure/HttpOnly cookies, foreign-origin rejection and unchanged SMS availability.
+Fresh invitation recipients landed on `/` with the token removed before and
+after sign-up and accepted the invitation through the UI. Verification records
+are retained. There were no browser JavaScript exceptions; a focused console
+diagnostic found only the expected unauthenticated `/api/me` 401. Private test
+navigation errors were corrected before the accepted runs; no runtime repair or
+rollback was needed. [Sanitized public evidence](ui/review-2026-10-11/public-upgrade.json)
+records each case and the runtime preservation checks.
+
+The revised goal withdraws the live MCP evidence/Inbox approval check for this
+first release. No agent exists in the verification workspace, so a task-specific
+Inbox reference is also not present and is **not claimed verified** here; it
+will be checked with the real review in step 6. The released browser suite covers
+the review flow. No production seed or agent copy was performed.
+
+Caddy, Valkey, every neighboring container, the route file, DNS, private env
+values except `TAFF_TAG`, and the external database/role were retained. Their
+identities, start times and health were checked against the locked baseline.
+PostgreSQL was not restarted; all 12 Taff connections observed used TLS and the
+dedicated role. DNS remains `146.56.215.142` and trusted public HTTPS health is
+200. The env remains mode 0600 with `TAFF_TAG` pinned to the released SHA.
+
+Rollback restores `/srv/taff/secrets/.env.before-828443e23c2e08a1f1936aa1dbb23380db496b52`
+and the verified previous API/worker/web images, then recreates only those three
+services from the previous detached checkout. Retain additive 0021/0022 and
+data, PostgreSQL/role, Caddy, Valkey, neighbors, DNS and the route. Verify the old
+health and preservation checks before releasing the lock. No rollback occurred.
+The lock was released after verification on 2026-10-11, before this documentation
+commit and the agent-creation follow-up.
+
+## Operations
+
+### Production verification account
+
+- Username: `taff_verify`.
+- Workspace: `Taff verification`.
+- Credentials: 1Password vault `Codex Automation`, item
+  `Taff production verification account`.
+
+### Username and administrative setup
+
+Sign-in accepts email or a 2–30 character ASCII username (letters, digits,
+underscores and dots; case insensitive). Public signup offers an optional
+username and retains its eight-character password rule. Private deployment
+provisioning can configure a six-character credential; it does not reset an
+existing account's password.
+
+After the additive 0020 migration, use the immutable API image's private CLI
+with a mode-0600 JSON file supplied through stdin. Run from the accepted release
+directory on the application server:
+
+```sh
+docker compose --env-file /srv/taff/secrets/.env.production \
+  -f compose.prod.yaml -f compose.apuch.yaml run --rm --no-deps -T \
+  api node dist/administration.mjs < /private/path/administration.json
+```
+
+The validated input has `workspaceNames`, canonical `systemAdminPhones`, and
+`orgAdmin: { username, password, workspaceName }`; the scoped workspace must be
+included in the organization list. Keep actual identity/password values out of
+the repository, shell arguments and reports. The operation is atomic and
+idempotent for identical input; conflicting ownership or credentials fail
+without reassignment or password reset. Its output contains only IDs and
+organization names. Remove the temporary private input after verification.
+
+System administrators receive protected real admin memberships in every
+existing and future organization, including personal workspaces. The scoped
+organization administrator receives its target membership and its usual
+personal workspace. New phone identities remain unverified until their holders
+complete SMS login; this CLI does not send SMS. No public HTTP/MCP adapter
+exposes this setup operation.
+
+### Invitation email and independent ownership verification
+
+Set `EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASSWORD` and `EMAIL_FROM` together
+for SMTP. `EMAIL_FROM` is a mailbox address; `EMAIL_PORT` defaults to 465 and
+`EMAIL_SECURE` to true. For STARTTLS set the provider's port and
+`EMAIL_SECURE=false`; TLS is still required and certificates verified.
+Partial SMTP credentials fail startup. Only API receives these variables.
+Nodemailer 10.1.0 is MIT-0 and its development types are MIT (ADR 0013).
+
+Invitation creation commits before attempting delivery. Its response reports
+`emailDelivery` as sent, logged or failed and preserves the copyable invite
+link even when SMTP fails. SMTP acceptance does not prove inbox delivery.
+Recipients must independently verify ownership of the invited address before
+joining. Me and the pending invitation expose the verification request; the
+one-hour verification link is consumed from a fragment and sent as JSON.
+Existing email/password, username and SMS login remain available.
+
+With SMTP unset, the development fallback writes messages to
+`EMAIL_LOG_PATH` (default `.taff-mail/messages.jsonl`) in a private directory
+and mode-0600 regular file. That file contains secret verification links:
+keep it outside version control and restrict access. Ordinary application
+logs record delivery status only. The production API image has a private
+node-owned `/app/.taff-mail` directory; its default sink is container-local
+and disappears when the container is replaced. Use SMTP for real recipient
+delivery. No public endpoint exposes fallback messages or bypasses email proof.
+Both env examples and production Compose list the settings; configuring SMTP
+for a future live release is separate from this source preparation.
+
+### Optional Tencent SMS login
+
+Configure `TENCENT_SECRET_ID`, `TENCENT_SECRET_KEY`, `TENCENT_SMS_SDK_APP_ID`,
+`TENCENT_SMS_SIGN_NAME` and `TENCENT_SMS_TEMPLATE_ID` together from the approved
+SMS secret manager. Never copy a personal Tencent CLI profile into production.
+`TENCENT_SMS_REGION` defaults to `ap-guangzhou`. Empty credentials disable the
+SMS method; a partial configuration fails startup. Only the API needs these
+values. Preserve the private env file's unrelated values and mode 0600.
+
+Before enabling, use the dedicated SMS identity to confirm the configured
+application, approved sign, approved one-parameter template and package-query
+readiness. Apply the additive migrations and deploy the validated release
+through the existing publisher. Verify health, existing email login and
+`GET /api/auth/methods` returning `{"smsEnabled":true}`. Test real delivery only
+with an explicitly authorized recipient; never send to fixture numbers.
+
+SMS supports mainland `+86` mobile numbers. First verification creates a
+separate phone account; existing email accounts are not automatically linked.
+Reverse-proxy users share conservative socket-peer rate limits until a trusted
+client-IP chain is explicitly configured. See [ADR 0009](adr/0009-tencent-sms-login.md).
+
+For configuration rollback, retain the previous env backup and image tags.
+Remove all five SMS values together, recreate only the API when the release
+itself is unchanged, then verify email login and SMS availability is false.
+Keep the additive schema and data.
+
+- Health: `GET /api/health` on the API; Caddy proxies it at `AUTH_URL/api/health`.
+- Logs: `docker compose -f compose.prod.yaml logs -f api worker web caddy`.
+  pino redacts cookies, authorization headers, passwords and tokens.
+- Rate limit: `MCP_RATE_LIMIT` calls per token per minute, counted in Valkey.
+  Valkey holds only counters and queue state; it may be emptied at any time.
+- Data lives in the `postgres18_data` volume. Caddy keeps certificates in
+  `caddy_data`.
+- Scaling: the API hub fans out database notifications to its own sockets, so
+  run one API replica per deployment until a shared bus is added.
+
+## Build and runtime settings
+
+- `ASSET_VERSION` (web build argument, optional): the stamp on the service
+  worker URL, its cache name and the locale URLs. It defaults to the build
+  time, so every image build invalidates the previous worker cache; set it to
+  the commit SHA for reproducible builds.
+- `API_HOST` (API runtime): the interface the API binds. The server image sets
+  `0.0.0.0` so Caddy can reach it; outside a container it stays on loopback.
+- `MIGRATIONS_DIR` (migrator runtime): the server image sets
+  `/app/migrations`; the repository layout needs no value.
+- `pnpm perf:lcp` runs in CI against the bundled API and production web build
+  in EN, CN and HK, three samples each; a median above 2,000 ms fails. Also
+  measure on a quiet machine before a release.
+
+## Not configured yet
+
+- OAuth Client ID Metadata Documents (CIMD) for `/mcp`; OAuth 2.1 with
+  dynamic registration is available (ADR 0022). Its discovery paths
+  `/.well-known/oauth-*` reach the API through the web app's rewrites, so the
+  Caddy and Traefik routes stay unchanged; verify them after an upgrade with
+  `curl AUTH_URL/.well-known/oauth-authorization-server`.
+- Push notifications: digests are in-app pages.
+
+## Agent creation upgrade checkpoint — 2026-10-11
+
+Released source `23387723f8c438d990db00d561cba2899f48ab80` (tree
+`081ade25b8525a090afd4aee2ff1a181d7118ffb`) adds workspace-admin agent
+creation through Team and the strict, human-only REST adapter. Agent membership
+is fixed to member, with no linked user; creation emits one activity and change
+notification. Agent-profile identity and null-supervisor rendering are corrected.
+
+Exact-source [feature CI](https://github.com/ksamint/taff01/actions/runs/38101185018)
+and [main CI](https://github.com/ksamint/taff01/actions/runs/38101185022)
+passed checks and images. All local validation commands passed: 500 tests in
+47 files, 132 browser cases and official MCP smoke. Initial mobile Today JS is
+195,767 bytes gzipped. Lighthouse performance/accessibility/best practices are
+100/96/100 in all three locales. Slow-4G LCP samples and medians, in ms:
+
+| Locale | Samples | Median | Budget |
+| --- | --- | ---: | ---: |
+| EN | 692 / 696 / 680 | 692 | 2,000 |
+| CN | 776 / 784 / 780 | 780 | 2,000 |
+| HK | 888 / 772 / 776 | 776 | 2,000 |
+
+The [native capture run](https://github.com/ksamint/taff01/actions/runs/38101198542)
+passed all 64 cases and produced 86 PNGs for this exact source and workflow.
+77 match approved baselines byte for byte, including all four Team captures;
+nine have only inspected 3–30-pixel antialias/corner differences. Existing
+baselines and thresholds stay. The earlier Docker-font capture was discarded
+before publication; its evidence remains marked superseded, not validated.
+
+Under the existing native deployment lock, the dedicated Taff database dump
+was verified with `pg_restore --list`: 137,727 bytes, SHA-256
+`b2a74f883fda5633e8a5793975097ef5c33cb53649d9b10057c98a9ba78fe21a`,
+at `/srv/postgresql/backups/taff-before-23387723f8c438d990db00d561cba2899f48ab80/taff.dump`.
+The exclusive env backup is `/srv/taff/secrets/.env.before-23387723f8c438d990db00d561cba2899f48ab80`.
+The 25,804-byte Git bundle was relayed and verified, SHA-256
+`e0475288ac7290ba4059587d2656dfdad1f07b4ea76bfaee18f12b870927dd1c`.
+The existing SSH relay disconnected before migration; fresh inspection proved
+no migration or replacement had started. The same native lock was reacquired
+for the same candidate, backups and attempt, with a detached keeper to survive
+SSH disconnects. No route, host layout or database role changed.
+
+The detached clean source was built using the explicit default builder. The
+one-shot migrator exited 0. Both existing additive migration journals match;
+missing task numbers, missing workspace keys and duplicate task numbers are
+zero. Only API, worker and web were replaced. Their immutable image IDs are
+recorded in [sanitized release evidence](ui/review-2026-10-11/agent-public-upgrade.json).
+Caddy, Valkey, route, DNS and neighbouring container identities, start times
+and health stayed intact. PostgreSQL was not restarted; Taff connections use
+TLS and its dedicated role. `TAFF_TAG` is the released SHA; all other private
+env values and mode 0600 are preserved. Health and SMS-method discovery passed.
+
+All four public-origin cases passed: EN/HK on phone and desktop, email
+sign-out/sign-in, real task references DE-10–DE-13 in Today/Projects/detail/search,
+desktop board drag and phone native scrolling, calendar scheduling/list/editor,
+Inbox counts/tabs/digests, Me preferences, realtime between two browsers,
+fresh-browser invitation fragment clearing, Secure/HttpOnly cookies and
+foreign-origin rejection. There were zero browser page errors. These human
+quick-add tasks had no Inbox review item; the separate agent check below
+supplies the required actual Inbox task-reference acceptance.
+
+The withdrawn flow now passes publicly: Team created a real agent, quick add
+assigned task DE-15, the human started its run and issued a token from Me → MCP.
+The official SDK discovered 20 tools, reported exactly one `runs.event`, attached
+one actual discovery-result artifact and called `runs.submit` once with review
+requested. Inbox displayed DE-15; the human checked the evidence and approved.
+The run became completed and the task Done. Me revoked the token; a subsequent
+authenticated MCP initialize received HTTP 401. SDK/browser cleanup and original
+locale, time zone, appearance and workspace restoration passed. No SMS was
+sent, production seed run or agent copied from another workspace.
+
+The first agent attempt also persisted approval of DE-14, then its private
+helper asserted a standalone-page status label in the embedded drawer. A
+read-only diagnosis confirmed completed/Done and all three checks true. The
+helper assertion was corrected; the one permitted rollback-free retry passed
+the entire flow, including UI revocation. The first token was revoked by the
+failure cleanup. Both agents/tasks/artifacts remain as verification evidence.
+
+Rollback retains source and image identities of `828443e23c2e08a1f1936aa1dbb23380db496b52`:
+API/migrator `sha256:fdea97ab658541f0bda317421925a873f68853263550146f8b8eb413dc520819`,
+worker `sha256:b331e9d5b38ef793d8c5d11a3c8857f25e9dcad30ac27eef428e0d3347c650ee`,
+web `sha256:99e116322e7d3b63ff9c8a306140cbd37ea3e76a11b0e797bf8a651bd0c70b60`.
+Under the existing lock, restore the exclusive env backup and recreate only
+API, worker and web from those retained images. Keep additive migrations and
+data; the dump is recovery evidence, not an automatic destructive restore.
+No rollback was needed. Lock-release verification is recorded below after the
+acceptance receipt is written. Continue M9 at the existing Lighthouse evidence
+and the missing all-locale LCP CI guard.
+
+After the complete public acceptance, the verified receipt was written and
+`deployment.done` set to the accepted SHA. The detached keeper logged
+`LOCK_RELEASED` and removed its owner file. An independent nonblocking native
+flock probe then acquired the same lock and confirmed the accepted runtime
+images were still running and API healthy. The lock is free. This checkpoint
+is a documentation-only commit ahead of the accepted source.
+
+## Release candidate checks
+
+Every frontend v2 candidate passes the plan §6.0 checklist
+(`e2e/release/checklist.spec.ts`, `playwright.release.config.ts`) twice:
+against a local production-mode stack before the candidate section is
+written, and against the live origin after the deploy. It never starts
+servers; it drives whatever `RELEASE_BASE_URL` points at.
+
+**Local production-mode stack, without Docker image builds.**
+`scripts/release-stack.mjs` (`pnpm release:stack`) runs the bundled API from
+`pnpm build:server` (`dist/runtime/api/api.mjs`, as `deploy/Dockerfile.server`
+does) and the Next standalone server (`apps/web/.next/standalone/apps/web/server.js`,
+as `deploy/Dockerfile.web` does, with `.next/static` and `public` copied
+beside it), both with `NODE_ENV=production`. `next start` is not used: it
+warns under `output: "standalone"`.
+
+```sh
+# Ports default to 3000/3001 and the database to DATABASE_URL from .env.
+pnpm release:stack --build --migrate --seed   # --worker also starts the worker
+```
+
+- `--build` runs `pnpm build` and `pnpm build:server`. Next bakes the `/api`
+  and `/mcp` rewrite target (`API_INTERNAL_URL`) into the build, so the script
+  refuses a build made for another API URL; rebuild after changing it.
+- On other ports or another database, export the values first; exported
+  variables win over `.env`:
+
+  ```sh
+  export DATABASE_URL=postgres://…/taff_r1 API_PORT=4201 WEB_PORT=4200 \
+    API_INTERNAL_URL=http://127.0.0.1:4201 AUTH_URL=http://localhost:4200 \
+    EMAIL_LOG_PATH=/tmp/taff-r1/mail/messages.jsonl
+  pnpm release:stack --build --migrate --seed
+  ```
+
+- `AUTH_URL` must be the browser origin: the MCP page shows `AUTH_URL/mcp` as
+  the endpoint and the checklist asserts it equals `RELEASE_BASE_URL/mcp`.
+- Ctrl-C stops every process the script started.
+
+**Run the checklist.**
+
+```sh
+# Against the local stack, with full coverage of owner and role changes:
+RELEASE_BASE_URL=http://localhost:4200 \
+RELEASE_MAIL_LOG=/tmp/taff-r1/mail/messages.jsonl pnpm release:checklist
+
+# Against the live origin, from the local agent:
+RELEASE_BASE_URL=https://taff.apuch.cn \
+RELEASE_DEMO_EMAIL=<verification account> RELEASE_DEMO_PASSWORD=<from the private env> \
+pnpm release:checklist
+```
+
+- Projects: `phone-en`, `phone-zh-HK` (Pixel 7) and `desktop-en`,
+  `desktop-zh-HK` (1280×800); `--project` selects one, `-g "item 8"` one item.
+- One test per §6.0 item. Each signs up its own fresh account
+  (`release-<id>@example.test`, random password) and works only in that
+  account's workspace; agents are added through Team › Add agent. Nothing
+  depends on the clock or on seeded counts.
+- Owner and member-role changes need a second person with a verified email:
+  `RELEASE_MAIL_LOG` (the local stack's `EMAIL_LOG_PATH`) lets a second fresh
+  account verify itself; otherwise the `RELEASE_DEMO_*` account accepts the
+  invitation (it must have a verified email). Without either, those two
+  sub-steps are skipped and the reason is recorded.
+- SMS is exercised only when `/api/auth/methods` reports it enabled, and then
+  only up to the open form: no code is ever sent. Otherwise the step is
+  recorded as skipped with the reason.
+- Item 8 runs the shared MCP round trip (`apps/api/scripts/mcp-round-trip.ts`,
+  the same code as `pnpm mcp:smoke`) with the official client against
+  `RELEASE_BASE_URL/mcp`, using a token issued on the MCP page: every tool
+  (all 30 in `MCP_TOOLS`, including `relations.get`, `brief.get` and
+  `suggestions.create`),
+  the rate limit (`RELEASE_MCP_RATE_LIMIT`, default `MCP_RATE_LIMIT` or 60;
+  `RELEASE_SKIP_RATE_LIMIT=1` skips the probe with a recorded reason), the
+  call log in the UI, the created task arriving on an open board in real
+  time, and revocation from the UI. The probe sends at most limit + 2
+  requests on the run's own throwaway token; where the deploy goal says not
+  to probe production, set `RELEASE_SKIP_RATE_LIMIT=1`.
+- Tokens, passwords and cookies are never printed: the token is asserted by
+  its `taff_` prefix only, traces and screenshots are off (`RELEASE_DEBUG=1`
+  turns them on for local debugging only), and the report is redacted.
+- The report lands in `release-reports/checklist-<timestamp>.{json,md}`
+  (gitignored): each item × project with pass, fail or skip-with-reason,
+  durations, skipped sub-steps and the MCP checks. Paste the Markdown table
+  into the candidate section.
+- Optional: `RELEASE_WORKERS` (default 1), `RELEASE_RETRIES` (default 0),
+  `RELEASE_REPORT_DIR`.
+
+## Frontend v2 releases
+
+Frontend v2 (`docs/frontend-v2-plan.md`) is released in stages. The cloud
+build agent appends a `### Frontend v2 release candidate <name> — <date>`
+section here for each validated `main` SHA. The local agent deploys it with
+`docs/agent-goal-deploy-frontend-v2.md`. Then it appends the matching
+`### Frontend v2 <name> upgrade checkpoint — <date>`, or a `Blocked:` note
+under the candidate.
+
+### Frontend v2 release candidate R1 — 2026-10-14
+
+**Source.** `main` at `5e616dd27bb167508155f4c5dd9bde9284538a7c`, the merge of
+PR #10 (M14). It includes PR #7 (M12), PR #9 (M13) and PR #10 (M14) on top of
+the last recorded deployment, `23387723f8c438d990db00d561cba2899f48ab80`
+(agent creation upgrade checkpoint, 2026-10-11).
+
+**CI.**
+
+- Pull requests:
+  - [PR #9 CI](https://github.com/ksamint/taff01/actions/runs/38512986433)
+  - [PR #10 CI](https://github.com/ksamint/taff01/actions/runs/38519911336)
+- `main` CI:
+  - [after #9](https://github.com/ksamint/taff01/actions/runs/38514991407)
+  - [after #10](https://github.com/ksamint/taff01/actions/runs/38521546475)
+- Visual baselines on CI's Chromium:
+  - [M13 capture](https://github.com/ksamint/taff01/actions/runs/38512400959)
+  - [M14 capture](https://github.com/ksamint/taff01/actions/runs/38519032163)
+
+**What changes for people.**
+
+- **Navigation (v2 shell):**
+  - phone: a four-tab bar (今天 · 日曆 · 項目 · 我的);
+  - desktop: a foldable sidebar;
+  - signed out: a landing page.
+- **Screens:** Today, Me, Inbox and MCP use the v2 layouts.
+- **Projects:** the v2 board and list.
+- **Task detail:** contacts, and a right panel on desktop.
+- **Calendar:** the v2 calendar.
+- **Search:** ⌘K also finds companies and contacts.
+- **Undo:** toasts with undo on both layouts.
+- **Backend only for now:** planning and CRM (M12). Its screens arrive with
+  later candidates.
+
+Reports:
+
+- `docs/milestones/12-planning-crm-backend.md`
+- `docs/milestones/13-shell-today-me.md`
+- `docs/milestones/14-projects-task-calendar-search.md`
+
+**Validation numbers** (M14 head, then `main`).
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 683 / 683 |
+| e2e | 141 / 141 |
+| visual suite | 16 screens × 4 projects |
+| Today initial JS | 193,325 B gzipped / 204,800 B budget |
+| Today LCP (median of 3, slow 4G, 4× CPU) | en 792 ms, zh-CN 1020 ms, zh-HK 980 ms (limit 2000 ms) |
+| Lighthouse (performance / accessibility / best practices) | en 92/100/100, zh-CN 93/100/100, zh-HK 94/100/100 |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+**Migrations.** One new migration, `0023_m12_planning_crm.sql`. It is
+**additive**, with no backfill (0 rows rewritten):
+
+- **New tables:** 10, all workspace-scoped, with composite foreign keys and
+  `_audit` triggers: companies, contacts, company_contacts,
+  project_contacts, task_contacts, contact_roles, task_plans, milestones,
+  task_dependencies and project_payments.
+- **New project columns:** three nullable ones (`contract_amount`,
+  `currency`, `client_company_id`).
+- **New unique constraint:** `tasks (workspace_id, id, project_id)`, which
+  builds an index on `tasks`.
+- **Checks:** a role-rule CHECK on contact_roles.
+- **Nothing destructive:** no `DROP`, `TRUNCATE`, `DELETE`, rename or data
+  rewrite.
+
+**Environment.** No new variables for frontend v2. Since `2338772`, these
+settings are new or changed:
+
+- **`EMAIL_HOST`, `EMAIL_USER`, `EMAIL_PASSWORD`, `EMAIL_FROM`:** optional
+  and all-or-none. Unset, mail goes to the private log at `EMAIL_LOG_PATH`.
+  `EMAIL_PORT` (465) and `EMAIL_SECURE` (true) only apply with SMTP.
+  Partial settings stop the API at start.
+- **`EMAIL_LOG_PATH`:** defaults to `/app/.taff-mail/messages.jsonl` in the
+  image. Its directory must be mode 0700 and owned by the API user, or
+  delivery fails closed.
+- **`AUTH_URL`:** an existing variable, now also passed to the web
+  container. The MCP page shows `AUTH_URL/mcp` as the client endpoint, so it
+  must be the public origin.
+
+No secret values are recorded here.
+
+**Compose, Docker and Caddy.**
+
+- **`compose.prod.yaml`:**
+  - the API receives the `EMAIL_*` settings above;
+  - the worker uses its own image, `${TAFF_IMAGE_WORKER:-taff-worker}`,
+    built from `deploy/Dockerfile.server` with `TARGET=worker`;
+  - web receives `AUTH_URL`.
+- **`deploy/Dockerfile.server`:** creates `/app/.taff-mail` as 0700, owned
+  by `node`.
+- **Caddy:** no changes.
+
+**Release checklist (plan §6.0)** against a local production-mode stack built
+from `5e616dd`:
+
+- **Stack:** `pnpm release:stack --build --migrate --seed` on a fresh
+  database, API on 4201 and web on 4200. That is
+  `dist/runtime/api/api.mjs` and the Next standalone server with
+  `NODE_ENV=production`.
+- **Command:** `RELEASE_MAIL_LOG=… pnpm release:checklist`.
+- **Result: passed, 32 / 32** (8 items × phone-en, phone-zh-HK, desktop-en,
+  desktop-zh-HK), 0 failed, 0 skipped.
+- **Covered:** owner and role changes (a second person verifies from the
+  mail log) and the rate-limit probe.
+- **One sub-step skipped**, in every project: SMS sign-in, because
+  `/api/auth/methods` reports `smsEnabled=false` locally. Live SMS stays
+  covered by the 2026-10-10 checkpoint.
+- **MCP:** each project's real `@modelcontextprotocol/client` round trip
+  passed 38/38 checks, covering all 27 tools in `MCP_TOOLS`.
+
+| Item | phone-en | phone-zh-HK | desktop-en | desktop-zh-HK |
+| --- | --- | --- | --- | --- |
+| 1. Sign-in and preferences | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) |
+| 2. Tasks | pass | pass | pass | pass |
+| 3. Agents and review | pass | pass | pass | pass |
+| 4. Projects | pass | pass | pass | pass |
+| 5. Calendar | pass | pass | pass | pass |
+| 6. Search and organizations | pass | pass | pass | pass |
+| 7. Settings | pass | pass | pass | pass |
+| 8. MCP | pass | pass | pass | pass |
+
+**Notes for the deploy.**
+
+- Build and push both server images (`api` and `worker`) and the web image,
+  then migrate with the API image as before.
+- After the deploy, run the checklist against the live origin with the
+  verification account (see "Release candidate checks").
+
+**Blocked: exact-source feature CI is missing — 2026-10-14.** Step 0 of
+`docs/agent-goal-deploy-frontend-v2.md` requires both linked CI runs to be
+green for the listed source `5e616dd27bb167508155f4c5dd9bde9284538a7c`.
+Main run [38521546475](https://github.com/ksamint/taff01/actions/runs/38521546475)
+is completed/success for that SHA. Feature run
+[38519911336](https://github.com/ksamint/taff01/actions/runs/38519911336)
+is completed/success for `ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`,
+not the listed source. The exact-source run inventory contains only the main
+run. The source is an ancestor of `origin/main`, and the non-documentation
+diff is empty, but the required second exact-SHA CI result is absent. Publish
+a corrected candidate with both exact-source CI links before deployment.
+No local release validation, migration, build or container replacement was
+started; production remains `23387723f8c438d990db00d561cba2899f48ab80`.
+
+### Frontend v2 release candidate R1b — 2026-10-14
+
+R1 republished under the corrected Step 0 CI rule. The source is unchanged:
+`5e616dd27bb167508155f4c5dd9bde9284538a7c` (`main`, the merge of PR #10).
+The R1 section above holds everything else: scope, validation numbers,
+migrations, env, Compose, checklist and local production-mode result.
+
+R1 was blocked because the rule asked for a feature run on the exact merge
+SHA, which a merged PR never has. The rule now accepts:
+
+- **`main` push CI on the exact SHA:**
+  [38521546475](https://github.com/ksamint/taff01/actions/runs/38521546475),
+  completed/success. The local agent confirmed this in the block note.
+- **PR #10 CI on its head:**
+  [38519911336](https://github.com/ksamint/taff01/actions/runs/38519911336),
+  completed/success. The head is `ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`,
+  an ancestor of the source.
+
+Everything after the source on `main` touches only `docs/`.
+
+**Blocked: local `pnpm e2e` readiness failure — 2026-10-14.** R1b passed
+the revised Step 0: main CI is green for source
+`5e616dd27bb167508155f4c5dd9bde9284538a7c`, PR CI is green for its ancestor
+`ff6f05b4f0e87b87b206acdf5e1a2b27f1c932db`, and the source-to-main code
+diff is empty. In a clean detached checkout on Node 24.19.0, local lint,
+typecheck, licence, 683 tests in 67 files, build, build:server and perf:budget
+passed; Today initial JavaScript is 193,190 bytes gzipped (204,800 limit).
+The deploy agent interrupted a local readiness setup to set the web port,
+but its detached API helper remained running. `pnpm e2e` then exited 1:
+`http://127.0.0.1:4601/api/health is already used`. No browser cases ran.
+This is a local deploy-helper failure, not evidence of an application defect;
+the checkout-owned API/web helpers have been stopped and the ignored local
+environment now explicitly sets `PORT=4600`. Step 1 requires stopping on a
+failed command, so MCP smoke, Lighthouse, LCP and production deployment were
+not run. Publish a fresh unblocked candidate to repeat the complete local
+validation. No production lock, backup, migration, image build or container
+replacement was started; the live SHA is still
+`23387723f8c438d990db00d561cba2899f48ab80`.
+
+### Frontend v2 release candidate M15 — 2026-10-14
+
+**Source:** `main` at `8019c6943e453e087a6cfa6c48651c99b9840a9d`. This
+candidate supersedes R1b and answers its `Blocked:` note: it contains all of
+R1/R1b plus M15, so one deploy covers both.
+
+The R1b blocker was a local helper still holding port 4601 when `pnpm e2e`
+started. The application was not at fault. Before `pnpm e2e`, make sure
+nothing listens on the configured API and web ports. The Playwright web
+servers refuse a busy port on purpose (`reuseExistingServer` is false).
+
+Scope since R1:
+
+- PR #11 (`m15-crm`), merged as `7872024`.
+- `main` commits after `7872024`, which touch only `docs/`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source:**
+  [38528200033](https://github.com/ksamint/taff01/actions/runs/38528200033).
+  The run for `7872024` was cancelled by the next push to `main`.
+- **PR #11 CI on its head `58ea2cb141cfdcd57791e19fe6b81603ee88143c`:**
+  [38525583386](https://github.com/ksamint/taff01/actions/runs/38525583386),
+  success. That head is an ancestor of the source, and the source-to-head
+  diff is only `docs/agent-goal-deploy-frontend-v2.md` and `docs/deploy.md`.
+- **Visual baselines and gated Lighthouse on CI's Chromium:**
+  [38524514460](https://github.com/ksamint/taff01/actions/runs/38524514460).
+
+**What changes for people.**
+
+- **CRM screens:** companies and contacts, each with list, detail, create,
+  edit and archive (archive asks for confirmation; every change has undo).
+  On desktop, list and detail share a split view.
+- **Stakeholders:** 相關方 at `?view=stakeholders`, with the client company
+  per project.
+- **Navigation:** 公司 · 聯繫人 sit under 項目 in the desktop sidebar and the
+  Projects switch. They are shown only to people who can read CRM.
+- **Phase B backend, ahead of its screens (M16–M18):**
+  - brief and Ask taff, rules-based;
+  - suggestions;
+  - the relations graph;
+  - mind-map APIs.
+- **New MCP tools:** `brief.get`, `relations.get` and `suggestions.create`
+  (30 tools in all).
+
+Reports: `docs/milestones/15-crm-screens.md` and
+`docs/milestones/16-18-phase-b-backend.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green (PR CI) |
+| unit and integration tests | 814 / 814 locally; green in PR CI |
+| e2e | green in PR CI |
+| visual suite | 16 screens × 4 projects, locally and on CI |
+| Today initial JS | 193,457 B gzipped / 204,800 B (CI) |
+| Today LCP, median of 3 (slow 4G, 4× CPU), local production build | en 640 ms, zh-CN 656 ms, zh-HK 664 ms |
+| Lighthouse (gated, CI Chromium) | en 96/100/100, zh-CN 95/100/100, zh-HK 96/100/100 (performance / accessibility / best practices) |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+The cloud container's local Lighthouse scores were 82–91 after a host
+restart. The same container measured the unchanged M14 build at 87–93,
+against 92–94 before the restart. The CI run above is the gated
+measurement.
+
+**Migrations.** Two new migrations, both additive, with no backfill (0 rows
+rewritten):
+
+- **`0024_m17_suggestions_ai.sql`:**
+  - a `suggestions` table, workspace-scoped, with composite foreign keys and
+    an `_audit` trigger;
+  - `workspaces.ai_enabled boolean NOT NULL DEFAULT false`. The default is a
+    constant, so PostgreSQL stores it as metadata and does not rewrite the
+    table. Every workspace starts opted out.
+- **`0025_m18_mind_map.sql`:** `mind_nodes`, `mind_edges`, `mind_sources`
+  and `mind_node_sources`, workspace-scoped, with composite foreign keys and
+  `_audit` triggers.
+
+Neither migration has a `DROP`, `TRUNCATE`, `DELETE`, rename or data
+rewrite.
+
+**Environment.** `.env.example` documents four optional variables, none
+needed in production:
+
+- **`ASK_RATE_LIMIT`:** Ask requests per person per minute. Default 20.
+- **`AI_BASE_URL`, `AI_API_KEY`, `AI_MODEL`:** the optional model path for
+  Ask taff (ADR 0016). `compose.prod.yaml` does not pass them to the API, so
+  in production the path stays off and no workspace data goes to any model.
+  Ask answers by rules. Turning the path on would need a Compose change, all
+  three values, and a workspace admin's opt-in. Do not set them for this
+  deploy.
+
+No secret values are recorded here.
+
+**Compose, Docker and Caddy.** No changes since R1.
+
+**Release checklist (plan §6.0)** against a local production-mode stack built
+from PR head `58ea2cb`, which has the same application code as the source:
+
+- **Stack:** `pnpm release:stack --build --migrate --seed` on a fresh
+  database, API on 4201 and web on 4200.
+- **Command:** `RELEASE_MAIL_LOG=… pnpm release:checklist`. The mail-log
+  directory must be mode 0700.
+- **Result: passed, 32 / 32**, 0 failed, 0 skipped. Owner and role changes
+  and the rate-limit probe ran.
+- **One sub-step skipped**, in every project: SMS sign-in, because
+  `smsEnabled=false` locally.
+- **MCP:** each project's `@modelcontextprotocol/client` round trip passed
+  42/42 checks, covering all 30 tools in `MCP_TOOLS`.
+
+| Item | phone-en | phone-zh-HK | desktop-en | desktop-zh-HK |
+| --- | --- | --- | --- | --- |
+| 1. Sign-in and preferences | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) | pass (SMS skipped) |
+| 2. Tasks | pass | pass | pass | pass |
+| 3. Agents and review | pass | pass | pass | pass |
+| 4. Projects | pass | pass | pass | pass |
+| 5. Calendar | pass | pass | pass | pass |
+| 6. Search and organizations | pass | pass | pass | pass |
+| 7. Settings | pass | pass | pass | pass |
+| 8. MCP | pass | pass | pass | pass |
+
+**Notes for the deploy.**
+
+- The live SHA is still `2338772`, so this deploy applies migrations 0023,
+  0024 and 0025 together, in order, with the API image.
+- After the deploy, run the checklist against the live origin. Because of the
+  new CRM screens, check that a member without CRM access sees no 公司 ·
+  聯繫人 entries.
+
+**Blocked: local `pnpm e2e` calendar assertion — 2026-10-14.** The M15
+source `8019c6943e453e087a6cfa6c48651c99b9840a9d` passed Step 0 with
+main CI [38528200033](https://github.com/ksamint/taff01/actions/runs/38528200033)
+and ancestor-head PR CI
+[38525583386](https://github.com/ksamint/taff01/actions/runs/38525583386).
+A clean detached checkout on macOS arm64, Node 24.19.0 and pnpm 12.10.1
+passed lint, typecheck, licence, 814 tests in 77 files, build, build:server
+and perf:budget (Today: 193,320 bytes gzipped, limit 204,800).
+The browser suite completed with **154 passed, 2 failed** in 9.4 minutes.
+Both failures are the `calendar phone touch, cancellation, month move, tray
+scheduling, empty-slot create and list navigation` case, in **en** and
+**zh-CN**, at `e2e/calendar.spec.ts:994:28`: expected a value greater than
+zero, received zero. The zh-HK case passed. The API and web ports were free
+before the run, agreed with the local origin settings, and the checkout-owned
+helper servers were cleaned up afterward; this is not the R1b port conflict.
+The failure's cause is not yet established. Step 1 forbids deployment after
+a failed command, so MCP smoke, Lighthouse, LCP and production deployment
+did not run. The build agent should investigate and publish a fresh candidate
+with the assertion passing. Production remains
+`23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
+migration, image build or container replacement was started.
+
+### Frontend v2 release candidate M16 — 2026-10-14 (answers the M15 calendar block)
+
+**Source.** `main` at `78c68ab9182fa1d9bdbdd9219108f276176567db`. It is the
+merge of PR #15 (calendar e2e fix) on top of PR #13 (`m16-timeline`, merged as
+`4989a27`). It supersedes the blocked M15 candidate, so one deploy covers R1,
+M15 and M16.
+
+**Answer to the M15 `Blocked:` note** (`calendar.spec.ts:994`, "expected > 0,
+received 0" in en and zh-CN on macOS arm64):
+
+- **Cause:** `calendar-engine.tsx` switches to month view with
+  `setView("month-grid")`. The SDK renders the month DOM on a later frame,
+  and the engine itself waits for `.sx__month-grid-wrapper`. The test read
+  `.sx__month-grid-day[data-date]` straight after the click, so a slower host
+  could find no cells and count 0.
+- **Fix (PR #15, test only):** the test now polls the grid until it contains
+  today in the member's time zone, then counts. The assertion is unchanged; a
+  grid that never shows today now fails with that message.
+- **Validation:** `calendar.spec.ts` passed 15/15 in en, zh-CN and zh-HK with
+  `TZ=Asia/Shanghai` on a fresh database.
+- **Not reproduced here:** neither a browser time zone whose date differs from
+  the member's (`TZ=Pacific/Honolulu`) nor full CPU load made the old test
+  fail. The code path above is the only way the count can reach 0 without
+  navigation.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `78c68ab`:** [38544901342](https://github.com/ksamint/taff01/actions/runs/38544901342), success (pushed only after it succeeded).
+- **PR #15 CI on its head `4d5a0ae8121477111010ed096b7ac9a78c8a30de`:**
+  [38542333878](https://github.com/ksamint/taff01/actions/runs/38542333878),
+  success. That head is an ancestor of the source.
+- **PR #13 CI on its head `721887866ed725dbcea6675f5ce7dfd30d5525d7`:**
+  [38538390232](https://github.com/ksamint/taff01/actions/runs/38538390232),
+  success. Between that head and the source, only `docs/deploy.md` and
+  `e2e/calendar.spec.ts` differ.
+- **Visual baselines and gated Lighthouse on CI Chromium:**
+  - [38530381663](https://github.com/ksamint/taff01/actions/runs/38530381663),
+    which also ran the Lighthouse gate;
+  - [38537224735](https://github.com/ksamint/taff01/actions/runs/38537224735),
+    which recaptured the baselines after the fix below.
+
+**What changes for people.**
+
+- **Timeline (`?view=timeline`).**
+  - **Display:** day and week zoom, summary bars, milestones and the critical
+    path. Blocked and conflicting tasks are marked. Risk, forecast and slip
+    come from the plan model.
+  - **Editing:** move and resize bars; moving a parent bar moves its
+    subtree. Add or remove dependencies by drag, link mode or form.
+  - **Undo:** every change shows a toast with 撤銷 (undo), which calls the
+    inverse API with `version`.
+  - **Keyboard:** row selection, with a footer form for editing.
+- **Relations graph (`?view=relations`).**
+  - **Layouts:** layered and seeded-force, both deterministic.
+  - **Navigation:** pan, zoom and fit, plus layer chips. The scope is this
+    project or the workspace.
+  - **Inspector:** reachable by keyboard, with an "as list" alternative.
+- **Fix: Today opened an arbitrary workspace.** A person's default workspace
+  could depend on the query plan when several workspaces were created
+  together, as the seed does. `getMe` now breaks `createdAt` ties by name
+  (`COLLATE "C"`), then id. Existing people may see seeded workspaces listed
+  in a different order.
+
+Report: `docs/milestones/16-timeline-relations.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 839 / 839 (fresh database) |
+| e2e | 165 / 165 (fresh database); green in PR CI |
+| visual suite | 16 screens × 4 projects, green in PR CI |
+| Today initial JS | 193,537 B gzipped / 204,800 B |
+| Today LCP, median of 3, slow 4G, 4× CPU, local production build | en 636 ms, zh-CN 640 ms, zh-HK 640 ms |
+| Lighthouse, gated, CI Chromium (performance / accessibility / best practices) | 99/100/100 in en, zh-CN and zh-HK |
+| `pnpm mcp:smoke` against the production-mode stack | passed |
+
+**Migrations.** None. The last migration is still `0025` from the M15
+candidate.
+
+**Environment.** No changes.
+
+**Compose, Docker and Caddy.** No changes.
+
+**Release checklist (plan §6.0).** It ran on PR #13 head `7218878` against a
+local production-mode stack. That head has the source's application code:
+only `docs/deploy.md` and the calendar test differ.
+
+- **Setup:** `pnpm release:stack --build --migrate --seed` on a fresh database,
+  then `RELEASE_MAIL_LOG=… pnpm release:checklist`.
+- **Result: passed, 32 / 32,** with 0 failed and 0 skipped.
+- **Sub-step skipped:** SMS sign-in, in every project, because
+  `smsEnabled=false` locally.
+- **MCP:** the `@modelcontextprotocol/client` round trip passed 42/42 checks
+  over the 30 tools, in every project.
+
+All eight items passed on phone-en, phone-zh-HK, desktop-en and desktop-zh-HK.
+
+**Notes for the deploy.**
+
+- If the live origin is still on `2338772`, migrations `0023`–`0025` apply
+  together, as described in the M15 candidate.
+- After the deploy, open a project's 時間線 (timeline) and 關係圖 (relations
+  graph) views as an admin and as a member. Members must not see finance
+  figures.
+
+**Blocked: local `pnpm test` member-order assertion — 2026-10-14.** Source
+`78c68ab9182fa1d9bdbdd9219108f276176567db` passed Step 0: exact-source
+main CI [38544901342](https://github.com/ksamint/taff01/actions/runs/38544901342)
+and ancestor-head PR CI
+[38542333878](https://github.com/ksamint/taff01/actions/runs/38542333878)
+are completed/success, the source is an ancestor of main, and its code diff
+to main is empty. On a clean detached macOS arm64 checkout with fresh isolated
+local databases, Node 24.19.0 and pnpm 12.10.1, lint, typecheck and licence
+passed. `pnpm test` exited 1: **838 passed, 1 failed**, across **78 passed,
+1 failed test files** (839 tests, 79 files total).
+The failing test is `core PostgreSQL integration > signup provisions an
+audited personal workspace and auth defaults`, at
+`packages/core/src/integration.test.ts:91:7`. It compares the roster as an
+ordered array `[person/admin, agent]`; the returned roster has the same two
+fixture members in `[agent/member, person/admin]` order. The current
+`listMembers` query in `packages/core/src/index.ts` orders by `createdAt`.
+The reason that these fixture timestamps place the agent before the person
+needs investigation; the ordered person-first assertion does not hold in
+this local run. This needs investigation
+and a fresh candidate; the deploy agent did not change tests or application
+code, weaken the assertion, or retry the failed command.
+Per Step 1, build, build:server, perf:budget, e2e, MCP smoke, Lighthouse, LCP
+and production deployment did not run. Production remains
+`23387723f8c438d990db00d561cba2899f48ab80`; no production lock, backup,
+migration, image build or container replacement was started.
+
+### Frontend v2 release candidate M17 — 2026-10-14 (answers the M16 member-order block)
+
+**Superseded during deployment:** M18 was published while M17 was live under
+the native lock. The user's effective 2026-10-14 rules require the newest
+candidate to supersede an in-progress one. M17 was healthy, migrations
+0023–0025 had applied, and the brief overlay passed on the live phone UI.
+A proposal test failed only during harness cleanup of agent-assigned tasks;
+its two residual verification tasks were completed through supported,
+version-checked assignment/task APIs after repairing the helper. M17 was
+not recorded as an accepted release. The same keeper retained the lock
+while M18 took a fresh database/env backup and superseded it.
+
+**Source.** `main` at `c38cde71ba7e2a5d440eed8da2052cd4fa6bb59c`. It supersedes
+the M16 candidate, so one deploy covers R1, M15, M16 and M17. Since the M16
+candidate's source `78c68ab`, it adds:
+
+- **PR #14:** M17, the AI brief and Ask taff (rules-based).
+- **PR #16:** an e2e fix for an intermittent `optimistic-m4` failure.
+- **PR #17:** a core fix for the member-order assertion that blocked M16.
+
+**Answer to the M16 `Blocked:` note.** The note reported
+`integration.test.ts:91`: `listMembers` returned `[agent, person]`.
+
+- **Cause:** `listMembers` ordered only by `createdAt`. Signup creates the
+  person and the personal agent in one transaction, and the seed creates each
+  workspace's members together, so the rows share `created_at`. The order was
+  then left to the query plan.
+- **Fix (PR #17):**
+  - Members now order by `createdAt`, then `kind` (the enum lists person
+    before agent), then `id`. The existing ordered assertion covers this.
+  - Agent tokens, activity, MCP calls, invites and grants now break ties by
+    `id`.
+
+**Other fixes since M16.**
+
+- **`e2e/optimistic-m4.spec.ts` (PR #16, test only):** it failed 5 of 36 runs
+  on `78c68ab`.
+  - Cause: the test removed its only route right after fulfilling a held
+    request, which turns off request interception in Playwright 1.64. Chromium
+    then left some already-paused app refetches hanging. The rejected
+    mutation never settled, so no alert appeared and the controls stayed
+    disabled.
+  - Result after the fix: 45 / 45.
+- **`assistant.integration.test.ts` (in PR #14, test only):** the "minimum
+  context" check now masks random UUIDs before looking for the contract
+  amount. A task id containing `1000` had tripped it. No finance data is
+  sent.
+- **Phone brief overlay (in PR #14):** closing it now returns focus to the 我的
+  › AI 簡報 row. Before the fix, the production build restored focus to
+  `<body>`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `c38cde7`:**
+  [38553436097](https://github.com/ksamint/taff01/actions/runs/38553436097),
+  success.
+- **PR CI on the merged heads,** each an ancestor of the source, all success:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #17 | `3cf187a0f441723b6ee7a9960cef80cd76adef73` | [38551082162](https://github.com/ksamint/taff01/actions/runs/38551082162) |
+  | #16 | `9219f707e44c4c582d652aa5cb34fc4831ab3198` | [38550241804](https://github.com/ksamint/taff01/actions/runs/38550241804) |
+  | #14 | `193f16cb264e09b2b06c8dfbeace67f58fc79b59` | [38547202218](https://github.com/ksamint/taff01/actions/runs/38547202218) |
+
+- **Visual baselines and gated Lighthouse on CI Chromium:**
+  - [38538826114](https://github.com/ksamint/taff01/actions/runs/38538826114):
+    M17 baselines.
+  - [38551080750](https://github.com/ksamint/taff01/actions/runs/38551080750):
+    gated Lighthouse on PR #17's source, which includes M17.
+
+**What changes for people.**
+
+- **AI brief (M17).**
+  - Where: on phone, 我的 › AI 簡報 opens `/brief` as a full-screen dialog; on
+    desktop, it is the Me › AI 簡報 tab.
+  - Content: a greeting, stat tiles, and risk and slip per project. Finance
+    figures appear for admins only.
+  - Suggested actions never decide anything in one tap. They open the review,
+    the task or a confirm sheet.
+- **Ask taff.** It answers by rules and needs no AI environment variables. The
+  model path stays off in production because `compose.prod.yaml` does not
+  pass the AI variables.
+- **Member lists.** People are listed before agents when they were created
+  together.
+
+Report: `docs/milestones/17-ai-brief.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 855 / 855 |
+| e2e and visual suite | green in PR and `main` CI |
+| Today initial JS | 194,384 B gzipped / 204,800 B (CI) |
+| Today LCP, local production build (median of 3, slow 4G, 4× CPU) | en 660 ms, zh-CN 656 ms, zh-HK 668 ms |
+| Lighthouse, gated, CI Chromium (performance / accessibility / best practices) | en 93/100/100, zh-CN 93/100/100, zh-HK 94/100/100 |
+| `pnpm mcp:smoke`, against the production-mode stack | passed |
+
+**Migrations.** None. The last migration is still `0025`.
+
+**Environment.** No changes since the M15 candidate. `ASK_RATE_LIMIT` and the
+`AI_*` variables stay optional and unset.
+
+**Compose, Docker and Caddy.** No changes.
+
+**Release checklist (plan §6.0).** It ran on the exact source `c38cde7`, on a
+fresh database, with `pnpm release:stack --build --migrate --seed` and
+`RELEASE_MAIL_LOG=… pnpm release:checklist`.
+
+- **Result: passed, 32 / 32,** with 0 failed and 0 skipped.
+- **One sub-step skipped:** SMS sign-in, in every project
+  (`smsEnabled=false` locally).
+- **MCP:** the `@modelcontextprotocol/client` round trip passed 42 / 42
+  checks, covering all 30 tools.
+
+**Notes for the deploy.**
+
+- If the live origin is still on `2338772`, migrations `0023`–`0025` apply
+  together, as described in the M15 candidate.
+- Before `pnpm e2e`, make sure nothing listens on the configured ports. A
+  stale local API caused one failed checklist attempt here.
+
+
+### Frontend v2 release candidate M18 — 2026-10-14
+
+**Superseded during deployment:** M18b was published before the M18
+checkpoint. Per the user's effective newest-candidate rule, M18b took over
+under the same native lock with fresh backups and pinned image builds.
+M18 was healthy and its 21 critical public cases passed (four task
+cleanup-only failures passed their single retry after descendant-first
+cleanup was fixed). The application code is unchanged in M18b; the
+completed M18 public milestone coverage is identified separately in the
+M18b checkpoint, alongside fresh critical checks on the M18b runtime.
+M18 was not marked accepted and deployment.done was not advanced to it.
+
+
+**Source.** `main` at `98cf3c64b63a397512dc9bf940f2152d2c305a44`. It supersedes
+the M17 candidate, so one deploy covers R1 and M15–M18. If the M17 deploy is
+already running, finish it first, then take this one. Since the M17
+candidate's source `c38cde7`, it adds:
+
+- **PR #18:** M18, the mind map (`?view=mind`).
+- **PR #20:** docs only (the pinned-candidate deploy rule).
+
+The application tree is identical to `a13fca9`, the PR #18 merge: PR #20 changes
+only `docs/agent-goal-deploy-frontend-v2.md`. The `main` run on `a13fca9` was
+cancelled when PR #20 merged, so the candidate is pinned to `98cf3c6`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `98cf3c6`:**
+  [38561997658](https://github.com/ksamint/taff01/actions/runs/38561997658),
+  success.
+- **PR CI on the merged heads,** each an ancestor of the source, all success:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #18 | `f7fd369685b70cecd8809b68a778c0f7d3a861b2` | [38558870195](https://github.com/ksamint/taff01/actions/runs/38558870195) |
+
+  PR #20 is docs only; its content is covered by the `main` run above.
+- **Visual baselines and gated Lighthouse on CI Chromium:**
+  [38557553181](https://github.com/ksamint/taff01/actions/runs/38557553181)
+  on `89af016`, which has the same application code as the source. One
+  `me.png` capture from an earlier run showed a font-metric variant. PR #18
+  replaced it with this run's capture, which is byte-identical to the previous
+  `main` baseline.
+
+**What changes for people.**
+
+- **Mind map (M18).** `/projects/[id]?view=mind`, one map per workspace:
+  - **Canvas:** an overview and node detail.
+  - **Editing:** create and edit nodes and sources, add, re-kind and remove
+    links, attach evidence, and archive or restore (never delete). Every
+    write has undo.
+  - **Validation task:** a node can become a real task owned by the signed-in
+    person; nothing is attributed to an agent or generated by a model.
+  - **Keyboard and screen readers:** 以列表顯示 replaces the canvas with a
+    keyboard-navigable list. Selection changes are announced politely.
+  - **Access:** editing needs `mind:write`. No new permission rule and no new
+    MCP tool.
+
+Report: `docs/milestones/18-mind-map.md`.
+
+**Validation numbers.**
+
+| Check | Result |
+| --- | --- |
+| lint, typecheck, licence | green |
+| unit and integration tests | 866 / 866 |
+| e2e and visual suite | green in PR CI ([38558870195](https://github.com/ksamint/taff01/actions/runs/38558870195)) |
+| Today initial JS | 194,424 B gzipped / 204,800 B |
+| Today LCP, local production build on `a13fca9` (median of 3, slow 4G, 4× CPU) | en 640 ms, zh-CN 640 ms, zh-HK 648 ms |
+| Lighthouse, gated at 90 / 90 / 90, CI Chromium | passed for en, zh-CN and zh-HK in both CI runs above |
+| `pnpm mcp:smoke`, against the production-mode stack | passed |
+
+Per-locale Lighthouse scores are not copied here: this session could not
+download the CI job log. A local run in this build container scored 83–84
+for performance (100 accessibility, 100 best practices). That container is
+slower than CI's runner and is not the gate.
+
+**Migrations.** One, additive: `0026_m18_mind_edge_version`.
+
+- `ALTER TABLE mind_edges ADD COLUMN version integer DEFAULT 1 NOT NULL`
+- `ADD CONSTRAINT mind_edges_version CHECK (version > 0)`
+- **Backfill:** existing rows take the default `1`; no data rewrite. On the
+  fresh seeded checklist database, 29 / 29 `mind_edges` rows read version 1.
+
+**Environment.** No changes.
+
+**Compose, Docker and Caddy.** No changes.
+
+**Release checklist (plan §6.0).** It ran on `a13fca9` (the same application
+tree as the source), on a fresh database, with
+`pnpm release:stack --build --migrate --seed` and
+`RELEASE_MAIL_LOG=… pnpm release:checklist`.
+
+- **Result: passed, 32 / 32,** with 0 failed and 0 skipped.
+- **One sub-step skipped:** SMS sign-in, in every project
+  (`smsEnabled=false` locally).
+- **MCP:** the `@modelcontextprotocol/client` round trip passed 42 / 42
+  checks in each of the four projects, covering all 30 tools.
+
+**Notes for the deploy.**
+
+- If the live origin is still on `2338772`, migrations `0023`–`0026` apply
+  together.
+
+### Frontend v2 release candidate M18b — 2026-10-14
+
+**Source.** `main` at `ab243e8379c952f37c459a60596e4754ba33967e`. It supersedes
+the M18 candidate, whose source was `98cf3c6`. Since that source, it adds:
+
+- **PR #19, test only.** A shared `holdRequest` helper keeps request
+  interception on for the rest of each test. It is used in the planning,
+  persistence, notifications, me and optimistic-m4 specs. The specs no longer
+  unroute in the middle of a test, which could leave app refetches hanging (the
+  same race PR #16 fixed in optimistic-m4).
+- This candidate's own M18 section, docs only.
+
+Outside `e2e/` and `docs/`, nothing has changed since the M18 candidate. If M18
+is already deploying, finish it; this candidate then changes nothing at
+runtime.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `ab243e8`:**
+  [38564795332](https://github.com/ksamint/taff01/actions/runs/38564795332),
+  success.
+- **PR CI on the merged head,** an ancestor of the source:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #19 | `5e1abc2cd156be43d9ca07f2c1cbdcd1b5f68ad0` | [38559438423](https://github.com/ksamint/taff01/actions/runs/38559438423), success |
+
+**Validation, migrations, environment, Compose, Docker and Caddy.** These are
+the same as for the M18 candidate: migration `0026` is additive, and there are
+no environment or infrastructure changes. Under the current working rules,
+the local production-mode checklist is optional and was not rerun for this
+test-only change. The M18 checklist, which passed 32 / 32 with MCP 42 / 42,
+covers the same application tree.
+
+
+### Frontend v2 M18b upgrade checkpoint — 2026-10-14
+
+M18b superseded healthy M18, which had superseded M17, under the user's effective
+2026-10-14 deployment rules. The live pinned source is
+`ab243e8379c952f37c459a60596e4754ba33967e`, tree `30e53242c2723e30a84bb753a3fa7271c4e601dc`.
+Application commits newer than this source on main do not block deployment.
+The Git diff outside `e2e/` and `docs/` from M18 to M18b is empty; PR #19
+changes test interception helpers only. Application/migration/env/Compose,
+Docker and Caddy sources are identical to M18.
+
+**Validation.** Exact-source main-push CI
+[38564795332](https://github.com/ksamint/taff01/actions/runs/38564795332)
+and PR #19 head CI
+[38559438423](https://github.com/ksamint/taff01/actions/runs/38559438423)
+were completed/success; both source ancestry and PR-head ancestry were
+verified again before build, migration and container start. CI is the
+validation; the full local suite, Lighthouse and LCP were not re-run for
+M18b. The candidate records 866 tests, 194,424 B Today initial JS and
+640/640/648 ms en/zh-CN/zh-HK LCP; these are candidate/CI evidence, not new
+local measurements. On this Mac all three pinned Docker images built and
+`pnpm mcp:smoke` passed against production-mode API/worker containers on an
+isolated local-development database. The Mac used its existing Colima builder; production builds retained
+`--builder default`. Local smoke containers were removed.
+
+**Lock and backups.** Detached native lock keeper PID `3710910` retained
+`/srv/taff/deploy.lock` continuously through the M17-to-M18 handoff.
+M18b took a fresh dedicated dump, verified by `pg_restore --list`:
+`/srv/taff/secrets/db.before-ab243e8379c952f37c459a60596e4754ba33967e.dump`, 424,832 B,
+SHA-256 `b4c17a1a4537ccfc87fb0aa5a23d81622c075908ff5c1963355afd4cc27ad846`; catalog includes 88 tables, tasks,
+workspaces and migration journal. Exclusive env backup:
+`/srv/taff/secrets/.env.before-ab243e8379c952f37c459a60596e4754ba33967e`, mode 0600.
+Git bundle: 8,177 B, SHA-256 `0c6867ae0720f5bd76b1cca383f42abf0085e6107a1682b20e680d4744faf0bb`;
+`git bundle verify`, detached SHA, clean tree and GitHub origin verified.
+The tracked public source modes were normalized to Git's 0644/0755 before
+building, leaving private Git/env/secret files protected.
+
+**Migrations and runtime.** Earlier M17/M18 applied additive 0023–0026. M18b adds no migration;
+the most recent remains `0026_m18_mind_edge_version.sql`, hash
+`3dd0bf9837fbe740fac652712f32a71b84bddd619a6f9198a5c5ebe0b9e0b520`.
+It adds integer version default 1 and a positive-version constraint, with
+no rewrite of existing user data. The canonical M18b one-shot migrator
+exited 0, and all four migration hashes were present. Only API, worker
+and web were recreated with SHA-stamped tags/cache assets:
+
+- api: `sha256:e3ec7ac800fe6e540d173ead9fa16c7ba9d587cc29abe945d5f03e42602bbbe7`
+- worker: `sha256:bcdd2a0d96d33c3533a138851ec05fcbb56f00a9eec8d76c89f14a3f0a245163`
+- web: `sha256:63825ed6a64ca62304f3a9423112b0e37788a9b7bcec3043968dfb56434c6bbb`
+
+Caddy, Valkey and all 46 neighboring containers kept their IDs, start
+times and health; Traefik route hash unchanged. Private env changed only
+TAFF_TAG, retaining mode 0600. Email/SMS values unchanged; AI_* unset and
+all workspace AI flags disabled. PostgreSQL remained on its existing host,
+role and TLS connection, with postmaster start
+`2026-08-29 01:19:14.878015+00`. No database restart, DNS, route or role
+change.
+
+**Rollback identities.** The immediately preceding M18 images were retained:
+
+- api: `sha256:8eda1e0abdf2154d89bc43c8a7086d450ebd28b66b360316011ee6e22b9cbfad`
+- worker: `sha256:d5ab6682906ca664be8729983298d6710a124940dcb017a5fefa9a40c87a1ff7`
+- web: `sha256:e42d02b6be57391f87157ac51deb4608b87a4f247d3d75c8f140ff8c3c7992dd`
+
+The last previously accepted `23387723f8c438d990db00d561cba2899f48ab80`
+images and its original env/database backups also remain available:
+
+- api: `sha256:c828844901e46b97b58d0bb537922f807079cbc5aa65129b8a78d538ea467e25`
+- worker: `sha256:1531e2630e941710d7604a5106884cae2c6424f47bba434b97945f70f2375c7e`
+- web: `sha256:c8daf2f869c5594a7ae3eceda850474bf507261dfe4345b94ec0274b1fed9625`
+
+**Public acceptance.** On the fresh M18b runtime, 21 / 21 critical and
+platform cases passed on the first attempt: en and zh-HK on 390×844 phone
+and 1280×800 desktop, plus a zh-CN phone platform/Today/Projects/Me spot
+check. Username and email sign-in, sign-out/re-sign-in, Today, task create,
+edit and person/agent assignment, run start/pause/resume/cancel, Inbox
+review approve/request changes, grant access, and the real official MCP
+client round trip passed. Each of the four MCP projects listed/exercised
+all 30 tools, checked live browser updates and call logs, submitted work
+for human review, regenerated/revoked tokens, and confirmed revocation
+returns 401. HTTPS/health, Secure/HttpOnly session cookies, foreign-origin
+rejection, unchanged auth methods, navigation, locale/theme preferences
+passed. All 21 journals report zero browser errors and zero cleanup failures.
+No public rate-limit flood or SMS OTP request was made: the rate-limit
+probe is covered by local MCP smoke; SMS was offered and its form opened.
+
+**Additional public coverage, explicitly on M18's equivalent application.**
+Before switching to M18b, the full remaining public batch completed 94
+unique cases: 89 applicable cases passed, five expected brief form-factor
+counterparts skipped, one initial failure passed its single retry (95
+attempts). CRM roles/stakeholders/cascade/archives and undo, timeline
+move/resize/dependencies/cycle rejection/graph and undo, brief/Ask rules and
+human-approved proposals, mind-map keyboard node/link/evidence editing and
+undo plus person-owned validation tasks, board/list/calendar/search,
+organizations and fresh invitations, notifications/permissions/settings,
+restricted-member access, and realtime between independently authenticated
+Chromium processes were exercised across en/zh-HK phone and desktop and
+zh-CN phone milestones. This is application-equivalence evidence, not a
+claim that the optional batch ran again on M18b. All 95 entity journals
+report zero browser errors and successful cleanup.
+
+**Follow-up (release kept live).** The restricted-member check on desktop
+zh-HK initially failed at `platform.spec.ts:28` and passed the one permitted
+retry. The underlying first-attempt cause remains unestablished; investigate
+verification stability. There is no twice-failing critical flow, so no
+rollback was required. Earlier verification-helper failures were resolved:
+M17's restrictive checkout permissions prevented the first migrator from
+reading its journal before SQL; tracked public source modes were repaired
+and images rebuilt. A retained historical stopped migrator confused a
+uniqueness check; verification now selects the canonical one-shot by name
+and immutable image. Task cleanup initially tried to finish parents before
+open children and to finish agent-assigned work directly; supported
+version-checked unassignment and descendant-first completion fixed it.
+The four affected M18 task cases passed their single retry and all residual
+verification parents were completed through public APIs. No application
+permission or data-integrity guard was weakened.
+
+Verification tokens/new grants were revoked, active runs canceled, agent
+settings and profile/notification preferences restored, schedules cleared,
+and current-run projects/CRM/mind nodes and sources archived. Current-run
+mind edges were removed through the supported link API. Tasks, accepted
+invitations, verification recipients/members and workspaces retain their
+auditable verification history because no supported archive/delete API
+exists; they were not reported deleted. No demo seed or real user's
+workspace was used.
+
+**Receipt and lock release.** The acceptance receipt is
+`/srv/taff/frontend-v2-m18b-accepted-ab243e8379c952f37c459a60596e4754ba33967e.json`.
+`deployment.done` is `ab243e8379c952f37c459a60596e4754ba33967e`. The adopted
+keeper was released through its original job's reconciled unlock receipt.
+An independent native flock probe acquired and released the lock; exact
+M18b image identities/running state, API healthy, public health 200,
+Caddy/Valkey/all 46 neighbors, route hash and PostgreSQL start time were
+verified again after unlock. The release stayed live. No deployment is
+blocked; the one retry-passing noncritical follow-up is recorded above.
+The local agent continues newest-candidate discovery every 30 minutes until
+v0.2.0 is deployed and recorded, using the effective user rules in the
+updated runbook.
+
+### Frontend v2 release candidate M19a — 2026-10-14
+
+**Source.** `main` at `9577c8cde908f0da38987dcb196fcd6704c998b3`. It supersedes
+M18b, whose source `ab243e8` is live. Since M18b, it adds two parts of M19:
+
+- **PR #21: v1 leftovers.**
+  - Removes 317 lines of unused v1 CSS from `base.css`, `task-detail.css` and
+    `today.css`.
+  - Renames the visual suite to `e2e/ui-v2.spec.ts`; its 86 baselines move
+    byte for byte.
+- **PR #22: fonts and i18n.**
+  - Regenerates the Noto Sans TC subsets from the v2 strings: 714 → 975
+    characters, 219,496 → 295,616 bytes across the two files.
+  - Updates the `unicode-range` values in `tokens.css` to match.
+  - Adds a zh-HK Traditional-character lint test.
+  - Recaptures 69 visual baselines on CI.
+- **`848060a`:** the deploy agent's M18b record, docs only.
+
+**What changes for people.** Seed names, titles and v2 interface characters
+that used to fall back to the system font now render in Noto Sans TC. The
+fonts keep `font-display: optional`. The service worker and locale caches
+refresh through `ASSET_VERSION`, as usual.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `9577c8c`:**
+  [38572631759](https://github.com/ksamint/taff01/actions/runs/38572631759),
+  success. It runs the LCP guard, gated Lighthouse, the visual suite, e2e and
+  the MCP smoke test.
+- **PR CI on the merged heads,** each an ancestor of the source, all success:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #22 | `132bc1ccfb0d7ac0f93e70d1b5709adc43dabc98` | [38569973363](https://github.com/ksamint/taff01/actions/runs/38569973363) |
+  | #21 | `bdaae8aa1a0bb1726e4b3b8ba819cba9e2956f69` | [38565883593](https://github.com/ksamint/taff01/actions/runs/38565883593) |
+
+- **Visual baselines:**
+  [38568927657](https://github.com/ksamint/taff01/actions/runs/38568927657)
+  on `32ac206`, the PR #22 head before the baseline commit.
+
+**Validation numbers.** Unit and integration tests: 877 / 877 (PR #22). Today
+initial JS: 194,431 B gzipped of 204,800 B. The LCP guard and Lighthouse
+(at least 90 in every category) are gated in the `main` run above. Under the
+current rules, the local production-mode checklist was not rerun.
+
+**Migrations.** None. The last migration is still `0026`.
+
+**Environment, Compose, Docker and Caddy.** No changes.
+
+### Frontend v2 M19a upgrade checkpoint — 2026-10-14
+
+Live pinned source `9577c8cde908f0da38987dcb196fcd6704c998b3`, tree
+`bf341ea42f786d8115ab7f045dfab2e1b9f69ae1`. M19a removes unused v1 CSS and expands the
+Traditional Chinese Noto Sans TC font subsets for v2 strings. Review [PR
+#21](https://github.com/ksamint/taff01/pull/21) and [PR
+#22](https://github.com/ksamint/taff01/pull/22). Newer code on main was left for later
+candidates; M19a remained the newest published candidate at the final eligibility check.
+
+**Validation.** Exact-source main-push CI
+[38572631759](https://github.com/ksamint/taff01/actions/runs/38572631759) and merged PR
+#22 head CI [38569973363](https://github.com/ksamint/taff01/actions/runs/38569973363)
+completed/success. PR #21
+[38565883593](https://github.com/ksamint/taff01/actions/runs/38565883593) also passed.
+Source and PR-head ancestry were verified before build, migration, start and acceptance.
+The candidate records 877/877 tests and Today initial JS 194,431 B gzipped against a
+204,800 B budget. Exact-source main CI logs report signed-in Today LCP medians en 624
+ms, zh-CN 648 ms, zh-HK 648 ms (three runs per locale, slow 4G, 4× CPU; 2,000 ms limit),
+and Lighthouse 13.5.0 performance/accessibility/best-practices 96/100/100 in every
+locale. These are CI measurements. The full local suite, Lighthouse and LCP were not
+rerun.
+
+On a clean detached checkout, all three local images built and `pnpm mcp:smoke` passed
+on the first attempt against production-mode API/worker containers with a dedicated
+local development database and Redis namespace. The existing Mac Colima builder was
+used; production retained `--builder default`. Local smoke containers were removed.
+
+**Lock, backups and source relay.** Fresh detached keeper PID `107294` held the existing
+native `/srv/taff/deploy.lock`. Verified dedicated database dump:
+`/srv/taff/secrets/db.before-9577c8cde908f0da38987dcb196fcd6704c998b3.dump`, 559,842 B,
+SHA-256 `831891fa685413683eb8341ac0a45db4535b1df4ca1fc756fdc282463d65d373`. `pg_restore
+--list` verified 88 tables, tasks, workspaces and migration journal. Exclusive env
+backup `/srv/taff/secrets/.env.before-9577c8cde908f0da38987dcb196fcd6704c998b3`, mode
+0600. Incremental Git bundle 5,406,313 B, SHA-256
+`a52841f7a827232b6a9967cb86a99b7fa8a2f95cb4dbaea004fcfd74871204f7`; hash, `git bundle
+verify`, detached SHA, clean tree and GitHub origin verified. Only tracked public source
+modes were normalized to 0644/0755; private Git/env/secret files stayed protected.
+
+**Migrations and runtime.** No new migration, env variable, Compose, Dockerfile or Caddy
+change since accepted M18b. Canonical one-shot migrator exited 0; existing additive
+0023–0026 hashes were confirmed. Last migration remains
+`0026_m18_mind_edge_version.sql`, hash
+`3dd0bf9837fbe740fac652712f32a71b84bddd619a6f9198a5c5ebe0b9e0b520`. Only API, worker and
+web were recreated, with SHA tags and `ASSET_VERSION` cache stamping:
+
+- api: `sha256:8de56737961121eb0ad04c3d8d7ffa9a6e09bd3cfc19964eed77d67320f398de`
+- worker: `sha256:aa240a32862ee3a76511a3e3ca865e933b941809fcc9ac74cf15006906b09449`
+- web: `sha256:51a42c0bb3e4a040fef2acecff746d0ce47978019711f392108e668633e7ab61`
+
+Caddy, Valkey and all 46 neighboring containers retained IDs, images, start times and
+health. Route hash unchanged. Private env changed only TAFF_TAG and retained mode 0600;
+email/SMS unchanged, AI_* unset and all workspace AI flags disabled. PostgreSQL retained
+its host, dedicated role, TLS connection and postmaster start `2026-08-29
+01:19:14.878015+00`. No database restart, DNS, route or role change.
+
+**Rollback identities.** Immediately preceding accepted M18b
+`ab243e8379c952f37c459a60596e4754ba33967e` images remain available:
+
+- api: `sha256:e3ec7ac800fe6e540d173ead9fa16c7ba9d587cc29abe945d5f03e42602bbbe7`
+- worker: `sha256:bcdd2a0d96d33c3533a138851ec05fcbb56f00a9eec8d76c89f14a3f0a245163`
+- web: `sha256:63825ed6a64ca62304f3a9423112b0e37788a9b7bcec3043968dfb56434c6bbb`
+
+**Fresh public acceptance.** All 21 critical/platform cases passed on this M19a runtime:
+en and zh-HK at 390×844 phone and 1280×800 desktop, plus the zh-CN Today/Projects/Me
+spot check. Sign-in, sign-out/re-sign-in, Today, task creation/edit/person and agent
+assignment, run start/pause/resume/cancel, review approve/request changes, grant access,
+navigation, locale/theme, HTTPS/health, Secure/HttpOnly cookies, foreign-origin
+rejection and unchanged auth methods passed. Each of the four live MCP cases used the
+official client, initialized/listed and exercised all 30 read/write tools on current-run
+verification entities, confirmed call logs and live browser updates, submitted and
+approved review, regenerated/revoked tokens and confirmed fresh initialization returns
+401. No production rate-limit flood or SMS OTP request was made.
+
+The fresh remaining public batch completed 108 unique cases: 102 passed, 6 expected
+phone/desktop brief counterparts skipped, 0 remaining noncritical failures, across 109
+attempts. It exercised board drag/status, list filters, calendar day/week/month
+schedule/drag/resize/undo, command search, organizations/create/invite in a fresh
+browser, notifications and agent permissions, CRM
+roles/stakeholders/cascade/archive/undo, timeline dependencies/cycle rejection/relations
+graph/undo, brief and rules-only Ask with human-approved proposals, mind-map keyboard
+nodes/links/evidence/undo and person-owned validation tasks, restricted-member finance
+visibility, and realtime between separate Chromium processes. en/zh-HK phone and desktop
+and zh-CN phone/desktop milestone checks ran. This is fresh M19a evidence, with no
+application-equivalence substitution. 134 entity journals report 0 browser errors and 0
+cleanup failures.
+
+**Verification follow-ups.** The copied recipient helper initially generated an M18b
+prefix while the scoped proof bridge required M19a. Both phone task cases stopped twice
+before task creation; all four journals contain zero created tasks, browser errors and
+cleanup failures. The prefixes were corrected, and each affected phone task flow passed
+its first valid attempt. These four invalid harness attempts are retained in the
+evidence; they are not classified as twice-failing application task flows. No
+application or production permission/data guard was weakened.
+
+- phone-zh-HK mind-map keyboard node/link editing and archive/undo: first attempt
+  failed, then the one permitted retry passed. The sanitized location is
+  `mind.spec.ts:66` (test declaration); the first-attempt cause remains unestablished.
+  Follow up on verification stability.
+
+Verification tokens/new grants were revoked, active runs canceled, agent settings and
+profile/notification preferences restored, schedules cleared, and current-run
+projects/CRM/mind nodes and sources archived; current-run mind edges were removed
+through the supported link API. Tasks, accepted invitations, verification
+recipients/members and workspaces retain auditable history because no supported
+archive/delete API exists. Failed helper signups also retain their isolated
+verification-account history. Public checks used the dedicated verification workspace
+and its own test entities.
+
+**Receipt and unlock.** Acceptance receipt
+`/srv/taff/frontend-v2-m19a-accepted-9577c8cde908f0da38987dcb196fcd6704c998b3.json`;
+`deployment.done` is `9577c8cde908f0da38987dcb196fcd6704c998b3`. Keeper release followed
+the reconciled receipt. An independent native flock probe acquired/released the lock and
+reverified exact images, healthy API, public health 200, Caddy/Valkey/all 46 neighbors,
+route hash and PostgreSQL start time. No twice-failing critical flow required rollback.
+The release remains live; the agent resumes 30-minute discovery until v0.2.0 is deployed
+and recorded.
+
+### Frontend v2 release candidate v0.2.0 — 2026-10-14
+
+**Source.** `main` at `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, the **`v0.2.0`** release. It supersedes M19a,
+whose source `9577c8c` is live and accepted. This candidate completes M19 and
+is the frontend v2 release. Since M19a, it adds:
+
+- **PR #23, accessibility.**
+  - The accessibility audit (`scripts/ui/a11y-audit.mjs`) now covers every v2
+    route: 348 contexts, 0 failures.
+  - CSS fixes:
+    - deep-blue `--text-on-accent` text on the gold badges (5.5:1);
+    - 44 px targets for timeline rows, mind-map source links, project view
+      tabs, contact links and the brief's send button;
+    - the standard focus ring on the brief's ask input.
+  - The Me visual test now waits for its content before capturing.
+  - The PR adds 186 locale captures.
+- **PR #24, the release itself.**
+  - The v0.2.0 `CHANGELOG.md` and README.
+  - Workspace packages and the MCP server version move to `0.2.0`.
+  - The complete M19 report.
+- **`191243d`:** the deploy agent's M19a record, docs only.
+
+**What changes for people.** Badge counts on the phone tab bar, the desktop
+sidebar and Me now use deep-blue text on gold instead of white. The
+timeline, mind map, contact detail and brief controls are easier to hit,
+and the brief's ask field shows a focus ring. MCP clients now see server
+version `0.2.0`.
+
+**CI (Step 0 rule).**
+
+- **`main` push CI on the exact source `191243d`:**
+  [38585652337](https://github.com/ksamint/taff01/actions/runs/38585652337),
+  success. It covers the LCP guard, gated Lighthouse, the visual suite, e2e
+  and MCP smoke.
+- **PR CI on the merged heads,** each an ancestor of the source, all success:
+
+  | PR | Head | CI run |
+  | --- | --- | --- |
+  | #24 | `aaa5c5e3321c230596a695b13112db03defd5ff6` | [38580016843](https://github.com/ksamint/taff01/actions/runs/38580016843) |
+  | #23 | `00630dcf22c50d073dd97edf6590a697df0ac3b1` | [38576480541](https://github.com/ksamint/taff01/actions/runs/38576480541) |
+
+- **Visual baselines:**
+  - [38572695160](https://github.com/ksamint/taff01/actions/runs/38572695160)
+    on `cfd5e76`;
+  - [38575377243](https://github.com/ksamint/taff01/actions/runs/38575377243)
+    on `7ba0c1b`, for the Me baseline.
+
+**Validation numbers.** The gates are the `main` run above. The M19 report
+(`docs/milestones/19-cleanup-a11y-i18n-release.md`) records the audit,
+keyboard flow, locale captures and the per-PR checks. Under the current
+rules, the local production-mode checklist was not rerun.
+
+**Migrations.** None since M18. The last migration is still `0026`; every
+migration since v0.1.0 (`0023`–`0026`) is additive.
+
+**Environment, Compose, Docker and Caddy.** No changes.
+
+**Tag.** The build session cannot push tags because its git proxy refuses
+tag refs with a 403. When this candidate is accepted, the deploy agent
+creates the tag from a workstation with push access, on the exact source:
+
+```sh
+git fetch origin
+git tag -a v0.2.0 191243d25ea4f72116aadf2a9f7fec844a0ffa6e -m "Taff v0.2.0 — frontend v2 (M11–M19)"
+git push origin v0.2.0
+```
+
+### Frontend v2 v0.2.0 upgrade checkpoint — 2026-10-15
+
+Live pinned source `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, tree
+`cb98c3f495c05894cef5199ef7c0aead32d7a0e8`. This completes the frontend v2 deployment
+goal. The [M19 report](milestones/19-cleanup-a11y-i18n-release.md), [PR
+#23](https://github.com/ksamint/taff01/pull/23) and [PR
+#24](https://github.com/ksamint/taff01/pull/24) cover the accessibility fixes, larger
+touch targets, brief focus ring, release documentation, package versions and MCP server
+identity `taff/0.2.0`. Newer main commits were left for later candidates; this remained
+the newest published candidate at acceptance.
+
+**CI and local readiness.** Exact-source main-push CI
+[38585652337](https://github.com/ksamint/taff01/actions/runs/38585652337), merged PR #24
+head CI [38580016843](https://github.com/ksamint/taff01/actions/runs/38580016843), and
+PR #23 CI [38576480541](https://github.com/ksamint/taff01/actions/runs/38576480541)
+completed/success. Source and PR-head ancestry and newest-candidate eligibility were
+refreshed before build, migration, container start and acceptance. CI is the validation:
+877/877 unit/integration tests; Today initial JS 194,421 B gzipped against 204,800 B;
+signed-in Today LCP medians en 584 ms, zh-CN 676 ms, zh-HK 660 ms (three runs/locale,
+slow 4G, 4× CPU, 2,000 ms limit); Lighthouse 13.5.0
+performance/accessibility/best-practices 100/100/100 in every locale. These are
+exact-source CI measurements. The M19 report records its 348-context accessibility audit
+with zero failures and 186 locale captures.
+
+All three pinned images built on a clean detached local checkout and `pnpm mcp:smoke`
+passed on the first attempt against production-mode API/worker containers with a
+dedicated local development database and Redis namespace. The Mac used its existing
+Colima builder; production retained `--builder default`. Local smoke containers were
+independently confirmed removed. The full local suite, Lighthouse and LCP were not
+rerun.
+
+**Lock, backups and bundle.** Fresh detached keeper PID `392956` held the existing
+native `/srv/taff/deploy.lock`. Verified dedicated dump
+`/srv/taff/secrets/db.before-191243d25ea4f72116aadf2a9f7fec844a0ffa6e.dump`, 791,092 B,
+SHA-256 `bf3fb0a6feff80b0ae98b9ddae834ad40bd753234af9046220cb5bb5b50ead05`; `pg_restore
+--list` confirmed 88 tables, tasks, workspaces and migration journal. Exclusive env
+backup `/srv/taff/secrets/.env.before-191243d25ea4f72116aadf2a9f7fec844a0ffa6e`, mode
+0600. Incremental bundle 16,767,395 B, SHA-256
+`aa3eca66a010c6e3755f34325496e010eb796245318de91aa278aa8f8ae83ed7`; bundle hash, `git
+bundle verify`, detached SHA, clean tree and GitHub origin verified. Only tracked public
+source modes were normalized to 0644/0755; private Git/env/secret files remained
+protected.
+
+**Migrations and runtime.** No new migration, env variable, Compose, Dockerfile or Caddy
+change since accepted M19a. Canonical one-shot migrator exited 0 and existing additive
+0023–0026 hashes were present. Last migration remains `0026_m18_mind_edge_version.sql`,
+hash `3dd0bf9837fbe740fac652712f32a71b84bddd619a6f9198a5c5ebe0b9e0b520`. Only API,
+worker and web were recreated, with SHA tags and `ASSET_VERSION` cache stamping:
+
+- api: `sha256:fe32cd4997f9c9ee13ffe50580dd6ec2a5ed6d50f1958b5937c7a77523d24303`
+- worker: `sha256:0e4938d7e6854c3388beba670c506d0002dea94eec36b2816431530e9fee8bdb`
+- web: `sha256:797f5939f799128df6df0bac9faa7a9e2e529cd1a580814c89ddf2a626010100`
+
+Caddy, Valkey and all 46 neighboring containers retained IDs, images, start times and
+health; route hash unchanged. Private env changed only TAFF_TAG and remained mode 0600.
+Email/SMS unchanged, AI_* unset and all workspace AI flags disabled. PostgreSQL retained
+its host, dedicated role, TLS and postmaster start `2026-08-29 01:19:14.878015+00`. No
+database restart, DNS, route or role change.
+
+**Rollback identities.** Previously accepted M19a
+`9577c8cde908f0da38987dcb196fcd6704c998b3` images remain available:
+
+- api: `sha256:8de56737961121eb0ad04c3d8d7ffa9a6e09bd3cfc19964eed77d67320f398de`
+- worker: `sha256:aa240a32862ee3a76511a3e3ca865e933b941809fcc9ac74cf15006906b09449`
+- web: `sha256:51a42c0bb3e4a040fef2acecff746d0ce47978019711f392108e668633e7ab61`
+
+**Fresh public acceptance.** All 21 critical/platform cases passed on the final runtime:
+en and zh-HK at 390×844 phone and 1280×800 desktop, plus zh-CN Today/Projects/Me spot
+checks. Sign-in, sign-out/re-sign-in, Today, task creation/edit/person and agent
+assignment, run start/pause/resume/cancel, review approve/request changes, grant access,
+navigation, locale/theme, HTTPS/health, Secure/HttpOnly cookies, foreign-origin
+rejection and unchanged auth methods passed. Each of four live MCP cases used the
+official client, exercised all 30 read/write tools on current-run verification entities,
+confirmed call logs and live browser changes, submitted and approved review,
+regenerated/revoked tokens, and verified fresh initialize returns 401. Separate
+official-client connections in all four locale/viewport cases confirmed server identity
+`taff/0.2.0`. No public rate-limit flood or SMS OTP request was made.
+
+The fresh remaining batch completed 108 unique cases: 102 passed, 6 expected
+phone/desktop brief counterparts skipped, 0 remaining noncritical failures, across 111
+attempts. It exercised board drag/status, list filters, calendar day/week/month
+schedule/drag/resize/undo, command search, organizations/create/invite in a fresh
+browser, notifications/agent permissions, CRM roles/stakeholders/cascade/archive/undo,
+timeline dependencies/cycle rejection/relations graph/undo, brief and rules-only Ask
+with human-approved proposals, mind-map keyboard node/link/evidence/undo and
+person-owned validation tasks, restricted-member finance visibility, and realtime
+between separate Chromium processes. en/zh-HK phone and desktop and zh-CN phone/desktop
+milestones ran. 132 entity journals report 0 browser errors and 0 cleanup failures. This
+is fresh final-release evidence.
+
+**Follow-ups.**
+
+SMS is configured and its sign-in form opened in all four locale/viewport cases. The
+repository checklist explicitly skips requesting a real OTP; that delivery/sign-in cycle
+remains unverified and is a manual follow-up. Email and username sign-in passed. Public
+rate-limit enforcement was also intentionally not flooded, as the deployment runbook
+directs; local/CI MCP smoke covers it.
+
+- phone-en: create nodes and links by keyboard, edit and archive with undo — first
+  attempt failed; the single retry passed. Sanitized failed-attempt evidence:
+  [{"status": "failed", "retry": 0, "failureLocations": [{"file": "mind.spec.ts",
+  "line": 66, "column": 1}]}].
+- desktop-en: sources become evidence, with undo — first attempt failed; the single
+  retry passed. Sanitized failed-attempt evidence: [{"status": "failed", "retry": 0,
+  "failureLocations": [{"file": "mind.spec.ts", "line": 220, "column": 1}]}].
+- desktop-zh-HK: create nodes and links by keyboard, edit and archive with undo — first
+  attempt failed; the single retry passed. Sanitized failed-attempt evidence:
+  [{"status": "failed", "retry": 0, "failureLocations": [{"file": "mind.spec.ts",
+  "line": 66, "column": 1}]}].
+
+The M19 source report retains known visual limitations: manual review of 216 text nodes
+on gradient/image backgrounds, light-theme-only locale captures, and system-font
+fallback for 173 Simplified Chinese characters. These were reported by the build agent
+and remain follow-ups; they were not represented as new local audit measurements.
+
+Verification tokens/new grants were revoked, active runs canceled, agent settings and
+profile/notification preferences restored, schedules cleared, and current-run
+projects/CRM/mind nodes and sources archived. Current-run mind edges were removed
+through the supported link API. Tasks, accepted invitations, verification
+recipients/members and workspaces retain their auditable history because no supported
+archive/delete API exists. Public checks used the dedicated verification workspace and
+its own entities.
+
+**Acceptance, unlock and final tag.** Receipt
+`/srv/taff/frontend-v2-v020-accepted-191243d25ea4f72116aadf2a9f7fec844a0ffa6e.json`;
+`deployment.done` is `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`. Keeper release followed
+the reconciled receipt. An independent native flock probe acquired/released the lock and
+verified exact images, healthy API, public health 200, Caddy/Valkey/all 46 neighbors,
+route hash and PostgreSQL start time. No twice-failing critical flow required rollback.
+The remote annotated [v0.2.0 tag](https://github.com/ksamint/taff01/tree/v0.2.0), object
+`189a4a20658de40851ec2bd5075d196566dab82f`, was verified through GitHub Git APIs and
+`git ls-remote` to peel to exact source `191243d25ea4f72116aadf2a9f7fec844a0ffa6e`. The
+final release remains live. The watcher already returned when it found this candidate
+and is not restarted; the deployment goal is complete.
+
+### Frontend v2 release candidate v0.2.1-a — 2026-10-15
+
+Pinned main source `5191671743d36b4d2719882514ba0d2ff44019a4`, tree `50a1dda138e779acaab9b9badb82015a9d8a15b0`.
+
+Items 1–2 of plan §10.1, [PR 27](https://github.com/ksamint/taff01/pull/27) and
+[PR 28](https://github.com/ksamint/taff01/pull/28): the public acceptance harness,
+mind-map own-write/undo version races and evidence IDs, initial-socket role refresh,
+and MCP copy in en/zh-CN/zh-HK. MCP continues to report taff/0.2.0 at this checkpoint.
+Items 3–6 wait until this upgrade checkpoint is accepted.
+
+**CI.** Exact-source main push [38670282333](https://github.com/ksamint/taff01/actions/runs/38670282333)
+and merged PR-head [38666948980](https://github.com/ksamint/taff01/actions/runs/38666948980)
+are completed/success. The PR head is an ancestor of the pinned source. The item 1
+head CI [38668491277](https://github.com/ksamint/taff01/actions/runs/38668491277) is also green.
+
+Exact-main validation: 885/885 unit/integration tests;
+Today initial JS 194427 B gzipped against 204800 B;
+Today LCP medians en 592 ms, zh-CN 660 ms,
+zh-HK 648 ms (three runs/locale, slow 4G, 4× CPU, 2,000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 95/100/100; zh-CN 94/100/100; zh-HK 95/100/100.
+Full visual, browser-flow and bundled MCP smoke gates pass in that exact-source CI.
+
+**Migrations.** None since the live source. Last migration remains 0026; no backfill (0 rows).
+
+**Environment and infrastructure.** No .env.production.example, Compose, Dockerfile or Caddy changes. No new variables. The private env changes only TAFF_TAG, stays 0600, email/SMS unchanged, AI_* unset. Host layout, route, DNS, PostgreSQL role/host stay unchanged.
+
+**Acceptance checklist.** Run all 122 applicable public cases in e2e/live, without runtime skips:
+plan §6.0 basic functions and all 30 live official-client MCP read/write tools,
+CRM, timeline/relations, rules-based brief/Ask, mind-map keyboard/evidence/undo,
+validation tasks and restricted-member finance/role changes. Include held first-socket
+promotion plus demotion, and repeated mind-map operations. Platform HTTPS/health,
+Secure/HttpOnly cookies, foreign-origin rejection, unchanged auth methods, realtime,
+and independent neighbor/PostgreSQL preservation checks are required. en and zh-HK
+phone 390×844 and desktop 1280×800, plus zh-CN Today/Projects/Me and milestone spots.
+Use only the dedicated verification account/workspace, with runtime credential refs.
+Every failed check gets one retry; apply the deploy goal's critical rollback rules.
+No SMS OTP or rate-limit flood; AI model stays off.
+
+Deploy only this pinned SHA, with verified database/env backups, Git bundle,
+SHA-stamped images/service worker, native detached keeper, and fresh ancestry/CI gates.
+The [v0.2.1 milestone report](milestones/20-v0.2.1.md) records development evidence.
+
+### Frontend v2 v0.2.1-a upgrade checkpoint — 2026-10-15
+
+Live pinned source `5191671743d36b4d2719882514ba0d2ff44019a4`, tree
+`50a1dda138e779acaab9b9badb82015a9d8a15b0`. The [v0.2.1 report](milestones/20-v0.2.1.md)
+records scope and development evidence. This is the required intermediate checkpoint
+after items 1–2; items 3–6 remain for the final release.
+
+**CI and local production smoke.** Exact-source main push
+[38670282333](https://github.com/ksamint/taff01/actions/runs/38670282333) and merged
+PR-head [38666948980](https://github.com/ksamint/taff01/actions/runs/38666948980)
+completed/success. Ancestry, exact CI identity and newest-candidate eligibility were
+refreshed before build, migration, start and acceptance. Exact-main measurements:
+885/885 tests; Today initial JS 194427 B gzipped against 204800 B; Today LCP en 592 ms,
+zh-CN 660 ms, zh-HK 648 ms (three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 95/100/100; zh-CN
+94/100/100; zh-HK 95/100/100. CI includes visual/browser/MCP gates. All three images
+built on a clean detached Mac checkout and production-mode API/worker MCP smoke passed
+on the first attempt. Local smoke containers were removed. Full local suite, LCP and
+Lighthouse were not rerun.
+
+**Local image identities.**
+
+- api: `sha256:8c536552ee29cee65c2b0b2e704bf661f7727936522599ded44c903cf3e32dd0`
+- worker: `sha256:dd2936a824d61f7b88a11d4e2b9871c20268f230db1474caced482e9497c19d7`
+- web: `sha256:cfa05efac45bc424bf90e8668c333c60934c312b3740d70b69227114905d7fd0`
+
+**Lock, backup and source relay.** Detached keeper PID `3222992` held the existing
+native /srv/taff/deploy.lock. Dedicated dump
+`/srv/taff/secrets/db.before-5191671743d36b4d2719882514ba0d2ff44019a4.dump`, 1,058,528
+B, SHA-256 `dc4c41f877084777ec405f7851be3beb2b0c3b9051e750995deae90d0c794666`;
+pg_restore --list verified the catalog. Exclusive env backup
+`/srv/taff/secrets/.env.before-5191671743d36b4d2719882514ba0d2ff44019a4`, mode 0600.
+Bundle 325,964 B, SHA-256
+`7bf4529cdb0bcc960d50587acc0bcea44480eb09b6ec542c49e759acd0001237`; checksum, git bundle
+verify, exact detached SHA, clean tree and GitHub origin verified. Production used
+--builder default and SHA/ASSET_VERSION stamping. Only tracked public source modes were
+normalized.
+
+**Migrations and runtime.** No new migration or backfill since the prior live source;
+canonical one-shot migrator exited 0 and existing 0023–0026 hashes were verified. Only
+API, worker and web were recreated:
+
+- api: `sha256:54beffd8a6e814f4320a619ee4a352371d7540c3855d7bcb326b4a0bd3002695`
+- worker: `sha256:0325b1cc6562de7962f4b0e6a3c0eb66cf1ad37f1e4982301381d7ae8947a75e`
+- web: `sha256:52f14faab71782cea420c63ed8a2bbda9c8c26a37b597d346497c4ccfab135a4`
+
+Immediately after start, Caddy/Valkey and all 46 neighbors matched. The fresh
+pre-acceptance strict neighbor check later failed: four TableAI A/B app/converter
+containers were replaced/restarted by an independent rollout after 03:00UTC. 42 other
+baseline neighbors remained unchanged. Caddy/Valkey stayed unchanged. The Taff publisher
+managed only its own project; no TableAI remediation was attempted. This is retained as
+a failed noncritical platform check under the deploy goal; it was not reported as
+preservation success. Route hash unchanged; no DNS, host-layout, PostgreSQL host or role
+change. Private env changed only TAFF_TAG and remained 0600; email/SMS unchanged, AI_*
+unset and all workspace AI flags disabled. PostgreSQL postmaster start remains
+`2026-08-29 01:19:14.878015+00` with dedicated role and TLS.
+
+**Rollback identities.** Accepted prior source
+`191243d25ea4f72116aadf2a9f7fec844a0ffa6e`:
+
+- api: `sha256:fe32cd4997f9c9ee13ffe50580dd6ec2a5ed6d50f1958b5937c7a77523d24303`
+- worker: `sha256:0e4938d7e6854c3388beba670c506d0002dea94eec36b2816431530e9fee8bdb`
+- web: `sha256:797f5939f799128df6df0bac9faa7a9e2e529cd1a580814c89ddf2a626010100`
+
+**Fresh public acceptance.** 122 applicable cases executed; 122 passed, 0 failed
+test-case follow-ups and 1 platform follow-ups, no skips, across 123 attempts. All 20
+critical/platform cases passed. 123 scoped cleanup journals report zero browser page
+errors, 1 initial cleanup failures and 0 unresolved cleanup failures. en/zh-HK
+phone 390×844 and desktop 1280×800, with zh-CN Today/Projects/Me and milestone spots, used
+the dedicated verification workspace. Checks covered sign-in/out/re-sign-in; navigation,
+Today, task create/edit/person+agent assignment; run start/pause/resume/cancel; review
+approve/request changes; grants; board/status/list filters; calendar day/week/month
+schedule/drag/resize/undo; command search; organization switch/create/invite in a fresh
+browser; notification preferences, agent permissions, locale/theme; CRM
+roles/stakeholders/cascade/archive/undo; timeline/relations; rules-based brief/Ask; mind
+keyboard/evidence/undo/validation; restricted-member finance/role refresh; and
+cross-browser realtime. HTTPS/health, Secure/HttpOnly cookies, foreign-origin rejection
+and pre-upgrade auth methods passed.
+
+Four official-client MCP cases exercised every one of the 30 read/write tools on
+current-run verification entities, observed call logs and live UI changes, submitted and
+approved review, revoked tokens and confirmed a fresh initialize 401. All four separately
+verified server identity taff/0.2.0. No public flood or real SMS OTP was requested.
+Strengthened mind/evidence and held-first-socket role checks exercised the item 1
+root-cause fixes.
+
+**Retries and follow-ups.**
+
+- phone-zh-HK: move and resize bars by mouse and by the form, with undo; {"status": "failed", "retry": 0, "failureLocations": [{"file": "timeline.spec.ts", "line": 111, "column": 1}, {"file": "live.ts", "line": 816, "column": 11}]}.
+
+Real SMS OTP sign-in remains unverified. Public rate-limit flood is omitted under the
+runbook; CI MCP smoke covers rate limiting. AI model/OAuth/hard delete/value chain/Neo4j
+remain out of scope. Performance claims apply to Today. Earlier manual gradient/image
+text contrast notes remain documented.
+
+Verification tokens and own grants were revoked, runs canceled,
+profile/agent/preferences restored, schedules cleared and current-run archiveable
+entities archived. Auditable tasks, recipients/members, accepted invitations and
+workspaces remain where no supported archive API exists. No demo seed or real-user
+workspace was used.
+
+**Acceptance and unlock.** Receipt
+`/srv/taff/frontend-v2-v021a-accepted-5191671743d36b4d2719882514ba0d2ff44019a4.json`;
+deployment.done is `5191671743d36b4d2719882514ba0d2ff44019a4`. Keeper released the
+reconciled lock. Independent flock probe acquired/released it and confirmed exact
+healthy runtime, public health 200, Caddy/Valkey, route hash and unchanged PostgreSQL.
+Neighbor preservation is reported above, including any independently observed drift. No
+twice-failing critical flow required rollback.
+
+The original strict preservation probe remains failed in the evidence. A separate
+independent follow-up probe verified free native flock, exact healthy Taff runtime,
+PostgreSQL/route/env/Caddy/Valkey and 42 unchanged neighbors while explicitly reporting
+the four TableAI neighbor differences. No critical flow failed twice and no Taff
+rollback was required.
+
+One initial notification-cleanup read failed before its restore PATCH. The exact failed
+attempt created no entities, never edited notification settings, and restored
+profile/theme; its sole retry passed with complete cleanup. Pinned source control flow,
+failed/retry journal hashes and a fresh authenticated batch-end read of all seven
+semantic preference fields support zero unresolved cleanup work. The original failure
+and cleanupFailures=1 are retained; no test outcome was changed.
+
+### Frontend v2 release candidate v0.2.1 — 2026-10-15
+
+Pinned main source `e9bfa7727e57171f032712e1a222e36b50cb3f81`, tree
+`270551f351dd4e80f2bd887fc852780965528348`.
+
+All six items in plan §10.1, delivered through
+[PR27](https://github.com/ksamint/taff01/pull/27),
+[PR28](https://github.com/ksamint/taff01/pull/28),
+[PR29](https://github.com/ksamint/taff01/pull/29),
+[PR30](https://github.com/ksamint/taff01/pull/30),
+[PR31](https://github.com/ksamint/taff01/pull/31) and
+[PR32](https://github.com/ksamint/taff01/pull/32). This completes the mind/role race
+repairs, MCP copy, M14 notes, v2 baselines, CRM/timeline/brief/mind/desktop Me gaps,
+glyph coverage, font transfer and dark captures. Follow-up
+[PR33](https://github.com/ksamint/taff01/pull/33) attributes neighbour changes to their
+publisher; [PR34](https://github.com/ksamint/taff01/pull/34) corrects setup navigation
+and preserves safe diagnostics. Workspace packages and official MCP server identity are
+0.2.1. §10.2 remains deferred.
+
+Font coverage now supplies 172 previously missing Simplified CJK glyphs and ↳, with
+unchanged common-TC bytes and 4,368 preserved outline/advance comparisons. Ten bounded
+static TC chunks replace the 224,900-byte monolith (262,464 B installed, +16.7%; largest
+31,936 B). On the original Northwind English Relations fixture, total cold font transfer
+falls 323,348→230,120 B (−28.8%), remainder 224,900→129,368 B (−42.5%), with 3→8
+requests. zh-HK Relations grows 3.5%; zh-CN grows 24.9% including 54,036 B of new SC
+coverage (8.2% excluding that added coverage). Six native network cases cover the
+original fixture and a pure English workspace. The optional manual Today transfer
+comparison is unverified and excluded from performance claims. The font README and
+network-comparison JSON record the trade-offs and reproducible source/license hashes.
+With the corrected font helper, a controlled HK Brief paragraph parent/current A/B
+across 12 cold contexts produced identical character geometry and byte-identical PNGs;
+the earlier wrapping attribution was a capture artifact. Native capture
+[38684943841](https://github.com/ksamint/taff01/actions/runs/38684943841) passed and its
+source is an ancestor of this pinned release. Source/hash manifests and a dual-hash
+import ledger cover 186 baseline references (126 light and 60 dark in Git). Another 186
+authenticated dark route PNGs are artifact-only; the UI guide/index links the 14-day
+GitHub artifact and download instructions. The verified original archive is retained
+with private operator evidence.
+
+**CI.** Exact-source main push
+[38690465322](https://github.com/ksamint/taff01/actions/runs/38690465322) and merged
+PR-head [38687696747](https://github.com/ksamint/taff01/actions/runs/38687696747) are
+completed/success. The PR head is an ancestor of the pinned source. The item 1 head CI
+[38668491277](https://github.com/ksamint/taff01/actions/runs/38668491277) is also green.
+
+Exact-main validation: 930/930 unit/integration tests; Today initial JS 194489 B gzipped
+against 204800 B; Today LCP medians en 636 ms, zh-CN 688 ms, zh-HK 684 ms (three
+runs/locale, slow 4G, 4× CPU, 2000 ms ceiling). Lighthouse 13.5.0
+performance/accessibility/best-practices: en 95/100/100; zh-CN 94/100/100; zh-HK
+95/100/100. Full visual, browser-flow and bundled MCP smoke gates pass in that
+exact-source CI.
+
+**Local production smoke.** A clean detached checkout of this exact source built API,
+worker and web images and passed the official-client MCP smoke on the first attempt
+against an isolated local production-mode stack. Its own temporary containers were
+removed. A read-only, network-disabled probe verified all 16 CSS-declared font assets in
+the immutable web image against source hashes. No full local suite, Lighthouse or LCP
+was rerun. Production builds remain separate, SHA-stamped builds under the host lock.
+
+**Migrations.** Additive 0027_v021_suggestion_undo.sql, SHA-256
+`0ae43b818b3f328f7236972f6ad0dd5e5435b7d7f1a285175adef72366884f25`: four nullable
+columns only (tasks.archived_at, task_plans.archived_at, suggestions.inverse,
+suggestions.undone_at). No backfill (0 rows), rename, drop or rewrite. Existing applied
+suggestions without an inverse remain auditable and cannot be undone retroactively.
+
+**Environment and infrastructure.** No .env.production.example, Compose, Dockerfile or
+Caddy changes since the intermediate checkpoint. No new production variables; private
+env changes only TAFF_TAG and stays 0600, email/SMS unchanged, AI_* unset and all
+workspace AI flags disabled. Docker context now excludes live/report output directories.
+The scoped visual API clock is a dedicated capture driver and is absent from
+production/API/MCP launch paths. No host-layout, route, DNS, PostgreSQL host or role
+change.
+
+**Acceptance checklist.** Run all 146 applicable public cases with no runtime skips: the
+full 122-case intermediate checklist, 18 feature cases and six delayed-font setup
+regressions. Feature cases cover contact→project/roles, milestone
+create/rename/archive/undo and keyboard nudging, split/reschedule suggestion undo, off
+admin AI settings, phone mind selection scrolling and desktop snoozed/v2-agent views.
+Follow-up PRs also verify setup navigation without waiting for unrelated font loads and
+attribute neighbour changes to their publisher. Keep all plan §6.0 functions,
+CRM/timeline/relations/rules-based brief/Ask/mind, restricted-member checks, platform
+checks and four official-client live MCP round trips (all 30 tools), with server
+identity taff/0.2.1. en and zh-HK phone 390×844 and desktop 1280×800 plus zh-CN spots;
+dedicated verification entities only. Each failure gets one retry and critical rollback
+follows the deploy goal. Require zero browser errors, complete per-attempt cleanup
+journals and all supported cleanup successful. No SMS OTP or public rate-limit flood; AI
+stays off.
+
+Deploy only this pinned SHA, with verified database/env backups, Git bundle, SHA-stamped
+images/service worker, native detached keeper, and fresh ancestry/CI gates. The [v0.2.1
+milestone report](milestones/20-v0.2.1.md) records development evidence.
+
+**Blocked: archived split subtasks prevent parent completion — 2026-10-15.**
+The pinned source `e9bfa7727e57171f032712e1a222e36b50cb3f81` is running
+and healthy but is not accepted or tagged. All 20 critical/platform cases passed
+first attempt, including four official-client MCP round trips, with zero browser
+errors and cleanup failures. During the remaining public checks, phone-en's
+Brief proposal case failed both attempts in supported cleanup: completing the
+split parent returned HTTP 409 after its worker was cleared. Both journals retain
+the failures; no outcome or cleanup counter is waived.
+
+Split undo correctly archives its generated `todo` subtasks and active task lists
+hide them. The database planning guard from migration 0011 still counts archived
+unfinished children, so the parent cannot complete even though its access API
+allows it. A new regression reproduces the same 409 with the old guard in an
+isolated local database. The correction will append a compatible guard-definition
+migration with no existing-row rewrite, backfill, delete, rename or drop, retaining
+all active-child and parent invariants. Existing migrations remain immutable.
+
+The diagnostic checklist is now terminal: 146 unique cases, 137 passed, 156 attempts,
+19 failed attempts, 14 failed cleanup journals and zero browser/harness errors.
+Twelve cleanup failures are the Brief parent guard defect across six projects and
+two attempts. One owned pending grant incorrectly received a revoke request;
+its 409 skipped agent baseline restoration and blocked subsequent duplicate-grant
+checks. One notification cleanup transport failure passed its sole retry. PRs
+[35](https://github.com/ksamint/taff01/pull/35) and
+[36](https://github.com/ksamint/taff01/pull/36) address these defects with strict
+state confirmation. A separate native-selector font instability in PR 35 CI is
+being corrected without changing references or comparison tolerances.
+
+The healthy runtime stays live under the detached keeper while the corrected
+candidate is prepared. No critical flow failed twice and no rollback is required.
+Original failed journals and counters remain unchanged. Exact supported cleanup
+and audited baseline restoration must finish through the application, followed by
+a fresh full checklist on the corrected source before acceptance or the annotated
+v0.2.1 tag.
+
+### Frontend v2 release candidate v0.2.1b — 2026-10-15
+
+Pinned main source `1200f704fd8bb10af890c6761618291f8370e925`, tree `0bd4f3a1f0d1ef48c05d5527aaf85fa8aa14ddd6`.
+
+All six items in plan §10.1, delivered through
+[PR27](https://github.com/ksamint/taff01/pull/27),
+[PR28](https://github.com/ksamint/taff01/pull/28),
+[PR29](https://github.com/ksamint/taff01/pull/29),
+[PR30](https://github.com/ksamint/taff01/pull/30),
+[PR31](https://github.com/ksamint/taff01/pull/31) and
+[PR32](https://github.com/ksamint/taff01/pull/32).
+This completes the mind/role race repairs, MCP copy, M14 notes, v2 baselines,
+CRM/timeline/brief/mind/desktop Me gaps, glyph coverage, font transfer and dark captures.
+Follow-up [PR33](https://github.com/ksamint/taff01/pull/33) attributes neighbour changes to their publisher; [PR34](https://github.com/ksamint/taff01/pull/34) corrects setup navigation and preserves safe diagnostics. Workspace packages and official MCP server identity are 0.2.1. §10.2 remains deferred.
+
+Follow-up [PR35](https://github.com/ksamint/taff01/pull/35) fixes the archived-child planning guard and stabilizes native-selector font readiness in CI. [PR36](https://github.com/ksamint/taff01/pull/36) closes pending verification grants by denial, confirms terminal state, continues audited agent restoration and validates semantic notification preferences. The healthy but unaccepted e9bfa77 candidate is superseded. Finish its exact journaled cleanup through supported application APIs, with fresh confirmation, before running a new full 146-case checklist. No baseline, reference or comparison-tolerance change is included.
+
+Font coverage now supplies 172 previously missing Simplified CJK glyphs and ↳, with unchanged common-TC bytes and 4,368 preserved outline/advance comparisons. Ten bounded static TC chunks replace the 224,900-byte monolith (262,464 B installed, +16.7%; largest 31,936 B). On the original Northwind English Relations fixture, total cold font transfer falls 323,348→230,120 B (−28.8%), remainder 224,900→129,368 B (−42.5%), with 3→8 requests. zh-HK Relations grows 3.5%; zh-CN grows 24.9% including 54,036 B of new SC coverage (8.2% excluding that added coverage). Six native network cases cover the original fixture and a pure English workspace. The optional manual Today transfer comparison is unverified and excluded from performance claims. The font README and network-comparison JSON record the trade-offs and reproducible source/license hashes. With the corrected font helper, a controlled HK Brief paragraph parent/current A/B across 12 cold contexts produced identical character geometry and byte-identical PNGs; the earlier wrapping attribution was a capture artifact.
+
+Fresh source-bound [native capture 38708013406](https://github.com/ksamint/taff01/actions/runs/38708013406), source `737c2d72c98a600334cd5af974aaa9785926841e` (an ancestor of this release), passes all 186 frozen references with unchanged default comparisons: 155 pixel-identical and 31 with only accepted antialias differences under the existing comparator. It also supplies 186 additional authenticated dark-route PNGs, six native network checks, three locale font-readiness checks and all three locale native-control matrices in both capture modes. Retained font faces, localized controlled cold home navigation and authenticated native metric refresh remove font lifecycle races without changing production styling. Artifact `11960196960`, archive SHA-256 `bc78c3cdcec5061fed1e0e51f6b499ec1a15d75ee013234c691064dd57baa662`, manifest SHA-256 `6da0ab04760d5b5456aa5d2c64b5e6597f7d2ca76ab60c4ea8d03c86b246b2ba`. No references were imported or changed. This fresh validation is separate from the historical baseline-import ledger linked by the UI guide; the verified archive is retained in operator evidence.
+
+**CI.** Exact-source main push [38714791084](https://github.com/ksamint/taff01/actions/runs/38714791084)
+and merged PR-head [38711738274](https://github.com/ksamint/taff01/actions/runs/38711738274)
+are completed/success. The PR head is an ancestor of the pinned source. The item 1
+head CI [38668491277](https://github.com/ksamint/taff01/actions/runs/38668491277) is also green.
+
+Exact-main validation: 952/952 unit/integration tests;
+Today initial JS 194490 B gzipped against 204800 B;
+Today LCP medians en 632 ms, zh-CN 696 ms,
+zh-HK 700 ms (three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 100/100/100; zh-CN 100/100/100; zh-HK 100/100/100.
+Full visual, browser-flow and bundled MCP smoke gates pass in that exact-source CI.
+
+**Migrations.** Production-approved 0028_v021_archived_subtask_guard.sql, SHA-256 `a4a2ff1c2eaf58f0ccd9c7c776c5cd4628c7984733b00d74a1b4a5ece9361a61`, only replaces the planning-guard function definition so archived children do not block parent completion. Existing active-child invariants remain. No row rewrite, DML, backfill (0 rows), drop or rename. This definition-only correction is explicitly allowed under Step 2. The previously applied additive 0027 is retained.
+
+**Environment and infrastructure.** No .env.production.example, Compose, Dockerfile or Caddy changes since the intermediate checkpoint. No new production variables; private env changes only TAFF_TAG and stays 0600, email/SMS unchanged, AI_* unset and all workspace AI flags disabled. Docker context now excludes live/report output directories. The scoped visual API clock is a dedicated capture driver and is absent from production/API/MCP launch paths. No host-layout, route, DNS, PostgreSQL host or role change.
+
+**Acceptance checklist.** Run all 146 applicable public cases with no runtime skips: the full
+122-case intermediate checklist, 18 feature cases and six delayed-font setup regressions. Feature cases cover contact→project/roles, milestone
+create/rename/archive/undo and keyboard nudging, split/reschedule suggestion undo,
+off admin AI settings, phone mind selection scrolling and desktop snoozed/v2-agent
+views. Follow-up PRs also verify setup navigation without waiting for unrelated font loads and attribute neighbour changes to their publisher. Keep all plan §6.0 functions, CRM/timeline/relations/rules-based brief/Ask/mind,
+restricted-member checks, platform checks and four official-client live MCP round
+trips (all 30 tools), with server identity taff/0.2.1. en and zh-HK phone 390×844 and
+desktop 1280×800 plus zh-CN spots; dedicated verification entities only. Each failure
+gets one retry and critical rollback follows the deploy goal. Require zero browser
+errors, complete per-attempt cleanup journals and all supported cleanup successful.
+No SMS OTP or public rate-limit flood; AI stays off.
+
+Deploy only this pinned SHA, with verified database/env backups, Git bundle,
+SHA-stamped images/service worker, native detached keeper, and fresh ancestry/CI gates.
+The [v0.2.1 milestone report](milestones/20-v0.2.1.md) records development evidence.
+
+### Frontend v2 v0.2.1b upgrade checkpoint — 2026-10-15
+
+Live pinned source `1200f704fd8bb10af890c6761618291f8370e925`, tree
+`0bd4f3a1f0d1ef48c05d5527aaf85fa8aa14ddd6`. The [v0.2.1 report](milestones/20-v0.2.1.md)
+records scope and development evidence. All six items in plan §10.1 are delivered. §10.2
+stays deferred.
+
+**CI and local production smoke.** Exact-source main push
+[38714791084](https://github.com/ksamint/taff01/actions/runs/38714791084) and merged
+PR-head [38711738274](https://github.com/ksamint/taff01/actions/runs/38711738274)
+completed/success. Ancestry, exact CI identity and newest-candidate eligibility were
+refreshed before build, migration, start and acceptance. Exact-main measurements:
+952/952 tests; Today initial JS 194490 B gzipped against 204800 B; Today LCP en 632 ms,
+zh-CN 696 ms, zh-HK 700 ms (three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling).
+Lighthouse 13.5.0 performance/accessibility/best-practices: en 100/100/100; zh-CN
+100/100/100; zh-HK 100/100/100. CI includes visual/browser/MCP gates. All three images
+built on a clean detached Mac checkout and production-mode API/worker MCP smoke passed
+on the first attempt. Local smoke containers were removed. Full local suite, LCP and
+Lighthouse were not rerun.
+
+**Local image identities.**
+
+- api: `sha256:31b897e52639d8373907a6fbd7b34af3e8d2c394cda76336e4a97aed1f0ed69f`
+- worker: `sha256:345ce2d39884c60aac38336847d6a4015f10bc900b6f2ce0de485177c38e4273`
+- web: `sha256:f1172c37bffdafe7e1800b802e9b3d5cb6cb03c56aa48e9d5618b6031e1d1556`
+
+**Lock, backup and source relay.** Detached keeper PID `970825` held the existing native
+/srv/taff/deploy.lock. Dedicated dump
+`/srv/taff/secrets/db.before-1200f704fd8bb10af890c6761618291f8370e925.dump`, 1,645,833
+B, SHA-256 `1973ec9919c39aecdc520052986be634fa94fc245c34470718b0417315eee347`;
+pg_restore --list verified the catalog. Exclusive env backup
+`/srv/taff/secrets/.env.before-1200f704fd8bb10af890c6761618291f8370e925`, mode 0600.
+Bundle 51,455 B, SHA-256
+`b635783a556331516489ef2a1902ce94ef93ac8ba6d626514e57b7ee1cc39bc1`; checksum, git bundle
+verify, exact detached SHA, clean tree and GitHub origin verified. Production used
+--builder default and SHA/ASSET_VERSION stamping. Only tracked public source modes were
+normalized.
+
+**Migrations and runtime.** The approved function-definition-only migration 0028 ignores
+archived children while preserving active-child guards; SHA-256
+`a4a2ff1c2eaf58f0ccd9c7c776c5cd4628c7984733b00d74a1b4a5ece9361a61`. No DML, backfill,
+row rewrite, drop or rename. The canonical one-shot migrator exited 0 and all six
+0023–0028 hashes were verified. Existing 0027 remains applied. Only API, worker and web
+were recreated:
+
+- api: `sha256:7d0dcc6e52da89edff871e416a8d6d7a0041fc969e99a777210cad448516ef30`
+- worker: `sha256:20f8c328c86b7c8ba64490770710fff0a10c1be73b3f10395b3e64e919a5b824`
+- web: `sha256:11e4ff62f329fd784af5e8f2e3bc25b8cb7ef10296421546006b480e69fac3fa`
+
+Caddy and Valkey retained identity, images, start times and health. 46 baseline
+neighbors remained unchanged. No Taff-caused or unexplained neighbor changes. Route hash
+unchanged; no DNS, host-layout, PostgreSQL host or role change. Private env changed only
+TAFF_TAG and remained 0600; email/SMS unchanged, AI_* unset and all workspace AI flags
+disabled. PostgreSQL postmaster start remains `2026-08-29 01:19:14.878015+00` with
+dedicated role and TLS.
+
+**Rollback identities.** Preceding running, unaccepted source
+`e9bfa7727e57171f032712e1a222e36b50cb3f81`:
+
+- api: `sha256:09ef0b7e75cb215148eabb90cadbe8047cded00062435f008c9cd57b68c4f731`
+- worker: `sha256:2004f74097e0443bafb8e3cf2cdb4be2b12c78766b6ea9d4861d7437ee4541b5`
+- web: `sha256:97dd7bf0c537eecde8da7d3c7da8bcdd6b93c23b81fd7b9c87e943f7b3f53f5a`
+
+**Fresh public acceptance.** 146 applicable cases executed; 146 passed, 0 failed
+test-case follow-ups and 0 platform follow-ups, no skips, across 146 attempts. All 20
+critical/platform cases passed. 146 scoped cleanup journals report zero browser page
+errors, 0 initial cleanup failures and 0 unresolved cleanup failures. en/zh-HK phone
+390×844 and desktop 1280×800, with zh-CN Today/Projects/Me and milestone spots, used the
+dedicated verification workspace. Checks covered sign-in/out/re-sign-in; navigation,
+Today, task create/edit/person+agent assignment; run start/pause/resume/cancel; review
+approve/request changes; grants; board/status/list filters; calendar day/week/month
+schedule/drag/resize/undo; command search; organization switch/create/invite in a fresh
+browser; notification preferences, agent permissions, locale/theme; CRM
+roles/stakeholders/cascade/archive/undo; timeline/relations; rules-based brief/Ask; mind
+keyboard/evidence/undo/validation; restricted-member finance/role refresh; and
+cross-browser realtime. HTTPS/health, Secure/HttpOnly cookies, foreign-origin rejection
+and pre-upgrade auth methods passed.
+
+Four official-client MCP cases exercised every one of the 30 read/write tools on
+current-run verification entities, observed call logs and live UI changes, submitted and
+approved review, revoked tokens and confirmed a fresh initialize 401. All four
+separately verified server identity taff/0.2.1. No public flood or real SMS OTP was
+requested. Final item 5 cases additionally covered contact→project/roles, timeline
+milestone lifecycle and keyboard nudging, suggestion split/reschedule undo, off AI
+settings, phone mind-panel visibility and desktop snoozed/v2-agent views.
+
+**Retries and follow-ups.**
+
+No public check required a retry.
+
+Real SMS OTP sign-in remains unverified. Public rate-limit flood is omitted under the
+runbook; CI MCP smoke covers rate limiting. AI model/OAuth/hard delete/value chain/Neo4j
+remain out of scope. Performance claims apply to Today. Earlier manual gradient/image
+text contrast notes remain documented.
+
+Verification tokens were revoked and owned grants closed with denial or revocation as
+appropriate; runs were canceled and profile/agent/preferences restored, schedules
+cleared and current-run archiveable entities archived. Auditable tasks,
+recipients/members, accepted invitations and workspaces remain where no supported
+archive API exists. No demo seed or real-user workspace was used.
+
+**Acceptance and unlock.** Receipt
+`/srv/taff/frontend-v2-v021b-accepted-1200f704fd8bb10af890c6761618291f8370e925.json`;
+deployment.done is `1200f704fd8bb10af890c6761618291f8370e925`. Keeper released the
+reconciled lock. Independent flock probe acquired/released it and confirmed exact
+healthy runtime, public health 200, Caddy/Valkey, route hash and unchanged PostgreSQL.
+Neighbor preservation is reported above, including any independently observed drift. No
+twice-failing critical flow required rollback.
+
+Annotated [v0.2.1 tag](https://github.com/ksamint/taff01/tree/v0.2.1), object
+`6e71708d760395871d9e5806c8ff6001b78f49b7`, remotely verified to peel to this exact
+deployed SHA. Final release accepted.
+
+The clean local web image passed a read-only, network-disabled hash check of all 16
+CSS-declared font assets against pinned source. Fresh source-bound [native capture
+38708013406](https://github.com/ksamint/taff01/actions/runs/38708013406), source
+`737c2d72c98a600334cd5af974aaa9785926841e` (an ancestor of this release), passes all 186
+frozen references with unchanged default comparisons: 155 pixel-identical and 31 with
+only accepted antialias differences under the existing comparator. It also supplies 186
+additional authenticated dark-route PNGs, six native network checks, three locale
+font-readiness checks and all three locale native-control matrices in both capture
+modes. Retained font faces, localized controlled cold home navigation and authenticated
+native metric refresh remove font lifecycle races without changing production styling.
+Artifact `11960196960`, archive SHA-256
+`bc78c3cdcec5061fed1e0e51f6b499ec1a15d75ee013234c691064dd57baa662`, manifest SHA-256
+`6da0ab04760d5b5456aa5d2c64b5e6597f7d2ca76ab60c4ea8d03c86b246b2ba`. No references were
+imported or changed. This fresh validation is separate from the historical
+baseline-import ledger linked by the UI guide; the verified archive is retained in
+operator evidence.
+
+This corrected candidate supersedes the unaccepted
+e9bfa7727e57171f032712e1a222e36b50cb3f81 runtime. Its original public failures and
+cleanup journals remain unchanged. After migration 0028, supported REST operations
+completed 12 exact journaled verification parents; fresh reads confirmed completion,
+with no child-history rewrite. Its exact journaled grant was closed and its four audited
+agent-profile fields were restored using supported REST, with terminal and baseline
+state confirmed twice; unrelated grants and permissions stayed unchanged. Two read-only
+reads confirmed seven notification preference fields after the sole clean retry; the
+original ambiguous transport failure remains recorded. The old candidate was never
+accepted or tagged. The old keeper released only through an explicit reconciled handoff;
+the new keeper held the lock before fresh backup and deployment. Last accepted source
+5191671743d36b4d2719882514ba0d2ff44019a4 and its rollback evidence remain retained.
+Final public counts above cover only the corrected source and include no cleanup waiver.
+
+Applied additive migration hashes: -
+`packages/db/migrations/0028_v021_archived_subtask_guard.sql`:
+`a4a2ff1c2eaf58f0ccd9c7c776c5cd4628c7984733b00d74a1b4a5ece9361a61` (no backfill)
+
+### Frontend v2 release candidate v0.2.2 — 2026-10-15
+
+Pinned main source `271bdbd694cbec233673814332d1666c7b2c1e8d`, tree `1f4e428712efb645ba3bd452ddd49fc85df68849`.
+
+**Blocked:** This first candidate was not accepted or tagged. Its fresh checklist
+passed 144/146 cases across 149 attempts; two desktop Calendar lifecycle checks
+failed. All 149 cleanup journals and three separate diagnostics had zero cleanup
+failures and zero browser errors. Normal rollback restored accepted v0.2.1
+`1200f704fd8bb10af890c6761618291f8370e925`, retained additive 0029, restored the
+private env at 0600 and independently confirmed the deploy lock free. The
+Calendar readiness test-only repair is PR49. A later pinned candidate must run
+an entirely fresh checklist; no passing case from this attempt is reused.
+
+
+Audit repair release following accepted v0.2.1 `1200f704fd8bb10af890c6761618291f8370e925`.
+Workspace packages and official MCP server identity are 0.2.2. The v0.2.1 audit
+identifies two P0 silent lost-update defects, one P1 human proposal-path defect,
+13 P2s and one P3; ten separate repair PRs address all P0/P1s and seven local P2s:
+
+- PR40: version/membership guard for Timeline subtree Undo.
+- PR44: one server-captured, atomic CRM inverse; reference locks and state guard
+  reject concurrent task moves, role changes and partial cascades safely.
+- PR42: human task owners/admins share proposal creation, attribution, review,
+  apply and Undo; agent assignment, scopes and grants remain enforced.
+- PR38: every rate-limited MCP request avoids authentication and database logs,
+  including the first 429 and limiter failure; accepted calls remain logged.
+- PR39: scoped patched transitive esbuild with compatible migration tooling.
+- PR41: additive 0029 versions, positive constraints and revision triggers for
+  the seven relationship/ledger tables that lacked them.
+- PR43: self identity reads pass explicit can() rule/table tests.
+- PR45: 44 px Calendar all-day/multi-day row targets with real lower-edge and
+  keyboard activation, stacked alignment and exact schedule restoration.
+- PR46: valid semantic groups on localized SDK Calendar containers across view
+  changes; whole-document isolated axe checks in all locales/viewports.
+- PR47: opaque font-scaled Relations label halos and selected-node paint order,
+  with pixel-backed default/minimum-zoom/selection contrast and unchanged graph geometry. Relations references are regenerated only through the source-pinned native workflow for this intended accessibility correction, retaining original prototype captures and all comparison tolerances.
+
+The larger endpoint authorization matrix, overlapping optimistic rollback,
+non-Today performance, remaining historical timing, headers and retention/restore
+policy remain follow-ups. Product §10.2 and infrastructure recommendations are
+not implemented by this release.
+
+**CI.** Exact-source main push [38734441916](https://github.com/ksamint/taff01/actions/runs/38734441916)
+and merged PR-head [38725948847](https://github.com/ksamint/taff01/actions/runs/38725948847)
+are completed/success. The PR head is an ancestor of the pinned source.
+
+Exact-main validation: 1002 unit/integration tests; Today initial JS 194491 B
+gzipped against 204800 B; Today LCP en 628 ms, zh-CN 676 ms, zh-HK 696 ms
+(three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling). Lighthouse 13.5.0
+performance/accessibility/best-practices: en 100/100/100; zh-CN 100/100/100; zh-HK 100/100/100. Full committed visual,
+all browser flows and bundled MCP smoke gates pass. pnpm audit: zero reported
+vulnerabilities; licence:check passes with documented ADR exceptions.
+
+**Migration.** `packages/db/migrations/0029_v022_relation_versions.sql`,
+SHA-256 `72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72`, is additive: seven non-null version columns default 1,
+positive constraints and new BEFORE UPDATE revision/timestamp triggers. Existing
+IDs and payload are preserved. No DML, explicit backfill, drop, truncate, rename,
+type narrowing or rewrite of existing user values. Existing 0023–0028 bytes
+remain unchanged and every journal hash must match. The canonical one-shot
+migrator must finish before application replacement.
+
+**Environment and infrastructure.** No new production variables or changes to
+.env.production.example, Compose, Dockerfiles, Caddy or route files. Only TAFF_TAG
+changes in the private 0600 env; email/SMS unchanged, AI_* unset and every
+workspace AI flag remains disabled. No host layout, DNS, database host/role,
+runner, retention or proxy change. Retain accepted v0.2.1 rollback images and the
+verified predeploy database/env backups. Deploy only the pinned source with
+SHA/ASSET_VERSION stamping and the native detached keeper.
+
+**Acceptance.** All 146 applicable public cases must execute with no runtime
+skips, zero page errors and zero unresolved cleanup failures. Retain full plan
+§6.0, CRM/timeline/relations/rules brief/Ask/mind, restricted-member finance,
+platform, three-locale spots, en/zh-HK phone and desktop, and four official-client
+MCP round trips exercising all 30 tools with taff/0.2.2 and revoked-token 401.
+Existing live cases additionally exercise human proposal attribution/apply/Undo/
+dismiss and day/week multi-day targets at their lower edge/by Enter, restoring
+the exact original schedule through supported application operations. One retry
+per failure; twice-failing critical flows restore recorded accepted images/env
+while retaining additive migration 0029. No production seed, direct repair SQL,
+public rate-limit flood, SMS send or AI call.
+
+Supplementary route LCP/Lighthouse runs only as normal Step 4 under the same
+verified keeper and exact runtime. Accepted cleanup leaves no active verification
+project, so a separately journaled functional route check may create exactly one
+project and three owned tasks through supported public APIs, give them current-day
+due dates and schedule one current-day occurrence. This is a dedicated normal
+verification fixture, not a production seed. Confirm create/read behavior, then
+measure existing fixture routes with read-only page loads. Record actual card and
+occurrence counts; do not call three tasks the 20-card CI baseline.
+
+The measurement driver permits only its normal sign-in/sign-out and locale-only
+profile changes; restore the original profile and confirm twice. The fixture
+lifecycle helper must clear its schedule, finish its three tasks, archive its
+project and confirm terminal state twice through application APIs, with every ID
+journaled and workspace/ownership/version checked. It never touches unrelated
+entities. Fresh acceptance requires this supplemental cleanup and profile/session
+cleanup as well as the original 146 cases. Clearly distinguish these live-network
+observations from the audit's populated controlled-local v0.2.1 measurements;
+other-route budgets are not new release gates.
+
+After acceptance, record the checkpoint, push annotated `v0.2.2` on this exact
+SHA, release the native keeper and independently verify free flock and healthy
+runtime, then update the audit and milestone.
+
+### Frontend v2 release candidate v0.2.2 — 2026-10-15
+
+Pinned main source `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`, tree `c499e1d112b43ea715e51b3053074db72c8f5344`.
+
+Audit repair release following accepted v0.2.1 `1200f704fd8bb10af890c6761618291f8370e925`.
+Workspace packages and official MCP server identity are 0.2.2. The v0.2.1 audit
+identifies two P0 silent lost-update defects, one P1 human proposal-path defect,
+13 P2s and one P3; ten separate repair PRs address all P0/P1s and seven local P2s:
+
+- PR40: version/membership guard for Timeline subtree Undo.
+- PR44: one server-captured, atomic CRM inverse; reference locks and state guard
+  reject concurrent task moves, role changes and partial cascades safely.
+- PR42: human task owners/admins share proposal creation, attribution, review,
+  apply and Undo; agent assignment, scopes and grants remain enforced.
+- PR38: every rate-limited MCP request avoids authentication and database logs,
+  including the first 429 and limiter failure; accepted calls remain logged.
+- PR39: scoped patched transitive esbuild with compatible migration tooling.
+- PR41: additive 0029 versions, positive constraints and revision triggers for
+  the seven relationship/ledger tables that lacked them.
+- PR43: self identity reads pass explicit can() rule/table tests.
+- PR45: 44 px Calendar all-day/multi-day row targets with real lower-edge and
+  keyboard activation, stacked alignment and exact schedule restoration.
+- PR46: valid semantic groups on localized SDK Calendar containers across view
+  changes; whole-document isolated axe checks in all locales/viewports.
+- PR47: opaque font-scaled Relations label halos and selected-node paint order,
+  with pixel-backed default/minimum-zoom/selection contrast and unchanged graph geometry. Relations references are regenerated only through the source-pinned native workflow for this intended accessibility correction, retaining original prototype captures and all comparison tolerances.
+
+PR49 is an additional test-only Calendar lifecycle repair: semantic save readiness
+and the actual native day/week grid must settle before gestures, scrolling and
+activation. All 27 original assertion expressions, gesture coordinates/durations,
+PATCH/database checks, 44 px lower-edge/keyboard checks and exact schedule restore
+remain. Six held-reconciliation/view-replacement browser cases and six complete
+Calendar cases passed locally without retries; fixed phase enums improve safe
+diagnostics without retaining raw errors or DOM.
+
+The previous unaccepted v0.2.2 source `271bdbd694cbec233673814332d1666c7b2c1e8d`
+was rolled back after 144/146 cases passed and two desktop Calendar cases failed;
+all 149 attempt journals and three separate diagnostics cleaned up with zero
+failures and zero browser errors. Exact accepted v0.2.1 was restored and the
+native lock independently verified free; additive 0029 remains installed.
+This candidate requires an entirely fresh checklist and current-runtime proofs.
+
+The larger endpoint authorization matrix, overlapping optimistic rollback,
+non-Today performance, remaining historical timing, headers and retention/restore
+policy remain follow-ups. Product §10.2 and infrastructure recommendations are
+not implemented by this release.
+
+**CI.** Exact-source main push [38752276276](https://github.com/ksamint/taff01/actions/runs/38752276276)
+and merged PR-head [38747282203](https://github.com/ksamint/taff01/actions/runs/38747282203)
+are completed/success. The PR head is an ancestor of the pinned source.
+
+Exact-main validation: 1002 unit/integration tests; Today initial JS 194490 B
+gzipped against 204800 B; Today LCP en 612 ms, zh-CN 660 ms, zh-HK 680 ms
+(three runs/locale, slow 4G, 4× CPU, 2000 ms ceiling). Lighthouse 13.5.0
+performance/accessibility/best-practices: en 95/100/100; zh-CN 95/100/100; zh-HK 95/100/100. Full committed visual,
+all browser flows and bundled MCP smoke gates pass. pnpm audit: zero reported
+vulnerabilities; licence:check passes with documented ADR exceptions.
+
+**Migration.** `packages/db/migrations/0029_v022_relation_versions.sql`,
+SHA-256 `72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72`, is additive: seven non-null version columns default 1,
+positive constraints and new BEFORE UPDATE revision/timestamp triggers. Existing
+IDs and payload are preserved. No DML, explicit backfill, drop, truncate, rename,
+type narrowing or rewrite of existing user values. Existing 0023–0028 bytes
+remain unchanged and every journal hash must match. The canonical one-shot
+migrator must finish before application replacement.
+
+**Environment and infrastructure.** No new production variables or changes to
+.env.production.example, Compose, Dockerfiles, Caddy or route files. Only TAFF_TAG
+changes in the private 0600 env; email/SMS unchanged, AI_* unset and every
+workspace AI flag remains disabled. No host layout, DNS, database host/role,
+runner, retention or proxy change. Retain accepted v0.2.1 rollback images and the
+verified predeploy database/env backups. Deploy only the pinned source with
+SHA/ASSET_VERSION stamping and the native detached keeper.
+
+**Acceptance.** All 146 applicable public cases must execute with no runtime
+skips, zero page errors and zero unresolved cleanup failures. Retain full plan
+§6.0, CRM/timeline/relations/rules brief/Ask/mind, restricted-member finance,
+platform, three-locale spots, en/zh-HK phone and desktop, and four official-client
+MCP round trips exercising all 30 tools with taff/0.2.2 and revoked-token 401.
+Existing live cases additionally exercise human proposal attribution/apply/Undo/
+dismiss and day/week multi-day targets at their lower edge/by Enter, restoring
+the exact original schedule through supported application operations. One retry
+per failure; twice-failing critical flows restore recorded accepted images/env
+while retaining additive migration 0029. No production seed, direct repair SQL,
+public rate-limit flood, SMS send or AI call.
+
+Supplementary route LCP/Lighthouse runs only as normal Step 4 under the same
+verified keeper and exact runtime. Accepted cleanup leaves no active verification
+project, so a separately journaled functional route check may create exactly one
+project and three owned tasks through supported public APIs, give them current-day
+due dates and schedule one current-day occurrence. This is a dedicated normal
+verification fixture, not a production seed. Confirm create/read behavior, then
+measure existing fixture routes with read-only page loads. Record actual card and
+occurrence counts; do not call three tasks the 20-card CI baseline.
+
+The measurement driver permits only its normal sign-in/sign-out and locale-only
+profile changes; restore the original profile and confirm twice. The fixture
+lifecycle helper must clear its schedule, finish its three tasks, archive its
+project and confirm terminal state twice through application APIs, with every ID
+journaled and workspace/ownership/version checked. It never touches unrelated
+entities. Fresh acceptance requires this supplemental cleanup and profile/session
+cleanup as well as the original 146 cases. Clearly distinguish these live-network
+observations from the audit's populated controlled-local v0.2.1 measurements;
+other-route budgets are not new release gates.
+
+After acceptance, record the checkpoint, push annotated `v0.2.2` on this exact
+SHA, release the native keeper and independently verify free flock and healthy
+runtime, then update the audit and milestone.
+
+### Frontend v2 v0.2.2 upgrade checkpoint — 2026-10-15
+
+Live pinned source `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`, tree
+`c499e1d112b43ea715e51b3053074db72c8f5344`. Annotated v0.2.2 is on this exact deployed
+SHA. The [v0.2.1 audit](reviews/2026-10-15-v0.2.1-audit.md) and [repair
+milestone](milestones/21-v0.2.2.md) record findings and disposition. Ten separate
+repairs address two P0 lost-update defects, one P1 proposer-parity defect and seven
+local P2s. An additional test-only PR synchronizes Calendar acceptance with save
+reconciliation and native view replacement, preserving every original assertion. Product
+and infrastructure decisions remain recommendations.
+
+**CI and local production smoke.** Exact-source main push
+[38752276276](https://github.com/ksamint/taff01/actions/runs/38752276276) and merged
+PR-head [38747282203](https://github.com/ksamint/taff01/actions/runs/38747282203)
+completed/success. Fresh ancestry/CI gates ran before build, migration, start and
+acceptance. Exact-main validation: 1002 tests; Today initial JS 194490 B gzipped against
+204800 B; Today LCP en 612 ms, zh-CN 660 ms, zh-HK 680 ms. Lighthouse
+performance/accessibility/best-practices: en 95/100/100; zh-CN 95/100/100; zh-HK
+95/100/100. Full visual/browser/MCP gates passed. Step 1 used these CI results, a clean
+detached local image build and bundled production API/worker MCP smoke; it did not rerun
+the full local suite/performance gates. Local smoke containers were removed.
+
+**Local image identities.**
+
+- api: `sha256:222d0a6e2f51c0bf202e2dc52c77735400c9ae8b598fcdea789ee65040c7e7b1`
+- worker: `sha256:96c3a3cf720cb2358b6a35bf483b10f2bf56b8dcf76de658d19c27e7ef474531`
+- web: `sha256:67b4112318cb21201b571d00ea42c832485ea5dfa4b0082c28a206bce1ee7536`
+
+**Lock, backups and source.** Native detached keeper PID `2288063` held
+/srv/taff/deploy.lock through acceptance, checkpoint and annotated-tag verification.
+Dedicated dump
+`/srv/taff/secrets/db.before-8d335ff7a9513bf35bcaf6b99c7f54935a0446e4.dump`, 2,148,534
+B, SHA-256 `8d6826c2530f71e7fae82685677c7fb64927626e0d348bfc06a711ab4b75c2c0`;
+pg_restore --list succeeded. Exclusive env backup
+`/srv/taff/secrets/.env.before-8d335ff7a9513bf35bcaf6b99c7f54935a0446e4` stayed 0600.
+Bundle 994,519 B, SHA-256
+`4fec292b38f36abf9e79377b3628b623c51e936513f1a38ed9e9ceee934d2a0c`; checksum, git bundle
+verify, exact detached SHA, clean source and GitHub origin verified. Production used
+--builder default and SHA/ASSET_VERSION stamping.
+
+**Migration and runtime.** Additive 0029_v022_relation_versions.sql adds seven non-null
+version columns default 1, positive constraints and BEFORE UPDATE revision/timestamp
+triggers; SHA-256 `72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72`. No
+DML, explicit backfill, drop, truncate, rename or overwrite of existing payload. The
+canonical one-shot migrator exited 0 and all seven 0023–0029 hashes were verified;
+earlier migration bytes remain unchanged. Only API, worker and web were recreated:
+
+- api: `sha256:7cc1008e5819a22f62a39c5f6832f48b6e460ae3d428c1a77877ad82d3646037`
+- worker: `sha256:b809d738db847f44018546f36159dca377b4aede19571c34bdd27622a31df74f`
+- web: `sha256:ae27965d80d060da1061e5bff86fefe8b4c66b2fdc6bb32709ef92b6538adf00`
+
+Caddy/Valkey and all 46 baseline neighbors retained identities, images, start times and
+health. No Taff-caused or unexplained neighbor change. Route hash unchanged; no
+host-layout, DNS, PostgreSQL host or role change. PostgreSQL postmaster start remains
+`2026-08-29 01:19:14.878015+00`. Private env changed only TAFF_TAG and stayed 0600;
+email/SMS unchanged and AI remains off.
+
+**Rollback retained.** Accepted prior source `1200f704fd8bb10af890c6761618291f8370e925`:
+
+- api: `sha256:7d0dcc6e52da89edff871e416a8d6d7a0041fc969e99a777210cad448516ef30`
+- worker: `sha256:20f8c328c86b7c8ba64490770710fff0a10c1be73b3f10395b3e64e919a5b824`
+- web: `sha256:11e4ff62f329fd784af5e8f2e3bc25b8cb7ef10296421546006b480e69fac3fa`
+
+**Fresh public acceptance.** All 146 applicable cases passed across 146 attempts, no
+skips, zero browser errors and zero cleanup failures; 146 per-attempt cleanup journals.
+All 20 critical/platform cases and four official-client MCP cases passed. Dedicated
+verification entities only: en/zh-HK phone and desktop, zh-CN spots; full plan §6.0 and
+CRM/timeline/relations/brief/Ask/mind/finance restrictions/realtime. Added live
+assertions exercise human proposal create/attribution/apply/Undo/dismiss and Calendar
+multi-day 44 px lower-edge/keyboard activation in day/week, with exact original schedule
+restored. Existing assertions remain intact.
+
+**Supplementary Step 4 route checks.** A separately journaled functional fixture created
+one verification project and three person-owned current-day tasks with one scheduled
+occurrence through supported public APIs. Twelve locale/route LCP and Lighthouse
+observations confirmed actual route content and a visible Calendar occurrence; this
+three-card fixture is distinct from the 20-card CI baseline. The schedule was cleared,
+all three tasks finished and the project archived with two fresh confirmations; original
+locale/timezone were restored and independently read twice, sessions signed out and
+owned browser profiles removed. Exact SHA, native keeper and all three image identities
+were attested before/after these operations. Supplemental cleanup passed with zero
+failures and is part of the accepted receipt; metrics and limitations are in the audit.
+
+Four official-client round trips exercised all 30 MCP tools, verified live changes and
+call logs, completed review, revoked tokens and confirmed fresh initialize 401; each
+verified taff/0.2.2. HTTPS/health, Secure/HttpOnly cookies, foreign-origin rejection and
+unchanged pre-upgrade authentication methods passed. No public flood, SMS OTP or model
+call.
+
+**Retries.** No public check required a retry.
+
+Owned verification tokens were revoked, grants closed, runs canceled,
+profile/agent/preferences restored, schedules cleared and supported entities archived.
+Audit history and entities without a supported archive path remain; the audit quantifies
+that defined verification scope. No production seed or direct data repair was used.
+
+**Acceptance, tag and unlock.** Full checkpoint was recorded before tag creation;
+annotated [v0.2.2](https://github.com/ksamint/taff01/tree/v0.2.2), object
+`a683a6daaf1da92fd7c0e8e3dd18fa57e3a29ebd`, remotely peels to
+`8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`. Receipt
+`/srv/taff/frontend-v2-v022-accepted-8d335ff7a9513bf35bcaf6b99c7f54935a0446e4.json`;
+deployment.done matches. Explicit reconciled unlock released the keeper. Independent
+flock acquired/released and exact healthy runtime, public health, neighboring
+containers, route and PostgreSQL preservation passed. No critical flow failed twice in
+this accepted attempt. An earlier unaccepted v0.2.2 candidate was rolled back after
+Calendar harness lifecycle failures; its attempts and cleanup evidence are retained in
+the audit.
+
+Clean local web image: all 16 CSS-declared font hashes match pinned source, verified
+read-only with networking disabled. Controlled local baseline route measurements and
+supplementary live route observations are separately qualified in the audit; Today CI
+budgets are not silently extended to other routes.
+
+Applied additive migration hash: -
+`packages/db/migrations/0029_v022_relation_versions.sql`:
+`72e7efd3aec37012a2d6293595528382d98e7806fbb949a77b78dccf6c8cae72` (zero explicit row
+backfill; existing payload unchanged)
+
+### Frontend v2 release candidate v0.2.3 — 2026-10-16
+- Source `66534378d81ac57aed31683f2a0a32248c7a6e9b`; tag after acceptance: `v0.2.3`.
+- Exact-source main [CI 38834383104](https://github.com/ksamint/taff01/actions/runs/38834383104) passed in 9m 7s; merged PR-head CI: [#51 / 38832370275](https://github.com/ksamint/taff01/actions/runs/38832370275), [#52 / 38833466980](https://github.com/ksamint/taff01/actions/runs/38833466980).
+- Changes: four-way browser sharding, isolated optimistic rollback, compatible CSP/frame denial, removed project placeholder, current-goal instruction; real authorization matrix and lazy Projects/Calendar/Timeline.
+- Validation: 1582 unit/integration tests (including 570 matrix cases), 164 visual cases, 237 browser cases; no skips or baseline/tolerance changes. Three image builds and all-tool MCP smoke passed.
+- Today initial JS 191.2 KiB; three-run LCP en/zh-CN/zh-HK 628/688/684 ms; Lighthouse performance/accessibility/best practices: en 96/100/100; zh-CN 97/100/100; zh-HK 97/100/100.
+- Migrations: none. No environment-template, Compose, Dockerfile or Caddy changes; production changes only TAFF_TAG. AI_* remain unset.
+- Patch acceptance: 20 critical live cases across en/zh-HK phone/desktop (with zh-CN spot checks), one independent realtime case, and one official-client all-30-tool MCP round trip; zero page/CSP errors. Full 146-case checklist is for minor releases.
+- Local production: all three exact-source image builds and the API/worker/web all-tool MCP smoke passed. A temporary build-only proxy bypass cleared a slow dependency fetch. Steps 0–6 retain the native lock, exclusive DB/env backups and scoped replacement.
+- Follow-up: controlled non-Today cold LCP/Lighthouse measurements and further optimization; those budgets are not claimed passed.
+- Rollback source: `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; preserve additive migrations and data.
+
+### Frontend v2 v0.2.3 upgrade checkpoint — 2026-10-16
+- Source `66534378d81ac57aed31683f2a0a32248c7a6e9b`, tag `v0.2.3`; exact-source [CI 38834383104](https://github.com/ksamint/taff01/actions/runs/38834383104) passed in 9m 7s.
+- Validation: 1582 unit/integration tests, 164 visual cases, 237 browser cases; all three image builds and the all-tool local MCP smoke passed. Both implementation PRs (#51, #52) merged green within the code time box.
+- Today JS 191.2 KiB; LCP en/zh-CN/zh-HK 628/688/684 ms; Lighthouse performance/accessibility/best practices 96/100/100, 97/100/100, 97/100/100.
+- Migrations: none. Native deploy lock and exclusive verified DB/env backups; scoped API/worker/web replacement; AI_* unset; Caddy, neighboring workloads and PostgreSQL preserved.
+- Host relay initially preserved restrictive directory permissions; normalized tracked checkout permissions and rebuilt unchanged source before the successful migrator retry; isolated migrator stdin before service replacement.
+- Live: 22/22 passed, including independent realtime and official-client all-30-tool MCP round trip; retries 0; zero browser page errors.
+- Follow-ups: extend the new actor matrix to 11 public/auth/email/invite lifecycle routes (existing integration coverage retained); measure non-Today cold LCP/Lighthouse budgets.
+- Rollback: `8d335ff7a9513bf35bcaf6b99c7f54935a0446e4`; preserve additive data.
+
+### Frontend v2 release candidate v0.2.4 — 2026-10-16 UTC
+- Source `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; annotated tag after acceptance: `v0.2.4`.
+- Main was fast-forwarded to the tested PR head; source and PR head are identical, with separate main/PR CI events.
+- Exact-source main [CI 38850556326](https://github.com/ksamint/taff01/actions/runs/38850556326) green in 8m 51s; merged [PR #53 head CI 38849782535](https://github.com/ksamint/taff01/actions/runs/38849782535) green.
+- Validation: 1641 unit/integration tests (628 actor-matrix cases), 164 visual cases, 243 browser cases; all original tests, baselines and tolerances retained. Three pinned local production images and the official all-30-tool MCP smoke passed on Node 24.
+- Changes: all 11 lifecycle routes in the actor matrix; authorized project bootstrap and read-only first paint; card/timeline/date/event memoization with explicit permission activation after confirmation.
+- Today: JS 190.7 KiB; LCP en/zh-CN/zh-HK 608/668/668 ms; Lighthouse P/A/BP en 99/100/100; zh-CN 99/100/100; zh-HK 99/100/100.
+- Migrations: none. Environment template, Compose, Dockerfiles, Caddy and host layout unchanged. Production changes only TAFF_TAG; AI_* stay unset; keep the native lock and exclusive verified DB/env backups.
+- Time-box diagnostics on pre-permission-repair `fb31f91` (local Chromium/M1, Node 26 services): cold LCP P 680/736/752, C 2848/3280/3132, T 628/716/728 ms (en/CN/HK, three-run medians, slow 4G/4x CPU).
+- Diagnostic Lighthouse P 99/91/99; C 77/76/79; T en 96, zh-CN failed the loading/locale guard and HK was not reached. Node 24 control failed setup before measurement. These are not final-source Node 24 budget passes.
+- Remaining after the 60-minute box: Calendar LCP/Lighthouse; final-source Node 24 Projects/Timeline Lighthouse revalidation, including Timeline zh-CN/HK. Unproven Calendar startup UI and experimental route CI jobs were removed; strict route measurement commands remain.
+- Patch acceptance: 20 critical live cases with en/zh-HK phone/desktop and zh-CN spot checks, independent realtime, official-client all-30-tool MCP round trip; zero browser page errors, one retry at most.
+- Rollback source: `66534378d81ac57aed31683f2a0a32248c7a6e9b`; preserve data.
+
+### Frontend v2 v0.2.4 upgrade checkpoint — 2026-10-16 UTC
+- Source `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; annotated tag `v0.2.4`. [PR #53](https://github.com/ksamint/taff01/pull/53) merged green; main fast-forwarded to that tested head.
+- Exact-source [main CI 38850556326](https://github.com/ksamint/taff01/actions/runs/38850556326) passed in 8m 51s: 1641 unit/integration tests (628 actor cases), 164 visual and 243 browser cases, unchanged baselines/tolerances.
+- All 11 public/auth/email/invite lifecycle routes now cover owner/member/agent/other-workspace/anonymous; cross-account proof/invite denials included.
+- Three pinned clean-checkout production images and official all-30-tool MCP smoke passed on Node 24; image identities retained in private local/host deployment logs.
+- Migrations: none. Exclusive env and verified database backups; native deploy lock; only API/worker/web replaced. AI_* unset; Caddy, neighbors and PostgreSQL start preserved.
+- Live: 22/22 passed (20 critical cases, independent realtime and official-client all-30-tool MCP round trip); zero retries and zero browser page errors.
+- Guarded omissions retained: SMS form only (no real phone/code); public MCP rate-limit flood forbidden, covered locally.
+- Performance time box closed: pre-repair Node 26 diagnostics are qualified in the candidate, not final-source Node 24 budget passes.
+- Remaining: Calendar LCP/Lighthouse; final-source Node 24 cold LCP/Lighthouse validation for Projects/Timeline, including Timeline zh-CN/HK. No further optimization in this release.
+- Rollback source: `66534378d81ac57aed31683f2a0a32248c7a6e9b`; preserve data. Acceptance receipt/deployment.done and independent lock-release probe complete before docs push.
+
+### Frontend v2 release candidate v0.2.5 — 2026-10-16 UTC
+- Source `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; annotated tag after acceptance: `v0.2.5`; [PR #54](https://github.com/ksamint/taff01/pull/54).
+- Exact-source [main CI 38878948411](https://github.com/ksamint/taff01/actions/runs/38878948411) and [PR-head CI 38877858880](https://github.com/ksamint/taff01/actions/runs/38877858880) green; main fast-forwarded to the tested head.
+- Validation: 1647 unit/integration tests (632 actor-matrix cases), 164 visual and 246 browser cases. Approved baselines and tolerances retained; visual clock covers the server Calendar bootstrap.
+- MCP: read-only `context.get` returns the server instant, token creator's saved display zone, members/projects and human owner. Only existing description changed: `runs.submit`, to explain required artifacts and current versions.
+- Five local Codex chats passed with a non-UTC saved zone, including an attributed progress-note submission; public five-chat and Inbox approval acceptance remain.
+- Calendar paints an authenticated inert grid with real task previews, then imports Schedule-X after first paint; protected requests/interactions still wait for browser confirmation.
+- Same application code, local production Node 24, three-sample phone cold LCP medians (en/zh-CN/zh-HK): Calendar 632/704/716 ms; Projects 676/748/748; Timeline 644/708/708.
+- Calendar Lighthouse P/A/BP: 96/100/100, 98/100/100, 97/100/100; Projects P 92/92/93; Timeline P 96/95/95, all A/BP 100.
+- Today: JS 190.7 KiB; LCP 624/660/672 ms; all three CI Lighthouse categories >=90.
+- Migrations: none; env template, Compose, Dockerfiles and host layout unchanged. AI_* remain unset; native deploy lock, exclusive DB/env backups and API/worker/web-only replacement required.
+- Acceptance: Steps 0–6, three pinned production images and official all-31-tool smoke, 22 critical/realtime/MCP public cases, five actual Codex chats and Inbox approval; verification workspace only.
+- Verification credentials are read from the existing 1Password item; no stored token exists, so the chat token is issued in memory and revoked after use.
+- Rollback: `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; preserve additive data.
+
+### Frontend v2 v0.2.5 upgrade checkpoint — 2026-10-16 UTC
+- Source `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`, tag `v0.2.5`, [PR #54](https://github.com/ksamint/taff01/pull/54); exact-source [main CI 38878948411](https://github.com/ksamint/taff01/actions/runs/38878948411) and PR-head CI green.
+- Validation: 1647 unit/integration (632 actor cases), 164 visual, 246 browser; Today JS 190.7 KiB; three clean local production images and official all-31-tool MCP smoke passed.
+- Live: 22/22 incl. realtime and official MCP; five Codex chats 5/5, changes visible, Inbox approved; live retries 0, zero browser page errors.
+
+| Chat | Selected tools | Verified result (UTC) |
+| --- | --- | --- |
+| What's on my plate today? | context.get, tasks.list, calendar.list | Workspace local day and human owner resolved correctly. |
+| Create Q4 report due Friday; tomorrow 3pm | context.get, tasks.create | Friday deadline 10-16 15:59Z; schedule 10-17 07:00Z. |
+| Start, log outline drafted, submit | runs.start/event, files.attach, runs.submit | Attributed progress note; needs_review, then human Inbox approval. |
+| 今日有咩要做？ | context.get, tasks.list, calendar.list | Correct workspace-local Today and current task/review state. |
+| 将任务改到下周一 | tasks.edit, calendar.set | Schedule 10-19 07:00Z; deadline 10-19 15:59Z, visible in task detail. |
+
+| Cold route LCP median, ms | en | zh-CN | zh-HK |
+| --- | ---: | ---: | ---: |
+| Today (exact-source CI) | 624 | 660 | 672 |
+| Calendar | 632 | 704 | 716 |
+| Projects | 676 | 748 | 748 |
+| Timeline | 644 | 708 | 708 |
+
+- Other route rows: same application code, local production Node 24, slow 4G/4x CPU, three samples. Calendar Lighthouse P 96/98/97; Projects 92/92/93; Timeline 96/95/95; all A/BP 100.
+- Migrations: none. Native lock, exclusive verified DB/env backups; only API/worker/web replaced; AI_* unset, neighbors and PostgreSQL start preserved.
+- Ops: a local preflight sequencing error interrupted client tracking; the original successful build was reconciled before replacement. Runtime-only database connection injection verified.
+- Verification credentials read from 1Password; short-lived chat token revoked and initialize returned 401. Completed Q4 verification task retained as history.
+- Follow-ups: none. Rollback: `fa0c9f1ccc732b2897f6a0de72be76b2dba65de2`; preserve data. Acceptance receipt, deployment.done and independent lock-release probe precede docs push.
+
+### Frontend v2 release candidate v0.2.6 — 2026-10-16 UTC
+- Source `69434acc66851c766f43834131a449382b461ce7`; annotated tag after acceptance: `v0.2.6`.
+- [PR #55](https://github.com/ksamint/taff01/pull/55) merged by fast-forward to its tested head. Exact-source [main CI 38920627000](https://github.com/ksamint/taff01/actions/runs/38920627000) and [PR CI 38919155166](https://github.com/ksamint/taff01/actions/runs/38919155166) green without retries.
+- Validation: 1652 unit/integration tests, 258 browser cases in en/zh-CN/zh-HK, 166 visuals. Final-source home capture matches all 12 approved light/dark phone/desktop references; other baselines and tolerances unchanged.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 608/668/664 ms; Lighthouse P/A/BP 98/100/100 in every locale.
+- Changes: simple signed-out home, four-second headlines and reduced-motion support, one sign-in identifier, browser-language default; fixes for missing headline glyphs, form movement and live motion preferences.
+- Test-only repairs retain all assertions: rate limiting precedes audit writes; fresh-account locale is saved before its first authenticated render. Only the two failed local cases were rerun after the helper repair: 2/2 passed; combined production checklist coverage 32/32 across the original run and targeted retries.
+- Three clean detached local production images and official all-31-tool MCP smoke passed on Node 24. Package and MCP versions are 0.2.6.
+- Decision closed: ADR 0018 stands; HK/Macau, including en-HK, default to Traditional Chinese. A saved language-picker choice overrides detection.
+- Migrations: none. Env template, Compose, Dockerfiles, Caddy and host layout unchanged; production changes only TAFF_TAG, with AI_* unset.
+- Acceptance: Steps 0–6, native lock and exclusive verified DB/env backups, scoped API/worker/web replacement; 22 critical/realtime/MCP public cases, plus fresh en-HK, persisted English override, rotating headlines, email/username login and phone-code form. Never submit a mobile number or flood public MCP.
+- Rollback: `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; retain its images and all data.
+
+### Frontend v2 v0.2.6 upgrade checkpoint — 2026-10-16 UTC
+- Source `69434acc66851c766f43834131a449382b461ce7`, annotated tag `v0.2.6`; [PR #55](https://github.com/ksamint/taff01/pull/55) merged green. Exact-source [main CI 38920627000](https://github.com/ksamint/taff01/actions/runs/38920627000) and [PR CI 38919155166](https://github.com/ksamint/taff01/actions/runs/38919155166) passed without retries.
+- Validation: 1652 unit/integration, 258 browser and 166 visual cases; Today JS 190.7 KiB, LCP en/zh-CN/zh-HK 608/668/664 ms, Lighthouse P/A/BP 98/100/100 in all three locales. All 12 final home captures match the approved baselines.
+- Fixes: missing Chinese headline glyphs, form movement during rotation, live reduced-motion changes; test-only rate-limit audit and fresh-account locale setup corrections retain all assertions. The two previously failed local cases passed 2/2 after the helper fix; combined local checklist coverage 32/32 across the original run and targeted retries.
+- Three pinned clean local images and official all-31-tool production MCP smoke passed on Node 24. The original host build completed despite slow npm metadata requests; no duplicate build was started.
+- Migrations: none. Native deploy lock, exclusive private env backup and verified Taff database dump; only API/worker/web replaced. AI_* remain unset; Caddy, Valkey, neighbors and PostgreSQL start preserved.
+- Live: 22/22 critical/platform/realtime/MCP cases passed, retries 0, zero browser page errors. All 22 cleanup journals completed without a cleanup failure; accepted invitation/history records remain through supported cleanup rules.
+- Additional live home checks passed: fresh en-HK → Traditional Chinese, English picker override survives reload, en-US → English, headline rotation, email/username sign-in and phone-code form. Zero SMS requests; no mobile number submitted or public MCP flood.
+- Decision closed: retain ADR 0018 for HK/Macau, including en-HK; saved picker choice overrides detection.
+- Follow-ups: none. Rollback: `bd0705af2ecd8408e6bbed785b69ba4a05ff934f`; previous images and data retained. Acceptance receipt, deployment.done, annotated tag verification and independent lock-release probe complete before this docs push.
+
+### Existing system-admin phone passwords
+
+The private API image CLI also accepts `--phone-passwords` with a JSON object
+containing `phones` (canonical +86 numbers, unique, maximum ten) and `password`.
+Supply that object through stdin from a private source; never put it in command
+arguments, the repository or logs. Run the immutable API image's
+`node dist/administration.mjs --phone-passwords` using the same scoped Compose
+command as the administrative setup above. Every phone must already identify a
+system administrator. Setup adds password hashes atomically, preserves phone
+verification and organization membership, and creates no accounts or workspaces.
+Re-running the same setup is idempotent; a different existing password fails
+with conflict. Phone login offers "Use password instead" after a mobile number.
+
+### Frontend v2 release candidate v0.2.7 — 2026-10-16 UTC
+- Source `e6928f066616b400ad2f2740c5e3e388beae5eb3`; annotated tag after acceptance: `v0.2.7`; [PR #56](https://github.com/ksamint/taff01/pull/56) merged by fast-forward to the tested head.
+- Exact-source [main CI 38930534663](https://github.com/ksamint/taff01/actions/runs/38930534663) and [PR-head CI 38929288044](https://github.com/ksamint/taff01/actions/runs/38929288044) green.
+- Validation: 1662 unit/integration, 264 browser and 166 visual cases. All 12 home references reviewed; other baselines and tolerances retained.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 624/676/680 ms; Lighthouse P/A/BP en 98/100/100; zh-CN 99/100/100; zh-HK 99/100/100.
+- Changes: existing phone identities can use a provisioned password, including when SMS is unavailable; SMS remains the default where configured, with an explicit translated password toggle. ADR 0019 records this addition.
+- Private stdin-only setup adds salted credentials only for existing system admins; no accounts/workspaces, privilege changes, phone verification or existing-password resets.
+- Local production checklist 32/32, all-31-tool MCP smoke and two synthetic phone/password logins passed; three clean pinned images built. No SMS sent.
+- Migrations: none. Env template, Compose, Dockerfiles and host layout unchanged; AI_* remain unset. Preserve native lock, exclusive verified DB/env backups and scoped API/worker/web replacement.
+- Acceptance: 22 critical/platform/realtime/MCP live cases; two authorized admin phone/password logins; fresh en-HK defaults to Traditional Chinese, saved English persists and code/password toggle works without SMS.
+- ADR 0018 remains closed: HK/Macau, including en-HK, default to Traditional Chinese; saved picker choice overrides detection.
+- Rollback: `69434acc66851c766f43834131a449382b461ce7`; previous images and all data retained.
+
+### Frontend v2 v0.2.7 upgrade checkpoint — 2026-10-16 UTC
+- Source `e6928f066616b400ad2f2740c5e3e388beae5eb3`, annotated tag `v0.2.7`; [PR #56](https://github.com/ksamint/taff01/pull/56) merged at its tested head. Exact-source [main CI 38930534663](https://github.com/ksamint/taff01/actions/runs/38930534663) and [PR CI 38929288044](https://github.com/ksamint/taff01/actions/runs/38929288044) green.
+- Validation: 1662 unit/integration, 264 browser and 166 visual cases; all 12 final-SHA home captures match approved references. Local production checklist 32/32; three clean pinned images and all-31-tool MCP smoke passed.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 624/676/680 ms; Lighthouse P/A/BP 98/100/100, 99/100/100, 99/100/100.
+- Added native phone/password login and the translated SMS/password toggle (ADR 0019). Existing SMS flow and ADR 0018 HK/Macau language decision retained.
+- Private stdin-only setup configured two existing system admins with salted password hashes. Both distinct live phone/password logins passed; admin memberships retained, zero SMS requests and browser errors; no users/workspaces created by setup.
+- Live: 22/22 critical/platform/realtime/all-31-tool MCP cases; retries 0; 22 cleanup journals, zero cleanup failures and browser errors. Fresh en-HK Traditional, saved English override and code/password toggle passed without SMS.
+- Migrations: none. Native lock, exclusive private env backup and verified database dump; only API/worker/web replaced. AI_* unset; Caddy, Valkey, neighbors and PostgreSQL start preserved. Original host build completed after slow dependency downloads.
+- Workspace inventory before this verification: 3 business organizations, 167 test workspaces and 3 admin personal workspaces. Signup automatically creates personal workspaces; verification history retained under supported cleanup, no hard deletes.
+- Follow-up: retained verification-account personal workspaces explain the crowded picker; no cleanup change in this release. Rollback: `69434acc66851c766f43834131a449382b461ce7`; previous images and data retained. Acceptance receipt/deployment.done, tag verification and independent lock-release probe complete before docs push.
+
+
+### Frontend v2 release candidate v0.2.8 — 2026-10-17 UTC
+- Source `700ad4f0080070c6b0e4d67e9e28294749a316e9`; annotated tag after acceptance: `v0.2.8`; [PR #57](https://github.com/ksamint/taff01/pull/57) merged by fast-forward to its tested head.
+- Exact-source [main CI 39018484498](https://github.com/ksamint/taff01/actions/runs/39018484498) and [PR CI 39017862865](https://github.com/ksamint/taff01/actions/runs/39017862865) passed on attempt 1, without reruns.
+- Validation: 1662 unit/integration tests, 267 browser cases across three locales and 166 visual comparisons. All 12 home references reviewed and approved; baselines and tolerances retained.
+- Today JS 190.7 KiB; LCP en/zh-CN/zh-HK 636/692/676 ms; Lighthouse P/A/BP 98/100/100 in every locale.
+- Local: 267/267 browser cases; LCP 744/808/808 ms; Lighthouse 99/100/100 each. Final `release:stack --build --migrate --seed` and production checklist 32/32 passed, retries 0; three pinned images and official all-31-tool MCP smoke passed.
+- Changes: account-first sign-in; explicit SMS sending; password/code toggle and account preservation; keyboard focus; designed ink/underline/round-button landing with system serif headlines (ADR 0020).
+- Review repairs: focus returns to the account and moves to the SMS action; Me visual capture waits for its seeded Brief badge. No baseline or threshold change.
+- Owner decision: keep system fonts and report fallback; no font file added. Desktop Chromium resolves Songti SC. Real iPhone/Android rendering and native Safari/Chrome saved-password autofill remain unverified.
+- Migrations: none. Env template, Compose, Dockerfiles and host layout unchanged; AI_* remain unset. Native lock, exclusive verified DB/env backups and scoped API/worker/web replacement required.
+- Acceptance: 22 critical/platform/realtime/MCP live cases, fresh zh-HK/en-US landing, email/username sign-in, mobile code/password toggle with zero SMS requests and signup. Never tap Send code or flood public MCP.
+- Rollback: `e6928f066616b400ad2f2740c5e3e388beae5eb3`; retain prior images and all data.
+
+
+### Frontend v2 v0.2.8 upgrade checkpoint — 2026-10-17 UTC
+- Source `700ad4f0080070c6b0e4d67e9e28294749a316e9`, annotated tag `v0.2.8`; [PR #57](https://github.com/ksamint/taff01/pull/57) merged at the tested head. Exact-source [main CI 39018484498](https://github.com/ksamint/taff01/actions/runs/39018484498) and [PR CI 39017862865](https://github.com/ksamint/taff01/actions/runs/39017862865) passed on attempt 1.
+- Validation: 1662 unit/integration tests, 267 browser cases in all three locales, 166 visual comparisons; all 12 home references approved. Local browser 267/267 and production checklist 32/32, retries 0; three pinned images and all-31-tool MCP smoke passed.
+- Today JS 190.7 KiB; main LCP en/zh-CN/zh-HK 636/692/676 ms; Lighthouse P/A/BP 98/100/100 each. Local LCP 744/808/808 ms and Lighthouse 99/100/100 each.
+- Live: 22/22 critical/platform/realtime/all-31-tool MCP cases, retries 0; 22 cleanup journals, zero cleanup failures and browser page errors.
+- Fresh zh-HK/en-US landing, signup, email and username password login, and mobile code/password toggle passed; zero SMS requests. Fresh live phone capture shows the approved layout and system serif headline.
+- Migrations: none. Native lock, exclusive verified private DB/env backups and scoped API/worker/web replacement; AI_* unset. Caddy, Valkey, neighbors and PostgreSQL start preserved; previous images and data retained.
+- Ops: corrected the relay's worktree path before the successful pinned-source relay/build; no service replacement occurred during that correction.
+- Owner chose system fonts; no font file added. Desktop Chromium resolves Songti SC; real iPhone/Android rendering and native Safari/Chrome saved-password autofill remain unverified. Devices lacking a CJK serif retain browser fallback.
+- Verification signup histories, including one additional UI-signup personal workspace, are retained; no hard deletes or cleanup expansion.
+- Rollback: `e6928f066616b400ad2f2740c5e3e388beae5eb3`. Acceptance receipt/deployment.done written; annotated tag verified remotely; independent native flock probe confirmed lock release and healthy pinned runtime before this docs push.
+
+
+### Frontend v2 release candidate v0.2.9 — 2026-10-17 UTC
+- Source `dee8c00f152bb7db73edfc3f13d40a48ad6bc8f1`; [organization defaults/cleanup PR #58](https://github.com/ksamint/taff01/pull/58), [MCP version repair PR #59](https://github.com/ksamint/taff01/pull/59). [Exact-source main CI](https://github.com/ksamint/taff01/actions/runs/39027213072) and [repair PR CI](https://github.com/ksamint/taff01/actions/runs/39026619151) passed on attempt 1.
+- Changes: audited organization archiving and live-test cleanup; personal ownership; saved login default editable by the user or system administrator; automatic organization/personal fallback; readable phone admin controls. Invited personal workspaces remain available to ordinary members; system administrators' normal switcher hides other users' personal workspaces.
+- Migration `0030_workspace_lifecycle` is additive: owner/archive/default columns, audited ownership backfill of 147 existing personal workspaces, and future signup ownership. Later organizations with the same name are preserved as organizations.
+- No new env variables, dependencies, Compose/Dockerfile/route changes or AI enablement. Native lock, exclusive verified DB/env backups and scoped API/worker/web replacement remain required.
+- Acceptance: protect Table AI, 侍天TIANSIGHT, APUCH and personal workspaces; archive only the 32 R1 organizations; verify persisted defaults and the critical live checklist. Rollback: `700ad4f0080070c6b0e4d67e9e28294749a316e9`; retain data and previous images.
+
+### Frontend v2 v0.2.9 upgrade checkpoint — 2026-10-17 UTC
+- Source `dee8c00f152bb7db73edfc3f13d40a48ad6bc8f1`, annotated tag `v0.2.9`, exact-source CI above: 1,689 unit/integration tests, 270 browser cases, 166 visual comparisons and three image builds passed.
+- Today JS 190.9 KiB; LCP en/zh-CN/zh-HK 616/680/680 ms; Lighthouse P/A/BP 95/100/100, 94/100/100, 94/100/100.
+- Cleanup: 32 R1 organizations archived with history retained; final core verification reports exactly Table AI, 侍天TIANSIGHT and APUCH as active organizations, 151 personal workspaces retained, zero additional organizations. Verification-created personal histories remain preserved.
+- Saved default persisted across two independent authenticated sessions; the verification account's original choice was restored. Its public Me response exposes only its personal workspace after cleanup. User/admin authorization and actual acting-admin audit coverage passed.
+- Live: 22 unique cases passed. Sixteen unchanged platform/sign-in/task/calendar cases passed on `07419c2`; four review cases, all-31-tool MCP and independent-process realtime passed on the final image. The only application difference is MCP version metadata plus its regression test.
+- Initial review initialization guards rejected the stale hard-coded MCP v0.2.8 advertisement after packages advanced to v0.2.9; four initial cases failed at that precondition. Direct initialize/context reads remained healthy. PR #59 derives the advertised version from package metadata; all six affected/unrun live cases then passed without retries. No required check was weakened.
+- The same native lock covered both candidates. Fresh exclusive DB/env backups preceded each replacement; migration 0030 applied once. AI_* stayed unset; Caddy, Valkey, neighbors and PostgreSQL start were preserved. Verification tokens/grants/runs/settings were cleaned or restored through supported APIs.
+- Acceptance receipt and deployment.done name the final source; the annotated remote tag was verified. The independent native flock probe confirmed lock release and healthy final runtime. Follow-ups for this request: none.
+
+### Frontend v2 release candidate v0.2.10 — 2026-10-19 UTC
+- Source `fb0446b8259c28136d375a097de44f6e66330003`; [release PR #61](https://github.com/ksamint/taff01/pull/61) merged at its tested head, following project pipeline PR #60. Annotated tag `v0.2.10` follows acceptance.
+- Exact-source main CI [main CI 39244987126](https://github.com/ksamint/taff01/actions/runs/39244987126) and [PR CI 39243818163](https://github.com/ksamint/taff01/actions/runs/39243818163): all eight jobs green, including browser/visual and three image builds.
+- Validation: 1,698 unit/integration tests in 102 files; 276 browser and 166 visual cases. Today JS 191.9 KiB; LCP en/zh-CN/zh-HK 616/672/672 ms; Lighthouse P/A/BP en 94/100/100; zh-CN 93/100/100; zh-HK 93/100/100. Three clean pinned local production images and all-31-tool MCP smoke (59 checks) passed.
+- Migration `0031_project_stage_lead` is ADDITIVE: `project_stage` enum, nullable `projects.stage` and `projects.lead_id`, FK to members and `projects_lead_person` trigger. No backfill, no data change.
+- Owner-approved visibility change (ADR 0021): contract amount, collected and collection % are visible to every non-guest person. Guests and agents still see delivery % only; editing stays admin-only.
+- People in charge can move their project's stage with header Undo; Brief shows stage/person and filters rows/totals. Admin edits retain unchanged leads after guest demotion. Dependency patch refresh includes Next 16.4.2, React 19.3.1 and better-auth 1.7.10.
+- No new env variables, dependencies, Compose/Dockerfile/route changes. AI_* stay unset. Native host lock, fresh exclusive verified DB/env backups, full-SHA TAFF_TAG, default-builder build, one migration before API and replacement of only API/worker/web required.
+- Acceptance: 22 critical/platform/realtime cases with all-31-tool live MCP smoke, plus admin stage/lead assignment, lead header stage/Undo, member finance and guest exclusion, Brief stage rows/totals, MCP stage/leadId and null finance. Clean verification entities through supported APIs; never flood public MCP or tap Send code.
+- Rollback: v0.2.9 source `dee8c00f152bb7db73edfc3f13d40a48ad6bc8f1` and retained images. Migration 0031 stays additive; old code ignores it. Preserve Caddy, Valkey, neighbors, PostgreSQL, route and DNS.
+
+### Frontend v2 v0.2.10 upgrade checkpoint — 2026-10-19 UTC
+- Source `fb0446b8259c28136d375a097de44f6e66330003`, annotated tag `v0.2.10`; [release PR #61](https://github.com/ksamint/taff01/pull/61) merged at its tested head. [PR CI 39243818163](https://github.com/ksamint/taff01/actions/runs/39243818163) and [exact-source main CI 39244987126](https://github.com/ksamint/taff01/actions/runs/39244987126): all eight jobs green on attempt 1.
+- Validation: 1,698 unit/integration tests, 276 browser cases in three locales, 166 visual comparisons and three image builds. Today JS 191.9 KiB; LCP en/zh-CN/zh-HK 616/672/672 ms; Lighthouse P/A/BP 94/100/100, 93/100/100, 93/100/100. Three pinned local production images and all-31-tool MCP smoke passed (59 checks).
+- Migration 0031 is additive: enum, nullable stage/lead columns, member FK and person trigger; applied once before API replacement. Existing projects retained null metadata; no backfill or data rewrite. Owner-approved non-guest person finance visibility follows ADR 0021; guests/agents retain delivery-only visibility and editing stays admin-only.
+- Live: 22/22 critical/platform/realtime cases including official all-31-tool MCP; additional pipeline scenario 1/1. Admin stage/lead assignment, lead header move/Undo/persistence, member contract/collected figures, guest exclusion, Brief stage rows/totals and populated MCP stage/leadId with null finance passed.
+- Test-case retries 0; 4 sign-in requests received 429 and each passed after one explicit 10-second wait/retry. Zero browser page errors and cleanup failures; 23 cleanup journals completed. Verification entities archived and tokens/grants/settings cleaned or restored through supported APIs; accepted invitation/personal histories retained. No SMS sent or public MCP flood.
+- Native lock held through deployment and acceptance; fresh exclusive private env backup and verified DB dump. Pinned clean source used the verified bundle after a bounded 45-second Git fetch timeout. Default-builder build completed once; only API/worker/web replaced, AI_* unset. Caddy, Valkey, neighbors, route, DNS and PostgreSQL start preserved.
+- Follow-ups for this release: none. Rollback: v0.2.9 `dee8c00f152bb7db73edfc3f13d40a48ad6bc8f1`, retained images and env backup; migration 0031 remains installed and old code ignores it.
+- Acceptance receipt and deployment.done name the accepted source; annotated tag verified remotely. Independent native flock probe confirmed lock release and healthy pinned runtime before this docs push. [Milestone 30](milestones/30-v0.2.10.md).
+
+### Frontend v2 release candidate v0.2.11 — 2026-10-20 UTC
+- Source `897340eb25605a8acb7f9e44a878453b80dc2238`; [release PR #64](https://github.com/ksamint/taff01/pull/64) merged at its tested head, containing MCP annotations PR #62 and visual capture race fix PR #63. Annotated tag `v0.2.11` follows acceptance.
+- [PR CI 39370606682](https://github.com/ksamint/taff01/actions/runs/39370606682) and [exact-source main CI 39371441660](https://github.com/ksamint/taff01/actions/runs/39371441660): all eight jobs green. Validation: 1699 unit/integration tests in 102 files, 276 browser cases in three locales and 166 visual comparisons; all three images built.
+- Today JS 191.9 KiB; LCP en/zh-CN/zh-HK 624/672/676 ms; Lighthouse P/A/BP en 93/100/100; zh-CN 93/100/100; zh-HK 94/100/100. Three clean pinned local production images and all-31-tool MCP smoke (60 checks) passed.
+- Every MCP tool carries annotations: 14 read-only (`readOnlyHint`), 8 additive, 9 updating (`destructiveHint`, `idempotentHint`); `openWorldHint` is false. These are hints only: `can()` and token scopes still decide every call.
+- The MCP round trip also lists all 31 tools over protocol 2026-07-28 using its per-request envelope, without initialize. Live initialization must advertise 0.2.11.
+- PR #63 makes visual capture wait for each board card's task access. No baseline or product change; existing PNGs and comparison thresholds retained.
+- Migrations: none. No env, dependency, Compose, Dockerfile, route or UI change. AI_* stay unset. Native lock, fresh exclusive verified DB/env backups, full-SHA TAFF_TAG, default-builder build, successful migrator with unchanged journal, and replacement of only API/worker/web required.
+- Acceptance: 22 critical/platform/realtime cases and the all-31-tool live MCP round trip, including annotation/read-only classification, protocol 2026-07-28 without initialize and server version 0.2.11. Clean verification data through supported APIs; never flood public MCP or tap Send code.
+- Rollback: v0.2.10 source `fb0446b8259c28136d375a097de44f6e66330003` and its retained images. Preserve Caddy, Valkey, neighbors, PostgreSQL, route, DNS and all data.
+
+### Frontend v2 v0.2.11 upgrade checkpoint — 2026-10-20 UTC
+- Source `897340eb25605a8acb7f9e44a878453b80dc2238`, annotated tag `v0.2.11`; [release PR #64](https://github.com/ksamint/taff01/pull/64) merged at its tested head. [PR CI 39370606682](https://github.com/ksamint/taff01/actions/runs/39370606682) and [exact-source main CI 39371441660](https://github.com/ksamint/taff01/actions/runs/39371441660): all eight jobs green on attempt 1; initial main gate 39369768721 also passed 8/8.
+- Validation: 1699 unit/integration tests in 102 files, 276 browser cases in three locales, 166 visual comparisons and three image builds. Today JS 191.9 KiB; LCP en/zh-CN/zh-HK 624/672/676 ms; Lighthouse P/A/BP 93/100/100, 93/100/100, 94/100/100. Three pinned local production images and all-31-tool MCP smoke passed (60 checks).
+- MCP: all 31 tools annotated (14 read-only, 8 additive, 9 updating), openWorldHint false; hints only, can() and token scopes still enforce every call. The live annotation/read-only classification check and protocol 2026-07-28 per-request tools/list without initialize passed. Live official MCP initialize reports version 0.2.11.
+- Live: 22/22 critical/platform/realtime cases, including the all-31-tool round trip; test-case retries 0, authentication throttle retries 2, each after a 10-second wait. Zero browser page errors and cleanup failures; 22 cleanup journals completed. Verification entities archived and tokens/grants/settings cleaned or restored through supported APIs; accepted invitation/personal histories retained. No SMS sent or public MCP flood.
+- Migrations: none. The migrator ran once, exited 0 and the journal stayed unchanged. No env, dependency, Compose, Dockerfile, route or product UI change; AI_* stay unset. PR #63 waits for each board card's task access before visual capture; baselines and thresholds unchanged.
+- Native lock held through deployment and acceptance; fresh exclusive private env backup and verified DB dump. Default-builder build; only API/worker/web replaced. Caddy, Valkey, neighbors, PostgreSQL start, route and DNS preserved. Pinned clean source used the verified bundle after a bounded 45-second Git fetch timeout.
+- Local setup: one build restart through the existing Mac proxy cleared a stalled package download; a database-readiness sequencing error was corrected before the first MCP execution. Passing images were reused, not rebuilt for that correction.
+- Follow-ups: none. Rollback: v0.2.10 `fb0446b8259c28136d375a097de44f6e66330003`, retained images and env backup; all schema/data retained.
+- Acceptance receipt and deployment.done match the accepted source; annotated tag verified remotely. Independent native flock probe confirmed lock release and healthy pinned runtime before this docs push. [Milestone 31](milestones/31-v0.2.11.md).
+
+### Frontend v2 release candidate v0.2.12 — 2026-10-20 UTC
+- Release source: the tested head of the v0.2.12 release PR, after OAuth PR #65 and role-based approval PR #66 merged. Exact-source main CI and release PR CI must both pass all eight jobs before production replacement; the checkpoint records the full SHA.
+- OAuth 2.1 for MCP (ADR 0022 + 0023): discovery, public client registration, PKCE S256, consent, hourly access tokens, rotating refresh tokens and revocation. Existing personal agent tokens remain valid.
+- Admins approve any organization agent and all five scopes; members approve only supervised agents within tasks:read, tasks:write, calendar:write and inbox:review. files:write stays admin-only; guests and agents never approve. Core rechecks role/supervision/ceiling on code exchange and refresh; lost authority revokes the grant.
+- Members see and revoke their own grants in Connected apps. Admins retain personal token issuance, all grants and call logs. Agent capabilities and can() still decide every call.
+- Migration 0032_mcp_oauth is ADDITIVE: oauth_clients, oauth_codes and nullable OAuth/expiry/refresh columns, indexes and foreign-key constraints on agent_tokens. No backfill and no other new migration; keep it and its data on rollback.
+- Only apps/api, apps/web and apps/worker advance to 0.2.12; the MCP version derives from apps/api. No new dependency or env variable; Compose and Dockerfiles unchanged. OAuth discovery uses the web rewrite; Caddy, Traefik, route and DNS remain unchanged. AI_* stay unset; PostgreSQL stays running.
+- Local candidate gate: pnpm release:stack --build --migrate --seed, then the complete 32-case pnpm release:checklist (item 8 includes the official-client OAuth round trip). No production seed.
+- Production: native lock, fresh exclusive verified DB dump and private env backup, pinned full-SHA TAFF_TAG, default builder, migration once before API, replacement of only api/worker/web. Preserve neighbors, Caddy, Valkey and PostgreSQL.
+- Live acceptance: discovery issuer/resource/S256, unauthenticated MCP 401 challenge, a personal token retained across replacement, full release checklist using the guarded production configuration, platform/realtime checks, and Claude.ai admin approval/tools/context/grant/revocation. Repeat for an existing supervised non-admin verification account if available; otherwise rely on CI. Never send SMS or flood public MCP; clean verification data through supported APIs.
+- Rollback: v0.2.11 source 897340eb25605a8acb7f9e44a878453b80dc2238, its retained images and the env backup; retain additive 0032 and all data.
+
+### Frontend v2 v0.2.12 upgrade checkpoint — 2026-10-22 UTC
+- Deployed source `789bb20b4947d1a5ec15f83c73ae6fe6086e7be4`; annotated tag `v0.2.12` verified on origin. [Release PR #67](https://github.com/ksamint/taff01/pull/67), [release CI 39424696735](https://github.com/ksamint/taff01/actions/runs/39424696735) and [exact-source main CI 39426067761](https://github.com/ksamint/taff01/actions/runs/39426067761): 8/8 green.
+- Validation: 1,742 tests / 103 files, 285 browser cases, 166 visuals, three images; Today 192.4 KiB; LCP en/CN/HK 624/676/672 ms; Lighthouse P 95/94/94, A/BP 100/100. Local production checklist 32/32 after correcting private mail-log setup; same built candidate reused.
+- Live automated acceptance 37/37 (checklist 32, platform 4, independent-process realtime 1); all 31 MCP tools, four OAuth round trips, annotations and protocol 2026-07-28 passed. Discovery 4/4; retained personal token passed and was revoked; MCP reports 0.2.12. Case/auth retries 0; 37 cleanup journals, zero failures/page errors. No SMS or public MCP flood.
+- Migration 0032_mcp_oauth applied once, additive, no backfill or other migration. Native lock, fresh exclusive verified DB/env backups, pinned source and default-builder build; only API/worker/web replaced. No edge change; Caddy, Valkey, neighbors, PostgreSQL start, route/DNS and other env preserved; AI unset.
+- Closeout: recorded current container IDs/starts/restart counts privately; image IDs match, restart counts 0, running services started before acceptance and API healthy. Preservation script: 19 unchanged containers, no unexplained drift; external PostgreSQL start unchanged.
+- post-replacement start times were not captured; capture step added in docs/release-closeout.md (currently on origin/claude/fervent-archimedes-7n3rb0, not main).
+- Owner decision (2026-10-21): "Accept v0.2.12 with the Claude.ai custom-connector check pending; tag and release the lock now. Run that check later without the lock."
+- PENDING: Claude.ai admin custom connector check (tools/context.get, /me/mcp grant, revoke/reconnect); run later without the lock and record via a one-line docs PR. PENDING: live member-supervisor approval; no eligible non-admin verification supervisor exists, flow passed CI in all three locales.
+- Native build used a verified bundle after bounded GitHub fetch timeout; slow registry downloads; stale SSH client closed after remote completion, no rebuild/migration retry. Receipt carries pending items; deployment.done holds only the SHA. Lock release follows receipt publication and is confirmed by an independent nonblocking flock probe.
+- Rollback: restore env backup + retained v0.2.11 images, source `897340eb25605a8acb7f9e44a878453b80dc2238`; keep migration 0032 and its data. [Milestone 34](milestones/34-v0.2.12.md).
+
+### Release candidate v0.2.13 — 2026-10-21 UTC
+- Release source: the tested head of the v0.2.13 PR. Exact-source main CI and PR CI must both pass all eight jobs before production replacement; the checkpoint records the full SHA.
+- Security patch only: `restoreAgentToken` lets a member undo only an OAuth-grant revocation they made, and only while `token:connect` and the scope ceiling still allow it; admins unchanged. Regression test fails on v0.2.12 and passes here.
+- No migration, dependency, env variable, Compose, Dockerfile, edge-route or UI change. Only apps/api, apps/web and apps/worker advance to 0.2.13. AI_* stay unset; PostgreSQL stays running.
+- Local candidate gate: pnpm release:stack --build --migrate --seed, then the complete pnpm release:checklist. No production seed.
+- Production and closeout follow [the closeout checklist](release-closeout.md), including capturing replaced-service container ids, startedAt and restartCount right after replacement.
+- Live acceptance: health, OAuth discovery and the `/mcp` 401 challenge, a personal token retained across replacement, and the full release checklist with the guarded production configuration. The v0.2.12 pending Claude.ai connector and member-supervisor checks stay pending unless run.
+- Rollback: v0.2.12 source 789bb20b4947d1a5ec15f83c73ae6fe6086e7be4, its retained images and the env backup; all schema and data retained.
+
+### Frontend v2 v0.2.13 upgrade checkpoint — 2026-10-25 UTC
+- Source `45a7cc65fba6d859f0733466950cc1163ef298dc`, annotated tag `v0.2.13` verified on origin; [PR #69](https://github.com/ksamint/taff01/pull/69), [PR CI 39693073031](https://github.com/ksamint/taff01/actions/runs/39693073031) and [main CI 39694069213](https://github.com/ksamint/taff01/actions/runs/39694069213) passed 8/8.
+- Validation: 1,743 tests / 103 files, 285 browser cases, 166 visuals and three images. Today 197,028 gzip bytes; LCP en/CN/HK 608/680/676 ms; Lighthouse P 97/98/98, A/BP 100/100.
+- Local production checklist 32/32. Migrations: none; migration journal, env shape, Compose, Dockerfiles, route and PostgreSQL start unchanged.
+- Live full-project first attempts 138/146; bounded retries made the critical checklist 32/32 and the unique-case result 142/146. OAuth discovery, retained-token checks and official 31-tool MCP round trip passed.
+- Four remaining failures repeat one stale non-critical assertion that members lack finance; ADR 0021 intentionally grants finance to non-guest people. No v0.2.13 UI/finance change or rollback cause exists.
+- Follow-ups: align the stale finance test with ADR 0021; harden live cleanup transport; investigate two pre-write setup flakes. Current-run leftovers were archived through supported APIs.
+- The M1 Pro shell outage and hostd restarts interrupted two long harness invocations; the detached native keeper retained the lock and acceptance resumed per project without rebuild, migration or replacement.
+- Closeout: API/web/worker IDs, images and starts match capture with restartCount 0; 23 preserved containers, PostgreSQL and route are unchanged; health/OAuth/MCP challenge pass.
+- v0.2.12 Claude.ai connector and member-supervisor approval remain PENDING under the recorded owner decision. Rollback: v0.2.12 `789bb20b4947d1a5ec15f83c73ae6fe6086e7be4` and retained images/env; keep all data.
+
+
+### Release candidate v0.2.14 — 2026-10-28 UTC
+- Release source: the merge commit of the v0.2.14 prep PR. Exact-source main CI and PR CI must both pass all eight jobs before production replacement; the checkpoint records the full SHA.
+- Node 26 runtime (PR #75, ADR 0024): .node-version 26, server and web base images node:26-alpine, @types/node 26. The remaining changes since v0.2.13 are live-harness, CI and documentation (PRs #71–#74).
+- No migration or new env variable. Only apps/api, apps/web and apps/worker advance to 0.2.14. AI_* stay unset; PostgreSQL stays running.
+- Local candidate gate: Node 26, pnpm install --frozen-lockfile, pnpm release:stack --build --migrate --seed, then the complete pnpm release:checklist. No production seed.
+- Production and closeout follow [the closeout checklist](release-closeout.md): native lock, exclusive verified DB/env backups, default-builder builds, replace only api/web/worker and immediately capture container ids, startedAt and restartCount. Verify api node --version is v26.x; preserve neighbors with scripts/deploy/neighbor_preservation.py.
+- Live acceptance: health, OAuth discovery, /mcp 401 resource_metadata, retained personal token, MCP round trip advertising 0.2.14 and all 147 live cases, one project per detached invocation. Give each failure one targeted retry; distinguish Node-26-caused failures from pre-existing failures. Critical items 1–8 caused by Node 26 require rollback if still failing; pre-existing critical failures require an explicit NEEDS-DECISION. Non-critical failures are follow-ups.
+- Claude.ai connector remains pending under the recorded owner decision; run later without the lock.
+- Rollback: v0.2.13 source 45a7cc65fba6d859f0733466950cc1163ef298dc, its retained images and env backup; preserve all schema/data, Caddy, Valkey, neighbors, PostgreSQL, route and DNS.
+
+### Frontend v2 v0.2.14 upgrade checkpoint — 2026-10-28 UTC
+- Source `f033b1f019de3a25ddd8412acd39eb7fe9d73ebf`, annotated tag `v0.2.14` verified on origin; [release PR #76](https://github.com/ksamint/taff01/pull/76), [PR CI 40617401360](https://github.com/ksamint/taff01/actions/runs/40617401360) and [exact-source main CI 40618363473](https://github.com/ksamint/taff01/actions/runs/40618363473): 8/8 green.
+- Validation: 1,744 tests / 103 files, 285 browser cases and three image builds; Today JS 192.4 KiB, LCP en/zh-CN/zh-HK 612/700/700 ms, Lighthouse P 99/98/98, A/BP 100/100. Node 26 local production checklist 32/32 after one targeted search-shortcut timing retry on the same build.
+- Runtime: Node 26 base images (ADR 0024), confirmed in the live API. Migrations: none; production migrator not invoked, migration journal and PostgreSQL start unchanged. Only api/web/worker replaced; Caddy, Valkey, neighbors, route and DNS preserved; AI_* unset.
+- Native detached lock, exclusive mode-0600 verified DB dump and env backup; exact clean source relayed with verified bundle, default-builder build. Replaced container ids, image ids, startedAt and restartCount captured immediately after replacement.
+- Deployment recovery: corrected the Compose API build target and source modes (0600 → Git-standard 0644/0755). The first image set failed web startup; v0.2.13 was restored under the same lock, then the same SHA rebuilt and the final web image verified as its non-root user. No source or test change.
+- Live: 146/147 unique cases, first attempts 143/147, targeted retries 4; critical checklist 31/32, official MCP round trips advertise 0.2.14. Health, OAuth discovery, /mcp 401 resource_metadata and a personal token retained across replacement passed. Reports stay private under /private/tmp.
+- NEEDS-DECISION: phone-zh-HK item 4 Projects timed out before project creation twice; zero entities/page errors and cleanup complete. Same pre-write failure documented in v0.2.13. Recommendation: ship the Node 26 runtime with this pre-existing UI-readiness failure tracked; no Node-26-caused critical failure found. This is the release agent’s recommendation, not a new owner waiver.
+- Follow-ups: NEEDS-DECISION: pre-existing phone-HK Projects pre-create timeout after one retry; recommend release with a UI-readiness follow-up; harden Projects/Search readiness and cleanup read/state diagnostics (original owned project confirmed archived). Claude.ai connector remains PENDING: custom connector to https://taff.apuch.cn/mcp, admin approval, tools/context.get, grant in /me/mcp, revoke/reconnect; run later without the lock.
+- Task failure policy: "A pre-existing critical failure: print NEEDS-DECISION: <case + assertion + cause> — recommend <option>." The Node-26-caused critical rollback condition was not met.
+- Owner decision: "Accept v0.2.12 with the Claude.ai custom-connector check pending; tag and release the lock now. Run that check later without the lock." Current owner direction: "dont ask for approve just go" and "dont stuck".
+- Rollback: v0.2.13 `45a7cc65fba6d859f0733466950cc1163ef298dc`, retained images and env backup; preserve all schema/data. Lock held through acceptance and this docs PR; final receipt, SHA-only deployment.done and reconciled release follow the green merge under [the closeout checklist](release-closeout.md). [Milestone 36](milestones/36-v0.2.14.md).
+
+### Frontend v2 release candidate v0.2.15 — 2026-10-28 UTC
+- Source: tested head of [PR #78](https://github.com/ksamint/taff01/pull/78); require green PR CI and exact-source main CI (8/8) before deployment. Resolve and record the pinned 40-character main SHA under the native lock.
+- Default organization agents: core creates safe agent/member defaults on organization creation; atomic personal signup provisioning uses additive 0033. Core migrator backfills only workspaces with no agent, including archived workspaces; logs the inserted workspace count and is idempotent. No existing member or permission rewrite and no credentials issued.
+- UI: Organizations exposes Add agent with unavailable reasons; MCP shows loading/errors/no-agent guidance and an organization link, reconciles selected agents after workspace changes, and reports copy/submit failures. Empty rosters and read-only permission controls have feedback.
+- Validation: local lint/typecheck, production web/server builds, 1747 unit/integration tests, 12 relevant browser cases across all three locales; Today JS 192.3 KiB. Final CI supplies full browser/visual/LCP/Lighthouse and image gates. No visual baseline or threshold weakened.
+- Access review: create; token issue/regenerate/list/revoke/restore; OAuth approve/exchange/refresh/list/revoke/restore. New default-agent and member/guest demotion coverage plus existing full authorization matrix. [Milestone 37](milestones/37-default-organization-agents.md) records remaining UI follow-ups.
+- Migrations: 0033_personal_default_agent.sql (additive provisioning function) and core idempotent insert-only default-agent backfill. Determine expected workspace count through a read-only core inventory before apply; report actual count from migrator output. Existing agents and all user data retained.
+- Env template, Compose, Dockerfiles, route, DNS, role and host layout unchanged; AI_* remain unset. Follow Steps 0–6 and [release closeout](release-closeout.md), native keeper lock, exclusive verified DB/env backups, scoped API/web/worker replacement and neighbor preservation.
+- Live acceptance: critical platform/task/project/calendar/search/organization/settings flows in en/zh-HK phone/desktop plus zh-CN spot check; Organizations Add agent availability and MCP default selection in en/zh-CN. No real-owner UI mutations beyond the authorized backfill.
+- Owner decision: “Then STOP — do NOT issue any agent token yourself (a separate session on afmac does that for fenshen01).” This overrides token-issuing live checks: defer agent-token/MCP round trip and token-dependent review to that session; retain local/CI MCP verification and public unauthenticated discovery checks.
+- Rollback: v0.2.14 `f033b1f019de3a25ddd8412acd39eb7fe9d73ebf`; retain prior images and all additive schema/data/default members. Restore only private env and API/web/worker images if needed.
+
+### Frontend v2 v0.2.15 upgrade checkpoint — 2026-10-28 UTC
+- Source `b52866ddaf72b09637ca3c7db4e4c5b7a31b0a96`, annotated tag `v0.2.15` verified on origin; [release PR #78](https://github.com/ksamint/taff01/pull/78), [PR CI 40631434743](https://github.com/ksamint/taff01/actions/runs/40631434743) and [exact-source main CI 40632532580](https://github.com/ksamint/taff01/actions/runs/40632532580): 8/8 green.
+- Validation: `pnpm lint`, `pnpm typecheck`, `pnpm test`, production web/server builds, relevant e2e, licence/performance gates and official MCP smoke passed. CI: 1748 unit/integration, 288 browser, 166 visual cases. Today JS 192.4 KiB; EN/CN/HK LCP 616/672/676 ms; Lighthouse P/A/BP 100/100/100, 99/100/100, 100/100/100. Baselines and thresholds retained.
+- Migrations: additive 0033 personal provisioning plus insert-only, transactional core backfill: **245 workspaces backfilled**, zero missing agents after replacement. Existing agents preserved; 侍天TIANSIGHT retains `fenshen01`; Table AI and APUCH receive `默认智能体 / Default agent`. No agent credentials created by migration.
+- Native keeper lock, pre-deploy snapshots, exclusive verified database dump and private 0600 env backup completed before migration. Compose's combined build returned 0 without exporting API; the first inventory stopped before any migration/replacement. The existing publisher's isolated `migrate` build repaired the API image; all three images were verified before the reconciled startup.
+- Only API/web/worker replaced. Their built image identities match runtime records; API healthy, worker ready. Initial closeout preserves all 27 other containers, route and PostgreSQL start; private env differs only by TAFF_TAG, AI_* unset. Final stability/preservation checks follow the green docs merge.
+- Live acceptance: **33/34 distinct cases passed**, including 2/2 new EN/zh-CN organization/MCP cases (empty roster simulated with read-only routing). Critical checklist first pass 30/32; phone EN Projects passed its one retry, phone HK Projects did not. Across 36 execution journals: zero browser exceptions, cleanup failures and agent-token creations. Public health, discovery/S256 and unauthenticated MCP 401 challenge passed.
+- Non-critical follow-up: phone HK Projects `new-project` is absent after the filter click despite backend management permission; failed twice before any project/task write. Desktop EN/HK Projects pass. This pre-create symptom is already recorded in v0.2.13/v0.2.14; per Steps 0–6/lean-delivery failure policy, keep the release live and track readiness. [Milestone 37](milestones/37-default-organization-agents.md) lists the remaining UI issues.
+- Owner instruction: “Then STOP — do NOT issue any agent token yourself (a separate session on afmac does that for fenshen01).” No production agent token was issued. Token-dependent live MCP/review checks are deferred to that session; local production MCP smoke and CI cover those paths.
+- Rollback: `f033b1f019de3a25ddd8412acd39eb7fe9d73ebf`, retained immutable images and exclusive env backup; recreate only API/web/worker and retain all schema, data and default members. No rollback needed.
+- Lock remains held through this docs-only PR. After green merge: final runtime/neighbor/DB/env checks, receipt, SHA-only deployment.done, keeper release and independent healthy-runtime flock probe, per [release closeout](release-closeout.md).
+
+
+### Master-confirmed project operations v0.2.16 upgrade checkpoint — 2026-10-31 UTC
+
+- Running source `749811497ce1cc053d098c61570b43101b14b2d6`, annotated tag `v0.2.16`. Exact-source [PostgreSQL 18.6 CI](https://github.com/ksamint/taff01/actions/runs/41022303427): one checks job, 1,544 passed / 1 skipped in 64 files.
+- Owner decision: “接受本次限定替代验收”; same-source focused CI, completed three-locale project permission/money acceptance, three amd64 builds and signed local interoperability replace full eight-job CI for this release only. Full eight-job CI, full visual regression and LCP were not run. All native safety checks remain required. Deployment resumed on the owner's “直连服务器部署” instruction.
+- Native SSH deployment: exclusive lock, fresh database/env backups, exact-source api/worker/web builds, additive migration and scoped replacement. Git-tracked public build inputs were made readable; non-root migration/SQL and web-public checks passed before migration. Previous failed attempts remain intact in private deployment logs.
+- Migrations 0034–0037 are additive; journal 34 → 38, backfilled workspaces 0. Existing 0033 and the PostgreSQL start time were preserved. API is healthy; all three replaced services were recorded running with restart count 0.
+- Live checks passed: authenticated session, project board, health, OAuth metadata, MCP 401/resource metadata without bearer, and 33 MCP tools. Original-agent context matched; project create/edit both returned confirmation-only previews and left the project list unchanged. No synthetic production project or finance write was performed.
+- Native administrator enabled only the existing agent's projects.manage capability. Twin retained its credentials and agent links, added the reviewed project/roster preparation tools, and matched both native signing keys. Twin preflight passed all five checks; both agents expose 58 tools. Only twin-jobs restarted; the other Twin units retained their PIDs.
+- Earlier three-locale/browser/image evidence used runtime-equivalent 3a5079d; signed writes/replay/revocation used isolated Taff c13c686 + Twin 6618aaa fixtures. These local results are not described as production financial writes.
+- This two-file docs PR's exact-head focused CI, merge and annotated tag are verified by native closeout. Its final receipt records acceptance, service/neighbor/env/database preservation, the SHA-only deployment marker and native keeper release; operational identities and hashes stay in private deploy logs.
+- Follow-ups: the earlier owner-accepted Claude.ai connector grant/revoke/reconnect check; actual Master five-minute and voice acceptance. Run these after lock release. The full CI/visual/LCP omissions above remain explicit.
+- Rollback source: b52866ddaf72b09637ca3c7db4e4c5b7a31b0a96. Restore its retained three images and exclusive env backup; retain additive schema/data. Preserve Caddy, Valkey, PostgreSQL, neighbors, proxy, DNS and all unrelated services. Procedure: [release closeout](release-closeout.md).
+
+### Release candidate v0.2.17 — 2026-11-05 UTC
+- Source: the `main` commit that carries `claude/daily-summary-module-plan-maapa1` (PR #85, pushed directly; GitHub CI is retired); record its full SHA. The local gate, capture and closeout follow [the closeout checklist](release-closeout.md).
+- Scope: shareholder daily summaries ([ADR 0027](adr/0027-shareholder-daily-summary.md), milestones 85–89). Only apps/api, apps/web and apps/worker advance to 0.2.17.
+- Migration: additive `0038_shareholder_summaries.sql`: five audited tables, one immutability function and trigger, no backfill. Production journal 38 → 39. Open PRs #81 and #82 also claim 0038/0039; whichever reaches `main` second renumbers before it releases.
+- No new environment variable (`TOKEN_PEPPER` reused; `AI_*` stay unset). The worker adds the `daily-summary-scan` scheduler; capture its `Worker ready` line (closeout capture table).
+- Routing: `/s/*` goes to web and `/api/shared-summary` to the API under Caddy (`/api/*` → api) and Traefik (all → web, which proxies `/api`). No proxy change.
+- Assets: three Noto Sans TC detail fonts and their `tokens.css` ranges change (13 glyphs added, none removed).
+- Local candidate gate (Node 26.13, PostgreSQL 18.6, Redis): production web and server builds, then `release:stack --migrate --seed --worker`: journal 39 rows, five new tables, both schedulers registered before `Worker ready`. `release:checklist` 31/32 first pass; desktop-en item 6 (⌘K search did not open) passed its one retry, and the same case passed on the other three projects. `pnpm mcp:smoke` passed against the bundle. The four no-write acceptance checks above behaved as stated. Full `pnpm e2e`, all specs in en/zh-CN/zh-HK on dev servers: 278 passed, 13 failed. The zh-HK MCP OAuth case passed its one retry. The other 12 (`finance-visibility`, `persistence` and two `ssr-session` cases, each in three locales) fail identically on unmodified `main` `707161c` with the same database and services, so they predate this release. Image builds were not run here: Docker Hub answered 429 through this environment's egress; the operator's native exact-source builds cover them. Owner decision (2026-11-05): "accept the old failures, merge 85 to main". The 13 pre-existing failures (12 browser cases and the MCP tool-list unit test) are accepted for v0.2.17; they are not described as passing. PR #85 merged first, so PRs #81 and #82 renumber their migrations.
+- Live acceptance creates no owner data: the usual health, OAuth discovery and `/mcp` 401 checks; `POST /api/shared-summary` with a random well-formed token answers 404 `not_found` with `private, no-store`; `/s/<random token>` shows the unavailable page with `noindex`; unauthenticated `GET /api/summaries?workspaceId=…` answers 401; a signed-in admin opens `/orgs/summaries` without writing. The deployer creates no tag, recipient or share; the owner creates the first tag after the lock is released.
+- Known limits (ADR 0027 notes): public page JavaScript 187.5 KiB against a 50 KiB target; behind the proxy the share-read address limit is a global 30 per minute; no Inbox row; visual baselines for the new screens are pending.
+- Rollback: v0.2.16 source `749811497ce1cc053d098c61570b43101b14b2d6`, its retained images and env backup. Keep 0038's tables and rows; v0.2.16 code never reads them.
+
+### Shareholder summaries v0.2.17 upgrade checkpoint — 2026-11-06 UTC
+
+- Running source `ed84caba558ceeaa12d8a4789feae94af12ac490`, annotated tag `v0.2.17`. Local gate and native closeout follow [release closeout](release-closeout.md); no GitHub CI or runner was used.
+- Exact-source local validation: lint, typecheck, licence, production web/server builds, bundle budget, three linux/amd64 image builds, production checklist 32/32 and official MCP smoke passed. Unit tests: 1,955 passed / one accepted stale MCP tool-list assertion. Browser first attempts: 275/291; four targeted retries passed, giving 279 unique passes and 12 accepted existing finance/persistence/SSR failures. Owner decision: “accept the old failures, merge 85 to main”. No assertion or threshold weakened. Today JavaScript: 197,038 gzip bytes (192.4 KiB).
+- Native keeper, exclusive mode-0600 env backup and verified 7,399,778-byte database dump preceded migration. Only API/web/worker were replaced; migration 0038 advanced journal 38 → 39, backfilled workspaces 0. PostgreSQL start and existing journal entries were preserved. API healthy, all three services restartCount 0; worker readiness recorded after both schedulers registered.
+- Artifact recovery: the private Git clone's directory modes initially blocked migration-file reads; the first migrator failed before applying anything or replacing services. Public source modes were normalized and worker/web rebuilt. A stale API build layer retained a 0700 migration directory; an offline default-builder layer corrected only migration-directory/file modes to 0755/0644. All 70 migration files match Git and the locally validated image byte for byte. Runtime user/env/CMD/entrypoint and private mail directory 0700 were retained. Comprehensive non-root migration and all 27 public-asset reads passed before the successful migrator. Failed attempts remain in private logs.
+- Public acceptance passed: trusted HTTPS health; unchanged auth/SMS methods; OAuth S256 discovery; unauthenticated MCP 401/resource metadata; random share 404 with private/no-store; unavailable share page with noindex; unauthenticated summaries 401; signed-in verification admin opened `/orgs/summaries` with zero business writes, browser exceptions or agent-token issues.
+- Preservation: all 29 other containers unchanged, including Caddy and Valkey; route hash, DNS `146.56.215.142`, PostgreSQL start and private env values except `TAFF_TAG` retained. Existing approval signing key and controller mappings/overlay retained. Final stability, receipt, SHA-only deployment marker and keeper release follow the docs push under [release closeout](release-closeout.md).
+- No audience tag, recipient or share was created by the deployer; the owner creates the first audience tag after lock release. Known public-page JavaScript target, global share-read address limit, missing Inbox row and pending visual baselines remain as recorded in the candidate. Lighthouse/visual baseline generation and the earlier owner-pending Claude.ai connector check were not run.
+- Rollback: restore v0.2.16 `749811497ce1cc053d098c61570b43101b14b2d6` images and the exclusive env backup; recreate only API/web/worker. Preserve additive 0038 schema/data, Caddy, Valkey, PostgreSQL, neighbors, route and DNS. No runtime rollback was needed. [Milestone 96](milestones/96-v0.2.17.md).
+
+### Release candidate v0.2.18 — organization access
+
+- Source: the locally validated head of `feat/v0.2.18-organization-access`;
+  deployment and closeout follow [the checklist](release-closeout.md).
+- Additive migrations: `0039_agent_token_workspaces` (PR #81 renumbered after
+  shareholder summaries), `0040_token_organization_policy` (policy, grant
+  origin/revoker, optimistic token version). No new environment variable or
+  proxy/Compose change; only API/web/worker advance to 0.2.18.
+- Personal tokens retain credentials. Effective workspace selection and
+  `context.get.authorizedWorkspaces` expose current grants. Policy enrollment
+  excludes personal and archived workspaces; administrator revocations remain
+  sticky until explicitly restored.
+- Local acceptance includes the full gate, six grant-management browser cases
+  and three production SSR private-cache cases across en/zh-CN/zh-HK. Record
+  final counts and exact source in the release milestone before deployment.
+- Live acceptance: health, OAuth discovery and `/mcp` challenge; read-only
+  `workspaces.list` with the operator's existing token. The deployer does not
+  activate policy as part of image replacement.
+- After closeout the operator sets `all_organizations` on Twin's existing
+  token through the authorized management operation, supplying the current
+  version. No rotation. Twin integration follows its own repository plan.
+- Rollback retains the additive schema/data and prior API/web/worker images;
+  preserve PostgreSQL, Valkey, Caddy and neighboring applications.
+
+
+### Organization access v0.2.18 upgrade checkpoint — 2026-11-06 UTC
+
+- Running source `599f38d5d5f66037fa7b7e3912c98588219ee611`, annotated tag `v0.2.18` verified on origin. Exact-source local validation and native closeout follow [release closeout](release-closeout.md); no GitHub CI or runner was used. [Milestone 97](milestones/97-v0.2.18-candidate.md).
+- Local gate: 2034 tests/122 files; full browser run 297 passed, zero failed and three expected development-only private-SSR skips, separately passed 3/3 against production; verified-peer production checklist 32/32; official MCP smoke 67 checks/34 tools. Lint 581, six typecheck tasks, licence 304 packages/seven documented exceptions, web/server builds and three linux/amd64 images passed. Today JavaScript 197041 gzip bytes (192.4/200 KiB).
+- Browser fixture fixes await the new review cycle before opening its keyed disclosure, select the intended OAuth agent and budget 60 seconds for the entire task workflow; per-action/assertion limits and behavior checks are unchanged. Native local PostgreSQL 18.6 avoided Docker forwarding variance; prior databases/containers were preserved. One initial image DNS attempt failed; the standard proxy retry passed on unchanged source, with both logs retained.
+- Direct artifact: accepted three-image OCI archive, 333698723 bytes, SHA256 `87a050a61812811e75e9dd2226a3a65ceb06a1fa9013b1b86b5a8a1064c0aa2f`, transferred in private staging and verified before import. Public source directories/files were normalized to 0755/0644. No server npm rebuild or image-content correction was needed.
+- Image identity: Desktop's accepted manifest digests api `603c7b58`, worker `cbd8a39c`, web `7e7c52d5` map cryptographically to native configuration IDs api `9cbec798`, worker `51b3dc63`, web `2e795b2a`. An initial cross-namespace equality assertion stopped before migration; exact manifest/configuration/rootfs proof, all 21 archive blobs, five corrupt-input negatives, comprehensive non-root reads and all 72 migration-file hashes passed before activation. Full identities and the failed check are retained privately.
+- Native keeper, exclusive mode-0600 env backup and verified 7566307-byte database dump preceded migrations 0039–0040, exit 0, journal 39→41. Existing journal entries and PostgreSQL start were retained. Only API/web/worker were replaced; API healthy, both worker schedulers ready and all three accepted container IDs/start times stable with restartCount 0.
+- Live acceptance passed trusted HTTPS health, unchanged auth/SMS methods, OAuth S256 discovery, unauthenticated MCP challenge, private summary/share denial and signed-in read-only summaries/MCP pages with secure cookies. No browser exceptions, business writes, token issuance, SMS or real message. Twin's existing credential passed one read-only workspaces.list call for its home organization; its three approved scopes remain tasks:read/tasks:write/calendar:write.
+- Preservation: all 29 neighbors, including Caddy/Valkey, route hash, PostgreSQL start and private env values except TAFF_TAG are unchanged. Existing approval signing key/controller overlay is retained. Receipt and accepted SHA-only marker are written. Keeper released at 10:52:13Z; independent nonblocking flock at 10:52:29Z proved owner absent, accepted images/start times unchanged and API healthy.
+- Separate post-closeout Twin policy activation passed at 11:00:27Z: existing token version 1→2, all_organizations, two policy grants added for three active organizations. The accepted core operation ran on behalf of the exact email-bound existing owner/current system administrator through normal role/version/planner/audit checks; this was a native operator invocation, not an authenticated web login. No promotion, password reset, session mint or direct SQL policy write. The original grant, credential hash and exact tasks:read/tasks:write/calendar:write scopes remained unchanged.
+- The private fixed-target helper passed 13 binding/hash-retention negatives/positives and five accepted-core authority/demotion tests in a fresh isolated local database before activation. Its source/helper hashes, exact authenticated MCP-probe binding and three owner-attributed audit rows are recorded in `policy-activation.json` beside the native receipt. One post-activation existing-credential workspaces.list read passed at 11:02:09Z: exactly three organizations, the manual home plus two policy grants, every grant with the same three scopes. The temporary helper was removed from the running container; accepted apps remain stable and API healthy. No summary source/pin, recipient, share, real message or extra scope was enabled. Public-share JavaScript, visual references and previously owner-pending Claude.ai checks remain as recorded.
+- Rollback: v0.2.17 `ed84caba558ceeaa12d8a4789feae94af12ac490`, calibrated API `b6ba957f7450247c3741da0386e301be67f57866eb27643f6511dc19edbb0ae5`, web `226fd8700c2658d7abdbe120a1573b09fd39c153141bbe8c93c62537669afb63`, worker `1ddd58e80f3834e3ec55a6c2194e3d260f8113939886b3274788359746ffd6ae` and exclusive env backup. Keep additive schema/data and recreate only the three apps; preserve all shared services. No runtime rollback was needed.
+- Process gap retained: candidate feature branches were pushed before full browser acceptance; main and production remained unchanged at that point. Main was fast-forwarded only after all checks passed for the source above.
+
+### Release candidate v0.2.19 — access matrix and renders
+
+- Source: locally validated head of `feat/v0.2.19-access-matrix-and-renders`;
+  deploy and close out using [the checklist](release-closeout.md).
+- Additive migration `0041_summary_renders`: immutable text/bytea image storage,
+  known-scope CHECK extension and bounded retry-scan indexes. Renders are retained
+  with summaries. No existing summary row is rewritten.
+- Four images: API/web/worker plus internal `taff-render`. New environment value
+  `SUMMARY_RENDER_URL=http://render:3002`; no Caddy route or public renderer port.
+  Replace only those application services; preserve database, Valkey and neighbors.
+- Worker generates text in-process and calls Rust for PNG with a 10-second timeout.
+  Capture renderer health and both summary schedulers before declaring readiness.
+- Live acceptance uses existing authorized read-only data: matrix visibility,
+  health/OAuth/MCP boundaries, text/image delivery if an owner-created summary
+  exists. Never manufacture owner summaries or shares during deployment.
+- Local acceptance includes 1080px PNGs under 400KB, three locale text/image
+  goldens, immutable storage, public 404 parity, 37 MCP tools and scope revocation.
+- Rollback: restore previous API/web/worker images/env; stop only the new renderer
+  if required. Keep additive schema/renders/data, PostgreSQL, Valkey and routing.
+
+
+### Access matrix and renders v0.2.19 upgrade checkpoint — 2026-11-06 UTC
+
+- Deployed source `d10c0a86cd20c360e258029101b1a91bb5391d7f`; annotated `v0.2.19` verified on origin. [Milestone 102](milestones/102-v0.2.19.md), [release closeout](release-closeout.md); no CI or runners.
+- Full exact-source gate passed: Node 2151/126, Rust 25 including mandatory SQL parity/fixtures/CJK/fmt/clippy/deny, browser 306/0 failures/3 expected development private-SSR skips, production SSR 3/3, fresh-peer checklist 32/32, MCP 67 checks/37 tools; lint 610/typecheck six/licence 304 with seven documented exceptions/frozen install/builds/four images. Today 197136 gzip bytes (192.5/200 KiB). Initial wrong-origin checklist invocation was excluded; corrected origin passed without source/assertion changes.
+- Direct accepted four-image OCI archive: 352792423 bytes, SHA256 `866332de15a5f4db3ee10248a5adcc14f1d5b9aeaaf631ab377263b3156d5132`. Exact accepted manifest→native configuration→rootfs identities and all 27 blob hashes passed. Native configurations api `fbaef9b7`, worker `a7e8a7ed`, web `62f75a35`, render `ca811485`; full digests/private receipt retain both namespaces. No rebuild or content correction.
+- Existing SSH jump was bandwidth-limited; same host/key/fingerprint direct SSH transferred identical bytes in 33.43s. A staging rename across /tmp and /srv filesystems failed before runtime work; scoped copy/checksum verification corrected it. Source modes were normalized before activation; comprehensive non-root migration/public/renderer reads passed.
+- Under keeper: exclusive mode-0600 env backup and verified 7654284-byte DB dump; migration0041 exit0/journal41→42, prior entries and DB start unchanged. Renderer became healthy first, then only three existing apps advanced. Four accepted IDs/start times are stable, all restartCount0, API/renderer healthy, both actual schedulers registered before Worker ready. Private helper's initial literal scheduler-name log expectation was corrected to the sourced check; failed log/source-hash receipt retained, no source/image change.
+- Preservation: all 29 neighbors including Valkey/Caddy, private env except TAFF_TAG, approval overlay and route unchanged. Renderer is internal/non-root with no DB credentials, mounts or public port; no Valkey transition in this release.
+- Native acceptance passed health/auth methods/OAuth/MCP boundaries, random private summary/text/image/share negatives and signed-in read-only summaries/MCP/workspace matrix plus system-role denial. No browser exceptions, business writes, agent-token issues, audience/recipient/share/source/pin creation, SMS or real messages. Actual owner summary render downloads were not fabricated; local production render cases passed.
+- Native receipt and SHA-only marker are written; keeper released at 12:30:35Z. Independent nonblocking flock at 12:30:56Z confirmed owner absent, accepted four apps/start times unchanged and API/renderer healthy.
+- Separate post-closeout Twin scope activation passed at 12:32:37Z through accepted v0.2.19 core on behalf of the exact approved existing owner/current system administrator. Existing token version 2→3/all_organizations retained; only summaries:read appended to tasks:read/tasks:write/calendar:write, hash unchanged/no rotation. Home manual origin/provenance and two active policy grants retained, four owner-attributed audit rows; all new scopes propagated only as the core specifies. No role promotion, session mint, password reset or direct SQL update.
+- Private fixed-target helper passed 13 local binding/hash guards and six fresh isolated accepted-core authority/propagation/demotion cases; source/helper hashes and audit IDs are in scope-activation.json beside the native receipt. Scope input uses normal core locks/version increment and has no version-CAS field; receipt states this. Helper removed from running container; accepted apps remain stable. One actual existing-credential workspaces.list read passed at 12:34:55Z: three organizations, manual home plus two policy grants, each with exactly the original three scopes plus summaries:read; normal protocol tools/list returned 37 tools. No source/pin/recipient/summary/message was changed.
+- Rollback before that scope append: restore v0.2.18 `599f38d` native API `9cbec798`, worker `51b3dc63`, web `2e795b2a` and env backup; stop only this new renderer, preserve additive0041 renders/schema/data. After the append, v0.2.18's scope enum/token-list parser cannot represent summaries:read: first use accepted v0.2.19 audited home-grant operation to remove only that new scope/restoring the exact prior three and active policy grants with unchanged credential hash, verify, then intentionally downgrade. Automatic runtime rollback ends before scope activation.
+
+
+### TypeScript and persisted runtime v0.2.20 upgrade checkpoint — 2026-11-06 UTC
+
+- Running source `596272a374499d629ab990c6c957af58bd150bba`, annotated `v0.2.20` verified on origin. [Milestone 104](milestones/104-v0.2.20.md); [release closeout](release-closeout.md), no CI/runners. T0–T3/C1–C4/C6, runtime hardening and optional Twin identity metadata ship with existing authority and design retained.
+- Exact-source gate passed: Node2202/134, Rust25 mandatory SQL/fixtures/fmt/clippy/deny, lint641/typecheck six packages+strict root/frozen install/licence304 with seven documented exceptions/serial builds/four exact-label linux/amd64 images. Browser318/0fail/3 expected development private-SSR skips; production SSR3, checklist32 (four SMS substeps conditionally disabled), MCP69/37tools including refresh-family descendant revocation, pinned9.1.2 Valkey rehearsal7 and Linux C6 no-update6/36 references. Today197274gzip bytes/204800.
+- Local native Valkey9.1.3 avoided diagnosed Docker readiness stalls; real persistence rehearsal and production stay9.1.2. Failed/interrupted bcb attempts were never accepted. Calendar harness now waits finite ancestor animations and reads paired rects in the same frame; no product layout, tolerance or deadline changed. Initial local renderer SIGTERM143 remains recorded; identical binary health200/graceful SIGINT0 verified.
+- Accepted OCI archive352881020bytes, SHA256 `2c56975b54eda45d38c04aeb1e0fd62a21a19e54d5b541ef8f42871239bf0da8`; exact manifest→native configuration→rootfs mapping/all27blobs/non-root/migration/public reads passed. Native configs API8190d5c7/worker3d8a1317/web63f1747f/renderb4bdaab5; full identities private. No rebuild/content correction.
+- Native keeper, exclusive0600 env backup and verified7673904-byte DB dump preceded activation. Current Twin token/all-grant fingerprint was captured fresh under lock, then verified unchanged: version3/four scopes/hash/manual/policy/revoked state. No token, mapping or credential operation.
+- API/worker alone drained exit0. Original Valkey stayed live through SAVE/private0600 RDB290107bytes SHA256 `1fee712a75a7982904be29243acef075525e7020ea27abe08584239041b86c89`, checker, isolated RDB load with AOF OFF, semantic/job/scheduler parity, AOF enable/rewrite and cold AOF restart parity. Baseline112keys:wait0/active0/delayed2/repeat2/completed100; only one naturally expired TTL key vanished, no persistent record lost/changed.
+- Only after that proof, exact-image9.1.2 Valkey moved to own persistent volume/AOFyes/everysec/noeviction/256MiB. Source migration0042 exit0/journal42→43 preserves old entries/DB start. Renderer healthy first; four accepted apps stable/restart0/API+renderer healthy/both schedulers ready. Writer-resume marker is written before any start attempt.
+- Valkey is the explicit intended service transition; all28 other containers, previous volumes, Caddy/route/env exceptTAFF_TAG and approval overlay retained. Final full queue parity was before writer resume; normal subsequent queue evolution is not compared to a stale snapshot.
+- Native read-only health/auth/SMS/OAuth/MCP/cache-denial/matrix/summaries/token UI and typed-service-worker header checks passed with secure cookies, zero exceptions/business writes/token issues. One actual existing ToolServer 3 credential workspaces.list read passed at 14:32:22Z, with normal protocol tools/list37; current returned three organizations/manual home+two policy grants each retain exactly tasks:read/tasks:write/calendar:write/summaries:read. Credential/config/grant set unchanged; dynamic returned grants were used, no prep-time count frozen. No real signed business writes, source/pin/recipient/summary creation, SMS or messages; owner downloads/sign-in remain usage checks.
+- C5 uses the documented conditional default: current routing retained, prior valid share192158gzipbytes(187.7KiB)>50KiB remains an unresolved optimization, not a claimed success. Counterpart Twin c8f4ffb/schema46 completed its separate closeout and17m12s observation; optional identity metadata does not broaden controller/verifier authority.
+- Receipt and accepted SHA-only marker are written; keeper released14:38:58Z and removed its owner file. Independent nonblocking flock14:39:31Z proved four apps and persisted Valkey unchanged/restart0/API+renderer+Valkey healthy. Roll back apps to retained v0.2.19 while keeping healthy new persisted Valkey/data. Once any writer may have resumed, NEVER restore pre-cutover RDB blindly: fence again, verify fresh current RDB/AOF/recovery and only then resume. Preserve additive0042/schema/data/volumes and backups; no down-v/flush.
+
+### Release candidate v0.2.21 — designed daily report
+
+- Source: the `main` commit that carries milestones 105–107 (fast-forwarded from
+  `claude/nifty-pascal-tm5d5d`); record its full SHA. Deploy and close out using
+  [the checklist](release-closeout.md); check 3 now runs
+  `node scripts/deploy/neighbor-preservation.mts`.
+- No migration (journal stays 43), no new environment value, no proxy or route
+  change. Four images as in v0.2.19: API, web, worker and internal `taff-render`.
+- Order: replace `taff-render` first and confirm `/health`; the new worker sends
+  the layout input and stores a PNG only when the renderer answers
+  `x-taff-renderer: image-2`. The renderer still accepts the v0.2.20 input, so a
+  worker that is briefly older keeps rendering.
+- Existing stored renders are not rewritten; summaries generated after the
+  release use `text-2` and `image-2`.
+- Live acceptance stays read-only: health, OAuth discovery, `/mcp` 401, signed-in
+  summaries page and matrix, renderer health from inside the network, and a
+  text/image download only if an owner-created summary exists. Never create a
+  tag, recipient, summary or share during deployment.
+- Visual references: the six `summary.png` delivery-visual images must be
+  recaptured on the pinned Playwright build-1248 Linux pipeline before the
+  comparison; the access references are unchanged.
+- Rollback: v0.2.20 source `596272a`, its four retained images and env backup.
+  No schema change to keep; renders written by v0.2.21 stay readable by v0.2.20.
+
+### Designed daily reports v0.2.21 upgrade checkpoint — 2026-11-07 UTC
+
+- Merged/deployed `cc449c698378a334f64264a7250565a9ed0eaba4`; annotated `v0.2.21` verified on origin. [Milestone 110](milestones/110-v0.2.21.md); [release closeout](release-closeout.md), no CI/runners.
+- Exact-source gate: Node2231/138, Rust29/SQL parity/fixtures/fmt/clippy/deny, browser318/0fail/3 expected development skips, productionSSR3, checklist32, MCP69/37 tools, pinned Linux visual6 with six reviewed summary references/access references unchanged, lint/typecheck/licences/frozen install/builds/four amd64 images. Today197276/204800 gzip bytes.
+- Accepted archive352961053 bytes SHA256 `e242efd6cd3f5794ef0af79a908fad74dec049f2f898bd19644f4d71d4f00f96`; all immutable identities/non-root reads verified. Native configs API586b3a24/worker56543a5a/webafa60dce/renderd291d9c7. Private receipt retains full identities.
+- Native keeper, exclusive0600 env backup and verified7839483-byte DB dump preceded activation. Renderer healthy first, then only API/worker/web replaced; migrator exit0/journal43 unchanged/PostgreSQL start retained. Four apps stable/restart0, API+renderer healthy, worker schedulers ready. All29 neighbors including persisted Valkey/Caddy, route and env exceptTAFF_TAG retained.
+- Read-only live health/auth/OAuth/MCP/private-share denial/summaries/matrix/token pages passed with secure cookies and zero browser exceptions/business writes/agent-token issues. No visible owner summary on verification account, so no actual download fabricated. No summary/tag/recipient/share/source/pin, SMS, real message, credential or grant operation. Existing public-share JS/owner-pending connector checks remain.
+- Rollback restores retained v0.2.20 `596272a` four images/env while preserving data, healthy persisted Valkey/PostgreSQL/Caddy and neighbors. No rollback needed. Receipt and SHA-only marker written; keeper released01:50:55Z. Independent nonblocking probe01:51:03Z proved owner absent, exact marker, four accepted apps unchanged/restart0 and API/renderer healthy.
+
+### Release candidate v0.2.22 — admin screens
+
+- Source: the locally validated release revision following main `9767467`;
+  close out using [release closeout](release-closeout.md).
+- Project finance administration, workspace audit log and Permissions matrix
+  tab ship in API/web/worker0.2.22. No migration, environment, MCP-tool or
+  agent change. Journal stays43; the renderer contract is unchanged.
+- Build and verify all four images locally. Replace only the four application
+  services; retain PostgreSQL, persisted Valkey, Caddy and all neighbors.
+- Live acceptance is read-only: health/OAuth/MCP boundaries, finance read view,
+  audit access and Permissions tab. Never create a payment, approval, summary,
+  recipient, tag, share or grant during deployment.
+- Recapture affected access/organizations references with pinned Linux build1248
+  and compare without updating snapshots. Record actual acceptance counts.
+- Rollback uses retained v0.2.21 `cc449c6` four images and env backup; preserve
+  existing data and healthy persisted Valkey.
+- Deployment instructions accidentally emptied in `9767467` are restored from
+  the accepted v0.2.21 closeout before any production change.
