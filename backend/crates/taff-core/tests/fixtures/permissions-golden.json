@@ -9549,6 +9549,149 @@
     "result": false
   },
   {
+    "name": "admin: view:export",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "admin"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": true
+  },
+  {
+    "name": "member: view:export",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": true
+  },
+  {
+    "name": "guest: view:export",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "guest"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "agent: view:export",
+    "now": 1793923200000,
+    "actor": {
+      "id": "agent",
+      "workspaceId": "ws",
+      "userId": "agent",
+      "name": "Agent",
+      "kind": "agent",
+      "role": "member",
+      "scopes": [
+        "tasks:read",
+        "tasks:write",
+        "calendar:write",
+        "inbox:review",
+        "files:write",
+        "summaries:read"
+      ],
+      "reviewPolicy": "always_review"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "system administrator: view:export",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member",
+      "systemAdmin": true
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": true
+  },
+  {
+    "name": "outsider: view:export",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "other",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "anonymous: view:export",
+    "now": 1793923200000,
+    "actor": null,
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
     "name": "tasks.read ask expiry null",
     "now": 1793923200000,
     "actor": {

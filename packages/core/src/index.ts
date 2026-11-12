@@ -124,6 +124,7 @@ import {
   lockTokenPolicy,
   reconcilePolicyGrantScopes,
 } from "./token-policy";
+import { createViewExportOperations } from "./view-export";
 import { createWorkspaceLifecycle } from "./workspace-lifecycle";
 
 export class CoreError extends Error {
@@ -1611,6 +1612,13 @@ export function createCore(options: {
     planSource: timeline.planSource,
     now: options.summaryClock,
   });
+  const { loadSummarySources, ...summaryOperations } = summaries;
+  const viewExport = createViewExportOperations({
+    db,
+    requireMember,
+    loadSummarySources,
+    now: options.summaryClock,
+  });
   const relations = createRelationOperations({ db, requireMember });
   const suggestionOperations = createSuggestionOperations({
     db,
@@ -1818,7 +1826,8 @@ export function createCore(options: {
     ...planning.operations,
     ...timeline.operations,
     ...crm.operations,
-    ...summaries,
+    ...summaryOperations,
+    ...viewExport,
     ...relations.operations,
     ...suggestionOperations.operations,
     ...assistant.operations,

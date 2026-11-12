@@ -71,6 +71,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
+import { ViewExportButton } from "./view-export";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 // 相關方 (M15) is its own chunk, loaded only for ?view=stakeholders.
@@ -501,6 +502,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               </span>
               <MoreViews view={view} href={viewHref} t={t} />
             </nav>
+            {confirmed && workspace.role !== "guest" && (
+              <ViewExportButton
+                key={selected?.id ?? "workspace"}
+                workspaceId={workspace.id}
+                projectId={selected?.id}
+              />
+            )}
             <Button
               className="projects-search button-quiet"
               data-testid="open-search"

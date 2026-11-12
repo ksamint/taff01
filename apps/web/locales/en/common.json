@@ -1631,5 +1631,26 @@
     "truncated": "Showing the newest 200 changes; filter to see older ones.",
     "followTrace": "Show trace {{trace}}",
     "filtered": "Filtered by {{kind}}: {{value}}"
+  },
+  "viewExport": {
+    "button": "Export image",
+    "title": "Export image",
+    "workspaceHeading": "Workspace overview",
+    "projectHeading": "Project status",
+    "eyebrow": "Exported view",
+    "exportedBy": "Exported by {{name}}",
+    "confidential": "Internal. Exported by {{name}}.",
+    "generated": "Exported {{date}} · {{zone}}",
+    "noProjects": "This workspace has no active projects.",
+    "send": "Send",
+    "copy": "Copy image",
+    "save": "Save image",
+    "copied": "Image copied",
+    "copyFailed": "Could not copy the image",
+    "failed": "Could not create the image. Try again.",
+    "unavailable": "Image export is not available right now.",
+    "size": "{{width}} px · {{size}}",
+    "preparing": "Preparing image…",
+    "alt": "Preview of the exported image"
   }
 }

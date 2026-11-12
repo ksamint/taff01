@@ -1631,5 +1631,26 @@
     "truncated": "仅显示最近 200 条更改；筛选可查看更早的记录。",
     "followTrace": "查看追踪 {{trace}}",
     "filtered": "按{{kind}}筛选：{{value}}"
+  },
+  "viewExport": {
+    "button": "导出图片",
+    "title": "导出图片",
+    "workspaceHeading": "工作区概览",
+    "projectHeading": "项目进展",
+    "eyebrow": "导出视图",
+    "exportedBy": "由 {{name}} 导出",
+    "confidential": "内部资料。由 {{name}} 导出。",
+    "generated": "导出于 {{date}} · {{zone}}",
+    "noProjects": "此工作区暂无进行中的项目。",
+    "send": "发送",
+    "copy": "复制图片",
+    "save": "保存图片",
+    "copied": "图片已复制",
+    "copyFailed": "无法复制图片",
+    "failed": "无法生成图片，请重试。",
+    "unavailable": "暂时无法导出图片。",
+    "size": "{{width}} px · {{size}}",
+    "preparing": "正在生成图片…",
+    "alt": "导出图片预览"
   }
 }

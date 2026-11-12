@@ -79,6 +79,7 @@ import {
   registerSummaryRoutes,
 } from "./routes/summaries";
 import { registerTimelineRoutes } from "./routes/timeline";
+import { registerViewExportRoutes } from "./routes/view-export";
 
 type Core = ReturnType<typeof createCore>;
 /** Request variables set by the session middleware, shared with route modules. */
@@ -112,6 +113,11 @@ export function createApp(
   askRateLimiter?: RateLimiter,
   oauthRateLimiter?: RateLimiter,
   shareRateLimiter?: RateLimiter,
+  viewExport: {
+    exportRateLimiter?: RateLimiter;
+    renderUrl?: string;
+    renderFetch?: typeof fetch;
+  } = {},
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<AppEnv>();
@@ -985,6 +991,13 @@ export function createApp(
   });
   registerCrmRoutes(app, core);
   registerSummaryRoutes(app, core);
+  registerViewExportRoutes(
+    app,
+    core,
+    viewExport.exportRateLimiter ?? rateLimiter,
+    viewExport.renderUrl,
+    viewExport.renderFetch,
+  );
   registerRelationRoutes(app, core);
   registerMindRoutes(app, core);
   registerAssistantRoutes(app, core, askRateLimiter ?? rateLimiter);

@@ -65,3 +65,4 @@ Baseline: actors share a workspace; people are unrelated to the task owner; the 
 | summary:preview | Yes | No | No | No |
 | summary:share | Yes | No | No | No |
 | summary:revoke | Yes | No | No | No |
+| view:export | Yes | Yes | No | No |

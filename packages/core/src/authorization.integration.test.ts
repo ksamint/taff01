@@ -433,6 +433,16 @@ const routes: RequestCase[] = [
     member: "deny",
   },
   { method: "GET", path: "/api/summaries?workspaceId=:workspace" },
+  // Exported view images (ADR 0031): this app has no renderer, so a caller
+  // core authorizes reaches the 503 after the layout is built.
+  ...[
+    "/view-image?locale=en",
+    "/view-image?locale=zh-CN&projectId=:project",
+  ].map((suffix) => ({
+    method: "GET",
+    path: `/api/workspaces/:workspace${suffix}`,
+    allowedStatus: [503],
+  })),
   {
     method: "POST",
     path: "/api/summaries/preview",

@@ -148,6 +148,18 @@ describe("permissions", () => {
           workspace,
           false,
         ],
+        // Exported view images (ADR 0031): lowest reaching role is member.
+        ["admin exports a view", admin, "view:export", workspace, true],
+        ["member exports a view", person, "view:export", workspace, true],
+        ["guest cannot export a view", guest, "view:export", workspace, false],
+        ["agent cannot export a view", agent, "view:export", workspace, false],
+        [
+          "other-workspace member cannot export a view",
+          person,
+          "view:export",
+          { workspaceId: "other" },
+          false,
+        ],
         ["admin reads any summary", admin, "summary:read", theirs, true],
         [
           "admin reads an unlinked summary",

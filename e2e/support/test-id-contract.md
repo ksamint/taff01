@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (462 distinct, 2163 uses)
+## Test ids (468 distinct, 2174 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -57,7 +57,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `inbox-badge` | 2 |  | optimistic-m4.spec.ts |
-| `open-quick` | 19 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts |
+| `open-quick` | 21 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts, view-export.spec.ts |
 
 ### apps/web/app/s/[token]/not-found.tsx
 
@@ -596,7 +596,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `toast` | 24 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts |
+| `toast` | 25 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, view-export.spec.ts |
 | `toast-action` | 41 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 
 ### sidebar.tsx
@@ -765,6 +765,17 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `token-policy-switch` | 5 |  | access.spec.ts, token-grants.spec.ts |
 
+### view-export.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `view-export-copy` | 1 |  | view-export.spec.ts |
+| `view-export-open` | 2 |  | view-export.spec.ts |
+| `view-export-preview` | 2 |  | view-export.spec.ts |
+| `view-export-save` | 1 |  | view-export.spec.ts |
+| `view-export-send` | 1 |  | view-export.spec.ts |
+| `view-export-size` | 1 |  | view-export.spec.ts |
+
 ## Role and name locators
 
 `getByRole(role, { name })`. Native semantics the suites also rely on:
@@ -825,6 +836,7 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: m.crm.contacts.add` | 3 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
+| `dialog — name: title` | 1 | view-export.spec.ts |
 | `heading` | 7 | audit.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
 | `heading — name: m.agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
@@ -1247,3 +1259,5 @@ Keys read from `apps/web/locales/*/common.json` through
 | `today` | 25 | live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
+| `viewExport.copied` | 1 | view-export.spec.ts |
+| `viewExport.title` | 2 | view-export.spec.ts |
