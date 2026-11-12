@@ -24,6 +24,8 @@ const env = z
     REDIS_URL: z.url(),
     MCP_RATE_LIMIT: z.coerce.number().int().min(1).default(60),
     ASK_RATE_LIMIT: z.coerce.number().int().min(1).default(20),
+    // Internal renderer for exported view images (ADR 0031); unset disables.
+    SUMMARY_RENDER_URL: z.url().optional(),
   })
   .parse(process.env);
 const logger = createLogger();
@@ -62,6 +64,8 @@ const askRateLimiter = createRateLimiter(env.REDIS_URL, env.ASK_RATE_LIMIT);
 const oauthRateLimiter = createRateLimiter(env.REDIS_URL, 30);
 // Public share-link reads per client address and per token per minute.
 const shareRateLimiter = createRateLimiter(env.REDIS_URL, 30);
+// Exported view images per person per minute (ADR 0031).
+const exportRateLimiter = createRateLimiter(env.REDIS_URL, 10);
 const realtime = await createRealtime(core);
 const app = createApp(
   core,
@@ -73,6 +77,7 @@ const app = createApp(
   askRateLimiter,
   oauthRateLimiter,
   shareRateLimiter,
+  { exportRateLimiter, renderUrl: env.SUMMARY_RENDER_URL },
 );
 const server = serve(
   {
@@ -100,6 +105,7 @@ const shutdown = createShutdown(
     () => askRateLimiter.close(),
     () => oauthRateLimiter.close(),
     () => shareRateLimiter.close(),
+    () => exportRateLimiter.close(),
   ],
   (stage) => logger.error({ stage }, "API shutdown failed"),
 );

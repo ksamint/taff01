@@ -68,6 +68,7 @@ export const PERMISSION_ACTIONS = [
   "summary:preview",
   "summary:share",
   "summary:revoke",
+  "view:export",
 ] as const;
 export type Action = (typeof PERMISSION_ACTIONS)[number];
 export type Resource =
@@ -183,6 +184,9 @@ export function can(
   )
     return actor.kind === "person" && actor.role === "admin";
   if (action === "audience:read") return actor.kind === "person";
+  // Exported view images (ADR 0031): members and admins. Guests read through
+  // their own summaries and agents through summaries.image, never an export.
+  if (action === "view:export") return actor.kind === "person";
   if (action === "summary:read" && actor.kind === "agent")
     return !!actor.scopes?.includes("summaries:read");
   if (action === "summary:read")

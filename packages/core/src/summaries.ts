@@ -612,36 +612,19 @@ export function createSummaryOperations({
 
   // ---- Building a snapshot -------------------------------------------
 
-  async function buildSnapshot(
-    recipient: RecipientRow,
-    tag: TagRow,
+  /**
+   * Live per-project sources for a day in a zone, shared by summaries and
+   * exported view images (ADR 0031). `planActor` decides finance unless
+   * `finance` overrides it, exactly as the timeline does.
+   */
+  async function loadSummarySources(
+    planActor: Actor,
+    w: string,
+    projectList: (typeof projects.$inferSelect)[],
+    zone: string,
     day: string,
-  ) {
-    const w = recipient.workspaceId;
-    const zone = recipient.timeZone;
-    const [workspace] = await db
-      .select({ name: workspaces.name })
-      .from(workspaces)
-      .where(eq(workspaces.id, w));
-    const projectRows = await db
-      .select({ project: projects })
-      .from(projectAudienceTags)
-      .innerJoin(
-        projects,
-        and(
-          eq(projects.workspaceId, projectAudienceTags.workspaceId),
-          eq(projects.id, projectAudienceTags.projectId),
-        ),
-      )
-      .where(
-        and(
-          eq(projectAudienceTags.workspaceId, w),
-          eq(projectAudienceTags.tagId, tag.id),
-          eq(projects.archived, false),
-        ),
-      )
-      .orderBy(projects.name, projects.id)
-      .limit(101);
+    finance?: boolean,
+  ): Promise<SummarySourceProject[]> {
     const people = new Map(
       (
         await db
@@ -650,21 +633,16 @@ export function createSummaryOperations({
           .where(eq(members.workspaceId, w))
       ).map((row) => [row.id, row.name]),
     );
-    const actor: Actor = {
-      id: SYSTEM_ACTOR_ID,
-      workspaceId: w,
-      userId: null,
-      name: "Daily summary",
-      kind: "person",
-      role: "member",
-    };
     const start = digestInstantForDay(day, "00:00", zone);
     const end = digestInstantForDay(nextDay(day), "00:00", zone);
     const sources: SummarySourceProject[] = [];
-    for (const { project } of projectRows) {
-      const { input, rows } = await planSource(actor, project, zone, {
-        finance: recipient.includeFinance,
-      });
+    for (const project of projectList) {
+      const { input, rows } = await planSource(
+        planActor,
+        project,
+        zone,
+        finance === undefined ? {} : { finance },
+      );
       const blocked = new Set(
         input.tasks.filter((task) => task.blocked).map((task) => task.id),
       );
@@ -703,6 +681,55 @@ export function createSummaryOperations({
         },
       });
     }
+    return sources;
+  }
+
+  async function buildSnapshot(
+    recipient: RecipientRow,
+    tag: TagRow,
+    day: string,
+  ) {
+    const w = recipient.workspaceId;
+    const zone = recipient.timeZone;
+    const [workspace] = await db
+      .select({ name: workspaces.name })
+      .from(workspaces)
+      .where(eq(workspaces.id, w));
+    const projectRows = await db
+      .select({ project: projects })
+      .from(projectAudienceTags)
+      .innerJoin(
+        projects,
+        and(
+          eq(projects.workspaceId, projectAudienceTags.workspaceId),
+          eq(projects.id, projectAudienceTags.projectId),
+        ),
+      )
+      .where(
+        and(
+          eq(projectAudienceTags.workspaceId, w),
+          eq(projectAudienceTags.tagId, tag.id),
+          eq(projects.archived, false),
+        ),
+      )
+      .orderBy(projects.name, projects.id)
+      .limit(101);
+    const actor: Actor = {
+      id: SYSTEM_ACTOR_ID,
+      workspaceId: w,
+      userId: null,
+      name: "Daily summary",
+      kind: "person",
+      role: "member",
+    };
+    const sources = await loadSummarySources(
+      actor,
+      w,
+      projectRows.map(({ project }) => project),
+      zone,
+      day,
+      recipient.includeFinance,
+    );
     return buildDailySummary({
       localDate: day,
       timeZone: zone,
@@ -1127,5 +1154,6 @@ export function createSummaryOperations({
     readSharedSummary,
     listDueSummaryJobs,
     generateDailySummary,
+    loadSummarySources,
   };
 }

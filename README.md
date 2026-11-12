@@ -11,6 +11,10 @@ graph data and isolation scope.
 
 ## Status
 
+**Unreleased on main — exported view images.** Members and admins export the
+current project or the workspace overview as one watermarked PNG (1080 px,
+≤ 400 KB) and send, copy or save it; see [view export](docs/spec/view-export.md).
+
 **v0.2.23 (deployed) — grant decisions and audience editing.** Pending requests
 are actionable from the access matrix; administrators can edit audience tags and
 recipients after creation. Existing permissions and immutable summaries remain

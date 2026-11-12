@@ -1631,5 +1631,26 @@
     "truncated": "只顯示最近 200 條更改；篩選可查看較早的記錄。",
     "followTrace": "查看追蹤 {{trace}}",
     "filtered": "按{{kind}}篩選：{{value}}"
+  },
+  "viewExport": {
+    "button": "匯出圖片",
+    "title": "匯出圖片",
+    "workspaceHeading": "工作區概覽",
+    "projectHeading": "項目進展",
+    "eyebrow": "匯出檢視",
+    "exportedBy": "由 {{name}} 匯出",
+    "confidential": "內部資料。由 {{name}} 匯出。",
+    "generated": "匯出於 {{date}} · {{zone}}",
+    "noProjects": "此工作區暫無進行中的項目。",
+    "send": "傳送",
+    "copy": "複製圖片",
+    "save": "儲存圖片",
+    "copied": "圖片已複製",
+    "copyFailed": "無法複製圖片",
+    "failed": "無法產生圖片，請重試。",
+    "unavailable": "暫時無法匯出圖片。",
+    "size": "{{width}} px · {{size}}",
+    "preparing": "正在產生圖片…",
+    "alt": "匯出圖片預覽"
   }
 }

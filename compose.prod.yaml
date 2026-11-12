@@ -75,6 +75,8 @@ services:
       EMAIL_LOG_PATH: ${EMAIL_LOG_PATH:-/app/.taff-mail/messages.jsonl}
       API_PORT: "3001"
       API_HOST: 0.0.0.0
+      # Exported view images (ADR 0031); internal only, never a Caddy route.
+      SUMMARY_RENDER_URL: ${SUMMARY_RENDER_URL:-http://render:3002}
     depends_on:
       migrate: { condition: service_completed_successfully }
       valkey: { condition: service_healthy }

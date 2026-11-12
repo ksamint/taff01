@@ -136,6 +136,11 @@ it("keeps Taff isolated while using the private PostgreSQL server and shared TLS
     "https://taff.apuch.cn",
   );
   expect(config.services.api.environment).toMatchObject(email);
+  // Exported view images reach the internal renderer exactly as the worker does.
+  expect(config.services.api.environment.SUMMARY_RENDER_URL).toBeTruthy();
+  expect(config.services.api.environment.SUMMARY_RENDER_URL).toBe(
+    config.services.worker.environment.SUMMARY_RENDER_URL,
+  );
   for (const service of ["migrate", "worker", "web"])
     for (const key of Object.keys(email))
       expect(config.services[service].environment[key]).toBeUndefined();

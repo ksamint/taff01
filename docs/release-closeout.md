@@ -65,4 +65,4 @@ source as a process gap in the milestone and fix the capture step below.
 
 Checks that need a person (for example a Claude.ai sign-in) are listed as
 pending with exact steps when the owner accepts that; they never hold the lock
-and run later without it.
+and run later without it. The steps live in [owner checks](owner-checks.md).

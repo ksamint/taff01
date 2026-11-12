@@ -1,0 +1,239 @@
+import { randomUUID } from "node:crypto";
+import { connectDatabase, members } from "@taff/db";
+import { summaryImageLayoutInputSchema } from "@taff/schemas";
+import { sql } from "drizzle-orm";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { migrateDatabase } from "../../db/src/migrate";
+import { type Core, createCore, type Principal, userPrincipal } from "./index";
+
+/*
+ * ADR 0031 exported view images against PostgreSQL. Following AGENTS.md, the
+ * one operation that issues an artifact (the export) runs with the lowest
+ * role that can reach it (member), with every role that cannot, and again
+ * after that member is demoted and restored.
+ */
+const url = process.env.TEST_DATABASE_URL;
+if (!url)
+  console.warn("SKIP view export PostgreSQL tests: TEST_DATABASE_URL required");
+if (url && !new URL(url).pathname.endsWith("_test"))
+  throw new Error("View export tests require an isolated _test database");
+
+describe.skipIf(!url)("exported view images (ADR 0031)", () => {
+  let core: Core;
+  let connection: ReturnType<typeof connectDatabase>;
+  let alice: Principal, bob: Principal, gina: Principal, outsider: Principal;
+  let agent: Principal;
+  let w: string, otherW: string, owner: string, bobMember: string;
+  let active: { id: string }, archived: { id: string }, foreign: { id: string };
+  const instant = new Date("2026-11-12T09:30:00Z");
+
+  beforeAll(async () => {
+    await migrateDatabase(url!);
+    connection = connectDatabase(url!);
+    core = createCore({
+      databaseUrl: url!,
+      authUrl: "http://localhost:3000",
+      authSecret: "view-export-test-secret-longer-than-32",
+      tokenPepper: "view-export-test-pepper",
+      summaryClock: () => instant,
+    });
+    const signup = (name: string) =>
+      core.auth.api.signUpEmail({
+        body: {
+          name,
+          email: `${randomUUID()}@test.local`,
+          password: `test-${randomUUID()}`,
+        },
+      });
+    const a = await signup("Alex Admin");
+    alice = userPrincipal(a.user.id);
+    const me = await core.getMe(a.user.id);
+    w = me.workspaces[0].id;
+    owner = me.workspaces[0].memberId;
+    const b = await signup("Bob Member");
+    bob = userPrincipal(b.user.id);
+    await core.updateProfile(b.user.id, { locale: "en", tz: "Asia/Shanghai" });
+    const g = await signup("Gina Guest");
+    gina = userPrincipal(g.user.id);
+    const o = await signup("Oscar Outsider");
+    outsider = userPrincipal(o.user.id);
+    otherW = (await core.getMe(o.user.id)).workspaces[0].id;
+    let agentMember = "";
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select set_config('taff.actor_id',${a.user.id},true)`,
+      );
+      const [bm] = await tx
+        .insert(members)
+        .values([
+          {
+            workspaceId: w,
+            userId: b.user.id,
+            name: "Bob Member",
+            kind: "person",
+          },
+          {
+            workspaceId: w,
+            userId: g.user.id,
+            name: "Gina Guest",
+            kind: "person",
+            role: "guest",
+          },
+        ])
+        .returning();
+      bobMember = bm.id;
+      const [ag] = await tx
+        .insert(members)
+        .values({ workspaceId: w, name: "Export Agent", kind: "agent" })
+        .returning();
+      agentMember = ag.id;
+    });
+    agent = (await core.authenticateAgentToken(
+      (
+        await core.createAgentToken(alice, {
+          workspaceId: w,
+          memberId: agentMember,
+          name: "export agent",
+          scopes: ["tasks:read", "tasks:write", "summaries:read"],
+        })
+      ).token,
+    ))!;
+    active = await core.createProject(alice, w, {
+      name: "Harbour fit-out",
+      contractAmount: "1000.00",
+      currency: "CNY",
+      receivedAmount: "250.00",
+    });
+    await core.createTask(alice, {
+      workspaceId: w,
+      ownerId: owner,
+      workerId: null,
+      title: "Order the counter stone",
+      projectId: active.id,
+      dueAt: "2026-11-10T04:00:00Z",
+    });
+    const old = await core.createProject(alice, w, { name: "Closed kiosk" });
+    archived = await core.updateProject(alice, old.id, {
+      version: old.version,
+      archived: true,
+    });
+    foreign = await core.createProject(outsider, otherW, {
+      name: "Elsewhere",
+    });
+  }, 60000);
+  afterAll(async () => {
+    if (core) await core.close();
+    if (connection) await connection.close();
+  });
+
+  it("lets a member export the workspace overview, bound to them and the data", async () => {
+    const result = await core.exportViewImageInput(bob, w, { locale: "en" });
+    const { fileName, ...input } = result;
+    // Exactly the renderer's contract (image-2), so taff-render draws it.
+    expect(summaryImageLayoutInputSchema.parse(input)).toEqual(input);
+    expect(input.layout.header).toMatchObject({
+      title: "Workspace overview",
+      recipient: "Exported by Bob Member",
+    });
+    expect(input.layout.header.audience).toBe("Exported view");
+    expect(input.layout.footer.confidential).toBe(
+      "Internal. Exported by Bob Member.",
+    );
+    // The exporter's zone: 17:30 in Shanghai on the 12th.
+    expect(input.layout.footer.generated).toContain("Asia/Shanghai");
+    expect(input.watermark.text).toMatch(
+      /^Bob Member · .+ · 2026-11-12 · export$/,
+    );
+    expect(input.watermark.summaryId).toBeNull();
+    expect(input.layout.footer.hashFull).toBe(input.contentHash);
+    expect(input.watermark.contentHash).toBe(input.contentHash);
+    expect(fileName).toBe(
+      `taff-workspace-2026-11-12-${input.contentHash.slice(0, 8)}.png`,
+    );
+    const names = input.layout.projects.map((project) => project.name);
+    expect(names).toContain("Harbour fit-out");
+    expect(names).not.toContain("Closed kiosk");
+    expect(names).not.toContain("Elsewhere");
+    const harbour = input.layout.projects.find(
+      (project) => project.projectId === active.id,
+    )!;
+    // Members read finance (ADR 0021), so the bar is there.
+    expect(harbour.finance?.label).toContain("250");
+    expect(
+      harbour.sections.find((section) => section.key === "overdue")?.items,
+    ).toEqual([expect.objectContaining({ title: "Order the counter stone" })]);
+  });
+
+  it("exports one project, including a named archived one, and hides other workspaces", async () => {
+    const one = await core.exportViewImageInput(alice, w, {
+      projectId: active.id,
+      locale: "zh-CN",
+    });
+    expect(one.layout.projects.map((project) => project.projectId)).toEqual([
+      active.id,
+    ]);
+    expect(one.layout.header.title).toBe("项目进展");
+    expect(one.layout.header.recipient).toBe("由 Alex Admin 导出");
+    expect(one.fileName).toMatch(/^taff-project-2026-11-12-[a-f0-9]{8}\.png$/);
+    const closed = await core.exportViewImageInput(alice, w, {
+      projectId: archived.id,
+      locale: "zh-HK",
+    });
+    expect(closed.layout.projects[0].name).toBe("Closed kiosk");
+    expect(closed.layout.header.title).toBe("項目進展");
+    await expect(
+      core.exportViewImageInput(alice, w, {
+        projectId: foreign.id,
+        locale: "en",
+      }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await expect(
+      core.exportViewImageInput(alice, w, {
+        projectId: randomUUID(),
+        locale: "en",
+      }),
+    ).rejects.toMatchObject({ code: "not_found" });
+  });
+
+  it("hashes the exact data, so a change in the data changes the hash", async () => {
+    const before = await core.exportViewImageInput(bob, w, { locale: "en" });
+    const again = await core.exportViewImageInput(bob, w, { locale: "en" });
+    expect(again.contentHash).toBe(before.contentHash);
+    await core.createTask(alice, {
+      workspaceId: w,
+      ownerId: owner,
+      workerId: null,
+      title: "Book the electrician",
+      projectId: active.id,
+    });
+    const after = await core.exportViewImageInput(bob, w, { locale: "en" });
+    expect(after.contentHash).not.toBe(before.contentHash);
+    expect(after.contentHash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("refuses guests, agents, outsiders and invalid input", async () => {
+    for (const principal of [gina, agent, outsider])
+      await expect(
+        core.exportViewImageInput(principal, w, { locale: "en" }),
+      ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.exportViewImageInput(bob, "not-an-id", { locale: "en" }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    await expect(
+      core.exportViewImageInput(bob, w, {
+        locale: "fr",
+      } as unknown as { locale: "en" }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+  });
+
+  it("stops a demoted member and allows them again once restored", async () => {
+    await core.updateMemberRole(alice, w, bobMember, { role: "guest" });
+    await expect(
+      core.exportViewImageInput(bob, w, { locale: "en" }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await core.updateMemberRole(alice, w, bobMember, { role: "member" });
+    await expect(
+      core.exportViewImageInput(bob, w, { locale: "en" }),
+    ).resolves.toMatchObject({ contentHash: expect.any(String) });
+  });
+});

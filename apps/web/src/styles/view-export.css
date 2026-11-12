@@ -1,0 +1,73 @@
+/* Exported view images (ADR 0031): icon on phone, icon and label on desktop. */
+.view-export-open.button {
+  width: 44px;
+  height: 44px;
+  margin: -2px;
+  padding: 0;
+  color: var(--text-muted);
+}
+.view-export-open.button:hover:not(:disabled) {
+  background: var(--bg-container-low);
+  color: var(--text);
+}
+.view-export-open-label {
+  display: none;
+}
+.view-export-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+.view-export-status {
+  margin: 0;
+  color: var(--text-muted);
+}
+.view-export-frame {
+  max-height: min(56dvh, 560px);
+  overflow-y: auto;
+  border: 1px solid var(--border-line);
+  border-radius: var(--radius-control);
+  background: var(--bg-container-low);
+}
+.view-export-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.view-export-size {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.view-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--space-sm);
+}
+.view-export-actions .button {
+  min-height: 44px;
+}
+@media (min-width: 1024px) {
+  .view-export-open.button {
+    width: auto;
+    height: 32px;
+    margin: 0;
+    padding: 0 10px;
+    gap: 6px;
+  }
+  .view-export-open.button svg {
+    width: 16px;
+    height: 16px;
+  }
+  .view-export-open-label {
+    display: inline;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 639px) {
+  .view-export-actions .button {
+    flex: 1 1 0;
+  }
+}
