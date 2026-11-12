@@ -38,6 +38,13 @@ reads use the same current membership checks as other administration operations.
 - AM-1.5 When an administrator explains a token granted from another workspace,
   the system shall resolve the target grant member and its current effective
   authority. A revoked grant shall have no active scopes.
+- AM-1.7 The workspace matrix shall display pending capability requests in a
+  localized Pending requests tab with agent profile links, capability, reason,
+  task or workspace scope, and pending status, or an explicit empty state.
+  Confirmed administrators with the agent's current `canDecideGrants` flag may
+  use the existing expiring allow and deny actions. The matrix shall refresh
+  after a decision; resolved requests shall disappear. Permanent permission
+  changes and resolved-request revocation remain in the agent profile.
 
 ### System matrix (AM-2)
 
@@ -83,6 +90,7 @@ reads use the same current membership checks as other administration operations.
 | Requirement | Evidence |
 | --- | --- |
 | AM-1, AM-2 | packages/core/src/access-matrix.integration.test.ts |
+| AM-1.7 | e2e/access.spec.ts "workspace admin resolves pending capability requests" in en, zh-CN and zh-HK |
 | Human REST boundaries | apps/api/src/app.test.ts; packages/core/src/authorization.integration.test.ts |
 | AM-3.1–2 | packages/core/src/permissions.test.ts |
 | AM-3.3 | scripts/permissions-matrix.test.ts; lint --check command |

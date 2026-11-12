@@ -5,6 +5,7 @@ import {
   agentTokenWorkspaces,
   connectDatabase,
   grants,
+  inboxItems,
   members,
   oauthClients,
   user,
@@ -191,6 +192,9 @@ describe.skipIf(!url)("access matrix", () => {
           await tx.delete(agentTokens).where(inArray(agentTokens.id, tokenIds));
         if (ownedWorkspaces.length) {
           await tx
+            .delete(inboxItems)
+            .where(inArray(inboxItems.workspaceId, ownedWorkspaces));
+          await tx
             .delete(grants)
             .where(inArray(grants.workspaceId, ownedWorkspaces));
           await tx
@@ -261,10 +265,21 @@ describe.skipIf(!url)("access matrix", () => {
     );
   });
   it("workspace reads deny members, guests, agents and outsiders, and current admin authority is required after demotion", async () => {
+    const pending = await core!.requestGrant(owner, agentId, {
+      capability: "web.search",
+      reason: "Matrix decision authority",
+    });
     for (const p of [member, guest, agent, outsider])
-      await expect(core!.getAccessMatrix(p, org)).rejects.toMatchObject({
-        status: 403,
-      });
+      for (const operation of [
+        () => core!.getAccessMatrix(p, org),
+        () =>
+          core!.decideGrant(p, pending.id, {
+            decision: "allow",
+            expiresAt: new Date(Date.now() + 3600000).toISOString(),
+          }),
+        () => core!.decideGrant(p, pending.id, { decision: "deny" }),
+      ])
+        await expect(operation()).rejects.toMatchObject({ status: 403 });
     const [person] = await connection!.db
       .select()
       .from(members)
@@ -273,6 +288,20 @@ describe.skipIf(!url)("access matrix", () => {
     await expect(core!.getAccessMatrix(owner, org)).rejects.toMatchObject({
       status: 403,
     });
+    for (const decision of ["allow", "deny"] as const)
+      await expect(
+        core!.decideGrant(owner, pending.id, {
+          decision,
+          expiresAt: new Date(Date.now() + 3600000).toISOString(),
+        }),
+      ).rejects.toMatchObject({ status: 403 });
+    expect(
+      (await core!.getAccessMatrix(system, org)).pendingGrants,
+    ).toContainEqual(expect.objectContaining({ id: pending.id }));
+    await core!.decideGrant(system, pending.id, { decision: "deny" });
+    expect(
+      (await core!.getAccessMatrix(system, org)).pendingGrants,
+    ).not.toContainEqual(expect.objectContaining({ id: pending.id }));
   });
   it("cross-workspace token explanation uses the target member and loses active scopes after revoke", async () => {
     const explanation = await core!.explainIntegrationPermission(system, {

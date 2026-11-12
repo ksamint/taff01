@@ -24,11 +24,19 @@ import {
 import { useChangeMemberRole } from "../lib/mutations/organizations";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
+import { GrantActions } from "./grant-actions";
 import { TokenPolicyControl } from "./token-policy-control";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
 
-const tabs = ["people", "agents", "tokens", "apps", "permissions"] as const;
+const tabs = [
+  "people",
+  "agents",
+  "tokens",
+  "apps",
+  "permissions",
+  "pendingGrants",
+] as const;
 function MatrixTable({
   children,
   label,
@@ -130,6 +138,7 @@ export function AccessMatrix() {
               {tab === "tokens" && <TokenGrants data={matrix.data} />}
               {tab === "apps" && <Apps data={matrix.data} />}
               {tab === "permissions" && <Permissions data={matrix.data} />}
+              {tab === "pendingGrants" && <PendingGrants data={matrix.data} />}
             </section>
           )}
         </>
@@ -152,6 +161,60 @@ export function AccessMatrix() {
   );
 }
 const ROLES = ["admin", "member", "guest", "agent"] as const;
+
+function PendingGrants({ data }: { data: Matrix }) {
+  const { t } = useTranslation();
+  const { confirmed } = useWorkspace();
+  if (!data.pendingGrants.length)
+    return <p role="status">{t("access.noPendingGrants")}</p>;
+  return (
+    <MatrixTable label={t("access.pendingGrants")}>
+      <thead>
+        <tr>
+          <th scope="col">{t("access.agent")}</th>
+          <th scope="col">{t("access.request")}</th>
+          <th scope="col">{t("access.actions")}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.pendingGrants.map((grant) => {
+          const agent = data.agents.find(
+            (item) => item.member.id === grant.agentId,
+          );
+          return (
+            <tr
+              key={grant.id}
+              data-testid="access-pending-grant"
+              data-grant-id={grant.id}
+            >
+              <th scope="row">
+                <Link href={`/agents/${grant.agentId}`}>
+                  {agent?.member.name ?? grant.agentId}
+                </Link>
+              </th>
+              <td>
+                <p>{t(`agentProfile.capability.${grant.capability}`)}</p>
+                <p className="preserve-text">{grant.reason}</p>
+                <p>
+                  {grant.taskId
+                    ? t("grants.taskScope", { task: grant.taskId })
+                    : t("grants.workspaceScope")}
+                </p>
+                <p>{t("grants.pending")}</p>
+              </td>
+              <td>
+                <GrantActions
+                  grant={grant}
+                  canDecide={confirmed && !!agent?.canDecideGrants}
+                />
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </MatrixTable>
+  );
+}
 
 /**
  * The baseline can() rows the matrix already returns (AM-3.1), grouped by

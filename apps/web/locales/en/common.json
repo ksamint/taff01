@@ -1575,7 +1575,10 @@
       "mind": "Mind map",
       "audience": "Audiences",
       "summary": "Summaries"
-    }
+    },
+    "pendingGrants": "Pending requests",
+    "noPendingGrants": "No pending capability requests.",
+    "request": "Request"
   },
   "projectFinance": {
     "title": "Finance",

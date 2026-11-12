@@ -1575,7 +1575,10 @@
       "mind": "心智圖",
       "audience": "受眾",
       "summary": "總結"
-    }
+    },
+    "pendingGrants": "待處理請求",
+    "noPendingGrants": "沒有待處理的能力授權請求。",
+    "request": "請求"
   },
   "projectFinance": {
     "title": "財務",

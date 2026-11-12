@@ -4,17 +4,127 @@ import { setLocalTestSystemAdmin } from "../packages/core/src/testing/system-adm
 import {
   accessMatrixSchema,
   agentProfileSchema,
+  grantSchema,
   issuedAgentTokenSchema,
   issuedWorkspaceInviteSchema,
   memberListSchema,
   meSchema,
   oauthClientSchema,
   oauthRedirectSchema,
+  taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
 import { verifyTestEmail } from "./support/email-verification";
 import { selectLocale } from "./support/preferences";
+
+test("workspace admin resolves pending capability requests", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const m = messages[locale];
+  const me = await freshAccount(page, locale);
+  const workspace = me.workspaces[0];
+  const agent = memberListSchema
+    .parse(
+      await (
+        await page.request.get(`/api/members?workspaceId=${workspace.id}`)
+      ).json(),
+    )
+    .find((member) => member.kind === "agent")!;
+  await page.goto("/orgs/access");
+  await page
+    .getByRole("tab", { name: m.access.pendingGrants, exact: true })
+    .click();
+  await expect(
+    page
+      .getByRole("status", { name: "" })
+      .filter({ hasText: m.access.noPendingGrants }),
+  ).toBeVisible();
+  for (const decision of ["allow", "deny"] as const) {
+    const reason = `Matrix pending ${decision} ${crypto.randomUUID()}`;
+    const task =
+      decision === "deny"
+        ? taskSchema.parse(
+            await (
+              await page.request.post("/api/tasks", {
+                data: {
+                  workspaceId: workspace.id,
+                  title: reason,
+                  ownerId: workspace.memberId,
+                  workerId: agent.id,
+                },
+              })
+            ).json(),
+          )
+        : null;
+    const response = await page.request.post(`/api/agents/${agent.id}/grants`, {
+      data: {
+        capability: "web.search",
+        reason,
+        ...(task ? { taskId: task.id } : {}),
+      },
+    });
+    expect(response.status()).toBe(201);
+    const grant = grantSchema.parse(await response.json());
+    await page.reload();
+    await page
+      .getByRole("tab", { name: m.access.pendingGrants, exact: true })
+      .click();
+    const row = page.locator(`[data-grant-id="${grant.id}"]`);
+    await expect(row).toContainText(reason);
+    await expect(row).toContainText(
+      task
+        ? m.grants.taskScope.replace("{{task}}", task.id)
+        : m.grants.workspaceScope,
+    );
+    await expect(
+      row.getByRole("link", { name: agent.name, exact: true }),
+    ).toHaveAttribute("href", `/agents/${agent.id}`);
+    await expect(row.getByTestId("grant-always")).toHaveCount(0);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    if (decision === "allow")
+      await page.screenshot({
+        path: info.outputPath(`pending-grants-${locale}.png`),
+        fullPage: true,
+      });
+    if (decision === "allow") await row.locator("select").selectOption("1");
+    await row.getByTestId(`grant-${decision}`).click();
+    await expect(row).toHaveCount(0);
+    await expect(
+      page.getByText(m.access.noPendingGrants, { exact: true }),
+    ).toBeVisible();
+    const profile = agentProfileSchema.parse(
+      await (await page.request.get(`/api/agents/${agent.id}`)).json(),
+    );
+    const decided = profile.grants.find((item) => item.id === grant.id)!;
+    expect(decided.status).toBe(decision === "allow" ? "allowed" : "denied");
+    if (decision === "allow") {
+      expect(Date.parse(decided.expiresAt!) - Date.now()).toBeGreaterThan(
+        3_500_000,
+      );
+      expect(Date.parse(decided.expiresAt!) - Date.now()).toBeLessThanOrEqual(
+        3_600_000,
+      );
+      expect(
+        (
+          await page.request.post(`/api/grants/${grant.id}/decision`, {
+            data: { decision: "revoke" },
+          })
+        ).ok(),
+      ).toBe(true);
+    }
+  }
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
 
 test("workspace admin edits a capability with Undo and sees the same decision in the agent profile", async ({
   page,

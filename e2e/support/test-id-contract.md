@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (460 distinct, 2160 uses)
+## Test ids (462 distinct, 2162 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -41,6 +41,7 @@ several do). “Also rendered by” lists the other files.
 | `agent-save` | 6 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `agent-settings-details` | 6 |  | agent-creation.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `agent-supervisor` | 4 |  | agent-creation.spec.ts, agent-review.spec.ts |
+| `grant-*` | 1 | crm/contact-links.tsx, crm/contact-role-row.tsx, grant-actions.tsx, mcp-view.tsx, relations-view.tsx, summaries-admin.tsx, token-policy-control.tsx | access.spec.ts |
 | `grant-card` | 6 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `permission-web.search-*` | 8 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx | access.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `permission-web.search-ask` | 4 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
@@ -263,6 +264,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `grant-allow` | 7 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
+| `grant-always` | 1 |  | access.spec.ts |
 | `grant-revoke` | 9 | mcp-view.tsx | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, token-grants.spec.ts |
 
 ### inbox-view.tsx
@@ -836,7 +838,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
 | `link — name: /M7 reviewer/` | 2 | delivery-visual.spec.ts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
-| `link — name: agent.name` | 1 | access.spec.ts |
+| `link — name: agent.name` | 2 | access.spec.ts |
 | `link — name: childTitle` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `link — name: controlled.title` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `link — name: dragged.title` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -863,9 +865,11 @@ several do). “Also rendered by” lists the other files.
 | `rowheader — name: client.client_name` | 1 | access.spec.ts |
 | `rowheader — name: token.name` | 2 | access.spec.ts |
 | `status` | 3 | audience-editing.spec.ts, completion.spec.ts, sms-auth.spec.ts |
+| `status — name: ""` | 1 | access.spec.ts |
 | `switch` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `tab — name: m.access.agents` | 1 | access.spec.ts |
 | `tab — name: m.access.apps` | 1 | access.spec.ts |
+| `tab — name: m.access.pendingGrants` | 2 | access.spec.ts |
 | `tab — name: m.access.people` | 2 | access.spec.ts |
 | `tab — name: m.access.permissions` | 2 | access.spec.ts, delivery-visual.spec.ts |
 | `tab — name: m.access.tokens` | 1 | access.spec.ts |
@@ -982,6 +986,7 @@ read (`data-event-id`, `data-date`).
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
 | `[data-agent-id="*"]` | 1 | access.spec.ts |
+| `[data-grant-id="*"]` | 1 | access.spec.ts |
 | `[data-intent="load"]` | 1 | completion.spec.ts |
 | `[data-role="admin"]` | 1 | access.spec.ts |
 | `[data-role="member"]` | 2 | access.spec.ts |
@@ -1056,17 +1061,19 @@ Keys read from `apps/web/locales/*/common.json` through
 | Key | Uses | Used in |
 | --- | ---: | --- |
 | `access.*` | 1 | delivery-visual.spec.ts |
-| `access.agents` | 8 | access.spec.ts |
-| `access.apps` | 4 | access.spec.ts |
-| `access.confirm` | 4 | access.spec.ts |
-| `access.denied` | 4 | access.spec.ts |
-| `access.explain` | 5 | access.spec.ts, delivery-visual.spec.ts |
-| `access.group.finance` | 4 | access.spec.ts |
-| `access.people` | 8 | access.spec.ts |
-| `access.permissions` | 5 | access.spec.ts, delivery-visual.spec.ts |
-| `access.permissionsBaseline` | 4 | access.spec.ts |
-| `access.selfDemotionHint` | 4 | access.spec.ts |
-| `access.tokens` | 4 | access.spec.ts |
+| `access.agents` | 10 | access.spec.ts |
+| `access.apps` | 5 | access.spec.ts |
+| `access.confirm` | 5 | access.spec.ts |
+| `access.denied` | 5 | access.spec.ts |
+| `access.explain` | 6 | access.spec.ts, delivery-visual.spec.ts |
+| `access.group.finance` | 5 | access.spec.ts |
+| `access.noPendingGrants` | 10 | access.spec.ts |
+| `access.pendingGrants` | 10 | access.spec.ts |
+| `access.people` | 10 | access.spec.ts |
+| `access.permissions` | 6 | access.spec.ts, delivery-visual.spec.ts |
+| `access.permissionsBaseline` | 5 | access.spec.ts |
+| `access.selfDemotionHint` | 5 | access.spec.ts |
+| `access.tokens` | 5 | access.spec.ts |
 | `accountIdentifier` | 5 | sms-auth.spec.ts, username-auth.spec.ts |
 | `actions.undo` | 18 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
@@ -1122,27 +1129,29 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.auth` | 6 | sms-auth.spec.ts, username-auth.spec.ts |
 | `errors.conflict` | 12 | audience-editing.spec.ts, calendar.spec.ts, planning.spec.ts |
 | `errors.email_verification_required` | 5 | planning.spec.ts |
-| `errors.forbidden` | 15 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
+| `errors.forbidden` | 16 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
 | `errors.internal_error` | 2 | calendar.spec.ts |
 | `errors.invalid_input` | 15 | agent-creation.spec.ts, audience-editing.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
+| `grants.taskScope` | 5 | access.spec.ts |
+| `grants.workspaceScope` | 5 | access.spec.ts |
 | `home.headline1` | 7 | home-layout.spec.ts, landing.spec.ts, ui-v2.spec.ts |
 | `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |
 | `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
 | `loading` | 4 | completion.spec.ts, i18n.spec.ts, ui-v2.spec.ts |
-| `mcp.cancel` | 6 | access.spec.ts, token-grants.spec.ts |
-| `mcp.confirmRevoke` | 4 | access.spec.ts |
-| `mcp.grantActive` | 10 | access.spec.ts, token-grants.spec.ts |
-| `mcp.policy.manual` | 7 | access.spec.ts, token-grants.spec.ts |
+| `mcp.cancel` | 7 | access.spec.ts, token-grants.spec.ts |
+| `mcp.confirmRevoke` | 5 | access.spec.ts |
+| `mcp.grantActive` | 12 | access.spec.ts, token-grants.spec.ts |
+| `mcp.policy.manual` | 8 | access.spec.ts, token-grants.spec.ts |
 | `mcp.policy.policy` | 1 | token-grants.spec.ts |
-| `mcp.policy.restore` | 4 | access.spec.ts |
-| `mcp.revokeAccess` | 4 | access.spec.ts |
-| `mcp.revoked` | 15 | access.spec.ts, token-grants.spec.ts |
-| `mcp.revokeGrant` | 4 | access.spec.ts |
-| `mcp.saveGrant` | 4 | access.spec.ts |
-| `mcp.undo` | 8 | access.spec.ts |
-| `mcp.workspaceGrants` | 4 | access.spec.ts |
+| `mcp.policy.restore` | 5 | access.spec.ts |
+| `mcp.revokeAccess` | 5 | access.spec.ts |
+| `mcp.revoked` | 18 | access.spec.ts, token-grants.spec.ts |
+| `mcp.revokeGrant` | 5 | access.spec.ts |
+| `mcp.saveGrant` | 5 | access.spec.ts |
+| `mcp.undo` | 10 | access.spec.ts |
+| `mcp.workspaceGrants` | 5 | access.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |
 | `me.digestSummary` | 1 | me.spec.ts |
 | `me.languageCN` | 1 | me.spec.ts |
@@ -1182,9 +1191,9 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
 | `organization.emailDelivery.logged` | 5 | planning.spec.ts |
 | `organization.invite` | 25 | planning.spec.ts |
-| `organization.roleFor` | 8 | access.spec.ts |
+| `organization.roleFor` | 10 | access.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
-| `planning.close` | 21 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
+| `planning.close` | 22 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
 | `projectFinance.invalidAmount` | 1 | project-finance.spec.ts |
 | `projectFinance.noContract` | 1 | project-finance.spec.ts |
 | `projectFinance.positiveAmount` | 1 | project-finance.spec.ts |

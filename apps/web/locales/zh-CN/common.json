@@ -1575,7 +1575,10 @@
       "mind": "心智图",
       "audience": "受众",
       "summary": "总结"
-    }
+    },
+    "pendingGrants": "待处理请求",
+    "noPendingGrants": "没有待处理的能力授权请求。",
+    "request": "请求"
   },
   "projectFinance": {
     "title": "财务",
