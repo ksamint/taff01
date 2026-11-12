@@ -10,6 +10,7 @@ import {
 import {
   dailySummaryListSchema,
   dailySummarySchema,
+  dailySummarySnapshotSchema,
   sharedSummarySchema,
   summaryRenderSchema,
   summaryShareSchema,
@@ -18,6 +19,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
 import { type Core, createCore, type Principal, userPrincipal } from "./index";
+import { summaryContentHash, summaryWatermark } from "./summary-model";
 
 /*
  * ADR 0027 shareholder summaries against PostgreSQL. The access matrix
@@ -32,6 +34,8 @@ if (url && !new URL(url).pathname.endsWith("_test"))
   throw new Error("Summary tests require an isolated _test database");
 
 const DAY = 86_400_000;
+const PNG =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lXcAAAAASUVORK5CYII=";
 describe.skipIf(!url)("shareholder daily summaries (ADR 0027)", () => {
   let core: Core;
   let connection: ReturnType<typeof connectDatabase>;
@@ -654,8 +658,7 @@ describe.skipIf(!url)("shareholder daily summaries (ADR 0027)", () => {
         rendererVersion: "test-v2",
       }),
     ).toEqual(text);
-    const data =
-      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lXcAAAAASUVORK5CYII=";
+    const data = PNG;
     const png = await core.storeSummaryRender({
       summaryId,
       format: "png",
@@ -692,11 +695,6 @@ describe.skipIf(!url)("shareholder daily summaries (ADR 0027)", () => {
       () => core.getSharedSummaryRender("unknown", "txt"),
       notFound,
     );
-    expect(
-      (await core.listMissingSummaryRenders()).filter(
-        (job) => job.summaryId === summaryId,
-      ),
-    ).toEqual([]);
     await core.recordSummaryRenderFailure(summaryId, "png");
     const [failure] = await connection.db
       .select()
@@ -733,27 +731,6 @@ describe.skipIf(!url)("shareholder daily summaries (ADR 0027)", () => {
       },
     ] as const)
       await expect(core.storeSummaryRender(input)).rejects.toThrow();
-    expect(
-      (await core.listMissingSummaryRenders(undefined, ["txt"])).filter(
-        (job) => job.summaryId === summaryId,
-      ),
-    ).toEqual([{ summaryId, format: "txt" }]);
-    await core.recordSummaryRenderFailure(summaryId, "png");
-    expect(
-      (await core.listMissingSummaryRenders()).filter(
-        (job) => job.summaryId === summaryId,
-      ),
-    ).toEqual([{ summaryId, format: "txt" }]);
-    expect(
-      (
-        await core.listMissingSummaryRenders(
-          new Date(Date.now() + 25 * 3600000).toISOString(),
-        )
-      ).filter((job) => job.summaryId === summaryId),
-    ).toEqual([
-      { summaryId, format: "txt" },
-      { summaryId, format: "png" },
-    ]);
     if (agent.kind !== "agent") throw new Error("agent fixture required");
     const issued = await core.createAgentToken(alice, {
       workspaceId: w,
@@ -787,5 +764,86 @@ describe.skipIf(!url)("shareholder daily summaries (ADR 0027)", () => {
       scopes: ["tasks:read"],
     });
     await refused(() => core.getDailySummary(reader, summaryId));
+  });
+  it("scans missing render formats and retries failures in an isolated age window", async () => {
+    const { summaryId: sourceId } = await setup("Render scan recipient");
+    const [source] = await connection.db
+      .select()
+      .from(dailySummaries)
+      .where(eq(dailySummaries.id, sourceId));
+    const [oldest] = await connection.db
+      .select({ createdAt: dailySummaries.createdAt })
+      .from(dailySummaries)
+      .orderBy(dailySummaries.createdAt)
+      .limit(1);
+    // A separate seven-day window keeps prior runs outside the 500-job cap.
+    const now = new Date(oldest.createdAt.getTime() - 8 * DAY);
+    const summaryId = randomUUID();
+    const snapshot = {
+      ...dailySummarySnapshotSchema.parse(source.snapshot),
+      localDate: now.toISOString().slice(0, 10),
+    };
+    const contentHash = summaryContentHash(snapshot);
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(sql`select set_config('taff.actor_id',${aliceId},true)`);
+      await tx.insert(dailySummaries).values({
+        ...source,
+        id: summaryId,
+        localDate: snapshot.localDate,
+        snapshot,
+        contentHash,
+        watermark: summaryWatermark(snapshot, summaryId, contentHash),
+        createdAt: now,
+      });
+    });
+    expect(await core.listMissingSummaryRenders(now.toISOString())).toEqual([
+      { summaryId, format: "txt" },
+      { summaryId, format: "png" },
+    ]);
+    expect(
+      await core.listMissingSummaryRenders(now.toISOString(), ["txt"]),
+    ).toEqual([{ summaryId, format: "txt" }]);
+    expect(
+      await core.listMissingSummaryRenders(
+        new Date(now.getTime() + 7 * DAY + 1).toISOString(),
+      ),
+    ).toEqual([]);
+    await connection.db.insert(activity).values({
+      actorId: "system:summary-render",
+      workspaceId: w,
+      action: "summary.render_failed",
+      resourceId: summaryId,
+      details: { format: "png" },
+      createdAt: now,
+    });
+    expect(await core.listMissingSummaryRenders(now.toISOString())).toEqual([
+      { summaryId, format: "txt" },
+    ]);
+    expect(
+      await core.listMissingSummaryRenders(
+        new Date(now.getTime() + 25 * 3600000).toISOString(),
+      ),
+    ).toEqual([
+      { summaryId, format: "txt" },
+      { summaryId, format: "png" },
+    ]);
+    await core.storeSummaryRender({
+      summaryId,
+      format: "txt",
+      body: "Rendered",
+      rendererVersion: "test",
+    });
+    expect(await core.listMissingSummaryRenders(now.toISOString())).toEqual([]);
+    await core.storeSummaryRender({
+      summaryId,
+      format: "png",
+      data: PNG,
+      rendererVersion: "test",
+    });
+    expect(
+      await core.listMissingSummaryRenders(
+        new Date(now.getTime() + 25 * 3600000).toISOString(),
+      ),
+    ).toEqual([]);
   });
 });
