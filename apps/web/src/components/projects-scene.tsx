@@ -507,7 +507,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               </span>
               <MoreViews view={view} href={viewHref} t={t} />
             </nav>
-            {confirmed && workspace.role !== "guest" && (
+            {confirmed && workspace.role !== "guest" && view !== "timeline" && (
               <ViewExportButton
                 key={selected?.id ?? "workspace"}
                 workspaceId={workspace.id}

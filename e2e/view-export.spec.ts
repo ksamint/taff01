@@ -31,7 +31,7 @@ async function stubShareSheet(page: Page) {
   });
 }
 
-async function openExport(page: Page, title: string) {
+async function openExport(page: Page, title: string, width = 1080) {
   await page.getByTestId("view-export-open").click();
   const dialog = page.getByRole("dialog", { name: title });
   await expect(dialog).toBeVisible();
@@ -44,12 +44,14 @@ async function openExport(page: Page, title: string) {
         .getByTestId("view-export-preview")
         .evaluate((image: HTMLImageElement) => image.naturalWidth),
     )
-    .toBe(1080);
-  await expect(page.getByTestId("view-export-size")).toContainText("1080 px");
+    .toBe(width);
+  await expect(page.getByTestId("view-export-size")).toContainText(
+    `${width} px`,
+  );
   return dialog;
 }
 
-async function save(page: Page, kind: "project" | "workspace") {
+async function save(page: Page, kind: "project" | "workspace" | "timeline") {
   const pending = page.waitForEvent("download");
   await page.getByTestId("view-export-save").click();
   const download = await pending;
@@ -134,4 +136,63 @@ test("a person exports, sends, copies and saves project and workspace images", a
     `/api/workspaces/${workspace.id}/view-image?locale=xx`,
   );
   expect(invalid.status()).toBe(400);
+});
+
+test("timeline exports its critical highlight and full chart in the viewer language", async ({
+  page,
+}, info) => {
+  test.setTimeout(120_000);
+  const locale = info.project.name as TestLocale;
+  const me = await freshAccount(page, locale);
+  const workspace = me.workspaces[0];
+  const created = await page.request.post(
+    `/api/projects?workspaceId=${workspace.id}`,
+    { data: { name: `Timeline export ${locale}` } },
+  );
+  expect(created.status()).toBe(201);
+  const project = projectSchema.parse(await created.json());
+  expect(
+    (
+      await page.request.post("/api/tasks", {
+        data: {
+          workspaceId: workspace.id,
+          ownerId: workspace.memberId,
+          workerId: null,
+          title: `Timeline task ${locale}`,
+          projectId: project.id,
+        },
+      })
+    ).status(),
+  ).toBe(201);
+  await page.goto(`/projects/${project.id}?view=timeline`);
+  await expect(page.getByTestId("timeline-critical")).toBeVisible();
+  await expect(page.getByTestId("view-export-open")).toHaveCount(1);
+  const exported = () =>
+    page.waitForResponse(
+      (response) =>
+        response.url().includes("/view-image?") &&
+        new URL(response.url()).searchParams.get("view") === "timeline",
+    );
+  const first = exported();
+  await openExport(page, messages[locale].viewExport.title, 1600);
+  const show = await first;
+  expect(new URL(show.url()).searchParams.get("criticalPath")).toBe("show");
+  expect(new URL(show.url()).searchParams.get("locale")).toBe(locale);
+  await save(page, "timeline");
+  await page.keyboard.press("Escape");
+  await page.getByTestId("timeline-critical").click();
+  const second = exported();
+  await openExport(page, messages[locale].viewExport.title, 1600);
+  const hide = await second;
+  expect(new URL(hide.url()).searchParams.get("criticalPath")).toBe("hide");
+  expect(hide.headers()["x-taff-content-hash"]).not.toBe(
+    show.headers()["x-taff-content-hash"],
+  );
+  await page.keyboard.press("Escape");
+  await page.getByTestId("timeline-zoom-week").click();
+  const third = exported();
+  await openExport(page, messages[locale].viewExport.title, 1600);
+  expect((await third).headers()["x-taff-content-hash"]).toBe(
+    hide.headers()["x-taff-content-hash"],
+  );
 });

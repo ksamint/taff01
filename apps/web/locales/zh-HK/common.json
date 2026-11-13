@@ -1665,6 +1665,7 @@
     "unavailable": "暫時無法匯出圖片。",
     "size": "{{width}} px · {{size}}",
     "preparing": "正在產生圖片…",
-    "alt": "匯出圖片預覽"
+    "alt": "匯出圖片預覽",
+    "timelineHeading": "時間線 · {{project}}"
   }
 }

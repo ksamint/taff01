@@ -71,6 +71,25 @@ it("resolves each image call, shares member quota across tokens and reports rend
     await call({});
     expect(hit.mock.calls[0]).toEqual(hit.mock.calls[1]);
     expect(resolve).toHaveBeenCalledTimes(2);
+    await call({
+      view: "timeline",
+      projectId: "00000000-0000-4000-8000-000000000001",
+      criticalPath: "hide",
+    });
+    expect(String(renderFetch.mock.calls[2][0])).toBe(
+      "http://render.test/render/timeline",
+    );
+    expect(input).toHaveBeenLastCalledWith(
+      { ...p, tokenId: "two" },
+      "home",
+      {
+        view: "timeline",
+        projectId: "00000000-0000-4000-8000-000000000001",
+        criticalPath: "hide",
+      },
+      "mcp",
+    );
+    expect(hit.mock.calls[2]).toEqual(hit.mock.calls[0]);
     renderFetch.mockRejectedValue(new Error("renderer down"));
     expect(await call({})).toMatchObject({
       isError: true,

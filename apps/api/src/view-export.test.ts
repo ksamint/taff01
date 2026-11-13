@@ -2,6 +2,7 @@ import { Writable } from "node:stream";
 import { CoreError, createCore } from "@taff/core";
 import pino from "pino";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
+import { timelineImageFixture } from "../../../packages/schemas/src/timeline-image.fixture";
 import { createApp } from "./app";
 import type { RateLimiter } from "./rate-limit";
 
@@ -161,11 +162,50 @@ describe("exported view image route", () => {
       `/api/workspaces/${id}/view-image`,
       `/api/workspaces/${id}/view-image?locale=en&projectId=nope`,
       `/api/workspaces/${id}/view-image?locale=en&extra=1`,
+      `/api/workspaces/${id}/view-image?locale=en&view=timeline`,
+      `${path}&criticalPath=hide`,
+      `${path}&view=timeline&criticalPath=yes`,
       "/api/workspaces/nope/view-image?locale=en",
     ])
       expect((await app.request(bad)).status).toBe(400);
     expect(call).not.toHaveBeenCalled();
     expect(hits).toEqual([]);
+  });
+
+  it("routes authorized timeline options through the shared quota and timeline renderer", async () => {
+    signIn();
+    const timeline = {
+      ...timelineImageFixture("en"),
+      fileName: "taff-timeline-2026-11-12-aaaaaaaa.png",
+    };
+    const call = vi
+      .spyOn(core, "exportViewImageInput")
+      .mockResolvedValue(timeline);
+    renderer.mockResolvedValue(
+      new Response(PNG, { headers: { "content-type": "image/png" } }),
+    );
+    const response = await app.request(
+      `${path}&view=timeline&criticalPath=hide`,
+    );
+    expect(response.status).toBe(200);
+    expect(call).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      id,
+      {
+        locale: "zh-CN",
+        projectId: project,
+        view: "timeline",
+        criticalPath: "hide",
+      },
+      "web",
+    );
+    expect(String(renderer.mock.calls[0][0])).toBe(
+      "http://render.internal:3002/render/timeline",
+    );
+    expect(JSON.parse(String(renderer.mock.calls[0][1]?.body))).toEqual(
+      timelineImageFixture("en"),
+    );
+    expect(hits).toHaveLength(1);
   });
 
   it("refuses over the limit and fails closed when the count fails", async () => {

@@ -1665,6 +1665,7 @@
     "unavailable": "Image export is not available right now.",
     "size": "{{width}} px · {{size}}",
     "preparing": "Preparing image…",
-    "alt": "Preview of the exported image"
+    "alt": "Preview of the exported image",
+    "timelineHeading": "Timeline · {{project}}"
   }
 }

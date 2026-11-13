@@ -1623,6 +1623,7 @@ export function createCore(options: {
     db,
     requireMember,
     loadSummarySources,
+    getTimeline: timeline.operations.getTimeline,
     now: options.summaryClock,
   });
   const relations = createRelationOperations({ db, requireMember });

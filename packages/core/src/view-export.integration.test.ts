@@ -1,6 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { activity, connectDatabase, members } from "@taff/db";
-import { summaryImageLayoutInputSchema } from "@taff/schemas";
+import {
+  summaryImageLayoutInputSchema,
+  timelineImageInputSchema,
+} from "@taff/schemas";
 import { and, desc, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
@@ -213,6 +216,110 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     expect(after.contentHash).toMatch(/^[a-f0-9]{64}$/);
   });
 
+  it.each(["en", "zh-CN", "zh-HK"] as const)(
+    "exports the member's timeline in %s with bound options, zone and audit",
+    async (locale) => {
+      const query = { view: "timeline" as const, projectId: active.id, locale };
+      const result = await core.exportViewImageInput(bob, w, query);
+      const { fileName, ...input } = result;
+      expect(timelineImageInputSchema.parse(input)).toEqual(input);
+      expect(input.layout.width).toBe(1600);
+      expect(input.layout.title).toContain("Harbour fit-out");
+      expect(input.layout.footer.text).toContain("Asia/Shanghai");
+      expect(input.watermark.text).toContain("Bob Member");
+      expect(input.layout.rows.map((row) => row.title)).toContain(
+        "Order the counter stone",
+      );
+      expect(fileName).toMatch(/^taff-timeline-2026-11-12-[a-f0-9]{8}\.png$/);
+      expect(
+        (
+          await core.exportViewImageInput(bob, w, {
+            ...query,
+            criticalPath: "show",
+          })
+        ).contentHash,
+      ).toBe(input.contentHash);
+      const hidden = await core.exportViewImageInput(bob, w, {
+        ...query,
+        criticalPath: "hide",
+      });
+      expect(hidden.layout.rows.every((row) => !row.critical)).toBe(true);
+      expect(hidden.contentHash).not.toBe(input.contentHash);
+      const [audit] = await connection.db
+        .select()
+        .from(activity)
+        .where(
+          and(
+            eq(activity.action, "view.export"),
+            eq(activity.actorId, bobUser),
+          ),
+        )
+        .orderBy(desc(activity.createdAt));
+      expect(audit.details).toEqual({
+        scope: "timeline",
+        locale,
+        contentHash: hidden.contentHash,
+        projectCount: 1,
+        finance: false,
+        channel: "web",
+      });
+    },
+  );
+
+  it("binds timeline hashes to locale and saved viewer zone, and refuses unauthorized projects/options without audit", async () => {
+    const query = {
+      view: "timeline" as const,
+      projectId: active.id,
+      locale: "en" as const,
+    };
+    const base = await core.exportViewImageInput(bob, w, query);
+    expect(
+      (await core.exportViewImageInput(bob, w, { ...query, locale: "zh-HK" }))
+        .contentHash,
+    ).not.toBe(base.contentHash);
+    try {
+      await core.updateProfile(bobUser, {
+        locale: "en",
+        tz: "America/New_York",
+      });
+      const changed = await core.exportViewImageInput(bob, w, query);
+      expect(changed.contentHash).not.toBe(base.contentHash);
+      expect(changed.layout.footer.text).toContain("America/New_York");
+    } finally {
+      await core.updateProfile(bobUser, { locale: "en", tz: "Asia/Shanghai" });
+    }
+    const count = async () =>
+      (
+        await connection.db
+          .select()
+          .from(activity)
+          .where(
+            and(
+              eq(activity.workspaceId, w),
+              eq(activity.action, "view.export"),
+            ),
+          )
+      ).length;
+    const before = await count();
+    for (const principal of [gina, outsider])
+      await expect(
+        core.exportViewImageInput(principal, w, query),
+      ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.exportViewImageInput(bob, w, { ...query, projectId: foreign.id }),
+    ).rejects.toMatchObject({ code: "not_found" });
+    await expect(
+      core.exportViewImageInput(bob, w, { view: "timeline", locale: "en" }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    await expect(
+      core.exportViewImageInput(bob, w, {
+        projectId: active.id,
+        criticalPath: "hide",
+      }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    expect(await count()).toBe(before);
+  });
+
   it("audits each authorized snapshot with allowlisted metadata and no change notification", async () => {
     const rows = () =>
       connection.db
@@ -314,6 +421,14 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       await expect(
         core.exportViewImageInput(p, w, {}, "mcp"),
       ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(
+        core.exportViewImageInput(
+          p,
+          w,
+          { view: "timeline", projectId: active.id },
+          "mcp",
+        ),
+      ).rejects.toMatchObject({ code: "forbidden" });
     }
     await core.setAgentTokenWorkspace(alice, issued.id, {
       workspaceId: w,
@@ -332,6 +447,15 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       tz: "Asia/Shanghai",
     });
     const image = await core.exportViewImageInput(agent, w, {}, "mcp");
+    const timelineImage = await core.exportViewImageInput(
+      agent,
+      w,
+      { view: "timeline", projectId: active.id },
+      "mcp",
+    );
+    expect(timelineImage.layout.locale).toBe("zh-CN");
+    expect(timelineImage.layout.footer.text).toContain("Asia/Shanghai");
+    expect(timelineImage.watermark.text).toContain("Export Agent");
     expect(image.watermark.text).toContain("Export Agent");
     expect(image.fileName).toContain("Export Agent 测试");
     const [row] = await connection.db
@@ -380,6 +504,14 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     await expect(
       core.exportViewImageInput(agent, w, {}, "mcp"),
     ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.exportViewImageInput(
+        agent,
+        w,
+        { view: "timeline", projectId: active.id },
+        "mcp",
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
   });
 
   it("refuses guests, outsiders and invalid input", async () => {
@@ -400,9 +532,21 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
   it("stops a demoted member and allows them again once restored", async () => {
     await core.updateMemberRole(alice, w, bobMember, { role: "guest" });
     await expect(
+      core.exportViewImageInput(bob, w, {
+        view: "timeline",
+        projectId: active.id,
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
       core.exportViewImageInput(bob, w, { locale: "en" }),
     ).rejects.toMatchObject({ code: "forbidden" });
     await core.updateMemberRole(alice, w, bobMember, { role: "member" });
+    await expect(
+      core.exportViewImageInput(bob, w, {
+        view: "timeline",
+        projectId: active.id,
+      }),
+    ).resolves.toMatchObject({ contentHash: expect.any(String) });
     await expect(
       core.exportViewImageInput(bob, w, { locale: "en" }),
     ).resolves.toMatchObject({ contentHash: expect.any(String) });

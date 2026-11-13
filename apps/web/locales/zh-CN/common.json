@@ -1665,6 +1665,7 @@
     "unavailable": "暂时无法导出图片。",
     "size": "{{width}} px · {{size}}",
     "preparing": "正在生成图片…",
-    "alt": "导出图片预览"
+    "alt": "导出图片预览",
+    "timelineHeading": "时间线 · {{project}}"
   }
 }
