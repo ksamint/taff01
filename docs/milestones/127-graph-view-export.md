@@ -1,8 +1,8 @@
 # 127 — public mind and relations image export candidate
 
-Status: v0.2.25 preparation only; full gate and deployment pending. No push.
-Exact future drop boundary: frozen final S2 `2dda9afa4e8e196fb4000b034410912b8c3cd749`; parent will rebase above it onto actual merged S2 before the final gate. S1 PR100 is merged at `0cd83021df951eb0f86de437a49d85577d3778a6`.
-Retained S3 commits: `7844f35` (pure geometry/render), `7673275` (public integration), `86d98f3` (review fixes), `ef3f634` (combined validation), `03a0544` (versions/changelog).
+Status: integrated onto merged S2 main `9182d16`; full final gate, PR and deployment pending.
+S1 PR100 merged at `0cd8302`; S2 PR101 merged at `9182d16` with exact validated tree: 2,313 unit, 38 Rust and 360 browser passed, 3 expected skips.
+All six S3 implementation/review/evidence/version commits retained; final rebase was conflict-free.
 Production remains accepted v0.2.24 `ff411c6`, also the v0.2.25 rollback source. API/web/worker package versions are now 0.2.25 with an explicitly unreleased changelog.
 Targets: TypeScript schemas/core/API/MCP/web/tests and Rust renderer; no new dependency, migration, environment value, permission or tool (38 remain).
 
@@ -31,4 +31,4 @@ Earlier evidence, not rerun on this rebased tree:
 - Dev StrictMode aborted requests consumed quota; fixtures use fresh accounts per graph (2/4 exports), without changing product quota or adding retries. Ignored dev types were moved before earlier clean-source typechecks; no layout change.
 - Historical browser artifacts: `/private/tmp/taff-v025-s3-graph-artifacts` (before palette correction). Parent full gate requires a fresh seeded runtime database after prior focused fixtures.
 
-Open implementation decisions: none. Parent owns final S2-main rebase, full local gate, PR/merge, deployment and owner acceptance.
+Open implementation decisions: none. Final full local gate, PR/merge, exact merged-source operator gate/direct deploy and owner checks remain.
