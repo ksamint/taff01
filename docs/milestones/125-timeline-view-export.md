@@ -25,3 +25,5 @@ Focused validation on the implementation tree:
 - Browser command: `node --env-file=.env node_modules/@playwright/test/cli.js test --config playwright.timeline.local.ts e2e/view-export.spec.ts -g 'timeline exports'`; temporary harness used direct API + webpack dev on 4100/4101, renderer 3303. Default Turbopack startup could not resolve external dependency links; no tracked config change.
 
 Parent owns full gate, rebase onto completed v24, PR/merge and deploy. S2/S3 integrate separately.
+
+Review repair: timeline colours now use approved TABLE AI ink/gold/error/outline/container tokens from tokens.css, guarded by a renderer source-token assertion. Intentionally refreshed only three timeline PNGs. Focused timeline checks: 5 passed; full renderer regression: 13 passed, summary goldens unchanged. No full gate or publication.

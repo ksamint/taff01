@@ -362,3 +362,18 @@ async fn timeline_http_version_and_validation() {
         }
     }
 }
+
+#[test]
+fn timeline_palette_uses_approved_table_ai_tokens() {
+    let tokens = include_str!("../../../../apps/web/src/styles/tokens.css");
+    let source = include_str!("../src/timeline.rs");
+    for suffix in source.split('#').skip(1) {
+        let hex: String = suffix.chars().take(6).collect();
+        if hex.len() == 6 && hex.chars().all(|c| c.is_ascii_hexdigit()) {
+            assert!(
+                tokens.contains(&format!("#{hex}")),
+                "unapproved colour #{hex}"
+            );
+        }
+    }
+}

@@ -1,3 +1,5 @@
+// TABLE AI light tokens: ink, primary gold, error, outline and surface containers.
+// Source: apps/web/src/styles/tokens.css, matching designed.rs.
 use crate::{escape, palette_svg};
 use serde::Deserialize;
 use serde_json::Value;
@@ -125,14 +127,14 @@ pub fn render_timeline(input: &Value) -> Result<Vec<u8>, &'static str> {
         "Manrope, Noto Sans TC, Noto Sans SC"
     };
     let mut svg = format!(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="{}"><rect width="1600" height="{}" fill="#ffffff"/><g font-family="{family}" fill="#20252b"><defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse"><path d="M0 0L6 3L0 6" fill="#737b87"/></marker></defs>"##,
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="{}"><rect width="1600" height="{}" fill="#ffffff"/><g font-family="{family}" fill="#1b1b1d"><defs><marker id="arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto-start-reverse"><path d="M0 0L6 3L0 6" fill="#44474c"/></marker></defs>"##,
         l.height, l.height
     );
     text(&mut svg, 48.0, 58.0, 32, &clipped(&l.title, 86));
     text(&mut svg, 48.0, 94.0, 20, &clipped(&l.subtitle, 130));
     for tick in &l.ticks {
         svg.push_str(&format!(
-            r##"<path d="M{} 150V{}" stroke="#e5e7eb"/>"##,
+            r##"<path d="M{} 150V{}" stroke="#e4e2e3"/>"##,
             tick.x,
             l.height - 100
         ));
@@ -146,7 +148,7 @@ pub fn render_timeline(input: &Value) -> Result<Vec<u8>, &'static str> {
     }
     for r in &l.rows {
         svg.push_str(&format!(
-            r##"<path d="M48 {}H1552" stroke="#eef0f3"/>"##,
+            r##"<path d="M48 {}H1552" stroke="#f5f3f4"/>"##,
             r.y + 26.0
         ));
         text(
@@ -157,12 +159,12 @@ pub fn render_timeline(input: &Value) -> Result<Vec<u8>, &'static str> {
             &clipped(&r.title, 32 - r.depth as usize),
         );
         let color = if r.blocked || r.critical {
-            "#c24148"
+            "#ba1a1a"
         } else {
-            "#4b76c8"
+            "#a88b52"
         };
         if r.forecast_x > r.end_x {
-            svg.push_str(&format!(r##"<path d="M{} {}H{}" stroke="#c24148" stroke-width="8" stroke-dasharray="5 4"/>"##, r.end_x, r.y, r.forecast_x));
+            svg.push_str(&format!(r##"<path d="M{} {}H{}" stroke="#ba1a1a" stroke-width="8" stroke-dasharray="5 4"/>"##, r.end_x, r.y, r.forecast_x));
         }
         if r.kind == "milestone" {
             svg.push_str(&format!(
@@ -178,13 +180,13 @@ pub fn render_timeline(input: &Value) -> Result<Vec<u8>, &'static str> {
     for d in &l.dependencies {
         let from = &l.rows[d.from];
         let to = &l.rows[d.to];
-        let color = if d.conflict { "#c24148" } else { "#737b87" };
+        let color = if d.conflict { "#ba1a1a" } else { "#44474c" };
         // Route backward links in the gap between rows, retaining finish-to-start direction.
         let mid = to.y + if to.y >= from.y { -26.0 } else { 26.0 };
         svg.push_str(&format!(r##"<path d="M{} {}H{}V{mid}H{}V{}H{}" stroke="{color}" fill="none" stroke-width="1.5" marker-end="url(#arrow)"/>"##, from.end_x, from.y, from.end_x + 8.0, to.x - 8.0, to.y, to.x));
     }
     svg.push_str(&format!(
-        r##"<path d="M{} 152V{}" stroke="#c24148" stroke-dasharray="6 4"/>"##,
+        r##"<path d="M{} 152V{}" stroke="#ba1a1a" stroke-dasharray="6 4"/>"##,
         l.today_x,
         l.height - 100
     ));
