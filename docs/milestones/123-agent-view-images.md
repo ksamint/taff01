@@ -2,8 +2,8 @@
 
 E3 implemented on `feat/v024-agent-images`; not released or deployed.
 Service metadata targets v0.2.24; changelog includes A1/A2/A3/E2/A4/E3.
-Base `692a44a`; local E2 dependency `eda856e` cherry-picked as `dbc8d79`.
-Integration must drop that dependency with `rebase --onto <final-main> dbc8d79`.
+Prepared on A4 `dc060485`, including the isolated fixture and invitation-selector repairs.
+Parent rebases onto merged main and runs the exact-head full gate before publishing.
 
 - `views.image` is tool 38, with strict optional workspace/project/locale args.
 - Each call resolves current grants; export requires both read scopes.
