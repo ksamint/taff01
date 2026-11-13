@@ -17,7 +17,8 @@ Targets: TypeScript core/API/MCP/UI and shared formatter; existing Rust calendar
 Focused validation:
 - `node node_modules/vitest/vitest.mjs run packages/schemas/src/view-export.test.ts packages/schemas/src/calendar-image.test.ts apps/api/src/view-export.test.ts apps/api/src/mcp-views.test.ts scripts/ui/fonts.test.ts`: 28 passed (5 files).
 - `node --env-file=.env node_modules/vitest/vitest.mjs run packages/core/src/view-export.integration.test.ts`: 16 passed, including scope narrowing/revocation, member demotion, options/hash/zone and audit.
-- `node node_modules/typescript/bin/tsc -p <packages/core|apps/api|apps/web>/tsconfig.json --noEmit`: passed all three.
+- `node node_modules/typescript/bin/tsc -p <packages/core|apps/api|apps/web>/tsconfig.json --noEmit`: clean-source checks passed all three.
+- Post-browser web tsc hit generated `.next/dev/types/app/layout.ts:42` TS2344: existing optional modal prop conflicts with required generated LayoutProps.modal. No production types directory existed; tracked layout source is unchanged. Moved only this task's ignored dev/types to `/tmp/taff-calendar-dev-types-20261114`; clean-source web tsc passed again. Parent canonical build/typecheck must assess this harness artifact.
 - `CARGO_TARGET_DIR=/tmp/taff-timeline-target CARGO_BUILD_JOBS=2 cargo test --locked --offline --manifest-path backend/Cargo.toml -p taff-render`: 16 passed; summary/timeline goldens unchanged.
 - Six calendar goldens regenerated with rust-calendar-golden.mts and UPDATE_RENDER_GOLDENS=1 filtered calendar tests. Worst case remains 3728 px / 190904 bytes; localized week/month images 34953–68258 bytes.
 - `node --env-file=.env node_modules/@playwright/test/cli.js test --config playwright.calendar.local.ts e2e/view-export.spec.ts -g 'calendar exports'`: 3 locales passed, 44.4 s, real PNG/save/window navigation, day/list absence.
