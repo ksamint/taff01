@@ -47,9 +47,9 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 
 ### Screen (OT-3)
 
-- OT-3.1 When an admin views Projects with no project selected, the filter sheet shall offer Add six-sector operation template (zh-CN 添加六大领域营运模板, zh-HK 加入六大板塊營運模板); others shall not see it.
+- OT-3.1 When an admin views Projects with no project selected, the filter sheet shall offer Add six-sector operation template (zh-CN 添加六大方面营运模板, zh-HK 加入六大方面營運模板); others shall not see it.
 - OT-3.2 When the apply succeeds, the screen shall show a toast with the created project and task counts and refresh projects and tasks; on failure it shall show the localized error.
-- OT-3.3 Every CJK character in the UI labels shall be in the bundled font subset (`scripts/ui/fonts.test.ts`); zh-CN uses 领域 because 块 is not bundled.
+- OT-3.3 Every CJK character in the UI labels shall be in the bundled font subset (`scripts/ui/fonts.test.ts`); the button says 方面 because 块 and 塊 are not bundled (sector names in task data render with the system font fallback).
 
 ## Non-functional
 

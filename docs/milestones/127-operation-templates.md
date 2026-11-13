@@ -7,6 +7,6 @@
 - Access operations reviewed: only apply is new; it grants no access. Tested with admin, member, guest, outsider, demoted admin and agent.
 - H5: the template creates ordinary projects and tasks, so the existing phone Projects and task screens list, open and add them; no phone-specific change.
 - Missing work: live XIDING creation. It needs a release from the deploy machine (docs/deploy.md, docs/release-closeout.md); this cloud session has no production access. After release, a system admin creates XIDING in Organizations (system admins hold protected admin memberships in every organization), opens Projects and applies the template.
-- Phone: `e2e/operation-templates.spec.ts` applies the template and opens an indicator task on the Pixel 7 profile in en, zh-CN and zh-HK. zh-CN says 领域, not 板块: 块 is not in the bundled font subset.
+- Phone: `e2e/operation-templates.spec.ts` applies the template and opens an indicator task on the Pixel 7 profile in en, zh-CN and zh-HK. The button says 六大方面, not 六大板塊/板块: 塊 and 块 are not in the bundled font subset.
 - Validation numbers: see the PR body (local gate on the committed tree).
 - Open decision: which account is "tiansight apuch admin" if it should be a named org admin rather than the system admins.
