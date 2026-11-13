@@ -363,6 +363,160 @@ async fn timeline_http_version_and_validation() {
     }
 }
 
+fn calendar_input(locale: &str, mode: &str) -> Value {
+    let base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    serde_json::from_slice(
+        &std::fs::read(base.join(format!("calendar-{mode}-{locale}.json"))).unwrap(),
+    )
+    .unwrap()
+}
+#[test]
+fn calendar_week_and_month_three_locale_goldens_have_hash_and_caps() {
+    let hasher = HasherConfig::new().hash_size(16, 16).to_hasher();
+    for locale in ["en", "zh-CN", "zh-HK"] {
+        for mode in ["week", "month"] {
+            let input = calendar_input(locale, mode);
+            let bytes = taff_render::render_calendar(&input).unwrap();
+            assert!(bytes.len() <= 400 * 1024);
+            assert_eq!(bytes[25], 3, "palette PNG");
+            assert_eq!(
+                text_chunk(&bytes, "taff:content-hash").as_deref(),
+                input["contentHash"].as_str()
+            );
+            let actual = image::load_from_memory(&bytes).unwrap();
+            assert_eq!(actual.width(), 1600);
+            assert_eq!(
+                actual.height(),
+                input["layout"]["height"].as_u64().unwrap() as u32
+            );
+            assert!(actual.height() <= 4000);
+            let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join(format!("tests/fixtures/calendar-{mode}-{locale}.png"));
+            if std::env::var("UPDATE_RENDER_GOLDENS").as_deref() == Ok("1") {
+                std::fs::write(&path, &bytes).unwrap();
+            }
+            let expected = image::open(path).unwrap();
+            assert_eq!(expected.height(), actual.height());
+            assert!(
+                hasher
+                    .hash_image(&actual)
+                    .dist(&hasher.hash_image(&expected))
+                    <= 2,
+                "{mode} {locale} drift"
+            );
+            let mut blank = input.clone();
+            blank["watermark"]["text"] = json!("");
+            assert_ne!(bytes, taff_render::render_calendar(&blank).unwrap());
+            eprintln!(
+                "calendar {mode} {locale}: {} px, {} bytes",
+                actual.height(),
+                bytes.len()
+            );
+        }
+    }
+}
+#[test]
+fn calendar_rejects_invalid_schema_geometry_and_hash() {
+    for (path, value) in [
+        ("/layout/height", json!(4001)),
+        ("/layout/height", json!(319)),
+        ("/layout/height", json!(1e100)),
+        ("/layout/width", json!(1599)),
+        ("/layout/mode", json!("day")),
+        ("/layout/cells/0/x", json!(-1)),
+        ("/layout/cells/0/x", json!(45)),
+        ("/layout/cells/0/y", json!(1e100)),
+        ("/layout/cells/0/height", json!(3700)),
+        ("/layout/cells/0/timedY", json!(0)),
+        ("/layout/cells/0/items/0/y", json!(3900)),
+        ("/layout/title", json!("x".repeat(201))),
+        ("/layout/footer/hashFull", json!("b".repeat(64))),
+        ("/watermark/contentHash", json!("b".repeat(64))),
+        ("/watermark/text", json!("x".repeat(501))),
+    ] {
+        let mut input = calendar_input("en", "week");
+        *input.pointer_mut(path).unwrap() = value;
+        assert_eq!(
+            taff_render::render_calendar(&input),
+            Err("invalid_input"),
+            "{path}"
+        );
+    }
+    for count in [0, 8, 43] {
+        let mut input = calendar_input("en", "week");
+        input["layout"]["cells"] = json!(vec![input["layout"]["cells"][0].clone(); count]);
+        assert_eq!(taff_render::render_calendar(&input), Err("invalid_input"));
+    }
+    let mut input = calendar_input("en", "week");
+    input["layout"]["cells"][0]["items"] =
+        json!(vec![input["layout"]["cells"][0]["items"][0].clone(); 9]);
+    assert_eq!(taff_render::render_calendar(&input), Err("invalid_input"));
+    let mut input = calendar_input("en", "week");
+    input["svg"] = json!("<svg/>");
+    assert_eq!(taff_render::render_calendar(&input), Err("invalid_input"));
+}
+#[test]
+fn calendar_dense_six_week_month_stays_within_delivery_caps() {
+    let mut input = calendar_input("zh-HK", "month");
+    input["layout"]["height"] = json!(3728);
+    for (index, cell) in input["layout"]["cells"]
+        .as_array_mut()
+        .unwrap()
+        .iter_mut()
+        .enumerate()
+    {
+        let top = 164 + (index / 7) * 572;
+        cell["y"] = json!(top);
+        cell["height"] = json!(572);
+        cell["timedY"] = json!(top + 276);
+        cell["items"] = json!((0..8).map(|i| json!({
+            "title": "侍饕餮鑫".repeat(55), "detail": "00:00–23:59", "y": if index % 7 == 0 { top + 62 + i * 26 } else { top + 290 + i * 32 },
+            "allDay": index % 7 == 0, "continuesBefore": true, "continuesAfter": true,
+        })).collect::<Vec<_>>());
+    }
+    let png = taff_render::render_calendar(&input).unwrap();
+    assert!(png.len() <= 400 * 1024);
+    assert_eq!(image::load_from_memory(&png).unwrap().height(), 3728);
+    eprintln!("calendar dense month: {} bytes", png.len());
+}
+#[tokio::test]
+async fn calendar_http_version_and_validation() {
+    use axum::{
+        body::Body,
+        http::{Request, StatusCode},
+    };
+    use tower::ServiceExt;
+    for valid in [false, true] {
+        let response = taff_render::router()
+            .oneshot(
+                Request::builder()
+                    .uri("/render/calendar")
+                    .method("POST")
+                    .header("content-type", "application/json")
+                    .body(Body::from(if valid {
+                        calendar_input("en", "week").to_string()
+                    } else {
+                        "{}".to_string()
+                    }))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            response.status(),
+            if valid {
+                StatusCode::OK
+            } else {
+                StatusCode::UNPROCESSABLE_ENTITY
+            }
+        );
+        if valid {
+            assert_eq!(response.headers()["x-taff-renderer"], "calendar-1");
+            assert_eq!(response.headers()["cache-control"], "no-store");
+        }
+    }
+}
+
 #[test]
 fn timeline_palette_uses_approved_table_ai_tokens() {
     let tokens = include_str!("../../../../apps/web/src/styles/tokens.css");

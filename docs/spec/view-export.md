@@ -54,6 +54,21 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 - VE-4.6 Core shall read the project through authorized `getTimeline` in the saved viewer/token-issuer zone, and bind the canonical hash to the snapshot, project, locale, zone and normalized highlight option. Timeline images contain no finance; their snapshot audit shall use `scope=timeline`, `projectCount=1`, `finance=false` and the trusted adapter's channel.
 - VE-4.7 The timeline toolbar shall show one Export image button to confirmed non-guests, export the current critical-path highlight, and fit the full chart independent of browser horizontal zoom. The existing preview/send/copy/save flow shall handle its 1600 px PNG.
 
+### Calendar renderer preparation (VE-5)
+- VE-5.1 The internal `POST /render/calendar` shall accept only the generated `calendar-image.json` display contract and report `X-Taff-Renderer: calendar-1`.
+- VE-5.2 `calendarImageWindow` shall validate a visible civil date, week/month mode and viewer IANA time zone; weeks start Monday and months include complete surrounding weeks (28, 35 or 42 days), matching the calendar screen. Its `from` and exclusive `to` shall be converted separately from local midnight.
+- VE-5.3 `buildCalendarLayout` shall split authorized `CalendarViewData` occurrences across intersecting civil days, clip at the window and day boundaries, deduplicate task/start occurrences, and preserve end-exclusive semantics across DST. Unscheduled tasks shall not appear.
+- VE-5.4 Whole local-day spans starting at midnight and ending at a later local midnight shall occupy the separate all-day band, including 23/25-hour days. An end at `23:59:59.999` shall remain timed; the source has no all-day flag.
+- VE-5.5 Each day shall show at most eight items total, ordered all-day first then start, end and occurrence id, with a localized known omitted count. `source.truncated` shall produce a separate localized unknown-overflow note without inventing a count.
+- VE-5.6 The palette PNG shall be 1600 px wide, at most 4000 px high and 400 KB; bounded layout validation, escaped text, matching footer/watermark hashes and embedded hash metadata shall precede delivery.
+
+This preparation is internal only; public calendar export and the initial day-view export choice remain for integration.
+
+The caller imports `calendarImageWindow` and `buildCalendarLayout` from `@taff/schemas/calendar-image`.
+Use `calendarImageWindow({mode, visibleDate, timeZone})` to obtain `startDate`, exclusive `endDate`, `from`, `to` and canonical `timeZone`; pass the instant range to authorized `listCalendar`.
+Build with `(source, query, locale, labels, contentHash)`. Labels supply `title`, `subtitle`, `allDay`, `footer`, `sourceTruncated`, `date(civil)`, `weekday(civil)`, `time(startInstant, endInstant, viewerZone)` and `more(count)`.
+Post `{layout, watermark: {text, contentHash}, contentHash}`. Core must bind the canonical hash to the authorized snapshot/window, format exporter attribution and timestamps, and apply permissions, audit and rate limiting.
+
 ## Non-functional
 
 - Image binaries are not stored; only the allowlisted export audit metadata is retained. One additive nullable OAuth refresh-scope migration; no new client dependency; the CJK text is drawn with the renderer's server fonts, so the web font subsets do not limit names.
@@ -78,6 +93,7 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 | Deploy wiring | `scripts/apuch-compose.test.ts` (API and worker share the renderer URL) |
 | VE-4.1–4.4 | `packages/schemas/src/timeline-image.test.ts`; `backend/crates/taff-render/tests/render.rs` timeline cases and three locale PNG goldens |
 | VE-4.5–4.7 | `packages/schemas/src/view-export.test.ts`; `view-export.integration.test.ts`; `apps/api/src/view-export.test.ts`, `mcp-views.test.ts`; timeline case in `e2e/view-export.spec.ts` across three locales |
+| VE-5.1–5.6 | `packages/schemas/src/calendar-image.test.ts`; `backend/crates/taff-render/tests/render.rs` calendar cases and six locale/mode PNG goldens |
 
 ## Open decisions
 

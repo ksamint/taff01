@@ -17,3 +17,11 @@ writeFileSync(
   new URL("timeline-image.json", dir),
   `${JSON.stringify(toJSONSchema(timelineImageInputSchema, { target: "draft-7", io: "input" }), null, 2)}\n`,
 );
+
+const { calendarImageInputSchema } = await import(
+  "../../../packages/schemas/src/calendar-image"
+);
+writeFileSync(
+  new URL("calendar-image.json", dir),
+  `${JSON.stringify(toJSONSchema(calendarImageInputSchema, { target: "draft-7", io: "input" }), null, 2)}\n`,
+);

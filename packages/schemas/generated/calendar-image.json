@@ -1,0 +1,229 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "layout": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string",
+          "enum": [
+            "en",
+            "zh-CN",
+            "zh-HK"
+          ]
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "week",
+            "month"
+          ]
+        },
+        "width": {
+          "type": "number",
+          "const": 1600
+        },
+        "height": {
+          "type": "number",
+          "minimum": 320,
+          "maximum": 4000
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "allDayLabel": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "weekdays": {
+          "maxItems": 7,
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100
+          }
+        },
+        "cells": {
+          "maxItems": 42,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1556
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3900
+              },
+              "width": {
+                "type": "number",
+                "const": 216
+              },
+              "height": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3700
+              },
+              "dateLabel": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "inMonth": {
+                "type": "boolean"
+              },
+              "timedY": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3900
+              },
+              "items": {
+                "maxItems": 8,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "title": {
+                      "type": "string",
+                      "maxLength": 220
+                    },
+                    "detail": {
+                      "type": "string",
+                      "maxLength": 100
+                    },
+                    "y": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 3900
+                    },
+                    "allDay": {
+                      "type": "boolean"
+                    },
+                    "continuesBefore": {
+                      "type": "boolean"
+                    },
+                    "continuesAfter": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "title",
+                    "detail",
+                    "y",
+                    "allDay",
+                    "continuesBefore",
+                    "continuesAfter"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "more": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 100
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "x",
+              "y",
+              "width",
+              "height",
+              "dateLabel",
+              "inMonth",
+              "timedY",
+              "items",
+              "more"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "sourceTruncatedNote": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 300
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "footer": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 300
+            },
+            "hashFull": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "text",
+            "hashFull"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "locale",
+        "mode",
+        "width",
+        "height",
+        "title",
+        "subtitle",
+        "allDayLabel",
+        "weekdays",
+        "cells",
+        "sourceTruncatedNote",
+        "footer"
+      ],
+      "additionalProperties": false
+    },
+    "watermark": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "text",
+        "contentHash"
+      ],
+      "additionalProperties": false
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "required": [
+    "layout",
+    "watermark",
+    "contentHash"
+  ],
+  "additionalProperties": false
+}
