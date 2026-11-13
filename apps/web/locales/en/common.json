@@ -150,6 +150,8 @@
     "filter": "Filter tasks",
     "newProject": "Create project",
     "projectName": "Project name",
+    "dueDate": "Due date",
+    "deliveryProgress": "Delivery progress",
     "manage": "Manage project",
     "archive": "Archive project",
     "restore": "Restore project",

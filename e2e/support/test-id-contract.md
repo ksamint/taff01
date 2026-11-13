@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (468 distinct, 2179 uses)
+## Test ids (472 distinct, 2203 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -486,20 +486,24 @@ several do). “Also rendered by” lists the other files.
 | `board-status` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-task` | 21 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `manage-project` | 5 |  | project-profile.spec.ts, summaries.spec.ts |
+| `manage-project` | 7 |  | project-profile.spec.ts, summaries.spec.ts |
 | `new-project` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-delivery-progress` | 1 |  | project-profile.spec.ts |
+| `project-due` | 3 |  | project-profile.spec.ts |
+| `project-due-date` | 5 |  | project-profile.spec.ts |
 | `project-filter` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, release/checklist.spec.ts |
 | `project-filters` | 9 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts |
 | `project-label` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-lead` | 2 |  | project-profile.spec.ts |
 | `project-lead-select` | 5 |  | project-profile.spec.ts |
 | `project-name` | 6 | summaries-admin.tsx | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-progress` | 5 |  | project-profile.spec.ts |
 | `project-select` | 1 |  | support/task-fields.ts |
 | `project-sort` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-stage` | 1 |  | project-profile.spec.ts |
 | `project-stage-control` | 4 |  | project-profile.spec.ts |
 | `project-stage-select` | 3 |  | project-profile.spec.ts |
-| `project-submit` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-submit` | 14 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-view-list` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 
 ### quick-add-dialog.tsx
@@ -596,7 +600,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `toast` | 25 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, view-export.spec.ts |
+| `toast` | 26 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, view-export.spec.ts |
 | `toast-action` | 41 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 
 ### sidebar.tsx
@@ -1139,7 +1143,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `emailVerification.delivery.logged` | 5 | planning.spec.ts |
 | `en` | 1 | me.spec.ts |
 | `errors.auth` | 6 | sms-auth.spec.ts, username-auth.spec.ts |
-| `errors.conflict` | 12 | audience-editing.spec.ts, calendar.spec.ts, planning.spec.ts |
+| `errors.conflict` | 13 | audience-editing.spec.ts, calendar.spec.ts, planning.spec.ts, project-profile.spec.ts |
 | `errors.email_verification_required` | 5 | planning.spec.ts |
 | `errors.forbidden` | 16 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
 | `errors.internal_error` | 2 | calendar.spec.ts |
@@ -1212,6 +1216,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projectFinance.positiveAmount` | 1 | project-finance.spec.ts |
 | `projectFinance.readOnly` | 1 | project-finance.spec.ts |
 | `projects.archive` | 2 | project-profile.spec.ts |
+| `projects.deliveryProgress` | 1 | project-profile.spec.ts |
+| `projects.dueDate` | 2 | project-profile.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |

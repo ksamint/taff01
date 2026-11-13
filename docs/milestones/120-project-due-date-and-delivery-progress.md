@@ -1,0 +1,22 @@
+# 120 — Project due date and delivery progress (A2)
+
+- Admin project dialogs edit a date in the saved user zone and integer delivery progress 0–100.
+- Unchanged displayed dates preserve exact API-supplied timestamps; clearing stores null.
+- Selected-project metadata shows localized due date and progress, including zero.
+- Existing versioned optimistic saves roll back on failure; stale edits show the conflict toast.
+- Members/leads read metadata without profile-edit access; losing admin removes an open editor.
+- Living contract: [projects PR-1 and PR-2](../spec/projects.md), same commit as the implementation.
+- TypeScript frontend/tests only; no backend, migration, dependency or permission change.
+- Isolated branch rebased without conflict onto A3 merge `692a44ac235cabffef5c6b7e57c0e68e44c0bf92`; regenerated contract unchanged.
+- Focused validation: `pnpm --filter @taff/web typecheck` and `pnpm exec tsc -p tsconfig.scripts.json` passed.
+- `pnpm exec biome check .` passed (666 files); `git diff --check` passed.
+- Focused Vitest passed: 5 files / 29 tests (task dates, cache rollback, core delivery, fonts, test-id contract).
+- `PORT=3700 pnpm e2e e2e/project-profile.spec.ts` passed 9/9 cases in en, zh-CN and zh-HK (1.2 min).
+- Browser evidence includes real renderer PNG (1080 px, ≤400 KB) and changed content hash before/after edits.
+- Delivery-case rerun with `--grep 'project deadline' --reporter=list,html` passed 3/3; six PNG attachments are retained in the local `playwright-report/` (ignored).
+- After A3 rebase: both typechecks, 29 focused tests, Biome, permission matrix and all 9 browser cases passed again (1.1 min); HTML/PNG report refreshed.
+- Inspected rendered PNGs show the saved date and progress (12% before, 100% after), with watermark and saved zone.
+- Permission-matrix check and spec link/unique-requirement checks passed (11 requirements, 71 lines).
+- Fresh isolated DB migrations and demo seed passed; browser work used ports 3700/3701, PG 55434 and Valkey db13.
+- Final exact-source full gate, PR/merge and deployment remain parent-owned and pending.
+- No production access or external delivery performed. Open decisions: none for A2.
