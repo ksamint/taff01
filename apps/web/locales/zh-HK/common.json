@@ -150,6 +150,8 @@
     "filter": "篩選任務",
     "newProject": "建立項目",
     "projectName": "項目名稱",
+    "dueDate": "截止日期",
+    "deliveryProgress": "交付進度",
     "manage": "管理項目",
     "archive": "封存項目",
     "restore": "還原項目",

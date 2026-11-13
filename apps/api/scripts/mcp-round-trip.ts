@@ -530,6 +530,19 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
       cleared.task.dueAt === scheduled?.dueAt &&
       cleared.task.version === interval.task.version + 1,
   );
+  // Clear the deadline so planning changes it even across UTC/local midnight.
+  const unplanned = taskSchema.parse(
+    text(
+      await client.callTool({
+        name: "tasks.edit",
+        arguments: { taskId, version: cleared.task.version, dueAt: null },
+      }),
+    ),
+  );
+  check(
+    "timeline fixture clears the deadline before planning",
+    unplanned.dueAt === null && unplanned.version === cleared.task.version + 1,
+  );
   // Timeline (ADR 0015): plan both smoke tasks, link them, refuse a cycle.
   const civil = (days: number) =>
     new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);

@@ -17,6 +17,143 @@ import { openProjectFilters } from "./support/task-fields";
 // project header shows both in the reader's language.
 test.use({ actionTimeout: 15000 });
 
+test("project deadline and delivery progress preserve time, export and reject stale edits", async ({
+  page,
+}, info) => {
+  test.setTimeout(120000);
+  const locale = info.project.name as TestLocale;
+  const me = await freshAccount(page, locale);
+  const workspace = me.workspaces[0];
+  const zone = "Pacific/Honolulu";
+  expect(
+    (
+      await page.request.patch("/api/profile", { data: { locale, tz: zone } })
+    ).status(),
+  ).toBe(200);
+  const originalDue = "2030-06-08T01:23:45.123Z";
+  let project = projectSchema.parse(
+    await (
+      await page.request.post(`/api/projects?workspaceId=${workspace.id}`, {
+        data: {
+          name: "Delivery fields",
+          dueAt: originalDue,
+          deliveryProgress: 12,
+        },
+      })
+    ).json(),
+  );
+  const path = `/api/projects/${project.id}`;
+  async function open() {
+    await openProjectFilters(page);
+    await page.getByTestId("manage-project").click();
+    await expect(page.getByTestId("project-due-date")).toBeVisible();
+  }
+  async function save() {
+    const response = page.waitForResponse(
+      (r) =>
+        new URL(r.url()).pathname === path && r.request().method() === "PATCH",
+    );
+    await page.getByTestId("project-submit").click();
+    const result = await response;
+    expect(result.status()).toBe(200);
+    await expect(page.getByTestId("project-submit")).toHaveCount(0);
+    return projectSchema.parse(await result.json());
+  }
+  async function exportedHash(phase: "before" | "after") {
+    const result = await page.request.get(
+      `/api/workspaces/${workspace.id}/view-image?locale=${locale}&projectId=${project.id}`,
+    );
+    expect(result.status()).toBe(200);
+    expect(result.headers()["content-type"]).toContain("image/png");
+    const png = await result.body();
+    expect(png.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+    expect(png.readUInt32BE(16)).toBe(1080);
+    expect(png.byteLength).toBeLessThanOrEqual(400 * 1024);
+    await info.attach(`${phase}-project-export`, {
+      body: png,
+      contentType: "image/png",
+    });
+    const hash = result.headers()["x-taff-content-hash"];
+    expect(hash).toMatch(/^[a-f0-9]{64}$/);
+    return hash;
+  }
+  await page.goto(`/projects/${project.id}`);
+  const beforeHash = await exportedHash("before");
+  await open();
+  await expect(page.getByTestId("project-due-date")).toHaveValue("2030-06-07");
+  const progress = page.getByTestId("project-delivery-progress");
+  for (const invalid of ["", "-1", "101", "1.5"]) {
+    await progress.fill(invalid);
+    await page.getByTestId("project-submit").click();
+    expect(
+      await progress.evaluate((input: HTMLInputElement) =>
+        input.checkValidity(),
+      ),
+    ).toBe(false);
+    await expect(page.getByTestId("project-submit")).toBeVisible();
+  }
+  await progress.fill("45");
+  project = await save();
+  expect(project.dueAt).toBe(originalDue);
+  expect(project.deliveryProgress).toBe(45);
+  await open();
+  await page.getByTestId("project-due-date").fill("2030-06-09");
+  await progress.fill("100");
+  project = await save();
+  expect(project.dueAt).toBe("2030-06-10T09:59:59.999Z");
+  expect(project.deliveryProgress).toBe(100);
+  const due = page.getByTestId("project-due");
+  await expect(due).toContainText(messages[locale].projects.dueDate);
+  await expect(due).toContainText(
+    new Intl.DateTimeFormat(locale, {
+      dateStyle: "medium",
+      timeZone: zone,
+    }).format(new Date(project.dueAt!)),
+  );
+  await expect(page.getByTestId("project-progress")).toContainText(
+    messages[locale].projects.deliveryProgress,
+  );
+  await expect(page.getByTestId("project-progress")).toContainText(
+    new Intl.NumberFormat(locale, { style: "percent" }).format(1),
+  );
+  expect(await exportedHash("after")).not.toBe(beforeHash);
+  await page.reload();
+  await open();
+  await expect(page.getByTestId("project-due-date")).toHaveValue("2030-06-09");
+  await expect(progress).toHaveValue("100");
+
+  // Keep the dialog's captured version while another writer advances the project.
+  const otherWrite = await page.request.patch(path, {
+    data: { version: project.version, deliveryProgress: 80 },
+  });
+  expect(otherWrite.status()).toBe(200);
+  await progress.fill("90");
+  const stale = page.waitForResponse(
+    (r) =>
+      new URL(r.url()).pathname === path && r.request().method() === "PATCH",
+  );
+  await page.getByTestId("project-submit").click();
+  expect((await stale).status()).toBe(409);
+  await expect(page.getByTestId("toast")).toContainText(
+    messages[locale].errors.conflict,
+  );
+  await expect(page.getByTestId("project-submit")).toBeVisible();
+  await expect(page.getByTestId("project-progress")).toContainText(
+    new Intl.NumberFormat(locale, { style: "percent" }).format(0.8),
+  );
+  await page.keyboard.press("Escape");
+  await open();
+  await page.getByTestId("project-due-date").fill("");
+  await progress.fill("0");
+  project = await save();
+  expect(project.dueAt).toBeNull();
+  expect(project.deliveryProgress).toBe(0);
+  await expect(page.getByTestId("project-due")).toHaveCount(0);
+  await expect(page.getByTestId("project-progress")).toContainText(
+    new Intl.NumberFormat(locale, { style: "percent" }).format(0),
+  );
+});
+
 test("an admin sets and changes a project's stage and person in charge", async ({
   page,
 }, info) => {
@@ -152,7 +289,12 @@ test("the person in charge moves the pipeline and Brief filters rows and totals"
     const project = projectSchema.parse(
       await (
         await page.request.post(`/api/projects?workspaceId=${workspace.id}`, {
-          data: { name: "Pipeline one", stage: "lead" },
+          data: {
+            name: "Pipeline one",
+            stage: "lead",
+            dueAt: "2030-06-08T01:23:45.123Z",
+            deliveryProgress: 64,
+          },
         })
       ).json(),
     );
@@ -213,6 +355,26 @@ test("the person in charge moves the pipeline and Brief filters rows and totals"
     await lead.person.reload();
     await expect(control).toHaveValue("proposal_sent");
     await other.person.goto(`/projects/${project.id}`);
+    for (const reader of [lead.person, other.person]) {
+      await expect(reader.getByTestId("project-due")).toContainText(
+        messages[locale].projects.dueDate,
+      );
+      await expect(reader.getByTestId("project-progress")).toContainText("64");
+      await openProjectFilters(reader);
+      await expect(reader.getByTestId("manage-project")).toHaveCount(0);
+      await reader.keyboard.press("Escape");
+      expect(
+        (
+          await reader.request.patch(`/api/projects/${project.id}`, {
+            data: {
+              version: project.version,
+              dueAt: null,
+              deliveryProgress: 0,
+            },
+          })
+        ).status(),
+      ).toBe(403);
+    }
     await expect(other.person.getByTestId("project-stage")).toContainText(
       m.projects.stages.proposal_sent,
     );
@@ -322,6 +484,28 @@ test("the person in charge moves the pipeline and Brief filters rows and totals"
         .getByTestId("project-lead-select")
         .locator(`option[value="${lead.member.id}"]`),
     ).toHaveCount(0);
+    // Losing admin authority removes an editor that was already open.
+    expect(
+      (
+        await page.request.patch(
+          `/api/workspaces/${workspace.id}/members/${other.member.id}`,
+          {
+            data: { role: "admin" },
+          },
+        )
+      ).status(),
+    ).toBe(200);
+    expect(
+      (
+        await other.person.request.patch(
+          `/api/workspaces/${workspace.id}/members/${workspace.memberId}`,
+          {
+            data: { role: "member" },
+          },
+        )
+      ).status(),
+    ).toBe(200);
+    await expect(page.getByTestId("project-submit")).toHaveCount(0);
   } finally {
     await Promise.all(contexts.map((context) => context.close()));
   }

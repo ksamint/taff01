@@ -8,6 +8,7 @@ import {
   issuedAgentTokenSchema,
   memberListSchema,
   meSchema,
+  notificationPreferencesSchema,
   systemAccessMatrixSchema,
 } from "../packages/schemas/src/index";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
@@ -49,6 +50,17 @@ test("summary and access screens", async ({ page }, info) => {
     ).ok(),
   ).toBe(true);
   const me = meSchema.parse(await (await page.request.get("/api/me")).json());
+  // Background digest scans must not add transient toasts to visual captures.
+  const preferences = notificationPreferencesSchema.parse(
+    await (await page.request.get("/api/me/notifications")).json(),
+  );
+  expect(
+    (
+      await page.request.patch("/api/me/notifications", {
+        data: { ...preferences, digest: false },
+      })
+    ).ok(),
+  ).toBe(true);
   await page.addInitScript(
     ({ locale }) => {
       localStorage.setItem("taff-locale", locale);

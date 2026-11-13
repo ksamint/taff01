@@ -59,6 +59,7 @@ import {
   type TaskFilter,
 } from "../lib/project-board";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
+import { deadlineFields, deadlineIso } from "../lib/task-date";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
 import {
@@ -201,10 +202,14 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     id: string;
     version: number;
     archived: boolean;
+    dueAt: string | null;
+    date: string;
   } | null>(null);
   const [name, setName] = useState("");
   const [stage, setStage] = useState<ProjectStage | null>(null);
   const [leadId, setLeadId] = useState<string | null>(null);
+  const [date, setDate] = useState("");
+  const [progress, setProgress] = useState("0");
   const [invalid, setInvalid] = useState(false);
   const dragHintId = useId();
   const selected = projectId
@@ -529,7 +534,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </div>
         </div>
-        {selected && (selected.stage || lead || canMoveStage) && (
+        {selected && (
           <p className="projects-meta" data-testid="project-meta">
             {canMoveStage ? (
               <ProjectStageControl
@@ -555,6 +560,24 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 {t("projects.leadIs", { name: lead.name })}
               </span>
             )}
+            {selected.dueAt && (
+              <span data-testid="project-due">
+                {t("projects.dueDate")}:{" "}
+                <time dateTime={selected.dueAt}>
+                  {new Intl.DateTimeFormat(locale, {
+                    dateStyle: "medium",
+                    timeZone: me.user.tz,
+                  }).format(new Date(selected.dueAt))}
+                </time>
+              </span>
+            )}
+            <span data-testid="project-progress">
+              {t("projects.deliveryProgress")}:{" "}
+              {new Intl.NumberFormat(locale, {
+                style: "percent",
+                maximumFractionDigits: 0,
+              }).format(selected.deliveryProgress / 100)}
+            </span>
           </p>
         )}
         {selected && (
@@ -687,6 +710,9 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                   setName("");
                   setStage(null);
                   setLeadId(null);
+                  setDate("");
+                  setProgress("0");
+                  setInvalid(false);
                   setSheetOpen(false);
                   setProjectDialog("new");
                 }}
@@ -703,10 +729,15 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                     id: selected.id,
                     version: selected.version,
                     archived: selected.archived,
+                    dueAt: selected.dueAt,
+                    date: deadlineFields(selected.dueAt, me.user.tz).date,
                   });
                   setName(selected.name);
                   setStage(selected.stage);
                   setLeadId(selected.leadId);
+                  setDate(deadlineFields(selected.dueAt, me.user.tz).date);
+                  setProgress(String(selected.deliveryProgress));
+                  setInvalid(false);
                   setProjectDialog("edit");
                 }}
               >
@@ -901,7 +932,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           </div>,
           document.body,
         )}
-      {projectDialog && (
+      {projectDialog && admin && confirmed && (
         <SheetDialog
           title={t(
             projectDialog === "new" ? "projects.newProject" : "projects.manage",
@@ -913,17 +944,37 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           <form
             onSubmit={(event) => {
               event.preventDefault();
+              if (busy || !admin || !confirmed) return;
+              let dueAt: string | null;
+              try {
+                // An unchanged displayed date preserves an API-supplied exact time.
+                dueAt =
+                  projectDialog === "edit" && date === projectBaseline?.date
+                    ? projectBaseline.dueAt
+                    : deadlineIso(date, "", me.user.tz);
+              } catch {
+                setInvalid(true);
+                return;
+              }
+              const fields = {
+                name,
+                stage,
+                leadId,
+                dueAt,
+                deliveryProgress: progress.trim() ? Number(progress) : NaN,
+              };
               const parsed =
                 projectDialog === "new"
-                  ? projectInputSchema.safeParse({ name, stage, leadId })
+                  ? projectInputSchema.safeParse(fields)
                   : projectUpdateSchema.safeParse({
                       version: projectBaseline?.version,
-                      name,
-                      stage,
-                      leadId,
+                      ...fields,
                     });
               setInvalid(!parsed.success);
-              if (parsed.success) manage.mutate(parsed.data);
+              if (parsed.success)
+                manage.mutate(parsed.data, {
+                  onError: (error) => showToast(t(errorKey(error))),
+                });
             }}
           >
             <div className="field">
@@ -935,6 +986,34 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 onChange={(event) => setName(event.target.value)}
                 maxLength={100}
                 autoFocus
+              />
+            </div>
+            <div className="field">
+              <Label htmlFor="project-due-date">{t("projects.dueDate")}</Label>
+              <Input
+                id="project-due-date"
+                data-testid="project-due-date"
+                type="date"
+                value={date}
+                onChange={(event) => setDate(event.target.value)}
+                disabled={busy}
+              />
+            </div>
+            <div className="field">
+              <Label htmlFor="project-delivery-progress">
+                {t("projects.deliveryProgress")}
+              </Label>
+              <Input
+                id="project-delivery-progress"
+                data-testid="project-delivery-progress"
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                required
+                value={progress}
+                onChange={(event) => setProgress(event.target.value)}
+                disabled={busy}
               />
             </div>
             <div className="field">
