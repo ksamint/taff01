@@ -24,6 +24,9 @@ Production remains v0.2.23; this task introduces no migration or dependency.
   marker proving export transactions emitted no change event.
 - Font coverage: 3 passed. Audit browser flow: 3 passed (en, zh-CN, zh-HK),
   including the exporter, localized label/hash details and member audit refusal.
+- Gate diagnosis isolated a 336-pixel native-select font race. C6 now requests
+  the existing loaded-font capture mode; HK repeated 3/3 and all six unchanged
+  Linux baselines passed. The rejected attempt is retained; no baseline changed.
 - Full exact-head local gate and source/tree are recorded in the PR body
   after rebasing onto the preceding task's merged main.
 
