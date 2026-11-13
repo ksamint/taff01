@@ -4,7 +4,7 @@ Living product specification for project profiles ([ADR 0021](../adr/0021-projec
 This file states the current contract; the ADR holds the decisions. Change this
 file in the same commit as the behaviour it describes.
 
-Status: implemented for v0.2.24; not yet released.
+Status: released in v0.2.24 (`ff411c6`).
 
 ## Users and roles
 

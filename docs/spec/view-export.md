@@ -5,7 +5,7 @@ project as one image ([ADR 0031](../adr/0031-exported-view-images.md),
 milestone 117). This file states the current contract; the ADR holds the
 decisions. Change this file in the same commit as the behaviour it describes.
 
-Status: implemented on `main`; not yet released (production is v0.2.23).
+Status: released in v0.2.24 (`ff411c6`); screen exports below remain planned for v0.2.25.
 
 ## Users and roles
 
@@ -50,7 +50,7 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 
 ## Out of scope in v1
 
-- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal E3, S1–S3): timeline, calendar, mind and relations images. These screen exports are not current behaviour yet.
+- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal S1–S3): timeline, calendar, mind and relations images. These screen exports are not current behaviour yet.
 
 ## Acceptance
 

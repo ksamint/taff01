@@ -11,10 +11,11 @@ graph data and isolation scope.
 
 ## Status
 
-**Unreleased on main — exported view images.** Members and admins export the
+**v0.2.24 (deployed) — exported view images and organization lifecycle.** Members and admins export the
 current project or the workspace overview as one watermarked PNG (1080 px,
 ≤ 400 KB) and send, copy or save it; each authorized snapshot records bounded
-metadata in the audit log. See [view export](docs/spec/view-export.md).
+metadata in the audit log. Agents with both read scopes use `views.image`,
+one of 38 MCP tools. See [view export](docs/spec/view-export.md).
 Project due-date and delivery-progress editing follows the [project profile spec](docs/spec/projects.md).
 Organization archive and restore follows the [workspace lifecycle spec](docs/spec/workspaces.md).
 

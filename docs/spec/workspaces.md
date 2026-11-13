@@ -6,7 +6,7 @@ Living product specification for workspace archive and restore
 the current contract; ADRs hold the decisions. Change this file in the same
 commit as the behaviour it describes.
 
-Status: implemented for v0.2.24; not yet released.
+Status: released in v0.2.24 (`ff411c6`).
 
 ## Users and roles
 
