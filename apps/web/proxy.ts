@@ -11,4 +11,4 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(new URL("/404", request.url), { status: 404 });
   return NextResponse.next();
 }
-export const config = { matcher: ["/admin/access"] };
+export const config = { matcher: ["/admin", "/admin/access"] };

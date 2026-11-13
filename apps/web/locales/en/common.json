@@ -640,6 +640,15 @@
     "newTask": "New task"
   },
   "organization": {
+    "archive": "Archive organization",
+    "archived": "Archived organizations",
+    "restore": "Restore organization",
+    "noArchived": "No archived organizations.",
+    "administration": "Organization administration",
+    "archivedState": "Archived",
+    "activeState": "Active",
+    "archiveTypeName": "Type {{name}} to confirm",
+    "archiveConsequences": "Archive {{name}}? Members and agents lose access to its tasks, projects and organization data. Login defaults are cleared. Data and memberships are kept. An administrator can restore access; restoration does not change login defaults or restore revoked permissions.",
     "title": "Organizations",
     "switch": "Switch organization",
     "switchHint": "Tasks, members and agent settings are separate in each organization.",

@@ -160,7 +160,7 @@ describe.skipIf(!url)("workspace archive concurrency", () => {
       await Promise.allSettled([demotion, archive]);
     }
   });
-  it("completes concurrent archives without upgrading a shared lifecycle lock", async () => {
+  it("completes concurrent archives and restores without upgrading a shared lifecycle lock", async () => {
     const first = await core.createWorkspace(userPrincipal(alice), {
       name: `Archive parallel A ${randomUUID()}`,
     });
@@ -175,6 +175,15 @@ describe.skipIf(!url)("workspace archive concurrency", () => {
     ).toEqual([
       { id: first.id, archived: true },
       { id: second.id, archived: true },
+    ]);
+    expect(
+      await Promise.all([
+        core.restoreWorkspace(userPrincipal(alice), first.id),
+        core.restoreWorkspace(userPrincipal(alice), second.id),
+      ]),
+    ).toEqual([
+      { id: first.id, archived: false },
+      { id: second.id, archived: false },
     ]);
   });
 });

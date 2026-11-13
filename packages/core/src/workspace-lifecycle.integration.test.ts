@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import {
   activity,
+  agentTokens,
+  agentTokenWorkspaces,
   connectDatabase,
   members,
   tasks,
@@ -11,7 +13,7 @@ import {
 import { and, eq, notInArray, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
-import { type Core, createCore, userPrincipal } from "./index";
+import { type Core, createCore, type Principal, userPrincipal } from "./index";
 
 const url = process.env.TEST_DATABASE_URL;
 if (url && !new URL(url).pathname.endsWith("_test"))
@@ -23,6 +25,16 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
   let bob: string;
   let personal: string;
   let organization: string;
+  const signup = async (name: string) =>
+    (
+      await core.auth.api.signUpEmail({
+        body: {
+          name,
+          email: `${randomUUID()}@test.local`,
+          password: `test-${randomUUID()}`,
+        },
+      })
+    ).user.id;
   beforeAll(async () => {
     await migrateDatabase(url!);
     connection = connectDatabase(url!);
@@ -261,5 +273,228 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
       ]),
     );
     await core.archiveWorkspace(userPrincipal(alice), organization);
+    expect(await core.listArchivedWorkspaces(userPrincipal(alice))).toEqual([
+      expect.objectContaining({ id: organization, personalOwnerId: null }),
+    ]);
+    await core.restoreWorkspace(userPrincipal(alice), organization);
+    expect(
+      (await core.listTasks(userPrincipal(bob), organization)).some(
+        (row) => row.id === task.id,
+      ),
+    ).toBe(true);
+    expect((await core.getMe(bob)).user.defaultWorkspaceId).toBeNull();
+    expect(await core.listArchivedWorkspaces(userPrincipal(alice))).toEqual([]);
+    const before = await connection.db
+      .select()
+      .from(activity)
+      .where(eq(activity.resourceId, organization));
+    await core.restoreWorkspace(userPrincipal(alice), organization);
+    expect(
+      await connection.db
+        .select()
+        .from(activity)
+        .where(eq(activity.resourceId, organization)),
+    ).toHaveLength(before.length);
+  });
+  it("refuses list/archive/restore to members, guests, agents and outsiders, including after demotion", async () => {
+    const p = userPrincipal(alice);
+    const team = await core.createWorkspace(p, { name: "Archive authority" });
+    const guestId = await signup("Archive guest");
+    const outsiderId = await signup("Archive outsider");
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(sql`select set_config('taff.actor_id',${alice},true)`);
+      await tx.insert(members).values([
+        {
+          workspaceId: team.id,
+          userId: bob,
+          name: "Second admin",
+          kind: "person",
+          role: "admin",
+        },
+        {
+          workspaceId: team.id,
+          userId: guestId,
+          name: "Guest",
+          kind: "person",
+          role: "guest",
+        },
+      ]);
+    });
+    const agent = await core.createWorkspaceAgent(p, team.id, {
+      name: "Archive agent",
+      kind: "agent",
+    });
+    const denied: Principal[] = [
+      userPrincipal(guestId),
+      userPrincipal(outsiderId),
+      {
+        kind: "agent",
+        memberId: agent.id,
+        tokenId: randomUUID(),
+        workspaceId: team.id,
+        scopes: ["tasks:read"],
+      },
+    ];
+    for (const caller of denied) {
+      await expect(core.listArchivedWorkspaces(caller)).rejects.toMatchObject({
+        status: 403,
+      });
+      await expect(
+        core.archiveWorkspace(caller, team.id),
+      ).rejects.toMatchObject({ status: 403 });
+      await expect(
+        core.restoreWorkspace(caller, team.id),
+      ).rejects.toMatchObject({ status: 403 });
+    }
+    // Lowest allowed role, not a system admin; personal ownership alone is insufficient.
+    expect((await core.getMe(alice)).user.systemAdmin).toBe(false);
+    expect(
+      (await core.getWorkspaceAccess(p, personal)).canArchiveWorkspace,
+    ).toBe(false);
+    expect(
+      (await core.getWorkspaceAccess(p, team.id)).canArchiveWorkspace,
+    ).toBe(true);
+    await expect(core.restoreWorkspace(p, personal)).rejects.toMatchObject({
+      status: 409,
+    });
+    await core.updateMemberRole(userPrincipal(bob), team.id, team.memberId, {
+      role: "member",
+    });
+    await core.archiveWorkspace(userPrincipal(bob), team.id);
+    await expect(core.archiveWorkspace(p, team.id)).rejects.toMatchObject({
+      status: 403,
+    });
+    await expect(core.restoreWorkspace(p, team.id)).rejects.toMatchObject({
+      status: 403,
+    });
+    expect(
+      (await core.listArchivedWorkspaces(p)).some((row) => row.id === team.id),
+    ).toBe(false);
+    await expect(
+      core.listArchivedWorkspaces(userPrincipal(guestId)),
+    ).rejects.toMatchObject({ status: 403 });
+    // A person who has lost their only nonpersonal admin role cannot list either.
+    const sole = await core.createWorkspace(userPrincipal(outsiderId), {
+      name: "Only administered team",
+    });
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select set_config('taff.actor_id',${outsiderId},true)`,
+      );
+      await tx.insert(members).values({
+        workspaceId: sole.id,
+        userId: bob,
+        name: "Admin",
+        kind: "person",
+        role: "admin",
+      });
+    });
+    await core.updateMemberRole(userPrincipal(bob), sole.id, sole.memberId, {
+      role: "member",
+    });
+    await core.archiveWorkspace(userPrincipal(bob), sole.id);
+    for (const operation of [
+      () => core.listArchivedWorkspaces(userPrincipal(outsiderId)),
+      () => core.archiveWorkspace(userPrincipal(outsiderId), sole.id),
+      () => core.restoreWorkspace(userPrincipal(outsiderId), sole.id),
+    ])
+      await expect(operation()).rejects.toMatchObject({ status: 403 });
+    await core.restoreWorkspace(userPrincipal(bob), team.id);
+    await expect(
+      core.listTasks(userPrincipal(outsiderId), team.id),
+    ).rejects.toMatchObject({ status: 403 });
+    await expect(core.listTasks(p, team.id)).resolves.toEqual([]);
+  });
+  it("system admins restore nonpersonal workspaces, retain defaults and never revive revoked token grants", async () => {
+    const p = userPrincipal(alice);
+    const team = await core.createWorkspace(p, {
+      name: "Revocation preservation",
+    });
+    const agent = await core.createWorkspaceAgent(p, team.id, {
+      name: "Revoked agent",
+      kind: "agent",
+    });
+    const token = await core.createAgentToken(p, {
+      workspaceId: team.id,
+      memberId: agent.id,
+      name: "Revoked token",
+      scopes: ["tasks:read"],
+    });
+    await core.setAgentTokenWorkspace(p, token.id, {
+      workspaceId: team.id,
+      memberId: agent.id,
+      scopes: ["tasks:read"],
+      revoked: true,
+    });
+    await core.revokeAgentToken(p, token.id);
+    const beforeToken = await connection.db
+      .select()
+      .from(agentTokens)
+      .where(eq(agentTokens.id, token.id));
+    const beforeGrants = await connection.db
+      .select()
+      .from(agentTokenWorkspaces)
+      .where(eq(agentTokenWorkspaces.tokenId, token.id));
+    const systemId = await signup("Archive system admin");
+    await connection.db.transaction(async (tx) => {
+      await tx.execute(
+        sql`select set_config('taff.actor_id',${systemId},true)`,
+      );
+      await tx
+        .update(user)
+        .set({ systemAdmin: true })
+        .where(eq(user.id, systemId));
+    });
+    const system = userPrincipal(systemId);
+    const beforeMembers = await connection.db
+      .select()
+      .from(members)
+      .where(eq(members.workspaceId, team.id));
+    try {
+      await core.setDefaultWorkspace(p, alice, { workspaceId: team.id });
+      await core.archiveWorkspace(system, team.id);
+      expect(
+        (await core.listArchivedWorkspaces(system)).some(
+          (row) => row.id === team.id,
+        ),
+      ).toBe(true);
+      await expect(
+        core.archiveWorkspace(system, personal),
+      ).rejects.toMatchObject({ status: 409 });
+      await expect(
+        core.restoreWorkspace(system, personal),
+      ).rejects.toMatchObject({ status: 409 });
+      await core.restoreWorkspace(system, team.id);
+      expect((await core.getMe(alice)).user.defaultWorkspaceId).toBeNull();
+      expect(await core.authenticateAgentToken(token.token)).toBeNull();
+      expect(
+        await connection.db
+          .select()
+          .from(agentTokens)
+          .where(eq(agentTokens.id, token.id)),
+      ).toEqual(beforeToken);
+      expect(
+        await connection.db
+          .select()
+          .from(agentTokenWorkspaces)
+          .where(eq(agentTokenWorkspaces.tokenId, token.id)),
+      ).toEqual(beforeGrants);
+      expect(
+        await connection.db
+          .select()
+          .from(members)
+          .where(eq(members.workspaceId, team.id)),
+      ).toEqual(beforeMembers);
+    } finally {
+      await connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id',${systemId},true)`,
+        );
+        await tx
+          .update(user)
+          .set({ systemAdmin: false })
+          .where(eq(user.id, systemId));
+      });
+    }
   });
 });

@@ -640,6 +640,15 @@
     "newTask": "新建任務"
   },
   "organization": {
+    "archive": "封存組織",
+    "archived": "已封存組織",
+    "restore": "恢復組織",
+    "noArchived": "沒有已封存組織。",
+    "administration": "組織管理",
+    "archivedState": "已封存",
+    "activeState": "使用中",
+    "archiveTypeName": "輸入 {{name}} 以確認",
+    "archiveConsequences": "封存 {{name}}？成員和智能體將無法存取此組織的任務、項目和資料。登入預設組織將清空。資料和成員關係將保留，管理員可恢復存取；恢復不會修改登入預設組織，也不會恢復已撤銷的權限。",
     "title": "組織",
     "switch": "切換組織",
     "switchHint": "每個組織的任務、成員與智能體設定相互獨立。",

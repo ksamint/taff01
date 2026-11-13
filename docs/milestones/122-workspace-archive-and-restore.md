@@ -1,0 +1,24 @@
+# 122 — Workspace archive and restore (A4)
+
+- Organization admins archive with exact-name confirmation and restore from Organizations; system admins use `/admin`.
+- Personal controls are absent; the current-workspace access response carries `canArchiveWorkspace`.
+- Archived lists use fresh identity and retained nonpersonal admin membership; no authority returns 403 and the UI hides the section.
+- Archive/restore share exclusive lifecycle → system administration → workspace row lock order; repeat calls are idempotent.
+- Restore preserves login defaults, visible selection, tasks, memberships and revoked token/grant state.
+- Existing `/api/admin/workspaces` remains; added archived-list and restore routes use shared response schemas.
+- TypeScript only, no migration/dependency/new permission; Rust authority remains unchanged.
+- Living contract: [workspaces WS-1/WS-2](../spec/workspaces.md), same commit as behavior.
+- Isolated branch based on main `692a44ac235cabffef5c6b7e57c0e68e44c0bf92`; parent owns rebase after E2 and full gate.
+- `pnpm typecheck` passed all six packages plus scripts; Biome passed 669 files; permission matrix and diff checks passed.
+- Focused Vitest: 112/112 in seven files (lifecycle, concurrency, planning, token policy, API, fonts and test-id contract).
+- REST lifecycle matrix + route inventory: 21/21 passed (817 unrelated cases skipped).
+- `PORT=3900 pnpm e2e e2e/workspace-lifecycle.spec.ts e2e/organization-default.spec.ts --reporter=list,html`: 12/12 passed in en/zh-CN/zh-HK (41 s).
+- Browser cases cover exact-name confirmation, restore rollback, unchanged defaults/selection, role refusal/demotion, guarded system UI and personal-control absence.
+- Inspected English and Traditional Chinese confirmation PNGs during the lifecycle run; latest focused report is under ignored `playwright-report/`.
+- Spec link/uniqueness check passed (15 requirements, 79 lines); test-id contract regenerated.
+- Initial checks caught one missing CJK glyph (wording corrected), a pre-promotion membership baseline, an overly broad alert assertion and missing `/admin` proxy matcher; final focused checks pass.
+- Local isolated DB migrations/seed passed; used ports 3900/3901, PG 55434, Valkey db15. No other service was stopped.
+- Parent's full gate must use a fresh migrated/seeded runtime DB: focused tests intentionally leave disposable organizations.
+- No full gate, push, PR, merge, production access or deployment performed.
+- Parent reuse review: lifecycle and token policy share `admin-workspaces` cache and response schema; realtime invalidates that key. Web typecheck, 14 realtime/contract tests and six affected system-admin browser cases passed (three locales, 18.7 s).
+- Open decisions: none for A4.

@@ -16,6 +16,7 @@ current project or the workspace overview as one watermarked PNG (1080 px,
 ≤ 400 KB) and send, copy or save it; each authorized snapshot records bounded
 metadata in the audit log. See [view export](docs/spec/view-export.md).
 Project due-date and delivery-progress editing follows the [project profile spec](docs/spec/projects.md).
+Organization archive and restore follows the [workspace lifecycle spec](docs/spec/workspaces.md).
 
 **v0.2.23 (deployed) — grant decisions and audience editing.** Pending requests
 are actionable from the access matrix; administrators can edit audience tags and
