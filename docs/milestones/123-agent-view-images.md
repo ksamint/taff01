@@ -14,7 +14,7 @@ Parent rebases onto merged main and runs the exact-head full gate before publish
 - Omitted/empty scope restores the ceiling; expansion/unknown scope is refused.
 - Original issuer authority and member restore use the ceiling; UI shows it.
 - RFC 6749 §6 decision in ADR 0031; live VE-2.3, DS-9.5, AA-4.8 updated.
-- Migration 0043 adds nullable `refresh_scopes`; journal has 44 entries.
+- Migration 0043 adds nullable `refresh_scopes`; journal has 44 entries. Full gate exposed a stale lineage-tail expectation; add 0043 while retaining the released migration hash/index checks.
 - Legacy null falls back to access scopes; old images tolerate added column.
 - Drizzle's old 0029 snapshot produced stale DDL; only the focused ALTER ships,
   alongside a current snapshot. No renderer or dependency change.
