@@ -1,11 +1,15 @@
 # Changelog
 
-## Unreleased — exported view images
+## v0.2.24 — candidate view exports and workspace lifecycle
 
 - Projects gain Export image: the current project, or the workspace overview with every active project, drawn by the existing Rust renderer as one 1080 px palette PNG of at most 400 KB, watermarked with the exporter, workspace and date and carrying the content hash. The dialog previews it and offers Send (system share sheet), Copy image and Save.
-- New permission `view:export` for members and admins; guests and agents are refused. Finance shows only to people who may read it. Image binaries are not stored; 10 exports per person per minute.
+- Members and admins export images; agents use the new `views.image` MCP tool when their effective workspace grant has both `tasks:read` and `summaries:read`. Finance follows the exporter's existing read authority. Image binaries are not stored; REST and MCP share a quota of 10 requests per person or agent per minute.
 - Each authorized export snapshot records one `view.export` audit row with bounded metadata and no realtime notification. Workspace administrators see it with a localized label in `/orgs/audit`.
-- Deployment: the API needs `SUMMARY_RENDER_URL` (the worker's internal value). No migration, dependency or MCP tool change.
+- Desktop Me and search link to shareholder summaries. Pending task-scoped grant requests show an authorized task title and link, with an unavailable fallback.
+- Project administrators edit saved-zone deadlines and delivery progress in the existing dialog; summaries and exports reflect those values.
+- Organization administrators archive by confirming the exact name and restore archived organizations. Personal workspaces cannot be archived; restore preserves cleared defaults and existing revocations.
+- OAuth refresh can issue narrower access scopes while retaining the original refresh grant ceiling. Additive migration 0043 stores that ceiling in nullable `refresh_scopes`; existing grants remain compatible.
+- MCP now has 38 tools. Deployment uses the existing internal renderer URL; no new environment value or dependency is required. Timeline, calendar and graph exports follow in v0.2.25.
 
 ## v0.2.23 — grant decisions and audience editing
 
