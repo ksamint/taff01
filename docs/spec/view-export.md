@@ -26,6 +26,7 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 - VE-1.5 The header shall read "Workspace overview" or "Project status", "Exported view", the workspace name and "Exported by <name>", in en, zh-CN or zh-HK.
 - VE-1.6 The footer shall carry "Internal. Exported by <name>.", the export instant and zone, and the content hash; the watermark shall read `<exporter> · <workspace> · <local date> · export`.
 - VE-1.7 The content hash shall be the sha256 of the snapshot's canonical JSON, so unchanged data gives the same hash and any change gives a new one.
+- VE-1.8 When core builds an authorized export snapshot, it shall record one `view.export` activity row in its own transaction, attributed to the exporter and project or workspace. Details shall contain only `scope`, `locale`, `contentHash`, `projectCount`, `finance` and the trusted adapter's `channel` (`web` or `mcp`). Invalid input and permission or project refusals shall write nothing; the audit insert shall emit no realtime notification.
 
 ### Access (VE-2)
 - VE-2.1 The action `view:export` shall allow people who are members or admins of the workspace and deny guests, agents and non-members.
@@ -42,18 +43,19 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 
 ## Non-functional
 
-- Nothing is stored; no migration. No new client dependency; the CJK text is drawn with the renderer's server fonts, so the web font subsets do not limit names.
+- Image binaries are not stored; only the allowlisted export audit metadata is retained. No migration or new client dependency; the CJK text is drawn with the renderer's server fonts, so the web font subsets do not limit names.
 - Environment: the API reads `SUMMARY_RENDER_URL` (optional); the renderer stays internal with no public route.
 
 ## Out of scope in v1
 
-- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal E2, E3, S1–S3): export audit rows, the agent `views.image` tool, and timeline, calendar, mind and relations images. None is current behaviour yet.
+- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal E3, S1–S3): the agent `views.image` tool, and timeline, calendar, mind and relations images. None is current behaviour yet.
 
 ## Acceptance
 
 | Requirement | Evidence |
 | --- | --- |
 | VE-1.1–1.7 | `packages/core/src/view-export.integration.test.ts` (5 cases, PostgreSQL) |
+| VE-1.8 | `view-export.integration.test.ts` audit metadata/refusal/notification barrier case; `e2e/audit.spec.ts` in three locales |
 | VE-2.1 | `packages/core/src/permissions.test.ts` (five `view:export` rows); `docs/spec/permissions-matrix.md` |
 | VE-2.2 | `view-export.integration.test.ts` "stops a demoted member…" |
 | VE-3.1–3.4 | `apps/api/src/view-export.test.ts` (6 cases) |

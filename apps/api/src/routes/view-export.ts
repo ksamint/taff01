@@ -10,8 +10,8 @@ const RENDER_TIMEOUT_MS = 10_000;
 
 /**
  * Exported view images (ADR 0031): core builds the watermarked layout with
- * the caller's own rights; the stateless internal renderer draws it. Nothing
- * is stored, so every export reflects the data at that instant.
+ * the caller's own rights; the stateless internal renderer draws it. Core
+ * audits snapshot metadata; image binaries are not stored.
  */
 export function registerViewExportRoutes(
   app: Hono<AppEnv>,

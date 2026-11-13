@@ -207,7 +207,11 @@ export function AuditView() {
                       </th>
                       <td>{names.get(entry.actorId) ?? entry.actorId}</td>
                       <td>
-                        <code>{entry.action}</code>
+                        <code>
+                          {entry.action === "view.export"
+                            ? t("audit.viewExport")
+                            : entry.action}
+                        </code>
                         {hasDetails(entry) && (
                           <details>
                             <summary>{t("audit.details")}</summary>

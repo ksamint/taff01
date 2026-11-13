@@ -62,10 +62,13 @@ Amendment 1.
 Status: accepted; implementation planned in the
 [v0.2.24 goal](../agent-goal-v0.2.24-view-export-and-alignment.md) (E2, E3, S1–S3).
 
-1. **Exports are audited.** Every issued export writes one `activity` row
+1. **Exports are audited.** Every authorized export snapshot built by core writes one `activity` row
    `view.export` in the workspace (actor, scope, project id, locale, content
    hash, project count, finance shown, channel `web` or `mcp`). It is a read,
    so it emits no change event and invalidates no cache. `/orgs/audit` lists it.
+   This records snapshot construction, as E2 specifies, before rendering or
+   delivery; it is not a receipt that a PNG reached the caller. Invalid input
+   and authorization or project refusals write nothing.
 2. **Agents export over MCP.** Tool `views.image` (read-only) returns the same
    PNG as an MCP image block. `view:export` allows an agent only when its
    token's effective grant for the workspace carries both `tasks:read` and

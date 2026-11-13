@@ -114,7 +114,7 @@ test("summary and access screens", async ({ page }, info) => {
     await page.goto(`/summaries/${id}`);
     const document = page.getByTestId("summary-view");
     await expect(document.getByTestId("summary-project")).toBeVisible();
-    await page.evaluate(prepareFonts, undefined);
+    await page.evaluate(prepareFonts, "loaded" as const);
     await expect(document).toHaveScreenshot("summary.png", {
       animations: "disabled",
     });
@@ -130,7 +130,7 @@ test("summary and access screens", async ({ page }, info) => {
     for (const tab of ["people", "agents", "tokens"] as const) {
       await page.getByRole("tab", { name: m.access[tab], exact: true }).click();
       await expect(matrix.locator("tbody tr").first()).toBeVisible();
-      await page.evaluate(prepareFonts, undefined);
+      await page.evaluate(prepareFonts, "loaded" as const);
       await expect(page).toHaveScreenshot(`access-${tab}.png`, {
         animations: "disabled",
       });
@@ -146,7 +146,7 @@ test("summary and access screens", async ({ page }, info) => {
         exact: true,
       }),
     ).toBeVisible();
-    await page.evaluate(prepareFonts, undefined);
+    await page.evaluate(prepareFonts, "loaded" as const);
     await expect(drawer).toHaveScreenshot("access-explain.png", {
       animations: "disabled",
     });
@@ -156,7 +156,7 @@ test("summary and access screens", async ({ page }, info) => {
       .getByRole("tab", { name: m.access.permissions, exact: true })
       .click();
     await expect(matrix.locator("tbody tr").first()).toBeVisible();
-    await page.evaluate(prepareFonts, undefined);
+    await page.evaluate(prepareFonts, "loaded" as const);
     await expect(page).toHaveScreenshot("access-permissions.png", {
       animations: "disabled",
     });
@@ -169,7 +169,7 @@ test("summary and access screens", async ({ page }, info) => {
           .getByRole("complementary")
           .getByRole("link", { name: /M7 reviewer/ }),
       ).toBeVisible();
-    await page.evaluate(prepareFonts, undefined);
+    await page.evaluate(prepareFonts, "loaded" as const);
     await expect(page).toHaveScreenshot("organizations.png", {
       animations: "disabled",
     });
@@ -201,7 +201,7 @@ test("summary and access screens", async ({ page }, info) => {
       ).toBeVisible();
     const systemMatrix = page.getByTestId("system-access-matrix");
     await expect(systemMatrix.locator("tbody tr").first()).toBeVisible();
-    await page.evaluate(prepareFonts, undefined);
+    await page.evaluate(prepareFonts, "loaded" as const);
     await expect(page).toHaveScreenshot("access-system.png", {
       animations: "disabled",
     });

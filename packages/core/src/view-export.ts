@@ -1,4 +1,5 @@
 import {
+  activity,
   type Database,
   projects,
   type Transaction,
@@ -12,7 +13,7 @@ import {
   type ViewExportQuery,
   viewExportQuerySchema,
 } from "@taff/schemas";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { zoneOf } from "./actor-timezone";
 import { CoreError, type Principal } from "./index";
 import { digestLocalDate } from "./notifications-time";
@@ -80,6 +81,7 @@ export function createViewExportOperations({
     p: Principal,
     workspaceId: string,
     query: ViewExportQuery,
+    channel: "web" | "mcp" = "web",
   ): Promise<ViewExport> {
     const body = parse(viewExportQuerySchema, query);
     const w = parse(idSchema, workspaceId);
@@ -164,6 +166,24 @@ export function createViewExportOperations({
         estimateSummaryImageHeight(candidate) <= IMAGE_HEIGHT_BUDGET,
     );
     const subject = body.projectId ? "project" : "workspace";
+    const actorId = actor.userId ?? actor.id;
+    await db.transaction(async (tx) => {
+      await tx.execute(sql`select set_config('taff.actor_id',${actorId},true)`);
+      await tx.insert(activity).values({
+        workspaceId: w,
+        actorId,
+        action: "view.export",
+        resourceId: body.projectId ?? w,
+        details: {
+          scope: subject,
+          locale: body.locale,
+          contentHash,
+          projectCount: snapshot.projects.length,
+          finance,
+          channel,
+        },
+      });
+    });
     return {
       layout,
       watermark,
