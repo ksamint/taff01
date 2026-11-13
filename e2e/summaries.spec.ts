@@ -5,7 +5,9 @@ import { expect, type Page, test } from "@playwright/test";
 import { htmlLang } from "../apps/web/src/lib/i18n";
 import {
   audienceRecipientListSchema,
+  audienceRecipientSchema,
   audienceTagListSchema,
+  audienceTagSchema,
   projectSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount } from "./support/account";
@@ -39,6 +41,65 @@ async function checkRenders(page: Page, hash: string) {
   const bytes = await readFile((await download.path())!);
   expect([...bytes.subarray(0, 8)]).toEqual([137, 80, 78, 71, 13, 10, 26, 10]);
 }
+
+test("a linked recipient reaches summaries from desktop Me and search", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const me = await freshAccount(page, locale);
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  const workspace = me.workspaces[0];
+  const tagResponse = await page.request.post(
+    `/api/workspaces/${workspace.id}/audience-tags`,
+    { data: { org: `Desktop ${locale}` } },
+  );
+  expect(tagResponse.status()).toBe(201);
+  const tag = audienceTagSchema.parse(await tagResponse.json());
+  const recipientResponse = await page.request.post(
+    `/api/audience-tags/${tag.id}/recipients`,
+    {
+      data: {
+        name: me.user.name,
+        userId: me.user.id,
+        locale,
+        timeZone: "UTC",
+        deliverAt: "00:00",
+      },
+    },
+  );
+  expect(recipientResponse.status()).toBe(201);
+  const recipient = audienceRecipientSchema.parse(
+    await recipientResponse.json(),
+  );
+  const generated = await promisify(execFile)(process.execPath, [
+    "--env-file=.env",
+    "node_modules/tsx/dist/cli.mjs",
+    "e2e/support/generate-summary.mts",
+    recipient.id,
+    "--snapshot-only",
+  ]);
+  const { summaryId } = JSON.parse(generated.stdout) as { summaryId: string };
+  const row = page.locator(
+    `[data-testid="summary-row"][data-summary="${summaryId}"]`,
+  );
+
+  await page.goto("/me?tab=settings");
+  await page.getByTestId("open-summaries").click();
+  await expect(page).toHaveURL(/\/summaries$/);
+  await expect(row).toBeVisible();
+
+  await page.goto("/me?tab=settings");
+  await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
+  await page.keyboard.press("ControlOrMeta+k");
+  await page.getByTestId("search-type-settings").click();
+  await page.getByTestId("search-input").fill(messages[locale].summary.nav);
+  await page
+    .getByTestId("search-setting")
+    .filter({ hasText: messages[locale].summary.nav })
+    .click();
+  await expect(page).toHaveURL(/\/summaries$/);
+  await expect(row).toBeVisible();
+});
 
 test("an admin tags, previews, shares and revokes a shareholder summary", async ({
   page,

@@ -83,7 +83,7 @@ Each statement is testable. "Shall" is a hard requirement.
   existing summaries after the project is untagged or the tag archived.
 - DS-5.2 `/summaries` shall list the newest 31 summaries with a `truncated` flag; `/summaries/[id]` shall
   render the document with the watermark on screen and in print, the hash in the footer, and a print
-  action. Me links to it; admins manage audiences at `/orgs/summaries`. The in-app, admin preview and
+  action. Phone Me, desktop Me Settings and the ⌘K settings shortcuts link to it; admins manage audiences at `/orgs/summaries`. The in-app, admin preview and
   public pages shall draw the same display layout as the text and image renders (DS-8.2): audience
   chip with the tag label, full localized date, "prepared for" line, KPI tiles, project cards with risk
   badge and accessible progress and finance bars, counted sections, and a confidential footer.
