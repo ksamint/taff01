@@ -881,7 +881,7 @@ several do). “Also rendered by” lists the other files.
 | `switch` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `tab — name: m.access.agents` | 1 | access.spec.ts |
 | `tab — name: m.access.apps` | 1 | access.spec.ts |
-| `tab — name: m.access.pendingGrants` | 2 | access.spec.ts |
+| `tab — name: m.access.pendingGrants` | 4 | access.spec.ts |
 | `tab — name: m.access.people` | 2 | access.spec.ts |
 | `tab — name: m.access.permissions` | 2 | access.spec.ts, delivery-visual.spec.ts |
 | `tab — name: m.access.tokens` | 1 | access.spec.ts |
@@ -1046,7 +1046,7 @@ read (`data-event-id`, `data-date`).
 | `a[href="/me"]` | 1 | ui-v2.spec.ts |
 | `a[href="/me"] .nav-badge` | 2 | ui-v2.spec.ts |
 | `a[href="/me"]:visible` | 1 | support/preferences.ts |
-| `a[href="/tasks/*"]` | 1 | accessibility.spec.ts |
+| `a[href="/tasks/*"]` | 2 | access.spec.ts, accessibility.spec.ts |
 | `aside.sidebar` | 4 | today.spec.ts, ui-v2.spec.ts |
 | `dd[data-status="rate_limited"]` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `dialog.confirm-dialog` | 7 | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
@@ -1080,7 +1080,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `access.explain` | 6 | access.spec.ts, delivery-visual.spec.ts |
 | `access.group.finance` | 5 | access.spec.ts |
 | `access.noPendingGrants` | 10 | access.spec.ts |
-| `access.pendingGrants` | 10 | access.spec.ts |
+| `access.pendingGrants` | 20 | access.spec.ts |
 | `access.people` | 10 | access.spec.ts |
 | `access.permissions` | 6 | access.spec.ts, delivery-visual.spec.ts |
 | `access.permissionsBaseline` | 5 | access.spec.ts |
@@ -1147,6 +1147,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
 | `grants.taskScope` | 5 | access.spec.ts |
+| `grants.taskUnavailable` | 1 | access.spec.ts |
 | `grants.workspaceScope` | 5 | access.spec.ts |
 | `home.headline1` | 7 | home-layout.spec.ts, landing.spec.ts, ui-v2.spec.ts |
 | `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |

@@ -11,6 +11,7 @@ import {
   meSchema,
   oauthClientSchema,
   oauthRedirectSchema,
+  taskReference,
   taskSchema,
   workspaceSchema,
 } from "../packages/schemas/src/index";
@@ -50,7 +51,7 @@ test("workspace admin resolves pending capability requests", async ({
               await page.request.post("/api/tasks", {
                 data: {
                   workspaceId: workspace.id,
-                  title: reason,
+                  title: `Task for ${reason}`,
                   ownerId: workspace.memberId,
                   workerId: agent.id,
                 },
@@ -75,9 +76,36 @@ test("workspace admin resolves pending capability requests", async ({
     await expect(row).toContainText(reason);
     await expect(row).toContainText(
       task
-        ? m.grants.taskScope.replace("{{task}}", task.id)
+        ? m.grants.taskScope.replace(
+            "{{task}}",
+            `${taskReference(workspace.key, task.number)} · ${task.title}`,
+          )
         : m.grants.workspaceScope,
     );
+    if (task) {
+      const taskLink = row.locator(`a[href="/tasks/${task.id}"]`);
+      await expect(taskLink).toContainText(task.title);
+      await page.screenshot({
+        path: info.outputPath(`pending-task-title-${locale}.png`),
+        fullPage: true,
+      });
+      const taskUrl = `**/api/tasks?workspaceId=${workspace.id}`;
+      await page.route(taskUrl, (route) => route.fulfill({ json: [] }));
+      await page.reload();
+      await page
+        .getByRole("tab", { name: m.access.pendingGrants, exact: true })
+        .click();
+      await expect(row).toContainText(task.id);
+      await expect(row).toContainText(messages[locale].grants.taskUnavailable);
+      await expect(row).not.toContainText(task.title);
+      await expect(taskLink).toHaveCount(0);
+      await page.unroute(taskUrl);
+      await page.reload();
+      await page
+        .getByRole("tab", { name: m.access.pendingGrants, exact: true })
+        .click();
+      await expect(taskLink).toContainText(task.title);
+    }
     await expect(
       row.getByRole("link", { name: agent.name, exact: true }),
     ).toHaveAttribute("href", `/agents/${agent.id}`);
