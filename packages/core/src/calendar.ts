@@ -175,6 +175,8 @@ export function createCalendarOperations({
     p: Principal,
     w: string,
     input: CalendarRange,
+    // Internal export read: omit the tray query and its unrelated truncation.
+    options: { scheduledOnly?: boolean } = {},
   ): Promise<CalendarViewData> {
     parse(idSchema, w);
     const range = parse(calendarRangeSchema, input);
@@ -204,20 +206,22 @@ export function createCalendarOperations({
       )
       .orderBy(desc(taskCalendar.startAt), taskCalendar.taskId)
       .limit(201);
-    const unscheduledRows = await db
-      .select({ task: tasks })
-      .from(tasks)
-      .leftJoin(taskCalendar, eq(taskCalendar.taskId, tasks.id))
-      .where(
-        and(
-          eq(tasks.workspaceId, w),
-          sql`${tasks.status}<>'done'`,
-          isNull(tasks.archivedAt),
-          isNull(taskCalendar.taskId),
-        ),
-      )
-      .orderBy(desc(tasks.updatedAt), tasks.id)
-      .limit(201);
+    const unscheduledRows = options.scheduledOnly
+      ? []
+      : await db
+          .select({ task: tasks })
+          .from(tasks)
+          .leftJoin(taskCalendar, eq(taskCalendar.taskId, tasks.id))
+          .where(
+            and(
+              eq(tasks.workspaceId, w),
+              sql`${tasks.status}<>'done'`,
+              isNull(tasks.archivedAt),
+              isNull(taskCalendar.taskId),
+            ),
+          )
+          .orderBy(desc(tasks.updatedAt), tasks.id)
+          .limit(201);
     const selected = [
       ...scheduled.slice(0, 200).map((row) => row.task.id),
       ...unscheduledRows.slice(0, 200).map((row) => row.task.id),

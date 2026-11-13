@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { activity, connectDatabase, members } from "@taff/db";
+import { activity, connectDatabase, members, tasks } from "@taff/db";
 import {
   calendarImageInputSchema,
   summaryImageLayoutInputSchema,
@@ -422,6 +422,64 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
         visibleDate: "2026-02-30",
       }),
     ).rejects.toMatchObject({ code: "invalid_input" });
+  });
+
+  it("keeps scheduled export stable across the 200-to-201 unscheduled tray boundary", async () => {
+    const workspace = await core.createWorkspace(alice, {
+      name: "Export tray isolation",
+    });
+    await core.createTask(alice, {
+      workspaceId: workspace.id,
+      ownerId: workspace.memberId,
+      workerId: null,
+      title: "Scheduled",
+      calendar: {
+        startAt: "2026-11-12T09:00:00Z",
+        endAt: "2026-11-12T10:00:00Z",
+        timeZone: "UTC",
+        rrule: null,
+      },
+    });
+    const addTray = async (from: number, count: number) =>
+      connection.db.transaction(async (tx) => {
+        await tx.execute(
+          sql`select set_config('taff.actor_id',${(alice as { userId: string }).userId},true)`,
+        );
+        await tx.insert(tasks).values(
+          Array.from({ length: count }, (_, index) => ({
+            workspaceId: workspace.id,
+            ownerId: workspace.memberId,
+            number: from + index,
+            title: "Unscheduled",
+          })),
+        );
+      });
+    await addTray(2, 200);
+    const range = { from: "2026-11-09T00:00:00Z", to: "2026-11-16T00:00:00Z" };
+    const query = {
+      view: "calendar" as const,
+      calendarMode: "week" as const,
+      visibleDate: "2026-11-12",
+      locale: "en" as const,
+    };
+    const normalBefore = await core.listCalendar(alice, workspace.id, range);
+    expect(normalBefore.unscheduled).toHaveLength(200);
+    expect(normalBefore.truncated).toBe(false);
+    const before = await core.exportViewImageInput(alice, workspace.id, query);
+    await addTray(202, 1);
+    const normalAfter = await core.listCalendar(alice, workspace.id, range);
+    expect(normalAfter.unscheduled).toHaveLength(200);
+    expect(normalAfter.truncated).toBe(true);
+    expect(normalAfter.occurrences).toEqual(normalBefore.occurrences);
+    const after = await core.exportViewImageInput(alice, workspace.id, query);
+    expect(after.contentHash).toBe(before.contentHash);
+    expect(after.layout).toEqual(before.layout);
+    expect(after.layout.sourceTruncatedNote).toBeNull();
+    const scheduledOnly = await core.listCalendar(alice, workspace.id, range, {
+      scheduledOnly: true,
+    });
+    expect(scheduledOnly.unscheduled).toEqual([]);
+    expect(scheduledOnly.truncated).toBe(false);
   });
 
   it("audits each authorized snapshot with allowlisted metadata and no change notification", async () => {

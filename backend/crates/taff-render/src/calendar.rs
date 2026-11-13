@@ -1,3 +1,5 @@
+// TABLE AI light tokens: ink, primary gold, error, outline and surface containers.
+// Source: apps/web/src/styles/tokens.css, matching designed.rs.
 use crate::{escape, palette_svg};
 use serde::Deserialize;
 use serde_json::Value;
@@ -142,7 +144,7 @@ pub fn render_calendar(input: &Value) -> Result<Vec<u8>, &'static str> {
         "Manrope, Noto Sans TC, Noto Sans SC"
     };
     let mut svg = format!(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="{}"><rect width="1600" height="{}" fill="#ffffff"/><g font-family="{family}" fill="#20252b">"##,
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="{}"><rect width="1600" height="{}" fill="#ffffff"/><g font-family="{family}" fill="#1b1b1d">"##,
         l.height, l.height
     );
     text(&mut svg, 44.0, 56.0, 32, &clipped(&l.title, 86));
@@ -157,9 +159,9 @@ pub fn render_calendar(input: &Value) -> Result<Vec<u8>, &'static str> {
         );
     }
     for cell in &l.cells {
-        let bg = if cell.in_month { "#ffffff" } else { "#f2f3f5" };
+        let bg = if cell.in_month { "#ffffff" } else { "#f5f3f4" };
         svg.push_str(&format!(
-            r##"<rect x="{}" y="{}" width="216" height="{}" fill="{bg}" stroke="#d9dde2"/>"##,
+            r##"<rect x="{}" y="{}" width="216" height="{}" fill="{bg}" stroke="#e4e2e3"/>"##,
             cell.x, cell.y, cell.height
         ));
         text(
@@ -177,14 +179,14 @@ pub fn render_calendar(input: &Value) -> Result<Vec<u8>, &'static str> {
             &clipped(&l.all_day_label, 32),
         );
         svg.push_str(&format!(
-            r##"<path d="M{} {}h200" stroke="#d9dde2"/>"##,
+            r##"<path d="M{} {}h200" stroke="#e4e2e3"/>"##,
             cell.x + 8.0,
             cell.timed_y - 6.0
         ));
         for item in &cell.items {
             if item.all_day {
                 svg.push_str(&format!(
-                    r##"<rect x="{}" y="{}" width="200" height="22" rx="3" fill="#e3ebfa"/>"##,
+                    r##"<rect x="{}" y="{}" width="200" height="22" rx="3" fill="#a88b52" fill-opacity="0.08"/>"##,
                     cell.x + 8.0,
                     item.y - 16.0
                 ));
@@ -207,14 +209,14 @@ pub fn render_calendar(input: &Value) -> Result<Vec<u8>, &'static str> {
             }
             if item.continues_before {
                 svg.push_str(&format!(
-                    r##"<path d="M{} {}l-4 4 4 4" fill="none" stroke="#4b76c8"/>"##,
+                    r##"<path d="M{} {}l-4 4 4 4" fill="none" stroke="#a88b52"/>"##,
                     cell.x + 12.0,
                     item.y - 9.0
                 ));
             }
             if item.continues_after {
                 svg.push_str(&format!(
-                    r##"<path d="M{} {}l4 4 -4 4" fill="none" stroke="#4b76c8"/>"##,
+                    r##"<path d="M{} {}l4 4 -4 4" fill="none" stroke="#a88b52"/>"##,
                     cell.x + 204.0,
                     item.y - 9.0
                 ));

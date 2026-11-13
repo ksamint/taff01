@@ -26,3 +26,10 @@ Focused validation:
 - Focused Biome, generated contracts, git diff --check: passed. No full release gate claim.
 
 Parent owns serial rebase onto merged S1, full gate, PR/merge and deployment; S3 graph integration is separate.
+
+Review repairs (local only):
+- S1 palette fix cc24ffe inherited as 226f5d5; calendar now uses approved CSS ink/gold/outline/container and gold-mist opacity. Only six calendar goldens intentionally updated here (34923–68517 bytes); summary goldens untouched.
+- Trusted fourth `listCalendar` argument `{ scheduledOnly: true }` skips the tray query only for export. Public REST/MCP/UI inputs and default truncation remain unchanged; all callers inspected.
+- 200→201 unscheduled tasks leave exported hash/layout unchanged and no false warning; normal calendar still reports truncation. Scheduled-row and occurrence overflow remain reported.
+- DB command above expanded with `packages/core/src/calendar.integration.test.ts`: 31 passed. Focused schema/API/MCP command above without fonts: 25 passed. Core/API typechecks passed; Biome, Rust fmt and diff checks passed.
+- Full renderer command above: 17 passed, including summary/timeline goldens and palette guard. Calendar-only UPDATE_RENDER_GOLDENS=1 run: 4 passed. No browser/full release gate rerun for this internal-read/palette repair; prior browser evidence remains above.

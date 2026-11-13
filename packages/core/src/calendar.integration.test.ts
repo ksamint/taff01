@@ -628,6 +628,20 @@ describe.skipIf(!url)("M6 PostgreSQL calendar", () => {
     const data = await core.listCalendar(person, rows.id, range);
     expect(data.occurrences).toHaveLength(200);
     expect(data.truncated).toBe(true);
+    expect(
+      (
+        await core.exportViewImageInput(person, rows.id, {
+          view: "calendar",
+          calendarMode: "week",
+          visibleDate: "2026-10-09",
+          locale: "en",
+        })
+      ).layout.sourceTruncatedNote,
+    ).not.toBeNull();
+    expect(
+      (await core.listCalendar(person, rows.id, range, { scheduledOnly: true }))
+        .truncated,
+    ).toBe(true);
     const outputs = await bulkWorkspace(
       "Occurrence cap",
       40,
@@ -640,6 +654,16 @@ describe.skipIf(!url)("M6 PostgreSQL calendar", () => {
     });
     expect(expanded.occurrences).toHaveLength(2000);
     expect(expanded.truncated).toBe(true);
+    expect(
+      (
+        await core.listCalendar(
+          person,
+          outputs.id,
+          { from: "2026-10-01T00:00:00Z", to: "2026-12-02T00:00:00Z" },
+          { scheduledOnly: true },
+        )
+      ).truncated,
+    ).toBe(true);
     const tray = await core.createWorkspace(person, { name: "Tray cap" });
     await connection.db.transaction(async (tx) => {
       await actor(tx);

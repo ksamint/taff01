@@ -64,6 +64,7 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 
 - VE-5.7 REST/MCP `view=calendar` shall require `calendarMode=week|month` and `visibleDate=YYYY-MM-DD`, reject projectId/criticalPath/client zone and irrelevant options, and query authorized `listCalendar` in the saved human/token-issuer zone. Hashes shall bind the normalized window, visible date/mode, locale, exporter and scheduled display data; no unscheduled tray data or finance is rendered/hashed. Snapshot audit shall use scope calendar, resource workspace, finance false and a deduplicated project count from scheduled source occurrences in the window (zero allowed).
 - VE-5.8 Confirmed non-guests shall see the calendar Export image button only in week/month grid views, not day or list views. The current visible date and mode shall pass through the existing preview/send/copy/save flow and shared REST/MCP quota and audit pipeline.
+- VE-5.9 Calendar rendering shall use the approved TABLE AI light tokens. Export reads shall omit the unscheduled tray query and its truncation via trusted internal scheduled-only mode; ordinary calendar reads retain the tray and combined truncation. Scheduled-row/occurrence overflow shall still show the export warning.
 
 The caller imports `calendarImageWindow` and `buildCalendarLayout` from `@taff/schemas/calendar-image`.
 Use `calendarImageWindow({mode, visibleDate, timeZone})` to obtain `startDate`, exclusive `endDate`, `from`, `to` and canonical `timeZone`; pass the instant range to authorized `listCalendar`.

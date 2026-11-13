@@ -64,6 +64,7 @@ type Dependencies = {
     p: Principal,
     workspaceId: string,
     range: { from: string; to: string },
+    options?: { scheduledOnly?: boolean },
   ): Promise<CalendarViewData>;
 };
 
@@ -227,10 +228,12 @@ export function createViewExportOperations({
         timeZone: zone,
       };
       const window = calendarImageWindow(query);
-      const source = await listCalendar(p, w, {
-        from: window.from,
-        to: window.to,
-      });
+      const source = await listCalendar(
+        p,
+        w,
+        { from: window.from, to: window.to },
+        { scheduledOnly: true },
+      );
       const snapshot = {
         truncated: source.truncated,
         occurrences: source.occurrences.map((o) => ({
