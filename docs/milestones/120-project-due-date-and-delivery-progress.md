@@ -16,6 +16,7 @@
 - Delivery-case rerun with `--grep 'project deadline' --reporter=list,html` passed 3/3; six PNG attachments are retained in the local `playwright-report/` (ignored).
 - After A3 rebase: both typechecks, 29 focused tests, Biome, permission matrix and all 9 browser cases passed again (1.1 min); HTML/PNG report refreshed.
 - Inspected rendered PNGs show the saved date and progress (12% before, 100% after), with watermark and saved zone.
+- Full-gate fixture fixes clear the MCP task deadline before planning and disable digests only for dedicated visual accounts; strict mutation/visual assertions remain intact. Release visual checks use a fresh seeded runtime database.
 - Permission-matrix check and spec link/unique-requirement checks passed (11 requirements, 71 lines).
 - Fresh isolated DB migrations and demo seed passed; browser work used ports 3700/3701, PG 55434 and Valkey db13.
 - Final exact-source full gate, PR/merge and deployment remain parent-owned and pending.
