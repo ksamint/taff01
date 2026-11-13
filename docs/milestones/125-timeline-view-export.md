@@ -1,8 +1,8 @@
 # 125 — public timeline image export candidate
 
-Status: local implementation; no push, merge, release gate or deployment.
-Base E3: d0c9eae16eae044e53dce4e2bbc9abf851dd4f09.
-Pure renderer dependency boundary: 6b634bd (cherry-pick of 52690d4).
+Status: implemented for unreleased v0.2.25; production remains accepted v0.2.24 `ff411c6`.
+Original implementation base E3: d0c9eae16eae044e53dce4e2bbc9abf851dd4f09.
+Integrated onto v0.2.24 closeout main `02e03c4`; pure renderer, public integration, browser evidence and palette repairs preserved.
 Targets: TypeScript core/API/MCP/UI and shared schemas; existing Rust timeline renderer.
 
 - Strict view=overview|project|timeline; omitted view preserves old projectId behavior.
@@ -24,6 +24,8 @@ Focused validation on the implementation tree:
 - Three-locale timeline browser tests: 3 passed in 29.3 s against the real renderer (1600 px PNG/save, critical highlight hash change, zoom hash stability).
 - Browser command: `node --env-file=.env node_modules/@playwright/test/cli.js test --config playwright.timeline.local.ts e2e/view-export.spec.ts -g 'timeline exports'`; temporary harness used direct API + webpack dev on 4100/4101, renderer 3303. Default Turbopack startup could not resolve external dependency links; no tracked config change.
 
-Parent owns full gate, rebase onto completed v24, PR/merge and deploy. S2/S3 integrate separately.
+Parent rebase is complete; full gate, PR/merge and v25 deployment remain. S2/S3 integrate separately.
+Conflict resolution keeps v24 released status separate from the timeline candidate; the goal now correctly requires all four application images.
+Post-rebase typecheck and 21 focused tests in six files passed. Replaced unsupported shared dependency-store links with a normal frozen local install; no configuration change.
 
 Review repair: timeline colours now use approved TABLE AI ink/gold/error/outline/container tokens from tokens.css, guarded by a renderer source-token assertion. Intentionally refreshed only three timeline PNGs. Focused timeline checks: 5 passed; full renderer regression: 13 passed, summary goldens unchanged. No full gate or publication.
