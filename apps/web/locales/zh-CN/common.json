@@ -640,6 +640,15 @@
     "newTask": "新建任务"
   },
   "organization": {
+    "archive": "归档组织",
+    "archived": "已归档组织",
+    "restore": "恢复组织",
+    "noArchived": "没有已归档组织。",
+    "administration": "组织管理",
+    "archivedState": "已归档",
+    "activeState": "使用中",
+    "archiveTypeName": "输入 {{name}} 以确认",
+    "archiveConsequences": "归档 {{name}}？成员和智能体将无法访问此组织的任务、项目和数据。登录默认组织将清空。数据和成员关系将保留，管理员可恢复访问；恢复不会修改登录默认组织，也不会恢复已撤销的权限。",
     "title": "组织",
     "switch": "切换组织",
     "switchHint": "每个组织的任务、成员和智能体设置相互独立。",

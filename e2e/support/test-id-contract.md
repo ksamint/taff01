@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (472 distinct, 2204 uses)
+## Test ids (481 distinct, 2240 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -176,13 +176,16 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
+| `archive-*` | 3 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `board-column-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `contact-search` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `grant-confirm` | 5 | mcp-view.tsx, token-policy-control.tsx | access.spec.ts, token-grants.spec.ts |
+| `lifecycle-*` | 1 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx, relations-view.tsx, summaries-admin.tsx | me.spec.ts |
 | `open-search` | 3 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts |
 | `project-audience-option` | 1 | project-audience-tags.tsx | summaries.spec.ts |
 | `quick-field-*` | 2 | crm/contact-role-row.tsx, quick-add-dialog.tsx, relations-view.tsx, summaries-admin.tsx | support/tasks.ts |
+| `restore-*` | 8 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `review-check-*` | 12 | crm/contact-role-row.tsx, relations-view.tsx, review-view.tsx, summaries-admin.tsx | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `role-*` | 7 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `summary-share-revoke-confirm` | 1 | summary-share-panel.tsx | summaries.spec.ts |
@@ -195,7 +198,7 @@ several do). “Also rendered by” lists the other files.
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 41 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts |
+| `workspace-*` | 49 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts, workspace-lifecycle.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -441,8 +444,10 @@ several do). “Also rendered by” lists the other files.
 | `open-access-matrix` | 1 |  | access.spec.ts |
 | `open-audit-log` | 3 |  | audit.spec.ts, delivery-visual.spec.ts |
 | `open-summaries-admin` | 1 |  | summaries.spec.ts |
+| `open-workspace-administration` | 1 |  | workspace-lifecycle.spec.ts |
 | `team-add-agent` | 8 |  | agent-creation.spec.ts, release/support.ts |
 | `team-invite` | 4 |  | me.spec.ts, planning.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
+| `workspace-lifecycle` | 2 | workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 
 ### print-button.tsx
 
@@ -620,6 +625,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
+| `archive-organization-name` | 3 | workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `audience-recipient-contact` | 2 |  | audience-editing.spec.ts |
 | `audience-recipient-create` | 1 |  | summaries.spec.ts |
 | `audience-recipient-edit-account` | 2 |  | audience-editing.spec.ts |
@@ -780,6 +786,14 @@ several do). “Also rendered by” lists the other files.
 | `view-export-send` | 1 |  | view-export.spec.ts |
 | `view-export-size` | 1 |  | view-export.spec.ts |
 
+### workspace-lifecycle.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `archive-organization` | 4 |  | workspace-lifecycle.spec.ts |
+| `archived-organizations` | 2 |  | workspace-lifecycle.spec.ts |
+| `confirm-archive-organization` | 4 |  | workspace-lifecycle.spec.ts |
+
 ## Role and name locators
 
 `getByRole(role, { name })`. Native semantics the suites also rely on:
@@ -790,7 +804,7 @@ several do). “Also rendered by” lists the other files.
 
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
-| `alert` | 38 | agent-creation.spec.ts, audience-editing.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `alert` | 40 | agent-creation.spec.ts, audience-editing.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts, workspace-lifecycle.spec.ts |
 | `button` | 11 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -834,7 +848,7 @@ several do). “Also rendered by” lists the other files.
 | `combobox — name: m.organization.roleFor.replace("{{name}}", "Access member")` | 1 | access.spec.ts |
 | `combobox — name: m.organization.roleFor.replace("{{name}}", admin.user.name)` | 1 | access.spec.ts |
 | `complementary` | 3 | delivery-visual.spec.ts |
-| `dialog` | 74 | access.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, audience-editing.spec.ts, calendar.spec.ts, delivery-visual.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
+| `dialog` | 75 | access.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, audience-editing.spec.ts, calendar.spec.ts, delivery-visual.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts, workspace-lifecycle.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
@@ -845,6 +859,7 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: m.agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
+| `heading — name: m.organization.invites` | 1 | planning.spec.ts |
 | `heading — name: m.organization.team` | 1 | me.spec.ts |
 | `heading — name: messages[locale].calendar.title` | 1 | calendar.spec.ts |
 | `heading — name: messages[locale].notifications.title` | 1 | notifications.spec.ts |
@@ -870,6 +885,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: renamed` | 2 | persistence.spec.ts |
 | `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
+| `list` | 1 | planning.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `progressbar` | 1 | summaries.spec.ts |
 | `region — name: m.access.agents` | 1 | access.spec.ts |
@@ -945,7 +961,6 @@ read (`data-event-id`, `data-date`).
 | `.calendar-engine-month-grid` | 1 | ui-v2.spec.ts |
 | `.calendar-engine-week` | 1 | ui-v2.spec.ts |
 | `.calendar-list-item` | 5 | calendar.spec.ts, persistence.spec.ts |
-| `.history-list` | 1 | planning.spec.ts |
 | `.history-list > li` | 1 | agent-review.spec.ts |
 | `.invite-banner a[href="/orgs"]` | 1 | live/live.ts |
 | `.is-event-copy` | 2 | calendar.spec.ts |
@@ -960,6 +975,7 @@ read (`data-event-id`, `data-date`).
 | `.me-agent-card` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.me-desk-panel` | 1 | completion.spec.ts |
 | `.me-profile-copy strong` | 1 | me.spec.ts |
+| `.me-section` | 1 | planning.spec.ts |
 | `.notifications-body` | 1 | notifications.spec.ts |
 | `.organization-choices` | 1 | scripts/ui/app-shots.mts |
 | `.organizations-view` | 1 | planning.spec.ts |
@@ -1028,7 +1044,7 @@ read (`data-event-id`, `data-date`).
 | `[data-workspace-id="*"]` | 4 | access.spec.ts, token-grants.spec.ts |
 | `#add-agent-reason` | 1 | agent-creation.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `#default-workspace` | 1 | organization-default.spec.ts |
+| `#default-workspace` | 6 | organization-default.spec.ts, workspace-lifecycle.spec.ts |
 | `#grant-reason` | 1 | optimistic-m4.spec.ts |
 | `#grant-task` | 1 | optimistic-m4.spec.ts |
 | `#inside` | 1 | native-select-fonts.spec.ts |
@@ -1148,7 +1164,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `errors.conflict` | 13 | audience-editing.spec.ts, calendar.spec.ts, planning.spec.ts, project-profile.spec.ts |
 | `errors.email_verification_required` | 5 | planning.spec.ts |
 | `errors.forbidden` | 16 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
-| `errors.internal_error` | 2 | calendar.spec.ts |
+| `errors.internal_error` | 3 | calendar.spec.ts, workspace-lifecycle.spec.ts |
 | `errors.invalid_input` | 15 | agent-creation.spec.ts, audience-editing.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `errors.profile` | 2 | me.spec.ts, optimistic-m4.spec.ts |
 | `grants.request` | 1 | optimistic-m4.spec.ts |
@@ -1207,9 +1223,11 @@ Keys read from `apps/web/locales/*/common.json` through
 | `oauth.returnToConsent` | 1 | completion.spec.ts |
 | `organization.accept` | 5 | planning.spec.ts |
 | `organization.adminRequired` | 1 | agent-creation.spec.ts |
+| `organization.archiveConsequences` | 1 | workspace-lifecycle.spec.ts |
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
 | `organization.emailDelivery.logged` | 5 | planning.spec.ts |
 | `organization.invite` | 25 | planning.spec.ts |
+| `organization.invites` | 5 | planning.spec.ts |
 | `organization.roleFor` | 10 | access.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 22 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |

@@ -78,6 +78,8 @@ const organizationRoutes = [
   ["PATCH", "/api/users/:id/default-workspace"],
   ["GET", "/api/admin/workspaces"],
   ["DELETE", "/api/workspaces/:id"],
+  ["POST", "/api/workspaces/:id/restore"],
+  ["GET", "/api/workspaces/archived"],
 ] as const;
 const lifecycleRoutes = [
   ["GET", "/api/health"],
@@ -1779,13 +1781,16 @@ describe.skipIf(!databaseUrl)(
       "organization lifecycle $method $path × $actor",
       async ({ method, path, actor }) => {
         const target =
-          method === "DELETE"
+          method === "DELETE" ||
+          method === "POST" ||
+          path === "/api/workspaces/archived"
             ? (
                 await core.createWorkspace(owner(), {
                   name: `Matrix cleanup ${randomUUID()}`,
                 })
               ).id
             : ownerUserId;
+        if (method === "POST") await core.archiveWorkspace(owner(), target);
         const response = await app.request(path.replace(":id", target), {
           method,
           headers:
@@ -1803,7 +1808,7 @@ describe.skipIf(!databaseUrl)(
         expect(response.status).toBe(
           actor === "agent"
             ? 401
-            : method !== "GET" && actor === "owner"
+            : actor === "owner" && path !== "/api/admin/workspaces"
               ? 200
               : 403,
         );

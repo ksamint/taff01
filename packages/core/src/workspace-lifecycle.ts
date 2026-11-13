@@ -11,6 +11,8 @@ import {
   type DefaultWorkspaceInput,
   defaultWorkspaceInputSchema,
   idSchema,
+  workspaceAdministrationListSchema,
+  workspaceLifecycleSchema,
 } from "@taff/schemas";
 import { and, eq, isNull, sql } from "drizzle-orm";
 import { CoreError, type Principal } from "./index";
@@ -116,7 +118,11 @@ export function createWorkspaceLifecycle({
       return body;
     });
   }
-  async function archiveWorkspace(p: Principal, id: string) {
+  async function setWorkspaceArchived(
+    p: Principal,
+    id: string,
+    archived: boolean,
+  ) {
     idSchema.parse(id);
     return mutation(
       p,
@@ -129,7 +135,11 @@ export function createWorkspaceLifecycle({
           .select()
           .from(members)
           .where(
-            and(eq(members.workspaceId, id), eq(members.userId, actor.userId!)),
+            and(
+              eq(members.workspaceId, id),
+              eq(members.userId, actor.userId!),
+              eq(members.kind, "person"),
+            ),
           );
         if (
           !can(
@@ -146,34 +156,106 @@ export function createWorkspaceLifecycle({
           .for("update");
         if (!row) throw new CoreError("not_found", 404);
         if (row.personalOwnerId) throw new CoreError("conflict", 409);
-        if (!row.archivedAt) {
+        if (Boolean(row.archivedAt) !== archived) {
           await tx
             .update(workspaces)
-            .set({ archivedAt: new Date(), updatedAt: new Date() })
+            .set({
+              archivedAt: archived ? new Date() : null,
+              updatedAt: new Date(),
+            })
             .where(eq(workspaces.id, id));
-          await tx
-            .update(user)
-            .set({ defaultWorkspaceId: null, updatedAt: new Date() })
-            .where(eq(user.defaultWorkspaceId, id));
+          if (archived)
+            await tx
+              .update(user)
+              .set({ defaultWorkspaceId: null, updatedAt: new Date() })
+              .where(eq(user.defaultWorkspaceId, id));
         }
-        return { id, archived: true };
+        return workspaceLifecycleSchema.parse({ id, archived });
       },
       "archive",
     );
+  }
+  const archiveWorkspace = (p: Principal, id: string) =>
+    setWorkspaceArchived(p, id, true);
+  const restoreWorkspace = (p: Principal, id: string) =>
+    setWorkspaceArchived(p, id, false);
+  const listFields = {
+    id: workspaces.id,
+    name: workspaces.name,
+    personalOwnerId: workspaces.personalOwnerId,
+    archivedAt: workspaces.archivedAt,
+  };
+  const serialize = (
+    rows: {
+      id: string;
+      name: string;
+      personalOwnerId: string | null;
+      archivedAt: Date | null;
+    }[],
+  ) =>
+    workspaceAdministrationListSchema.parse(
+      rows.map((row) => ({
+        ...row,
+        archivedAt: row.archivedAt?.toISOString() ?? null,
+      })),
+    );
+  async function listArchivedWorkspaces(p: Principal) {
+    // Resolve identity under the administration lock, then query current memberships.
+    return mutation(p, async (tx) => {
+      await tx.execute(
+        sql`select pg_advisory_xact_lock(hashtextextended('taff:system-administration',0))`,
+      );
+      const actor = await identity(tx, p);
+      const all = can(actor, "workspace:archive", { workspaceId: "" });
+      const rows = all
+        ? await tx
+            .select(listFields)
+            .from(workspaces)
+            .where(isNull(workspaces.personalOwnerId))
+            .orderBy(workspaces.createdAt, workspaces.id)
+        : await tx
+            .select(listFields)
+            .from(workspaces)
+            .innerJoin(members, eq(members.workspaceId, workspaces.id))
+            .where(
+              and(
+                isNull(workspaces.personalOwnerId),
+                eq(members.userId, actor.userId!),
+                eq(members.kind, "person"),
+                eq(members.role, "admin"),
+              ),
+            )
+            .orderBy(workspaces.createdAt, workspaces.id);
+      if (!all && !rows.length) throw new CoreError("forbidden", 403);
+      return serialize(
+        rows.filter(
+          (row) =>
+            row.archivedAt &&
+            can(
+              { ...actor, role: "admin", workspaceId: row.id },
+              "workspace:archive",
+              { workspaceId: row.id },
+            ),
+        ),
+      );
+    });
   }
   async function listWorkspaceAdministration(p: Principal) {
     const actor = await identity(db, p);
     if (!can(actor, "workspace:archive", { workspaceId: "" }))
       throw new CoreError("forbidden", 403);
-    return db
-      .select({
-        id: workspaces.id,
-        name: workspaces.name,
-        personalOwnerId: workspaces.personalOwnerId,
-        archivedAt: workspaces.archivedAt,
-      })
-      .from(workspaces)
-      .orderBy(workspaces.createdAt, workspaces.id);
+    return serialize(
+      await db
+        .select(listFields)
+        .from(workspaces)
+        .orderBy(workspaces.createdAt, workspaces.id),
+    );
   }
-  return { setDefaultWorkspace, archiveWorkspace, listWorkspaceAdministration };
+  return {
+    setDefaultWorkspace,
+    archiveWorkspace,
+    restoreWorkspace,
+    listArchivedWorkspaces,
+    listWorkspaceAdministration,
+  };
 }

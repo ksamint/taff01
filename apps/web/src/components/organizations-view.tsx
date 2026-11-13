@@ -40,6 +40,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
+import { OrganizationLifecycle } from "./workspace-lifecycle";
 
 function TeamAgentDetails({
   member,
@@ -279,6 +280,16 @@ export function OrganizationsView() {
       <Button disabled={busy} onClick={() => setDialog("create")}>
         {t("organization.create")}
       </Button>
+      {me.user.systemAdmin && (
+        <Link
+          className="button button-quiet"
+          href="/admin"
+          data-testid="open-workspace-administration"
+        >
+          {t("organization.administration")}
+        </Link>
+      )}
+      {!teamOnly && <OrganizationLifecycle />}
       {workspace.role === "admin" && (
         <Link
           className="button button-quiet"

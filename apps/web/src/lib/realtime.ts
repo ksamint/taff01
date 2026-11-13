@@ -22,6 +22,8 @@ const FAMILIES = [
   "search",
   "invites",
   "workspace-access",
+  "archived-workspaces",
+  "admin-workspaces",
   "notificationPreferences",
   "dailyDigests",
   "dailyDigest",

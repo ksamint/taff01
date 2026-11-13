@@ -551,6 +551,22 @@ export const workspaceSchema = object({
   key: string(),
   memberId: idSchema,
 });
+export const workspaceLifecycleSchema = object({
+  id: idSchema,
+  archived: boolean(),
+});
+export const workspaceAdministrationSchema = object({
+  id: idSchema,
+  name: string(),
+  personalOwnerId: nullable(string()),
+  archivedAt: nullable(iso.datetime()),
+});
+export const workspaceAdministrationListSchema = array(
+  workspaceAdministrationSchema,
+);
+export type WorkspaceAdministration = Infer<
+  typeof workspaceAdministrationSchema
+>;
 export const workspaceInviteInputSchema = strictObject({
   email: email(),
   role: _default(memberRoleSchema, "member"),

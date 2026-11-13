@@ -239,11 +239,19 @@ export function createPlanningOperations({
   ): Promise<WorkspaceAccess> {
     parse(idSchema, w);
     const actor = await requireMember(db, p, w, "workspace:read");
+    const [workspace] = await db
+      .select({ personalOwnerId: workspaces.personalOwnerId })
+      .from(workspaces)
+      .where(eq(workspaces.id, w));
     return {
       canCreateTasks: can(actor, "task:create", { workspaceId: w }),
       canManageProjects: can(actor, "project:manage", { workspaceId: w }),
       canInvite: can(actor, "workspace:manage", { workspaceId: w }),
       canManageRoles: can(actor, "workspace:manage", { workspaceId: w }),
+      canArchiveWorkspace:
+        !!workspace &&
+        !workspace.personalOwnerId &&
+        can(actor, "workspace:archive", { workspaceId: w }),
       // Plans follow task:schedule per task; this says whether any edit is possible.
       canEditPlan: actor.kind === "person" && actor.role !== "guest",
       canReadFinance: can(actor, "finance:read", { workspaceId: w }),

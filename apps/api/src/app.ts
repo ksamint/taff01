@@ -420,6 +420,17 @@ export function createApp(
       await core.listWorkspaceAdministration(userPrincipal(c.get("userId"))),
     ),
   );
+  app.get("/api/workspaces/archived", async (c) =>
+    c.json(await core.listArchivedWorkspaces(userPrincipal(c.get("userId")))),
+  );
+  app.post("/api/workspaces/:id/restore", async (c) =>
+    c.json(
+      await core.restoreWorkspace(
+        userPrincipal(c.get("userId")),
+        c.req.param("id"),
+      ),
+    ),
+  );
   app.delete("/api/workspaces/:id", async (c) =>
     c.json(
       await core.archiveWorkspace(

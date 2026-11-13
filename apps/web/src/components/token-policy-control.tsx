@@ -1,5 +1,8 @@
 "use client";
-import type { AgentToken } from "@taff/schemas";
+import {
+  type AgentToken,
+  workspaceAdministrationListSchema,
+} from "@taff/schemas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,15 +31,10 @@ export function TokenPolicyControl({
   const organizations = useQuery({
     queryKey: ["admin-workspaces"],
     enabled: me.user.systemAdmin === true && confirm,
-    queryFn: () =>
-      request<
-        Array<{
-          id: string;
-          name: string;
-          personalOwnerId: string | null;
-          archivedAt: string | null;
-        }>
-      >("/api/admin/workspaces"),
+    queryFn: async () =>
+      workspaceAdministrationListSchema.parse(
+        await request("/api/admin/workspaces"),
+      ),
   });
   const eligible = organizations.data?.filter(
     (item) => !item.personalOwnerId && !item.archivedAt,

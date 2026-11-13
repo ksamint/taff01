@@ -346,6 +346,7 @@ describe.skipIf(!url)("M5 PostgreSQL invariants", () => {
       canManageProjects: false,
       canInvite: false,
       canManageRoles: false,
+      canArchiveWorkspace: false,
       canEditPlan: false,
       canReadFinance: false,
       canManageFinance: false,

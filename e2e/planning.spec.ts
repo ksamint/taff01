@@ -607,7 +607,17 @@ test("rejected planning fields, comments, project move and invitation restore ca
     .getByRole("dialog")
     .getByRole("button", { name: m.planning.close })
     .click();
-  await expect(page.locator(".history-list")).not.toContainText(email);
+  await expect(
+    page
+      .locator(".me-section")
+      .filter({
+        has: page.getByRole("heading", {
+          name: m.organization.invites,
+          exact: true,
+        }),
+      })
+      .getByRole("list"),
+  ).not.toContainText(email);
 });
 
 test("concurrent edits reject stale drafts and title-only saves preserve exact DST-fold deadlines", async ({
