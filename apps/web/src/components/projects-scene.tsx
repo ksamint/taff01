@@ -507,13 +507,15 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               </span>
               <MoreViews view={view} href={viewHref} t={t} />
             </nav>
-            {confirmed && workspace.role !== "guest" && view !== "timeline" && (
-              <ViewExportButton
-                key={selected?.id ?? "workspace"}
-                workspaceId={workspace.id}
-                projectId={selected?.id}
-              />
-            )}
+            {confirmed &&
+              workspace.role !== "guest" &&
+              !["timeline", "mind", "relations"].includes(view) && (
+                <ViewExportButton
+                  key={selected?.id ?? "workspace"}
+                  workspaceId={workspace.id}
+                  projectId={selected?.id}
+                />
+              )}
             <Button
               className="projects-search button-quiet"
               data-testid="open-search"

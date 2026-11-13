@@ -1,5 +1,5 @@
 import { CoreError, type createCore, userPrincipal } from "@taff/core";
-import { idSchema, viewExportQuerySchema } from "@taff/schemas";
+import { idSchema, parseViewExportHttpQuery } from "@taff/schemas";
 import type { Hono } from "hono";
 import type { AppEnv } from "../app";
 import type { RateLimiter } from "../rate-limit";
@@ -21,7 +21,7 @@ export function registerViewExportRoutes(
         core,
         userPrincipal(c.get("userId")),
         idSchema.parse(c.req.param("id")),
-        viewExportQuerySchema.parse(c.req.query()),
+        parseViewExportHttpQuery(c.req.query()),
         "web",
         { exportRateLimiter: limiter, renderUrl, renderFetch: fetcher },
       );

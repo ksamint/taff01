@@ -138,9 +138,9 @@ per-day cap includes both bands; source truncation remains a separate unknown
 count note. Week/month grid headers export their visible date; day and list
 views hide the control. The existing shared quota, snapshot audit and export
 dialog apply unchanged. No new permission, scope or MCP tool is introduced.
-## Amendment 4 — bounded graph renderer preparation
+## Amendment 4 — bounded graph exports
 
-Status: internal S3 preparation only; public core/API/MCP/UI integration remains pending.
+Status: implemented in the S3 candidate; release validation and deployment remain pending.
 
 Mind and relations reuse the web's pure geometry from `packages/schemas`.
 Their existing source queries have no numeric node or edge limit. Force
@@ -167,3 +167,19 @@ fixtures verify the existing 400 KB PNG budget. Export fitting includes label
 bounds and does not apply the interactive minimum zoom. The internal renderer
 validates finite geometry, array/text limits and matching hashes before pixel
 allocation. It accepts server-built typed geometry, never client SVG or coordinates.
+
+The existing export route and `views.image` gain strict mind/relations options.
+Mind sends its archived filter. Relations sends layout, effective scope/project,
+visible layers and the existing web seed 7 (the public integer range is uint32).
+Defaults and layer order are normalized before hashing. Pan, zoom and selection
+are browser presentation only; relations list mode hides the graph export button.
+Core reads through authorized `getMindMap`/`relationGraph`, so CRM capability
+checks stay in their existing authority. The canonical hash includes the visible
+sanitized display, normalized options, locale, saved zone, exporter and local date.
+It excludes private notes, source URLs, CRM details, finance and the generated
+instant; those hidden changes cannot alter the graph hash. Both kinds use the
+shared quota and snapshot audit, with finance false and scope mind/relations.
+No new permission, scope, tool or migration is introduced by S3.
+
+The v0.2.25 deployment changes web, API, worker and renderer images from one
+validated source tree; the original renderer-only deployment note was incorrect.

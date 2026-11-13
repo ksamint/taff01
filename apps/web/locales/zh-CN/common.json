@@ -1275,9 +1275,9 @@
     "canvasLabel": "心智图，共 {{count}} 个节点。请使用“以列表显示”或右侧面板以键盘浏览。",
     "evidence": "证据",
     "momentum": {
-      "2": "急升",
-      "1": "上升",
       "0": "平稳",
+      "1": "上升",
+      "2": "急升",
       "m1": "降温",
       "m2": "急降"
     },
@@ -1668,6 +1668,9 @@
     "alt": "导出图片预览",
     "timelineHeading": "时间线 · {{project}}",
     "calendarHeading": "日历 · {{period}}",
-    "allDay": "全天"
+    "allDay": "全天",
+    "noMindNodes": "此工作区暂无心智图节点。",
+    "moreNodes": "+{{count}} 个节点",
+    "moreEdges": "+{{count}} 条连线"
   }
 }

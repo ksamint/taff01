@@ -439,6 +439,8 @@ const routes: RequestCase[] = [
   ...[
     "/view-image?locale=en",
     "/view-image?locale=zh-CN&projectId=:project",
+    "/view-image?locale=zh-CN&view=mind&archived=exclude",
+    "/view-image?locale=zh-HK&view=relations&scope=project&projectId=:project&layout=force&layers=org&forceSeed=7",
   ].map((suffix) => ({
     method: "GET",
     path: `/api/workspaces/:workspace${suffix}`,

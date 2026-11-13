@@ -1,5 +1,9 @@
 import { expect, it } from "vitest";
-import { mcpViewsImageArgs, viewExportQuerySchema } from "./view-export";
+import {
+  mcpViewsImageArgs,
+  parseViewExportHttpQuery,
+  viewExportQuerySchema,
+} from "./view-export";
 
 const projectId = "00000000-0000-4000-8000-000000000001";
 it("preserves legacy summary queries and accepts only applicable timeline options", () => {
@@ -63,4 +67,51 @@ it("requires an explicit calendar window and rejects irrelevant or authority opt
       viewExportQuerySchema.safeParse({ ...bad, locale: "en" }).success,
     ).toBe(false);
   }
+});
+
+it("shares strict graph options between typed MCP and decoded HTTP queries", () => {
+  for (const query of [
+    { view: "mind", archived: "include" },
+    { view: "relations" },
+    {
+      view: "relations",
+      scope: "project",
+      projectId,
+      layout: "force",
+      layers: ["org", "crm"],
+      forceSeed: 7,
+    },
+    { view: "relations", scope: "workspace", layers: [], forceSeed: 0 },
+  ]) {
+    expect(mcpViewsImageArgs.safeParse(query).success).toBe(true);
+    const http = Object.fromEntries(
+      Object.entries({ ...query, locale: "en" }).map(([key, value]) => [
+        key,
+        Array.isArray(value) ? value.join(",") : String(value),
+      ]),
+    );
+    expect(parseViewExportHttpQuery(http)).toEqual({ ...query, locale: "en" });
+  }
+  for (const query of [
+    { view: "mind", projectId },
+    { view: "mind", layout: "force" },
+    { view: "relations", archived: "include" },
+    { view: "relations", criticalPath: "show" },
+    { view: "relations", scope: "project" },
+    { view: "relations", scope: "workspace", projectId },
+    { view: "relations", layers: ["crm", "crm"] },
+    { view: "relations", layers: ["private"] },
+    { view: "relations", forceSeed: -1 },
+    { view: "relations", forceSeed: 4294967296 },
+    { view: "relations", forceSeed: 1.5 },
+    { view: "mind", timeZone: "UTC" },
+    { view: "mind", nodes: [] },
+    { view: "relations", svg: "<svg/>" },
+    { layout: "force" },
+  ])
+    expect(mcpViewsImageArgs.safeParse(query).success).toBe(false);
+  for (const forceSeed of ["", "1e2", "7.0", " 7", "-1", "Infinity"])
+    expect(() =>
+      parseViewExportHttpQuery({ locale: "en", view: "relations", forceSeed }),
+    ).toThrow();
 });

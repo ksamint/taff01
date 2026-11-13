@@ -88,6 +88,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
+import { ViewExportButton } from "./view-export";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 const EDGE_KINDS = ["relates", "supports", "contradicts"] as const;
@@ -181,6 +182,13 @@ export function MindView({ project }: { project: Project | undefined }) {
           <p>{t("mind.subtitle")}</p>
         </div>
         <div className="mind-toolbar">
+          {me && workspace.role !== "guest" && (
+            <ViewExportButton
+              workspaceId={workspace.id}
+              view="mind"
+              archived={showArchived ? "include" : "exclude"}
+            />
+          )}
           {canWrite && (
             <>
               <Button

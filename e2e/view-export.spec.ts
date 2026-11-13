@@ -3,6 +3,7 @@ import { expect, type Page, test } from "@playwright/test";
 import {
   calendarCivilTime,
   calendarWallToInstant,
+  mindNodeSchema,
   projectSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount } from "./support/account";
@@ -57,7 +58,13 @@ async function openExport(page: Page, title: string, width = 1080) {
 
 async function save(
   page: Page,
-  kind: "project" | "workspace" | "timeline" | "calendar",
+  kind:
+    | "project"
+    | "workspace"
+    | "timeline"
+    | "calendar"
+    | "mind"
+    | "relations",
 ) {
   const pending = page.waitForEvent("download");
   await page.getByTestId("view-export-save").click();
@@ -144,6 +151,128 @@ test("a person exports, sends, copies and saves project and workspace images", a
   );
   expect(invalid.status()).toBe(400);
 });
+
+for (const graphKind of ["mind", "relations"] as const)
+  test(`${graphKind} graph exports preserve visible options and render localized PNGs`, async ({
+    page,
+  }, info) => {
+    test.setTimeout(180_000);
+    const locale = info.project.name as TestLocale;
+    const me = await freshAccount(page, locale);
+    const workspace = me.workspaces[0];
+    const created = await page.request.post(
+      `/api/projects?workspaceId=${workspace.id}`,
+      { data: { name: `Graph ${locale}` } },
+    );
+    expect(created.status()).toBe(201);
+    const project = projectSchema.parse(await created.json());
+    for (const title of ["Visible task 侍", "Second task 饕餮鑫"])
+      expect(
+        (
+          await page.request.post("/api/tasks", {
+            data: {
+              workspaceId: workspace.id,
+              ownerId: workspace.memberId,
+              workerId: null,
+              projectId: project.id,
+              title,
+            },
+          })
+        ).status(),
+      ).toBe(201);
+    for (const [index, title] of [
+      "Current hypothesis 侍",
+      "Archived hypothesis 鑫",
+    ].entries()) {
+      const response = await page.request.post(
+        `/api/workspaces/${workspace.id}/mind/nodes`,
+        {
+          data: {
+            title,
+            layer: index + 1,
+            angle: 60 + index * 90,
+            note: "Private note excluded from export",
+          },
+        },
+      );
+      expect(response.status()).toBe(201);
+      if (index === 1) {
+        const node = mindNodeSchema.parse(await response.json());
+        expect(
+          (
+            await page.request.patch(`/api/mind/nodes/${node.id}`, {
+              data: { version: node.version, archived: true },
+            })
+          ).status(),
+        ).toBe(200);
+      }
+    }
+    const exportGraph = async (view: "mind" | "relations", name: string) => {
+      await expect(page.getByTestId("view-export-open")).toHaveCount(1);
+      const pending = page.waitForResponse(
+        (response) =>
+          response.url().includes("/view-image?") &&
+          new URL(response.url()).searchParams.get("view") === view,
+      );
+      await openExport(page, messages[locale].viewExport.title);
+      const response = await pending;
+      expect(response.status()).toBe(200);
+      const query = new URL(response.url()).searchParams;
+      expect(query.get("locale")).toBe(locale);
+      const png = await save(page, view);
+      const hash = response.headers()["x-taff-content-hash"];
+      expect(hash).toMatch(/^[a-f0-9]{64}$/);
+      expect(png.includes(Buffer.from(hash))).toBe(true);
+      expect(png.readUInt32BE(16)).toBe(1080);
+      expect(png.readUInt32BE(20)).toBeLessThanOrEqual(4000);
+      expect(png[25]).toBe(3);
+      await info.attach(`${name}-${locale}.png`, {
+        body: png,
+        contentType: "image/png",
+      });
+      await page.keyboard.press("Escape");
+      return { hash, query, png };
+    };
+    if (graphKind === "mind") {
+      await page.goto(`/projects/${project.id}?view=mind`);
+      await expect(page.getByTestId("mind-view")).toBeVisible();
+      const mind = await exportGraph("mind", "mind-current");
+      expect(mind.query.get("archived")).toBe("exclude");
+      expect(mind.query.has("projectId")).toBe(false);
+      await page.getByTestId("mind-show-archived").click();
+      const included = await exportGraph("mind", "mind-archived");
+      expect(included.query.get("archived")).toBe("include");
+      expect(included.hash).not.toBe(mind.hash);
+      expect(included.png.equals(mind.png)).toBe(false);
+      return;
+    }
+    await page.goto(`/projects/${project.id}?view=relations`);
+    await expect(page.getByTestId("relations-view")).toBeVisible();
+    await page.getByTestId("relations-as-list").click();
+    await expect(page.getByTestId("view-export-open")).toHaveCount(0);
+    await page.getByTestId("relations-as-list").click();
+    const layered = await exportGraph("relations", "relations-layered");
+    expect(layered.query.get("scope")).toBe("project");
+    expect(layered.query.get("projectId")).toBe(project.id);
+    expect(layered.query.get("layout")).toBe("layered");
+    expect(layered.query.get("forceSeed")).toBe("7");
+    await page.getByTestId("relations-layout-force").click();
+    const force = await exportGraph("relations", "relations-force");
+    expect(force.query.get("layout")).toBe("force");
+    expect(force.hash).not.toBe(layered.hash);
+    await page.getByTestId("relations-layer-all").click();
+    const filtered = await exportGraph("relations", "relations-filtered");
+    expect(filtered.query.get("layers")).toBe("");
+    expect(filtered.hash).not.toBe(force.hash);
+    await page.getByTestId("relations-scope").selectOption("workspace");
+    const workspaceGraph = await exportGraph(
+      "relations",
+      "relations-workspace",
+    );
+    expect(workspaceGraph.query.get("scope")).toBe("workspace");
+    expect(workspaceGraph.query.has("projectId")).toBe(false);
+    expect(workspaceGraph.hash).not.toBe(filtered.hash);
+  });
 
 test("timeline exports its critical highlight and full chart in the viewer language", async ({
   page,

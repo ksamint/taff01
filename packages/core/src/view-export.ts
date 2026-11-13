@@ -8,14 +8,24 @@ import {
 } from "@taff/db";
 import {
   buildCalendarLayout,
+  buildMindLayout,
+  buildRelationsLayout,
   buildSummaryLayout,
   buildTimelineLayout,
   type CalendarImageInput,
   type CalendarViewData,
   calendarImageWindow,
   formatCalendarImageTime,
+  GRAPH_LAYERS,
+  type GraphImageInput,
+  type GraphQuery,
   idSchema,
   localeSchema,
+  type MindImageOptions,
+  type MindMap,
+  type MindMapQuery,
+  type RelationGraph,
+  type RelationsImageOptions,
   type SummaryImageLayoutInput,
   type SummaryLayout,
   type Timeline,
@@ -66,6 +76,16 @@ type Dependencies = {
     range: { from: string; to: string },
     options?: { scheduledOnly?: boolean },
   ): Promise<CalendarViewData>;
+  getMindMap(
+    p: Principal,
+    workspaceId: string,
+    query: MindMapQuery,
+  ): Promise<MindMap>;
+  relationGraph(
+    p: Principal,
+    workspaceId: string,
+    query: GraphQuery,
+  ): Promise<RelationGraph>;
 };
 
 type NamedImage<T> = T & {
@@ -73,7 +93,10 @@ type NamedImage<T> = T & {
   fileName: string;
 };
 export type ViewExport = NamedImage<
-  SummaryImageLayoutInput | TimelineImageInput | CalendarImageInput
+  | SummaryImageLayoutInput
+  | TimelineImageInput
+  | CalendarImageInput
+  | GraphImageInput
 >;
 
 function parse<T>(schema: { parse(v: unknown): T }, input: unknown): T {
@@ -98,8 +121,16 @@ export function createViewExportOperations({
   loadSummarySources,
   getTimeline,
   listCalendar,
+  getMindMap,
+  relationGraph,
   now = () => new Date(),
 }: Dependencies) {
+  function exportViewImageInput(
+    p: Principal,
+    workspaceId: string,
+    query: ViewExportInputQuery & { view: "mind" | "relations" },
+    channel?: "web" | "mcp",
+  ): Promise<NamedImage<GraphImageInput>>;
   function exportViewImageInput(
     p: Principal,
     workspaceId: string,
@@ -180,8 +211,18 @@ export function createViewExportOperations({
       zone,
     });
     async function finish(
-      image: SummaryImageLayoutInput | TimelineImageInput | CalendarImageInput,
-      subject: "workspace" | "project" | "timeline" | "calendar",
+      image:
+        | SummaryImageLayoutInput
+        | TimelineImageInput
+        | CalendarImageInput
+        | GraphImageInput,
+      subject:
+        | "workspace"
+        | "project"
+        | "timeline"
+        | "calendar"
+        | "mind"
+        | "relations",
       projectCount: number,
       finance: boolean,
     ): Promise<ViewExport> {
@@ -331,6 +372,116 @@ export function createViewExportOperations({
       return finish(
         { layout, watermark, contentHash },
         "calendar",
+        projectCount,
+        false,
+      );
+    }
+    if (body.view === "mind" || body.view === "relations") {
+      const cut = (value: string, length: number) =>
+        Array.from(value).slice(0, length).join("");
+      const labels = {
+        title: t(
+          body.view === "mind" ? "mind.title" : "projects.relationsView",
+        ),
+        subtitle: cut(
+          [
+            workspaceName,
+            ...(body.projectId ? [projectList[0].name] : []),
+            t("viewExport.exportedBy", { name: actor.name }),
+          ].join(" · "),
+          300,
+        ),
+        footer: cut(
+          [t("viewExport.confidential", { name: actor.name }), generated].join(
+            " · ",
+          ),
+          300,
+        ),
+        empty: t(
+          body.view === "mind" ? "viewExport.noMindNodes" : "relations.empty",
+        ),
+        more: (count: number) => t("viewExport.moreNodes", { count }),
+        moreEdges: (count: number) => t("viewExport.moreEdges", { count }),
+        centre: t("mind.centre"),
+        ring: (layer: number) =>
+          layer < 4
+            ? t(`mind.layer.${layer}`)
+            : t("mind.layerN", { n: layer + 1 }),
+      };
+      const options: MindImageOptions | RelationsImageOptions =
+        body.view === "mind"
+          ? { archived: body.archived ?? "exclude" }
+          : {
+              layout: body.layout ?? "layered",
+              scope: body.scope ?? (body.projectId ? "project" : "workspace"),
+              projectId: body.projectId ?? null,
+              layers: GRAPH_LAYERS.filter((layer) =>
+                (body.layers ?? GRAPH_LAYERS).includes(layer),
+              ),
+              forceSeed: body.forceSeed ?? 7,
+            };
+      let projectCount = 0;
+      const pendingHash = "0".repeat(64);
+      const layout =
+        "archived" in options
+          ? buildMindLayout(
+              await getMindMap(p, w, options),
+              options,
+              body.locale,
+              labels,
+              pendingHash,
+            )
+          : await (async () => {
+              const source = await relationGraph(p, w, {
+                projectId: body.projectId,
+                layers: options.layers,
+              });
+              projectCount = source.nodes.filter(
+                (node) => node.kind === "project",
+              ).length;
+              return buildRelationsLayout(
+                source,
+                options,
+                body.locale,
+                labels,
+                pendingHash,
+              );
+            })();
+      // Hash only the displayed data/options: no private notes, source URLs, CRM details,
+      // permissions, finance or generated-at timestamp. Rendering supplies the real hash below.
+      const { footer: _footer, ...display } = layout;
+      const contentHash = createHash("sha256")
+        .update(
+          canonicalJson({
+            view: body.view,
+            options,
+            locale: body.locale,
+            timeZone: zone,
+            localDate: day,
+            exporter: actor.name,
+            workspaceName,
+            display,
+          }),
+        )
+        .digest("hex");
+      return finish(
+        {
+          layout: {
+            ...layout,
+            footer: { ...layout.footer, hashFull: contentHash },
+          },
+          watermark: {
+            contentHash,
+            text: cut(
+              [actor.name, workspaceName, day, t("viewExport.eyebrow")].join(
+                " · ",
+              ),
+              500,
+            ),
+          },
+          contentHash,
+        },
+        body.view,
         projectCount,
         false,
       );

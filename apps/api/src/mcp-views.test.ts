@@ -105,6 +105,28 @@ it("resolves each image call, shares member quota across tokens and reports rend
       "mcp",
     );
     expect(hit.mock.calls[3]).toEqual(hit.mock.calls[0]);
+    for (const query of [
+      { view: "mind", archived: "include" },
+      {
+        view: "relations",
+        scope: "workspace",
+        layout: "force",
+        layers: ["org"],
+        forceSeed: 7,
+      },
+    ]) {
+      await call(query);
+      expect(String(renderFetch.mock.lastCall?.[0])).toBe(
+        "http://render.test/render/graph",
+      );
+      expect(input).toHaveBeenLastCalledWith(
+        { ...p, tokenId: "two" },
+        "home",
+        query,
+        "mcp",
+      );
+      expect(hit.mock.lastCall).toEqual(hit.mock.calls[0]);
+    }
     renderFetch.mockRejectedValue(new Error("renderer down"));
     expect(await call({})).toMatchObject({
       isError: true,

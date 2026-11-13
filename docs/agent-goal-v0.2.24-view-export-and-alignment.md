@@ -135,8 +135,8 @@ cap 4,000 px; ≤ 400 KB palette PNG; watermark, hash and E2 audit as E1.
 
 Each S task: spec additions to `view-export.md` (VE-4..6), e2e three locales,
 API matrix rows, `pnpm rust:gate` goldens. Release v0.2.25 per closeout;
-deploy all four application images: TypeScript contracts, core, API and web
-change alongside the Rust renderer.
+deploy all four images (web, API, worker and renderer) from the same validated
+source tree, since shared schemas, core delivery, UI and renderer change together.
 
 ## Done when
 

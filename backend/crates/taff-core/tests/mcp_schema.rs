@@ -81,3 +81,26 @@ fn uuid_and_enums_are_enforced() {
     let stray: Value = serde_json::json!({ "nonexistentField": 1 });
     assert!(!jsonschema::is_valid(list_schema, &stray));
 }
+
+#[test]
+fn graph_image_options_have_typed_bounded_schemas() {
+    let tools = tool_schemas();
+    let schema = &tools["views.image"];
+    for input in [
+        serde_json::json!({"view":"mind","archived":"include"}),
+        serde_json::json!({"view":"relations","scope":"workspace","layout":"force","layers":["org"],"forceSeed":7}),
+    ] {
+        assert!(jsonschema::is_valid(schema, &input));
+    }
+    for input in [
+        serde_json::json!({"view":"mind","svg":"<svg/>"}),
+        serde_json::json!({"view":"relations","forceSeed":-1}),
+        serde_json::json!({"view":"relations","forceSeed":4294967296_u64}),
+        serde_json::json!({"view":"relations","forceSeed":1.5}),
+        serde_json::json!({"view":"relations","layers":"org"}),
+        serde_json::json!({"view":"relations","layers":["private"]}),
+    ] {
+        assert!(!jsonschema::is_valid(schema, &input));
+    }
+    // View-specific cross-field applicability stays in the authoritative Zod/core parser.
+}

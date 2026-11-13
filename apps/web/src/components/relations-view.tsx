@@ -47,6 +47,7 @@ import {
 import { useRelationGraph } from "../lib/graph-queries";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
+import { ViewExportButton } from "./view-export";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 type Layout = "layered" | "force";
@@ -71,7 +72,7 @@ export function relationsOf(
 }
 
 export function RelationsView({ project }: { project: Project | undefined }) {
-  const { workspace } = useWorkspace();
+  const { workspace, me } = useWorkspace();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const ids = useId();
@@ -137,6 +138,17 @@ export function RelationsView({ project }: { project: Project | undefined }) {
       aria-label={t("projects.relationsView")}
     >
       <div className="relations-toolbar">
+        {me && workspace.role !== "guest" && !asList && (
+          <ViewExportButton
+            workspaceId={workspace.id}
+            view="relations"
+            projectId={projectId ?? undefined}
+            scope={projectId ? "project" : "workspace"}
+            layout={layout}
+            layers={layers.filter((layer) => shownLayers.includes(layer))}
+            forceSeed={FORCE_SEED}
+          />
+        )}
         <div
           className="relations-segment"
           role="group"

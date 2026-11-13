@@ -4,6 +4,18 @@ use serde_json::Value;
 use std::{collections::HashSet, sync::OnceLock};
 
 pub const VERSION: &str = "graph-1";
+// Canonical TABLE AI light tokens from apps/web/src/styles/tokens.css.
+// Node/edge roles follow relations.css and mind.css; no independent palette.
+const WHITE: &str = "#ffffff";
+const INK: &str = "#1b1b1d";
+const DEEP_BLUE: &str = "#0a1626";
+const MUTED: &str = "#44474c";
+const FIXED: &str = "#d7e3fa";
+const GOLD: &str = "#a88b52";
+const GOLD_DEEP: &str = "#785f2a";
+const GOLD_FIXED: &str = "#e3c284";
+const OUTLINE: &str = "#c5c6cd";
+const WARNING: &str = "#8a5a12";
 #[derive(Deserialize)]
 struct Point {
     x: f64,
@@ -87,14 +99,33 @@ struct Input {
     content_hash: String,
 }
 
-fn color(tone: &str) -> &'static str {
-    match tone {
-        "blue" => "#4b76c8",
-        "gold" => "#a88d54",
-        "green" => "#468476",
-        "red" => "#c24148",
-        "purple" => "#8263a9",
-        _ => "#737b87",
+fn node_style(kind: &str, node: &Node) -> (&'static str, &'static str) {
+    if kind == "mind" {
+        // Existing typed tones identify the four shared ring categories.
+        return match node.tone.as_str() {
+            "gold" => (DEEP_BLUE, DEEP_BLUE),
+            "blue" => (MUTED, MUTED),
+            "green" => (WHITE, DEEP_BLUE),
+            _ => (GOLD_FIXED, GOLD_DEEP),
+        };
+    }
+    match node.tone.as_str() {
+        "green" => (MUTED, MUTED),
+        "purple" => (WHITE, GOLD),
+        "gold" => (FIXED, DEEP_BLUE),
+        _ if node.shape == "diamond" => (DEEP_BLUE, DEEP_BLUE),
+        _ => (WHITE, DEEP_BLUE),
+    }
+}
+fn edge_color(kind: &str, tone: &str) -> &'static str {
+    if kind == "mind" {
+        match tone {
+            "red" => WARNING,
+            "green" => MUTED,
+            _ => OUTLINE,
+        }
+    } else {
+        MUTED
     }
 }
 fn text(svg: &mut String, x: f64, y: f64, size: f64, anchor: &str, value: &str) {
@@ -203,7 +234,7 @@ pub fn render_graph(value: &Value) -> Result<Vec<u8>, &'static str> {
         "Manrope, Noto Sans TC, Noto Sans SC"
     };
     let mut svg = format!(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="{}"><rect width="1080" height="{}" fill="#ffffff"/><g font-family="{family}" fill="#20252b">"##,
+        r##"<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="{}"><rect width="1080" height="{}" fill="{WHITE}"/><g font-family="{family}" fill="{INK}">"##,
         l.height, l.height
     );
     text(&mut svg, 48.0, 58.0, 32.0, "start", &clipped(&l.title, 56));
@@ -224,7 +255,7 @@ pub fn render_graph(value: &Value) -> Result<Vec<u8>, &'static str> {
     ));
     for ring in &l.rings {
         svg.push_str(&format!(
-            r##"<circle r="{}" fill="none" stroke="#e1e4e8" stroke-width="1"/>"##,
+            r##"<circle r="{}" fill="none" stroke="{OUTLINE}" stroke-width="1"/>"##,
             ring.radius
         ));
         text(
@@ -248,17 +279,21 @@ pub fn render_graph(value: &Value) -> Result<Vec<u8>, &'static str> {
             format!("M{},{}L{},{}", from.x, from.y, to.x, to.y)
         };
         let dash = if edge.dashed { "5 4" } else { "none" };
-        svg.push_str(&format!(r#"<path d="{path}" fill="none" stroke="{}" stroke-width="1.3" stroke-dasharray="{dash}" opacity="0.6"/>"#, color(&edge.tone)));
+        svg.push_str(&format!(r#"<path d="{path}" fill="none" stroke="{}" stroke-width="1.3" stroke-dasharray="{dash}" opacity="0.6"/>"#, edge_color(&l.kind, &edge.tone)));
     }
     if let Some(centre) = &l.centre {
-        svg.push_str(r##"<circle r="36" fill="#f3efe5" stroke="#a88d54"/>"##);
+        svg.push_str(&format!(
+            r##"<circle r="36" fill="{DEEP_BLUE}"/><g fill="{WHITE}">"##
+        ));
         text(&mut svg, 0.0, 5.0, 13.0, "middle", centre);
+        svg.push_str("</g>");
     }
     for node in &l.nodes {
         let r = node.radius;
         let x = node.x;
         let y = node.y;
-        let color = color(&node.tone);
+        let (color, stroke) = node_style(&l.kind, node);
+        svg.push_str(&format!(r#"<g stroke="{stroke}" stroke-width="1.2">"#));
         match node.shape.as_str() {
             "square" => svg.push_str(&format!(
                 r#"<rect x="{}" y="{}" width="{}" height="{}" rx="2" fill="{color}"/>"#,
@@ -278,6 +313,7 @@ pub fn render_graph(value: &Value) -> Result<Vec<u8>, &'static str> {
                 r#"<circle cx="{x}" cy="{y}" r="{r}" fill="{color}"/>"#
             )),
         }
+        svg.push_str("</g>");
         let label = &node.label;
         text(
             &mut svg,
