@@ -1,9 +1,9 @@
 # 127 — public mind and relations image export candidate
 
 Status: implemented locally for v0.2.25; not released. No push, full gate or deployment.
-Dependency boundary: S1 public `55af14d5587d28d044612e82c308921b72de7431`.
-Graph preparation: `9875bec16bb2da452124f824fb3796f5fda381dd` (cherry-pick of `9b4f563`).
-Parent will retain graph commits while rebasing above that boundary onto final S2 main.
+Current dependency boundary: combined S2 candidate `b4485e8c4cd753374bbadd77d693f201a4219f75`; parent will rebase above it onto actual S2 main before full gate.
+Retained graph prep/public/review commits rebased from `9875bec`/`54e72d5`/`1426d1f` to `979dced`/`5a1316c`/`68865fc`; pure source originally `9b4f563`.
+Combined resolution preserves calendar/timeline options, scheduled-only reads, localized labels, typed dispatch/overloads, quota/audit; ADR amendments OAuth2/timeline3/calendar4/graph5.
 Targets: TypeScript schemas/core/API/MCP/web/tests and Rust graph rendering; no dependencies.
 
 - Strict mind archived filter and relations layout/scope/layers/uint32 seed; normalized defaults.
@@ -37,3 +37,4 @@ Review followup (separate commit after `54e72d5`): relations use all retained se
 Regression: 52-node/1,131-edge layered/force position tests failed before and passed after; six locale SSR cases passed using the provisional-session fixture to assert hidden-before/visible-after confirmation.
 Followup validation: graph/geometry/session/palette/test-id Vitest selection 60 passed; schema/web/scripts typechecks, Biome and diff check passed. Rust graph tests 5 passed; six PNG goldens unchanged; regenerated dense relations JSON renders 356,589 bytes.
 Followup own API4201/web4200 stopped; renderer not started; ignored Next dev types moved before clean-source web typecheck. No full gate/push/deploy.
+Combined-S2 rebase checks: 85 schema/API/MCP/geometry tests + 9 schema/font/language tests; 39 focused DB/auth passed (833 unrelated skipped); all eight TS targets, Rust MCP4/render22, Clippy/rustfmt/Biome passed. Full fixture regeneration (summary10) produced no drift; cross-calendar/graph irrelevant fields are rejected. No browser/services/full gate; v24 versions/migrations and38tools retained.

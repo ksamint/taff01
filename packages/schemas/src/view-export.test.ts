@@ -59,6 +59,11 @@ it("requires an explicit calendar window and rejects irrelevant or authority opt
     { ...query, projectId },
     { ...query, criticalPath: "show" },
     { ...query, timeZone: "UTC" },
+    { ...query, archived: "include" },
+    { ...query, layout: "force" },
+    { ...query, scope: "workspace" },
+    { ...query, layers: [] },
+    { ...query, forceSeed: 7 },
     { calendarMode: "week", visibleDate: "2026-03-08" },
     { view: "timeline", projectId, visibleDate: "2026-03-08" },
   ]) {
@@ -95,6 +100,8 @@ it("shares strict graph options between typed MCP and decoded HTTP queries", () 
   for (const query of [
     { view: "mind", projectId },
     { view: "mind", layout: "force" },
+    { view: "mind", calendarMode: "week", visibleDate: "2026-03-08" },
+    { view: "relations", calendarMode: "month", visibleDate: "2026-03-08" },
     { view: "relations", archived: "include" },
     { view: "relations", criticalPath: "show" },
     { view: "relations", scope: "project" },
