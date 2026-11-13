@@ -859,6 +859,7 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: m.agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
+| `heading — name: m.organization.invites` | 1 | planning.spec.ts |
 | `heading — name: m.organization.team` | 1 | me.spec.ts |
 | `heading — name: messages[locale].calendar.title` | 1 | calendar.spec.ts |
 | `heading — name: messages[locale].notifications.title` | 1 | notifications.spec.ts |
@@ -884,6 +885,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: renamed` | 2 | persistence.spec.ts |
 | `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
+| `list` | 1 | planning.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `progressbar` | 1 | summaries.spec.ts |
 | `region — name: m.access.agents` | 1 | access.spec.ts |
@@ -959,7 +961,6 @@ read (`data-event-id`, `data-date`).
 | `.calendar-engine-month-grid` | 1 | ui-v2.spec.ts |
 | `.calendar-engine-week` | 1 | ui-v2.spec.ts |
 | `.calendar-list-item` | 5 | calendar.spec.ts, persistence.spec.ts |
-| `.history-list` | 1 | planning.spec.ts |
 | `.history-list > li` | 1 | agent-review.spec.ts |
 | `.invite-banner a[href="/orgs"]` | 1 | live/live.ts |
 | `.is-event-copy` | 2 | calendar.spec.ts |
@@ -974,6 +975,7 @@ read (`data-event-id`, `data-date`).
 | `.me-agent-card` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.me-desk-panel` | 1 | completion.spec.ts |
 | `.me-profile-copy strong` | 1 | me.spec.ts |
+| `.me-section` | 1 | planning.spec.ts |
 | `.notifications-body` | 1 | notifications.spec.ts |
 | `.organization-choices` | 1 | scripts/ui/app-shots.mts |
 | `.organizations-view` | 1 | planning.spec.ts |
@@ -1225,6 +1227,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.create` | 11 | me.spec.ts, planning.spec.ts |
 | `organization.emailDelivery.logged` | 5 | planning.spec.ts |
 | `organization.invite` | 25 | planning.spec.ts |
+| `organization.invites` | 5 | planning.spec.ts |
 | `organization.roleFor` | 10 | access.spec.ts |
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 22 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
