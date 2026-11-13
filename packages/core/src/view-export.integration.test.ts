@@ -1,8 +1,8 @@
 import { randomUUID } from "node:crypto";
-import { connectDatabase, members } from "@taff/db";
+import { activity, connectDatabase, members } from "@taff/db";
 import { summaryImageLayoutInputSchema } from "@taff/schemas";
-import { sql } from "drizzle-orm";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { and, eq, sql } from "drizzle-orm";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
 import { type Core, createCore, type Principal, userPrincipal } from "./index";
 
@@ -24,6 +24,7 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
   let alice: Principal, bob: Principal, gina: Principal, outsider: Principal;
   let agent: Principal;
   let w: string, otherW: string, owner: string, bobMember: string;
+  let bobUser: string;
   let active: { id: string }, archived: { id: string }, foreign: { id: string };
   const instant = new Date("2026-11-12T09:30:00Z");
 
@@ -51,6 +52,7 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     w = me.workspaces[0].id;
     owner = me.workspaces[0].memberId;
     const b = await signup("Bob Member");
+    bobUser = b.user.id;
     bob = userPrincipal(b.user.id);
     await core.updateProfile(b.user.id, { locale: "en", tz: "Asia/Shanghai" });
     const g = await signup("Gina Guest");
@@ -209,6 +211,86 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     const after = await core.exportViewImageInput(bob, w, { locale: "en" });
     expect(after.contentHash).not.toBe(before.contentHash);
     expect(after.contentHash).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("audits each authorized snapshot with allowlisted metadata and no change notification", async () => {
+    const rows = () =>
+      connection.db
+        .select()
+        .from(activity)
+        .where(
+          and(eq(activity.workspaceId, w), eq(activity.action, "view.export")),
+        );
+    const previous = new Set((await rows()).map((row) => row.id));
+    const notifications: string[] = [];
+    const listener = await connection.client.listen(
+      "taff_changes",
+      (payload) => {
+        notifications.push(payload);
+      },
+    );
+    try {
+      const project = await core.exportViewImageInput(bob, w, {
+        projectId: active.id,
+        locale: "zh-HK",
+      });
+      const workspace = await core.exportViewImageInput(bob, w, {
+        locale: "en",
+      });
+      const recorded = (await rows()).filter((row) => !previous.has(row.id));
+      expect(recorded).toHaveLength(2);
+      for (const [resourceId, scope, locale, result] of [
+        [active.id, "project", "zh-HK", project],
+        [w, "workspace", "en", workspace],
+      ] as const) {
+        const row = recorded.find((entry) => entry.resourceId === resourceId);
+        expect(row).toMatchObject({
+          actorId: bobUser,
+          workspaceId: w,
+          action: "view.export",
+        });
+        expect(row?.details).toEqual({
+          scope,
+          locale,
+          contentHash: result.contentHash,
+          projectCount: result.layout.projects.length,
+          finance: true,
+          channel: "web",
+        });
+      }
+      const audit = await core.searchIntegrationAudit(alice, {
+        workspaceId: w,
+      });
+      expect(
+        audit.entries.filter((row) =>
+          recorded.some((entry) => entry.id === row.id),
+        ),
+      ).toHaveLength(2);
+      for (const principal of [gina, agent, outsider])
+        await expect(
+          core.exportViewImageInput(principal, w, { locale: "en" }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(
+        core.exportViewImageInput(bob, w, {
+          locale: "en",
+          projectId: foreign.id,
+        }),
+      ).rejects.toMatchObject({ code: "not_found" });
+      await expect(
+        core.exportViewImageInput(bob, "invalid", { locale: "en" }),
+      ).rejects.toMatchObject({ code: "invalid_input" });
+      expect(
+        (await rows()).filter((row) => !previous.has(row.id)),
+      ).toHaveLength(2);
+
+      // A later committed marker is a barrier for notifications from the export transactions.
+      const marker = `export-audit-${randomUUID()}`;
+      await connection.client`select pg_notify('taff_changes',${marker})`;
+      await vi.waitFor(() => expect(notifications).toContain(marker));
+      expect(notifications).toEqual([marker]);
+    } finally {
+      await listener.unlisten();
+    }
   });
 
   it("refuses guests, agents, outsiders and invalid input", async () => {

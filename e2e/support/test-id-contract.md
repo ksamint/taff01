@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (472 distinct, 2203 uses)
+## Test ids (472 distinct, 2204 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -82,7 +82,7 @@ several do). “Also rendered by” lists the other files.
 | `audit-forbidden` | 1 |  | audit.spec.ts |
 | `audit-invalid` | 1 |  | audit.spec.ts |
 | `audit-kind` | 1 |  | audit.spec.ts |
-| `audit-row` | 2 |  | audit.spec.ts |
+| `audit-row` | 3 |  | audit.spec.ts |
 | `audit-value` | 2 |  | audit.spec.ts |
 | `audit-view` | 1 |  | audit.spec.ts |
 
@@ -1011,6 +1011,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="audience-recipient-row"][data-recipient="*"]` | 1 | audience-editing.spec.ts |
 | `[data-testid="audience-tag-row"][data-tag="*"]` | 1 | audience-editing.spec.ts |
 | `[data-testid="audit-row"][data-action="projects.insert"][data-resource="*"]` | 1 | audit.spec.ts |
+| `[data-testid="audit-row"][data-action="view.export"][data-resource="*"]` | 1 | audit.spec.ts |
 | `[data-testid="contact-link"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="contact-row"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="desktop-new-task"]` | 1 | ui-v2.spec.ts |
@@ -1112,6 +1113,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `audit.invalid` | 1 | audit.spec.ts |
 | `audit.none` | 1 | audit.spec.ts |
 | `audit.title` | 1 | audit.spec.ts |
+| `audit.viewExport` | 1 | audit.spec.ts |
 | `brief.action.split_other` | 6 | brief.spec.ts, live/brief.spec.ts |
 | `brief.nav` | 12 | brief.spec.ts, live/brief.spec.ts |
 | `brief.proposal.intro` | 6 | live/brief.spec.ts |

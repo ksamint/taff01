@@ -1610,6 +1610,7 @@
     "readOnly": "Only administrators can change finance."
   },
   "audit": {
+    "viewExport": "View image export",
     "title": "Audit log",
     "open": "Audit log",
     "hint": "The newest 200 recorded changes in this workspace. Filter by an integration identifier to follow one operation.",

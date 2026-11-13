@@ -26,6 +26,12 @@ test("an admin reads and filters the audit log; a member is refused", async ({
   );
   expect(created.status()).toBe(201);
   const project = projectSchema.parse(await created.json());
+  const exported = await page.request.get(
+    `/api/workspaces/${workspace.id}/view-image?projectId=${project.id}&locale=${locale}`,
+  );
+  expect(exported.status()).toBe(200);
+  const contentHash = exported.headers()["x-taff-content-hash"];
+  expect(contentHash).toMatch(/^[a-f0-9]{64}$/);
 
   await page.goto("/orgs");
   await page.getByTestId("open-audit-log").click();
@@ -39,6 +45,13 @@ test("an admin reads and filters the audit log; a member is refused", async ({
   await expect(row).toBeVisible();
   // The actor resolves to the admin's member name.
   await expect(row).toContainText(admin.user.name);
+  const exportRow = view.locator(
+    `[data-testid="audit-row"][data-action="view.export"][data-resource="${project.id}"]`,
+  );
+  await expect(exportRow).toContainText(messages[locale].audit.viewExport);
+  await expect(exportRow).toContainText(admin.user.name);
+  await exportRow.locator("summary").click();
+  await expect(exportRow.locator("pre")).toContainText(contentHash);
 
   await view.getByTestId("audit-kind").selectOption("trace_id");
   await view.getByTestId("audit-value").fill("not-a-trace");

@@ -3,7 +3,8 @@
 ## Unreleased — exported view images
 
 - Projects gain Export image: the current project, or the workspace overview with every active project, drawn by the existing Rust renderer as one 1080 px palette PNG of at most 400 KB, watermarked with the exporter, workspace and date and carrying the content hash. The dialog previews it and offers Send (system share sheet), Copy image and Save.
-- New permission `view:export` for members and admins; guests and agents are refused. Finance shows only to people who may read it. Nothing is stored; 10 exports per person per minute.
+- New permission `view:export` for members and admins; guests and agents are refused. Finance shows only to people who may read it. Image binaries are not stored; 10 exports per person per minute.
+- Each authorized export snapshot records one `view.export` audit row with bounded metadata and no realtime notification. Workspace administrators see it with a localized label in `/orgs/audit`.
 - Deployment: the API needs `SUMMARY_RENDER_URL` (the worker's internal value). No migration, dependency or MCP tool change.
 
 ## v0.2.23 — grant decisions and audience editing
