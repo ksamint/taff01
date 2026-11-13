@@ -47,7 +47,7 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 
 ## Out of scope in v1
 
-- Exports by agents or over MCP; an audit list of exports; pictures of the calendar, timeline chart, mind or relations canvases as drawn.
+- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal E2, E3, S1–S3): export audit rows, the agent `views.image` tool, and timeline, calendar, mind and relations images. None is current behaviour yet.
 
 ## Acceptance
 
@@ -63,8 +63,7 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 
 ## Open decisions
 
-See [ADR 0031](../adr/0031-exported-view-images.md#open-decisions): export
-audit rows, an agent `views.image` tool, and screen-picture exports (owner).
+None open; the owner decided all three on 2026-11-13 (ADR 0031 amendment 1).
 
 ## Sources
 

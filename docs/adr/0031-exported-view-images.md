@@ -54,9 +54,32 @@ exporter cannot already read.
 
 ## Open decisions
 
-1. Whether exports write an audit row (who exported which view, when). The
-   watermark identifies a leaked copy; an audit row would list exports.
-2. Whether agents get a `views.image` MCP tool for Twin to post project
-   images (needs a scope and grant decision like ADR 0029 decision 5).
-3. Exports of the calendar, timeline chart and mind map as drawn (a picture
-   of the screen) rather than the status report document.
+All three were decided by the owner on 2026-11-13 ("yes for all"); see
+Amendment 1.
+
+## Amendment 1 — 2026-11-13: owner decisions
+
+Status: accepted; implementation planned in the
+[v0.2.24 goal](../agent-goal-v0.2.24-view-export-and-alignment.md) (E2, E3, S1–S3).
+
+1. **Exports are audited.** Every issued export writes one `activity` row
+   `view.export` in the workspace (actor, scope, project id, locale, content
+   hash, project count, finance shown, channel `web` or `mcp`). It is a read,
+   so it emits no change event and invalidates no cache. `/orgs/audit` lists it.
+2. **Agents export over MCP.** Tool `views.image` (read-only) returns the same
+   PNG as an MCP image block. `view:export` allows an agent only when its
+   token's effective grant for the workspace carries both `tasks:read` and
+   `summaries:read` (the scope ADR 0029 already gives Twin for status images);
+   finance follows the existing agent `finance:read` rule. The watermark and
+   the audit row name the agent. No new scope. Tools: 37 → 38.
+3. **Screen exports are drawn on the server too.** The timeline chart, the
+   calendar (week and month) and the mind and relations graphs export as
+   images from typed layouts built in TypeScript (`packages/schemas`, emitted
+   as JSON Schema) and drawn by new `taff-render` modules; never a DOM
+   capture or client-supplied SVG, so the watermark and the data stay
+   server-authored. Each layout has row or node caps with localized "+N more",
+   a width and height cap and the 400 KB cap.
+4. **Workspace archive gets a screen and a restore** (goal A4): archive stays
+   `workspace:archive` (workspace admin or system admin, never a personal
+   workspace); a new restore reverses it with the same rule; the archive
+   confirmation names the workspace and what members lose.
