@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased — operation templates
+
+- Workspace admins apply the 通用營運模板 / generic operation template from Projects: six sector projects (財務與現金, 客戶與市場, 營運與交付, 人才與組織, 風險與安全, 未來), each with a 領先指標 and a 結果指標 task tagged with the sector label. Applying again only restores what is missing. Members, guests and agents cannot apply it.
+- New route `POST /api/workspaces/:id/operation-templates/:template`. No migration, dependency, permission action or MCP tool.
+
 ## v0.2.24 — view exports and workspace lifecycle
 
 - Projects gain Export image: the current project, or the workspace overview with every active project, drawn by the existing Rust renderer as one 1080 px palette PNG of at most 400 KB, watermarked with the exporter, workspace and date and carrying the content hash. The dialog previews it and offers Send (system share sheet), Copy image and Save.

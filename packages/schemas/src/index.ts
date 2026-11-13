@@ -68,6 +68,7 @@ export * from "./inbox-read";
 export * from "./mind";
 export * from "./notification-preferences";
 export * from "./oauth";
+export * from "./operation-templates";
 export * from "./plan";
 export * from "./project-read";
 export * from "./run-read";

@@ -43,7 +43,11 @@ import {
   useTaskAccess,
   useWorkspaceAccess,
 } from "../lib/m5-queries";
-import { useManageProject, useMoveTaskStatus } from "../lib/mutations/projects";
+import {
+  useApplyOperationTemplate,
+  useManageProject,
+  useMoveTaskStatus,
+} from "../lib/mutations/projects";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import {
   agentShortName,
@@ -231,6 +235,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   );
   const projectName = selected ? selected.name : t("projects.allProjects");
   const admin = workspaceAccess.data?.canManageProjects;
+  const applyTemplate = useApplyOperationTemplate(workspace.id);
   const manage = useManageProject(workspace.id, {
     mode: projectDialog,
     baseline: projectBaseline,
@@ -718,6 +723,28 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 }}
               >
                 {t("projects.newProject")}
+              </Button>
+            )}
+            {admin && !selected && (
+              <Button
+                data-testid="apply-operation-template"
+                disabled={applyTemplate.isPending}
+                onClick={() =>
+                  applyTemplate.mutate("generic-operation", {
+                    onSuccess: (result) => {
+                      setSheetOpen(false);
+                      showToast(
+                        t("projects.templateApplied", {
+                          projects: result.createdProjects,
+                          tasks: result.createdTasks,
+                        }),
+                      );
+                    },
+                    onError: (error) => showToast(t(errorKey(error))),
+                  })
+                }
+              >
+                {t("projects.applyOperationTemplate")}
               </Button>
             )}
             {admin && selected && (

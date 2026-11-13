@@ -28,6 +28,7 @@ metadata in the audit log. Agents with both read scopes use `views.image`,
 one of 38 MCP tools. See [view export](docs/spec/view-export.md).
 Project due-date and delivery-progress editing follows the [project profile spec](docs/spec/projects.md).
 Organization archive and restore follows the [workspace lifecycle spec](docs/spec/workspaces.md).
+Admins add the six-sector generic operation template to an organization from Projects; see [operation templates](docs/spec/operation-templates.md) (unreleased).
 
 **v0.2.23 (deployed) — grant decisions and audience editing.** Pending requests
 are actionable from the access matrix; administrators can edit audience tags and

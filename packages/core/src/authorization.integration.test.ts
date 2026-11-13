@@ -571,6 +571,11 @@ const routes: RequestCase[] = [
   },
   {
     method: "POST",
+    path: "/api/workspaces/:workspace/operation-templates/:template",
+    member: "deny",
+  },
+  {
+    method: "POST",
     path: "/api/workspaces/:workspace/invites",
     body: () => ({ email: `${randomUUID()}@test.local`, role: "member" }),
     member: "deny",
@@ -929,6 +934,7 @@ function pathFor(path: string, f: Fixture) {
     run: f.run?.id ?? "",
     grant: f.grantId,
     inbox: f.inboxId,
+    template: "generic-operation",
   };
   for (const [name, value] of Object.entries(f))
     if (value && typeof value === "object" && "id" in value)

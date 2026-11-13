@@ -105,6 +105,7 @@ import { createCrmOperations } from "./crm";
 import { createMindOperations } from "./mind";
 import { createNotificationOperations } from "./notifications";
 import { createOAuthOperations } from "./oauth";
+import { createOperationTemplateOperations } from "./operation-templates";
 import {
   type Action,
   type Actor,
@@ -1637,6 +1638,11 @@ export function createCore(options: {
     insertTask,
     applyTaskPlan: timeline.applyTaskPlan,
   });
+  const operationTemplates = createOperationTemplateOperations({
+    mutation,
+    requireMember,
+    insertTask,
+  });
   const mind = createMindOperations({
     db,
     mutation,
@@ -1834,6 +1840,7 @@ export function createCore(options: {
     ...planning.operations,
     ...timeline.operations,
     ...crm.operations,
+    ...operationTemplates,
     ...summaryOperations,
     ...viewExport,
     ...relations.operations,
