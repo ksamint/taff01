@@ -5,14 +5,14 @@ project as one image ([ADR 0031](../adr/0031-exported-view-images.md),
 milestone 117). This file states the current contract; the ADR holds the
 decisions. Change this file in the same commit as the behaviour it describes.
 
-Status: released in v0.2.24 (`ff411c6`); screen exports below remain planned for v0.2.25.
+Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). Timeline is implemented for v0.2.25 and unreleased; calendar, mind and relations remain planned.
 
 ## Users and roles
 
 | Role | Can |
 | --- | --- |
-| Admin | Export the workspace overview or any project of the workspace, with finance |
-| Member | The same; finance follows `finance:read` (people who are not guests) |
+| Admin | Overview, project and timeline images; finance follows `finance:read` for summary images |
+| Member | Overview, project and timeline images; finance follows `finance:read` for summary images |
 | Guest | Nothing; no export button, and the API refuses |
 | Agent | Live image through `views.image` with both tasks:read and summaries:read |
 
@@ -32,16 +32,27 @@ Status: released in v0.2.24 (`ff411c6`); screen exports below remain planned for
 - VE-2.1 The action `view:export` shall allow people who are members or admins of the workspace and deny guests and non-members. Agents follow VE-2.3.
 - VE-2.2 When a member is demoted to guest, the next export shall be refused; when restored, allowed again.
 
-- VE-2.3 Every `views.image` call shall resolve the current token and workspace grant and require both tasks:read and summaries:read. Optional strict arguments are workspaceId, projectId and locale; omitted locale and time zone use the saved token issuer. Finance follows finance:read. The PNG watermark, Unicode-safe filename metadata and mcp audit identify the agent. Revoked tokens/grants, missing scopes and unauthorized workspaces shall be denied. REST and MCP share the 10 s renderer and 10/member/minute quota across tokens; unavailable services fail closed with visible MCP errors and failed call logs.
+- VE-2.3 Every `views.image` call shall resolve the current token and workspace grant and require both tasks:read and summaries:read. Strict arguments include optional workspaceId, projectId, locale, view and criticalPath (VE-4.5); omitted locale and time zone use the saved token issuer. Finance follows finance:read for summary images. The PNG watermark, Unicode-safe filename metadata and mcp audit identify the agent. Revoked tokens/grants, missing scopes and unauthorized workspaces shall be denied. REST and MCP share the 10 s renderer and 10/member/minute quota across tokens; unavailable services fail closed with visible MCP errors and failed call logs.
 
 ### Delivery (VE-3)
 - VE-3.1 `GET /api/workspaces/:id/view-image?locale=<en|zh-CN|zh-HK>[&projectId=<id>]` shall require a session and validate the id and a strict query before any count or read.
 - VE-3.2 The route shall count one hit per person per minute in Valkey under a hashed key, refuse above 10 with 429 and `Retry-After: 60`, and answer 503 when the count fails.
 - VE-3.3 The route shall post `{layout, watermark, contentHash}` to the internal renderer with a 10 s timeout and return `image/png` with `Cache-Control: private, no-store`, `nosniff`, an attachment name `taff-<workspace|project>-<date>-<hash8>.png` and `X-Taff-Content-Hash`.
 - VE-3.4 Without `SUMMARY_RENDER_URL` the route shall answer 503 `render_unavailable`; a renderer error, a non-PNG answer or a timeout shall answer 502 `render_failed`.
-- VE-3.5 The image shall be 1080 px wide, a palette PNG of at most 400 KB, fitted under the 3,400 px height budget (ADR 0029).
+- VE-3.5 Overview/project summary images shall be 1080 px wide, a palette PNG of at most 400 KB, fitted under the 3,400 px height budget (ADR 0029). Timeline images follow VE-4.3.
 - VE-3.6 The projects header shall show an Export image button to people who are not guests, once the session is confirmed; it shows the current project, or the workspace overview when no project is selected.
 - VE-3.7 The dialog shall preview the image with its width and size, and offer Send (only when `navigator.canShare` accepts the file), Copy image (only when `ClipboardItem` exists) and Save (always); Escape closes it and returns focus to the button.
+
+### Timeline exports (VE-4)
+- VE-4.1 The internal `POST /render/timeline` shall accept only the generated `timeline-image.json` display contract and report `X-Taff-Renderer: timeline-1`.
+- VE-4.2 The pure `buildTimelineLayout` builder shall retain the first 60 rows in `getTimeline` order, remove dependencies with omitted endpoints, and receive localized title, subtitle, today, footer, date and overflow labels from its caller.
+- VE-4.3 The chart shall fit civil dates, inclusive task bars, milestone diamonds, dependency arrows, forecasts and today to 1600 px; output shall be a palette PNG at most 400 KB and 4000 px high.
+- VE-4.4 The renderer shall validate bounded coordinates, strings and arrays before raster allocation, escape text, reject mismatched footer/watermark hashes, and embed the full hash in a PNG text chunk.
+- VE-4.8 Timeline rendering shall use the approved TABLE AI light palette in `apps/web/src/styles/tokens.css`, preserving gold normal/progress marks and error-coloured risk/slip marks.
+
+- VE-4.5 REST and MCP shall accept `view=overview|project|timeline`; omitted view preserves projectId-based summary behavior. Project/timeline require projectId; explicit overview refuses projectId. `criticalPath=show|hide` applies only to timeline and defaults to show; unknown or irrelevant options shall be refused.
+- VE-4.6 Core shall read the project through authorized `getTimeline` in the saved viewer/token-issuer zone, and bind the canonical hash to the snapshot, project, locale, zone and normalized highlight option. Timeline images contain no finance; their snapshot audit shall use `scope=timeline`, `projectCount=1`, `finance=false` and the trusted adapter's channel.
+- VE-4.7 The timeline toolbar shall show one Export image button to confirmed non-guests, export the current critical-path highlight, and fit the full chart independent of browser horizontal zoom. The existing preview/send/copy/save flow shall handle its 1600 px PNG.
 
 ## Non-functional
 
@@ -50,7 +61,7 @@ Status: released in v0.2.24 (`ff411c6`); screen exports below remain planned for
 
 ## Out of scope in v1
 
-- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal S1–S3): timeline, calendar, mind and relations images. These screen exports are not current behaviour yet.
+- Calendar, mind and relations images remain planned under ADR 0031 amendment 1. Timeline integration is implemented for v0.2.25 and unreleased.
 
 ## Acceptance
 
@@ -65,6 +76,8 @@ Status: released in v0.2.24 (`ff411c6`); screen exports below remain planned for
 | VE-3.5 | `e2e/view-export.spec.ts` (≤ 400 KB, 1080 px through the real renderer); `taff-render` caps |
 | VE-3.6–3.7 | `e2e/view-export.spec.ts`, en, zh-CN, zh-HK |
 | Deploy wiring | `scripts/apuch-compose.test.ts` (API and worker share the renderer URL) |
+| VE-4.1–4.4 | `packages/schemas/src/timeline-image.test.ts`; `backend/crates/taff-render/tests/render.rs` timeline cases and three locale PNG goldens |
+| VE-4.5–4.7 | `packages/schemas/src/view-export.test.ts`; `view-export.integration.test.ts`; `apps/api/src/view-export.test.ts`, `mcp-views.test.ts`; timeline case in `e2e/view-export.spec.ts` across three locales |
 
 ## Open decisions
 

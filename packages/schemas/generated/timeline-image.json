@@ -1,0 +1,237 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "layout": {
+      "type": "object",
+      "properties": {
+        "locale": {
+          "type": "string",
+          "enum": [
+            "en",
+            "zh-CN",
+            "zh-HK"
+          ]
+        },
+        "width": {
+          "type": "number",
+          "const": 1600
+        },
+        "height": {
+          "type": "number",
+          "minimum": 320,
+          "maximum": 4000
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "subtitle": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "todayLabel": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "todayX": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1552
+        },
+        "ticks": {
+          "maxItems": 7,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1552
+              },
+              "label": {
+                "type": "string",
+                "maxLength": 100
+              }
+            },
+            "required": [
+              "x",
+              "label"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "rows": {
+          "maxItems": 60,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "task",
+                  "milestone"
+                ]
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 220
+              },
+              "y": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 3800
+              },
+              "x": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1552
+              },
+              "endX": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1552
+              },
+              "forecastX": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1552
+              },
+              "progress": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100
+              },
+              "depth": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "critical": {
+                "type": "boolean"
+              },
+              "blocked": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "kind",
+              "title",
+              "y",
+              "x",
+              "endX",
+              "forecastX",
+              "progress",
+              "depth",
+              "critical",
+              "blocked"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "dependencies": {
+          "maxItems": 3600,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "from": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 59
+              },
+              "to": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 59
+              },
+              "conflict": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "from",
+              "to",
+              "conflict"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "more": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "footer": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "maxLength": 300
+            },
+            "hashFull": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          },
+          "required": [
+            "text",
+            "hashFull"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "locale",
+        "width",
+        "height",
+        "title",
+        "subtitle",
+        "todayLabel",
+        "todayX",
+        "ticks",
+        "rows",
+        "dependencies",
+        "more",
+        "footer"
+      ],
+      "additionalProperties": false
+    },
+    "watermark": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "contentHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "text",
+        "contentHash"
+      ],
+      "additionalProperties": false
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "required": [
+    "layout",
+    "watermark",
+    "contentHash"
+  ],
+  "additionalProperties": false
+}

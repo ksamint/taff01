@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (481 distinct, 2240 uses)
+## Test ids (483 distinct, 2244 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -745,6 +745,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-bar-body` | 14 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-bar-link` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-bar-resize` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline-critical` | 2 |  | view-export.spec.ts |
 | `timeline-dependency` | 6 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-dependency-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-duration` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -759,6 +760,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-save` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-start` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-view` | 8 |  | finance-visibility.spec.ts, live/platform.spec.ts, live/timeline.spec.ts, project-finance.spec.ts, timeline.spec.ts |
+| `timeline-zoom-week` | 1 |  | view-export.spec.ts |
 
 ### today-view.tsx
 
@@ -780,7 +782,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `view-export-copy` | 1 |  | view-export.spec.ts |
-| `view-export-open` | 2 |  | view-export.spec.ts |
+| `view-export-open` | 3 |  | view-export.spec.ts |
 | `view-export-preview` | 2 |  | view-export.spec.ts |
 | `view-export-save` | 1 |  | view-export.spec.ts |
 | `view-export-send` | 1 |  | view-export.spec.ts |
@@ -1289,4 +1291,4 @@ Keys read from `apps/web/locales/*/common.json` through
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
 | `viewExport.copied` | 1 | view-export.spec.ts |
-| `viewExport.title` | 2 | view-export.spec.ts |
+| `viewExport.title` | 5 | view-export.spec.ts |

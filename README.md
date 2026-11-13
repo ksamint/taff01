@@ -11,6 +11,11 @@ graph data and isolation scope.
 
 ## Status
 
+**Timeline export candidate.** The timeline toolbar and `views.image` export a
+1600 px server-drawn chart with critical-path highlighting, saved viewer zone,
+watermark and snapshot audit. Full release validation remains pending; see
+[view export VE-4](docs/spec/view-export.md).
+
 **v0.2.24 (deployed) — exported view images and organization lifecycle.** Members and admins export the
 current project or the workspace overview as one watermarked PNG (1080 px,
 ≤ 400 KB) and send, copy or save it; each authorized snapshot records bounded

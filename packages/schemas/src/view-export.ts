@@ -1,17 +1,37 @@
-// Exported view images (ADR 0031): the query a person sends to turn the
-// workspace overview, or one project, into a designed PNG.
-import { type infer as Infer, optional, strictObject } from "zod/mini";
+// Export queries share one strict contract across REST, MCP and core.
+import {
+  type infer as Infer,
+  optional,
+  refine,
+  strictObject,
+  enum as zodEnum,
+} from "zod/mini";
 import { idSchema, localeSchema } from "./primitives";
 
+const viewFields = {
+  projectId: optional(idSchema),
+  view: optional(zodEnum(["overview", "project", "timeline"])),
+  criticalPath: optional(zodEnum(["show", "hide"])),
+};
+const validView = (value: {
+  projectId?: string;
+  view?: string;
+  criticalPath?: string;
+}) =>
+  (!(value.view === "timeline" || value.view === "project") ||
+    !!value.projectId) &&
+  (value.view !== "overview" || !value.projectId) &&
+  (value.criticalPath === undefined || value.view === "timeline");
 export const viewExportQuerySchema = strictObject({
-  /** Omitted for the workspace overview (every active project). */
-  projectId: optional(idSchema),
-  /** The interface language the image is written in. */
+  ...viewFields,
   locale: localeSchema,
-});
+}).check(refine(validView));
 export const mcpViewsImageArgs = strictObject({
+  ...viewFields,
   workspaceId: optional(idSchema),
-  projectId: optional(idSchema),
   locale: optional(localeSchema),
-});
+}).check(refine(validView));
 export type ViewExportQuery = Infer<typeof viewExportQuerySchema>;
+export type ViewExportInputQuery = Omit<ViewExportQuery, "locale"> & {
+  locale?: ViewExportQuery["locale"];
+};

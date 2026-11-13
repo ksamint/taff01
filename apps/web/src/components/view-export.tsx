@@ -2,6 +2,7 @@
 // Exported view images (ADR 0031, spec view-export VE-3): one button opens a
 // preview of the server-drawn PNG with Send, Copy image and Save.
 import "../styles/view-export.css";
+import type { ViewExportQuery } from "@taff/schemas";
 import { ImageDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -37,10 +38,14 @@ export function canShareFile(file: File): boolean {
 export function ViewExportButton({
   workspaceId,
   projectId,
+  view,
+  criticalPath,
 }: {
   workspaceId: string;
   /** Omitted for the workspace overview. */
   projectId?: string;
+  view?: ViewExportQuery["view"];
+  criticalPath?: ViewExportQuery["criticalPath"];
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -60,6 +65,8 @@ export function ViewExportButton({
         <ViewExportDialog
           workspaceId={workspaceId}
           projectId={projectId}
+          view={view}
+          criticalPath={criticalPath}
           onClose={() => setOpen(false)}
         />
       )}
@@ -70,10 +77,14 @@ export function ViewExportButton({
 function ViewExportDialog({
   workspaceId,
   projectId,
+  view,
+  criticalPath,
   onClose,
 }: {
   workspaceId: string;
   projectId?: string;
+  view?: ViewExportQuery["view"];
+  criticalPath?: ViewExportQuery["criticalPath"];
   onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
@@ -85,6 +96,8 @@ function ViewExportDialog({
     let url: string | null = null;
     const query = new URLSearchParams({ locale });
     if (projectId) query.set("projectId", projectId);
+    if (view) query.set("view", view);
+    if (criticalPath) query.set("criticalPath", criticalPath);
     (async () => {
       try {
         const response = await fetch(
@@ -119,7 +132,7 @@ function ViewExportDialog({
       controller.abort();
       if (url) URL.revokeObjectURL(url);
     };
-  }, [workspaceId, projectId, locale]);
+  }, [workspaceId, projectId, locale, view, criticalPath]);
 
   const ready = state.kind === "ready" ? state : null;
   const shareable = ready ? canShareFile(ready.file) : false;

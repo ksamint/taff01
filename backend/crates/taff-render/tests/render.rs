@@ -234,3 +234,146 @@ fn designed_layout_stays_within_caps_at_the_fitted_budget() {
     eprintln!("worst case: {} px, {} bytes", image.height(), bytes.len());
     assert!(bytes.len() < 400 * 1024, "size {}", bytes.len());
 }
+
+fn timeline_input(locale: &str) -> Value {
+    let base = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures");
+    serde_json::from_slice(&std::fs::read(base.join(format!("timeline-{locale}.json"))).unwrap())
+        .unwrap()
+}
+#[test]
+fn timeline_renders_three_locale_goldens_with_hash_and_caps() {
+    let hasher = HasherConfig::new().hash_size(16, 16).to_hasher();
+    for locale in ["en", "zh-CN", "zh-HK"] {
+        let input = timeline_input(locale);
+        let bytes = taff_render::render_timeline(&input).unwrap();
+        assert!(bytes.len() <= 400 * 1024);
+        assert_eq!(
+            text_chunk(&bytes, "taff:content-hash").as_deref(),
+            input["contentHash"].as_str()
+        );
+        let actual = image::load_from_memory(&bytes).unwrap();
+        assert_eq!(actual.width(), 1600);
+        assert_eq!(
+            actual.height(),
+            input["layout"]["height"].as_u64().unwrap() as u32
+        );
+        assert!(actual.height() <= 4000);
+        let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join(format!("tests/fixtures/timeline-{locale}.png"));
+        if std::env::var("UPDATE_RENDER_GOLDENS").as_deref() == Ok("1") {
+            std::fs::write(&path, &bytes).unwrap();
+        }
+        let expected = image::open(path).unwrap();
+        assert_eq!(expected.height(), actual.height());
+        assert!(
+            hasher
+                .hash_image(&actual)
+                .dist(&hasher.hash_image(&expected))
+                <= 2
+        );
+        let mut blank = input.clone();
+        blank["watermark"]["text"] = json!("");
+        assert_ne!(bytes, taff_render::render_timeline(&blank).unwrap());
+    }
+}
+#[test]
+fn timeline_rejects_invalid_bounds_and_hash_before_rasterization() {
+    for (path, value) in [
+        ("/layout/height", json!(4001)),
+        ("/layout/height", json!(319)),
+        ("/layout/width", json!(1601)),
+        ("/layout/todayX", json!(-1)),
+        ("/layout/rows/0/x", json!(1e100)),
+        ("/layout/rows/0/y", json!(3700)),
+        ("/layout/rows/0/endX", json!(0)),
+        ("/layout/dependencies/0/to", json!(59)),
+        ("/layout/dependencies/0/from", json!(0.5)),
+        ("/layout/title", json!("x".repeat(201))),
+        ("/layout/footer/hashFull", json!("b".repeat(64))),
+        ("/watermark/contentHash", json!("b".repeat(64))),
+        ("/watermark/text", json!("x".repeat(501))),
+    ] {
+        let mut input = timeline_input("en");
+        *input.pointer_mut(path).unwrap() = value;
+        assert_eq!(
+            taff_render::render_timeline(&input),
+            Err("invalid_input"),
+            "{path}"
+        );
+    }
+    let mut input = timeline_input("en");
+    input["layout"]["rows"] = json!(vec![input["layout"]["rows"][0].clone(); 61]);
+    assert_eq!(taff_render::render_timeline(&input), Err("invalid_input"));
+    let mut input = timeline_input("en");
+    input["svg"] = json!("<svg/>");
+    assert_eq!(taff_render::render_timeline(&input), Err("invalid_input"));
+}
+#[test]
+fn timeline_sixty_rows_remain_within_delivery_caps() {
+    let mut input = timeline_input("zh-HK");
+    let mut rows = Vec::new();
+    for index in 0..60 {
+        let mut row = input["layout"]["rows"][index % 6].clone();
+        row["y"] = json!(194 + index * 52);
+        row["title"] = json!("侍饕餮鑫".repeat(55));
+        rows.push(row);
+    }
+    input["layout"]["rows"] = json!(rows);
+    input["layout"]["height"] = json!(3400);
+    let png = taff_render::render_timeline(&input).unwrap();
+    assert!(png.len() <= 400 * 1024);
+    assert_eq!(image::load_from_memory(&png).unwrap().height(), 3400);
+    eprintln!("timeline maximum rows: {} bytes", png.len());
+}
+#[tokio::test]
+async fn timeline_http_version_and_validation() {
+    use axum::{
+        body::Body,
+        http::{Request, StatusCode},
+    };
+    use tower::ServiceExt;
+    for valid in [false, true] {
+        let response = taff_render::router()
+            .oneshot(
+                Request::builder()
+                    .uri("/render/timeline")
+                    .method("POST")
+                    .header("content-type", "application/json")
+                    .body(Body::from(if valid {
+                        timeline_input("en").to_string()
+                    } else {
+                        "{}".to_string()
+                    }))
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(
+            response.status(),
+            if valid {
+                StatusCode::OK
+            } else {
+                StatusCode::UNPROCESSABLE_ENTITY
+            }
+        );
+        if valid {
+            assert_eq!(response.headers()["x-taff-renderer"], "timeline-1");
+            assert_eq!(response.headers()["cache-control"], "no-store");
+        }
+    }
+}
+
+#[test]
+fn timeline_palette_uses_approved_table_ai_tokens() {
+    let tokens = include_str!("../../../../apps/web/src/styles/tokens.css");
+    let source = include_str!("../src/timeline.rs");
+    for suffix in source.split('#').skip(1) {
+        let hex: String = suffix.chars().take(6).collect();
+        if hex.len() == 6 && hex.chars().all(|c| c.is_ascii_hexdigit()) {
+            assert!(
+                tokens.contains(&format!("#{hex}")),
+                "unapproved colour #{hex}"
+            );
+        }
+    }
+}

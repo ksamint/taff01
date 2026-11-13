@@ -8,3 +8,12 @@ writeFileSync(
   new URL("daily-summary.json", dir),
   `${JSON.stringify(toJSONSchema(summaryImageInputSchema, { target: "draft-7", io: "input" }), null, 2)}\n`,
 );
+
+// Screen export schemas use the same generation path as summaries.
+const { timelineImageInputSchema } = await import(
+  "../../../packages/schemas/src/timeline-image"
+);
+writeFileSync(
+  new URL("timeline-image.json", dir),
+  `${JSON.stringify(toJSONSchema(timelineImageInputSchema, { target: "draft-7", io: "input" }), null, 2)}\n`,
+);

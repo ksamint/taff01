@@ -62,6 +62,7 @@ import { useWorkspace } from "./app-shell";
 import { ProjectFinancePanel } from "./project-finance-panel";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
+import { ViewExportButton } from "./view-export";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 type Drag = {
@@ -87,7 +88,7 @@ export function TimelineView({ project }: { project: Project | undefined }) {
 }
 
 function ProjectTimeline({ project }: { project: Project }) {
-  const { workspace } = useWorkspace();
+  const { workspace, confirmed } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
   const desktop = useDesktop();
@@ -405,6 +406,14 @@ function ProjectTimeline({ project }: { project: Project }) {
       aria-label={t("projects.timelineView")}
     >
       <div className="timeline-toolbar">
+        {confirmed && workspace.role !== "guest" && (
+          <ViewExportButton
+            workspaceId={workspace.id}
+            projectId={project.id}
+            view="timeline"
+            criticalPath={critical ? "show" : "hide"}
+          />
+        )}
         {access.data?.canManageProjects && (
           <Button
             type="button"

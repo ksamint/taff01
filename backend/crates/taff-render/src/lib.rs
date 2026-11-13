@@ -7,6 +7,8 @@ use serde_json::Value;
 use std::sync::{Arc, OnceLock};
 
 mod designed;
+mod timeline;
+pub use timeline::render_timeline;
 
 pub const IMAGE_V1: &str = "image-1";
 pub const IMAGE_V2: &str = "image-2";
@@ -104,12 +106,25 @@ fn render_designed(input: &Value) -> Result<Vec<u8>, &'static str> {
         return Err("invalid_input");
     }
     let (svg, height) = designed::layout_svg(&parsed)?;
+    palette_svg(
+        &svg,
+        designed::WIDTH as u32,
+        height as u32,
+        &parsed.content_hash,
+    )
+}
+
+pub(crate) fn palette_svg(
+    svg: &str,
+    width: u32,
+    height: u32,
+    hash: &str,
+) -> Result<Vec<u8>, &'static str> {
     let options = usvg::Options {
         fontdb: fonts(),
         ..Default::default()
     };
-    let tree = usvg::Tree::from_str(&svg, &options).map_err(|_| "render_failed")?;
-    let (width, height) = (designed::WIDTH as u32, height as u32);
+    let tree = usvg::Tree::from_str(svg, &options).map_err(|_| "render_failed")?;
     let mut pixmap = tiny_skia::Pixmap::new(width, height).ok_or("render_too_large")?;
     resvg::render(
         &tree,
@@ -117,7 +132,7 @@ fn render_designed(input: &Value) -> Result<Vec<u8>, &'static str> {
         &mut pixmap.as_mut(),
     );
     let png = encode_palette_png(pixmap.data(), width, height)?;
-    let png = with_text_chunk(png, "taff:content-hash", &parsed.content_hash);
+    let png = with_text_chunk(png, "taff:content-hash", hash);
     if png.len() > MAX_BYTES {
         return Err("render_too_large");
     }
@@ -317,6 +332,26 @@ async fn render(
 pub fn router() -> Router {
     Router::new()
         .route("/render/summary", post(render))
+        .route("/render/timeline", post(render_timeline_http))
         .route("/health", axum::routing::get(|| async { "ok" }))
         .layer(DefaultBodyLimit::max(8 * 1024 * 1024))
+}
+
+async fn render_timeline_http(
+    Json(input): Json<Value>,
+) -> Result<([(&'static str, &'static str); 3], Vec<u8>), (StatusCode, &'static str)> {
+    tokio::task::spawn_blocking(move || render_timeline(&input))
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "render_failed"))?
+        .map(|png| {
+            (
+                [
+                    ("content-type", "image/png"),
+                    ("cache-control", "no-store"),
+                    ("x-taff-renderer", timeline::VERSION),
+                ],
+                png,
+            )
+        })
+        .map_err(|error| (StatusCode::UNPROCESSABLE_ENTITY, error))
 }

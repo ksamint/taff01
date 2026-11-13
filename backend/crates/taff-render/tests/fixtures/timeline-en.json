@@ -1,0 +1,152 @@
+{
+  "layout": {
+    "locale": "en",
+    "width": 1600,
+    "height": 592,
+    "title": "Timeline",
+    "subtitle": "Exported by Alice",
+    "todayLabel": "Today",
+    "todayX": 714,
+    "ticks": [
+      {
+        "x": 440,
+        "label": "Mar 6"
+      },
+      {
+        "x": 659.2,
+        "label": "Mar 8"
+      },
+      {
+        "x": 768.8,
+        "label": "Mar 9"
+      },
+      {
+        "x": 988,
+        "label": "Mar 11"
+      },
+      {
+        "x": 1097.6,
+        "label": "Mar 12"
+      },
+      {
+        "x": 1316.8000000000002,
+        "label": "Mar 14"
+      },
+      {
+        "x": 1426.4,
+        "label": "Mar 15"
+      }
+    ],
+    "rows": [
+      {
+        "kind": "task",
+        "title": "Delivery 1 · 侍饕餮鑫",
+        "y": 194,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 0,
+        "depth": 0,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "Delivery 2 · 侍饕餮鑫",
+        "y": 246,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 15,
+        "depth": 1,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "Delivery 3 · 侍饕餮鑫",
+        "y": 298,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 30,
+        "depth": 2,
+        "critical": true,
+        "blocked": true
+      },
+      {
+        "kind": "milestone",
+        "title": "Delivery 4 · 侍饕餮鑫",
+        "y": 350,
+        "x": 659.2,
+        "endX": 659.2,
+        "forecastX": 1426.4,
+        "progress": 45,
+        "depth": 0,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "Delivery 5 · 侍饕餮鑫",
+        "y": 402,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 60,
+        "depth": 1,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "Delivery 6 · 侍饕餮鑫",
+        "y": 454,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 75,
+        "depth": 2,
+        "critical": false,
+        "blocked": false
+      }
+    ],
+    "dependencies": [
+      {
+        "from": 0,
+        "to": 1,
+        "conflict": false
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "conflict": true
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "conflict": false
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "conflict": false
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "conflict": false
+      }
+    ],
+    "more": null,
+    "footer": {
+      "text": "Exported by Alice · 2026-03-08 12:00",
+      "hashFull": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "watermark": {
+    "text": "Exported by Alice · Taff · 2026-03-08",
+    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

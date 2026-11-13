@@ -99,3 +99,22 @@ This follows [RFC 6749 section 6](https://www.rfc-editor.org/rfc/rfc6749#section
 access may narrow, but rotated refresh scope must remain identical. Old images
 tolerate the nullable added column; rollback retains it and its data. No new
 dependency, renderer change or permission scope. Tool count is now 38.
+
+## Amendment 2 — timeline export integration
+
+The S1 candidate adds strict `view=overview|project|timeline` to the existing
+REST/MCP query; omitted view keeps projectId-based summary behavior. Timeline
+requires a project and accepts only `criticalPath=show|hide` (default show).
+The current screen has no row/date filter. Its day/week zoom is a horizontal
+browser scale, so the export always fits the complete capped chart to 1600 px;
+the critical-path highlight is preserved. Explicit overview/project selections
+and timeline options cannot be mixed ambiguously.
+
+Core calls the existing authorized `getTimeline` with the caller's principal;
+the saved human/token-issuer zone determines civil dates. Canonical snapshot
+hashing includes project, locale, zone and normalized highlight option, exporter
+and workspace labels. No timeline finance is rendered or hashed. The existing
+snapshot audit records scope timeline, projectCount 1 and finance false before
+rendering, using the same trusted web/MCP channel and quota. No scope or
+permission rule changes. The shared renderer helper selects `/render/timeline`;
+the existing export dialog handles its PNG. Calendar and graphs remain separate.

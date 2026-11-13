@@ -41,7 +41,10 @@ export async function renderViewImage(
   const { fileName, ...body } = input;
   try {
     const response = await (options.renderFetch ?? fetch)(
-      new URL("/render/summary", options.renderUrl),
+      new URL(
+        query.view === "timeline" ? "/render/timeline" : "/render/summary",
+        options.renderUrl,
+      ),
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
