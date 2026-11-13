@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { activity, connectDatabase, members } from "@taff/db";
 import { summaryImageLayoutInputSchema } from "@taff/schemas";
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { migrateDatabase } from "../../db/src/migrate";
 import { type Core, createCore, type Principal, userPrincipal } from "./index";
@@ -86,7 +86,7 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       bobMember = bm.id;
       const [ag] = await tx
         .insert(members)
-        .values({ workspaceId: w, name: "Export Agent", kind: "agent" })
+        .values({ workspaceId: w, name: "Export Agent 测试", kind: "agent" })
         .returning();
       agentMember = ag.id;
     });
@@ -266,7 +266,7 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
           recorded.some((entry) => entry.id === row.id),
         ),
       ).toHaveLength(2);
-      for (const principal of [gina, agent, outsider])
+      for (const principal of [gina, outsider])
         await expect(
           core.exportViewImageInput(principal, w, { locale: "en" }),
         ).rejects.toMatchObject({ code: "forbidden" });
@@ -293,8 +293,97 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     }
   });
 
-  it("refuses guests, agents, outsiders and invalid input", async () => {
-    for (const principal of [gina, agent, outsider])
+  it("enforces both current grant scopes and revocation, ignoring cached principal scopes", async () => {
+    const memberId = (agent as { memberId: string }).memberId;
+    const issued = await core.createAgentToken(alice, {
+      workspaceId: w,
+      memberId,
+      name: "grant-test",
+      scopes: ["tasks:read", "summaries:read"],
+    });
+    const p = (await core.authenticateAgentToken(issued.token))!;
+    await expect(
+      core.exportViewImageInput(p, w, {}, "mcp"),
+    ).resolves.toHaveProperty("layout");
+    for (const scopes of [["tasks:read"], ["summaries:read"]] as const) {
+      await core.setAgentTokenWorkspace(alice, issued.id, {
+        workspaceId: w,
+        memberId,
+        scopes: [...scopes],
+      });
+      await expect(
+        core.exportViewImageInput(p, w, {}, "mcp"),
+      ).rejects.toMatchObject({ code: "forbidden" });
+    }
+    await core.setAgentTokenWorkspace(alice, issued.id, {
+      workspaceId: w,
+      memberId,
+      scopes: ["tasks:read", "summaries:read"],
+      revoked: true,
+    });
+    await expect(
+      core.exportViewImageInput(p, w, {}, "mcp"),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+
+  it("exports for both scopes with issuer preferences, agent watermark and MCP audit", async () => {
+    await core.updateProfile((alice as { userId: string }).userId, {
+      locale: "zh-CN",
+      tz: "Asia/Shanghai",
+    });
+    const image = await core.exportViewImageInput(agent, w, {}, "mcp");
+    expect(image.watermark.text).toContain("Export Agent");
+    expect(image.fileName).toContain("Export Agent 测试");
+    const [row] = await connection.db
+      .select()
+      .from(activity)
+      .where(
+        and(
+          eq(activity.action, "view.export"),
+          eq(activity.actorId, (agent as { memberId: string }).memberId),
+        ),
+      )
+      .orderBy(desc(activity.createdAt));
+    expect(row.details).toMatchObject({
+      channel: "mcp",
+      locale: "zh-CN",
+      finance: false,
+    });
+    await expect(
+      core.exportViewImageInput(agent, otherW, {}, "mcp"),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await core.setAgentPermission(
+      alice,
+      (agent as { memberId: string }).memberId,
+      { capability: "projects.manage", decision: "allow" },
+    );
+    const financial = await core.exportViewImageInput(
+      agent,
+      w,
+      { projectId: active.id },
+      "mcp",
+    );
+    expect(financial.layout.projects[0].finance).not.toBeNull();
+    await core.setAgentPermission(
+      alice,
+      (agent as { memberId: string }).memberId,
+      { capability: "projects.manage", decision: "deny" },
+    );
+    const hidden = await core.exportViewImageInput(
+      agent,
+      w,
+      { projectId: active.id },
+      "mcp",
+    );
+    expect(hidden.layout.projects[0].finance).toBeNull();
+    await core.revokeAgentToken(alice, (agent as { tokenId: string }).tokenId);
+    await expect(
+      core.exportViewImageInput(agent, w, {}, "mcp"),
+    ).rejects.toMatchObject({ code: "forbidden" });
+  });
+
+  it("refuses guests, outsiders and invalid input", async () => {
+    for (const principal of [gina, outsider])
       await expect(
         core.exportViewImageInput(principal, w, { locale: "en" }),
       ).rejects.toMatchObject({ code: "forbidden" });

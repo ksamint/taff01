@@ -398,6 +398,61 @@ describe.skipIf(!url)("MCP OAuth 2.1 authorization server (ADR 0022)", () => {
     ).toBeNull();
   });
 
+  it("narrows access while preserving the rotating refresh ceiling", async () => {
+    const { verifier, challenge } = pkce();
+    const first = await exchange(
+      await approve(challenge, { scopes: ["tasks:read", "summaries:read"] }),
+      verifier,
+    );
+    const refresh = (token: string, scope?: string) =>
+      core.oauth.token({
+        grant_type: "refresh_token",
+        client_id: clientId,
+        refresh_token: token,
+        scope,
+      });
+    const narrow = await refresh(first.refresh_token, "tasks:read");
+    expect(narrow.scope).toBe("tasks:read");
+    const p = (await core.authenticateAgentToken(narrow.access_token))!;
+    await expect(
+      core.exportViewImageInput(p, w, {}, "mcp"),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      refresh(narrow.refresh_token, "tasks:write"),
+    ).rejects.toMatchObject({ error: "invalid_scope" });
+    await expect(
+      refresh(narrow.refresh_token, "unknown"),
+    ).rejects.toMatchObject({ error: "invalid_scope" });
+    const restored = await refresh(narrow.refresh_token);
+    expect(restored.scope).toBe("tasks:read summaries:read");
+    const restoredPrincipal = (await core.authenticateAgentToken(
+      restored.access_token,
+    ))!;
+    await expect(
+      core.exportViewImageInput(restoredPrincipal, w, {}, "mcp"),
+    ).resolves.toHaveProperty("contentHash");
+    const empty = await refresh(restored.refresh_token, "");
+    expect(empty.scope).toBe(restored.scope);
+    const [issuer] = await connection.db
+      .select()
+      .from(members)
+      .where(
+        and(
+          eq(members.userId, (alice as { userId: string }).userId),
+          eq(members.workspaceId, w),
+        ),
+      );
+    await role(issuer.id, "member");
+    try {
+      await expect(
+        refresh(empty.refresh_token, "tasks:read"),
+      ).rejects.toMatchObject({ error: "invalid_grant" });
+      expect(await core.authenticateAgentToken(empty.access_token)).toBeNull();
+    } finally {
+      await role(issuer.id, "admin");
+    }
+  });
+
   it("rotates refresh tokens and expires access tokens", async () => {
     const { verifier, challenge } = pkce();
     const first = await exchange(await approve(challenge), verifier);

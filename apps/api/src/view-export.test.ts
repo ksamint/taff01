@@ -123,10 +123,15 @@ describe("exported view image route", () => {
     );
     const response = await app.request(path);
     expect(response.status).toBe(200);
-    expect(call).toHaveBeenCalledWith({ kind: "user", userId: id }, id, {
-      locale: "zh-CN",
-      projectId: project,
-    });
+    expect(call).toHaveBeenCalledWith(
+      { kind: "user", userId: id },
+      id,
+      {
+        locale: "zh-CN",
+        projectId: project,
+      },
+      "web",
+    );
     const [target, init] = renderer.mock.calls[0];
     expect(String(target)).toBe("http://render.internal:3002/render/summary");
     // The download name never reaches the renderer's strict contract.

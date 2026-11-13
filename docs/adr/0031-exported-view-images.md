@@ -86,3 +86,16 @@ Status: accepted; implementation planned in the
    `workspace:archive` (workspace admin or system admin, never a personal
    workspace); a new restore reverses it with the same rule; the archive
    confirmation names the workspace and what members lose.
+
+## Amendment 2 — OAuth refresh scope ceiling
+
+E3 adds nullable `agent_tokens.refresh_scopes` (migration 0043). Access scopes
+may narrow on refresh; rotated refresh credentials retain the original ceiling,
+and omitted/empty scope restores that ceiling. Legacy null falls back to scopes.
+Every refresh and member restore rechecks authority against the ceiling; OAuth
+approval UI shows the ceiling, while access checks use current scopes. Unknown
+or expanding requested scopes are refused without consuming the credential.
+This follows [RFC 6749 section 6](https://www.rfc-editor.org/rfc/rfc6749#section-6):
+access may narrow, but rotated refresh scope must remain identical. Old images
+tolerate the nullable added column; rollback retains it and its data. No new
+dependency, renderer change or permission scope. Tool count is now 38.

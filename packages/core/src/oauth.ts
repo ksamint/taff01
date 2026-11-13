@@ -51,6 +51,7 @@ export class OAuthError extends Error {
     | "invalid_request"
     | "invalid_client"
     | "invalid_grant"
+    | "invalid_scope"
     | "unsupported_grant_type"
     | "invalid_client_metadata"
     | "invalid_redirect_uri"
@@ -416,6 +417,7 @@ export function createOAuthOperations({
             hash: hash(access),
             prefix: access.slice(0, 12),
             scopes: code.scopes,
+            refreshScopes: code.scopes,
             oauthClientId: code.clientId,
             expiresAt: new Date(now + ACCESS_TOKEN_SECONDS * 1000),
             refreshHash: hash(refresh),
@@ -483,6 +485,15 @@ export function createOAuthOperations({
         );
       return fail();
     }
+    const ceiling = row.refreshScopes ?? row.scopes;
+    const scopes = body.scope?.trim()
+      ? [...new Set(body.scope.trim().split(/\s+/))]
+      : ceiling;
+    if (scopes.some((scope) => !ceiling.includes(scope)))
+      throw new OAuthError(
+        "invalid_scope",
+        "Requested scope exceeds refresh grant",
+      );
     const access = secret("taff_");
     const refresh = secret("taffr_");
     const now = Date.now();
@@ -503,7 +514,7 @@ export function createOAuthOperations({
           userPrincipal(approver.userId),
           row.workspaceId,
           row.memberId,
-          row.scopes as Scope[],
+          ceiling as Scope[],
         );
       } catch (error) {
         if (!(error instanceof CoreError)) throw error;
@@ -519,6 +530,8 @@ export function createOAuthOperations({
       const rotated = await tx
         .update(agentTokens)
         .set({
+          scopes,
+          refreshScopes: ceiling,
           hash: hash(access),
           prefix: access.slice(0, 12),
           expiresAt: new Date(now + ACCESS_TOKEN_SECONDS * 1000),
@@ -547,7 +560,7 @@ export function createOAuthOperations({
       await tx
         .insert(oauthRefreshHistory)
         .values({ hash: presentedHash, tokenId: row.id });
-      return issued(access, refresh, row.scopes);
+      return issued(access, refresh, scopes);
     });
     return result ?? fail();
   }

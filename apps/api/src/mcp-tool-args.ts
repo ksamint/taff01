@@ -35,6 +35,7 @@ import {
   mcpTasksPlanArgs,
   mcpTasksUpdateArgs,
   mcpTimelineGetArgs,
+  mcpViewsImageArgs,
 } from "@taff/schemas";
 import type { $ZodType } from "zod/v4/core";
 
@@ -45,6 +46,7 @@ import type { $ZodType } from "zod/v4/core";
  * authorization integration test in turn pins to the live server's tool list.
  */
 export const MCP_TOOL_ARGS = {
+  "views.image": mcpViewsImageArgs,
   "brief.get": mcpBriefGetArgs,
   "calendar.list": mcpCalendarListArgs,
   "calendar.schedule": mcpCalendarScheduleArgs,

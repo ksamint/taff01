@@ -302,6 +302,13 @@
       "when": 1793232000008,
       "tag": "0042_oauth_refresh_history",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1794586373906,
+      "tag": "0043_oauth_refresh_scopes",
+      "breakpoints": true
     }
   ]
 }

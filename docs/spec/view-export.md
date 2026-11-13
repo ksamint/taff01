@@ -14,7 +14,7 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 | Admin | Export the workspace overview or any project of the workspace, with finance |
 | Member | The same; finance follows `finance:read` (people who are not guests) |
 | Guest | Nothing; no export button, and the API refuses |
-| Agent | Nothing; agents read summaries through `summaries.image` (ADR 0029) |
+| Agent | Live image through `views.image` with both tasks:read and summaries:read |
 
 ## Requirements
 
@@ -29,8 +29,10 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 - VE-1.8 When core builds an authorized export snapshot, it shall record one `view.export` activity row in its own transaction, attributed to the exporter and project or workspace. Details shall contain only `scope`, `locale`, `contentHash`, `projectCount`, `finance` and the trusted adapter's `channel` (`web` or `mcp`). Invalid input and permission or project refusals shall write nothing; the audit insert shall emit no realtime notification.
 
 ### Access (VE-2)
-- VE-2.1 The action `view:export` shall allow people who are members or admins of the workspace and deny guests, agents and non-members.
+- VE-2.1 The action `view:export` shall allow people who are members or admins of the workspace and deny guests and non-members. Agents follow VE-2.3.
 - VE-2.2 When a member is demoted to guest, the next export shall be refused; when restored, allowed again.
+
+- VE-2.3 Every `views.image` call shall resolve the current token and workspace grant and require both tasks:read and summaries:read. Optional strict arguments are workspaceId, projectId and locale; omitted locale and time zone use the saved token issuer. Finance follows finance:read. The PNG watermark, Unicode-safe filename metadata and mcp audit identify the agent. Revoked tokens/grants, missing scopes and unauthorized workspaces shall be denied. REST and MCP share the 10 s renderer and 10/member/minute quota across tokens; unavailable services fail closed with visible MCP errors and failed call logs.
 
 ### Delivery (VE-3)
 - VE-3.1 `GET /api/workspaces/:id/view-image?locale=<en|zh-CN|zh-HK>[&projectId=<id>]` shall require a session and validate the id and a strict query before any count or read.
@@ -43,12 +45,12 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 
 ## Non-functional
 
-- Image binaries are not stored; only the allowlisted export audit metadata is retained. No migration or new client dependency; the CJK text is drawn with the renderer's server fonts, so the web font subsets do not limit names.
+- Image binaries are not stored; only the allowlisted export audit metadata is retained. One additive nullable OAuth refresh-scope migration; no new client dependency; the CJK text is drawn with the renderer's server fonts, so the web font subsets do not limit names.
 - Environment: the API reads `SUMMARY_RENDER_URL` (optional); the renderer stays internal with no public route.
 
 ## Out of scope in v1
 
-- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal E3, S1–S3): the agent `views.image` tool, and timeline, calendar, mind and relations images. None is current behaviour yet.
+- Planned, owner-approved 2026-11-13 ([ADR 0031 amendment 1](../adr/0031-exported-view-images.md#amendment-1--2026-11-13-owner-decisions), goal E3, S1–S3): timeline, calendar, mind and relations images. These screen exports are not current behaviour yet.
 
 ## Acceptance
 
@@ -57,6 +59,7 @@ Status: implemented on `main`; not yet released (production is v0.2.23).
 | VE-1.1–1.7 | `packages/core/src/view-export.integration.test.ts` (5 cases, PostgreSQL) |
 | VE-1.8 | `view-export.integration.test.ts` audit metadata/refusal/notification barrier case; `e2e/audit.spec.ts` in three locales |
 | VE-2.1 | `packages/core/src/permissions.test.ts` (five `view:export` rows); `docs/spec/permissions-matrix.md` |
+| VE-2.3 | `mcp-views.test.ts`, `view-export.integration.test.ts`, `oauth.integration.test.ts`, authorization matrix and MCP smoke |
 | VE-2.2 | `view-export.integration.test.ts` "stops a demoted member…" |
 | VE-3.1–3.4 | `apps/api/src/view-export.test.ts` (6 cases) |
 | VE-3.5 | `e2e/view-export.spec.ts` (≤ 400 KB, 1080 px through the real renderer); `taff-render` caps |

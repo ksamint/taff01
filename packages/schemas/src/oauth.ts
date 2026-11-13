@@ -112,6 +112,7 @@ export const oauthTokenRequestSchema = object({
   redirect_uri: optional(string().check(maxLength(2000))),
   code_verifier: optional(pkceSchema),
   refresh_token: optional(string().check(maxLength(200))),
+  scope: optional(string().check(maxLength(2000))),
   resource: optional(string().check(maxLength(2000))),
 });
 export const oauthTokenResponseSchema = object({

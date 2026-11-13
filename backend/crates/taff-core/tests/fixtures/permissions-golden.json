@@ -1,5 +1,91 @@
 [
   {
+    "name": "view agent both",
+    "now": 1793923200000,
+    "actor": {
+      "id": "agent",
+      "workspaceId": "ws",
+      "userId": "agent",
+      "name": "Agent",
+      "kind": "agent",
+      "role": "member",
+      "scopes": [
+        "tasks:read",
+        "summaries:read"
+      ],
+      "reviewPolicy": "always_review"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws"
+    },
+    "result": true
+  },
+  {
+    "name": "view agent missing tasks",
+    "now": 1793923200000,
+    "actor": {
+      "id": "agent",
+      "workspaceId": "ws",
+      "userId": "agent",
+      "name": "Agent",
+      "kind": "agent",
+      "role": "member",
+      "scopes": [
+        "summaries:read"
+      ],
+      "reviewPolicy": "always_review"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws"
+    },
+    "result": false
+  },
+  {
+    "name": "view agent missing summaries",
+    "now": 1793923200000,
+    "actor": {
+      "id": "agent",
+      "workspaceId": "ws",
+      "userId": "agent",
+      "name": "Agent",
+      "kind": "agent",
+      "role": "member",
+      "scopes": [
+        "tasks:read"
+      ],
+      "reviewPolicy": "always_review"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "ws"
+    },
+    "result": false
+  },
+  {
+    "name": "view agent foreign",
+    "now": 1793923200000,
+    "actor": {
+      "id": "agent",
+      "workspaceId": "ws",
+      "userId": "agent",
+      "name": "Agent",
+      "kind": "agent",
+      "role": "member",
+      "scopes": [
+        "tasks:read",
+        "summaries:read"
+      ],
+      "reviewPolicy": "always_review"
+    },
+    "action": "view:export",
+    "resource": {
+      "workspaceId": "foreign"
+    },
+    "result": false
+  },
+  {
     "name": "admin moves stage",
     "now": 1793923200000,
     "actor": {
@@ -9635,7 +9721,7 @@
       "workerId": "agent",
       "userId": "person"
     },
-    "result": false
+    "result": true
   },
   {
     "name": "system administrator: view:export",

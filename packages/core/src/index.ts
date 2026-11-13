@@ -134,7 +134,11 @@ export class CoreError extends Error {
     | "not_found"
     | "invalid_input"
     | "conflict"
-    | "email_verification_required";
+    | "email_verification_required"
+    | "internal_error"
+    | "rate_limited"
+    | "render_unavailable"
+    | "render_failed";
   status: number;
   constructor(code: CoreError["code"], status: number) {
     super(code);
@@ -187,7 +191,9 @@ function toAgentToken(
     name: row.name,
     prefix: row.prefix,
     oauthClientId: row.oauthClientId,
-    scopes: row.scopes as Scope[],
+    scopes: (row.oauthClientId
+      ? (row.refreshScopes ?? row.scopes)
+      : row.scopes) as Scope[],
     createdAt: row.createdAt.toISOString(),
     revokedAt: row.revokedAt?.toISOString() ?? null,
     lastUsedAt: lastUsedAt?.toISOString() ?? null,
@@ -1222,7 +1228,7 @@ export function createCore(options: {
               workspaceId: row.workspaceId,
               supervisorId: profile?.supervisorId,
             },
-            row.scopes as Scope[],
+            (row.refreshScopes ?? row.scopes) as Scope[],
           ))
       )
         throw new CoreError("forbidden", 403);

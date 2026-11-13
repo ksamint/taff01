@@ -65,6 +65,7 @@ export const TOOLS: readonly (readonly [string, string])[] = [
   ["summaries.list", "listSummaries"],
   ["summaries.get", "readSummary"],
   ["summaries.image", "summaryImage"],
+  ["views.image", "viewImage"],
   ["search.query", "search"],
   ["quickadd.parse", "parseDraft"],
   ["calendar.list", "calendarList"],

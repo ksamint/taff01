@@ -1082,6 +1082,7 @@ read (`data-event-id`, `data-date`).
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `nav.tabbar a[href="/"]` | 1 | optimistic-m4.spec.ts |
 | `option[value="*"]` | 9 | agent-creation.spec.ts, live/v021-feature-gaps.spec.ts, mcp-oauth.spec.ts, planning.spec.ts, project-profile.spec.ts, v021-feature-gaps.spec.ts |
+| `section[aria-labelledby='mcp-tools-heading']` | 1 | mcp.spec.ts |
 | `select[data-capability="web.search"]` | 1 | access.spec.ts |
 | `select[id="grant-expiry-*"]` | 1 | agent-review.spec.ts |
 

@@ -184,9 +184,13 @@ export function can(
   )
     return actor.kind === "person" && actor.role === "admin";
   if (action === "audience:read") return actor.kind === "person";
-  // Exported view images (ADR 0031): members and admins. Guests read through
-  // their own summaries and agents through summaries.image, never an export.
-  if (action === "view:export") return actor.kind === "person";
+  // Guests stop above; agents need both effective workspace scopes.
+  if (action === "view:export")
+    return (
+      actor.kind === "person" ||
+      (!!actor.scopes?.includes("tasks:read") &&
+        !!actor.scopes?.includes("summaries:read"))
+    );
   if (action === "summary:read" && actor.kind === "agent")
     return !!actor.scopes?.includes("summaries:read");
   if (action === "summary:read")

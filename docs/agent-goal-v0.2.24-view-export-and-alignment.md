@@ -107,7 +107,7 @@ Production is v0.2.23 `4a751a9`. The current goal is the user's latest command.
 ### Release v0.2.24
 Per [release closeout](release-closeout.md). Deployment delta: API gets
 `SUMMARY_RENDER_URL=http://render:3002`; one additive restore route; MCP 38
-tools; no migration. Rollback: v0.2.23 `4a751a9`. Owner checks
+tools; additive nullable OAuth refresh-scope migration 0043 (44 journal entries). Rollback: v0.2.23 `4a751a9`. Owner checks
 ([owner checks](owner-checks.md)) 1–3 run after unlock; add 4: Twin posts one
 `views.image` to a test chat.
 

@@ -41,6 +41,11 @@ test("an admin issues an agent token once and sees it in the list", async ({
     labels[locale].mcp,
   );
   await expect(page.getByTestId("mcp-endpoint")).toContainText("/mcp");
+  await expect(
+    page
+      .locator("section[aria-labelledby='mcp-tools-heading']")
+      .getByText("views.image", { exact: true }),
+  ).toBeVisible();
   const name = `e2e ${locale} ${Date.now()}`;
   await page.getByTestId("token-name").fill(name);
   await expect(page.getByTestId("token-submit")).toBeEnabled();

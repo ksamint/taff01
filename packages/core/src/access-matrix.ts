@@ -116,6 +116,7 @@ export function createAccessMatrixOperations({
         .filter((t) => t.oauthClientId)
         .map((t) => ({
           ...toAgentToken(t, null),
+          scopes: t.refreshScopes ?? t.scopes,
           clientName:
             clients.find((c) => c.id === t.oauthClientId)?.name ??
             t.oauthClientId!,

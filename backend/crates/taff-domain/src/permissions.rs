@@ -439,7 +439,8 @@ pub fn can_at(actor: Option<&Actor>, action: Action, resource: &Resource, now: i
     }
     // Exported view images (ADR 0031): members and admins; guests stop above.
     if action == Action::ViewExport {
-        return actor.kind == MemberKind::Person;
+        return actor.kind == MemberKind::Person
+            || (has_scope(actor, Scope::TasksRead) && has_scope(actor, Scope::SummariesRead));
     }
     if action == Action::SummaryRead {
         return if actor.kind == MemberKind::Agent {

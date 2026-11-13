@@ -8,13 +8,14 @@ import {
 import {
   buildSummaryLayout,
   idSchema,
+  localeSchema,
   type SummaryImageLayoutInput,
   type SummaryLayout,
   type ViewExportQuery,
   viewExportQuerySchema,
 } from "@taff/schemas";
 import { and, eq, sql } from "drizzle-orm";
-import { zoneOf } from "./actor-timezone";
+import { actorTimeZone } from "./actor-timezone";
 import { CoreError, type Principal } from "./index";
 import { digestLocalDate } from "./notifications-time";
 import { type Action, type Actor, can, type Resource } from "./permissions";
@@ -51,7 +52,7 @@ type Dependencies = {
 };
 
 export type ViewExport = SummaryImageLayoutInput & {
-  /** ASCII-only download name; the renderer never sees it. */
+  /** REST uses ASCII; MCP preserves the agent name, including CJK. */
   fileName: string;
 };
 
@@ -80,13 +81,19 @@ export function createViewExportOperations({
   async function exportViewImageInput(
     p: Principal,
     workspaceId: string,
-    query: ViewExportQuery,
+    query: Omit<ViewExportQuery, "locale"> & {
+      locale?: ViewExportQuery["locale"];
+    },
     channel: "web" | "mcp" = "web",
   ): Promise<ViewExport> {
-    const body = parse(viewExportQuerySchema, query);
     const w = parse(idSchema, workspaceId);
     const actor = await requireMember(db, p, w, "view:export", {
       workspaceId: w,
+    });
+    const identity = await actorTimeZone(db, p, actor);
+    const body = parse(viewExportQuerySchema, {
+      ...query,
+      locale: query.locale ?? localeSchema.parse(identity.locale),
     });
     const [workspace] = await db
       .select({ name: workspaces.name })
@@ -104,7 +111,7 @@ export function createViewExportOperations({
       .limit(101);
     if (body.projectId && projectList.length === 0)
       throw new CoreError("not_found", 404);
-    const zone = await zoneOf(db, p, actor);
+    const zone = identity.timeZone;
     const instant = now();
     const day = digestLocalDate(instant, zone);
     const finance = can(actor, "finance:read", { workspaceId: w });
@@ -188,7 +195,17 @@ export function createViewExportOperations({
       layout,
       watermark,
       contentHash,
-      fileName: `taff-${subject}-${day}-${contentHash.slice(0, 8)}.png`,
+      fileName: `taff-${subject}-${
+        p.kind === "agent"
+          ? `${Array.from(
+              actor.name
+                .normalize("NFC")
+                .replace(/[\\/:*?"<>|\p{Cc}\p{Cf}]/gu, "_"),
+            )
+              .slice(0, 80)
+              .join("")}-`
+          : ""
+      }${day}-${contentHash.slice(0, 8)}.png`,
     };
   }
   return { exportViewImageInput };
