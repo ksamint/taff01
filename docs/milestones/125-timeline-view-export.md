@@ -21,6 +21,7 @@ Focused validation on the implementation tree:
 - tsc --noEmit for packages/core, apps/api and apps/web: passed.
 - schema generator and test-id contract regenerated; Biome and git diff --check passed.
 - `CARGO_TARGET_DIR=/tmp/taff-timeline-target CARGO_BUILD_JOBS=2 cargo test --locked --offline --manifest-path backend/Cargo.toml -p taff-render`: 12 passed; summary/timeline goldens unchanged.
-- Three-locale timeline browser tests: pending temporary webpack harness; default dev startup could not resolve external read-only dependency links with Turbopack.
+- Three-locale timeline browser tests: 3 passed in 29.3 s against the real renderer (1600 px PNG/save, critical highlight hash change, zoom hash stability).
+- Browser command: `node --env-file=.env node_modules/@playwright/test/cli.js test --config playwright.timeline.local.ts e2e/view-export.spec.ts -g 'timeline exports'`; temporary harness used direct API + webpack dev on 4100/4101, renderer 3303. Default Turbopack startup could not resolve external dependency links; no tracked config change.
 
 Parent owns full gate, rebase onto completed v24, PR/merge and deploy. S2/S3 integrate separately.
