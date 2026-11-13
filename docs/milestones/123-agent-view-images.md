@@ -30,9 +30,9 @@ Validation (local working tree; parent owns final exact-source full gate):
   including SQL read models, permission fixtures and eight real renderer cases.
 - Browser: MCP catalog/token flow three locales passed after scoping its locator;
   unchanged real image export/send/copy/save three locales passed.
-- MCP smoke: live `views.image` PNG and 38-tool catalog pass; total smoke has
-  one unrelated `tasks.plan` assertion failure (UTC date vs issuer-zone deadline
-  already equal, so changed-task list is empty). Reported to parent; not hidden.
+- MCP smoke: all 69 checks/38 tools pass, including actual live PNG.
+  Standalone fixture repair `cb24c62` clears dueAt with versioned tasks.edit
+  before planning, preserving the strict changed-task assertion at midnight.
 - `git diff --check` clean. No push, PR, merge, production, SSH or messages.
 
 Open: parent full gate, migration-count/operator journal integration and release.
