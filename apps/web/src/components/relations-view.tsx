@@ -39,6 +39,7 @@ import {
   layeredLayout,
   nodeOrder,
   type Positions,
+  relationEdgePath,
   type View,
   visibleGraph,
   zoomAt,
@@ -470,11 +471,7 @@ function GraphCanvas({
               const a = positions[edge.from];
               const b = positions[edge.to];
               if (!a || !b) return null;
-              const mx = (a.x + b.x) / 2;
-              const d =
-                layout === "layered"
-                  ? `M${a.x},${a.y}C${mx},${a.y} ${mx},${b.y} ${b.x},${b.y}`
-                  : `M${a.x},${a.y}L${b.x},${b.y}`;
+              const d = relationEdgePath(a, b, layout);
               const on =
                 selectedKey !== null &&
                 (edge.from === selectedKey || edge.to === selectedKey);

@@ -1,0 +1,396 @@
+{
+  "layout": {
+    "kind": "mind",
+    "locale": "en",
+    "width": 1080,
+    "height": 979,
+    "title": "Mind map",
+    "subtitle": "Exported by Alice",
+    "empty": null,
+    "more": null,
+    "moreEdges": null,
+    "view": {
+      "scale": 0.759757557039725,
+      "x": 524.8846234026947,
+      "y": 513.5
+    },
+    "nodes": [
+      {
+        "key": "00000000-0000-4000-8000-000000000000",
+        "x": 0,
+        "y": -80,
+        "radius": 8.4,
+        "tone": "gold",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 1 · 侍饕餮鑫",
+          "x": 0,
+          "y": -99.4,
+          "width": 340,
+          "fontSize": 16,
+          "anchor": "middle"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000008",
+        "x": 27.36,
+        "y": -75.18,
+        "radius": 12.6,
+        "tone": "gold",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 9 · 侍饕餮鑫",
+          "x": 34.41,
+          "y": -89.53,
+          "width": 340,
+          "fontSize": 16,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000004",
+        "x": -13.89,
+        "y": 78.78,
+        "radius": 14,
+        "tone": "gold",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 5 · 侍饕餮鑫",
+          "x": -17.71,
+          "y": 105.45,
+          "width": 340,
+          "fontSize": 16,
+          "anchor": "end"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000001",
+        "x": 111.47,
+        "y": 121.65,
+        "radius": 9.8,
+        "tone": "blue",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 2 · 侍饕餮鑫",
+          "x": 123.5,
+          "y": 139.77,
+          "width": 297.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000009",
+        "x": 63.14,
+        "y": 152.44,
+        "radius": 14,
+        "tone": "blue",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 10 · 侍饕餮鑫",
+          "x": 71.56,
+          "y": 177.77,
+          "width": 315,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000005",
+        "x": -88.65,
+        "y": -139.16,
+        "radius": 8.4,
+        "tone": "blue",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 6 · 侍饕餮鑫",
+          "x": -97.47,
+          "y": -147.99,
+          "width": 297.5,
+          "fontSize": 14,
+          "anchor": "end"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000006",
+        "x": 241.48,
+        "y": 64.7,
+        "radius": 9.8,
+        "tone": "green",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 7 · 侍饕餮鑫",
+          "x": 258.67,
+          "y": 74.31,
+          "width": 297.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000002",
+        "x": -249.05,
+        "y": -21.79,
+        "radius": 11.2,
+        "tone": "green",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 3 · 侍饕餮鑫",
+          "x": -268.18,
+          "y": -18.46,
+          "width": 297.5,
+          "fontSize": 14,
+          "anchor": "end"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000010",
+        "x": -226.58,
+        "y": -105.65,
+        "radius": 8.4,
+        "tone": "green",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 11 · 侍饕餮鑫",
+          "x": -241.44,
+          "y": -107.59,
+          "width": 315,
+          "fontSize": 14,
+          "anchor": "end"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000003",
+        "x": 265.77,
+        "y": -203.94,
+        "radius": 12.6,
+        "tone": "purple",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 4 · 侍饕餮鑫",
+          "x": 282.12,
+          "y": -211.48,
+          "width": 297.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000011",
+        "x": 319.5,
+        "y": -100.74,
+        "radius": 9.8,
+        "tone": "purple",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 12 · 侍饕餮鑫",
+          "x": 336.47,
+          "y": -101.09,
+          "width": 315,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "00000000-0000-4000-8000-000000000007",
+        "x": -297.15,
+        "y": 154.69,
+        "radius": 11.2,
+        "tone": "purple",
+        "shape": "circle",
+        "label": {
+          "text": "Delivery 8 · 侍饕餮鑫",
+          "x": -314.18,
+          "y": 168.55,
+          "width": 297.5,
+          "fontSize": 14,
+          "anchor": "end"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": 0,
+        "to": 3,
+        "c1": {
+          "x": 0,
+          "y": -122.5
+        },
+        "c2": {
+          "x": 82.76,
+          "y": 90.32
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "c1": {
+          "x": 140.18,
+          "y": 152.99
+        },
+        "c2": {
+          "x": -206.71,
+          "y": -18.08
+        },
+        "tone": "green",
+        "dashed": false
+      },
+      {
+        "from": 7,
+        "to": 9,
+        "c1": {
+          "x": -291.39,
+          "y": -25.49
+        },
+        "c2": {
+          "x": 232.06,
+          "y": -178.06
+        },
+        "tone": "red",
+        "dashed": true
+      },
+      {
+        "from": 9,
+        "to": 2,
+        "c1": {
+          "x": 164.62,
+          "y": -126.32
+        },
+        "c2": {
+          "x": -36.03,
+          "y": 204.35
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 2,
+        "to": 5,
+        "c1": {
+          "x": -21.27,
+          "y": 120.64
+        },
+        "c2": {
+          "x": -65.82,
+          "y": -103.32
+        },
+        "tone": "green",
+        "dashed": false
+      },
+      {
+        "from": 5,
+        "to": 6,
+        "c1": {
+          "x": -111.49,
+          "y": -175
+        },
+        "c2": {
+          "x": 200.43,
+          "y": 53.7
+        },
+        "tone": "red",
+        "dashed": true
+      },
+      {
+        "from": 6,
+        "to": 11,
+        "c1": {
+          "x": 282.53,
+          "y": 75.7
+        },
+        "c2": {
+          "x": -259.45,
+          "y": 135.06
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 11,
+        "to": 1,
+        "c1": {
+          "x": -184.05,
+          "y": 95.81
+        },
+        "c2": {
+          "x": 70.97,
+          "y": -194.99
+        },
+        "tone": "green",
+        "dashed": false
+      },
+      {
+        "from": 1,
+        "to": 4,
+        "c1": {
+          "x": 41.9,
+          "y": -115.11
+        },
+        "c2": {
+          "x": 46.88,
+          "y": 113.18
+        },
+        "tone": "red",
+        "dashed": true
+      },
+      {
+        "from": 4,
+        "to": 8,
+        "c1": {
+          "x": 79.41,
+          "y": 191.71
+        },
+        "c2": {
+          "x": -188.06,
+          "y": -87.69
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 8,
+        "to": 10,
+        "c1": {
+          "x": -265.1,
+          "y": -123.62
+        },
+        "c2": {
+          "x": 278.96,
+          "y": -87.96
+        },
+        "tone": "green",
+        "dashed": false
+      }
+    ],
+    "rings": [
+      {
+        "radius": 80,
+        "label": "Layer 1"
+      },
+      {
+        "radius": 165,
+        "label": "Layer 2"
+      },
+      {
+        "radius": 250,
+        "label": "Layer 3"
+      },
+      {
+        "radius": 335,
+        "label": "Layer 4"
+      }
+    ],
+    "centre": "Focus",
+    "footer": {
+      "text": "Exported by Alice · 2026-03-08 12:00 · Asia/Shanghai",
+      "hashFull": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  },
+  "watermark": {
+    "text": "Exported by Alice · Taff · 2026-03-08",
+    "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

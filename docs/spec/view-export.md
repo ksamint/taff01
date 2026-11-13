@@ -70,6 +70,15 @@ The caller imports `calendarImageWindow` and `buildCalendarLayout` from `@taff/s
 Use `calendarImageWindow({mode, visibleDate, timeZone})` to obtain `startDate`, exclusive `endDate`, `from`, `to` and canonical `timeZone`; pass the instant range to authorized `listCalendar`.
 Build with `(source, query, locale, labels, contentHash)`. Labels supply `title`, `subtitle`, `allDay`, `footer`, `sourceTruncated`, `date(civil)`, `weekday(civil)`, `time(startInstant, endInstant, viewerZone)` and `more(count)`.
 Post `{layout, watermark: {text, contentHash}, contentHash}`. Core must bind the canonical hash to the authorized snapshot/window, format exporter attribution and timestamps, and apply permissions, audit and rate limiting.
+### Graph renderer preparation (VE-5)
+- VE-5.1 The internal `POST /render/graph` shall accept only the generated `graph-image.json` display contract, validate matching footer/watermark/content hashes and projected geometry before pixel allocation, and report `X-Taff-Renderer: graph-1`.
+- VE-5.2 The pure relations builder shall receive authorized `RelationGraph` data plus explicit layout, scope, project id, layers and force seed; it shall retain the first 150 visible nodes in shared web reading order before layout. Uncapped core graphs shall preserve web positions; truncated relation graphs shall be laid out on their retained subgraph and may move.
+- VE-5.3 The pure mind builder shall receive authorized `MindMap` data and an explicit archived filter, retain the first 150 visible nodes in shared reading order, preserve web node/label/curve geometry and derive ring extent from all visible nodes.
+- VE-5.4 Both builders shall deduplicate semantic edges, remove dangling endpoints, retain at most 600 edges deterministically and show caller-localized exact omitted-node and omitted-edge counts, including edges dropped with omitted endpoints. Counts shall exclude nodes and edges hidden by selected layers or archived filters.
+- VE-5.5 The builders shall receive localized header, footer, empty and overflow labels, with centre/ring labels for mind, and shall omit CRM details, notes, source URLs and linked-task content from the display contract.
+- VE-5.6 Graph export fitting shall include label bounds without the interactive minimum-zoom clamp; output shall be a 1080 px palette PNG, at most 4000 px high and 400 KB, with the full hash in a PNG text chunk and a visible watermark.
+
+This internal preparation does not expose graph export through core, REST, MCP or the web UI; authorized source resolution and public delivery remain pending.
 
 ## Non-functional
 
@@ -97,6 +106,7 @@ Post `{layout, watermark: {text, contentHash}, contentHash}`. Core must bind the
 | VE-4.5–4.7 | `packages/schemas/src/view-export.test.ts`; `view-export.integration.test.ts`; `apps/api/src/view-export.test.ts`, `mcp-views.test.ts`; timeline case in `e2e/view-export.spec.ts` across three locales |
 | VE-5.1–5.6 | `packages/schemas/src/calendar-image.test.ts`; `backend/crates/taff-render/tests/render.rs` calendar cases and six locale/mode PNG goldens |
 | VE-5.7–5.8 | `packages/schemas/src/view-export.test.ts`; `view-export.integration.test.ts`; API/MCP export tests; calendar case in `e2e/view-export.spec.ts`, three locales |
+| VE-5.1–5.6 | `packages/schemas/src/graph-image.test.ts`; existing web `graph-layout.test.ts` and `mind-model.test.ts`; `backend/crates/taff-render/tests/graph.rs`, six locale PNG goldens and empty/capped/dense fixtures |
 
 ## Open decisions
 
