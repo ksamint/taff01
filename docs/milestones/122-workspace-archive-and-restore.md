@@ -3,6 +3,8 @@
 - Organization admins archive with exact-name confirmation and restore from Organizations; system admins use `/admin`.
 - Personal controls are absent; the current-workspace access response carries `canArchiveWorkspace`.
 - Archived lists use fresh identity and retained nonpersonal admin membership; no authority returns 403 and the UI hides the section.
+- Visual gate found an empty lifecycle block shifting personal-only layouts; hide the block when no lifecycle content is available, preserving existing baselines.
+- Layout fix: all six unchanged Linux comparisons and 12 lifecycle/default browser cases passed. An excluded production-mode focus run hit sign-up limits; the normal development harness passed without changing limits.
 - Archive/restore share exclusive lifecycle → system administration → workspace row lock order; repeat calls are idempotent.
 - Restore preserves login defaults, visible selection, tasks, memberships and revoked token/grant state.
 - Existing `/api/admin/workspaces` remains; added archived-list and restore routes use shared response schemas.

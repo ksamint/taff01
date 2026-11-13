@@ -102,14 +102,17 @@ function WorkspaceLifecycle({ system = false }: { system?: boolean }) {
       : !!access.data?.canArchiveWorkspace && target?.id === workspace.id);
   const forbidden = list.error instanceof ApiError && list.error.status === 403;
   const error = change.error ?? (!forbidden ? list.error : null);
+  const showArchive = confirmed && access.data?.canArchiveWorkspace;
+  const showList = confirmed && !forbidden && list.data !== undefined;
   const openArchive = (row: Target) => {
     setTarget(row);
     setName("");
     change.reset();
   };
+  if (!system && !showArchive && !showList && !error) return null;
   return (
     <section className="me-section" data-testid="workspace-lifecycle">
-      {!system && confirmed && access.data?.canArchiveWorkspace && (
+      {!system && showArchive && (
         <Button
           className="button-quiet"
           data-testid="archive-organization"
@@ -125,7 +128,7 @@ function WorkspaceLifecycle({ system = false }: { system?: boolean }) {
           {t(errorKey(error))}
         </p>
       )}
-      {confirmed && !forbidden && list.data && (
+      {showList && list.data && (
         <section data-testid="archived-organizations">
           {!system && <h2>{t("organization.archived")}</h2>}
           {!list.data.length && <p>{t("organization.noArchived")}</p>}

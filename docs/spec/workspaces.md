@@ -36,7 +36,7 @@ Status: implemented for v0.2.24; not yet released.
 - WS-2.2 When the current workspace is personal or the person lacks archive authority, Organizations shall hide its archive control using the server's `canArchiveWorkspace` capability.
 - WS-2.3 When an admin opens archive confirmation, the dialog shall name the organization, explain loss of access and cleared defaults, and require its exact name before submitting.
 - WS-2.4 When a person restores from Organizations, the screen shall refresh the organization list while preserving the currently visible active selection and login default.
-- WS-2.5 When archived-list access is forbidden, Organizations shall hide that section without displaying an error for the refused read.
+- WS-2.5 When archived-list access is forbidden, Organizations shall hide that section without displaying an error or leaving an empty layout block for the refused read.
 - WS-2.6 When a nonsystem user requests `/admin`, the page shall be refused before streaming; the system-admin page shall offer archive/restore controls only for nonpersonal workspaces.
 - WS-2.7 When current authority is lost with an archive dialog open, the screen shall remove that dialog after the confirmed access state updates.
 
