@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (468 distinct, 2174 uses)
+## Test ids (468 distinct, 2179 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -314,6 +314,7 @@ several do). “Also rendered by” lists the other files.
 | `me-tab-brief` | 4 |  | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |
 | `me-tab-inbox` | 4 |  | brief.spec.ts, live/brief.spec.ts |
 | `open-mcp` | 4 | me-view.tsx | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts |
+| `open-summaries` | 2 | me-view.tsx | summaries.spec.ts |
 
 ### me-view.tsx
 
@@ -325,7 +326,6 @@ several do). “Also rendered by” lists the other files.
 | `me-team` | 3 |  | me.spec.ts, scripts/ui/app-shots.mts |
 | `me-tz` | 9 |  | me.spec.ts |
 | `open-notifications` | 5 |  | live/release/checklist.spec.ts, me.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mts |
-| `open-summaries` | 1 |  | summaries.spec.ts |
 | `theme-dark` | 6 |  | live/release/checklist.spec.ts, me.spec.ts, release/checklist.spec.ts |
 | `theme-light` | 3 |  | live/release/checklist.spec.ts, me.spec.ts, release/checklist.spec.ts |
 
@@ -586,11 +586,11 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `search-input` | 9 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `search-input` | 10 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, summaries.spec.ts, ui-v2.spec.ts |
 | `search-result` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `search-setting` | 1 |  | planning.spec.ts |
+| `search-setting` | 2 |  | planning.spec.ts, summaries.spec.ts |
 | `search-type-comment` | 1 |  | planning.spec.ts |
-| `search-type-settings` | 1 |  | planning.spec.ts |
+| `search-type-settings` | 2 |  | planning.spec.ts, summaries.spec.ts |
 
 ### shell/toaster.tsx
 
@@ -642,7 +642,7 @@ several do). “Also rendered by” lists the other files.
 | `summary-list` | 1 | summaries-view.tsx | summaries.spec.ts |
 | `summary-preview` | 1 |  | summaries.spec.ts |
 | `summary-preview-open` | 1 |  | summaries.spec.ts |
-| `summary-row` | 2 | summaries-view.tsx | summaries.spec.ts |
+| `summary-row` | 3 | summaries-view.tsx | summaries.spec.ts |
 
 ### summary-document.tsx
 
@@ -1013,7 +1013,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="mind-node"][data-id="*"]` | 3 | live/mind.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts |
 | `[data-testid="project-audience-option"][data-tag="*"]` | 1 | summaries.spec.ts |
 | `[data-testid="relations-node"][data-key="task:*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
-| `[data-testid="summary-row"][data-summary="*"]` | 2 | summaries.spec.ts |
+| `[data-testid="summary-row"][data-summary="*"]` | 3 | summaries.spec.ts |
 | `[data-testid="timeline-bar"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-dependency"][data-from="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-dependency"][data-from="*"][data-to="*"]` | 4 | live/timeline.spec.ts, timeline.spec.ts |
@@ -1055,7 +1055,7 @@ read (`data-event-id`, `data-date`).
 | `form input[autocomplete="username"]` | 1 | username-auth.spec.ts |
 | `head link[rel="preload"][as="font"][href="/fonts/NotoSansTC-ui-common.woff2"]` | 1 | i18n.spec.ts |
 | `head link[rel="preload"][href="/api/me"]` | 1 | ssr-session.spec.ts |
-| `main.content` | 14 | live/platform.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
+| `main.content` | 15 | live/platform.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, summaries.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 | `main.loading` | 2 | i18n.spec.ts |
 | `meta[name="robots"]` | 1 | summaries.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
@@ -1246,6 +1246,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `status.todo` | 4 | optimistic-m4.spec.ts |
 | `summary.confidential` | 1 | summaries.spec.ts |
 | `summary.heading` | 1 | summaries.spec.ts |
+| `summary.nav` | 2 | summaries.spec.ts |
 | `summary.preview` | 1 | summaries.spec.ts |
 | `summary.print` | 1 | summaries.spec.ts |
 | `summary.unavailableTitle` | 1 | summaries.spec.ts |

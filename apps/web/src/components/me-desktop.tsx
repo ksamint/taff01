@@ -2,7 +2,7 @@
 // Prototype v2 desktop Me tabs, Team Tasks.dc.html lines 1230 and 1443–1537.
 import type { Member } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
-import { ExternalLink, LogOut, Plus, Sparkles } from "lucide-react";
+import { ExternalLink, FileText, LogOut, Plus, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -449,6 +449,18 @@ function SettingsTab() {
         </div>
       </section>
       <AiSettingsSection />
+      <Link
+        className="me-settings-row me-settings-link"
+        href="/summaries"
+        prefetch={false}
+        data-testid="open-summaries"
+      >
+        <FileText size={20} strokeWidth={1.5} aria-hidden="true" />
+        <span className="me-row-stack">
+          <span className="me-settings-name">{t("summary.nav")}</span>
+          <span className="me-row-summary">{t("summary.meHint")}</span>
+        </span>
+      </Link>
       <section aria-labelledby="preferences-heading">
         <h2 id="preferences-heading" className="me-settings-label">
           {t("me.preferences")}

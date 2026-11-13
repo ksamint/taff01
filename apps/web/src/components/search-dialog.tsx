@@ -36,6 +36,7 @@ const SETTINGS = [
   { key: "me.appearance", href: "/me#preferences-heading" },
   { key: "notifications.title", href: "/me/notifications" },
   { key: "mcp.title", href: "/me/mcp" },
+  { key: "summary.nav", href: "/summaries" },
 ];
 export function SearchDialog({ onClose }: { onClose: () => void }) {
   const { workspace, me, setWorkspaceId } = useWorkspace();
