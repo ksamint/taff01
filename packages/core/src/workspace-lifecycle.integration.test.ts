@@ -436,6 +436,10 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
       .from(agentTokenWorkspaces)
       .where(eq(agentTokenWorkspaces.tokenId, token.id));
     const systemId = await signup("Archive system admin");
+    const priorMemberships = await connection.db
+      .select({ id: members.id })
+      .from(members)
+      .where(eq(members.userId, systemId));
     await connection.db.transaction(async (tx) => {
       await tx.execute(
         sql`select set_config('taff.actor_id',${systemId},true)`,
@@ -494,6 +498,15 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
           .update(user)
           .set({ systemAdmin: false })
           .where(eq(user.id, systemId));
+        await tx.delete(members).where(
+          and(
+            eq(members.userId, systemId),
+            notInArray(
+              members.id,
+              priorMemberships.map((row) => row.id),
+            ),
+          ),
+        );
       });
     }
   });

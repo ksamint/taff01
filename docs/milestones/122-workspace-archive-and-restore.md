@@ -5,6 +5,8 @@
 - Archived lists use fresh identity and retained nonpersonal admin membership; no authority returns 403 and the UI hides the section.
 - Visual gate found an empty lifecycle block shifting personal-only layouts; hide the block when no lifecycle content is available, preserving existing baselines.
 - Layout fix: all six unchanged Linux comparisons and 12 lifecycle/default browser cases passed. An excluded production-mode focus run hit sign-up limits; the normal development harness passed without changing limits.
+- Repeated unit runs exposed a temporary system-admin fixture membership left in the demo workspace; cleanup now preserves only its original memberships, using the neighboring test's existing pattern.
+- Both affected PostgreSQL suites passed twice on the same isolated database (22 tests each), retaining the strict five-person seed assertion.
 - Archive/restore share exclusive lifecycle → system administration → workspace row lock order; repeat calls are idempotent.
 - Restore preserves login defaults, visible selection, tasks, memberships and revoked token/grant state.
 - Existing `/api/admin/workspaces` remains; added archived-list and restore routes use shared response schemas.
