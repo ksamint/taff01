@@ -11,6 +11,7 @@ import {
   toJSONSchema,
 } from "zod/v4/core";
 import apiPackage from "../package.json";
+import { renderViewImage, type ViewImageOptions } from "./view-image";
 
 /** zod/mini schemas validate but carry no JSON Schema; the SDK needs both. */
 export function toolSchema<T extends $ZodType>(
@@ -60,6 +61,7 @@ import {
   mcpTasksEditArgs,
   mcpTasksListArgs,
   mcpTasksUpdateArgs,
+  mcpViewsImageArgs,
 } from "@taff/schemas";
 import { ADDITIVE, READ_ONLY, UPDATE } from "./mcp-annotations";
 import { registerCrmTools } from "./mcp-crm";
@@ -101,6 +103,7 @@ export function createMcpServer(
   tokenPrincipal: AgentPrincipal,
   state: CallState,
   logger?: ErrorLogger,
+  viewImage: ViewImageOptions = {},
 ) {
   const server = new McpServer({ name: "taff", version: apiPackage.version });
   const runResult = async (fn: () => Promise<CallToolResult>) => {
@@ -113,6 +116,49 @@ export function createMcpServer(
   const run = (fn: () => Promise<unknown>) =>
     runResult(async () => ok(await fn()));
   registerSummaryTools(server, core, tokenPrincipal, run, runResult, state);
+  server.registerTool(
+    "views.image",
+    {
+      title: "Export live view image",
+      description:
+        "Export an agent-watermarked live workspace or project PNG. Requires tasks:read and summaries:read. Locale defaults to the token issuer's saved preference.",
+      inputSchema: toolSchema(mcpViewsImageArgs),
+      annotations: READ_ONLY,
+    },
+    (args) =>
+      runResult(async () => {
+        const p = await core.resolveAgentWorkspace(
+          tokenPrincipal,
+          args.workspaceId,
+        );
+        state.principal = p;
+        const { workspaceId: _workspaceId, ...query } = args;
+        const image = await renderViewImage(
+          core,
+          p,
+          p.workspaceId,
+          query,
+          "mcp",
+          viewImage,
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({
+                fileName: image.fileName,
+                contentHash: image.contentHash,
+              }),
+            },
+            {
+              type: "image",
+              mimeType: "image/png",
+              data: Buffer.from(image.data).toString("base64"),
+            },
+          ],
+        };
+      }),
+  );
   server.registerTool(
     "workspaces.list",
     {
@@ -669,14 +715,24 @@ export function createMcpServer(
   return server;
 }
 
-export function createMcpHttpHandler(core: Core, logger?: ErrorLogger) {
+export function createMcpHttpHandler(
+  core: Core,
+  logger?: ErrorLogger,
+  viewImage: ViewImageOptions = {},
+) {
   return createMcpHandler(
     (ctx) => {
       const extra = ctx.authInfo?.extra as
         | { principal: AgentPrincipal; state: CallState }
         | undefined;
       if (!extra) throw new CoreError("unauthorized", 401);
-      return createMcpServer(core, extra.principal, extra.state, logger);
+      return createMcpServer(
+        core,
+        extra.principal,
+        extra.state,
+        logger,
+        viewImage,
+      );
     },
     { responseMode: "json", maxRequestBodySize: 1_048_576 },
   );

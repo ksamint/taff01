@@ -137,6 +137,7 @@ tag archive.
   summaries:read, including after revocation or scope loss.
 - DS-9.2 summaries.list shall list authorized summaries; summaries.get shall return JSON or text;
   summaries.image shall return native MCP PNG image content.
+- DS-9.5 Live workspace/project images use `views.image` under VE-2.3, requiring both tasks:read and summaries:read; summaries.image continues to return a stored immutable PNG.
 - DS-9.3 Agents shall remain denied audience reads/management, preview, share and share revocation.
   Members shall not approve summaries:read in OAuth.
 - DS-9.4 Policy grants shall track home-token scope changes while retaining administrator revocations and

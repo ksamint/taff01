@@ -121,7 +121,7 @@ export function createApp(
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<AppEnv>();
-  const mcp = createMcpHttpHandler(core, logger);
+  const mcp = createMcpHttpHandler(core, logger, viewExport);
   // Clients discover the authorization server from a 401 (RFC 9728 §5.1).
   const challenge = `Bearer realm="taff", resource_metadata="${core.oauthMetadata().resourceMetadataUrl}"`;
   app.use(
@@ -1023,7 +1023,10 @@ export function createApp(
         status === 403 ||
         status === 404 ||
         status === 409 ||
-        status === 400
+        status === 400 ||
+        status === 429 ||
+        status === 502 ||
+        status === 503
       ) {
         return c.json({ error: error.code }, status);
       }

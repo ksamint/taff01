@@ -335,7 +335,8 @@
       "readWorkspaces": "列出授权工作区",
       "listSummaries": "列出摘要",
       "readSummary": "读取摘要文本",
-      "summaryImage": "读取摘要图片"
+      "summaryImage": "读取摘要图片",
+      "viewImage": "导出工作区或项目图片"
     },
     "back": "返回",
     "copyEndpoint": "复制端点",

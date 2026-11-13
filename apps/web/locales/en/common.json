@@ -335,7 +335,8 @@
       "readWorkspaces": "List authorized workspaces",
       "listSummaries": "List summaries",
       "readSummary": "Read summary text",
-      "summaryImage": "Read summary image"
+      "summaryImage": "Read summary image",
+      "viewImage": "Export live workspace or project image"
     },
     "back": "Back",
     "copyEndpoint": "Copy endpoint",

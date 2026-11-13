@@ -9,4 +9,9 @@ export const viewExportQuerySchema = strictObject({
   /** The interface language the image is written in. */
   locale: localeSchema,
 });
+export const mcpViewsImageArgs = strictObject({
+  workspaceId: optional(idSchema),
+  projectId: optional(idSchema),
+  locale: optional(localeSchema),
+});
 export type ViewExportQuery = Infer<typeof viewExportQuerySchema>;

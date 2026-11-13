@@ -435,15 +435,14 @@ const routes: RequestCase[] = [
     member: "deny",
   },
   { method: "GET", path: "/api/summaries?workspaceId=:workspace" },
-  // Exported view images (ADR 0031): this app has no renderer, so a caller
-  // core authorizes reaches the 503 after the layout is built.
+  // Exported view images use the same deterministic renderer as MCP.
   ...[
     "/view-image?locale=en",
     "/view-image?locale=zh-CN&projectId=:project",
   ].map((suffix) => ({
     method: "GET",
     path: `/api/workspaces/:workspace${suffix}`,
-    allowedStatus: [503],
+    allowedStatus: [200],
   })),
   {
     method: "POST",
@@ -966,11 +965,30 @@ describe.skipIf(!databaseUrl)(
         },
         tokenPepper: "authorization-matrix-pepper-16-chars",
       });
-      app = createApp(core, origin, pino({ enabled: false }), {
+      const limiter = {
         limit: 10000,
         hit: async () => ({ allowed: true, count: 1 }),
         close: async () => {},
-      });
+      };
+      app = createApp(
+        core,
+        origin,
+        pino({ enabled: false }),
+        limiter,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        {
+          exportRateLimiter: limiter,
+          renderUrl: "http://render.test",
+          renderFetch: async () =>
+            new Response(new Uint8Array([137, 80, 78, 71]), {
+              headers: { "Content-Type": "image/png" },
+            }),
+        },
+      );
       const a = await signup("Matrix owner");
       const b = await signup("Matrix member");
       const c = await signup("Matrix other workspace");
@@ -1504,6 +1522,7 @@ describe.skipIf(!databaseUrl)(
       "context.get",
       "workspaces.list",
       "summaries.list",
+      "views.image",
       "tasks.list",
       "projects.list",
       "projects.create",
@@ -1557,6 +1576,7 @@ describe.skipIf(!databaseUrl)(
         "context.get": {},
         "workspaces.list": {},
         "summaries.list": {},
+        "views.image": {},
         "summaries.get": { summaryId: f.summary?.id },
         "summaries.image": { summaryId: f.summary?.id },
         "tasks.list": {},

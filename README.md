@@ -244,8 +244,10 @@ curl -s http://127.0.0.1:3001/mcp -H "Authorization: Bearer $TOKEN" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"context.get","arguments":{}}}'
 ```
 
-`tools/list` lists the 31 tools; a missing or revoked token returns 401, and
-each call appears in the MCP page's call log.
+`tools/list` lists the 38 tools; a missing or revoked token returns 401, and
+each call appears in the MCP page's call log. `views.image` exports a live PNG
+with the agent watermark and filename; it requires both `tasks:read` and
+`summaries:read` (see [view export spec](docs/spec/view-export.md)).
 
 Organization admins can approve any agent; members can approve only agents they
 supervise, within four scopes (files:write is admin-only). Members manage their own

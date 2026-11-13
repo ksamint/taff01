@@ -14,7 +14,7 @@ export async function actorTimeZone(
   q: Database | Transaction,
   principal: Principal,
   actor?: Actor,
-): Promise<{ userId: string; timeZone: string }> {
+): Promise<{ userId: string; timeZone: string; locale: string }> {
   const personId =
     principal.kind === "user"
       ? principal.userId
@@ -34,11 +34,11 @@ export async function actorTimeZone(
         )[0]?.userId;
   if (!personId) throw new CoreError("unauthorized", 401);
   const [person] = await q
-    .select({ tz: user.tz })
+    .select({ tz: user.tz, locale: user.locale })
     .from(user)
     .where(eq(user.id, personId));
   if (!person) throw new CoreError("unauthorized", 401);
-  return { userId: personId, timeZone: person.tz };
+  return { userId: personId, timeZone: person.tz, locale: person.locale };
 }
 
 export async function zoneOf(

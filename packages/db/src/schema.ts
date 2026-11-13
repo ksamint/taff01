@@ -409,6 +409,7 @@ export const agentTokens = pgTable(
     /** OAuth grants (ADR 0022): client, access expiry and rotating refresh. */
     oauthClientId: text("oauth_client_id").references(() => oauthClients.id),
     expiresAt: timestamp("expires_at", { withTimezone: true }),
+    refreshScopes: text("refresh_scopes").array(),
     refreshHash: text("refresh_hash").unique(),
     refreshExpiresAt: timestamp("refresh_expires_at", { withTimezone: true }),
     ...dates,

@@ -69,6 +69,7 @@ export const MCP_READ_ONLY_TOOLS = [
   "tasks.comments.list",
   "tasks.list",
   "timeline.get",
+  "views.image",
   "workspaces.list",
 ] as const;
 
@@ -261,6 +262,22 @@ export async function runMcpRoundTrip(options: McpRoundTripOptions) {
         ),
     );
   }
+  const viewImage = await client.callTool({
+    name: "views.image",
+    arguments: {},
+  });
+  check(
+    "views.image returns a live PNG",
+    viewImage.isError !== true &&
+      viewImage.content.some(
+        (block) =>
+          block.type === "image" &&
+          block.mimeType === "image/png" &&
+          Buffer.from(block.data, "base64")
+            .subarray(0, 8)
+            .equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])),
+      ),
+  );
   const calendarStart = new Date(Date.now() + 3_600_000).toISOString();
   const calendarEnd = new Date(Date.now() + 7_200_000).toISOString();
   const initialCalendar = {

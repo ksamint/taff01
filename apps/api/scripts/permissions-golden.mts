@@ -46,6 +46,30 @@ const task: Resource = {
 type Case = [string, Actor | null, Action, Resource];
 
 const cases: Case[] = [
+  [
+    "view agent both",
+    { ...agent, scopes: ["tasks:read", "summaries:read"] },
+    "view:export",
+    { workspaceId: "ws" },
+  ],
+  [
+    "view agent missing tasks",
+    { ...agent, scopes: ["summaries:read"] },
+    "view:export",
+    { workspaceId: "ws" },
+  ],
+  [
+    "view agent missing summaries",
+    { ...agent, scopes: ["tasks:read"] },
+    "view:export",
+    { workspaceId: "ws" },
+  ],
+  [
+    "view agent foreign",
+    { ...agent, scopes: ["tasks:read", "summaries:read"] },
+    "view:export",
+    { workspaceId: "foreign" },
+  ],
   // project:stage
   ["admin moves stage", { ...person, role: "admin" }, "project:stage", task],
   ["lead moves stage", person, "project:stage", { ...task, leadId: "person" }],

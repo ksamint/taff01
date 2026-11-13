@@ -30,7 +30,7 @@ Needs: the owner's Claude.ai account with custom connectors allowed.
 
 1. In Claude.ai, add a custom connector with the URL `https://taff.apuch.cn/mcp`.
 2. Complete sign-in and the admin approval screen in Taff.
-3. In a Claude.ai chat, ask it to list Taff tools; expect 37, including
+3. In a Claude.ai chat, ask it to list Taff tools; expect 38, including
    `context.get`. Run `context.get` once.
 4. In Taff, open `/me/mcp`: the Claude.ai grant is listed.
 5. Revoke it there; the next Claude.ai tool call fails with an authorization
@@ -43,3 +43,9 @@ Needs: the owner's Claude.ai account with custom connectors allowed.
 1. On a phone, open a project, tap Export image, then Send, and pick WeChat
    (or any chat). The image arrives as a picture, not a file link.
 2. Record: date, release, target app, pass/fail.
+
+## 4. Twin live view image (owner-only after unlock)
+
+Have Twin call `views.image` with both read scopes and post one returned PNG
+to an owner-selected test chat. Check agent watermark, filename and readable
+content; record date, release and pass/fail. This task does not send messages.

@@ -79,6 +79,8 @@ Status: shipped in v0.2.20, deployed source `596272a`; final local and native ac
   stable through their authorization decision and write. Agent mutations and
   permission writers shall serialize on the agent's authority row.
 
+- AA-4.8 Refresh shall reject unknown or expanded requested scopes, narrow only access scopes and retain the original refresh ceiling across rotation. Omitted/empty scope restores the ceiling. Approval displays and restore authority use the ceiling; current access uses access scopes. Legacy null refresh_scopes falls back to scopes.
+
 - AA-4.7 When consent has no eligible agent, the browser shall link to
   organization management and offer a return to the same validated consent
   request, retaining client, redirect, PKCE, state and requested scopes.
@@ -129,6 +131,7 @@ Status: shipped in v0.2.20, deployed source `596272a`; final local and native ac
 | AA-3 | token-policy.test.ts; token-policy.integration.test.ts |
 | AA-4 | authorization.integration.test.ts; oauth integration tests |
 | AA-4.4–4.6 | oauth.integration.test.ts; authorization.integration.test.ts; MCP OAuth refresh-family smoke |
+| AA-4.8 | oauth.integration.test.ts (narrow/restore/expansion/original issuer loss); migration 0043 |
 | AA-4.7 | oauth-guidance.test.ts; oauth-return.test.ts; e2e/completion.spec.ts; three-locale accepted release gate in [milestone 104](../milestones/104-v0.2.20.md) |
 | AA-5.1 | permissions.test.ts; app.test.ts |
 | AA-5.2 | e2e/ssr-session.spec.ts |

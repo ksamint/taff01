@@ -1,8 +1,9 @@
 # v0.2.24–v0.2.25 — view exports, audit, agent images and GUI gaps
 
-Status: E1 done (milestone 117, `main` `c06d836`). Everything below is open
-and owner-approved (2026-11-13, "yes for all"; ADR 0031 amendment 1).
-Production is v0.2.23 `4a751a9`. The current goal is the user's latest command.
+Status: E1 and Phase 1 (A1/A3/A2/E2/A4/E3) are implemented; v0.2.24
+release acceptance and Phase 2 remain open. Owner-approved 2026-11-13
+("yes for all"; ADR 0031 amendment 1). Production is v0.2.23 `4a751a9`.
+The current goal is the user's latest command.
 
 ## How to work this plan
 
@@ -107,7 +108,7 @@ Production is v0.2.23 `4a751a9`. The current goal is the user's latest command.
 ### Release v0.2.24
 Per [release closeout](release-closeout.md). Deployment delta: API gets
 `SUMMARY_RENDER_URL=http://render:3002`; one additive restore route; MCP 38
-tools; no migration. Rollback: v0.2.23 `4a751a9`. Owner checks
+tools; additive nullable OAuth refresh-scope migration 0043 (44 journal entries). Rollback: v0.2.23 `4a751a9`. Owner checks
 ([owner checks](owner-checks.md)) 1–3 run after unlock; add 4: Twin posts one
 `views.image` to a test chat.
 
