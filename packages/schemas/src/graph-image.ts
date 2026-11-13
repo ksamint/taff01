@@ -302,7 +302,6 @@ export function buildRelationsLayout(
   );
   const retainedEdges = distinctEdges
     .filter((edge) => indices.has(edge.from) && indices.has(edge.to))
-    .slice(0, GRAPH_IMAGE_MAX_EDGES)
     // Core relationGraph and the web use key order for force springs.
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
   const positions =
@@ -341,27 +340,30 @@ export function buildRelationsLayout(
       ),
     };
   });
-  const edges: ImageEdge[] = retainedEdges.flatMap((edge) => {
-    const from = indices.get(edge.from),
-      to = indices.get(edge.to);
-    if (from === undefined || to === undefined) return [];
-    const a = nodes[from],
-      b = nodes[to];
-    return [
-      {
-        from,
-        to,
-        ...relationEdgeGeometry(a, b, selected.layout),
-        tone:
-          edge.layer === "dependencies"
-            ? "red"
-            : edge.layer === "crm"
-              ? "gold"
-              : "neutral",
-        dashed: edge.kind === "depends_on",
-      },
-    ];
-  });
+  // The edge budget limits raster work, not the shared web layout's adjacency.
+  const edges: ImageEdge[] = retainedEdges
+    .slice(0, GRAPH_IMAGE_MAX_EDGES)
+    .flatMap((edge) => {
+      const from = indices.get(edge.from),
+        to = indices.get(edge.to);
+      if (from === undefined || to === undefined) return [];
+      const a = nodes[from],
+        b = nodes[to];
+      return [
+        {
+          from,
+          to,
+          ...relationEdgeGeometry(a, b, selected.layout),
+          tone:
+            edge.layer === "dependencies"
+              ? "red"
+              : edge.layer === "crm"
+                ? "gold"
+                : "neutral",
+          dashed: edge.kind === "depends_on",
+        },
+      ];
+    });
   return finish(
     "relations",
     locale,

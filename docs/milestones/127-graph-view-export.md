@@ -32,3 +32,8 @@ Resolved harness findings: a combined six-export/account dev case hit 429 becaus
 Browser artifacts: `/private/tmp/taff-v025-s3-graph-artifacts` (before palette correction).
 Own 4200/4201/3304 services stopped; other worktrees/services untouched. Full gate needs a fresh seeded runtime database after focused fixtures.
 Open implementation decisions: none. Parent owns combined S1/S2 integration, clean full gate, PR/merge and deployment.
+
+Review followup (separate commit after `54e72d5`): relations use all retained semantic edges for geometry, with 600 applied only to rendered edges; both graph buttons require confirmed membership.
+Regression: 52-node/1,131-edge layered/force position tests failed before and passed after; six locale SSR cases passed using the provisional-session fixture to assert hidden-before/visible-after confirmation.
+Followup validation: graph/geometry/session/palette/test-id Vitest selection 60 passed; schema/web/scripts typechecks, Biome and diff check passed. Rust graph tests 5 passed; six PNG goldens unchanged; regenerated dense relations JSON renders 356,589 bytes.
+Followup own API4201/web4200 stopped; renderer not started; ignored Next dev types moved before clean-source web typecheck. No full gate/push/deploy.

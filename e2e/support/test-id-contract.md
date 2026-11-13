@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (486 distinct, 2266 uses)
+## Test ids (486 distinct, 2268 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -785,7 +785,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `view-export-copy` | 1 |  | view-export.spec.ts |
-| `view-export-open` | 9 |  | view-export.spec.ts |
+| `view-export-open` | 11 |  | ssr-session.spec.ts, view-export.spec.ts |
 | `view-export-preview` | 2 |  | view-export.spec.ts |
 | `view-export-save` | 1 |  | view-export.spec.ts |
 | `view-export-send` | 1 |  | view-export.spec.ts |

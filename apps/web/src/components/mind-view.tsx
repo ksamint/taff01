@@ -116,7 +116,7 @@ const momentumMark = (momentum: number) =>
 const isOptimistic = (id: string | null) => !!id?.startsWith("optimistic:");
 
 export function MindView({ project }: { project: Project | undefined }) {
-  const { workspace, me } = useWorkspace();
+  const { workspace, me, confirmed } = useWorkspace();
   const { t } = useTranslation();
   const router = useRouter();
   const desktop = useDesktop();
@@ -182,7 +182,7 @@ export function MindView({ project }: { project: Project | undefined }) {
           <p>{t("mind.subtitle")}</p>
         </div>
         <div className="mind-toolbar">
-          {me && workspace.role !== "guest" && (
+          {confirmed && workspace.role !== "guest" && (
             <ViewExportButton
               workspaceId={workspace.id}
               view="mind"

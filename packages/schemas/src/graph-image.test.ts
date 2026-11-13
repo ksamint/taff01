@@ -128,6 +128,37 @@ describe("graph export display contract", () => {
 
 describe("shared web geometry", () => {
   for (const layout of ["layered", "force"] as const)
+    it(`preserves every ${layout} web position when only rendered edges are capped`, () => {
+      const source = relationsFixture(52);
+      for (let from = 6; from < source.nodes.length; from++)
+        for (let to = from + 1; to < source.nodes.length; to++)
+          source.edges.push({
+            key: `depends_on:${source.nodes[from].key}:${source.nodes[to].key}`,
+            from: source.nodes[from].key,
+            to: source.nodes[to].key,
+            kind: "depends_on",
+            layer: "dependencies",
+          });
+      source.edges.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+      const options = { ...relationsOptions, layout, forceSeed: 7 };
+      const visible = visibleGraph(source, options.layers);
+      expect(visible.edges.length).toBeGreaterThan(600);
+      const positions =
+        layout === "layered"
+          ? layeredLayout(visible.nodes, visible.edges)
+          : forceLayout(visible.nodes, visible.edges, options.forceSeed);
+      const actual = buildRelationsLayout(source, options, "en", labels, hash);
+      expect(actual.nodes).toHaveLength(52);
+      expect(actual.edges).toHaveLength(600);
+      expect(actual.more).toBeNull();
+      expect(actual.moreEdges).toBe(
+        labels.moreEdges(visible.edges.length - 600),
+      );
+      for (const node of actual.nodes)
+        expect({ x: node.x, y: node.y }).toEqual(positions[node.key]);
+    });
+
+  for (const layout of ["layered", "force"] as const)
     it(`preserves exact uncapped ${layout} web positions and seed`, () => {
       const source = relationsFixture(150);
       const original = structuredClone(source);

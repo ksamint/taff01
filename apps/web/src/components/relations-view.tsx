@@ -72,7 +72,7 @@ export function relationsOf(
 }
 
 export function RelationsView({ project }: { project: Project | undefined }) {
-  const { workspace, me } = useWorkspace();
+  const { workspace, confirmed } = useWorkspace();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const ids = useId();
@@ -138,7 +138,7 @@ export function RelationsView({ project }: { project: Project | undefined }) {
       aria-label={t("projects.relationsView")}
     >
       <div className="relations-toolbar">
-        {me && workspace.role !== "guest" && !asList && (
+        {confirmed && workspace.role !== "guest" && !asList && (
           <ViewExportButton
             workspaceId={workspace.id}
             view="relations"

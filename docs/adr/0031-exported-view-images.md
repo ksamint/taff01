@@ -138,7 +138,8 @@ per-day cap includes both bands; source truncation remains a separate unknown
 count note. Week/month grid headers export their visible date; day and list
 views hide the control. The existing shared quota, snapshot audit and export
 dialog apply unchanged. No new permission, scope or MCP tool is introduced.
-## Amendment 4 — bounded graph exports
+
+## Amendment 5 — bounded graph exports
 
 Status: implemented in the S3 candidate; release validation and deployment remain pending.
 
@@ -148,10 +149,12 @@ layout performs pairwise repulsion (260 iterations, 80 above 400 nodes), so
 laying out an unbounded source before truncation would leave export work
 unbounded. Relations therefore select the first 150 nodes in shared reading
 order before layout. Edges are deduplicated by source, target, type and layer,
-filtered to retained endpoints, sorted deterministically and capped at 600
-(four times the node budget). Both layered and force modes lay out that
-retained graph. Uncapped core graphs use identical web geometry and force
-seed; truncated relation positions can differ from the full web graph.
+filtered to retained endpoints and sorted by key. Both layered and force
+modes use all these unique edges for geometry; only rendered edges are capped
+at 600 (four times the node budget). The retained nodes and finite semantic
+edge kinds bound geometry work. Core graphs with at most 150 visible nodes
+use identical web geometry and force seed even above 600 edges; only graphs
+truncated by the node cap can differ from the full web positions.
 
 Mind node positions and curves depend only on each node's ring and angle,
 so they remain identical after the 150-node cap. The full visible source
