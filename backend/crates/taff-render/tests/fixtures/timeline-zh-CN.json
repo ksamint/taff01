@@ -1,0 +1,152 @@
+{
+  "layout": {
+    "locale": "zh-CN",
+    "width": 1600,
+    "height": 592,
+    "title": "项目时间线",
+    "subtitle": "由艾丽丝导出",
+    "todayLabel": "今天",
+    "todayX": 714,
+    "ticks": [
+      {
+        "x": 440,
+        "label": "3月6日"
+      },
+      {
+        "x": 659.2,
+        "label": "3月8日"
+      },
+      {
+        "x": 768.8,
+        "label": "3月9日"
+      },
+      {
+        "x": 988,
+        "label": "3月11日"
+      },
+      {
+        "x": 1097.6,
+        "label": "3月12日"
+      },
+      {
+        "x": 1316.8000000000002,
+        "label": "3月14日"
+      },
+      {
+        "x": 1426.4,
+        "label": "3月15日"
+      }
+    ],
+    "rows": [
+      {
+        "kind": "task",
+        "title": "项目交付 1 · 侍饕餮鑫",
+        "y": 194,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 0,
+        "depth": 0,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "项目交付 2 · 侍饕餮鑫",
+        "y": 246,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 15,
+        "depth": 1,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "项目交付 3 · 侍饕餮鑫",
+        "y": 298,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 30,
+        "depth": 2,
+        "critical": true,
+        "blocked": true
+      },
+      {
+        "kind": "milestone",
+        "title": "项目交付 4 · 侍饕餮鑫",
+        "y": 350,
+        "x": 659.2,
+        "endX": 659.2,
+        "forecastX": 1426.4,
+        "progress": 45,
+        "depth": 0,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "项目交付 5 · 侍饕餮鑫",
+        "y": 402,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 60,
+        "depth": 1,
+        "critical": false,
+        "blocked": false
+      },
+      {
+        "kind": "task",
+        "title": "项目交付 6 · 侍饕餮鑫",
+        "y": 454,
+        "x": 549.6,
+        "endX": 1207.1999999999998,
+        "forecastX": 1426.4,
+        "progress": 75,
+        "depth": 2,
+        "critical": false,
+        "blocked": false
+      }
+    ],
+    "dependencies": [
+      {
+        "from": 0,
+        "to": 1,
+        "conflict": false
+      },
+      {
+        "from": 1,
+        "to": 2,
+        "conflict": true
+      },
+      {
+        "from": 2,
+        "to": 3,
+        "conflict": false
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "conflict": false
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "conflict": false
+      }
+    ],
+    "more": null,
+    "footer": {
+      "text": "由艾丽丝导出 · 2026-03-08 12:00",
+      "hashFull": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "watermark": {
+    "text": "由艾丽丝导出 · Taff · 2026-03-08",
+    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

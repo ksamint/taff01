@@ -1017,4 +1017,5 @@ export const mcpSummariesImageArgs = strictObject({
 
 export * from "./summary-image";
 export * from "./summary-layout";
+export * from "./timeline-image";
 export * from "./view-export";

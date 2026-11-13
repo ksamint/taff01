@@ -13,6 +13,7 @@ const generators = [
   "scripts/rust-tz-golden.mts",
   "scripts/rust-token-policy-golden.mts",
   "scripts/rust-summary-text-golden.mts",
+  "scripts/rust-timeline-golden.mts",
   "apps/api/scripts/summary-schema-gen.mts",
 ];
 const root = fileURLToPath(new URL("..", import.meta.url));

@@ -43,6 +43,14 @@ Status: released in v0.2.24 (`ff411c6`); screen exports below remain planned for
 - VE-3.6 The projects header shall show an Export image button to people who are not guests, once the session is confirmed; it shows the current project, or the workspace overview when no project is selected.
 - VE-3.7 The dialog shall preview the image with its width and size, and offer Send (only when `navigator.canShare` accepts the file), Copy image (only when `ClipboardItem` exists) and Save (always); Escape closes it and returns focus to the button.
 
+### Timeline renderer preparation (VE-4)
+- VE-4.1 The internal `POST /render/timeline` shall accept only the generated `timeline-image.json` display contract and report `X-Taff-Renderer: timeline-1`.
+- VE-4.2 The pure `buildTimelineLayout` builder shall retain the first 60 rows in `getTimeline` order, remove dependencies with omitted endpoints, and receive localized title, subtitle, today, footer, date and overflow labels from its caller.
+- VE-4.3 The chart shall fit civil dates, inclusive task bars, milestone diamonds, dependency arrows, forecasts and today to 1600 px; output shall be a palette PNG at most 400 KB and 4000 px high.
+- VE-4.4 The renderer shall validate bounded coordinates, strings and arrays before raster allocation, escape text, reject mismatched footer/watermark hashes, and embed the full hash in a PNG text chunk.
+
+This internal preparation does not yet expose timeline export through core, REST, MCP or the web UI.
+
 ## Non-functional
 
 - Image binaries are not stored; only the allowlisted export audit metadata is retained. One additive nullable OAuth refresh-scope migration; no new client dependency; the CJK text is drawn with the renderer's server fonts, so the web font subsets do not limit names.
@@ -65,6 +73,7 @@ Status: released in v0.2.24 (`ff411c6`); screen exports below remain planned for
 | VE-3.5 | `e2e/view-export.spec.ts` (≤ 400 KB, 1080 px through the real renderer); `taff-render` caps |
 | VE-3.6–3.7 | `e2e/view-export.spec.ts`, en, zh-CN, zh-HK |
 | Deploy wiring | `scripts/apuch-compose.test.ts` (API and worker share the renderer URL) |
+| VE-4.1–4.4 | `packages/schemas/src/timeline-image.test.ts`; `backend/crates/taff-render/tests/render.rs` timeline cases and three locale PNG goldens |
 
 ## Open decisions
 
