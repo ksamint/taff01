@@ -11,17 +11,17 @@ graph data and isolation scope.
 
 ## Status
 
-**Calendar export candidate.** Week and month grids export a 1600 px PNG from
+**Calendar export candidate (v0.2.25, unreleased).** Week and month grids export a 1600 px PNG from
 the visible civil window in the saved viewer zone; day/list views have no export
 button. See [view export VE-5](docs/spec/view-export.md); full release validation
 remains with the parent release gate.
 
-**Timeline export candidate.** The timeline toolbar and `views.image` export a
+**Timeline export candidate (v0.2.25, unreleased).** The timeline toolbar and `views.image` export a
 1600 px server-drawn chart with critical-path highlighting, saved viewer zone,
 watermark and snapshot audit. Full release validation remains pending; see
 [view export VE-4](docs/spec/view-export.md).
 
-**v0.2.24 (deployed) — exported view images and organization lifecycle.** Members and admins export the
+**v0.2.24 (deployed, `ff411c6`) — exported view images and organization lifecycle.** Members and admins export the
 current project or the workspace overview as one watermarked PNG (1080 px,
 ≤ 400 KB) and send, copy or save it; each authorized snapshot records bounded
 metadata in the audit log. Agents with both read scopes use `views.image`,

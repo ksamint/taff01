@@ -1,8 +1,8 @@
 # 126 — public calendar image export candidate
 
-Status: local focused verification complete; no push, full gate, merge or deployment.
-Base: S1 head ec6f3a342716138847f324a074beda8d64f30b10.
-Pure S2 dependency boundary: dcc2eecc541b0a9f8cf2d1331af8266cc3e7d375 (b6e1087 cherry-pick).
+Status: preparatory integration only; v0.2.25 unreleased. No push or full gate in this rebase.
+Current drop boundary: frozen S1 `d49be16ad6bace3f8a6326befa27f2b8566c23d8`; final rebase onto actual merged S1 remains parent-owned.
+S2-only commits retained as `d5ce96f`, `13cda58`, `7eb0913`, `8695f24`; accepted v0.2.24 production/next rollback source is `ff411c6`.
 Targets: TypeScript core/API/MCP/UI and shared formatter; existing Rust calendar renderer.
 
 - Strict view=calendar requires calendarMode=week|month and visibleDate; project/highlight/client-zone options refused.
@@ -12,9 +12,9 @@ Targets: TypeScript core/API/MCP/UI and shared formatter; existing Rust calendar
 - Confirmed non-guests export the visible week/month grid; day and list views hide export.
 - Existing dialog previews/sends/copies/saves 1600 px PNGs; MCP remains 38 tools with no scope changes.
 - Shared localized formatter labels next-day midnight as 24:00; DST 23/25-hour segment assertions and six goldens updated.
-- Schema, ADR amendment 3, VE-5, README and generated MCP/test-id contracts updated.
+- Schema, ADR amendment 4, VE-5, README and generated MCP/test-id contracts updated.
 
-Focused validation:
+Original focused validation (before this preparatory rebase):
 - `node node_modules/vitest/vitest.mjs run packages/schemas/src/view-export.test.ts packages/schemas/src/calendar-image.test.ts apps/api/src/view-export.test.ts apps/api/src/mcp-views.test.ts scripts/ui/fonts.test.ts`: 28 passed (5 files).
 - `node --env-file=.env node_modules/vitest/vitest.mjs run packages/core/src/view-export.integration.test.ts`: 16 passed, including scope narrowing/revocation, member demotion, options/hash/zone and audit.
 - `node node_modules/typescript/bin/tsc -p <packages/core|apps/api|apps/web>/tsconfig.json --noEmit`: clean-source checks passed all three.
@@ -33,3 +33,7 @@ Review repairs (local only):
 - 200→201 unscheduled tasks leave exported hash/layout unchanged and no false warning; normal calendar still reports truncation. Scheduled-row and occurrence overflow remain reported.
 - DB command above expanded with `packages/core/src/calendar.integration.test.ts`: 31 passed. Focused schema/API/MCP command above without fonts: 25 passed. Core/API typechecks passed; Biome, Rust fmt and diff checks passed.
 - Full renderer command above: 17 passed, including summary/timeline goldens and palette guard. Calendar-only UPDATE_RENDER_GOLDENS=1 run: 4 passed. No browser/full release gate rerun for this internal-read/palette repair; prior browser evidence remains above.
+
+Preparatory rebase onto frozen S1 d49be16: one conflict in the view-export spec, resolved with released v24 ff411c6 and implemented/unreleased timeline+calendar; graphs remain planned. ADR numbering OAuth2/timeline3/calendar4 and all-four-images goal preserved; calendar behavior/review-fix files unchanged from b4485e8.
+Current checks: 82 pure schema/calendar-recurrence/API/MCP/font/language/test-id tests (10 files); all eight schema/db/core/API/worker/web/SW/scripts tsc targets passed. MCP/schema/calendar/test-id generation produced no drift (38 tools); focused Biome and diff checks passed.
+No services, listeners, browser, Rust, database or full-gate runs in this preparation; no dependency/config changes or shared links created. Parent owns final rebase above d49be16, full gate and release.

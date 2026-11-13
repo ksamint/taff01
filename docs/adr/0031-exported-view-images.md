@@ -100,7 +100,7 @@ access may narrow, but rotated refresh scope must remain identical. Old images
 tolerate the nullable added column; rollback retains it and its data. No new
 dependency, renderer change or permission scope. Tool count is now 38.
 
-## Amendment 2 — timeline export integration
+## Amendment 3 — timeline export integration
 
 The S1 candidate adds strict `view=overview|project|timeline` to the existing
 REST/MCP query; omitted view keeps projectId-based summary behavior. Timeline
@@ -119,7 +119,7 @@ rendering, using the same trusted web/MCP channel and quota. No scope or
 permission rule changes. The shared renderer helper selects `/render/timeline`;
 the existing export dialog handles its PNG. Calendar and graphs remain separate.
 
-## Amendment 3 — calendar export integration
+## Amendment 4 — calendar export integration
 
 S2 adds `view=calendar`, requiring `calendarMode=week|month` and a visible civil
 date. Project, timeline-highlight and client-zone options are refused. Core
