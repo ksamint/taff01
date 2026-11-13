@@ -1,40 +1,33 @@
 # 127 — public mind and relations image export candidate
 
-Status: implemented locally for v0.2.25; not released. No push, full gate or deployment.
-Current dependency boundary: combined S2 candidate `b4485e8c4cd753374bbadd77d693f201a4219f75`; parent will rebase above it onto actual S2 main before full gate.
-Retained graph prep/public/review commits rebased from `9875bec`/`54e72d5`/`1426d1f` to `979dced`/`5a1316c`/`68865fc`; pure source originally `9b4f563`.
-Combined resolution preserves calendar/timeline options, scheduled-only reads, localized labels, typed dispatch/overloads, quota/audit; ADR amendments OAuth2/timeline3/calendar4/graph5.
-Targets: TypeScript schemas/core/API/MCP/web/tests and Rust graph rendering; no dependencies.
+Status: v0.2.25 preparation only; full gate and deployment pending. No push.
+Exact future drop boundary: S2 preparation `7ee1e51affb658648f7656b9ee822b346461e1a8`; parent will rebase above it onto actual merged S2 before the final gate.
+Retained S3 commits: `91b73c5` (pure geometry/render), `d93dfd4` (public integration), `16ce0b4` (review fixes), `2f97911` (combined validation).
+Production remains accepted v0.2.24 `ff411c6`, also the v0.2.25 rollback source. API/web/worker package versions are now 0.2.25 with an explicitly unreleased changelog.
+Targets: TypeScript schemas/core/API/MCP/web/tests and Rust renderer; no new dependency, migration, environment value, permission or tool (38 remain).
 
-- Strict mind archived filter and relations layout/scope/layers/uint32 seed; normalized defaults.
-- Core calls authorized getMindMap/relationGraph; current membership, scopes and CRM grants apply.
-- Canonical hash covers visible sanitized display/options, saved zone and exporter; no private fields or finance.
-- Shared quota/render delivery and snapshot audit; MCP remains 38 tools, no new permission or migration.
-- Toolbar exports current graph options in three locales; relations list mode hides the graph button.
-- Shared geometry, 150 nodes/600 semantic edges and exact localized overflow counts remain intact.
-- Graph uses canonical web semantic colors; six graph goldens updated, summary/timeline goldens unchanged.
-- VE-6 living spec, ADR 0031, README and goal updated; deployment requires all four images.
+- Strict mind archived filter and relations layout/scope/layers/uint32 seed; normalized defaults and cross-view irrelevant options refused.
+- Authorized getMindMap/relationGraph preserve current membership/scopes/CRM grants; visible sanitized display/options determine the hash with saved zone and exporter, excluding private fields and finance.
+- Shared quota/render delivery and bounded snapshot audit; scope mind/relations and finance false.
+- Confirmed non-guests export current graph options in three locales; relations list mode hides the control.
+- Shared web geometry retains 150 nodes; all retained unique edges drive layout, while only 600 edges render. Separate exact localized overflow counts exclude hidden nodes/edges.
+- Canonical TABLE AI colors, bounded geometry, label-aware fit, 1080 px palette PNGs, maximum 4000 px/400 KB, watermark and embedded hash.
+- VE-6 spec, README and ADR updated; numbering OAuth 2 / timeline 3 / calendar 4 / graph 5. All four application images must share the validated release source.
 
-Focused validation on this implementation (not the release gate):
-- Vitest schema/graph/API/MCP/web geometry/font/palette/test-id/language selection: 69 passed in 10 files.
-- PostgreSQL view-export + authorization selection (`exported view images|view-image|every REST endpoint`): 34 passed, 825 unrelated matrix cases skipped.
-- `tsc --noEmit` for schemas/core/db/API/worker/web/SW and scripts: passed on clean-source generated types.
-- `cargo test --locked --offline -p taff-core --test mcp_schema`: 4 passed; regenerated MCP fixture.
-- `cargo test --locked --offline -p taff-render`: 17 passed; Clippy tests with `-D warnings` and rustfmt passed.
-- Rust commands use `--manifest-path backend/Cargo.toml`, `CARGO_BUILD_JOBS=2`, private `/private/tmp/taff-graph-integration-target`.
-- Six graph browser cases: passed (three locales, real PNG/hash/save and visible option changes).
-- Six existing summary/timeline browser regressions: passed. Browser runs precede the Rust palette correction.
-- Post-palette six locale graph goldens passed; HK mind/relations visually inspected without clipping.
-- Dense mind/relations PNGs: 210,306 / 356,201 bytes; both within 400 KB and geometry bounds.
-- Biome changed sources, generated test-id contract and `git diff --check`: passed.
+Current preparatory rebase validation:
+- 99 pure schema/API/MCP/geometry/session/font/palette/language/test-id tests passed in 13 files.
+- All eight tsc targets passed: schemas, db, core, API, worker, web, SW and scripts.
+- `node --import tsx scripts/rust-fixtures.mts` passed (summary model 10 tests); MCP/schema/calendar/timeline/graph/parity fixtures regenerated with no drift.
+- `node --import tsx scripts/test-id-contract.mts` produced no drift. Focused Biome and `git diff --check` passed.
+- Only spec release/role text and the four-image goal conflicted; both intents retained. Dense geometry, confirmed controls and all public graph source files match the previous S3 candidate.
+- No Rust execution, shared target, browser, services, listeners or database changes in this preparation; no full-gate claim.
 
-Resolved harness findings: a combined six-export/account dev case hit 429 because StrictMode aborts still count; split into fresh accounts per graph (2/4 exports), preserving quota/no retries. New Chinese empty text uses existing audited “心智图/心智圖” vocabulary. Ignored Next dev types required modal unlike tracked layout; moved only generated dev types before clean-source typechecks, no layout change.
-Browser artifacts: `/private/tmp/taff-v025-s3-graph-artifacts` (before palette correction).
-Own 4200/4201/3304 services stopped; other worktrees/services untouched. Full gate needs a fresh seeded runtime database after focused fixtures.
-Open implementation decisions: none. Parent owns combined S1/S2 integration, clean full gate, PR/merge and deployment.
+Earlier evidence, not rerun on this rebased tree:
+- 39 focused PostgreSQL authorization/export cases passed (833 unrelated matrix cases skipped); Rust MCP 4 and renderer 22 passed with Clippy/rustfmt.
+- Six graph export browser cases plus six summary/timeline regressions passed before palette correction; six provisional-session locale cases passed after confirmed-control correction.
+- Post-palette graph goldens passed and HK images were inspected. Dense mind/relations PNGs: 210,306 / 356,589 bytes; six PNG goldens unchanged by the geometry fix.
+- The 52-node/1,131-edge regression reproduced layered/force drift before the fix and verifies every shared position with seed 7 after it.
+- Dev StrictMode aborted requests consumed quota; fixtures use fresh accounts per graph (2/4 exports), without changing product quota or adding retries. Ignored dev types were moved before earlier clean-source typechecks; no layout change.
+- Historical browser artifacts: `/private/tmp/taff-v025-s3-graph-artifacts` (before palette correction). Parent full gate requires a fresh seeded runtime database after prior focused fixtures.
 
-Review followup (separate commit after `54e72d5`): relations use all retained semantic edges for geometry, with 600 applied only to rendered edges; both graph buttons require confirmed membership.
-Regression: 52-node/1,131-edge layered/force position tests failed before and passed after; six locale SSR cases passed using the provisional-session fixture to assert hidden-before/visible-after confirmation.
-Followup validation: graph/geometry/session/palette/test-id Vitest selection 60 passed; schema/web/scripts typechecks, Biome and diff check passed. Rust graph tests 5 passed; six PNG goldens unchanged; regenerated dense relations JSON renders 356,589 bytes.
-Followup own API4201/web4200 stopped; renderer not started; ignored Next dev types moved before clean-source web typecheck. No full gate/push/deploy.
-Combined-S2 rebase checks: 85 schema/API/MCP/geometry tests + 9 schema/font/language tests; 39 focused DB/auth passed (833 unrelated skipped); all eight TS targets, Rust MCP4/render22, Clippy/rustfmt/Biome passed. Full fixture regeneration (summary10) produced no drift; cross-calendar/graph irrelevant fields are rejected. No browser/services/full gate; v24 versions/migrations and38tools retained.
+Open implementation decisions: none. Parent owns final S2-main rebase, full local gate, PR/merge, deployment and owner acceptance.

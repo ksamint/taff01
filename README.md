@@ -15,7 +15,8 @@ graph data and isolation scope.
 the visible civil window in the saved viewer zone; day/list views have no export
 button. See [view export VE-5](docs/spec/view-export.md); full release validation
 remains with the parent release gate.
-**Graph export candidate.** Mind and relations toolbars and `views.image` export
+
+**Graph export candidate (v0.2.25, unreleased).** Mind and relations toolbars and `views.image` export
 authorized 1080 px graphs with current visible options, localized overflow,
 watermark and snapshot audit. See [view export VE-6](docs/spec/view-export.md).
 
