@@ -548,6 +548,7 @@
     "deny": "拒絕請求",
     "revoke": "撤銷授權",
     "taskScope": "任務範圍：{{task}}",
+    "taskUnavailable": "無法讀取任務",
     "workspaceScope": "工作空間範圍",
     "expires": "到期時間：{{date}}",
     "notGranted": "無生效中的有效期",

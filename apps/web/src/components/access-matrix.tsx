@@ -9,6 +9,7 @@ import {
   type Member,
   type ReviewPolicy,
   systemAccessMatrixSchema,
+  taskReference,
 } from "@taff/schemas";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, Minus } from "lucide-react";
@@ -22,6 +23,7 @@ import {
   useSetAgentPermission,
 } from "../lib/mutations/agents";
 import { useChangeMemberRole } from "../lib/mutations/organizations";
+import { useTasks } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
 import { GrantActions } from "./grant-actions";
@@ -164,7 +166,8 @@ const ROLES = ["admin", "member", "guest", "agent"] as const;
 
 function PendingGrants({ data }: { data: Matrix }) {
   const { t } = useTranslation();
-  const { confirmed } = useWorkspace();
+  const { confirmed, workspace } = useWorkspace();
+  const tasks = useTasks(workspace.id);
   if (!data.pendingGrants.length)
     return <p role="status">{t("access.noPendingGrants")}</p>;
   return (
@@ -181,6 +184,7 @@ function PendingGrants({ data }: { data: Matrix }) {
           const agent = data.agents.find(
             (item) => item.member.id === grant.agentId,
           );
+          const task = tasks.data?.find((item) => item.id === grant.taskId);
           return (
             <tr
               key={grant.id}
@@ -196,9 +200,22 @@ function PendingGrants({ data }: { data: Matrix }) {
                 <p>{t(`agentProfile.capability.${grant.capability}`)}</p>
                 <p className="preserve-text">{grant.reason}</p>
                 <p>
-                  {grant.taskId
-                    ? t("grants.taskScope", { task: grant.taskId })
-                    : t("grants.workspaceScope")}
+                  {grant.taskId ? (
+                    task ? (
+                      <Link className="text-link" href={`/tasks/${task.id}`}>
+                        {t("grants.taskScope", {
+                          task: `${taskReference(workspace.key, task.number)} · ${task.title}`,
+                        })}
+                      </Link>
+                    ) : (
+                      <>
+                        {t("grants.taskScope", { task: grant.taskId })} ·{" "}
+                        {t("grants.taskUnavailable")}
+                      </>
+                    )
+                  ) : (
+                    t("grants.workspaceScope")
+                  )}
                 </p>
                 <p>{t("grants.pending")}</p>
               </td>

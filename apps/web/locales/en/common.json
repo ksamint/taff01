@@ -548,6 +548,7 @@
     "deny": "Deny request",
     "revoke": "Revoke grant",
     "taskScope": "Task scope: {{task}}",
+    "taskUnavailable": "Task unavailable",
     "workspaceScope": "Workspace scope",
     "expires": "Expires {{date}}",
     "notGranted": "No active expiry",

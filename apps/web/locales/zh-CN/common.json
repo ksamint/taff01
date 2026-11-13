@@ -548,6 +548,7 @@
     "deny": "拒绝请求",
     "revoke": "撤销授权",
     "taskScope": "任务范围：{{task}}",
+    "taskUnavailable": "无法读取任务",
     "workspaceScope": "工作空间范围",
     "expires": "到期时间：{{date}}",
     "notGranted": "无生效中的有效期",

@@ -41,6 +41,9 @@ reads use the same current membership checks as other administration operations.
 - AM-1.7 The workspace matrix shall display pending capability requests in a
   localized Pending requests tab with agent profile links, capability, reason,
   task or workspace scope, and pending status, or an explicit empty state.
+  Readable task scopes shall show the task reference and title linked to the
+  task; an unreadable or unavailable task shall retain its raw id with a
+  localized unavailable label and no task link.
   Confirmed administrators with the agent's current `canDecideGrants` flag may
   use the existing expiring allow and deny actions. The matrix shall refresh
   after a decision; resolved requests shall disappear. Permanent permission
