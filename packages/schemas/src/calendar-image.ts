@@ -90,6 +90,27 @@ const civil = (day: number) => new Date(day * DAY).toISOString().slice(0, 10);
 const monday = (day: number) => day - ((((day + 3) % 7) + 7) % 7);
 const lexical = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
+/** A clipped next-day midnight is 24:00, so a timed whole-day segment never looks zero-length. */
+export function formatCalendarImageTime(
+  start: string,
+  end: string,
+  locale: CalendarLayout["locale"],
+  timeZone: string,
+): string {
+  const localEnd = calendarCivilTime(end, timeZone);
+  const nextMidnight =
+    localEnd.getTime() % DAY === 0 &&
+    localEnd > calendarCivilTime(start, timeZone);
+  const format = (instant: string, hourCycle: "h23" | "h24") =>
+    new Intl.DateTimeFormat(locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle,
+      timeZone,
+    }).format(new Date(instant));
+  return `${format(start, "h23")}–${format(end, nextMidnight ? "h24" : "h23")}`;
+}
+
 /** Query listCalendar with from/to; endDate/to are exclusive, converted separately through the viewer's zone. */
 export function calendarImageWindow(input: CalendarImageQuery) {
   const query = calendarImageQuerySchema.parse(input);

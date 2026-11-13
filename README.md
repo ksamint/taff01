@@ -11,6 +11,11 @@ graph data and isolation scope.
 
 ## Status
 
+**Calendar export candidate.** Week and month grids export a 1600 px PNG from
+the visible civil window in the saved viewer zone; day/list views have no export
+button. See [view export VE-5](docs/spec/view-export.md); full release validation
+remains with the parent release gate.
+
 **Timeline export candidate.** The timeline toolbar and `views.image` export a
 1600 px server-drawn chart with critical-path highlighting, saved viewer zone,
 watermark and snapshot audit. Full release validation remains pending; see

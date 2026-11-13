@@ -90,6 +90,21 @@ it("resolves each image call, shares member quota across tokens and reports rend
       "mcp",
     );
     expect(hit.mock.calls[2]).toEqual(hit.mock.calls[0]);
+    await call({
+      view: "calendar",
+      calendarMode: "week",
+      visibleDate: "2026-03-08",
+    });
+    expect(String(renderFetch.mock.calls[3][0])).toBe(
+      "http://render.test/render/calendar",
+    );
+    expect(input).toHaveBeenLastCalledWith(
+      { ...p, tokenId: "two" },
+      "home",
+      { view: "calendar", calendarMode: "week", visibleDate: "2026-03-08" },
+      "mcp",
+    );
+    expect(hit.mock.calls[3]).toEqual(hit.mock.calls[0]);
     renderFetch.mockRejectedValue(new Error("renderer down"));
     expect(await call({})).toMatchObject({
       isError: true,

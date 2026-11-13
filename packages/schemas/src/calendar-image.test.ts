@@ -76,6 +76,15 @@ describe("calendar image layout", () => {
     const layout = build(source([event]), { ...query, visibleDate: date });
     expect(layout.cells.flatMap((cell) => cell.items)).toHaveLength(1);
     expect(layout.cells[6].items[0].allDay).toBe(true);
+    const spanning = {
+      ...event,
+      startAt: new Date(Date.parse(event.startAt) - 3600000).toISOString(),
+      endAt: new Date(Date.parse(event.endAt) + 7200000).toISOString(),
+    };
+    expect(
+      build(source([spanning]), { ...query, visibleDate: date }).cells[6]
+        .items[0],
+    ).toMatchObject({ allDay: false, detail: "00:00–24:00" });
     const window = calendarImageWindow({ ...query, visibleDate: date });
     expect((Date.parse(window.to) - Date.parse(window.from)) / 3600000).toBe(
       6 * 24 + hours,
@@ -120,7 +129,7 @@ describe("calendar image layout", () => {
       allDay: false,
       continuesBefore: true,
       continuesAfter: true,
-      detail: "00:00–00:00",
+      detail: "00:00–24:00",
     });
     expect(layout.cells[1].items[0]).toMatchObject({
       continuesBefore: true,

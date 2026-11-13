@@ -1,6 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { expect, type Page, test } from "@playwright/test";
-import { projectSchema } from "../packages/schemas/src/index";
+import {
+  calendarCivilTime,
+  calendarWallToInstant,
+  projectSchema,
+} from "../packages/schemas/src/index";
 import { freshAccount } from "./support/account";
 import { messages, type TestLocale } from "./support/messages";
 
@@ -51,7 +55,10 @@ async function openExport(page: Page, title: string, width = 1080) {
   return dialog;
 }
 
-async function save(page: Page, kind: "project" | "workspace" | "timeline") {
+async function save(
+  page: Page,
+  kind: "project" | "workspace" | "timeline" | "calendar",
+) {
   const pending = page.waitForEvent("download");
   await page.getByTestId("view-export-save").click();
   const download = await pending;
@@ -195,4 +202,80 @@ test("timeline exports its critical highlight and full chart in the viewer langu
   expect((await third).headers()["x-taff-content-hash"]).toBe(
     hide.headers()["x-taff-content-hash"],
   );
+});
+
+test("calendar exports its visible week and month, and hides export in day and list views", async ({
+  page,
+}, info) => {
+  test.setTimeout(120_000);
+  const locale = info.project.name as TestLocale;
+  const me = await freshAccount(page, locale);
+  const workspace = me.workspaces[0];
+  const date = calendarCivilTime(new Date(), me.user.tz)
+    .toISOString()
+    .slice(0, 10);
+  expect(
+    (
+      await page.request.post("/api/tasks", {
+        data: {
+          workspaceId: workspace.id,
+          ownerId: workspace.memberId,
+          workerId: null,
+          title: `Calendar export ${locale}`,
+          calendar: {
+            startAt: calendarWallToInstant(`${date}T09:00`, me.user.tz),
+            endAt: calendarWallToInstant(`${date}T10:00`, me.user.tz),
+            timeZone: me.user.tz,
+            rrule: null,
+          },
+        },
+      })
+    ).status(),
+  ).toBe(201);
+  await page.goto("/calendar");
+  await expect(page.getByTestId("calendar-day")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  await expect(page.getByTestId("view-export-open")).toHaveCount(0);
+  await page.getByTestId("calendar-week").click();
+  await expect(page.getByTestId("view-export-open")).toHaveCount(1);
+  const exported = () =>
+    page.waitForResponse(
+      (response) =>
+        response.url().includes("/view-image?") &&
+        new URL(response.url()).searchParams.get("view") === "calendar",
+    );
+  const weekResponse = exported();
+  await openExport(page, messages[locale].viewExport.title, 1600);
+  const week = await weekResponse;
+  expect(new URL(week.url()).searchParams.get("calendarMode")).toBe("week");
+  expect(new URL(week.url()).searchParams.get("visibleDate")).toBe(date);
+  expect(new URL(week.url()).searchParams.has("timeZone")).toBe(false);
+  await save(page, "calendar");
+  await page.keyboard.press("Escape");
+  await page.getByTestId("calendar-month-grid").click();
+  const monthResponse = exported();
+  await openExport(page, messages[locale].viewExport.title, 1600);
+  const month = await monthResponse;
+  expect(new URL(month.url()).searchParams.get("calendarMode")).toBe("month");
+  expect(month.headers()["x-taff-content-hash"]).not.toBe(
+    week.headers()["x-taff-content-hash"],
+  );
+  await page.keyboard.press("Escape");
+  await page.getByTestId("calendar-next").click();
+  const nextResponse = exported();
+  await openExport(page, messages[locale].viewExport.title, 1600);
+  const next = await nextResponse;
+  expect(new URL(next.url()).searchParams.get("visibleDate")).not.toBe(date);
+  expect(next.headers()["x-taff-content-hash"]).not.toBe(
+    month.headers()["x-taff-content-hash"],
+  );
+  await page.keyboard.press("Escape");
+  await page.getByTestId("calendar-week").click();
+  await page.getByTestId("calendar-tools").click();
+  await page.getByTestId("calendar-list").click();
+  await expect(page.getByTestId("view-export-open")).toHaveCount(0);
+  await page.getByTestId("calendar-day").click();
+  await expect(page.getByTestId("view-export-open")).toHaveCount(0);
 });

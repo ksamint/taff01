@@ -32,3 +32,35 @@ it("preserves legacy summary queries and accepts only applicable timeline option
     expect(mcpViewsImageArgs.safeParse(query).success).toBe(false);
   }
 });
+
+it("requires an explicit calendar window and rejects irrelevant or authority options", () => {
+  const query = {
+    view: "calendar",
+    calendarMode: "week",
+    visibleDate: "2026-03-08",
+  };
+  for (const calendarMode of ["week", "month"]) {
+    expect(
+      mcpViewsImageArgs.safeParse({ ...query, calendarMode }).success,
+    ).toBe(true);
+    expect(
+      viewExportQuerySchema.safeParse({ ...query, calendarMode, locale: "en" })
+        .success,
+    ).toBe(true);
+  }
+  for (const bad of [
+    { view: "calendar" },
+    { ...query, calendarMode: "day" },
+    { ...query, visibleDate: "2026-02-30" },
+    { ...query, projectId },
+    { ...query, criticalPath: "show" },
+    { ...query, timeZone: "UTC" },
+    { calendarMode: "week", visibleDate: "2026-03-08" },
+    { view: "timeline", projectId, visibleDate: "2026-03-08" },
+  ]) {
+    expect(mcpViewsImageArgs.safeParse(bad).success).toBe(false);
+    expect(
+      viewExportQuerySchema.safeParse({ ...bad, locale: "en" }).success,
+    ).toBe(false);
+  }
+});

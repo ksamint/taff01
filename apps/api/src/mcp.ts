@@ -121,7 +121,7 @@ export function createMcpServer(
     {
       title: "Export live view image",
       description:
-        "Export an agent-watermarked live workspace, project or timeline PNG. Timeline requires projectId and accepts criticalPath show/hide; it fits the full chart. Requires tasks:read and summaries:read. Locale and time zone use the token issuer's saved preferences.",
+        "Export an agent-watermarked live workspace, project, timeline or calendar PNG. Timeline requires projectId and accepts criticalPath show/hide; it fits the full chart. Calendar requires calendarMode week/month and visibleDate YYYY-MM-DD. Requires tasks:read and summaries:read. Locale defaults to the issuer's preference; time zone always uses the issuer's saved zone.",
       inputSchema: toolSchema(mcpViewsImageArgs),
       annotations: READ_ONLY,
     },

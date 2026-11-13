@@ -3,6 +3,7 @@ import {
   buildCalendarLayout,
   type CalendarImageInput,
   type CalendarImageLabels,
+  formatCalendarImageTime,
 } from "./calendar-image";
 import type { CalendarOccurrence, CalendarViewData } from "./calendar-read";
 
@@ -81,15 +82,8 @@ export function calendarLabelsFixture(
         weekday: "long",
         timeZone: "UTC",
       }).format(new Date(`${d}T00:00:00Z`)),
-    time: (start, end, timeZone) => {
-      const format = new Intl.DateTimeFormat(locale, {
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23",
-        timeZone,
-      });
-      return `${format.format(new Date(start))}–${format.format(new Date(end))}`;
-    },
+    time: (start, end, timeZone) =>
+      formatCalendarImageTime(start, end, locale, timeZone),
   };
 }
 export function calendarImageFixture(

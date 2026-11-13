@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { activity, connectDatabase, members } from "@taff/db";
 import {
+  calendarImageInputSchema,
   summaryImageLayoutInputSchema,
   timelineImageInputSchema,
 } from "@taff/schemas";
@@ -116,6 +117,12 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       title: "Order the counter stone",
       projectId: active.id,
       dueAt: "2026-11-10T04:00:00Z",
+      calendar: {
+        startAt: "2026-11-12T09:00:00Z",
+        endAt: "2026-11-12T10:00:00Z",
+        timeZone: "UTC",
+        rrule: null,
+      },
     });
     const old = await core.createProject(alice, w, { name: "Closed kiosk" });
     archived = await core.updateProject(alice, old.id, {
@@ -320,6 +327,103 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     expect(await count()).toBe(before);
   });
 
+  it.each(["en", "zh-CN", "zh-HK"] as const)(
+    "exports calendar windows in %s with saved zone, options hash and scheduled project audit",
+    async (locale) => {
+      const query = {
+        view: "calendar" as const,
+        calendarMode: "week" as const,
+        visibleDate: "2026-11-12",
+        locale,
+      };
+      const result = await core.exportViewImageInput(bob, w, query);
+      const { fileName, ...input } = result;
+      expect(calendarImageInputSchema.parse(input)).toEqual(input);
+      expect(input.layout.cells).toHaveLength(7);
+      expect(input.layout.cells.flatMap((cell) => cell.items)).toEqual([
+        expect.objectContaining({
+          title: "Order the counter stone",
+          detail: "17:00–18:00",
+        }),
+      ]);
+      expect(input.layout.footer.text).toContain("Asia/Shanghai");
+      expect(input.watermark.text).toContain("Bob Member");
+      expect(fileName).toMatch(/^taff-calendar-2026-11-12-[a-f0-9]{8}\.png$/);
+      expect((await core.exportViewImageInput(bob, w, query)).contentHash).toBe(
+        input.contentHash,
+      );
+      const month = await core.exportViewImageInput(bob, w, {
+        ...query,
+        calendarMode: "month",
+      });
+      expect(month.layout.cells).toHaveLength(42);
+      expect(month.contentHash).not.toBe(input.contentHash);
+      const next = await core.exportViewImageInput(bob, w, {
+        ...query,
+        visibleDate: "2026-11-19",
+      });
+      expect(next.layout.cells.every((cell) => cell.items.length === 0)).toBe(
+        true,
+      );
+      expect(next.contentHash).not.toBe(input.contentHash);
+      const [audit] = await connection.db
+        .select()
+        .from(activity)
+        .where(
+          and(
+            eq(activity.action, "view.export"),
+            eq(activity.actorId, bobUser),
+          ),
+        )
+        .orderBy(desc(activity.createdAt));
+      expect(audit.resourceId).toBe(w);
+      expect(audit.details).toEqual({
+        scope: "calendar",
+        locale,
+        contentHash: next.contentHash,
+        projectCount: 0,
+        finance: false,
+        channel: "web",
+      });
+    },
+  );
+
+  it("changes calendar with saved viewer zone and refuses unauthorized/irrelevant windows", async () => {
+    const query = {
+      view: "calendar" as const,
+      calendarMode: "week" as const,
+      visibleDate: "2026-11-12",
+      locale: "en" as const,
+    };
+    const base = await core.exportViewImageInput(bob, w, query);
+    try {
+      await core.updateProfile(bobUser, {
+        locale: "en",
+        tz: "America/New_York",
+      });
+      const changed = await core.exportViewImageInput(bob, w, query);
+      expect(changed.contentHash).not.toBe(base.contentHash);
+      expect(changed.layout.cells.flatMap((cell) => cell.items)[0].detail).toBe(
+        "04:00–05:00",
+      );
+    } finally {
+      await core.updateProfile(bobUser, { locale: "en", tz: "Asia/Shanghai" });
+    }
+    for (const principal of [gina, outsider])
+      await expect(
+        core.exportViewImageInput(principal, w, query),
+      ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.exportViewImageInput(bob, w, { ...query, projectId: active.id }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+    await expect(
+      core.exportViewImageInput(bob, w, {
+        ...query,
+        visibleDate: "2026-02-30",
+      }),
+    ).rejects.toMatchObject({ code: "invalid_input" });
+  });
+
   it("audits each authorized snapshot with allowlisted metadata and no change notification", async () => {
     const rows = () =>
       connection.db
@@ -425,6 +529,14 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
         core.exportViewImageInput(
           p,
           w,
+          { view: "calendar", calendarMode: "week", visibleDate: "2026-11-12" },
+          "mcp",
+        ),
+      ).rejects.toMatchObject({ code: "forbidden" });
+      await expect(
+        core.exportViewImageInput(
+          p,
+          w,
           { view: "timeline", projectId: active.id },
           "mcp",
         ),
@@ -436,6 +548,14 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       scopes: ["tasks:read", "summaries:read"],
       revoked: true,
     });
+    await expect(
+      core.exportViewImageInput(
+        p,
+        w,
+        { view: "calendar", calendarMode: "week", visibleDate: "2026-11-12" },
+        "mcp",
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
     await expect(
       core.exportViewImageInput(p, w, {}, "mcp"),
     ).rejects.toMatchObject({ code: "forbidden" });
@@ -456,6 +576,15 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     expect(timelineImage.layout.locale).toBe("zh-CN");
     expect(timelineImage.layout.footer.text).toContain("Asia/Shanghai");
     expect(timelineImage.watermark.text).toContain("Export Agent");
+    const calendarImage = await core.exportViewImageInput(
+      agent,
+      w,
+      { view: "calendar", calendarMode: "week", visibleDate: "2026-11-12" },
+      "mcp",
+    );
+    expect(calendarImage.layout.locale).toBe("zh-CN");
+    expect(calendarImage.layout.subtitle).toContain("Asia/Shanghai");
+    expect(calendarImage.watermark.text).toContain("Export Agent");
     expect(image.watermark.text).toContain("Export Agent");
     expect(image.fileName).toContain("Export Agent 测试");
     const [row] = await connection.db
@@ -502,6 +631,14 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     expect(hidden.layout.projects[0].finance).toBeNull();
     await core.revokeAgentToken(alice, (agent as { tokenId: string }).tokenId);
     await expect(
+      core.exportViewImageInput(
+        agent,
+        w,
+        { view: "calendar", calendarMode: "week", visibleDate: "2026-11-12" },
+        "mcp",
+      ),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
       core.exportViewImageInput(agent, w, {}, "mcp"),
     ).rejects.toMatchObject({ code: "forbidden" });
     await expect(
@@ -533,6 +670,13 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     await core.updateMemberRole(alice, w, bobMember, { role: "guest" });
     await expect(
       core.exportViewImageInput(bob, w, {
+        view: "calendar",
+        calendarMode: "week",
+        visibleDate: "2026-11-12",
+      }),
+    ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.exportViewImageInput(bob, w, {
         view: "timeline",
         projectId: active.id,
       }),
@@ -541,6 +685,13 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       core.exportViewImageInput(bob, w, { locale: "en" }),
     ).rejects.toMatchObject({ code: "forbidden" });
     await core.updateMemberRole(alice, w, bobMember, { role: "member" });
+    await expect(
+      core.exportViewImageInput(bob, w, {
+        view: "calendar",
+        calendarMode: "week",
+        visibleDate: "2026-11-12",
+      }),
+    ).resolves.toMatchObject({ contentHash: expect.any(String) });
     await expect(
       core.exportViewImageInput(bob, w, {
         view: "timeline",
