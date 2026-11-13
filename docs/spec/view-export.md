@@ -5,14 +5,14 @@ project as one image ([ADR 0031](../adr/0031-exported-view-images.md),
 milestone 117). This file states the current contract; the ADR holds the
 decisions. Change this file in the same commit as the behaviour it describes.
 
-Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). Timeline is implemented for v0.2.25 and unreleased; calendar, mind and relations remain planned.
+Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). Timeline and calendar are implemented for v0.2.25 and unreleased; mind and relations remain planned.
 
 ## Users and roles
 
 | Role | Can |
 | --- | --- |
-| Admin | Overview, project and timeline images; finance follows `finance:read` for summary images |
-| Member | Overview, project and timeline images; finance follows `finance:read` for summary images |
+| Admin | Overview, project, timeline and calendar images; finance follows `finance:read` for summary images |
+| Member | Overview, project, timeline and calendar images; finance follows `finance:read` for summary images |
 | Guest | Nothing; no export button, and the API refuses |
 | Agent | Live image through `views.image` with both tasks:read and summaries:read |
 
@@ -39,7 +39,7 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 - VE-3.2 The route shall count one hit per person per minute in Valkey under a hashed key, refuse above 10 with 429 and `Retry-After: 60`, and answer 503 when the count fails.
 - VE-3.3 The route shall post `{layout, watermark, contentHash}` to the internal renderer with a 10 s timeout and return `image/png` with `Cache-Control: private, no-store`, `nosniff`, an attachment name `taff-<workspace|project>-<date>-<hash8>.png` and `X-Taff-Content-Hash`.
 - VE-3.4 Without `SUMMARY_RENDER_URL` the route shall answer 503 `render_unavailable`; a renderer error, a non-PNG answer or a timeout shall answer 502 `render_failed`.
-- VE-3.5 Overview/project summary images shall be 1080 px wide, a palette PNG of at most 400 KB, fitted under the 3,400 px height budget (ADR 0029). Timeline images follow VE-4.3.
+- VE-3.5 Overview/project summary images shall be 1080 px wide, a palette PNG of at most 400 KB, fitted under the 3,400 px height budget (ADR 0029). Timeline images follow VE-4.3; calendars follow VE-5.6.
 - VE-3.6 The projects header shall show an Export image button to people who are not guests, once the session is confirmed; it shows the current project, or the workspace overview when no project is selected.
 - VE-3.7 The dialog shall preview the image with its width and size, and offer Send (only when `navigator.canShare` accepts the file), Copy image (only when `ClipboardItem` exists) and Save (always); Escape closes it and returns focus to the button.
 
@@ -54,6 +54,23 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 - VE-4.6 Core shall read the project through authorized `getTimeline` in the saved viewer/token-issuer zone, and bind the canonical hash to the snapshot, project, locale, zone and normalized highlight option. Timeline images contain no finance; their snapshot audit shall use `scope=timeline`, `projectCount=1`, `finance=false` and the trusted adapter's channel.
 - VE-4.7 The timeline toolbar shall show one Export image button to confirmed non-guests, export the current critical-path highlight, and fit the full chart independent of browser horizontal zoom. The existing preview/send/copy/save flow shall handle its 1600 px PNG.
 
+### Calendar exports (VE-5)
+- VE-5.1 The internal `POST /render/calendar` shall accept only the generated `calendar-image.json` display contract and report `X-Taff-Renderer: calendar-1`.
+- VE-5.2 `calendarImageWindow` shall validate a visible civil date, week/month mode and viewer IANA time zone; weeks start Monday and months include complete surrounding weeks (28, 35 or 42 days), matching the calendar screen. Its `from` and exclusive `to` shall be converted separately from local midnight.
+- VE-5.3 `buildCalendarLayout` shall split authorized `CalendarViewData` occurrences across intersecting civil days, clip at the window and day boundaries, deduplicate task/start occurrences, and preserve end-exclusive semantics across DST. Unscheduled tasks shall not appear.
+- VE-5.4 Whole local-day spans starting at midnight and ending at a later local midnight shall occupy the separate all-day band, including 23/25-hour days. An end at `23:59:59.999` shall remain timed; the source has no all-day flag. A timed segment clipped at next-day midnight shall label its end as 24:00, preserving its actual DST instants.
+- VE-5.5 Each day shall show at most eight items total, ordered all-day first then start, end and occurrence id, with a localized known omitted count. `source.truncated` shall produce a separate localized unknown-overflow note without inventing a count.
+- VE-5.6 The palette PNG shall be 1600 px wide, at most 4000 px high and 400 KB; bounded layout validation, escaped text, matching footer/watermark hashes and embedded hash metadata shall precede delivery.
+
+- VE-5.7 REST/MCP `view=calendar` shall require `calendarMode=week|month` and `visibleDate=YYYY-MM-DD`, reject projectId/criticalPath/client zone and irrelevant options, and query authorized `listCalendar` in the saved human/token-issuer zone. Hashes shall bind the normalized window, visible date/mode, locale, exporter and scheduled display data; no unscheduled tray data or finance is rendered/hashed. Snapshot audit shall use scope calendar, resource workspace, finance false and a deduplicated project count from scheduled source occurrences in the window (zero allowed).
+- VE-5.8 Confirmed non-guests shall see the calendar Export image button only in week/month grid views, not day or list views. The current visible date and mode shall pass through the existing preview/send/copy/save flow and shared REST/MCP quota and audit pipeline.
+- VE-5.9 Calendar rendering shall use the approved TABLE AI light tokens. Export reads shall omit the unscheduled tray query and its truncation via trusted internal scheduled-only mode; ordinary calendar reads retain the tray and combined truncation. Scheduled-row/occurrence overflow shall still show the export warning.
+
+The caller imports `calendarImageWindow` and `buildCalendarLayout` from `@taff/schemas/calendar-image`.
+Use `calendarImageWindow({mode, visibleDate, timeZone})` to obtain `startDate`, exclusive `endDate`, `from`, `to` and canonical `timeZone`; pass the instant range to authorized `listCalendar`.
+Build with `(source, query, locale, labels, contentHash)`. Labels supply `title`, `subtitle`, `allDay`, `footer`, `sourceTruncated`, `date(civil)`, `weekday(civil)`, `time(startInstant, endInstant, viewerZone)` and `more(count)`.
+Post `{layout, watermark: {text, contentHash}, contentHash}`. Core must bind the canonical hash to the authorized snapshot/window, format exporter attribution and timestamps, and apply permissions, audit and rate limiting.
+
 ## Non-functional
 
 - Image binaries are not stored; only the allowlisted export audit metadata is retained. One additive nullable OAuth refresh-scope migration; no new client dependency; the CJK text is drawn with the renderer's server fonts, so the web font subsets do not limit names.
@@ -61,7 +78,7 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 
 ## Out of scope in v1
 
-- Calendar, mind and relations images remain planned under ADR 0031 amendment 1. Timeline integration is implemented for v0.2.25 and unreleased.
+- Mind and relations images remain planned under ADR 0031 amendment 1. Timeline and calendar are implemented for v0.2.25 and unreleased.
 
 ## Acceptance
 
@@ -78,6 +95,8 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 | Deploy wiring | `scripts/apuch-compose.test.ts` (API and worker share the renderer URL) |
 | VE-4.1–4.4 | `packages/schemas/src/timeline-image.test.ts`; `backend/crates/taff-render/tests/render.rs` timeline cases and three locale PNG goldens |
 | VE-4.5–4.7 | `packages/schemas/src/view-export.test.ts`; `view-export.integration.test.ts`; `apps/api/src/view-export.test.ts`, `mcp-views.test.ts`; timeline case in `e2e/view-export.spec.ts` across three locales |
+| VE-5.1–5.6 | `packages/schemas/src/calendar-image.test.ts`; `backend/crates/taff-render/tests/render.rs` calendar cases and six locale/mode PNG goldens |
+| VE-5.7–5.8 | `packages/schemas/src/view-export.test.ts`; `view-export.integration.test.ts`; API/MCP export tests; calendar case in `e2e/view-export.spec.ts`, three locales |
 
 ## Open decisions
 

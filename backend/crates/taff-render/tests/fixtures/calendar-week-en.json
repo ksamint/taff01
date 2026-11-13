@@ -1,0 +1,209 @@
+{
+  "layout": {
+    "locale": "en",
+    "mode": "week",
+    "width": 1600,
+    "height": 716,
+    "title": "Calendar",
+    "subtitle": "Exported by Alice · America/New_York",
+    "allDayLabel": "All day",
+    "weekdays": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "cells": [
+      {
+        "x": 44,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "Mar 2",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "Delivery 1 · 侍饕餮鑫",
+            "detail": "",
+            "y": 226,
+            "allDay": true,
+            "continuesBefore": true,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "Mar 3",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "Delivery 1 · 侍饕餮鑫",
+            "detail": "",
+            "y": 226,
+            "allDay": true,
+            "continuesBefore": true,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 4 · 侍饕餮鑫",
+            "detail": "08:00–09:00",
+            "y": 272,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 5 · 侍饕餮鑫",
+            "detail": "09:00–10:00",
+            "y": 304,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 6 · 侍饕餮鑫",
+            "detail": "10:00–11:00",
+            "y": 336,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 7 · 侍饕餮鑫",
+            "detail": "11:00–12:00",
+            "y": 368,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 8 · 侍饕餮鑫",
+            "detail": "12:00–13:00",
+            "y": 400,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 9 · 侍饕餮鑫",
+            "detail": "13:00–14:00",
+            "y": 432,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 10 · 侍饕餮鑫",
+            "detail": "14:00–15:00",
+            "y": 464,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          }
+        ],
+        "more": "+2 more"
+      },
+      {
+        "x": 476,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "Mar 4",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "Mar 5",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "Mar 6",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "Mar 7",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "Delivery 2 · 侍饕餮鑫",
+            "detail": "23:00–24:00",
+            "y": 272,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "Mar 8",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "Delivery 3 · 侍饕餮鑫",
+            "detail": "",
+            "y": 226,
+            "allDay": true,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "Delivery 2 · 侍饕餮鑫",
+            "detail": "00:00–24:00",
+            "y": 272,
+            "allDay": false,
+            "continuesBefore": true,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      }
+    ],
+    "sourceTruncatedNote": "Some source results were omitted",
+    "footer": {
+      "text": "Exported by Alice · 2026-03-08 12:00",
+      "hashFull": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "watermark": {
+    "text": "Exported by Alice · 2026-03-08 12:00 · Taff",
+    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

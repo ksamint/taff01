@@ -7,8 +7,13 @@ import {
   workspaces,
 } from "@taff/db";
 import {
+  buildCalendarLayout,
   buildSummaryLayout,
   buildTimelineLayout,
+  type CalendarImageInput,
+  type CalendarViewData,
+  calendarImageWindow,
+  formatCalendarImageTime,
   idSchema,
   localeSchema,
   type SummaryImageLayoutInput,
@@ -16,7 +21,6 @@ import {
   type Timeline,
   type TimelineImageInput,
   type ViewExportInputQuery,
-  type ViewExportQuery,
   viewExportQuerySchema,
 } from "@taff/schemas";
 import { and, eq, sql } from "drizzle-orm";
@@ -56,6 +60,12 @@ type Dependencies = {
   ): Promise<SummarySourceProject[]>;
   now?: () => Date;
   getTimeline(p: Principal, projectId: string): Promise<Timeline>;
+  listCalendar(
+    p: Principal,
+    workspaceId: string,
+    range: { from: string; to: string },
+    options?: { scheduledOnly?: boolean },
+  ): Promise<CalendarViewData>;
 };
 
 type NamedImage<T> = T & {
@@ -63,7 +73,7 @@ type NamedImage<T> = T & {
   fileName: string;
 };
 export type ViewExport = NamedImage<
-  SummaryImageLayoutInput | TimelineImageInput
+  SummaryImageLayoutInput | TimelineImageInput | CalendarImageInput
 >;
 
 function parse<T>(schema: { parse(v: unknown): T }, input: unknown): T {
@@ -87,6 +97,7 @@ export function createViewExportOperations({
   requireMember,
   loadSummarySources,
   getTimeline,
+  listCalendar,
   now = () => new Date(),
 }: Dependencies) {
   function exportViewImageInput(
@@ -103,6 +114,12 @@ export function createViewExportOperations({
     query: ViewExportInputQuery & { view: "timeline" },
     channel?: "web" | "mcp",
   ): Promise<NamedImage<TimelineImageInput>>;
+  function exportViewImageInput(
+    p: Principal,
+    workspaceId: string,
+    query: ViewExportInputQuery & { view: "calendar" },
+    channel?: "web" | "mcp",
+  ): Promise<NamedImage<CalendarImageInput>>;
   function exportViewImageInput(
     p: Principal,
     workspaceId: string,
@@ -128,16 +145,25 @@ export function createViewExportOperations({
       .select({ name: workspaces.name })
       .from(workspaces)
       .where(eq(workspaces.id, w));
-    const projectList = await db
-      .select()
-      .from(projects)
-      .where(
-        body.projectId
-          ? and(eq(projects.workspaceId, w), eq(projects.id, body.projectId))
-          : and(eq(projects.workspaceId, w), eq(projects.archived, false)),
-      )
-      .orderBy(projects.name, projects.id)
-      .limit(101);
+    const projectList =
+      body.view === "calendar"
+        ? []
+        : await db
+            .select()
+            .from(projects)
+            .where(
+              body.projectId
+                ? and(
+                    eq(projects.workspaceId, w),
+                    eq(projects.id, body.projectId),
+                  )
+                : and(
+                    eq(projects.workspaceId, w),
+                    eq(projects.archived, false),
+                  ),
+            )
+            .orderBy(projects.name, projects.id)
+            .limit(101);
     if (body.projectId && projectList.length === 0)
       throw new CoreError("not_found", 404);
     const zone = identity.timeZone;
@@ -154,8 +180,8 @@ export function createViewExportOperations({
       zone,
     });
     async function finish(
-      image: SummaryImageLayoutInput | TimelineImageInput,
-      subject: "workspace" | "project" | "timeline",
+      image: SummaryImageLayoutInput | TimelineImageInput | CalendarImageInput,
+      subject: "workspace" | "project" | "timeline" | "calendar",
       projectCount: number,
       finance: boolean,
     ): Promise<ViewExport> {
@@ -195,6 +221,120 @@ export function createViewExportOperations({
       };
     }
 
+    if (body.view === "calendar") {
+      const query = {
+        mode: body.calendarMode!,
+        visibleDate: body.visibleDate!,
+        timeZone: zone,
+      };
+      const window = calendarImageWindow(query);
+      const source = await listCalendar(
+        p,
+        w,
+        { from: window.from, to: window.to },
+        { scheduledOnly: true },
+      );
+      const snapshot = {
+        truncated: source.truncated,
+        occurrences: source.occurrences.map((o) => ({
+          id: o.id,
+          startAt: o.startAt,
+          endAt: o.endAt,
+          task: {
+            id: o.task.id,
+            title: o.task.title,
+            projectId: o.task.projectId,
+          },
+        })),
+      };
+      const contentHash = createHash("sha256")
+        .update(
+          canonicalJson({
+            view: "calendar",
+            window,
+            locale: body.locale,
+            workspaceName,
+            exporter: actor.name,
+            snapshot,
+          }),
+        )
+        .digest("hex");
+      const cut = (value: string, length: number) =>
+        Array.from(value).slice(0, length).join("");
+      const civilDate = (date: string) => new Date(`${date}T00:00:00Z`);
+      const period =
+        body.calendarMode === "month"
+          ? new Intl.DateTimeFormat(body.locale, {
+              year: "numeric",
+              month: "long",
+              timeZone: "UTC",
+            }).format(civilDate(body.visibleDate!))
+          : new Intl.DateTimeFormat(body.locale, {
+              dateStyle: "medium",
+              timeZone: "UTC",
+            }).formatRange(
+              civilDate(window.startDate),
+              new Date(civilDate(window.endDate).getTime() - 86_400_000),
+            );
+      const layout = buildCalendarLayout(
+        source,
+        query,
+        body.locale,
+        {
+          title: cut(t("viewExport.calendarHeading", { period }), 200),
+          subtitle: cut(
+            [
+              workspaceName,
+              t("viewExport.exportedBy", { name: actor.name }),
+              zone,
+            ].join(" · "),
+            300,
+          ),
+          allDay: t("viewExport.allDay"),
+          footer: cut(
+            [
+              t("viewExport.confidential", { name: actor.name }),
+              generated,
+            ].join(" · "),
+            300,
+          ),
+          sourceTruncated: t("calendar.truncated"),
+          date: (date) =>
+            new Intl.DateTimeFormat(body.locale, {
+              month: "short",
+              day: "numeric",
+              timeZone: "UTC",
+            }).format(civilDate(date)),
+          weekday: (date) =>
+            new Intl.DateTimeFormat(body.locale, {
+              weekday: "long",
+              timeZone: "UTC",
+            }).format(civilDate(date)),
+          time: (start, end, timeZone) =>
+            formatCalendarImageTime(start, end, body.locale, timeZone),
+          more: (count) => t("summary.more", { count }),
+        },
+        contentHash,
+      );
+      const watermark = {
+        contentHash,
+        text: cut(
+          [actor.name, workspaceName, day, t("viewExport.eyebrow")].join(" · "),
+          500,
+        ),
+      };
+      const projectCount = new Set(
+        source.occurrences
+          .map((o) => o.task.projectId)
+          .filter((id) => id !== null),
+      ).size;
+      return finish(
+        { layout, watermark, contentHash },
+        "calendar",
+        projectCount,
+        false,
+      );
+    }
     if (body.view === "timeline") {
       const timeline = await getTimeline(p, body.projectId!);
       const criticalPath = body.criticalPath ?? "show";

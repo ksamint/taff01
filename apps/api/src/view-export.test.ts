@@ -2,6 +2,7 @@ import { Writable } from "node:stream";
 import { CoreError, createCore } from "@taff/core";
 import pino from "pino";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
+import { calendarImageFixture } from "../../../packages/schemas/src/calendar-image.fixture";
 import { timelineImageFixture } from "../../../packages/schemas/src/timeline-image.fixture";
 import { createApp } from "./app";
 import type { RateLimiter } from "./rate-limit";
@@ -165,6 +166,8 @@ describe("exported view image route", () => {
       `/api/workspaces/${id}/view-image?locale=en&view=timeline`,
       `${path}&criticalPath=hide`,
       `${path}&view=timeline&criticalPath=yes`,
+      `/api/workspaces/${id}/view-image?locale=en&view=calendar&calendarMode=day&visibleDate=2026-03-08`,
+      `${path}&view=calendar&calendarMode=week&visibleDate=2026-03-08`,
       "/api/workspaces/nope/view-image?locale=en",
     ])
       expect((await app.request(bad)).status).toBe(400);
@@ -255,4 +258,40 @@ describe("exported view image route", () => {
       expect(await failed.json()).toEqual({ error: "render_failed" });
     }
   });
+});
+
+it("routes an authorized calendar window through the shared quota and calendar renderer", async () => {
+  signIn();
+  const calendar = {
+    ...calendarImageFixture("en", "week"),
+    fileName: "taff-calendar-2026-11-12-aaaaaaaa.png",
+  };
+  const call = vi
+    .spyOn(core, "exportViewImageInput")
+    .mockResolvedValue(calendar);
+  renderer.mockResolvedValue(
+    new Response(PNG, { headers: { "content-type": "image/png" } }),
+  );
+  const response = await app.request(
+    `/api/workspaces/${id}/view-image?locale=en&view=calendar&calendarMode=week&visibleDate=2026-03-08`,
+  );
+  expect(response.status).toBe(200);
+  expect(call).toHaveBeenCalledWith(
+    { kind: "user", userId: id },
+    id,
+    {
+      locale: "en",
+      view: "calendar",
+      calendarMode: "week",
+      visibleDate: "2026-03-08",
+    },
+    "web",
+  );
+  expect(String(renderer.mock.calls[0][0])).toBe(
+    "http://render.internal:3002/render/calendar",
+  );
+  expect(JSON.parse(String(renderer.mock.calls[0][1]?.body))).toEqual(
+    calendarImageFixture("en", "week"),
+  );
+  expect(hits).toHaveLength(1);
 });

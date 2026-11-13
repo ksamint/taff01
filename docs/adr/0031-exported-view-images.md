@@ -100,7 +100,7 @@ access may narrow, but rotated refresh scope must remain identical. Old images
 tolerate the nullable added column; rollback retains it and its data. No new
 dependency, renderer change or permission scope. Tool count is now 38.
 
-## Amendment 2 — timeline export integration
+## Amendment 3 — timeline export integration
 
 The S1 candidate adds strict `view=overview|project|timeline` to the existing
 REST/MCP query; omitted view keeps projectId-based summary behavior. Timeline
@@ -118,3 +118,23 @@ snapshot audit records scope timeline, projectCount 1 and finance false before
 rendering, using the same trusted web/MCP channel and quota. No scope or
 permission rule changes. The shared renderer helper selects `/render/timeline`;
 the existing export dialog handles its PNG. Calendar and graphs remain separate.
+
+## Amendment 4 — calendar export integration
+
+S2 adds `view=calendar`, requiring `calendarMode=week|month` and a visible civil
+date. Project, timeline-highlight and client-zone options are refused. Core
+uses the saved human/token-issuer zone to resolve Monday-based week or complete
+surrounding month windows, then calls authorized `listCalendar`. The canonical
+hash includes the normalized window, visible date/mode, locale, exporter and
+scheduled display data; unscheduled tray data, task descriptions and finance do
+not enter the image/hash. Snapshot audit uses the workspace resource, scope
+calendar, finance false and distinct scheduled project ids in the window.
+
+A calendar occurrence has no all-day flag. Whole local midnight-to-later-midnight
+spans occupy the all-day band (including 23/25-hour DST days); `.999ms` end-of-day
+values remain timed. Timed segments ending at next-day midnight display 24:00,
+so a clipped full-day segment cannot look like zero duration. The eight-item
+per-day cap includes both bands; source truncation remains a separate unknown
+count note. Week/month grid headers export their visible date; day and list
+views hide the control. The existing shared quota, snapshot audit and export
+dialog apply unchanged. No new permission, scope or MCP tool is introduced.

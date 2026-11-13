@@ -1666,6 +1666,8 @@
     "size": "{{width}} px · {{size}}",
     "preparing": "Preparing image…",
     "alt": "Preview of the exported image",
-    "timelineHeading": "Timeline · {{project}}"
+    "timelineHeading": "Timeline · {{project}}",
+    "calendarHeading": "Calendar · {{period}}",
+    "allDay": "All day"
   }
 }

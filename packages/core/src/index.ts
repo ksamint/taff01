@@ -1624,6 +1624,7 @@ export function createCore(options: {
     requireMember,
     loadSummarySources,
     getTimeline: timeline.operations.getTimeline,
+    listCalendar: calendar.operations.listCalendar,
     now: options.summaryClock,
   });
   const relations = createRelationOperations({ db, requireMember });

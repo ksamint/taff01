@@ -1585,7 +1585,8 @@
         "enum": [
           "overview",
           "project",
-          "timeline"
+          "timeline",
+          "calendar"
         ]
       },
       "criticalPath": {
@@ -1594,6 +1595,17 @@
           "show",
           "hide"
         ]
+      },
+      "calendarMode": {
+        "type": "string",
+        "enum": [
+          "week",
+          "month"
+        ]
+      },
+      "visibleDate": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
       },
       "workspaceId": {
         "type": "string",

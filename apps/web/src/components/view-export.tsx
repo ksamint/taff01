@@ -40,12 +40,16 @@ export function ViewExportButton({
   projectId,
   view,
   criticalPath,
+  calendarMode,
+  visibleDate,
 }: {
   workspaceId: string;
   /** Omitted for the workspace overview. */
   projectId?: string;
   view?: ViewExportQuery["view"];
   criticalPath?: ViewExportQuery["criticalPath"];
+  calendarMode?: ViewExportQuery["calendarMode"];
+  visibleDate?: string;
 }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -67,6 +71,8 @@ export function ViewExportButton({
           projectId={projectId}
           view={view}
           criticalPath={criticalPath}
+          calendarMode={calendarMode}
+          visibleDate={visibleDate}
           onClose={() => setOpen(false)}
         />
       )}
@@ -79,12 +85,16 @@ function ViewExportDialog({
   projectId,
   view,
   criticalPath,
+  calendarMode,
+  visibleDate,
   onClose,
 }: {
   workspaceId: string;
   projectId?: string;
   view?: ViewExportQuery["view"];
   criticalPath?: ViewExportQuery["criticalPath"];
+  calendarMode?: ViewExportQuery["calendarMode"];
+  visibleDate?: string;
   onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
@@ -98,6 +108,8 @@ function ViewExportDialog({
     if (projectId) query.set("projectId", projectId);
     if (view) query.set("view", view);
     if (criticalPath) query.set("criticalPath", criticalPath);
+    if (calendarMode) query.set("calendarMode", calendarMode);
+    if (visibleDate) query.set("visibleDate", visibleDate);
     (async () => {
       try {
         const response = await fetch(
@@ -132,7 +144,15 @@ function ViewExportDialog({
       controller.abort();
       if (url) URL.revokeObjectURL(url);
     };
-  }, [workspaceId, projectId, locale, view, criticalPath]);
+  }, [
+    workspaceId,
+    projectId,
+    locale,
+    view,
+    criticalPath,
+    calendarMode,
+    visibleDate,
+  ]);
 
   const ready = state.kind === "ready" ? state : null;
   const shareable = ready ? canShareFile(ready.file) : false;

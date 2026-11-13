@@ -6,22 +6,31 @@ import {
   strictObject,
   enum as zodEnum,
 } from "zod/mini";
+import { civilDateSchema } from "./plan";
 import { idSchema, localeSchema } from "./primitives";
 
 const viewFields = {
   projectId: optional(idSchema),
-  view: optional(zodEnum(["overview", "project", "timeline"])),
+  view: optional(zodEnum(["overview", "project", "timeline", "calendar"])),
   criticalPath: optional(zodEnum(["show", "hide"])),
+  calendarMode: optional(zodEnum(["week", "month"])),
+  visibleDate: optional(civilDateSchema),
 };
 const validView = (value: {
   projectId?: string;
   view?: string;
   criticalPath?: string;
+  calendarMode?: string;
+  visibleDate?: string;
 }) =>
   (!(value.view === "timeline" || value.view === "project") ||
     !!value.projectId) &&
-  (value.view !== "overview" || !value.projectId) &&
-  (value.criticalPath === undefined || value.view === "timeline");
+  (!(value.view === "overview" || value.view === "calendar") ||
+    !value.projectId) &&
+  (value.criticalPath === undefined || value.view === "timeline") &&
+  (value.view === "calendar"
+    ? !!value.calendarMode && !!value.visibleDate
+    : value.calendarMode === undefined && value.visibleDate === undefined);
 export const viewExportQuerySchema = strictObject({
   ...viewFields,
   locale: localeSchema,

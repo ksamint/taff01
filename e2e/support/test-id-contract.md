@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (483 distinct, 2244 uses)
+## Test ids (483 distinct, 2256 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -148,15 +148,15 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `calendar-day` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
-| `calendar-list` | 5 |  | calendar.spec.ts, persistence.spec.ts, support/calendar.ts |
-| `calendar-month-grid` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `calendar-next` | 2 |  | calendar-accessibility.spec.ts, calendar.spec.ts |
+| `calendar-day` | 7 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, view-export.spec.ts |
+| `calendar-list` | 6 |  | calendar.spec.ts, persistence.spec.ts, support/calendar.ts, view-export.spec.ts |
+| `calendar-month-grid` | 6 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts, view-export.spec.ts |
+| `calendar-next` | 3 |  | calendar-accessibility.spec.ts, calendar.spec.ts, view-export.spec.ts |
 | `calendar-previous` | 4 |  | calendar-accessibility.spec.ts, calendar.spec.ts, ssr-session.spec.ts |
 | `calendar-scene` | 1 |  | ssr-session.spec.ts |
-| `calendar-tools` | 1 |  | support/calendar.ts |
+| `calendar-tools` | 2 |  | support/calendar.ts, view-export.spec.ts |
 | `calendar-undo` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, support/calendar.ts |
-| `calendar-week` | 5 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `calendar-week` | 7 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts, view-export.spec.ts |
 | `desktop-new-task` | 6 | projects-scene.tsx, today-view.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, support/tasks.ts, ui-v2.spec.ts |
 | `schedule-task-*` | 5 | crm/contact-links.tsx, crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 
@@ -782,7 +782,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `view-export-copy` | 1 |  | view-export.spec.ts |
-| `view-export-open` | 3 |  | view-export.spec.ts |
+| `view-export-open` | 7 |  | view-export.spec.ts |
 | `view-export-preview` | 2 |  | view-export.spec.ts |
 | `view-export-save` | 1 |  | view-export.spec.ts |
 | `view-export-send` | 1 |  | view-export.spec.ts |
@@ -1291,4 +1291,4 @@ Keys read from `apps/web/locales/*/common.json` through
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
 | `viewExport.copied` | 1 | view-export.spec.ts |
-| `viewExport.title` | 5 | view-export.spec.ts |
+| `viewExport.title` | 8 | view-export.spec.ts |

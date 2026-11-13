@@ -1,0 +1,209 @@
+{
+  "layout": {
+    "locale": "zh-CN",
+    "mode": "week",
+    "width": 1600,
+    "height": 716,
+    "title": "项目日历",
+    "subtitle": "由艾丽丝导出 · America/New_York",
+    "allDayLabel": "全天",
+    "weekdays": [
+      "星期一",
+      "星期二",
+      "星期三",
+      "星期四",
+      "星期五",
+      "星期六",
+      "星期日"
+    ],
+    "cells": [
+      {
+        "x": 44,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "3月2日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "项目交付 1 · 侍饕餮鑫",
+            "detail": "",
+            "y": 226,
+            "allDay": true,
+            "continuesBefore": true,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "3月3日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "项目交付 1 · 侍饕餮鑫",
+            "detail": "",
+            "y": 226,
+            "allDay": true,
+            "continuesBefore": true,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 4 · 侍饕餮鑫",
+            "detail": "08:00–09:00",
+            "y": 272,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 5 · 侍饕餮鑫",
+            "detail": "09:00–10:00",
+            "y": 304,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 6 · 侍饕餮鑫",
+            "detail": "10:00–11:00",
+            "y": 336,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 7 · 侍饕餮鑫",
+            "detail": "11:00–12:00",
+            "y": 368,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 8 · 侍饕餮鑫",
+            "detail": "12:00–13:00",
+            "y": 400,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 9 · 侍饕餮鑫",
+            "detail": "13:00–14:00",
+            "y": 432,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 10 · 侍饕餮鑫",
+            "detail": "14:00–15:00",
+            "y": 464,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          }
+        ],
+        "more": "+2 项"
+      },
+      {
+        "x": 476,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "3月4日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "3月5日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "3月6日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "3月7日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "项目交付 2 · 侍饕餮鑫",
+            "detail": "23:00–24:00",
+            "y": 272,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 164,
+        "width": 216,
+        "height": 420,
+        "dateLabel": "3月8日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "项目交付 3 · 侍饕餮鑫",
+            "detail": "",
+            "y": 226,
+            "allDay": true,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 2 · 侍饕餮鑫",
+            "detail": "00:00–24:00",
+            "y": 272,
+            "allDay": false,
+            "continuesBefore": true,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      }
+    ],
+    "sourceTruncatedNote": "来源结果不完整",
+    "footer": {
+      "text": "由艾丽丝导出 · 2026-03-08 12:00",
+      "hashFull": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "watermark": {
+    "text": "由艾丽丝导出 · 2026-03-08 12:00 · Taff",
+    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

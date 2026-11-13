@@ -1015,6 +1015,7 @@ export const mcpSummariesImageArgs = strictObject({
   workspaceId: optional(idSchema),
 });
 
+export * from "./calendar-image";
 export * from "./summary-image";
 export * from "./summary-layout";
 export * from "./timeline-image";

@@ -1666,6 +1666,8 @@
     "size": "{{width}} px · {{size}}",
     "preparing": "正在生成图片…",
     "alt": "导出图片预览",
-    "timelineHeading": "时间线 · {{project}}"
+    "timelineHeading": "时间线 · {{project}}",
+    "calendarHeading": "日历 · {{period}}",
+    "allDay": "全天"
   }
 }

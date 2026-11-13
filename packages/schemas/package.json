@@ -19,6 +19,7 @@
     "./crm": "./src/crm.ts",
     "./plan": "./src/plan.ts",
     "./timeline-image": "./src/timeline-image.ts",
+    "./calendar-image": "./src/calendar-image.ts",
     "./graph": "./src/graph.ts",
     "./assistant": "./src/assistant.ts",
     "./mind": "./src/mind.ts"

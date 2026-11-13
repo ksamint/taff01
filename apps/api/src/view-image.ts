@@ -42,7 +42,11 @@ export async function renderViewImage(
   try {
     const response = await (options.renderFetch ?? fetch)(
       new URL(
-        query.view === "timeline" ? "/render/timeline" : "/render/summary",
+        query.view === "timeline"
+          ? "/render/timeline"
+          : query.view === "calendar"
+            ? "/render/calendar"
+            : "/render/summary",
         options.renderUrl,
       ),
       {

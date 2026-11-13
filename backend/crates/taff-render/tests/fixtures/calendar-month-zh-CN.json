@@ -1,0 +1,612 @@
+{
+  "layout": {
+    "locale": "zh-CN",
+    "mode": "month",
+    "width": 1600,
+    "height": 1654,
+    "title": "项目日历",
+    "subtitle": "由艾丽丝导出 · America/New_York",
+    "allDayLabel": "全天",
+    "weekdays": [
+      "星期一",
+      "星期二",
+      "星期三",
+      "星期四",
+      "星期五",
+      "星期六",
+      "星期日"
+    ],
+    "cells": [
+      {
+        "x": 44,
+        "y": 164,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "2月23日",
+        "inMonth": false,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 164,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "2月24日",
+        "inMonth": false,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 476,
+        "y": 164,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "2月25日",
+        "inMonth": false,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 164,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "2月26日",
+        "inMonth": false,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 164,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "2月27日",
+        "inMonth": false,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 164,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "2月28日",
+        "inMonth": false,
+        "timedY": 258,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 164,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月1日",
+        "inMonth": true,
+        "timedY": 258,
+        "items": [
+          {
+            "title": "项目交付 1 · 侍饕餮鑫",
+            "detail": "",
+            "y": 226,
+            "allDay": true,
+            "continuesBefore": false,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 44,
+        "y": 364,
+        "width": 216,
+        "height": 358,
+        "dateLabel": "3月2日",
+        "inMonth": true,
+        "timedY": 458,
+        "items": [
+          {
+            "title": "项目交付 1 · 侍饕餮鑫",
+            "detail": "",
+            "y": 426,
+            "allDay": true,
+            "continuesBefore": true,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 364,
+        "width": 216,
+        "height": 358,
+        "dateLabel": "3月3日",
+        "inMonth": true,
+        "timedY": 458,
+        "items": [
+          {
+            "title": "项目交付 1 · 侍饕餮鑫",
+            "detail": "",
+            "y": 426,
+            "allDay": true,
+            "continuesBefore": true,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 4 · 侍饕餮鑫",
+            "detail": "08:00–09:00",
+            "y": 472,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 5 · 侍饕餮鑫",
+            "detail": "09:00–10:00",
+            "y": 504,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 6 · 侍饕餮鑫",
+            "detail": "10:00–11:00",
+            "y": 536,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 7 · 侍饕餮鑫",
+            "detail": "11:00–12:00",
+            "y": 568,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 8 · 侍饕餮鑫",
+            "detail": "12:00–13:00",
+            "y": 600,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 9 · 侍饕餮鑫",
+            "detail": "13:00–14:00",
+            "y": 632,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 10 · 侍饕餮鑫",
+            "detail": "14:00–15:00",
+            "y": 664,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": false
+          }
+        ],
+        "more": "+2 项"
+      },
+      {
+        "x": 476,
+        "y": 364,
+        "width": 216,
+        "height": 358,
+        "dateLabel": "3月4日",
+        "inMonth": true,
+        "timedY": 458,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 364,
+        "width": 216,
+        "height": 358,
+        "dateLabel": "3月5日",
+        "inMonth": true,
+        "timedY": 458,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 364,
+        "width": 216,
+        "height": 358,
+        "dateLabel": "3月6日",
+        "inMonth": true,
+        "timedY": 458,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 364,
+        "width": 216,
+        "height": 358,
+        "dateLabel": "3月7日",
+        "inMonth": true,
+        "timedY": 458,
+        "items": [
+          {
+            "title": "项目交付 2 · 侍饕餮鑫",
+            "detail": "23:00–24:00",
+            "y": 472,
+            "allDay": false,
+            "continuesBefore": false,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 364,
+        "width": 216,
+        "height": 358,
+        "dateLabel": "3月8日",
+        "inMonth": true,
+        "timedY": 458,
+        "items": [
+          {
+            "title": "项目交付 3 · 侍饕餮鑫",
+            "detail": "",
+            "y": 426,
+            "allDay": true,
+            "continuesBefore": false,
+            "continuesAfter": false
+          },
+          {
+            "title": "项目交付 2 · 侍饕餮鑫",
+            "detail": "00:00–24:00",
+            "y": 472,
+            "allDay": false,
+            "continuesBefore": true,
+            "continuesAfter": true
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 44,
+        "y": 722,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月9日",
+        "inMonth": true,
+        "timedY": 790,
+        "items": [
+          {
+            "title": "项目交付 2 · 侍饕餮鑫",
+            "detail": "00:00–02:00",
+            "y": 804,
+            "allDay": false,
+            "continuesBefore": true,
+            "continuesAfter": false
+          }
+        ],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 722,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月10日",
+        "inMonth": true,
+        "timedY": 790,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 476,
+        "y": 722,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月11日",
+        "inMonth": true,
+        "timedY": 790,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 722,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月12日",
+        "inMonth": true,
+        "timedY": 790,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 722,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月13日",
+        "inMonth": true,
+        "timedY": 790,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 722,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月14日",
+        "inMonth": true,
+        "timedY": 790,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 722,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月15日",
+        "inMonth": true,
+        "timedY": 790,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 44,
+        "y": 922,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月16日",
+        "inMonth": true,
+        "timedY": 990,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 922,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月17日",
+        "inMonth": true,
+        "timedY": 990,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 476,
+        "y": 922,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月18日",
+        "inMonth": true,
+        "timedY": 990,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 922,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月19日",
+        "inMonth": true,
+        "timedY": 990,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 922,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月20日",
+        "inMonth": true,
+        "timedY": 990,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 922,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月21日",
+        "inMonth": true,
+        "timedY": 990,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 922,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月22日",
+        "inMonth": true,
+        "timedY": 990,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 44,
+        "y": 1122,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月23日",
+        "inMonth": true,
+        "timedY": 1190,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 1122,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月24日",
+        "inMonth": true,
+        "timedY": 1190,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 476,
+        "y": 1122,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月25日",
+        "inMonth": true,
+        "timedY": 1190,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 1122,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月26日",
+        "inMonth": true,
+        "timedY": 1190,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 1122,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月27日",
+        "inMonth": true,
+        "timedY": 1190,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 1122,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月28日",
+        "inMonth": true,
+        "timedY": 1190,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 1122,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月29日",
+        "inMonth": true,
+        "timedY": 1190,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 44,
+        "y": 1322,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月30日",
+        "inMonth": true,
+        "timedY": 1390,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 260,
+        "y": 1322,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "3月31日",
+        "inMonth": true,
+        "timedY": 1390,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 476,
+        "y": 1322,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "4月1日",
+        "inMonth": false,
+        "timedY": 1390,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 692,
+        "y": 1322,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "4月2日",
+        "inMonth": false,
+        "timedY": 1390,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 908,
+        "y": 1322,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "4月3日",
+        "inMonth": false,
+        "timedY": 1390,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1124,
+        "y": 1322,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "4月4日",
+        "inMonth": false,
+        "timedY": 1390,
+        "items": [],
+        "more": null
+      },
+      {
+        "x": 1340,
+        "y": 1322,
+        "width": 216,
+        "height": 200,
+        "dateLabel": "4月5日",
+        "inMonth": false,
+        "timedY": 1390,
+        "items": [],
+        "more": null
+      }
+    ],
+    "sourceTruncatedNote": "来源结果不完整",
+    "footer": {
+      "text": "由艾丽丝导出 · 2026-03-08 12:00",
+      "hashFull": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  "watermark": {
+    "text": "由艾丽丝导出 · 2026-03-08 12:00 · Taff",
+    "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "contentHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

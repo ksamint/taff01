@@ -41,6 +41,7 @@ import type { CalendarEngineProps, CalendarMode } from "./calendar-engine";
 import { DeferredCalendarEngine as CalendarEngine } from "./deferred-calendar-engine";
 import { useInitialTodayTime } from "./providers";
 import { RouteLoading } from "./route-loading";
+import { ViewExportButton } from "./view-export";
 
 const ScheduleEditor = dynamic(
   () => import("./schedule-editor").then((module) => module.ScheduleEditor),
@@ -69,7 +70,7 @@ type Undo = {
 // Prototype v2 Calendar: phone 141–247 (Schedule-X keeps the gestures),
 // desktop header 1221–1238 and grid 1405–1442 with the tray on the side.
 export function CalendarScene() {
-  const { me, workspace, openQuick } = useWorkspace();
+  const { me, workspace, openQuick, confirmed } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const desktop = useSyncExternalStore(
@@ -329,6 +330,15 @@ export function CalendarScene() {
           ),
     [desktop, view, selected, locale],
   );
+  const exportButton =
+    confirmed && workspace.role !== "guest" && !list && view !== "day" ? (
+      <ViewExportButton
+        workspaceId={workspace.id}
+        view="calendar"
+        calendarMode={view === "week" ? "week" : "month"}
+        visibleDate={date}
+      />
+    ) : null;
   const navigation = (
     <div className="calendar-source-navigation">
       <p className="calendar-month-title" aria-live="polite">
@@ -643,6 +653,7 @@ export function CalendarScene() {
             {todayButton("calendar-today")}
             <span className="calendar-desk-spacer" />
             {modes}
+            {exportButton}
             <Button
               className="button-primary calendar-new-task"
               data-testid="desktop-new-task"
@@ -687,6 +698,7 @@ export function CalendarScene() {
             <h1 className="sr-only">{t("calendar.title")}</h1>
             {navigation}
             {modes}
+            {exportButton}
           </header>
           <details className="calendar-source-tools">
             <summary
