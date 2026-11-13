@@ -1,8 +1,8 @@
 # 126 — public calendar image export candidate
 
-Status: preparatory integration only; v0.2.25 unreleased. No push or full gate in this rebase.
-Current drop boundary: frozen S1 `d49be16ad6bace3f8a6326befa27f2b8566c23d8`; final rebase onto actual merged S1 remains parent-owned.
-S2-only commits retained as `d5ce96f`, `13cda58`, `7eb0913`, `8695f24`; accepted v0.2.24 production/next rollback source is `ff411c6`.
+Status: integrated onto merged S1 main `0cd8302`; v0.2.25 unreleased. Final local gate pending.
+S1 PR100 merged with the exact validated tree: 2,293 unit, 34 Rust, 357 browser passed, 3 expected skips.
+All five S2 implementation/review/evidence commits retained; accepted v0.2.24 production/next rollback source is `ff411c6`.
 Targets: TypeScript core/API/MCP/UI and shared formatter; existing Rust calendar renderer.
 
 - Strict view=calendar requires calendarMode=week|month and visibleDate; project/highlight/client-zone options refused.
@@ -36,4 +36,4 @@ Review repairs (local only):
 
 Preparatory rebase onto frozen S1 d49be16: one conflict in the view-export spec, resolved with released v24 ff411c6 and implemented/unreleased timeline+calendar; graphs remain planned. ADR numbering OAuth2/timeline3/calendar4 and all-four-images goal preserved; calendar behavior/review-fix files unchanged from b4485e8.
 Current checks: 82 pure schema/calendar-recurrence/API/MCP/font/language/test-id tests (10 files); all eight schema/db/core/API/worker/web/SW/scripts tsc targets passed. MCP/schema/calendar/test-id generation produced no drift (38 tools); focused Biome and diff checks passed.
-No services, listeners, browser, Rust, database or full-gate runs in this preparation; no dependency/config changes or shared links created. Parent owns final rebase above d49be16, full gate and release.
+Preparation ran no services, browser, Rust, database or full gate. Final rebase onto merged S1 was clean; canonical full gate, PR and release remain pending.
