@@ -1,8 +1,8 @@
 # 127 — public mind and relations image export candidate
 
 Status: v0.2.25 preparation only; full gate and deployment pending. No push.
-Exact future drop boundary: S2 preparation `7ee1e51affb658648f7656b9ee822b346461e1a8`; parent will rebase above it onto actual merged S2 before the final gate.
-Retained S3 commits: `91b73c5` (pure geometry/render), `d93dfd4` (public integration), `16ce0b4` (review fixes), `2f97911` (combined validation).
+Exact future drop boundary: frozen final S2 `2dda9afa4e8e196fb4000b034410912b8c3cd749`; parent will rebase above it onto actual merged S2 before the final gate. S1 PR100 is merged at `0cd83021df951eb0f86de437a49d85577d3778a6`.
+Retained S3 commits: `7844f35` (pure geometry/render), `7673275` (public integration), `86d98f3` (review fixes), `ef3f634` (combined validation), `03a0544` (versions/changelog).
 Production remains accepted v0.2.24 `ff411c6`, also the v0.2.25 rollback source. API/web/worker package versions are now 0.2.25 with an explicitly unreleased changelog.
 Targets: TypeScript schemas/core/API/MCP/web/tests and Rust renderer; no new dependency, migration, environment value, permission or tool (38 remain).
 
@@ -14,13 +14,14 @@ Targets: TypeScript schemas/core/API/MCP/web/tests and Rust renderer; no new dep
 - Canonical TABLE AI colors, bounded geometry, label-aware fit, 1080 px palette PNGs, maximum 4000 px/400 KB, watermark and embedded hash.
 - VE-6 spec, README and ADR updated; numbering OAuth 2 / timeline 3 / calendar 4 / graph 5. All four application images must share the validated release source.
 
-Current preparatory rebase validation:
+Focused validation before this documentation-only rebase (unchanged code):
 - 99 pure schema/API/MCP/geometry/session/font/palette/language/test-id tests passed in 13 files.
 - All eight tsc targets passed: schemas, db, core, API, worker, web, SW and scripts.
 - `node --import tsx scripts/rust-fixtures.mts` passed (summary model 10 tests); MCP/schema/calendar/timeline/graph/parity fixtures regenerated with no drift.
 - `node --import tsx scripts/test-id-contract.mts` produced no drift. Focused Biome and `git diff --check` passed.
 - Only spec release/role text and the four-image goal conflicted; both intents retained. Dense geometry, confirmed controls and all public graph source files match the previous S3 candidate.
 - No Rust execution, shared target, browser, services, listeners or database changes in this preparation; no full-gate claim.
+- Second preparation onto final S2 was conflict-free. Compared all apps/packages/backend/scripts/e2e and lockfile bytes with `836eb744`: identical, including generated contracts/fixtures, confirmed controls and dense geometry. `git diff --check` passed; focused gates were not repeated.
 
 Earlier evidence, not rerun on this rebased tree:
 - 39 focused PostgreSQL authorization/export cases passed (833 unrelated matrix cases skipped); Rust MCP 4 and renderer 22 passed with Clippy/rustfmt.
