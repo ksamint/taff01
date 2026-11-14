@@ -1,4 +1,5 @@
 import {
+  compareGraphEdges,
   GRAPH_LAYERS,
   type GraphEdge,
   type GraphEdgeKind,
@@ -8,7 +9,6 @@ import {
   type RelationGraph,
   type TaskStatus,
 } from "@taff/schemas";
-import { compareGraphEdges } from "@taff/schemas/graph-layout";
 
 /**
  * The relations read model (plan §4.3, D8, D9). A pure function: core loads

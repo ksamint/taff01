@@ -1,4 +1,8 @@
-import type { GraphNodeKind, RelationGraph } from "./graph";
+import {
+  compareGraphEdges,
+  type GraphNodeKind,
+  type RelationGraph,
+} from "./graph";
 import {
   buildMindLayout,
   buildRelationsLayout,
@@ -6,7 +10,6 @@ import {
   type MindImageLabels,
   type RelationsImageOptions,
 } from "./graph-image";
-import { compareGraphEdges } from "./graph-layout";
 import type { MindMap } from "./mind";
 
 export const graphFixtureId = (index: number) =>

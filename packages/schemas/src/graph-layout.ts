@@ -1,38 +1,13 @@
 // Pure layouts for the M16 relations graph: a layered (structured) layout
 // and a deterministic, seeded force simulation. Hand-rolled on purpose: no
 // graph library and no d3-force (plan §3).
-import {
-  GRAPH_LAYERS,
-  type GraphEdge,
-  type GraphEdgeKind,
-  type GraphLayer,
-  type GraphNode,
-  type GraphNodeKind,
-  type RelationGraph,
+import type {
+  GraphEdge,
+  GraphLayer,
+  GraphNode,
+  GraphNodeKind,
+  RelationGraph,
 } from "./graph";
-
-/** Edge kinds in the canonical order core returns them. */
-export const GRAPH_EDGE_ORDER: readonly GraphEdgeKind[] = [
-  "contains",
-  "owns",
-  "works_on",
-  "supervises",
-  "depends_on",
-  "client_of",
-  "stakeholder_of",
-  "contact_of",
-];
-const byText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
-/**
- * Canonical edge order (layer, kind, from, to): core relationGraph returns
- * edges in it and the web lays them out in it. Force springs are summed in
- * edge order, so every layout input must use this order.
- */
-export const compareGraphEdges = (a: GraphEdge, b: GraphEdge) =>
-  GRAPH_LAYERS.indexOf(a.layer) - GRAPH_LAYERS.indexOf(b.layer) ||
-  GRAPH_EDGE_ORDER.indexOf(a.kind) - GRAPH_EDGE_ORDER.indexOf(b.kind) ||
-  byText(a.from, b.from) ||
-  byText(a.to, b.to);
 
 export type Point = { x: number; y: number };
 export type Positions = Record<string, Point>;

@@ -17,12 +17,12 @@ import {
   enum as zodEnum,
 } from "zod/mini";
 import {
+  compareGraphEdges,
   graphLayerSchema,
   type RelationGraph,
   relationGraphSchema,
 } from "./graph";
 import {
-  compareGraphEdges,
   forceLayout,
   layeredLayout,
   nodeOrder,

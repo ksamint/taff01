@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { compareGraphEdges } from "./graph";
 import {
   buildMindLayout,
   buildRelationsLayout,
@@ -15,7 +16,6 @@ import {
   relationsOptions,
 } from "./graph-image.fixture";
 import {
-  compareGraphEdges,
   forceLayout,
   layeredLayout,
   nodeOrder,
