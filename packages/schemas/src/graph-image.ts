@@ -17,6 +17,7 @@ import {
   enum as zodEnum,
 } from "zod/mini";
 import {
+  compareGraphEdges,
   graphLayerSchema,
   type RelationGraph,
   relationGraphSchema,
@@ -302,12 +303,16 @@ export function buildRelationsLayout(
   );
   const retainedEdges = distinctEdges
     .filter((edge) => indices.has(edge.from) && indices.has(edge.to))
-    // Core relationGraph and the web use key order for force springs.
     .sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+  // Geometry uses the web's input order: core's canonical edge order, whatever
+  // order the caller passed. Force springs are summed in edge order.
+  const layoutEdges = visible.edges
+    .filter((edge) => indices.has(edge.from) && indices.has(edge.to))
+    .sort(compareGraphEdges);
   const positions =
     selected.layout === "layered"
-      ? layeredLayout(retained, retainedEdges)
-      : forceLayout(retained, retainedEdges, selected.forceSeed);
+      ? layeredLayout(retained, layoutEdges)
+      : forceLayout(retained, layoutEdges, selected.forceSeed);
   const nodes: ImageNode[] = retained.map((node) => {
     const p = positions[node.key];
     if (!p) throw new Error("invalid_graph_geometry");

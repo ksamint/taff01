@@ -112,3 +112,26 @@ export type GraphNode = Infer<typeof graphNodeSchema>;
 export type GraphEdge = Infer<typeof graphEdgeSchema>;
 export type RelationGraph = Infer<typeof relationGraphSchema>;
 export type GraphQuery = Infer<typeof graphQuerySchema>;
+
+/** Edge kinds in the canonical order core returns them. */
+export const GRAPH_EDGE_ORDER: readonly GraphEdgeKind[] = [
+  "contains",
+  "owns",
+  "works_on",
+  "supervises",
+  "depends_on",
+  "client_of",
+  "stakeholder_of",
+  "contact_of",
+];
+const byEdgeText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
+/**
+ * Canonical edge order (layer, kind, from, to): core relationGraph returns
+ * edges in it and the web lays them out in it. Force springs are summed in
+ * edge order, so every layout input must use this order.
+ */
+export const compareGraphEdges = (a: GraphEdge, b: GraphEdge) =>
+  GRAPH_LAYERS.indexOf(a.layer) - GRAPH_LAYERS.indexOf(b.layer) ||
+  GRAPH_EDGE_ORDER.indexOf(a.kind) - GRAPH_EDGE_ORDER.indexOf(b.kind) ||
+  byEdgeText(a.from, b.from) ||
+  byEdgeText(a.to, b.to);

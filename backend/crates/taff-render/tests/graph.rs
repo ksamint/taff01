@@ -178,3 +178,16 @@ async fn graph_http_version_and_validation() {
         }
     }
 }
+#[test]
+fn graph_xml_invalid_characters_in_user_text_never_fail_a_render() {
+    // VE-3.8: node labels, titles and watermarks are user text.
+    let bad = "Fix\u{1}login\u{0}\u{fffe}";
+    for kind in ["mind", "relations"] {
+        let mut input = fixture(kind, "en");
+        *input.pointer_mut("/layout/nodes/0/label/text").unwrap() = json!(bad);
+        *input.pointer_mut("/layout/title").unwrap() = json!(bad);
+        *input.pointer_mut("/watermark/text").unwrap() = json!(bad);
+        let result = render_graph(&input);
+        assert!(result.is_ok(), "{kind}: {result:?}");
+    }
+}

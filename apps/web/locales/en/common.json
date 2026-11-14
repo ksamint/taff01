@@ -177,6 +177,8 @@
     "stakeholdersView": "Stakeholders",
     "relationsView": "Relations",
     "mindView": "Mindscape",
+    "sectorsView": "Sectors",
+    "sectorsHint": "Tasks tagged with a sector name appear here, grouped by project. Untagged tasks are hidden.",
     "views": "Project views",
     "sections": "Projects, companies and contacts",
     "filterAll": "All",

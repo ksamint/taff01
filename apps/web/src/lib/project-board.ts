@@ -16,10 +16,16 @@ export const PROJECT_VIEWS = [
   "stakeholders",
   "relations",
   "mind",
+  "sectors",
 ] as const;
 export type ProjectView = (typeof PROJECT_VIEWS)[number];
 /** Views behind 更多 (prototype `moreMenu`): 相關方 · 關係圖 · 心智圖. */
-export const MORE_VIEWS = ["stakeholders", "relations", "mind"] as const;
+export const MORE_VIEWS = [
+  "stakeholders",
+  "relations",
+  "mind",
+  "sectors",
+] as const;
 
 /** `?view=` with the board as the default for anything unknown. */
 export function parseProjectView(value: string | null | undefined) {

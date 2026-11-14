@@ -535,3 +535,18 @@ fn screen_palettes_use_approved_table_ai_tokens() {
         }
     }
 }
+#[test]
+fn xml_invalid_characters_in_user_text_never_fail_a_render() {
+    // Titles, names and watermarks are only trimmed upstream; a control
+    // character must not make usvg reject the SVG (v0.2.25 review).
+    let bad = "Fix\u{1}login\u{0}\u{b}\u{fffe}\u{ffff}";
+    let mut timeline = timeline_input("en");
+    *timeline.pointer_mut("/layout/rows/0/title").unwrap() = json!(bad);
+    *timeline.pointer_mut("/layout/title").unwrap() = json!(bad);
+    *timeline.pointer_mut("/watermark/text").unwrap() = json!(bad);
+    assert!(taff_render::render_timeline(&timeline).is_ok());
+    let mut calendar = calendar_input("en", "week");
+    *calendar.pointer_mut("/layout/title").unwrap() = json!(bad);
+    *calendar.pointer_mut("/watermark/text").unwrap() = json!(bad);
+    assert!(taff_render::render_calendar(&calendar).is_ok());
+}

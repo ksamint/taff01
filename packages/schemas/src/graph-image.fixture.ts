@@ -1,4 +1,8 @@
-import type { GraphNodeKind, RelationGraph } from "./graph";
+import {
+  compareGraphEdges,
+  type GraphNodeKind,
+  type RelationGraph,
+} from "./graph";
 import {
   buildMindLayout,
   buildRelationsLayout,
@@ -79,7 +83,8 @@ export function relationsFixture(count = 12): RelationGraph {
     layers: relationsOptions.layers,
     crmVisible: true,
     nodes,
-    edges: edges.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0)),
+    // Core relationGraph's order, which the web lays out as given.
+    edges: edges.sort(compareGraphEdges),
   };
 }
 export function mindFixture(count = 10): MindMap {

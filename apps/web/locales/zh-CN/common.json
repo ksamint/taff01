@@ -177,6 +177,8 @@
     "stakeholdersView": "相关方",
     "relationsView": "关系图",
     "mindView": "心智图",
+    "sectorsView": "营运视图",
+    "sectorsHint": "加上方面标签的任务会显示在这里，并按项目分组；未加标签的任务不会显示。",
     "views": "项目视图",
     "sections": "项目、公司与联系人",
     "filterAll": "全部",

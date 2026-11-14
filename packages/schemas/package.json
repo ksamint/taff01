@@ -11,6 +11,7 @@
     "./inbox-read": "./src/inbox-read.ts",
     "./changes": "./src/changes.ts",
     "./project-read": "./src/project-read.ts",
+    "./operation-templates": "./src/operation-templates.ts",
     "./workspace-read": "./src/workspace-read.ts",
     "./calendar-read": "./src/calendar-read.ts",
     "./notification-preferences": "./src/notification-preferences.ts",

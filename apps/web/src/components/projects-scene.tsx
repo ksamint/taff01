@@ -12,6 +12,10 @@ import {
   type Task,
   taskReference,
 } from "@taff/schemas";
+import {
+  groupBySector,
+  SECTOR_INDICATORS,
+} from "@taff/schemas/operation-templates";
 import { useIsMutating } from "@tanstack/react-query";
 import {
   ChevronDown,
@@ -99,6 +103,7 @@ const VIEW_LABEL: Record<ProjectView, string> = {
   stakeholders: "projects.stakeholdersView",
   relations: "projects.relationsView",
   mind: "projects.mindView",
+  sectors: "projects.sectorsView",
 };
 
 function projectDueLabels(locale: string, timeZone: string, now: number) {
@@ -229,7 +234,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     () => projectDueLabels(locale, me.user.tz, minute * 60_000),
     [locale, me.user.tz, minute],
   );
-  const projectName = selected ? selected.name : t("projects.allProjects");
+  const projectName =
+    selected && view !== "sectors" ? selected.name : t("projects.allProjects");
   const admin = workspaceAccess.data?.canManageProjects;
   const manage = useManageProject(workspace.id, {
     mode: projectDialog,
@@ -440,7 +446,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     }),
     [workspace.key, dueLabel, members.data, tasks.data, runs.data, pathname],
   );
-  const showFilters = view === "board" || view === "list";
+  const showFilters = view === "board" || view === "list" || view === "sectors";
   return (
     <div className={`projects-view projects-view-${view}`}>
       <header className="projects-header">
@@ -509,7 +515,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             </nav>
             {confirmed &&
               workspace.role !== "guest" &&
-              !["timeline", "mind", "relations"].includes(view) && (
+              !["timeline", "mind", "relations", "sectors"].includes(view) && (
                 <ViewExportButton
                   key={selected?.id ?? "workspace"}
                   workspaceId={workspace.id}
@@ -536,7 +542,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </div>
         </div>
-        {selected && (
+        {selected && view !== "sectors" && (
           <p className="projects-meta" data-testid="project-meta">
             {canMoveStage ? (
               <ProjectStageControl
@@ -817,6 +823,29 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         <MindView project={selected} />
       ) : tasks.isPending ? (
         <p className="loading projects-loading">{t("loading")}</p>
+      ) : view === "sectors" ? (
+        <SectorList
+          tasks={sortProjectTasks(
+            filterProjectTasks(tasks.data ?? [], {
+              // Every project: the view regroups the whole workspace.
+              projectId: "",
+              filter,
+              agentId,
+              label,
+              memberId: workspace.memberId,
+              members: members.data ?? [],
+            }),
+            sort,
+            locale,
+          )}
+          projectOrder={(projects.data ?? []).map((item) => item.id)}
+          projectName={(id) =>
+            projects.data?.find((item) => item.id === id)?.name ??
+            t("planning.noProject")
+          }
+          t={t}
+          {...cardProps}
+        />
       ) : view === "list" ? (
         desktop ? (
           <DesktopList tasks={visible} t={t} {...cardProps} />
@@ -1444,6 +1473,85 @@ function ListRow({
       )}
       <Avatar name={owner ? owner.name : t("unknownMember")} t={t} />
     </li>
+  );
+}
+
+/**
+ * 營運視圖 (spec OT-1): the generic operation template regroups the
+ * workspace's tasks by sector label, then by project. Untagged tasks are not
+ * shown; an empty sector keeps its heading and indicators.
+ */
+function SectorList({
+  tasks,
+  projectOrder,
+  projectName,
+  ...card
+}: CardData & {
+  tasks: Task[];
+  projectOrder: string[];
+  projectName: (id: string | null) => string;
+}) {
+  const { t } = card;
+  return (
+    <div className="planning-list projects-list projects-sectors">
+      <p className="projects-sectors-hint" data-testid="sector-view-hint">
+        {t("projects.sectorsHint")}
+      </p>
+      {groupBySector(tasks, projectOrder).map(
+        ({ sector, projects, count }, index) => (
+          <section
+            key={sector.label}
+            data-testid="sector-group"
+            data-sector={sector.label}
+            className="projects-list-group"
+            aria-labelledby={`projects-sector-${index}`}
+          >
+            <h2
+              className="projects-list-group-heading"
+              id={`projects-sector-${index}`}
+            >
+              <span lang="zh-Hant">{sector.label}</span>
+              <span className="projects-sector-english" lang="en">
+                {sector.english}
+              </span>
+              <span className="projects-count">{count}</span>
+            </h2>
+            <dl className="projects-sector-indicators">
+              <div>
+                <dt lang="zh-Hant">{SECTOR_INDICATORS.leading}</dt>
+                <dd>{sector.leading}</dd>
+              </div>
+              <div>
+                <dt lang="zh-Hant">{SECTOR_INDICATORS.result}</dt>
+                <dd>{sector.result}</dd>
+              </div>
+            </dl>
+            {projects.length === 0 ? (
+              <p className="projects-column-empty">
+                <span aria-hidden="true">—</span>
+                <span className="sr-only">{t("projects.empty")}</span>
+              </p>
+            ) : (
+              projects.map((group) => (
+                <div key={group.projectId ?? "none"}>
+                  <h3
+                    className="projects-sector-project"
+                    data-testid="sector-project"
+                  >
+                    {projectName(group.projectId)}
+                  </h3>
+                  <ul className="projects-list-rows">
+                    {group.tasks.map((task) => (
+                      <ListRow key={task.id} task={task} {...card} />
+                    ))}
+                  </ul>
+                </div>
+              ))
+            )}
+          </section>
+        ),
+      )}
+    </div>
   );
 }
 

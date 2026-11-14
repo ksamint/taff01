@@ -8,6 +8,16 @@ import { afterEach, expect, it, vi } from "vitest";
 import { graphImageFixture } from "../../../packages/schemas/src/graph-image.fixture";
 import { createApp } from "./app";
 
+/**
+ * Abort listeners the adapter could leak. Node 26.13 also lists its own
+ * `abortSignalFollowers` link from a cloned Request's signal to its parent;
+ * Node owns and releases that one, so it is not an adapter leak.
+ */
+const abortListeners = (signal: AbortSignal) =>
+  getEventListeners(signal, "abort").filter(
+    (listener) => listener.name !== "abortSignalFollowers",
+  );
+
 type Core = Parameters<typeof createApp>[0];
 type Entry = Parameters<Core["recordMcpCall"]>[0];
 const id = "00000000-0000-4000-8000-000000000001";
@@ -190,9 +200,7 @@ for (const modern of [false, true])
       if (!modern) {
         expect(f.close).toHaveBeenCalledTimes(1);
         expect(f.transportClose).toHaveBeenCalledTimes(1);
-        expect(
-          getEventListeners(f.handle.mock.calls[0][0].signal, "abort"),
-        ).toEqual([]);
+        expect(abortListeners(f.handle.mock.calls[0][0].signal)).toEqual([]);
       }
     });
 
@@ -226,14 +234,12 @@ for (const when of ["already", "connecting", "rendering"] as const)
     expect(response.status).toBe(499);
     expect(f.logs).toHaveLength(1);
     expect(f.logs[0].status).toBe("error");
-    expect(getEventListeners(f.requests[0].signal, "abort")).toEqual([]);
+    expect(abortListeners(f.requests[0].signal)).toEqual([]);
     expect(f.close).toHaveBeenCalledTimes(when === "already" ? 0 : 1);
     expect(f.transportClose).toHaveBeenCalledTimes(when === "already" ? 0 : 1);
     if (when !== "rendering") expect(f.handle).not.toHaveBeenCalled();
     else {
-      expect(
-        getEventListeners(f.handle.mock.calls[0][0].signal, "abort"),
-      ).toEqual([]);
+      expect(abortListeners(f.handle.mock.calls[0][0].signal)).toEqual([]);
       f.render.reject(new Error("late renderer failure after cancellation"));
     }
     releaseConnect.resolve();
@@ -264,7 +270,7 @@ it("cleans up both resources if legacy connection fails before attaching the tra
   const signal = removed.mock.contexts[cleanup];
   if (!(signal instanceof AbortSignal))
     throw new Error("missing bridge signal");
-  expect(getEventListeners(signal, "abort")).toEqual([]);
+  expect(abortListeners(signal)).toEqual([]);
   expect(f.close).toHaveBeenCalledTimes(1);
   expect(f.transportClose).toHaveBeenCalledTimes(1);
   expect(f.handle).not.toHaveBeenCalled();
