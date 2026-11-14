@@ -1619,14 +1619,6 @@ export function createCore(options: {
     now: options.summaryClock,
   });
   const { loadSummarySources, ...summaryOperations } = summaries;
-  const viewExport = createViewExportOperations({
-    db,
-    requireMember,
-    loadSummarySources,
-    getTimeline: timeline.operations.getTimeline,
-    listCalendar: calendar.operations.listCalendar,
-    now: options.summaryClock,
-  });
   const relations = createRelationOperations({ db, requireMember });
   const suggestionOperations = createSuggestionOperations({
     db,
@@ -1643,6 +1635,16 @@ export function createCore(options: {
     requireMember,
     zoneOf: timeline.zoneOf,
     insertTask,
+  });
+  const viewExport = createViewExportOperations({
+    db,
+    requireMember,
+    loadSummarySources,
+    getTimeline: timeline.operations.getTimeline,
+    listCalendar: calendar.operations.listCalendar,
+    getMindMap: mind.operations.getMindMap,
+    relationGraph: relations.operations.relationGraph,
+    now: options.summaryClock,
   });
   const assistant = createAssistantOperations({
     db,

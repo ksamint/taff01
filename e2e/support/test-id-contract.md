@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (483 distinct, 2256 uses)
+## Test ids (486 distinct, 2268 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -369,6 +369,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-note` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-open-task` | 2 | relations-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-overview` | 5 |  | live/mind.spec.ts, mind.spec.ts, ui-v2.spec.ts |
+| `mind-show-archived` | 1 |  | view-export.spec.ts |
 | `mind-source` | 4 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-form` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-link` | 4 |  | live/mind.spec.ts, mind.spec.ts |
@@ -384,7 +385,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-task-title` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-tasked` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-to-node` | 2 |  | live/mind.spec.ts, mind.spec.ts |
-| `mind-view` | 2 |  | live/mind.spec.ts, mind.spec.ts |
+| `mind-view` | 3 |  | live/mind.spec.ts, mind.spec.ts, view-export.spec.ts |
 
 ### notification-alerts.tsx
 
@@ -532,12 +533,13 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `relations-as-list` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `relations-as-list` | 4 |  | live/timeline.spec.ts, timeline.spec.ts, view-export.spec.ts |
 | `relations-fit` | 3 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-inspector` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-inspector-title` | 6 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `relations-layer-all` | 1 |  | view-export.spec.ts |
 | `relations-layer-people` | 2 |  | font-loading.spec.ts |
-| `relations-layout-force` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `relations-layout-force` | 3 |  | live/timeline.spec.ts, timeline.spec.ts, view-export.spec.ts |
 | `relations-layout-layered` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-list-node` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-list-open-task` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -545,7 +547,8 @@ several do). “Also rendered by” lists the other files.
 | `relations-node-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-open-task` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-relation` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `relations-view` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
+| `relations-scope` | 1 |  | view-export.spec.ts |
+| `relations-view` | 3 |  | live/timeline.spec.ts, timeline.spec.ts, view-export.spec.ts |
 | `relations-zoom-in` | 1 |  | timeline.spec.ts |
 | `relations-zoom-out` | 1 |  | timeline.spec.ts |
 
@@ -782,7 +785,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `view-export-copy` | 1 |  | view-export.spec.ts |
-| `view-export-open` | 7 |  | view-export.spec.ts |
+| `view-export-open` | 11 |  | ssr-session.spec.ts, view-export.spec.ts |
 | `view-export-preview` | 2 |  | view-export.spec.ts |
 | `view-export-save` | 1 |  | view-export.spec.ts |
 | `view-export-send` | 1 |  | view-export.spec.ts |
@@ -1291,4 +1294,4 @@ Keys read from `apps/web/locales/*/common.json` through
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
 | `viewExport.copied` | 1 | view-export.spec.ts |
-| `viewExport.title` | 8 | view-export.spec.ts |
+| `viewExport.title` | 9 | view-export.spec.ts |

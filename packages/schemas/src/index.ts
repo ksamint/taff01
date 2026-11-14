@@ -1016,6 +1016,7 @@ export const mcpSummariesImageArgs = strictObject({
 });
 
 export * from "./calendar-image";
+export * from "./graph-image";
 export * from "./summary-image";
 export * from "./summary-layout";
 export * from "./timeline-image";

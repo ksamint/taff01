@@ -1,8 +1,12 @@
 import {
   type CallToolResult,
   createMcpHandler,
+  isJsonContentType,
+  isLegacyRequest,
+  type McpRequestContext,
   McpServer,
   type StandardSchemaWithJSON,
+  WebStandardStreamableHTTPServerTransport,
 } from "@modelcontextprotocol/server";
 import {
   type $ZodType,
@@ -121,7 +125,7 @@ export function createMcpServer(
     {
       title: "Export live view image",
       description:
-        "Export an agent-watermarked live workspace, project, timeline or calendar PNG. Timeline requires projectId and accepts criticalPath show/hide; it fits the full chart. Calendar requires calendarMode week/month and visibleDate YYYY-MM-DD. Requires tasks:read and summaries:read. Locale defaults to the issuer's preference; time zone always uses the issuer's saved zone.",
+        "Export an agent-watermarked live workspace, project, timeline, calendar, mind or relations PNG. Timeline requires projectId and accepts criticalPath show/hide. Calendar requires calendarMode week/month and visibleDate YYYY-MM-DD. Mind accepts archived include/exclude. Relations accepts layout layered/force, scope workspace/project, projectId, layers and forceSeed. Graphs show at most 150 nodes and 600 edges with omitted counts. Requires tasks:read and summaries:read. Locale defaults to the issuer's preference; time zone always uses the issuer's saved zone.",
       inputSchema: toolSchema(mcpViewsImageArgs),
       annotations: READ_ONLY,
     },
@@ -719,23 +723,91 @@ export function createMcpHttpHandler(
   core: Core,
   logger?: ErrorLogger,
   viewImage: ViewImageOptions = {},
-) {
-  return createMcpHandler(
-    (ctx) => {
-      const extra = ctx.authInfo?.extra as
-        | { principal: AgentPrincipal; state: CallState }
-        | undefined;
-      if (!extra) throw new CoreError("unauthorized", 401);
-      return createMcpServer(
-        core,
-        extra.principal,
-        extra.state,
-        logger,
-        viewImage,
-      );
+): ReturnType<typeof createMcpHandler> {
+  const factory = (ctx: McpRequestContext) => {
+    const extra = ctx.authInfo?.extra as
+      | { principal: AgentPrincipal; state: CallState }
+      | undefined;
+    if (!extra) throw new CoreError("unauthorized", 401);
+    return createMcpServer(
+      core,
+      extra.principal,
+      extra.state,
+      logger,
+      viewImage,
+    );
+  };
+  const maxRequestBodySize = 1_048_576;
+  const handler = createMcpHandler(factory, {
+    responseMode: "json",
+    maxRequestBodySize,
+  });
+  return {
+    ...handler,
+    async fetch(request, options) {
+      if (
+        request.method !== "POST" ||
+        !isJsonContentType(request.headers.get("content-type")) ||
+        !(await isLegacyRequest(request, options?.parsedBody, {
+          maxRequestBodySize,
+        }))
+      )
+        return handler.fetch(request, options);
+      if (request.signal.aborted) return new Response(null, { status: 499 });
+      // SDK responseMode applies only to modern requests. Its legacy fallback
+      // returns SSE before the tool settles, making the adapter log success early.
+      const server = factory({
+        era: "legacy",
+        authInfo: options?.authInfo,
+        requestInfo: request,
+      });
+      const transport = new WebStandardStreamableHTTPServerTransport({
+        sessionIdGenerator: undefined,
+        enableJsonResponse: true,
+        maxRequestBodySize,
+      });
+      let onAbort!: () => void;
+      const aborted = new Promise<Response>((resolve) => {
+        onAbort = () => resolve(new Response(null, { status: 499 }));
+      });
+      request.signal.addEventListener("abort", onAbort, { once: true });
+      try {
+        await Promise.race([server.connect(transport), aborted]);
+        if (request.signal.aborted) return new Response(null, { status: 499 });
+        // Closing this SDK transport does not settle a pending JSON response.
+        return await Promise.race([
+          transport.handleRequest(request, options),
+          aborted,
+        ]);
+      } catch (error) {
+        logger?.error(
+          { errorName: error instanceof Error ? error.name : typeof error },
+          "MCP transport failed",
+        );
+        const body = options?.parsedBody;
+        const id =
+          body &&
+          typeof body === "object" &&
+          "id" in body &&
+          (typeof body.id === "string" || typeof body.id === "number")
+            ? body.id
+            : null;
+        return Response.json(
+          {
+            jsonrpc: "2.0",
+            id,
+            error: { code: -32603, message: "Internal server error" },
+          },
+          { status: 500 },
+        );
+      } finally {
+        request.signal.removeEventListener("abort", onAbort);
+        const connected = server.server.transport === transport;
+        await server.close(); // Owns and closes its connected transport.
+        if (!connected) await transport.close();
+      }
     },
-    { responseMode: "json", maxRequestBodySize: 1_048_576 },
-  );
+  };
 }
 
 /** Method and tool name from a JSON-RPC body, for the call log only. */

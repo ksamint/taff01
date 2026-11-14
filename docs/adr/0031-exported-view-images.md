@@ -138,3 +138,51 @@ per-day cap includes both bands; source truncation remains a separate unknown
 count note. Week/month grid headers export their visible date; day and list
 views hide the control. The existing shared quota, snapshot audit and export
 dialog apply unchanged. No new permission, scope or MCP tool is introduced.
+
+## Amendment 5 — bounded graph exports
+
+Status: implemented in the S3 candidate; release validation and deployment remain pending.
+
+Mind and relations reuse the web's pure geometry from `packages/schemas`.
+Their existing source queries have no numeric node or edge limit. Force
+layout performs pairwise repulsion (260 iterations, 80 above 400 nodes), so
+laying out an unbounded source before truncation would leave export work
+unbounded. Relations therefore select the first 150 nodes in shared reading
+order before layout. Edges are deduplicated by source, target, type and layer,
+filtered to retained endpoints and sorted by key. Both layered and force
+modes use all these unique edges for geometry; only rendered edges are capped
+at 600 (four times the node budget). The retained nodes and finite semantic
+edge kinds bound geometry work. Core graphs with at most 150 visible nodes
+use identical web geometry and force seed even above 600 edges; only graphs
+truncated by the node cap can differ from the full web positions.
+
+Mind node positions and curves depend only on each node's ring and angle,
+so they remain identical after the 150-node cap. The full visible source
+still determines ring extent using a linear maximum. Mind edges use the same
+600-edge budget, deduplicated by source, target and type. There is no arbitrary
+source-size rejection. Both builders count all authorized visible nodes and
+unique visible edges, showing separate localized omitted-node and omitted-edge
+counts, including edges whose endpoints were omitted. Hidden layers/archived
+nodes excluded by the caller's options do not contribute to those counts.
+
+These budgets bound force and raster work; dense 150-node/600-edge long-CJK
+fixtures verify the existing 400 KB PNG budget. Export fitting includes label
+bounds and does not apply the interactive minimum zoom. The internal renderer
+validates finite geometry, array/text limits and matching hashes before pixel
+allocation. It accepts server-built typed geometry, never client SVG or coordinates.
+
+The existing export route and `views.image` gain strict mind/relations options.
+Mind sends its archived filter. Relations sends layout, effective scope/project,
+visible layers and the existing web seed 7 (the public integer range is uint32).
+Defaults and layer order are normalized before hashing. Pan, zoom and selection
+are browser presentation only; relations list mode hides the graph export button.
+Core reads through authorized `getMindMap`/`relationGraph`, so CRM capability
+checks stay in their existing authority. The canonical hash includes the visible
+sanitized display, normalized options, locale, saved zone, exporter and local date.
+It excludes private notes, source URLs, CRM details, finance and the generated
+instant; those hidden changes cannot alter the graph hash. Both kinds use the
+shared quota and snapshot audit, with finance false and scope mind/relations.
+No new permission, scope, tool or migration is introduced by S3.
+
+The v0.2.25 deployment changes web, API, worker and renderer images from one
+validated source tree; the original renderer-only deployment note was incorrect.

@@ -15,6 +15,7 @@ const generators = [
   "scripts/rust-summary-text-golden.mts",
   "scripts/rust-timeline-golden.mts",
   "scripts/rust-calendar-golden.mts",
+  "scripts/rust-graph-golden.mts",
   "apps/api/scripts/summary-schema-gen.mts",
 ];
 const root = fileURLToPath(new URL("..", import.meta.url));

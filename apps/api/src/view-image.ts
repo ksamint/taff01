@@ -46,7 +46,9 @@ export async function renderViewImage(
           ? "/render/timeline"
           : query.view === "calendar"
             ? "/render/calendar"
-            : "/render/summary",
+            : query.view === "mind" || query.view === "relations"
+              ? "/render/graph"
+              : "/render/summary",
         options.renderUrl,
       ),
       {

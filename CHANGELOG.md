@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.25 — unreleased: timeline, calendar and graph exports
+
+- Timeline exports fit the full chart with the current critical-path highlight, task bars, milestones and dependencies; up to 60 rows with localized overflow.
+- Calendar exports show the visible week or month in the saved viewer's zone, with DST-aware civil days, a separate all-day band, next-day midnight labeled 24:00 and at most eight items per day. Unscheduled tray changes do not affect the image or its hash.
+- Mind and relations toolbars export their visible archived, layout, scope and layer options. Graphs use shared web geometry, fit label bounds and show at most 150 nodes and 600 rendered edges with exact localized omitted counts. Relations geometry uses all unique edges between retained nodes; only node truncation can change web positions.
+- Confirmed non-guests use the existing preview, send, copy and save dialog. Calendar day/list and relations list presentations hide the export control. Agents use the existing `views.image` tool with current workspace grants and both required read scopes.
+- Each view uses authorized core reads, canonical TABLE AI colors, exporter watermark, content hash, the shared quota and bounded snapshot audit. Timeline/calendar PNGs are 1600 px wide, graphs 1080 px; all are palette PNGs at most 4000 px high and 400 KB. These new views contain no finance or private source details.
+- No new migration, environment variable, dependency, permission or MCP tool; the catalog remains at 38 tools. Release validation and deployment are pending. Deploy web, API, worker and renderer from the same validated source; accepted v0.2.24 `ff411c6` remains production and the rollback source.
+
 ## v0.2.24 — view exports and workspace lifecycle
 
 - Projects gain Export image: the current project, or the workspace overview with every active project, drawn by the existing Rust renderer as one 1080 px palette PNG of at most 400 KB, watermarked with the exporter, workspace and date and carrying the content hash. The dialog previews it and offers Send (system share sheet), Copy image and Save.

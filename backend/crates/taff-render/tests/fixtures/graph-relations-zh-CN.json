@@ -1,0 +1,449 @@
+{
+  "layout": {
+    "kind": "relations",
+    "locale": "zh-CN",
+    "width": 1080,
+    "height": 520,
+    "title": "关系图",
+    "subtitle": "由艾丽丝导出",
+    "empty": null,
+    "more": null,
+    "moreEdges": null,
+    "view": {
+      "scale": 0.7951515151515152,
+      "x": 65.49333333333334,
+      "y": 284.74214141414143
+    },
+    "nodes": [
+      {
+        "key": "contact:00000000-0000-4000-8000-000000000003",
+        "x": 0,
+        "y": -35.2,
+        "radius": 6,
+        "tone": "gold",
+        "shape": "circle",
+        "label": {
+          "text": "项目交付 4 · 侍饕餮鑫",
+          "x": 12,
+          "y": -30.533333333333335,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "company:00000000-0000-4000-8000-000000000002",
+        "x": 170,
+        "y": 9.6,
+        "radius": 6,
+        "tone": "gold",
+        "shape": "circle",
+        "label": {
+          "text": "项目交付 3 · 侍饕餮鑫",
+          "x": 182,
+          "y": 14.266666666666666,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "workspace:00000000-0000-4000-8000-000000000000",
+        "x": 340,
+        "y": 9.6,
+        "radius": 9,
+        "tone": "neutral",
+        "shape": "circle",
+        "label": {
+          "text": "项目交付 1 · 侍饕餮鑫",
+          "x": 352,
+          "y": 14.266666666666666,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "project:00000000-0000-4000-8000-000000000001",
+        "x": 510,
+        "y": 9.6,
+        "radius": 6,
+        "tone": "neutral",
+        "shape": "diamond",
+        "label": {
+          "text": "项目交付 2 · 侍饕餮鑫",
+          "x": 522,
+          "y": 14.266666666666666,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "task:00000000-0000-4000-8000-000000000006",
+        "x": 680,
+        "y": -80,
+        "radius": 6,
+        "tone": "blue",
+        "shape": "square",
+        "label": {
+          "text": "项目交付 7 · 侍饕餮鑫",
+          "x": 692,
+          "y": -75.33333333333333,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "task:00000000-0000-4000-8000-000000000007",
+        "x": 696,
+        "y": -48,
+        "radius": 6,
+        "tone": "blue",
+        "shape": "square",
+        "label": {
+          "text": "项目交付 8 · 侍饕餮鑫",
+          "x": 708,
+          "y": -43.333333333333336,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "task:00000000-0000-4000-8000-000000000008",
+        "x": 680,
+        "y": -16,
+        "radius": 6,
+        "tone": "blue",
+        "shape": "square",
+        "label": {
+          "text": "项目交付 9 · 侍饕餮鑫",
+          "x": 692,
+          "y": -11.333333333333332,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "task:00000000-0000-4000-8000-000000000009",
+        "x": 680,
+        "y": 16,
+        "radius": 6,
+        "tone": "blue",
+        "shape": "square",
+        "label": {
+          "text": "项目交付 10 · 侍饕餮鑫",
+          "x": 692,
+          "y": 20.666666666666668,
+          "width": 245,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "task:00000000-0000-4000-8000-000000000010",
+        "x": 680,
+        "y": 48,
+        "radius": 6,
+        "tone": "blue",
+        "shape": "square",
+        "label": {
+          "text": "项目交付 11 · 侍饕餮鑫",
+          "x": 692,
+          "y": 52.666666666666664,
+          "width": 245,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "task:00000000-0000-4000-8000-000000000011",
+        "x": 680,
+        "y": 80,
+        "radius": 6,
+        "tone": "blue",
+        "shape": "square",
+        "label": {
+          "text": "项目交付 12 · 侍饕餮鑫",
+          "x": 692,
+          "y": 84.66666666666667,
+          "width": 245,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "person:00000000-0000-4000-8000-000000000004",
+        "x": 960,
+        "y": -80,
+        "radius": 6,
+        "tone": "green",
+        "shape": "circle",
+        "label": {
+          "text": "项目交付 5 · 侍饕餮鑫",
+          "x": 972,
+          "y": -75.33333333333333,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      },
+      {
+        "key": "agent:00000000-0000-4000-8000-000000000005",
+        "x": 960,
+        "y": -48,
+        "radius": 6,
+        "tone": "purple",
+        "shape": "circle",
+        "label": {
+          "text": "项目交付 6 · 侍饕餮鑫",
+          "x": 972,
+          "y": -43.333333333333336,
+          "width": 227.5,
+          "fontSize": 14,
+          "anchor": "start"
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": 2,
+        "to": 3,
+        "c1": {
+          "x": 425,
+          "y": 9.6
+        },
+        "c2": {
+          "x": 425,
+          "y": 9.6
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 8,
+        "to": 7,
+        "c1": {
+          "x": 680,
+          "y": 48
+        },
+        "c2": {
+          "x": 680,
+          "y": 16
+        },
+        "tone": "red",
+        "dashed": true
+      },
+      {
+        "from": 9,
+        "to": 8,
+        "c1": {
+          "x": 680,
+          "y": 80
+        },
+        "c2": {
+          "x": 680,
+          "y": 48
+        },
+        "tone": "red",
+        "dashed": true
+      },
+      {
+        "from": 3,
+        "to": 8,
+        "c1": {
+          "x": 595,
+          "y": 9.6
+        },
+        "c2": {
+          "x": 595,
+          "y": 48
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 3,
+        "to": 9,
+        "c1": {
+          "x": 595,
+          "y": 9.6
+        },
+        "c2": {
+          "x": 595,
+          "y": 80
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 3,
+        "to": 4,
+        "c1": {
+          "x": 595,
+          "y": 9.6
+        },
+        "c2": {
+          "x": 595,
+          "y": -80
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 3,
+        "to": 6,
+        "c1": {
+          "x": 595,
+          "y": 9.6
+        },
+        "c2": {
+          "x": 595,
+          "y": -16
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 3,
+        "to": 7,
+        "c1": {
+          "x": 595,
+          "y": 9.6
+        },
+        "c2": {
+          "x": 595,
+          "y": 16
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 1,
+        "to": 3,
+        "c1": {
+          "x": 340,
+          "y": 9.6
+        },
+        "c2": {
+          "x": 340,
+          "y": 9.6
+        },
+        "tone": "gold",
+        "dashed": false
+      },
+      {
+        "from": 0,
+        "to": 1,
+        "c1": {
+          "x": 85,
+          "y": -35.2
+        },
+        "c2": {
+          "x": 85,
+          "y": 9.6
+        },
+        "tone": "gold",
+        "dashed": false
+      },
+      {
+        "from": 0,
+        "to": 4,
+        "c1": {
+          "x": 340,
+          "y": -35.2
+        },
+        "c2": {
+          "x": 340,
+          "y": -80
+        },
+        "tone": "gold",
+        "dashed": false
+      },
+      {
+        "from": 10,
+        "to": 4,
+        "c1": {
+          "x": 820,
+          "y": -80
+        },
+        "c2": {
+          "x": 820,
+          "y": -80
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 11,
+        "to": 5,
+        "c1": {
+          "x": 828,
+          "y": -48
+        },
+        "c2": {
+          "x": 828,
+          "y": -48
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 4,
+        "to": 5,
+        "c1": {
+          "x": 688,
+          "y": -80
+        },
+        "c2": {
+          "x": 688,
+          "y": -48
+        },
+        "tone": "neutral",
+        "dashed": false
+      },
+      {
+        "from": 6,
+        "to": 5,
+        "c1": {
+          "x": 688,
+          "y": -16
+        },
+        "c2": {
+          "x": 688,
+          "y": -48
+        },
+        "tone": "red",
+        "dashed": true
+      },
+      {
+        "from": 7,
+        "to": 6,
+        "c1": {
+          "x": 680,
+          "y": 16
+        },
+        "c2": {
+          "x": 680,
+          "y": -16
+        },
+        "tone": "red",
+        "dashed": true
+      }
+    ],
+    "rings": [],
+    "centre": null,
+    "footer": {
+      "text": "由艾丽丝导出 · 2026-03-08 12:00 · Asia/Shanghai",
+      "hashFull": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  },
+  "watermark": {
+    "text": "由艾丽丝导出 · Taff · 2026-03-08",
+    "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

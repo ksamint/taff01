@@ -341,7 +341,12 @@ for (const signedIn of [false, true]) {
   });
 }
 
-for (const route of ["/projects", "/calendar"]) {
+for (const route of [
+  "/projects",
+  "/calendar",
+  "/projects?view=mind",
+  "/projects?view=relations",
+]) {
   test(`authenticated ${route} paints read-only while browser confirmation is pending`, async ({
     page,
   }, info) => {
@@ -382,11 +387,13 @@ for (const route of ["/projects", "/calendar"]) {
       });
       expect(response?.headers()["cache-control"]).toContain("no-store");
       await expect(page.locator("main.content")).toHaveAttribute("inert", "");
-      if (route === "/projects")
+      if (route.startsWith("/projects"))
         await expect(page.locator(".projects-title-text")).toHaveText(
           projectName,
         );
       else await expect(page.getByTestId("calendar-previous")).toBeVisible();
+      if (route.includes("?view="))
+        await expect(page.getByTestId("view-export-open")).toHaveCount(0);
       await expect(page.getByTestId("open-quick")).toBeDisabled();
       expect(protectedReads).toEqual([]);
       release();
@@ -395,6 +402,8 @@ for (const route of ["/projects", "/calendar"]) {
         "inert",
         "",
       );
+      if (route.includes("?view="))
+        await expect(page.getByTestId("view-export-open")).toBeVisible();
     } finally {
       release();
     }

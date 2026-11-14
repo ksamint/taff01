@@ -25,3 +25,10 @@ writeFileSync(
   new URL("calendar-image.json", dir),
   `${JSON.stringify(toJSONSchema(calendarImageInputSchema, { target: "draft-7", io: "input" }), null, 2)}\n`,
 );
+const { graphImageInputSchema } = await import(
+  "../../../packages/schemas/src/graph-image"
+);
+writeFileSync(
+  new URL("graph-image.json", dir),
+  `${JSON.stringify(toJSONSchema(graphImageInputSchema, { target: "draft-7", io: "input" }), null, 2)}\n`,
+);

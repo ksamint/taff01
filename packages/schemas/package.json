@@ -21,6 +21,9 @@
     "./timeline-image": "./src/timeline-image.ts",
     "./calendar-image": "./src/calendar-image.ts",
     "./graph": "./src/graph.ts",
+    "./graph-layout": "./src/graph-layout.ts",
+    "./mind-geometry": "./src/mind-geometry.ts",
+    "./graph-image": "./src/graph-image.ts",
     "./assistant": "./src/assistant.ts",
     "./mind": "./src/mind.ts"
   },
