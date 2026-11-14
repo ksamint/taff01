@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased — operation templates
+## Unreleased — operation sector view
 
-- Workspace admins apply the 通用營運模板 / generic operation template from Projects: six sector projects (財務與現金, 客戶與市場, 營運與交付, 人才與組織, 風險與安全, 未來), each with a 領先指標 and a 結果指標 task tagged with the sector label. Applying again only restores what is missing. Members, guests and agents cannot apply it.
-- New route `POST /api/workspaces/:id/operation-templates/:template`. No migration, dependency, permission action or MCP tool.
+- Projects → More gains 營運視圖 / Sectors: the 通用營運模板 / generic operation template regroups every task in the workspace by its sector tag (財務與現金, 客戶與市場, 營運與交付, 人才與組織, 風險與安全, 未來), then by project, with each sector's 領先指標 and 結果指標. Untagged tasks are not shown. Tag a task with Quick Add `+財務與現金` or in the task editor.
+- Client-only view: no route, migration, dependency, permission action or MCP tool; nothing is created when the view opens.
+- Fix (pre-release review of the v0.2.25 exports): a control character in a task title, project, workspace or person name no longer makes timeline, calendar or summary images fail; the renderer draws it as a space.
 
 ## v0.2.24 — view exports and workspace lifecycle
 

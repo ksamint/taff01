@@ -28,7 +28,6 @@ import {
   integrationPermissionQuerySchema,
   integrationTraceIdSchema,
   memberRoleInputSchema,
-  operationTemplateKeySchema,
   phonePasswordSignInSchema,
   profileSchema,
   projectInputSchema,
@@ -641,15 +640,6 @@ export function createApp(
         workspaceCreateSchema.parse(await c.req.json()),
       ),
       201,
-    ),
-  );
-  app.post("/api/workspaces/:id/operation-templates/:template", async (c) =>
-    c.json(
-      await core.applyOperationTemplate(
-        userPrincipal(c.get("userId")),
-        idSchema.parse(c.req.param("id")),
-        operationTemplateKeySchema.parse(c.req.param("template")),
-      ),
     ),
   );
   app.get("/api/workspaces/:id/invites", async (c) =>

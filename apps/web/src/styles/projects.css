@@ -1035,3 +1035,41 @@ select.projects-stage {
   cursor: pointer;
   font-size: inherit;
 }
+
+/* 營運視圖 (spec OT-1): sector groups, then project sub-headings. */
+.projects-sectors-hint {
+  margin: 0;
+  padding: 10px 20px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.projects-sector-english {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.projects-sector-indicators {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--border-line);
+  font-size: 12px;
+}
+.projects-sector-indicators div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.projects-sector-indicators dt {
+  color: var(--text-muted);
+}
+.projects-sector-indicators dd {
+  margin: 0;
+}
+.projects-sector-project {
+  margin: 0;
+  padding: 8px 20px 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}

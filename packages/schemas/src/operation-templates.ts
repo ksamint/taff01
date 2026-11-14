@@ -1,97 +1,105 @@
-// Operation templates (spec: docs/spec/operation-templates.md). A template is
-// data: applying it creates one project per sector and one task per indicator.
-import {
-  type infer as Infer,
-  number,
-  strictObject,
-  enum as zodEnum,
-} from "zod/mini";
+// View templates (spec: docs/spec/operation-templates.md). A view template is
+// data: it names sectors and the task label that places a task in a sector.
+// Applying it changes nothing; the Projects 營運 view regroups tagged tasks.
 
-export type OperationIndicator = {
-  /** Task label naming the indicator kind. */
-  label: string;
-  /** Bilingual indicator text, used in the task title. */
-  name: string;
-};
 export type OperationSector = {
-  /** Project name: Chinese then English, at most 100 characters. */
-  project: string;
-  /** Task label tagging every task of this sector, at most 40 characters. */
+  /** Task label that places a task in this sector (exact match). */
   label: string;
-  leading: OperationIndicator;
-  result: OperationIndicator;
+  /** English sector name shown beside the label. */
+  english: string;
+  /** 領先指標 / leading indicator, bilingual. */
+  leading: string;
+  /** 結果指標 / result indicator, bilingual. */
+  result: string;
 };
 
-const LEADING = "領先指標";
-const RESULT = "結果指標";
-const sector = (
-  label: string,
-  english: string,
-  leading: string,
-  result: string,
-): OperationSector => ({
-  project: `${label} ${english}`,
-  label,
-  leading: { label: LEADING, name: leading },
-  result: { label: RESULT, name: result },
-});
+/** Indicator headings: template data, bilingual like the sector names. */
+export const SECTOR_INDICATORS = {
+  leading: "領先指標 Leading",
+  result: "結果指標 Result",
+} as const;
 
 /** 通用營運模板 / Generic operation template: the six recommended sectors. */
 export const GENERIC_OPERATION_SECTORS: readonly OperationSector[] = [
-  sector(
-    "財務與現金",
-    "Finance & Cash",
-    "逾期應收 Overdue receivables",
-    "收入與毛利對預算 Revenue and margin vs budget",
-  ),
-  sector(
-    "客戶與市場",
-    "Customers & Market",
-    "新增合格商機 New qualified pipeline",
-    "留存或複購率 Retention or repeat rate",
-  ),
-  sector(
-    "營運與交付",
-    "Operations & Delivery",
-    "工作量對產能 Workload vs capacity",
-    "準時交付與品質投訴 On-time delivery and complaints",
-  ),
-  sector(
-    "人才與組織",
-    "People & Organization",
-    "關鍵職缺空缺天數 Days critical roles open",
-    "關鍵人才流失 Key people lost",
-  ),
-  sector(
-    "風險與安全",
-    "Risk & Security",
-    "逾期整改事項 Overdue remediation items",
-    "事件數 Incidents",
-  ),
-  sector(
-    "未來",
-    "Future (strategy, product, succession)",
-    "戰略里程碑 Strategic milestones",
-    "新業務收入占比 Revenue share from new lines",
-  ),
+  {
+    label: "財務與現金",
+    english: "Finance & Cash",
+    leading: "逾期應收 Overdue receivables",
+    result: "收入與毛利對預算 Revenue and margin vs budget",
+  },
+  {
+    label: "客戶與市場",
+    english: "Customers & Market",
+    leading: "新增合格商機 New qualified pipeline",
+    result: "留存或複購率 Retention or repeat rate",
+  },
+  {
+    label: "營運與交付",
+    english: "Operations & Delivery",
+    leading: "工作量對產能 Workload vs capacity",
+    result: "準時交付與品質投訴 On-time delivery and complaints",
+  },
+  {
+    label: "人才與組織",
+    english: "People & Organization",
+    leading: "關鍵職缺空缺天數 Days critical roles open",
+    result: "關鍵人才流失 Key people lost",
+  },
+  {
+    label: "風險與安全",
+    english: "Risk & Security",
+    leading: "逾期整改事項 Overdue remediation items",
+    result: "事件數 Incidents",
+  },
+  {
+    label: "未來",
+    english: "Future (strategy, product, succession)",
+    leading: "戰略里程碑 Strategic milestones",
+    result: "新業務收入占比 Revenue share from new lines",
+  },
 ];
 
-export const operationTemplateKeySchema = zodEnum(["generic-operation"]);
-export type OperationTemplateKey = Infer<typeof operationTemplateKeySchema>;
-export const OPERATION_TEMPLATES: Record<
-  OperationTemplateKey,
-  readonly OperationSector[]
-> = { "generic-operation": GENERIC_OPERATION_SECTORS };
+export type SectorGroup<T> = {
+  sector: OperationSector;
+  /** Tasks carrying the sector label, by project in `projectOrder`, then no project. */
+  projects: { projectId: string | null; tasks: T[] }[];
+  count: number;
+};
 
-/** Title of an indicator task: `領先指標：逾期應收 Overdue receivables`. */
-export const indicatorTaskTitle = (indicator: OperationIndicator) =>
-  `${indicator.label}：${indicator.name}`;
-
-export const operationTemplateResultSchema = strictObject({
-  template: operationTemplateKeySchema,
-  createdProjects: number(),
-  createdTasks: number(),
-});
-export type OperationTemplateResult = Infer<
-  typeof operationTemplateResultSchema
->;
+/**
+ * Regroups tasks by sector (spec OT-1). A task appears under every sector
+ * whose label it carries; a task with no sector label is left out. Project
+ * groups follow `projectOrder` (unlisted projects after it, "no project"
+ * last); tasks keep their input order within a group.
+ */
+export function groupBySector<
+  T extends { labels: string[]; projectId: string | null },
+>(
+  tasks: readonly T[],
+  projectOrder: readonly string[] = [],
+  sectors: readonly OperationSector[] = GENERIC_OPERATION_SECTORS,
+): SectorGroup<T>[] {
+  const rank = (id: string | null) => {
+    if (id === null) return Number.MAX_SAFE_INTEGER;
+    const index = projectOrder.indexOf(id);
+    return index === -1 ? projectOrder.length : index;
+  };
+  return sectors.map((sector) => {
+    const byProject = new Map<string | null, T[]>();
+    let count = 0;
+    for (const task of tasks) {
+      if (!task.labels.includes(sector.label)) continue;
+      const list = byProject.get(task.projectId) ?? [];
+      list.push(task);
+      byProject.set(task.projectId, list);
+      count++;
+    }
+    return {
+      sector,
+      projects: [...byProject]
+        .sort(([a], [b]) => rank(a) - rank(b))
+        .map(([projectId, list]) => ({ projectId, tasks: list })),
+      count,
+    };
+  });
+}

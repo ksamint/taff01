@@ -1,12 +1,13 @@
-# Operation templates — 2026-11-13 UTC
+# Operation sector view — 2026-11-14 UTC
 
-- Request: "do we have template module? add … as generic operation template"; six sectors tag tasks and projects in a new XIDING organization administered by the 侍天TIANSIGHT/APUCH admin; tasks added and opened from H5.
-- Finding: there was no template module. Tasks already carry labels and projects; no migration was needed.
-- Working (branch `claude/epic-thompson-iwoxr3`): template data in `packages/schemas/src/operation-templates.ts`; core `applyOperationTemplate` creates six sector projects, each with a 領先指標 and a 結果指標 task labelled with the sector and indicator; idempotent under the workspace row lock; admin-only (`project:manage`), agents refused. Route `POST /api/workspaces/:id/operation-templates/generic-operation`. Projects shows Add six-sector operation template to admins with no project selected (en, zh-CN, zh-HK).
-- Spec: [operation templates](../spec/operation-templates.md), requirements OT-1 to OT-3.
-- Access operations reviewed: only apply is new; it grants no access. Tested with admin, member, guest, outsider, demoted admin and agent.
-- H5: the template creates ordinary projects and tasks, so the existing phone Projects and task screens list, open and add them; no phone-specific change.
-- Missing work: live XIDING creation. It needs a release from the deploy machine (docs/deploy.md, docs/release-closeout.md); this cloud session has no production access. After release, a system admin creates XIDING in Organizations (system admins hold protected admin memberships in every organization), opens Projects and applies the template.
-- Phone: `e2e/operation-templates.spec.ts` applies the template and opens an indicator task on the Pixel 7 profile in en, zh-CN and zh-HK. The button says 六大方面, not 六大板塊/板块: 塊 and 块 are not in the bundled font subset.
+- Requests: (1) "do we have template module? add … as generic operation template", six sectors tag tasks/projects in a new XIDING organization administered by the 侍天TIANSIGHT/APUCH admin, tasks added and opened from H5; (2) "the system admins — release and create XIDING, review all pr, think it as a view … if not [tagged] then no need to show, prepare upgrade plan".
+- Finding: there was no template module. Tasks already carry labels; Quick Add parses `+label`.
+- First version (create six projects and twelve tasks) was replaced before merge by the view the owner asked for; nothing of it remains in core, API or the database.
+- Working (TypeScript only: `packages/schemas`, web client): Projects → More → 營運視圖 / Sectors regroups every task in the workspace by sector label, then by project in project order, showing each sector's 領先指標 and 結果指標; untagged tasks are hidden; filters and sort apply; no project meta or image export in this view. No route, migration, permission or MCP change.
+- Spec: [operation templates](../spec/operation-templates.md) OT-1, OT-2.
+- Review of unreleased PRs #99–#101: no P0, no authorization or privacy defect. One P2/P1: XML-invalid characters in user text failed every timeline/calendar export (and reached summary watermarks). Fixed in the Rust renderer `escape()` (VE-3.8) with a failing-first test; goldens unchanged.
+- Fonts: 塊/块/指/领/域 are not in the bundled subset, so UI strings use 方面 and 視圖; sector and indicator text is template data drawn with the system fallback.
+- Upgrade plan: `docs/upgrade-plan.md`, "Release sequence after v0.2.24": v0.2.25 then XIDING on behalf of a system admin through normal core `createWorkspace`.
+- ADR: TypeScript and Rust only is ADR 0030; backend to Rust is ADR 0026. No new ADR needed.
 - Validation numbers: see the PR body (local gate on the committed tree).
-- Open decision: which account is "tiansight apuch admin" if it should be a named org admin rather than the system admins.
+- Pending: v0.2.25 deploy and XIDING creation run on the deploy machine; this cloud session has no production access.

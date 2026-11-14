@@ -1,10 +1,10 @@
-# Spec: Operation templates
+# Spec: Operation view templates
 
-Living product specification for operation templates (owner request
-2026-11-13, [milestone 127](../milestones/127-operation-templates.md)). This
-file states the current contract; no ADR was needed because the module reuses
-existing projects, tasks, labels and the `project:manage` permission. Change
-this file in the same commit as the behaviour it describes.
+Living product specification for view templates (owner requests 2026-11-13
+and 2026-11-14, [milestone 127](../milestones/127-operation-templates.md)).
+This file states the current contract; no ADR was needed because the module is
+a client view over existing tasks, labels and projects. Change this file in the
+same commit as the behaviour it describes.
 
 Status: implemented on branch `claude/epic-thompson-iwoxr3`; not yet released.
 
@@ -12,13 +12,15 @@ Status: implemented on branch `claude/epic-thompson-iwoxr3`; not yet released.
 
 | Role | Can |
 | --- | --- |
-| Workspace admin (including a system admin's protected admin membership) | Apply a template to the current organization or workspace |
-| Member, guest, outsider, demoted admin | Cannot apply; read the created projects and tasks as their role already allows |
-| Agent | Cannot apply (403); project creation by agents stays with ADR 0025 |
+| Admin, member, guest (including system admins' protected admin memberships) | Open the 營運視圖 / Sectors view and see the tasks they can already read |
+| Anyone who can edit a task's labels | Place it in a sector by tagging it with the sector label |
+| Agent | Unchanged: tags tasks through existing authorized task tools |
 
-## Template: 通用營運模板 / generic operation (`generic-operation`)
+The view grants no access: it regroups the tasks the existing task list returns.
 
-| 板塊 Sector (project; sector label) | 領先指標 Leading indicator | 結果指標 Result indicator |
+## Template: 通用營運模板 / generic operation
+
+| 板塊 Sector (task label) | 領先指標 Leading indicator | 結果指標 Result indicator |
 | --- | --- | --- |
 | 財務與現金 Finance & Cash | 逾期應收 Overdue receivables | 收入與毛利對預算 Revenue and margin vs budget |
 | 客戶與市場 Customers & Market | 新增合格商機 New qualified pipeline | 留存或複購率 Retention or repeat rate |
@@ -31,60 +33,49 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 
 ## Requirements
 
-### Apply (OT-1)
+### Regrouping (OT-1)
 
-- OT-1.1 When an admin applies `generic-operation`, the server shall create one project per sector, named `<中文> <English>`, in the table's order.
-- OT-1.2 For each sector, the server shall create two `todo` tasks in that project titled `領先指標：<indicator>` and `結果指標：<indicator>`, labelled with the sector label (the Chinese sector name) and the indicator label, owned by the applying admin and unassigned.
-- OT-1.3 When a sector project (not archived) or an indicator task (by title, in that project) already exists, the server shall reuse it; a repeat or concurrent apply shall create nothing more and report `createdProjects` and `createdTasks` as zero.
-- OT-1.4 When a sector project was archived, the next apply shall create a new project for that sector with its two tasks.
-- OT-1.5 Tasks created by the template shall be ordinary tasks: people add further tasks to a sector project, or tag any task with a sector label, through the existing task screens on desktop and phone (H5).
+- OT-1.1 The template shall define the six sectors in the table's order; each sector label shall be a valid task label.
+- OT-1.2 When the Sectors view opens, it shall show every sector, in order, with its name, English name, leading and result indicators and a task count, including sectors with no tasks.
+- OT-1.3 A task whose labels include a sector label exactly shall appear under that sector, under a heading of its project (or "No project"); a task with several sector labels shall appear under each of them.
+- OT-1.4 A task with no sector label shall not appear in the view.
+- OT-1.5 The view shall cover every project in the workspace regardless of the selected project; the header shall read All projects without a single project's stage or progress, and image export shall not be offered there. The existing filter (all, mine, agents, agent), label search and sort shall apply.
+- OT-1.6 Opening the view shall create, change or delete no projects or tasks.
 
-### Authority and input (OT-2)
+### Phone and tagging (OT-2)
 
-- OT-2.1 When the caller lacks `project:manage` in the workspace, the server shall refuse with 403, including an admin demoted to member.
-- OT-2.2 When the caller is an agent, the server shall refuse with 403.
-- OT-2.3 When the workspace id or template key is invalid, the server shall refuse with 400; an archived workspace shall not be changed.
-
-### Screen (OT-3)
-
-- OT-3.1 When an admin views Projects with no project selected, the filter sheet shall offer Add six-sector operation template (zh-CN 添加六大方面营运模板, zh-HK 加入六大方面營運模板); others shall not see it.
-- OT-3.2 When the apply succeeds, the screen shall show a toast with the created project and task counts and refresh projects and tasks; on failure it shall show the localized error.
-- OT-3.3 Every CJK character in the UI labels shall be in the bundled font subset (`scripts/ui/fonts.test.ts`); the button says 方面 because 块 and 塊 are not bundled (sector names in task data render with the system font fallback).
+- OT-2.1 The view shall be reachable from Projects → More → Sectors on phone (H5) and desktop, and by `?view=sectors`.
+- OT-2.2 When a person adds a task with a sector tag (Quick Add `+財務與現金`, or the task editor's labels), it shall appear under that sector; opening a row shall open the task.
+- OT-2.3 Every CJK character in the view's UI labels shall be in the bundled font subset; sector and indicator text is template data shown with the system font fallback.
 
 ## Non-functional
 
-- Route: `POST /api/workspaces/:id/operation-templates/:template`, response
-  `{ template, createdProjects, createdTasks }` (`operationTemplateResultSchema`).
-- One transaction under the workspace row lock; task numbers follow the
-  existing dense per-workspace sequence. No migration, dependency or new
-  permission action.
+- Client only: no route, migration, dependency, permission action or MCP tool.
+  Grouping is the pure `groupBySector` in `packages/schemas`.
 - English, Simplified Chinese and Traditional Chinese (Hong Kong) labels ship
   together; template content is bilingual Traditional Chinese and English.
 
 ## Out of scope in v1
 
-- Indicator values, targets or charts per sector.
-- Templates other than `generic-operation`, and user-edited templates.
-- An MCP tool for applying templates.
+- Tagging a project itself (projects carry no labels; a project appears under
+  a sector through its tagged tasks).
+- Indicator values, targets or charts per sector; other or user-edited templates.
 
 ## Acceptance
 
 | Requirement | Evidence |
 | --- | --- |
-| OT-1.1–1.4 | `packages/core/src/operation-templates.integration.test.ts` (create, idempotent repeat and concurrent apply, archived sector restore) |
-| OT-1.5 | `e2e/operation-templates.spec.ts` opens an indicator task on the Pixel 7 (H5) profile; task create and labels use existing tests |
-| OT-2.1–2.3 | `packages/core/src/operation-templates.integration.test.ts` (member, guest, outsider, demoted admin, agent, unknown template) |
-| OT-3.1–3.2 | `e2e/operation-templates.spec.ts`, Pixel 7 profile, en, zh-CN, zh-HK (3 cases); route row in `packages/core/src/authorization.integration.test.ts` (member denied) |
-| OT-3.3 | `scripts/ui/fonts.test.ts` |
+| OT-1.1–1.4 | `packages/schemas/src/operation-templates.test.ts` |
+| OT-1.2–1.5, OT-2.1–2.2 | `e2e/operation-templates.spec.ts`, Pixel 7 profile, en, zh-CN, zh-HK |
+| OT-1.6 | no test; the view issues only the existing task and project reads |
+| OT-2.3 | `scripts/ui/fonts.test.ts` |
 
 ## Open decisions
 
-- Live creation of the XIDING organization with the 侍天TIANSIGHT/APUCH
-  system admins as admins waits for the next release (owner, deploy machine).
+- Project-level sector tags would need a migration and an ADR; not requested.
 
 ## Sources
 
 - [Milestone 127](../milestones/127-operation-templates.md)
 - [Projects](projects.md)
-- [Permissions matrix](permissions-matrix.md)
 - [Changelog](../../CHANGELOG.md)
