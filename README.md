@@ -11,28 +11,30 @@ graph data and isolation scope.
 
 ## Status
 
-**Calendar export candidate (v0.2.25, unreleased).** Week and month grids export a 1600 px PNG from
-the visible civil window in the saved viewer zone; day/list views have no export
-button. See [view export VE-5](docs/spec/view-export.md); full release validation
-remains with the parent release gate.
+**v0.2.25 (deployed; closeout pending) — all six image outputs.** Summary, timeline,
+week, month, mind and relations images use authorized data, saved locale and
+time zone, watermarks, content hashes, shared quotas and snapshot audit.
+The existing dialog previews, sends, copies and saves images; agents use
+`views.image`, one of the unchanged 38 MCP tools. Legacy MCP JSON responses now
+wait for completion before recording call status. See the
+[view export spec](docs/spec/view-export.md) and [milestone 128](docs/milestones/128-v0.2.25.md).
+Sectors, XML-character rendering and canonical graph-order repairs are live.
+Realtime event bursts now share one refresh batch and a trailing read, preserving
+immediate session revocation. Deployed source `e5a42c5` (tree `47038018`) passed
+the exact-source operator gate and live acceptance; PR104 merged as `08b884a`
+with the same tree. **Tag verified; receipt, keeper release and independent probe
+remain pending; final closeout is not complete.** All four
+[owner checks](docs/owner-checks.md) remain pending after unlock. XIDING creation
+is separate and pending; no organization was created.
 
-**Graph export candidate (v0.2.25, unreleased).** Mind and relations toolbars and `views.image` export
-authorized 1080 px graphs with current visible options, localized overflow,
-watermark and snapshot audit. See [view export VE-6](docs/spec/view-export.md).
-
-**Timeline export candidate (v0.2.25, unreleased).** The timeline toolbar and `views.image` export a
-1600 px server-drawn chart with critical-path highlighting, saved viewer zone,
-watermark and snapshot audit. Full release validation remains pending; see
-[view export VE-4](docs/spec/view-export.md).
-
-**v0.2.24 (deployed, `ff411c6`) — exported view images and organization lifecycle.** Members and admins export the
+**v0.2.24 (previous deployed release, `ff411c6`) — exported view images and organization lifecycle.** Members and admins export the
 current project or the workspace overview as one watermarked PNG (1080 px,
 ≤ 400 KB) and send, copy or save it; each authorized snapshot records bounded
 metadata in the audit log. Agents with both read scopes use `views.image`,
 one of 38 MCP tools. See [view export](docs/spec/view-export.md).
 Project due-date and delivery-progress editing follows the [project profile spec](docs/spec/projects.md).
 Organization archive and restore follows the [workspace lifecycle spec](docs/spec/workspaces.md).
-Projects → More → Sectors regroups tagged tasks by the six-sector generic operation template; see [operation templates](docs/spec/operation-templates.md) (unreleased).
+Projects → More → Sectors regroups tagged tasks by the six-sector generic operation template; see [operation templates](docs/spec/operation-templates.md), deployed in v0.2.25.
 
 **v0.2.23 (deployed) — grant decisions and audience editing.** Pending requests
 are actionable from the access matrix; administrators can edit audience tags and

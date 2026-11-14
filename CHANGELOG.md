@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.2.25 — unreleased: timeline, calendar and graph exports
+## v0.2.25 — timeline, calendar, graph and Sectors views (deployed; closeout pending)
 
 - Timeline exports fit the full chart with the current critical-path highlight, task bars, milestones and dependencies; up to 60 rows with localized overflow.
 - Calendar exports show the visible week or month in the saved viewer's zone, with DST-aware civil days, a separate all-day band, next-day midnight labeled 24:00 and at most eight items per day. Unscheduled tray changes do not affect the image or its hash.
@@ -10,7 +10,10 @@
 - Projects → More gains 營運視圖 / Sectors: the 通用營運模板 / generic operation template regroups every task in the workspace by its sector tag (財務與現金, 客戶與市場, 營運與交付, 人才與組織, 風險與安全, 未來), then by project, with each sector's 領先指標 and 結果指標. Untagged tasks are not shown. Tag a task with Quick Add `+財務與現金` or in the task editor.
 - Fix (pre-release review of the v0.2.25 exports): a control character in a task title, project, workspace or person name no longer makes timeline, calendar, graph or summary images fail; the renderer draws it as a space.
 - Fix (pre-release review of #102): force-layout relations images now place every node exactly where the screen does; the image builder had laid out edges in key order instead of the canonical order core and the web use.
-- No new migration, environment variable, dependency, permission or MCP tool (the Sectors view is client only, and nothing is created when it opens); the catalog remains at 38 tools. Release validation and deployment are pending. Deploy web, API, worker and renderer from the same validated source; accepted v0.2.24 `ff411c6` remains production and the rollback source.
+- Together with existing summary images, these complete six outputs: summary, timeline, week, month, mind and relations, using saved locale/time zone unless an allowed locale override is supplied.
+- Legacy MCP uses the supported JSON transport so delayed image failures are logged as failed calls after completion. Modern handling and existing limits remain; cancellation settles the HTTP call and releases transport resources without undoing a snapshot already constructed.
+- Membership-event bursts now share one refresh batch and a trailing read for current data, preserving immediate session revocation and first-open stale-only behavior. PR104 merged the repair as `08b884a`, with the exact validated source tree.
+- No new migration, environment variable, dependency, permission, scope or MCP tool (the Sectors view is client only, and nothing is created when it opens); the catalog remains at 38 tools. All four images now run deployed source `e5a42c51eb8f096b94c34eaa052657afbb00a3d3`, tree `4703801890ecae415bbaba00ba13784c913c758e`, after the full exact-source gate and successful live acceptance. **Tag verified; receipt, keeper release and independent probe remain pending** ([milestone 128](docs/milestones/128-v0.2.25.md)); final closeout is not complete. Prior accepted v0.2.24 `ff411c6` remains the rollback source. All four owner checks remain pending after unlock; XIDING creation is separate and pending, and no organization was created.
 
 ## v0.2.24 — view exports and workspace lifecycle
 

@@ -1,9 +1,9 @@
 # 127 — public mind and relations image export candidate
 
-Status: integrated onto merged S2 main `9182d16`; full final gate, PR and deployment pending.
+Status: PR102 merged as `7c8db5c`, tree `5c84440`; graph exports and subsequent repairs are now deployed in v0.2.25 `e5a42c5`, tree `47038018`. Exact-source gate/live acceptance passed; final closeout pending.
 S1 PR100 merged at `0cd8302`; S2 PR101 merged at `9182d16` with exact validated tree: 2,313 unit, 38 Rust and 360 browser passed, 3 expected skips.
 All six S3 implementation/review/evidence/version commits retained; final rebase was conflict-free.
-Production remains accepted v0.2.24 `ff411c6`, also the v0.2.25 rollback source. API/web/worker package versions are now 0.2.25 with an explicitly unreleased changelog.
+Production now runs v0.2.25 `e5a42c5`; prior accepted v0.2.24 `ff411c6` is the rollback source. Tag verified; closeout checks 7–8 remain pending; no unlocked/final-closeout claim.
 Targets: TypeScript schemas/core/API/MCP/web/tests and Rust renderer; no new dependency, migration, environment value, permission or tool (38 remain).
 
 - Strict mind archived filter and relations layout/scope/layers/uint32 seed; normalized defaults and cross-view irrelevant options refused.
@@ -31,9 +31,9 @@ Earlier evidence, not rerun on this rebased tree:
 - Dev StrictMode aborted requests consumed quota; fixtures use fresh accounts per graph (2/4 exports), without changing product quota or adding retries. Ignored dev types were moved before earlier clean-source typechecks; no layout change.
 - Historical browser artifacts: `/private/tmp/taff-v025-s3-graph-artifacts` (before palette correction). Parent full gate requires a fresh seeded runtime database after prior focused fixtures.
 
-Open implementation decisions: none. Final full local gate, PR/merge, exact merged-source operator gate/direct deploy and owner checks remain.
+Open implementation decisions: none. Historical PR head `928ab9e`: 2,365 unit/147 files, Rust 44, 372 browser/3 skips (29.1 min), SSR 3, C6 six, checklist 32, MCP 69/38, four images, non-root 76+27, Today 197,317 bytes. Deployed `e5a42c5`: 2,376 unit/148, Rust 46, 375 browser/0 failures/3 expected skips (25.7 min), Today 197,390 bytes. Final closeout and all four owner checks remain pending in [milestone 128](128-v0.2.25.md).
 
 Proven audit repair after frozen `25bb821`: SDK legacy fallback ignored responseMode=json and logged ok before delayed renderer failure. Public legacy JSON transport now shares the same tool factory; modern handling, auth/quota and one-MiB limit remain intact.
 Real app/SDK regression was RED for legacy success/failure and GREEN for modern controls. Focused app/MCP/export suites now pass 100 tests in seven files, including 15 new HTTP completion/compatibility/abort/resource-cleanup cases; API/scripts types, changed-file Biome and diff checks passed.
 Request abort settles499 with one error log; connected server owns transport cleanup, listeners are released, and late work rejection is observed. No claim that abort undoes snapshots or cancels core work. VE-2.4 records this contract.
-The earlier checklist PNG assertion remains unexplained; parent reported 12 unchanged diagnostic cases passed. This patch fixes the independently reproduced audit defect only. No services/DB/Rust/full gate/push run here; parent must reseal and validate the new head.
+The earlier `25bb821` checklist PNG assertion remains unexplained; one focused rerun and 12 unchanged diagnostic cases passed. The patch fixes the independently reproduced audit defect only. The later deployed-source gate/live acceptance passed without establishing that PNG failure's cause. Known native-select capture variation remains documented in milestone 124; no baseline, tolerance or assertion was weakened.

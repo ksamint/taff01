@@ -6,7 +6,7 @@ Living product specification for workspace archive and restore
 the current contract; ADRs hold the decisions. Change this file in the same
 commit as the behaviour it describes.
 
-Status: released in v0.2.24 (`ff411c6`).
+Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a42c5`); exact-source gate and live acceptance passed. Tag verified; closeout checks 7–8 remain pending ([milestone 128](../milestones/128-v0.2.25.md)).
 
 ## Users and roles
 
