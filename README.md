@@ -11,7 +11,7 @@ graph data and isolation scope.
 
 ## Status
 
-**v0.2.25 (deployed; closeout pending) — all six image outputs.** Summary, timeline,
+**v0.2.25 (deployed and accepted) — all six image outputs.** Summary, timeline,
 week, month, mind and relations images use authorized data, saved locale and
 time zone, watermarks, content hashes, shared quotas and snapshot audit.
 The existing dialog previews, sends, copies and saves images; agents use
@@ -22,8 +22,8 @@ Sectors, XML-character rendering and canonical graph-order repairs are live.
 Realtime event bursts now share one refresh batch and a trailing read, preserving
 immediate session revocation. Deployed source `e5a42c5` (tree `47038018`) passed
 the exact-source operator gate and live acceptance; PR104 merged as `08b884a`
-with the same tree. **Tag verified; receipt, keeper release and independent probe
-remain pending; final closeout is not complete.** All four
+with the same tree. **Tag, receipt, keeper release and independent probe passed;
+final closeout is accepted.** All four
 [owner checks](docs/owner-checks.md) remain pending after unlock. XIDING creation
 is separate and pending; no organization was created.
 

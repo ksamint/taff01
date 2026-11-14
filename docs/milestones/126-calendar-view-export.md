@@ -1,6 +1,6 @@
 # 126 — public calendar image export candidate
 
-Status: merged in PR101 (`9182d16`), now deployed in v0.2.25 `e5a42c5`; exact-source gate and live acceptance passed, final closeout pending. Historical PR101 gate: 2,313 unit, 38 Rust and 360 browser, 3 expected skips.
+Status: merged in PR101 (`9182d16`), now deployed in v0.2.25 `e5a42c5`; exact-source gate and live acceptance passed, final closeout accepted. Historical PR101 gate: 2,313 unit, 38 Rust and 360 browser, 3 expected skips.
 S1 PR100 merged with the exact validated tree: 2,293 unit, 34 Rust, 357 browser passed, 3 expected skips.
 All five S2 implementation/review/evidence commits retained; accepted v0.2.24 production/next rollback source is `ff411c6`.
 Targets: TypeScript core/API/MCP/UI and shared formatter; existing Rust calendar renderer.
@@ -25,7 +25,7 @@ Original focused validation (before this preparatory rebase):
 - Temporary local harness used direct API + webpack dev on 4100/4101 and renderer 3303; no tracked config change. Existing isolated S1 test resources reused with parent authorization.
 - Focused Biome, generated contracts, git diff --check: passed. No full release gate claim.
 
-S3 and later repairs merged through PR104. Deployed `e5a42c5` passed 2,376 unit/148 files, Rust 46 and 375 browser/0 failures/3 expected skips; tag verified; closeout checks 7–8 remain pending in [milestone 128](128-v0.2.25.md).
+S3 and later repairs merged through PR104. Deployed `e5a42c5` passed 2,376 unit/148 files, Rust 46 and 375 browser/0 failures/3 expected skips; tag verified; closeout checks 7–8 passed in [milestone 128](128-v0.2.25.md).
 
 Review repairs (local only):
 - S1 palette fix cc24ffe inherited as 226f5d5; calendar now uses approved CSS ink/gold/outline/container and gold-mist opacity. Only six calendar goldens intentionally updated here (34923–68517 bytes); summary goldens untouched.

@@ -3,7 +3,7 @@
 Living product specification for browser realtime recovery, Node API/worker recovery and deployment
 configuration (PR #82). Change this file with the behavior it describes.
 
-Status: API/worker recovery shipped in v0.2.20, source `596272a`; persisted Valkey acceptance is recorded in [milestone 104](../milestones/104-v0.2.20.md). Bounded browser realtime refresh is deployed in v0.2.25 (`e5a42c5`) after exact-source gate and live acceptance; tag verified; closeout checks 7–8 remain pending. See [milestone 129](../milestones/129-realtime-invalidation.md).
+Status: API/worker recovery shipped in v0.2.20, source `596272a`; persisted Valkey acceptance is recorded in [milestone 104](../milestones/104-v0.2.20.md). Bounded browser realtime refresh is deployed in v0.2.25 (`e5a42c5`) after exact-source gate and live acceptance; tag verified; closeout checks 7–8 passed. See [milestone 129](../milestones/129-realtime-invalidation.md).
 
 ## Users and roles
 

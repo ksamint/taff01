@@ -1,6 +1,6 @@
 # 129 — bounded browser realtime invalidation
 
-Status: deployed in v0.2.25 source `e5a42c51eb8f096b94c34eaa052657afbb00a3d3`, tree `4703801890ecae415bbaba00ba13784c913c758e`; PR104 `08b884a` proves main ancestry and the same tree. Exact-source gate/live acceptance passed; final closeout pending.
+Status: deployed in v0.2.25 source `e5a42c51eb8f096b94c34eaa052657afbb00a3d3`, tree `4703801890ecae415bbaba00ba13784c913c758e`; PR104 `08b884a` proves main ancestry and the same tree. Exact-source gate/live acceptance passed; final closeout accepted.
 Base: merged main `c49aa07763b3cc9d1123430cb60dc49ec09316f7` (PR103 operation templates and pre-release fixes); isolated branch `fix/v025-realtime-invalidation`. Both realtime commits rebased without conflicts; their behavior is unchanged.
 Target: TypeScript realtime helper/tests and runtime living spec RT-3; no dependency, environment, migration, scope or tool change (38 tools).
 
@@ -16,5 +16,5 @@ Target: TypeScript realtime helper/tests and runtime living spec RT-3; no depend
 - The trace establishes amplification and preceding browser exhaustion; the later client scheduling gap was not CPU-profiled. The separate earlier PNG assertion remains unexplained; no test timeout, retry, baseline or tolerance changed.
 - Exact deployed-source operator gate: 2,376 unit/148 files, Rust 46, 375 browser/0 failures/3 expected skips (25.7 min), SSR 3, C6 six, checklist 32/zero retries (3.6 min), MCP 69/38, four amd64 images and non-root 76 migration/27 public reads passed. Today 197,390/204,800 gzip bytes.
 - Native replacement and live acceptance passed; live checks at 03:51:04 UTC recorded zero writes, browser exceptions and issued tokens. The selected project was archived and verification tags/summaries were absent; edit dialogs and owner download were not exercised.
-- Tag verified; closeout checks 7–8 remain pending; no keeper-release or independent-probe claim. All four owner checks remain pending after unlock; XIDING is separate/pending and no organization was created. See [milestone 128](128-v0.2.25.md).
+- Tag verified; closeout checks 7–8 passed; keeper released; independent probe passed. All four owner checks remain pending after unlock; XIDING is separate/pending and no organization was created. See [milestone 128](128-v0.2.25.md).
 - Open implementation decisions: none. [Runtime spec](../spec/runtime.md) records the behavior; [release closeout](../release-closeout.md) remains authoritative for acceptance.
