@@ -102,6 +102,47 @@ describe("bounded realtime reads", () => {
     await vi.advanceTimersByTimeAsync(0);
     return socket;
   }
+  it("marks first-open families stale during a mutation without queuing reads when no event arrives", async () => {
+    const task = observeFamily("tasks");
+    const me = observeFamily("me");
+    const write = deferred<void>();
+    const mutation = client.getMutationCache().build(client, {
+      mutationFn: () => write.promise,
+    });
+    const result = mutation.execute(undefined);
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    Socket.instances[0].open();
+    expect(me.reads).toHaveLength(1);
+    expect(task.reads).toHaveLength(0);
+    expect(client.getQueryState(task.key)?.isInvalidated).toBe(true);
+    me.reads[0].resolve(1);
+    write.resolve();
+    await result;
+    await vi.advanceTimersByTimeAsync(0);
+    expect(task.reads).toHaveLength(0);
+    expect(client.getQueryState(task.key)?.isInvalidated).toBe(true);
+  });
+  it("does not erase an ordinary change queued before first-open stale marking", async () => {
+    const task = observeFamily("tasks");
+    const write = deferred<void>();
+    const mutation = client.getMutationCache().build(client, {
+      mutationFn: () => write.promise,
+    });
+    const result = mutation.execute(undefined);
+    cleanup = connectWorkspace(client, workspaceId, userId);
+    // An early non-auth close queues a reconnect refresh while the write waits.
+    Socket.instances[0].close(1006);
+    await vi.advanceTimersByTimeAsync(250);
+    Socket.instances.at(-1)?.open();
+    expect(task.reads).toHaveLength(0);
+    write.resolve();
+    await result;
+    expect(task.reads).toHaveLength(1);
+    task.reads[0].resolve(1);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(client.getQueryData(task.key)).toBe(1);
+    expect(task.reads).toHaveLength(1);
+  });
   it("coalesces 317 membership events into one flight and one latest-state read per family", async () => {
     const socket = await open();
     const queries = [
@@ -383,12 +424,12 @@ describe("workspace realtime lifecycle", () => {
     await Promise.resolve();
     Socket.instances[0].open();
     Socket.instances[0].message(event);
-    // Only the role check runs at once; change refetches wait for the write.
-    expect(invalidate).toHaveBeenCalledTimes(1);
+    // Role check and stale-only marking run now; change refetches wait.
+    expect(invalidate).toHaveBeenCalledTimes(2);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["me"] });
     finish();
     await result;
-    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(invalidate).toHaveBeenCalledTimes(3);
   });
   it("checks revoked authentication immediately while a write is still pending", async () => {
     const invalidate = vi.spyOn(client, "invalidateQueries");
@@ -405,12 +446,12 @@ describe("workspace realtime lifecycle", () => {
     await Promise.resolve();
     Socket.instances[0].open();
     Socket.instances[0].close(1012);
-    expect(invalidate).toHaveBeenCalledTimes(2);
-    expect(invalidate).toHaveBeenNthCalledWith(2, { queryKey: ["me"] });
+    expect(invalidate).toHaveBeenCalledTimes(3);
+    expect(invalidate).toHaveBeenNthCalledWith(3, { queryKey: ["me"] });
     expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
     finish();
     await result;
-    expect(invalidate).toHaveBeenCalledTimes(2);
+    expect(invalidate).toHaveBeenCalledTimes(3);
     expect(client.getQueryData(["tasks", workspaceId])).toBeUndefined();
   });
   it("backs off, stops after eight failures, resumes on focus, and cleans up stale callbacks", () => {

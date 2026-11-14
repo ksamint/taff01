@@ -73,13 +73,9 @@ export function connectWorkspace(
   let refreshing = false;
   const families = ({ queryKey }: { queryKey: readonly unknown[] }) =>
     FAMILIES.includes(String(queryKey[0]));
-  const flush = (options?: { refetchType: "none" }) => {
+  const flush = () => {
     if (stopped || !dirty || refreshing || client.isMutating()) return;
     dirty = false;
-    if (options?.refetchType === "none") {
-      void client.invalidateQueries({ predicate: families, ...options });
-      return;
-    }
     // Join reads already in progress instead of restarting their HTTP work.
     // They may predate this change, so refresh once more after they settle.
     dirty = client.isFetching({ predicate: families, type: "active" }) > 0;
@@ -93,8 +89,13 @@ export function connectWorkspace(
       .then(settled, settled);
   };
   const invalidate = (options?: { refetchType: "none" }) => {
+    if (options?.refetchType === "none") {
+      // Stale-only marking neither queues reads nor consumes pending changes.
+      void client.invalidateQueries({ predicate: families, ...options });
+      return;
+    }
     dirty = true;
-    flush(options);
+    flush();
   };
   const unsubscribe = client.getMutationCache().subscribe(() => flush());
   function connect() {

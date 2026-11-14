@@ -41,7 +41,7 @@ Status: API/worker recovery shipped in v0.2.20, source `596272a`; persisted Valk
 
 - RT-3.1 When matching workspace or user events arrive during a refresh, the browser shall coalesce them into a trailing refresh instead of starting another concurrent batch of reads. Existing active reads shall be joined, with a later refresh to avoid retaining data read before the change.
 - RT-3.2 When an optimistic mutation is pending, ordinary event refreshes shall wait until it settles. Socket authentication revocation shall immediately clear session data and revalidate Me, independently of pending writes or ordinary refreshes.
-- RT-3.3 On the first socket open, the browser shall revalidate Me and mark other query families stale without refetching them. Reconnection shall refresh the families; stopping the connection shall prevent queued trailing refreshes and stale socket callbacks.
+- RT-3.3 On the first socket open, even during a pending mutation, the browser shall revalidate Me and mark other query families stale without queuing their reads or discarding a pending ordinary change. Reconnection shall refresh the families; stopping the connection shall prevent queued trailing refreshes and stale socket callbacks.
 
 ## Non-functional
 
