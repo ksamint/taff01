@@ -6,7 +6,7 @@ This file states the current contract; no ADR was needed because the module is
 a client view over existing tasks, labels and projects. Change this file in the
 same commit as the behaviour it describes.
 
-Status: implemented on branch `claude/epic-thompson-iwoxr3`; not yet released.
+Status: merged in PR103 and deployed in v0.2.25 (`e5a42c5`); exact-source gate and live acceptance passed. Tag verified; closeout checks 7–8 remain pending. XIDING creation is separate, pending and not performed.
 
 ## Users and roles
 

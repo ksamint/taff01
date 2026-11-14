@@ -12,4 +12,5 @@
 - Upgrade plan: `docs/upgrade-plan.md`, "Release sequence after v0.2.24": v0.2.25 then XIDING on behalf of a system admin through normal core `createWorkspace`.
 - ADR: TypeScript and Rust only is ADR 0030; backend to Rust is ADR 0026. No new ADR needed.
 - Validation numbers: see the PR body (local gate on the committed tree).
-- Pending: v0.2.25 deploy and XIDING creation run on the deploy machine; this cloud session has no production access.
+- Deployment update: v0.2.25 `e5a42c5`, tree `47038018`, passed the exact-source gate and native/live acceptance. PR104 `08b884a` has the same tree and includes that source in main. Tag verified; closeout checks 7–8 remain pending; all four owner checks run after unlock.
+- XIDING creation remains separate, pending and unauthorized in this closeout; no organization was created. Original implementation-session production-access limits remain historical.

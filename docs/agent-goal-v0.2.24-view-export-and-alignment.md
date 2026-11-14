@@ -1,9 +1,17 @@
 # v0.2.24–v0.2.25 — view exports, audit, agent images and GUI gaps
 
 Status: E1 and Phase 1 (A1/A3/A2/E2/A4/E3) are deployed in v0.2.24
-`ff411c6` ([milestone 124](milestones/124-v0.2.24.md)). Phase 2 remains open.
+`ff411c6` ([milestone 124](milestones/124-v0.2.24.md)). Phase 2 S1–S3 is merged
+through PRs 100–102; PR103 adds Sectors and pre-release repairs on main `c49aa07`.
+Production now runs v0.2.25 source `e5a42c5` (tree `47038018`), including the
+realtime repair merged by PR104 `08b884a` with the same tree. The full exact-source
+gate, native replacement and live acceptance passed. **Tag verified; receipt,
+keeper release and independent probe remain pending; final closeout is incomplete**
+([milestone 128](milestones/128-v0.2.25.md)).
 Owner-approved 2026-11-13 ("yes for all"; ADR 0031 amendment 1).
-The current goal is the user's latest command; owner checks run after unlock.
+The current goal is the user's latest command; all four owner checks, including
+native phone sharing, remain pending after unlock. XIDING creation remains a
+separate pending task without authorization in this closeout; no organization was created.
 
 ## How to work this plan
 
@@ -137,6 +145,11 @@ Each S task: spec additions to `view-export.md` (VE-4..6), e2e three locales,
 API matrix rows, `pnpm rust:gate` goldens. Release v0.2.25 per closeout;
 deploy all four images (web, API, worker and renderer) from the same validated
 source tree, since shared schemas, core delivery, UI and renderer change together.
+No new migration, environment variable, dependency, scope or tool is introduced;
+the catalog remains 38 tools. Rollback source is the actual accepted v0.2.24
+`ff411c6d035a64bb5ad1d91388245e910a81eb6b`. All four owner checks, including native
+phone sharing and Twin image-to-chat, remain pending after unlock per
+[owner checks](owner-checks.md).
 
 ## Done when
 
