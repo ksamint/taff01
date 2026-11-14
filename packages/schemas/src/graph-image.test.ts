@@ -15,6 +15,7 @@ import {
   relationsOptions,
 } from "./graph-image.fixture";
 import {
+  compareGraphEdges,
   forceLayout,
   layeredLayout,
   nodeOrder,
@@ -139,7 +140,9 @@ describe("shared web geometry", () => {
             kind: "depends_on",
             layer: "dependencies",
           });
-      source.edges.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
+      // The web lays out core's canonical order (layer, kind, from, to), not
+      // key order; force springs are summed in edge order.
+      source.edges.sort(compareGraphEdges);
       const options = { ...relationsOptions, layout, forceSeed: 7 };
       const visible = visibleGraph(source, options.layers);
       expect(visible.edges.length).toBeGreaterThan(600);

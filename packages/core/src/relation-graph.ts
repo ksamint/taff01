@@ -8,6 +8,7 @@ import {
   type RelationGraph,
   type TaskStatus,
 } from "@taff/schemas";
+import { compareGraphEdges } from "@taff/schemas/graph-layout";
 
 /**
  * The relations read model (plan §4.3, D8, D9). A pure function: core loads
@@ -67,16 +68,6 @@ const KIND_ORDER: GraphNodeKind[] = [
   "agent",
   "company",
   "contact",
-];
-const EDGE_ORDER: GraphEdgeKind[] = [
-  "contains",
-  "owns",
-  "works_on",
-  "supervises",
-  "depends_on",
-  "client_of",
-  "stakeholder_of",
-  "contact_of",
 ];
 const key = (kind: GraphNodeKind, id: string) => `${kind}:${id}`;
 const byText = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
@@ -291,13 +282,7 @@ export function relationGraph(input: RelationGraphInput): RelationGraph {
         byText(a.id, b.id),
     )
     .map(({ order: _order, ...node }) => node);
-  const sortedEdges = [...edges.values()].sort(
-    (a, b) =>
-      GRAPH_LAYERS.indexOf(a.layer) - GRAPH_LAYERS.indexOf(b.layer) ||
-      EDGE_ORDER.indexOf(a.kind) - EDGE_ORDER.indexOf(b.kind) ||
-      byText(a.from, b.from) ||
-      byText(a.to, b.to),
-  );
+  const sortedEdges = [...edges.values()].sort(compareGraphEdges);
   return {
     workspaceId: input.workspace.id,
     projectId: input.projectId,

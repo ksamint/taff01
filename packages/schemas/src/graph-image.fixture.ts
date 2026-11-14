@@ -6,6 +6,7 @@ import {
   type MindImageLabels,
   type RelationsImageOptions,
 } from "./graph-image";
+import { compareGraphEdges } from "./graph-layout";
 import type { MindMap } from "./mind";
 
 export const graphFixtureId = (index: number) =>
@@ -79,7 +80,8 @@ export function relationsFixture(count = 12): RelationGraph {
     layers: relationsOptions.layers,
     crmVisible: true,
     nodes,
-    edges: edges.sort((a, b) => (a.key < b.key ? -1 : a.key > b.key ? 1 : 0)),
+    // Core relationGraph's order, which the web lays out as given.
+    edges: edges.sort(compareGraphEdges),
   };
 }
 export function mindFixture(count = 10): MindMap {
