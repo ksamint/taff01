@@ -16,6 +16,7 @@ type State =
   | { kind: "loading" }
   | { kind: "failed"; unavailable: boolean }
   | ({ kind: "ready" } & Ready);
+type ExportProps = { workspaceId: string } & Omit<ViewExportQuery, "locale">;
 
 /** The download name the API sets; a safe fallback otherwise. */
 export function exportFileName(disposition: string | null): string {
@@ -35,22 +36,7 @@ export function canShareFile(file: File): boolean {
   }
 }
 
-export function ViewExportButton({
-  workspaceId,
-  projectId,
-  view,
-  criticalPath,
-  calendarMode,
-  visibleDate,
-}: {
-  workspaceId: string;
-  /** Omitted for the workspace overview. */
-  projectId?: string;
-  view?: ViewExportQuery["view"];
-  criticalPath?: ViewExportQuery["criticalPath"];
-  calendarMode?: ViewExportQuery["calendarMode"];
-  visibleDate?: string;
-}) {
+export function ViewExportButton({ workspaceId, ...options }: ExportProps) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   return (
@@ -68,11 +54,7 @@ export function ViewExportButton({
       {open && (
         <ViewExportDialog
           workspaceId={workspaceId}
-          projectId={projectId}
-          view={view}
-          criticalPath={criticalPath}
-          calendarMode={calendarMode}
-          visibleDate={visibleDate}
+          {...options}
           onClose={() => setOpen(false)}
         />
       )}
@@ -82,38 +64,31 @@ export function ViewExportButton({
 
 function ViewExportDialog({
   workspaceId,
-  projectId,
-  view,
-  criticalPath,
-  calendarMode,
-  visibleDate,
   onClose,
-}: {
-  workspaceId: string;
-  projectId?: string;
-  view?: ViewExportQuery["view"];
-  criticalPath?: ViewExportQuery["criticalPath"];
-  calendarMode?: ViewExportQuery["calendarMode"];
-  visibleDate?: string;
+  ...options
+}: ExportProps & {
   onClose: () => void;
 }) {
   const { t, i18n } = useTranslation();
   const locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
   const [state, setState] = useState<State>({ kind: "loading" });
   const [busy, setBusy] = useState(false);
+  const parameters = new URLSearchParams({ locale });
+  for (const [key, value] of Object.entries(options))
+    if (value !== undefined)
+      parameters.set(
+        key,
+        Array.isArray(value) ? value.join(",") : String(value),
+      );
+  const search = parameters.toString();
   useEffect(() => {
     const controller = new AbortController();
     let url: string | null = null;
-    const query = new URLSearchParams({ locale });
-    if (projectId) query.set("projectId", projectId);
-    if (view) query.set("view", view);
-    if (criticalPath) query.set("criticalPath", criticalPath);
-    if (calendarMode) query.set("calendarMode", calendarMode);
-    if (visibleDate) query.set("visibleDate", visibleDate);
+    setState({ kind: "loading" });
     (async () => {
       try {
         const response = await fetch(
-          `/api/workspaces/${encodeURIComponent(workspaceId)}/view-image?${query}`,
+          `/api/workspaces/${encodeURIComponent(workspaceId)}/view-image?${search}`,
           {
             credentials: "same-origin",
             cache: "no-store",
@@ -144,15 +119,7 @@ function ViewExportDialog({
       controller.abort();
       if (url) URL.revokeObjectURL(url);
     };
-  }, [
-    workspaceId,
-    projectId,
-    locale,
-    view,
-    criticalPath,
-    calendarMode,
-    visibleDate,
-  ]);
+  }, [workspaceId, search]);
 
   const ready = state.kind === "ready" ? state : null;
   const shareable = ready ? canShareFile(ready.file) : false;

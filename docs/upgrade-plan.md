@@ -121,15 +121,15 @@ access design [ADR 0028](adr/0028-organization-wide-agent-grants.md).
 Languages stay per [ADR 0030](adr/0030-typescript-and-rust-only.md) (TypeScript
 and Rust only) and [ADR 0026](adr/0026-backend-migration-to-rust.md) (backend to
 Rust module by module). Targets: sector view — TypeScript (`packages/schemas`,
-web client); view exports — TypeScript core/API/MCP/UI with the existing Rust
-`taff-render`; no new Rust crate, migration or dependency in this release.
+web client); view exports (timeline, calendar, mind and relations graphs) —
+TypeScript core/API/MCP/UI with the existing Rust `taff-render`; no new Rust crate, migration or dependency in this release.
 
 | Order | Release | Move | Validation |
 | --- | --- | --- | --- |
-| 1 | v0.2.25 | Merged on `main`: timeline export (PR #100), calendar export (PR #101), closeout docs (PR #99). Add the 營運視圖 / Sectors view ([operation templates](spec/operation-templates.md)). Fix any P0/P1 finding from the pre-release review of #99–#101 first. | Full local gate on the exact tree (`release-closeout.md` check 1), including `pnpm rust:gate` and the four image builds; Today ≤ 200 KiB. |
+| 1 | v0.2.25 | Merged on `main`: timeline export (PR #100), calendar export (PR #101), mind and relations graph exports (PR #102), closeout docs (PR #99). Add the 營運視圖 / Sectors view ([operation templates](spec/operation-templates.md)). Fix any P0/P1 finding from the pre-release review of #99–#102 first. | Full local gate on the exact tree (`release-closeout.md` check 1), including `pnpm rust:gate` and the four image builds; Today ≤ 200 KiB. |
 | 2 | v0.2.25 | Operator deploy from the deploy machine per `deploy.md`, automatic rollback to `ff411c6` on a failed check, closeout. | `release-closeout.md` checks 2–7. |
 | 3 | after closeout | Create organization **XIDING** on behalf of an existing system administrator through the normal core `createWorkspace` (Organizations → create, or the accepted native operator invocation recorded in `deploy.md`). No direct SQL, promotion, password reset or token. | Organization inventory shows XIDING active beside Table AI, 侍天TIANSIGHT and APUCH; each system admin holds its protected admin membership; one default agent; zero tokens issued; Sectors view opens on a phone. |
-| — | later | S3 graph view export (separate integration); project-level sector tags only with an ADR and migration. | Its own goal. |
+| — | later | Project-level sector tags only with an ADR and migration. | Its own goal. |
 
 ## Tooling move: TypeScript-only sources (v0.2.20)
 

@@ -88,6 +88,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
+import { ViewExportButton } from "./view-export";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 const EDGE_KINDS = ["relates", "supports", "contradicts"] as const;
@@ -115,7 +116,7 @@ const momentumMark = (momentum: number) =>
 const isOptimistic = (id: string | null) => !!id?.startsWith("optimistic:");
 
 export function MindView({ project }: { project: Project | undefined }) {
-  const { workspace, me } = useWorkspace();
+  const { workspace, me, confirmed } = useWorkspace();
   const { t } = useTranslation();
   const router = useRouter();
   const desktop = useDesktop();
@@ -181,6 +182,13 @@ export function MindView({ project }: { project: Project | undefined }) {
           <p>{t("mind.subtitle")}</p>
         </div>
         <div className="mind-toolbar">
+          {confirmed && workspace.role !== "guest" && (
+            <ViewExportButton
+              workspaceId={workspace.id}
+              view="mind"
+              archived={showArchived ? "include" : "exclude"}
+            />
+          )}
           {canWrite && (
             <>
               <Button

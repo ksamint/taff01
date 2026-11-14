@@ -1,10 +1,15 @@
 # Changelog
 
-## Unreleased — operation sector view
+## v0.2.25 — unreleased: timeline, calendar and graph exports
 
+- Timeline exports fit the full chart with the current critical-path highlight, task bars, milestones and dependencies; up to 60 rows with localized overflow.
+- Calendar exports show the visible week or month in the saved viewer's zone, with DST-aware civil days, a separate all-day band, next-day midnight labeled 24:00 and at most eight items per day. Unscheduled tray changes do not affect the image or its hash.
+- Mind and relations toolbars export their visible archived, layout, scope and layer options. Graphs use shared web geometry, fit label bounds and show at most 150 nodes and 600 rendered edges with exact localized omitted counts. Relations geometry uses all unique edges between retained nodes; only node truncation can change web positions.
+- Confirmed non-guests use the existing preview, send, copy and save dialog. Calendar day/list and relations list presentations hide the export control. Agents use the existing `views.image` tool with current workspace grants and both required read scopes.
+- Each view uses authorized core reads, canonical TABLE AI colors, exporter watermark, content hash, the shared quota and bounded snapshot audit. Timeline/calendar PNGs are 1600 px wide, graphs 1080 px; all are palette PNGs at most 4000 px high and 400 KB. These new views contain no finance or private source details.
 - Projects → More gains 營運視圖 / Sectors: the 通用營運模板 / generic operation template regroups every task in the workspace by its sector tag (財務與現金, 客戶與市場, 營運與交付, 人才與組織, 風險與安全, 未來), then by project, with each sector's 領先指標 and 結果指標. Untagged tasks are not shown. Tag a task with Quick Add `+財務與現金` or in the task editor.
-- Client-only view: no route, migration, dependency, permission action or MCP tool; nothing is created when the view opens.
-- Fix (pre-release review of the v0.2.25 exports): a control character in a task title, project, workspace or person name no longer makes timeline, calendar or summary images fail; the renderer draws it as a space.
+- Fix (pre-release review of the v0.2.25 exports): a control character in a task title, project, workspace or person name no longer makes timeline, calendar, graph or summary images fail; the renderer draws it as a space.
+- No new migration, environment variable, dependency, permission or MCP tool (the Sectors view is client only, and nothing is created when it opens); the catalog remains at 38 tools. Release validation and deployment are pending. Deploy web, API, worker and renderer from the same validated source; accepted v0.2.24 `ff411c6` remains production and the rollback source.
 
 ## v0.2.24 — view exports and workspace lifecycle
 

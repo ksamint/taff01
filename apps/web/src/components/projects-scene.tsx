@@ -515,8 +515,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             </nav>
             {confirmed &&
               workspace.role !== "guest" &&
-              view !== "timeline" &&
-              view !== "sectors" && (
+              !["timeline", "mind", "relations", "sectors"].includes(view) && (
                 <ViewExportButton
                   key={selected?.id ?? "workspace"}
                   workspaceId={workspace.id}

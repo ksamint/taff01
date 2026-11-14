@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto";
 import { activity, connectDatabase, members, tasks } from "@taff/db";
 import {
   calendarImageInputSchema,
+  GRAPH_LAYERS,
+  graphImageInputSchema,
   summaryImageLayoutInputSchema,
   timelineImageInputSchema,
 } from "@taff/schemas";
@@ -30,6 +32,7 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
   let w: string, otherW: string, owner: string, bobMember: string;
   let bobUser: string;
   let active: { id: string }, archived: { id: string }, foreign: { id: string };
+  let mindNode: { id: string; version: number };
   const instant = new Date("2026-11-12T09:30:00Z");
 
   beforeAll(async () => {
@@ -132,6 +135,27 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     foreign = await core.createProject(outsider, otherW, {
       name: "Elsewhere",
     });
+    mindNode = await core.createMindNode(bob, w, {
+      title: "Shared hypothesis",
+      layer: 1,
+      angle: 60,
+      note: "PRIVATE-NOTE",
+    });
+    const oldNode = await core.createMindNode(alice, w, {
+      title: "Archived hypothesis",
+      layer: 2,
+      angle: 90,
+    });
+    await core.updateMindNode(alice, oldNode.id, {
+      version: oldNode.version,
+      archived: true,
+    });
+    const source = await core.createMindSource(bob, w, {
+      title: "PRIVATE-SOURCE",
+      url: "https://private.example.test/source",
+      note: "PRIVATE-SOURCE-NOTE",
+    });
+    await core.linkMindSource(bob, mindNode.id, source.id);
   }, 60000);
   afterAll(async () => {
     if (core) await core.close();
@@ -482,6 +506,227 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     expect(scheduledOnly.truncated).toBe(false);
   });
 
+  it.each(["en", "zh-CN", "zh-HK"] as const)(
+    "exports member-authorized mind and relations in %s with exact scope and no private fields",
+    async (locale) => {
+      for (const view of ["mind", "relations"] as const) {
+        const query =
+          view === "mind"
+            ? { view, locale, archived: "exclude" as const }
+            : {
+                view,
+                locale,
+                projectId: active.id,
+                scope: "project" as const,
+                layout: "layered" as const,
+                layers: ["org" as const],
+                forceSeed: 7,
+              };
+        const result = await core.exportViewImageInput(bob, w, query);
+        const { fileName, ...image } = result;
+        expect(graphImageInputSchema.parse(image)).toEqual(image);
+        expect(image.layout.kind).toBe(view);
+        expect(image.layout.footer.text).toContain("Asia/Shanghai");
+        expect(image.layout.subtitle).toContain("Bob Member");
+        expect(image.watermark.contentHash).toBe(image.contentHash);
+        expect(image.layout.footer.hashFull).toBe(image.contentHash);
+        expect(fileName).toMatch(
+          new RegExp(`^taff-${view}-2026-11-12-[a-f0-9]{8}\\.png$`),
+        );
+        expect(JSON.stringify(image)).not.toMatch(
+          /PRIVATE-|private\.example|contractAmount|receivedAmount|finance/,
+        );
+        expect(
+          (await core.exportViewImageInput(bob, w, query)).contentHash,
+        ).toBe(image.contentHash);
+        const [audit] = await connection.db
+          .select()
+          .from(activity)
+          .where(
+            and(
+              eq(activity.action, "view.export"),
+              eq(activity.actorId, bobUser),
+            ),
+          )
+          .orderBy(desc(activity.createdAt));
+        expect(audit.resourceId).toBe(view === "mind" ? w : active.id);
+        expect(audit.details).toEqual({
+          scope: view,
+          locale,
+          contentHash: image.contentHash,
+          projectCount: view === "mind" ? 0 : 1,
+          finance: false,
+          channel: "web",
+        });
+      }
+    },
+  );
+
+  it("hashes visible graph options/data and saved zone while excluding private source changes", async () => {
+    const base = await core.exportViewImageInput(bob, w, {
+      view: "mind",
+      locale: "en",
+    });
+    expect(
+      (
+        await core.exportViewImageInput(bob, w, {
+          view: "mind",
+          locale: "en",
+          archived: "exclude",
+        })
+      ).contentHash,
+    ).toBe(base.contentHash);
+    expect(base.layout.nodes.map((node) => node.label.text)).toEqual([
+      "Shared hypothesis",
+    ]);
+    const included = await core.exportViewImageInput(bob, w, {
+      view: "mind",
+      archived: "include",
+      locale: "en",
+    });
+    expect(included.layout.nodes).toHaveLength(2);
+    expect(included.contentHash).not.toBe(base.contentHash);
+    mindNode = await core.updateMindNode(bob, mindNode.id, {
+      version: mindNode.version,
+      note: "CHANGED-PRIVATE-NOTE",
+    });
+    expect(
+      (await core.exportViewImageInput(bob, w, { view: "mind", locale: "en" }))
+        .contentHash,
+    ).toBe(base.contentHash);
+    mindNode = await core.updateMindNode(bob, mindNode.id, {
+      version: mindNode.version,
+      title: "Updated hypothesis",
+    });
+    expect(
+      (await core.exportViewImageInput(bob, w, { view: "mind", locale: "en" }))
+        .contentHash,
+    ).not.toBe(base.contentHash);
+    const relations = await core.exportViewImageInput(bob, w, {
+      view: "relations",
+      projectId: active.id,
+      locale: "en",
+    });
+    expect(
+      (
+        await core.exportViewImageInput(bob, w, {
+          view: "relations",
+          projectId: active.id,
+          locale: "en",
+          scope: "project",
+          layout: "layered",
+          layers: [...GRAPH_LAYERS].reverse(),
+          forceSeed: 7,
+        })
+      ).contentHash,
+    ).toBe(relations.contentHash);
+    for (const options of [
+      { layout: "force" as const },
+      { layers: [] },
+      { forceSeed: 8 },
+      { locale: "zh-CN" as const },
+    ])
+      expect(
+        (
+          await core.exportViewImageInput(bob, w, {
+            view: "relations",
+            projectId: active.id,
+            locale: "en",
+            ...options,
+          })
+        ).contentHash,
+      ).not.toBe(relations.contentHash);
+    try {
+      await core.updateProfile(bobUser, {
+        tz: "America/New_York",
+        locale: "en",
+      });
+      const changed = await core.exportViewImageInput(bob, w, {
+        view: "relations",
+        projectId: active.id,
+        locale: "en",
+      });
+      expect(changed.contentHash).not.toBe(relations.contentHash);
+      expect(changed.layout.footer.text).toContain("America/New_York");
+    } finally {
+      await core.updateProfile(bobUser, { tz: "Asia/Shanghai", locale: "en" });
+    }
+    for (const view of ["mind", "relations"] as const)
+      for (const principal of [gina, outsider])
+        await expect(
+          core.exportViewImageInput(principal, w, { view }),
+        ).rejects.toMatchObject({ code: "forbidden" });
+    await expect(
+      core.exportViewImageInput(bob, w, {
+        view: "relations",
+        projectId: foreign.id,
+      }),
+    ).rejects.toMatchObject({ code: "not_found" });
+  });
+
+  it("keeps CRM visibility in the authorized graph source and ignores hidden details in hashes", async () => {
+    let company = await core.createCompany(alice, w, {
+      name: "Graph CRM company",
+      industry: "PRIVATE-INDUSTRY",
+    });
+    let project = await core.createProject(alice, w, {
+      name: "CRM graph",
+      clientCompanyId: company.id,
+    });
+    const query = {
+      view: "relations" as const,
+      projectId: project.id,
+      locale: "en" as const,
+    };
+    const memberImage = await core.exportViewImageInput(bob, w, query);
+    expect(
+      memberImage.layout.nodes.some(
+        (node) => node.key === `company:${company.id}`,
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(memberImage)).not.toContain("PRIVATE-INDUSTRY");
+    company = await core.updateCompany(alice, company.id, {
+      version: company.version,
+      industry: "CHANGED-PRIVATE-INDUSTRY",
+    });
+    project = await core.updateProject(alice, project.id, {
+      version: project.version,
+      contractAmount: "9876.00",
+      currency: "CNY",
+    });
+    expect((await core.exportViewImageInput(bob, w, query)).contentHash).toBe(
+      memberImage.contentHash,
+    );
+    const hidden = await core.exportViewImageInput(agent, w, query, "mcp");
+    expect(
+      hidden.layout.nodes.some((node) => node.key.startsWith("company:")),
+    ).toBe(false);
+    await core.updateCompany(alice, company.id, {
+      version: company.version,
+      name: "Hidden renamed company",
+    });
+    expect(
+      (await core.exportViewImageInput(agent, w, query, "mcp")).contentHash,
+    ).toBe(hidden.contentHash);
+    const memberId = (agent as { memberId: string }).memberId;
+    await core.setAgentPermission(alice, memberId, {
+      capability: "crm.read",
+      decision: "allow",
+    });
+    expect(
+      (
+        await core.exportViewImageInput(agent, w, query, "mcp")
+      ).layout.nodes.some((node) => node.key === `company:${company.id}`),
+    ).toBe(true);
+    await core.setAgentPermission(alice, memberId, {
+      capability: "crm.read",
+      decision: "deny",
+    });
+    expect(
+      (await core.exportViewImageInput(agent, w, query, "mcp")).contentHash,
+    ).toBe(hidden.contentHash);
+  });
+
   it("audits each authorized snapshot with allowlisted metadata and no change notification", async () => {
     const rows = () =>
       connection.db
@@ -571,6 +816,10 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       scopes: ["tasks:read", "summaries:read"],
     });
     const p = (await core.authenticateAgentToken(issued.token))!;
+    for (const view of ["mind", "relations"] as const)
+      await expect(
+        core.exportViewImageInput(p, w, { view }, "mcp"),
+      ).resolves.toHaveProperty("layout");
     await expect(
       core.exportViewImageInput(p, w, {}, "mcp"),
     ).resolves.toHaveProperty("layout");
@@ -583,6 +832,10 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       await expect(
         core.exportViewImageInput(p, w, {}, "mcp"),
       ).rejects.toMatchObject({ code: "forbidden" });
+      for (const view of ["mind", "relations"] as const)
+        await expect(
+          core.exportViewImageInput(p, w, { view }, "mcp"),
+        ).rejects.toMatchObject({ code: "forbidden" });
       await expect(
         core.exportViewImageInput(
           p,
@@ -606,6 +859,10 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       scopes: ["tasks:read", "summaries:read"],
       revoked: true,
     });
+    for (const view of ["mind", "relations"] as const)
+      await expect(
+        core.exportViewImageInput(p, w, { view }, "mcp"),
+      ).rejects.toMatchObject({ code: "forbidden" });
     await expect(
       core.exportViewImageInput(
         p,
@@ -625,6 +882,12 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       tz: "Asia/Shanghai",
     });
     const image = await core.exportViewImageInput(agent, w, {}, "mcp");
+    for (const view of ["mind", "relations"] as const) {
+      const graph = await core.exportViewImageInput(agent, w, { view }, "mcp");
+      expect(graph.layout.locale).toBe("zh-CN");
+      expect(graph.layout.footer.text).toContain("Asia/Shanghai");
+      expect(graph.watermark.text).toContain("Export Agent");
+    }
     const timelineImage = await core.exportViewImageInput(
       agent,
       w,
@@ -688,6 +951,10 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
     );
     expect(hidden.layout.projects[0].finance).toBeNull();
     await core.revokeAgentToken(alice, (agent as { tokenId: string }).tokenId);
+    for (const view of ["mind", "relations"] as const)
+      await expect(
+        core.exportViewImageInput(agent, w, { view }, "mcp"),
+      ).rejects.toMatchObject({ code: "forbidden" });
     await expect(
       core.exportViewImageInput(
         agent,
@@ -726,6 +993,10 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
 
   it("stops a demoted member and allows them again once restored", async () => {
     await core.updateMemberRole(alice, w, bobMember, { role: "guest" });
+    for (const view of ["mind", "relations"] as const)
+      await expect(
+        core.exportViewImageInput(bob, w, { view }),
+      ).rejects.toMatchObject({ code: "forbidden" });
     await expect(
       core.exportViewImageInput(bob, w, {
         view: "calendar",
@@ -743,6 +1014,10 @@ describe.skipIf(!url)("exported view images (ADR 0031)", () => {
       core.exportViewImageInput(bob, w, { locale: "en" }),
     ).rejects.toMatchObject({ code: "forbidden" });
     await core.updateMemberRole(alice, w, bobMember, { role: "member" });
+    for (const view of ["mind", "relations"] as const)
+      await expect(
+        core.exportViewImageInput(bob, w, { view }),
+      ).resolves.toHaveProperty("layout");
     await expect(
       core.exportViewImageInput(bob, w, {
         view: "calendar",

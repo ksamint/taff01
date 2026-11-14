@@ -3,6 +3,7 @@ import { CoreError, createCore } from "@taff/core";
 import pino from "pino";
 import { afterAll, afterEach, describe, expect, it, vi } from "vitest";
 import { calendarImageFixture } from "../../../packages/schemas/src/calendar-image.fixture";
+import { graphImageFixture } from "../../../packages/schemas/src/graph-image.fixture";
 import { timelineImageFixture } from "../../../packages/schemas/src/timeline-image.fixture";
 import { createApp } from "./app";
 import type { RateLimiter } from "./rate-limit";
@@ -168,6 +169,11 @@ describe("exported view image route", () => {
       `${path}&view=timeline&criticalPath=yes`,
       `/api/workspaces/${id}/view-image?locale=en&view=calendar&calendarMode=day&visibleDate=2026-03-08`,
       `${path}&view=calendar&calendarMode=week&visibleDate=2026-03-08`,
+      `${path}&view=mind`,
+      `/api/workspaces/${id}/view-image?locale=en&view=relations&scope=project`,
+      `/api/workspaces/${id}/view-image?locale=en&view=relations&layers=crm,crm`,
+      `/api/workspaces/${id}/view-image?locale=en&view=relations&forceSeed=1e2`,
+      `/api/workspaces/${id}/view-image?locale=en&view=mind&nodes=[]`,
       "/api/workspaces/nope/view-image?locale=en",
     ])
       expect((await app.request(bad)).status).toBe(400);
@@ -210,6 +216,57 @@ describe("exported view image route", () => {
     );
     expect(hits).toHaveLength(1);
   });
+
+  it.each(["mind", "relations"] as const)(
+    "routes %s through the shared quota and graph renderer with typed options",
+    async (view) => {
+      signIn();
+      const image = graphImageFixture(view, "zh-CN");
+      const call = vi
+        .spyOn(core, "exportViewImageInput")
+        .mockResolvedValue({ ...image, fileName: `taff-${view}.png` });
+      renderer.mockResolvedValue(
+        new Response(PNG, { headers: { "content-type": "image/png" } }),
+      );
+      const query =
+        view === "mind"
+          ? "archived=include"
+          : `scope=project&projectId=${project}&layout=force&layers=org,dependencies&forceSeed=7`;
+      const response = await app.request(
+        `/api/workspaces/${id}/view-image?locale=zh-CN&view=${view}&${query}`,
+      );
+      expect(response.status).toBe(200);
+      expect(call).toHaveBeenLastCalledWith(
+        { kind: "user", userId: id },
+        id,
+        {
+          locale: "zh-CN",
+          view,
+          ...(view === "mind"
+            ? { archived: "include" }
+            : {
+                scope: "project",
+                projectId: project,
+                layout: "force",
+                layers: ["org", "dependencies"],
+                forceSeed: 7,
+              }),
+        },
+        "web",
+      );
+      expect(String(renderer.mock.calls[0][0])).toBe(
+        "http://render.internal:3002/render/graph",
+      );
+      expect(JSON.parse(String(renderer.mock.calls[0][1]?.body))).toEqual(
+        image,
+      );
+      expect(response.headers.get("cache-control")).toBe("private, no-store");
+      expect(response.headers.get("x-taff-content-hash")).toBe(
+        image.contentHash,
+      );
+      expect(hits).toHaveLength(1);
+    },
+  );
 
   it("refuses over the limit and fails closed when the count fails", async () => {
     signIn();

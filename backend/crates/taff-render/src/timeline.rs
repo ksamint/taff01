@@ -72,7 +72,7 @@ fn text(svg: &mut String, x: f64, y: f64, size: u32, value: &str) {
     ));
 }
 // A width budget measured conservatively in half-em units also handles user CJK names.
-fn clipped(value: &str, units: usize) -> String {
+pub(crate) fn clipped(value: &str, units: usize) -> String {
     let mut out = String::new();
     let mut used = 0;
     for ch in value.chars() {

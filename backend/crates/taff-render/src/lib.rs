@@ -9,7 +9,9 @@ use std::sync::{Arc, OnceLock};
 mod calendar;
 mod designed;
 pub use calendar::render_calendar;
+mod graph;
 mod timeline;
+pub use graph::render_graph;
 pub use timeline::render_timeline;
 
 pub const IMAGE_V1: &str = "image-1";
@@ -346,8 +348,28 @@ pub fn router() -> Router {
         .route("/render/summary", post(render))
         .route("/render/timeline", post(render_timeline_http))
         .route("/render/calendar", post(render_calendar_http))
+        .route("/render/graph", post(render_graph_http))
         .route("/health", axum::routing::get(|| async { "ok" }))
         .layer(DefaultBodyLimit::max(8 * 1024 * 1024))
+}
+
+async fn render_graph_http(
+    Json(input): Json<Value>,
+) -> Result<([(&'static str, &'static str); 3], Vec<u8>), (StatusCode, &'static str)> {
+    tokio::task::spawn_blocking(move || render_graph(&input))
+        .await
+        .map_err(|_| (StatusCode::INTERNAL_SERVER_ERROR, "render_failed"))?
+        .map(|png| {
+            (
+                [
+                    ("content-type", "image/png"),
+                    ("cache-control", "no-store"),
+                    ("x-taff-renderer", graph::VERSION),
+                ],
+                png,
+            )
+        })
+        .map_err(|error| (StatusCode::UNPROCESSABLE_ENTITY, error))
 }
 
 async fn render_timeline_http(

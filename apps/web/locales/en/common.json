@@ -1277,9 +1277,9 @@
     "canvasLabel": "Mind map with {{count}} nodes. Use “As list” or the side panel to browse by keyboard.",
     "evidence": "Evidence",
     "momentum": {
-      "2": "Rising fast",
-      "1": "Rising",
       "0": "Stable",
+      "1": "Rising",
+      "2": "Rising fast",
       "m1": "Cooling",
       "m2": "Cooling fast"
     },
@@ -1670,6 +1670,9 @@
     "alt": "Preview of the exported image",
     "timelineHeading": "Timeline · {{project}}",
     "calendarHeading": "Calendar · {{period}}",
-    "allDay": "All day"
+    "allDay": "All day",
+    "noMindNodes": "This workspace has no mind map nodes.",
+    "moreNodes": "+{{count}} more nodes",
+    "moreEdges": "+{{count}} more edges"
   }
 }

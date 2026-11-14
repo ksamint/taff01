@@ -1,0 +1,48 @@
+{
+  "layout": {
+    "kind": "mind",
+    "locale": "zh-HK",
+    "width": 1080,
+    "height": 1224,
+    "title": "思維圖",
+    "subtitle": "由艾麗絲匯出",
+    "empty": "暫無節點",
+    "more": null,
+    "moreEdges": null,
+    "view": {
+      "scale": 1.0123456790123457,
+      "x": 540,
+      "y": 636
+    },
+    "nodes": [],
+    "edges": [],
+    "rings": [
+      {
+        "radius": 80,
+        "label": "層 1"
+      },
+      {
+        "radius": 165,
+        "label": "層 2"
+      },
+      {
+        "radius": 250,
+        "label": "層 3"
+      },
+      {
+        "radius": 335,
+        "label": "層 4"
+      }
+    ],
+    "centre": "核心",
+    "footer": {
+      "text": "由艾麗絲匯出 · 2026-03-08 12:00 · Asia/Shanghai",
+      "hashFull": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  },
+  "watermark": {
+    "text": "由艾麗絲匯出 · Taff · 2026-03-08",
+    "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "contentHash": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

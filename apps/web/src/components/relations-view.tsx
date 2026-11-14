@@ -39,6 +39,7 @@ import {
   layeredLayout,
   nodeOrder,
   type Positions,
+  relationEdgePath,
   type View,
   visibleGraph,
   zoomAt,
@@ -46,6 +47,7 @@ import {
 import { useRelationGraph } from "../lib/graph-queries";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
+import { ViewExportButton } from "./view-export";
 
 type Translate = ReturnType<typeof useTranslation>["t"];
 type Layout = "layered" | "force";
@@ -70,7 +72,7 @@ export function relationsOf(
 }
 
 export function RelationsView({ project }: { project: Project | undefined }) {
-  const { workspace } = useWorkspace();
+  const { workspace, confirmed } = useWorkspace();
   const { t } = useTranslation();
   const searchParams = useSearchParams();
   const ids = useId();
@@ -136,6 +138,17 @@ export function RelationsView({ project }: { project: Project | undefined }) {
       aria-label={t("projects.relationsView")}
     >
       <div className="relations-toolbar">
+        {confirmed && workspace.role !== "guest" && !asList && (
+          <ViewExportButton
+            workspaceId={workspace.id}
+            view="relations"
+            projectId={projectId ?? undefined}
+            scope={projectId ? "project" : "workspace"}
+            layout={layout}
+            layers={layers.filter((layer) => shownLayers.includes(layer))}
+            forceSeed={FORCE_SEED}
+          />
+        )}
         <div
           className="relations-segment"
           role="group"
@@ -470,11 +483,7 @@ function GraphCanvas({
               const a = positions[edge.from];
               const b = positions[edge.to];
               if (!a || !b) return null;
-              const mx = (a.x + b.x) / 2;
-              const d =
-                layout === "layered"
-                  ? `M${a.x},${a.y}C${mx},${a.y} ${mx},${b.y} ${b.x},${b.y}`
-                  : `M${a.x},${a.y}L${b.x},${b.y}`;
+              const d = relationEdgePath(a, b, layout);
               const on =
                 selectedKey !== null &&
                 (edge.from === selectedKey || edge.to === selectedKey);
