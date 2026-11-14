@@ -1,8 +1,6 @@
 // Project mutations: create and rename/archive from the project dialog, and
 // board status moves with undo.
 import {
-  type OperationTemplateKey,
-  operationTemplateResultSchema,
   type Project,
   type ProjectInput,
   type ProjectUpdate,
@@ -102,23 +100,6 @@ export function useManageProject(
       );
       onSaved?.(project);
     },
-    onSettled: () => invalidateM3(client),
-  });
-}
-
-/**
- * Applies an operation template (spec OT-1). The server is idempotent, so a
- * repeat reports zero created items; no optimistic state is drawn.
- */
-export function useApplyOperationTemplate(workspaceId: string) {
-  const client = useQueryClient();
-  return useMutation({
-    mutationKey: m3MutationKey,
-    mutationFn: (template: OperationTemplateKey) =>
-      request(
-        `/api/workspaces/${workspaceId}/operation-templates/${template}`,
-        { method: "POST" },
-      ).then(operationTemplateResultSchema.parse),
     onSettled: () => invalidateM3(client),
   });
 }

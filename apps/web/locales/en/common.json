@@ -149,8 +149,6 @@
     "sortCreated": "Newest first",
     "filter": "Filter tasks",
     "newProject": "Create project",
-    "applyOperationTemplate": "Add six-sector operation template",
-    "templateApplied": "Operation template applied: {{projects}} projects and {{tasks}} tasks added",
     "projectName": "Project name",
     "dueDate": "Due date",
     "deliveryProgress": "Delivery progress",

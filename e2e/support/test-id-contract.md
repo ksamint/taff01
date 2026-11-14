@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (484 distinct, 2259 uses)
+## Test ids (483 distinct, 2256 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -485,7 +485,6 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `apply-operation-template` | 1 |  | operation-templates.spec.ts |
 | `board-column-done` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-column-in_progress` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-column-todo` | 1 |  | planning.spec.ts |
@@ -606,7 +605,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `toast` | 27 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, operation-templates.spec.ts, optimistic-m4.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, view-export.spec.ts |
+| `toast` | 26 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, view-export.spec.ts |
 | `toast-action` | 41 |  | crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, task-contacts.spec.ts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 
 ### sidebar.tsx
@@ -722,7 +721,7 @@ several do). “Also rendered by” lists the other files.
 | `subtask-title` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `task-comment` | 8 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `task-comment-submit` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `task-detail-heading` | 44 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, operation-templates.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
+| `task-detail-heading` | 43 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
 | `task-field-due` | 2 |  | planning.spec.ts |
 | `task-field-status` | 1 |  | optimistic-m4.spec.ts |
 | `task-field-text` | 5 |  | planning.spec.ts |
@@ -887,7 +886,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: original.title` | 2 | persistence.spec.ts |
 | `link — name: renamed` | 2 | persistence.spec.ts |
 | `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
-| `link — name: title` | 10 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, operation-templates.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
+| `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `list` | 1 | planning.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `progressbar` | 1 | summaries.spec.ts |
@@ -1239,14 +1238,12 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projectFinance.noContract` | 1 | project-finance.spec.ts |
 | `projectFinance.positiveAmount` | 1 | project-finance.spec.ts |
 | `projectFinance.readOnly` | 1 | project-finance.spec.ts |
-| `projects.applyOperationTemplate` | 1 | operation-templates.spec.ts |
 | `projects.archive` | 2 | project-profile.spec.ts |
 | `projects.deliveryProgress` | 1 | project-profile.spec.ts |
 | `projects.dueDate` | 2 | project-profile.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
-| `projects.templateApplied` | 1 | operation-templates.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `pwa.reconnect` | 1 | persistence.spec.ts |
 | `relations.edge.depends_on.out` | 12 | live/timeline.spec.ts, timeline.spec.ts |

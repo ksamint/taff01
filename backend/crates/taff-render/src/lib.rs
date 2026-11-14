@@ -18,8 +18,18 @@ pub const IMAGE_V2: &str = "image-2";
 const MAX_BYTES: usize = 400 * 1024;
 const SCHEMA: &str = include_str!("../../../../packages/schemas/generated/daily-summary.json");
 
+/// XML text for the SVG. Characters XML 1.0 forbids (control characters other
+/// than tab, newline and return; U+FFFE; U+FFFF) become spaces, because user
+/// text is only trimmed upstream and usvg rejects them.
 pub(crate) fn escape(text: &str) -> String {
-    text.replace('&', "&amp;")
+    text.chars()
+        .map(|c| match c {
+            '\t' | '\n' | '\r' => c,
+            '\u{0}'..='\u{1f}' | '\u{fffe}' | '\u{ffff}' => ' ',
+            _ => c,
+        })
+        .collect::<String>()
+        .replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;")

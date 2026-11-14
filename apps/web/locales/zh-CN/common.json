@@ -149,8 +149,6 @@
     "sortCreated": "最新创建",
     "filter": "筛选任务",
     "newProject": "创建项目",
-    "applyOperationTemplate": "添加六大方面营运模板",
-    "templateApplied": "已应用营运模板：新增 {{projects}} 个项目、{{tasks}} 项任务",
     "projectName": "项目名称",
     "dueDate": "截止日期",
     "deliveryProgress": "交付进度",

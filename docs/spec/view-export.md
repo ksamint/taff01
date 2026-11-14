@@ -42,6 +42,7 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 - VE-3.5 Overview/project summary images shall be 1080 px wide, a palette PNG of at most 400 KB, fitted under the 3,400 px height budget (ADR 0029). Timeline images follow VE-4.3; calendars follow VE-5.6.
 - VE-3.6 The projects header shall show an Export image button to people who are not guests, once the session is confirmed; it shows the current project, or the workspace overview when no project is selected.
 - VE-3.7 The dialog shall preview the image with its width and size, and offer Send (only when `navigator.canShare` accepts the file), Copy image (only when `ClipboardItem` exists) and Save (always); Escape closes it and returns focus to the button.
+- VE-3.8 The renderer shall draw text containing characters XML 1.0 forbids (control characters other than tab, newline and return; U+FFFE; U+FFFF), such as a task title, project, workspace or exporter name, by replacing each with a space instead of failing the export.
 
 ### Timeline exports (VE-4)
 - VE-4.1 The internal `POST /render/timeline` shall accept only the generated `timeline-image.json` display contract and report `X-Taff-Renderer: timeline-1`.
@@ -92,6 +93,7 @@ Post `{layout, watermark: {text, contentHash}, contentHash}`. Core must bind the
 | VE-3.1–3.4 | `apps/api/src/view-export.test.ts` (6 cases) |
 | VE-3.5 | `e2e/view-export.spec.ts` (≤ 400 KB, 1080 px through the real renderer); `taff-render` caps |
 | VE-3.6–3.7 | `e2e/view-export.spec.ts`, en, zh-CN, zh-HK |
+| VE-3.8 | `backend/crates/taff-render/tests/render.rs` `xml_invalid_characters_in_user_text_never_fail_a_render` |
 | Deploy wiring | `scripts/apuch-compose.test.ts` (API and worker share the renderer URL) |
 | VE-4.1–4.4 | `packages/schemas/src/timeline-image.test.ts`; `backend/crates/taff-render/tests/render.rs` timeline cases and three locale PNG goldens |
 | VE-4.5–4.7 | `packages/schemas/src/view-export.test.ts`; `view-export.integration.test.ts`; `apps/api/src/view-export.test.ts`, `mcp-views.test.ts`; timeline case in `e2e/view-export.spec.ts` across three locales |

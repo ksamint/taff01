@@ -149,8 +149,6 @@
     "sortCreated": "最新建立",
     "filter": "篩選任務",
     "newProject": "建立項目",
-    "applyOperationTemplate": "加入六大方面營運模板",
-    "templateApplied": "已套用營運模板：新增 {{projects}} 個項目、{{tasks}} 項任務",
     "projectName": "項目名稱",
     "dueDate": "截止日期",
     "deliveryProgress": "交付進度",
