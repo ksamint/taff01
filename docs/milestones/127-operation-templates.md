@@ -6,6 +6,7 @@
 - Working (TypeScript only: `packages/schemas`, web client): Projects → More → 營運視圖 / Sectors regroups every task in the workspace by sector label, then by project in project order, showing each sector's 領先指標 and 結果指標; untagged tasks are hidden; filters and sort apply; no project meta or image export in this view. No route, migration, permission or MCP change.
 - Spec: [operation templates](../spec/operation-templates.md) OT-1, OT-2.
 - Review of unreleased PRs #99–#101: no P0, no authorization or privacy defect. One P2/P1: XML-invalid characters in user text failed every timeline/calendar export (and reached summary watermarks). Fixed in the Rust renderer `escape()` (VE-3.8) with a failing-first test; goldens unchanged. PR #102 (graph exports) merged into `main` meanwhile; branch merged with it, the fix covers graphs (test added), and #102 is reviewed separately before release.
+- Node 26.13: `apps/api/src/mcp-http.test.ts` (from #102) failed 3 cases on main because Node 26.13 lists its internal `abortSignalFollowers` link; it passes on 26.12.1. The test now ignores only that Node-owned listener; the adapter-leak check stays.
 - Fonts: 塊/块/指/领/域 are not in the bundled subset, so UI strings use 方面 and 視圖; sector and indicator text is template data drawn with the system fallback.
 - Upgrade plan: `docs/upgrade-plan.md`, "Release sequence after v0.2.24": v0.2.25 then XIDING on behalf of a system admin through normal core `createWorkspace`.
 - ADR: TypeScript and Rust only is ADR 0030; backend to Rust is ADR 0026. No new ADR needed.
