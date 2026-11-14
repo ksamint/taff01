@@ -49,3 +49,10 @@ Needs: the owner's Claude.ai account with custom connectors allowed.
 Have Twin call `views.image` with both read scopes and post one returned PNG
 to an owner-selected test chat. Check agent watermark, filename and readable
 content; record date, release and pass/fail. This task does not send messages.
+
+## 5. XIDING on a phone (OT-2, from the v0.2.26 plan X3)
+
+1. Sign in on a phone, switch to XIDING, open Projects → More → Sectors.
+2. Six sectors show in order, each with its 營運設置 setup task.
+3. Quick Add `+財務與現金 <any title>`; the task appears under 財務與現金.
+4. Record: date, release, pass/fail. Archive the test task afterwards.
