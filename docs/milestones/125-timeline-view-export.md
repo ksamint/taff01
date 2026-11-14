@@ -1,6 +1,6 @@
 # 125 — public timeline image export candidate
 
-Status: merged in PR100 (`0cd8302`), now deployed in v0.2.25 source `e5a42c5` after exact-source gate and live acceptance; tag verified; closeout checks 7–8 remain pending.
+Status: merged in PR100 (`0cd8302`), now deployed in v0.2.25 source `e5a42c5` after exact-source gate and live acceptance; tag verified; closeout checks 7–8 passed.
 Original implementation base E3: d0c9eae16eae044e53dce4e2bbc9abf851dd4f09.
 Integrated onto v0.2.24 closeout main `02e03c4`; pure renderer, public integration, browser evidence and palette repairs preserved.
 Targets: TypeScript core/API/MCP/UI and shared schemas; existing Rust timeline renderer.
@@ -24,7 +24,7 @@ Focused validation on the implementation tree:
 - Three-locale timeline browser tests: 3 passed in 29.3 s against the real renderer (1600 px PNG/save, critical highlight hash change, zoom hash stability).
 - Browser command: `node --env-file=.env node_modules/@playwright/test/cli.js test --config playwright.timeline.local.ts e2e/view-export.spec.ts -g 'timeline exports'`; temporary harness used direct API + webpack dev on 4100/4101, renderer 3303. Default Turbopack startup could not resolve external dependency links; no tracked config change.
 
-PR100 gate: 2,293 unit, 34 Rust and 357 browser passed, 3 expected skips. S2/S3 and later repairs merged through PR104; deployed `e5a42c5` passed 2,376 unit/148 files, Rust 46 and 375 browser/0 failures/3 expected skips. Final closeout remains pending in [milestone 128](128-v0.2.25.md).
+PR100 gate: 2,293 unit, 34 Rust and 357 browser passed, 3 expected skips. S2/S3 and later repairs merged through PR104; deployed `e5a42c5` passed 2,376 unit/148 files, Rust 46 and 375 browser/0 failures/3 expected skips. Final closeout is accepted in [milestone 128](128-v0.2.25.md).
 Conflict resolution keeps v24 released status separate from the timeline candidate; the goal now correctly requires all four application images.
 Post-rebase typecheck and 21 focused tests in six files passed. Replaced unsupported shared dependency-store links with a normal frozen local install; no configuration change.
 

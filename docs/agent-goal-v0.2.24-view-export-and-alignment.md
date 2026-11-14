@@ -5,8 +5,8 @@ Status: E1 and Phase 1 (A1/A3/A2/E2/A4/E3) are deployed in v0.2.24
 through PRs 100–102; PR103 adds Sectors and pre-release repairs on main `c49aa07`.
 Production now runs v0.2.25 source `e5a42c5` (tree `47038018`), including the
 realtime repair merged by PR104 `08b884a` with the same tree. The full exact-source
-gate, native replacement and live acceptance passed. **Tag verified; receipt,
-keeper release and independent probe remain pending; final closeout is incomplete**
+gate, native replacement and live acceptance passed. **Tag, receipt, keeper release and independent probe passed;
+final closeout is accepted**
 ([milestone 128](milestones/128-v0.2.25.md)).
 Owner-approved 2026-11-13 ("yes for all"; ADR 0031 amendment 1).
 The current goal is the user's latest command; all four owner checks, including

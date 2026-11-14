@@ -5,7 +5,7 @@ relations images ([ADR 0031](../adr/0031-exported-view-images.md),
 milestones 117–128). This file states the current contract; the ADR holds the
 decisions. Change this file in the same commit as the behaviour it describes.
 
-Status: all six image outputs, legacy MCP call-log and rendering repairs are deployed in v0.2.25 (`e5a42c5`, tree `47038018`); exact-source gate and live acceptance passed. Tag verified; closeout checks 7–8 remain pending; see [milestone 128](../milestones/128-v0.2.25.md).
+Status: all six image outputs, legacy MCP call-log and rendering repairs are deployed in v0.2.25 (`e5a42c5`, tree `47038018`); exact-source gate and live acceptance passed. Tag verified; closeout checks 7–8 passed; see [milestone 128](../milestones/128-v0.2.25.md).
 
 ## Users and roles
 

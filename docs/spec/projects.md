@@ -4,7 +4,7 @@ Living product specification for project profiles ([ADR 0021](../adr/0021-projec
 This file states the current contract; the ADR holds the decisions. Change this
 file in the same commit as the behaviour it describes.
 
-Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a42c5`); exact-source gate and live acceptance passed. Tag verified; closeout checks 7–8 remain pending ([milestone 128](../milestones/128-v0.2.25.md)).
+Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a42c5`); exact-source gate and live acceptance passed. Tag verified; closeout checks 7–8 passed ([milestone 128](../milestones/128-v0.2.25.md)).
 
 ## Users and roles
 
