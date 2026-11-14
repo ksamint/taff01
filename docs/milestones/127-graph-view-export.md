@@ -32,3 +32,8 @@ Earlier evidence, not rerun on this rebased tree:
 - Historical browser artifacts: `/private/tmp/taff-v025-s3-graph-artifacts` (before palette correction). Parent full gate requires a fresh seeded runtime database after prior focused fixtures.
 
 Open implementation decisions: none. Final full local gate, PR/merge, exact merged-source operator gate/direct deploy and owner checks remain.
+
+Proven audit repair after frozen `25bb821`: SDK legacy fallback ignored responseMode=json and logged ok before delayed renderer failure. Public legacy JSON transport now shares the same tool factory; modern handling, auth/quota and one-MiB limit remain intact.
+Real app/SDK regression was RED for legacy success/failure and GREEN for modern controls. Focused app/MCP/export suites now pass 100 tests in seven files, including 15 new HTTP completion/compatibility/abort/resource-cleanup cases; API/scripts types, changed-file Biome and diff checks passed.
+Request abort settles499 with one error log; connected server owns transport cleanup, listeners are released, and late work rejection is observed. No claim that abort undoes snapshots or cancels core work. VE-2.4 records this contract.
+The earlier checklist PNG assertion remains unexplained; parent reported 12 unchanged diagnostic cases passed. This patch fixes the independently reproduced audit defect only. No services/DB/Rust/full gate/push run here; parent must reseal and validate the new head.

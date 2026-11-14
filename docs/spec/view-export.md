@@ -33,6 +33,7 @@ Status: overview/project and agent exports are released in v0.2.24 (`ff411c6`). 
 - VE-2.2 When a member is demoted to guest, the next export shall be refused; when restored, allowed again.
 
 - VE-2.3 Every `views.image` call shall resolve the current token and workspace grant and require both tasks:read and summaries:read. Strict arguments include optional workspaceId, locale and the view-specific options in VE-4, VE-5 and VE-6; omitted locale and time zone use the saved token issuer. Finance follows finance:read for summary images. The PNG watermark, Unicode-safe filename metadata and mcp audit identify the agent. Revoked tokens/grants, missing scopes and unauthorized workspaces shall be denied. REST and MCP share the 10 s renderer and 10/member/minute quota across tokens; unavailable services fail closed with visible MCP errors and failed call logs.
+- VE-2.4 Legacy and modern MCP tool requests shall return terminal JSON results before recording call status and duration. Legacy initialization and notifications shall remain compatible; cancelled legacy requests shall settle with an error log, release transport resources and not start tool work when already cancelled. Cancellation does not undo a constructed snapshot or imply underlying core work stopped.
 
 ### Delivery (VE-3)
 - VE-3.1 `GET /api/workspaces/:id/view-image?locale=<en|zh-CN|zh-HK>[&projectId=<id>]` shall require a session and validate the id and a strict query before any count or read.
@@ -102,6 +103,7 @@ Post `{layout, watermark: {text, contentHash}, contentHash}`. Core must bind the
 | VE-1.8 | `view-export.integration.test.ts` audit metadata/refusal/notification barrier case; `e2e/audit.spec.ts` in three locales |
 | VE-2.1 | `packages/core/src/permissions.test.ts` (five `view:export` rows); `docs/spec/permissions-matrix.md` |
 | VE-2.3 | `mcp-views.test.ts`, `view-export.integration.test.ts`, `oauth.integration.test.ts`, authorization matrix and MCP smoke |
+| VE-2.4 | `apps/api/src/mcp-http.test.ts`: actual SDK/app delayed renderer success/failure, cancellation/cleanup, legacy compatibility and one-MiB boundary |
 | VE-2.2 | `view-export.integration.test.ts` "stops a demoted member…" |
 | VE-3.1–3.4 | `apps/api/src/view-export.test.ts` (6 cases) |
 | VE-3.5 | `e2e/view-export.spec.ts` (≤ 400 KB, 1080 px through the real renderer); `taff-render` caps |
