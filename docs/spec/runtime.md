@@ -1,9 +1,9 @@
 # Spec: runtime recovery
 
-Living product specification for Node API/worker recovery and deployment
+Living product specification for browser realtime recovery, Node API/worker recovery and deployment
 configuration (PR #82). Change this file with the behavior it describes.
 
-Status: shipped in v0.2.20, source `596272a`; persisted Valkey activation and native acceptance are recorded in [milestone 104](../milestones/104-v0.2.20.md).
+Status: API/worker recovery shipped in v0.2.20, source `596272a`; persisted Valkey activation and native acceptance are recorded in [milestone 104](../milestones/104-v0.2.20.md). Bounded browser realtime refresh is implemented for unreleased v0.2.25; see [milestone 129](../milestones/129-realtime-invalidation.md).
 
 ## Users and roles
 
@@ -37,6 +37,12 @@ Status: shipped in v0.2.20, source `596272a`; persisted Valkey activation and na
 - RT-2.5 Production images shall retain non-root execution, readable migration
   and public assets, private mail mode 0700 and direct signal delivery to Node.
 
+### Browser realtime refresh (RT-3)
+
+- RT-3.1 When matching workspace or user events arrive during a refresh, the browser shall coalesce them into a trailing refresh instead of starting another concurrent batch of reads. Existing active reads shall be joined, with a later refresh to avoid retaining data read before the change.
+- RT-3.2 When an optimistic mutation is pending, ordinary event refreshes shall wait until it settles. Socket authentication revocation shall immediately clear session data and revalidate Me, independently of pending writes or ordinary refreshes.
+- RT-3.3 On the first socket open, even during a pending mutation, the browser shall revalidate Me and mark other query families stale without queuing their reads or discarding a pending ordinary change. Reconnection shall refresh the families; stopping the connection shall prevent queued trailing refreshes and stale socket callbacks.
+
 ## Non-functional
 
 - PostgreSQL, Valkey, existing schemas and neighboring services retain their
@@ -61,6 +67,7 @@ Status: shipped in v0.2.20, source `596272a`; persisted Valkey activation and na
 | RT-2.2, RT-2.4 | runtime-faults.mts; tracked dependency patches |
 | RT-2.3 | scripts/apuch-compose.test.ts; scripts/valkey-rehearsal.mts seven checks on 9.1.2; actual native RDB restore and cold AOF restart parity in [milestone 104](../milestones/104-v0.2.20.md) |
 | RT-2.5 | Dockerfiles; non-root image smoke; release closeout |
+| RT-3 | apps/web/src/lib/realtime.test.ts: actual QueryObserver burst, independent read, trailing freshness, mutation, cleanup and immediate revocation cases; existing routing/first-open/reconnect cases |
 
 ## Open decisions
 
