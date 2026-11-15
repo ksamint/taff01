@@ -215,6 +215,12 @@ pnpm exec playwright install chromium
 pnpm e2e
 ```
 
+`pnpm check` runs the whole local gate in one command: everything above plus
+the licence check, the Rust gate, the bundle budget, the production-mode
+checklist, the MCP smoke and the four image builds. It needs Docker and Cargo,
+refuses uncommitted changes and writes `release-reports/check-report.md`.
+`pnpm check --list` prints the steps.
+
 Create `taff_test` only once. `pnpm test` loads `.env` when present. PostgreSQL tests
 skip visibly without `TEST_DATABASE_URL` and reject names that do not end in
 `_test`; use a database distinct from `DATABASE_URL`. These tests create data in

@@ -73,6 +73,30 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   `scripts/audit-contract.test.ts` (references read from the audit's pinned
   source commit).
 
+### The single check command (TT-7)
+
+- TT-7.1 `pnpm check` shall run every command of the local gate
+  ([release closeout](../release-closeout.md), check 1) in one fixed order:
+  lint, typecheck, licences, the Rust gate, unit and integration tests,
+  migrate and seed, both builds, the bundle budget, the browser suite, then
+  the production SSR case, the release checklist and the MCP smoke against a
+  production-mode stack it starts and stops itself, then the four image
+  builds. It shall stop at the first failure.
+- TT-7.2 It shall print `tree=<git rev-parse HEAD^{tree}>` first and refuse a
+  working tree with uncommitted changes unless `--allow-dirty` is given.
+- TT-7.3 It shall refuse to start when `DATABASE_URL` or `TEST_DATABASE_URL`
+  names a host other than this machine, naming the variable and never its
+  value, and shall refuse the stack steps when another server already answers
+  on the web or API address.
+- TT-7.4 It shall write `release-reports/check-report.json` and `.md` (both
+  git-ignored) with the tree, the commit, each command, its result and its
+  duration. A step that did not run is `not run` with the reason. The result
+  is `passed` only when every step ran and passed on a clean tree, `failed`
+  when a step failed, and otherwise `partial`.
+- TT-7.5 `--only` and `--skip` shall accept step names from `--list` and
+  refuse unknown names; `AGENTS.md` shall declare the tda01 Start baseline and
+  name `pnpm check` as the check command.
+
 ## Non-functional
 
 - No new dependency name; web declares the same esbuild version already used
@@ -96,6 +120,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |
 | TT-6.3 | scripts/neighbor-preservation.test.ts (10, incl. CLI exit code; 6,000-case differential run in [milestone 107](../milestones/107-report-web-and-ports.md)); scripts/live-email-proof.test.ts (4); scripts/audit-contract.test.ts (5) |
+| TT-7 | scripts/check-plan.test.ts (9); full run recorded in [milestone 131](../milestones/131-tda01-start-baseline.md) |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
 ## Open decisions

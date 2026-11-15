@@ -13,6 +13,7 @@
     "lint": "biome check . && node node_modules/tsx/dist/cli.mjs scripts/permissions-matrix.mts --check",
     "typecheck": "turbo typecheck && tsc -p tsconfig.scripts.json",
     "test": "node --env-file-if-exists=.env node_modules/vitest/vitest.mjs run",
+    "check": "node node_modules/tsx/dist/cli.mjs scripts/check.mts",
     "db:generate": "pnpm --filter @taff/db generate",
     "db:migrate": "node --env-file=.env node_modules/tsx/dist/cli.mjs packages/core/src/migrate.ts",
     "db:seed": "node --env-file=.env node_modules/tsx/dist/cli.mjs packages/core/src/seed.ts",

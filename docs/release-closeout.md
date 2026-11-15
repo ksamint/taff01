@@ -36,6 +36,11 @@ source as a process gap in the milestone and fix the capture step below.
    Node fixtures with a clean diff (`pnpm rust:gate`). Source: the command output, with pass and fail
    counts, recorded in the release milestone. A check that cannot run is
    listed there as not run, never as passed.
+   `pnpm check` runs this list in order on a clean tree, stops at the first
+   failure and writes the table to record (`release-reports/check-report.md`,
+   [tooling TT-7](spec/tooling.md#the-single-check-command-tt-7)); only its
+   result `passed` is the gate. Release-specific supplements, such as the
+   pinned Linux visual comparison, stay separate commands.
    For v0.2.20, also complete the supplemental checks required by
    [tooling TT-3](spec/tooling.md#operator-scripts-tt-3) and the
    [Access and Completion plan, C6 and D](agent-goal-access-and-completion.md):
@@ -54,9 +59,11 @@ source as a process gap in the milestone and fix the capture step below.
 4. Public checks named by the release (health, and for MCP OAuth the
    authorization-server metadata and the `/mcp` 401 `resource_metadata`).
 5. Annotated tag `vX.Y.Z` on the deployed SHA, verified on origin.
-6. Docs-only commit pushed to `main`: `docs/deploy.md` checkpoint and
-   `docs/milestones/NN-vX.Y.Z.md` (≤ 40 lines), after `pnpm lint` passes on
-   it. Owner decisions and pending checks are quoted there and in the receipt.
+6. Docs-only commit pushed to `main`: `docs/deploy.md` checkpoint,
+   `docs/milestones/NN-vX.Y.Z.md` (≤ 40 lines) and the deploy report
+   `deploy/reports/<utc>-<tree12>.md` ([format](../deploy/reports/README.md);
+   source: the evidence captured above and the receipt), after `pnpm lint`
+   passes on it. Owner decisions and pending checks are quoted there and in the receipt.
 7. Receipt written; `deployment.done` holds the accepted SHA only (pending
    items live in the receipt and milestone, never in `deployment.done`).
 8. Keeper logs `LOCK_RELEASED` and removes its owner file; an independent
