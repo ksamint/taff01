@@ -44,6 +44,13 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 - TT-4.2 Renaming shall retain the capture matrix, paths, timers, fonts and
   screenshots. Browser-returned fixture data shall cross an unknown boundary
   and be narrowed before use. Approved references shall not change.
+- TT-4.3 When a calendar acceptance case measures or activates events after
+  changing view, it shall wait for the selected native SDK grid before
+  resolving event geometry; a React mode button alone is insufficient.
+- TT-4.4 Calendar-only fixtures shall reuse the normally authenticated demo
+  session in worker memory, bound to origin and account. A reused session
+  shall pass the current Me boundary without a relogin fallback; cookies
+  shall not be written to a storage-state file or copy private query caches.
 
 ### Service worker source (TT-5)
 
@@ -92,6 +99,8 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal on pinned production 9.1.2; native persisted-state proof in [milestone 104](../milestones/104-v0.2.20.md) |
 | TT-4 | Native before/after capture PNG hashes; capture-runtime, capture-selection and visual-clock tests |
+| TT-4.3 | e2e/calendar.spec.ts multi-day 44px targets and stacked rows; e2e/support/calendar.ts native view readiness |
+| TT-4.4 | e2e/demo-session.spec.ts fresh-context identity and sign-in count; e2e/support/demo-session.ts |
 | TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; same headers passed on native deployment; milestones 100 and [104](../milestones/104-v0.2.20.md) |
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |

@@ -2,7 +2,13 @@ import {
   Client,
   StreamableHTTPClientTransport,
 } from "@modelcontextprotocol/client";
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import {
+  expect,
+  type Locator,
+  type Page,
+  type Route,
+  test,
+} from "@playwright/test";
 import {
   issuedAgentTokenSchema,
   memberSchema,
@@ -115,14 +121,34 @@ test("keyboard alone creates, assigns, opens and approves a task with real agent
   );
   await activate(page, row.locator(`a[href="/tasks/${task.id}"]`));
   await expect(page.getByTestId("task-detail-heading")).toHaveText(title);
-  await activate(page, page.getByTestId("run-start"));
-  await expect(page.getByTestId("run-status")).toHaveText(
-    messages[locale].run.status.running,
-  );
-  await expect(page.getByTestId("run-status")).toHaveAttribute(
-    "role",
-    "status",
-  );
+  let releaseDetail!: () => void;
+  const deferredDetail = new Promise<void>((resolve) => {
+    releaseDetail = resolve;
+  });
+  let detailHeld = false;
+  const detailPattern = /\/api\/runs\/[^/?]+(?:\?|$)/;
+  const holdDetail = async (route: Route) => {
+    if (route.request().method() === "GET") {
+      detailHeld = true;
+      await deferredDetail;
+    }
+    await route.continue();
+  };
+  await page.route(detailPattern, holdDetail);
+  try {
+    await activate(page, page.getByTestId("run-start"));
+    await expect.poll(() => detailHeld).toBe(true);
+    await expect(page.getByTestId("run-status")).toHaveText(
+      messages[locale].run.status.running,
+    );
+    await expect(page.getByTestId("run-status")).toHaveAttribute(
+      "role",
+      "status",
+    );
+  } finally {
+    releaseDetail();
+    await page.unrouteAll({ behavior: "wait" });
+  }
   const runs = runListSchema.parse(
     await (
       await page.request.get(`/api/runs?workspaceId=${workspace.id}`)
