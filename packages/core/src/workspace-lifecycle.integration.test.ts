@@ -450,10 +450,12 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
         .where(eq(user.id, systemId));
     });
     const system = userPrincipal(systemId);
+    // No ORDER BY means no order: restore rewrites rows, so compare by id.
     const beforeMembers = await connection.db
       .select()
       .from(members)
-      .where(eq(members.workspaceId, team.id));
+      .where(eq(members.workspaceId, team.id))
+      .orderBy(members.id);
     try {
       await core.setDefaultWorkspace(p, alice, { workspaceId: team.id });
       await core.archiveWorkspace(system, team.id);
@@ -487,7 +489,8 @@ describe.skipIf(!url)("organization lifecycle and login defaults", () => {
         await connection.db
           .select()
           .from(members)
-          .where(eq(members.workspaceId, team.id)),
+          .where(eq(members.workspaceId, team.id))
+          .orderBy(members.id),
       ).toEqual(beforeMembers);
     } finally {
       await connection.db.transaction(async (tx) => {

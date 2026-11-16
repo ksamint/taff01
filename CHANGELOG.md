@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Tooling only, nothing changes in the app: `pnpm check` runs the whole local gate in one command, binds the result to the tree and writes the table for pull requests. The repository now follows the tda01 Start baseline (version 1): a pull request template, a deploy runbook, a deploy report per attempt and a stop list in `AGENTS.md`.
+- Decided (owner, 2026-11-15; ADR 0032): from v0.2.27 new backend behaviour is written in Rust and the TypeScript backend takes fixes only. The plan is `docs/plans/0001-rust-backend-port.md`.
+
 ## v0.2.25 — timeline, calendar, graph and Sectors views (deployed and accepted)
 
 - Timeline exports fit the full chart with the current critical-path highlight, task bars, milestones and dependencies; up to 60 rows with localized overflow.

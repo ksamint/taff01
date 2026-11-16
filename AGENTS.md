@@ -7,6 +7,15 @@
 > rollback · hard limits on shared infrastructure, secrets and product rules. Stricter safety rules below still apply.
 <!-- /ksamint-policy-pointer -->
 
+Baseline: tda01 start@1
+Check: `pnpm check`
+
+The two lines above declare the tda01 Start baseline (`ksamint/tda01`,
+`baseline/start.json`). `pnpm check` runs the whole local gate and prints the
+table, bound to `git rev-parse HEAD^{tree}`, that goes into every pull request
+(`.github/PULL_REQUEST_TEMPLATE.md`). A run with `--only`, `--skip` or
+`--allow-dirty` reports "partial" and never counts as the gate.
+
 Read `instruction_v0.md` before changing this repository. It contains the original
 product, architecture, stack, security, performance, and checkpoint requirements.
 The final line is the original repository creation request, not a recurring action.
@@ -52,9 +61,38 @@ can reach it, including after that role loses the authority.
 
 No CI and no runners, ever (owner, 2026-11-05). Do not add `.github/`
 workflows, runner checks, or any step that waits on a hosted or self-hosted
-runner. Before every push run the local gate (`docs/release-closeout.md`,
-check 1); deploy by pushing directly to the server per `docs/deploy.md` and
+runner. Before every push run the local gate (`pnpm check`;
+`docs/release-closeout.md`, check 1); deploy by pushing directly to the server per `docs/deploy.md` and
 the closeout checklist. "CI" in older documents now means that local gate.
+The deploy steps and the rollback are in `docs/runbooks/deploy.md`; every
+deploy attempt leaves a report in `deploy/reports/`.
+
+Backend port to Rust (owner, 2026-11-15: "yes for all"; plan
+`docs/plans/0001-rust-backend-port.md`, ADR 0032):
+- From v0.2.27, new backend behaviour (routes, MCP tools, jobs, domain rules)
+  is written in Rust under `backend/`. `packages/core`, `apps/api` and
+  `apps/worker` take fixes only.
+- A pull request that changes only `backend/` code which no production route,
+  image or job runs may merge on `pnpm check --only rust` plus the wire replay
+  of plan Wave 0. Until that replay exists, and for every route switch and
+  every release, the full `pnpm check` is required.
+- Sign-in, OAuth and SMS move to Rust last (plan Wave 4).
+
+## Stop and report
+
+Stop and report, never work around:
+- shared infrastructure other projects use: database access rules, Caddy and
+  other proxies, DNS, firewall, shared ports, and the neighbouring containers
+  `scripts/deploy/neighbor-preservation.mts` protects;
+- creating, printing or committing secrets;
+- bypassing the product's own approval, audit or legal rules: agent output
+  waits for a person, and an agent never gets a code path a person lacks;
+- destructive data operations without a tested backup;
+- decisions that change the product contract: licences, deleting data,
+  publishing outside the repository.
+
+Print `NEEDS-DECISION: <question> — recommend <option>`, continue with
+independent work, and print one `STATUS:` line per finished task.
 
 Goals and prompts for deploy or closeout may only require evidence that
 `docs/release-closeout.md` names a source for; reference that file instead of
