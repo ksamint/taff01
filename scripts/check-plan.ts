@@ -54,7 +54,8 @@ export const CHECK_STEPS: readonly CheckStep[] = [
       "--grep",
       "production SSR HTML is private",
     ],
-    env: { SSR_PRODUCTION: "1" },
+    // This step reuses the production stack already owned by the gate.
+    env: { SSR_PRODUCTION: "1", CI: "" },
     needsStack: true,
   },
   {

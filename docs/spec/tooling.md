@@ -82,6 +82,9 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 
 ### The single check command (TT-7)
 
+- TT-7.6 The production SSR step shall reuse the stack owned by the gate,
+  including when the initial browser matrix selected production-mode servers.
+
 - TT-7.1 `pnpm check` shall run every command of the local gate
   ([release closeout](../release-closeout.md), check 1) in one fixed order:
   lint, typecheck, licences, the Rust gate, unit and integration tests,

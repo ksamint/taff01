@@ -80,6 +80,10 @@ test("stack steps are contiguous, after the builds and the dev browser run", () 
     (item) => item.id,
   );
   expect(stack).toEqual(["ssr", "checklist", "mcp"]);
+  expect(CHECK_STEPS.find((item) => item.id === "ssr")?.env).toEqual({
+    SSR_PRODUCTION: "1",
+    CI: "",
+  });
   expect(ids.slice(ids.indexOf("ssr"), ids.indexOf("mcp") + 1)).toEqual(stack);
   for (const before of [
     "db-migrate",
