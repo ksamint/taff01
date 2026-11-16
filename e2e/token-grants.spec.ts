@@ -81,6 +81,16 @@ test("system admin confirms organization policy, sees grant origins, revokes and
       const policySwitch = card.getByTestId("token-policy-switch");
       await policySwitch.click();
       const dialog = page.getByRole("dialog");
+      const confirmPolicy = async () => {
+        const saved = page.waitForResponse(
+          (response) =>
+            response.request().method() === "PUT" &&
+            new URL(response.url()).pathname ===
+              `/api/agent-tokens/${token.id}/organization-policy`,
+        );
+        await dialog.getByTestId("grant-confirm").click();
+        expect((await saved).status()).toBe(200);
+      };
       await expect(dialog).toContainText(policy.name);
       await expect(dialog).toContainText(manual.name);
       await expect(policySwitch).not.toBeChecked();
@@ -89,7 +99,7 @@ test("system admin confirms organization policy, sees grant origins, revokes and
         .click();
       await expect(policySwitch).not.toBeChecked();
       await policySwitch.click();
-      await dialog.getByTestId("grant-confirm").click();
+      await confirmPolicy();
       await expect(dialog).toHaveCount(0);
       await expect(policySwitch).toBeChecked();
       const grants = agentTokenWorkspaceListSchema.parse(
@@ -126,7 +136,7 @@ test("system admin confirms organization policy, sees grant origins, revokes and
       await expect(row).toContainText(m.mcp.grantActive);
       await expect(row.getByTestId("grant-restore")).toHaveCount(0);
       await policySwitch.click();
-      await dialog.getByTestId("grant-confirm").click();
+      await confirmPolicy();
       await expect(policySwitch).not.toBeChecked();
       await expect(manualRow).toContainText(m.mcp.grantActive);
       await expect(row).toContainText(m.mcp.revoked);

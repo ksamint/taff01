@@ -52,6 +52,11 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   shall pass the current Me boundary without a relogin fallback; cookies
   shall not be written to a storage-state file or copy private query caches.
 
+- TT-4.5 Token-policy browser acceptance shall observe the successful policy
+  write response before checking the reconciled switch and grant state.
+  Pending writes shall retain the existing disabled control behavior; the
+  response status, switch, grant-origin and revocation assertions remain.
+
 ### Service worker source (TT-5)
 
 - TT-5.1 The web dev/build commands shall explicitly compile the typed service
@@ -128,6 +133,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-4 | Native before/after capture PNG hashes; capture-runtime, capture-selection and visual-clock tests |
 | TT-4.3 | e2e/calendar.spec.ts multi-day 44px targets and stacked rows; e2e/support/calendar.ts native view readiness |
 | TT-4.4 | e2e/demo-session.spec.ts fresh-context identity and sign-in count; e2e/support/demo-session.ts |
+| TT-4.5 | e2e/token-grants.spec.ts exact policy-write acknowledgement before switch/grant assertions |
 | TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; same headers passed on native deployment; milestones 100 and [104](../milestones/104-v0.2.20.md) |
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |

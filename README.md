@@ -13,6 +13,8 @@ graph data and isolation scope.
 
 **v0.2.26 preparation:** [run-detail continuity](docs/spec/client-navigation.md)
 and calendar acceptance readiness fixes are implemented; production stays v0.2.25.
+Token-policy browser acceptance also observes the server acknowledgement
+before checking reconciled state ([tooling TT-4.5](docs/spec/tooling.md)).
 
 **v0.2.25 (deployed and accepted) — all six image outputs.** Summary, timeline,
 week, month, mind and relations images use authorized data, saved locale and
