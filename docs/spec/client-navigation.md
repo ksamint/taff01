@@ -3,7 +3,8 @@
 Living specification for the remaining client completion work. Change this
 file in the same commit as the behavior it describes.
 
-Status: v0.2.20 candidate; browser acceptance pending.
+Status: existing navigation and optimistic behavior shipped; run-detail continuity
+is implemented for v0.2.26, not yet deployed.
 
 ## Users and roles
 
@@ -27,6 +28,11 @@ Status: v0.2.20 candidate; browser acceptance pending.
 - CN-2.2 Two overlapping failures in either order shall restore the baseline
   without resurrecting a failed layer, including shared calendar rows and
   newly created caches. Baselines shall be captured after query cancellation.
+- CN-2.3 When starting a run returns its authoritative ID, the browser shall
+  retain its running status while the corresponding detail read is pending.
+  Provisional detail shall grant neither control nor submission authority,
+  preserve existing authoritative detail and ignore acknowledgements from a
+  previous session identity.
 
 ### Project management after phone filters (CN-3)
 
@@ -50,6 +56,7 @@ Status: v0.2.20 candidate; browser acceptance pending.
 | --- | --- |
 | CN-3 | e2e/project-filter-completion.spec.ts (browser pending) |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
+| CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
 
 ## Open decisions

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (492 distinct, 2281 uses)
+## Test ids (492 distinct, 2277 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -91,11 +91,11 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `auth-change` | 3 |  | sms-auth.spec.ts, username-auth.spec.ts |
-| `auth-continue` | 42 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
-| `auth-email` | 51 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, home-layout.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, summaries.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-continue` | 41 |  | agent-review.spec.ts, brief.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, support/demo-session.ts, support/preferences.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts, username-auth.spec.ts |
+| `auth-email` | 50 |  | agent-review.spec.ts, brief.spec.ts, crm.spec.ts, finance-visibility.spec.ts, home-layout.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, summaries.spec.ts, support/demo-session.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-identity` | 3 |  | sms-auth.spec.ts, username-auth.spec.ts |
-| `auth-password` | 50 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
-| `auth-submit` | 41 |  | agent-review.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-password` | 49 |  | agent-review.spec.ts, brief.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, support/demo-session.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `auth-submit` | 40 |  | agent-review.spec.ts, brief.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, support/demo-session.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-toggle` | 7 |  | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `auth-username` | 5 |  | release/checklist.spec.ts, username-auth.spec.ts |
 | `phone-auth-toggle` | 8 | sms-auth.tsx | sms-auth.spec.ts |
@@ -777,7 +777,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-v2.spec.ts |
-| `today-heading` | 71 |  | agent-review.spec.ts, audit.spec.ts, brief.spec.ts, calendar-accessibility.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
+| `today-heading` | 71 |  | agent-review.spec.ts, audit.spec.ts, brief.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, support/demo-session.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
 
 ### token-policy-control.tsx

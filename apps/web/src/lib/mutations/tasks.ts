@@ -227,6 +227,12 @@ export function useStartRun(
     },
     onSuccess: (run, _, context) => {
       if (!isCurrentSnapshot(client, context.snapshot)) return;
+      const provisional = client.getQueryData<RunDetail>(runKey(context.id));
+      if (provisional)
+        client.setQueryData<RunDetail>(
+          runKey(run.id),
+          (current) => current ?? { ...provisional, run },
+        );
       client.setQueryData<Run[]>(runsKey(workspaceId), (current) =>
         replaceById(current, context.id, run),
       );

@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { expect, type Page, test } from "@playwright/test";
+import { demoSession } from "./support/demo-session";
 import { selectLocale } from "./support/preferences";
 
 // Reuse Lighthouse's approved axe dependency; no new browser/test dependency.
@@ -41,18 +42,7 @@ for (const desktop of [false, true]) {
   }, info) => {
     test.setTimeout(90_000);
     const locale = info.project.name as Locale;
-    if (!process.env.DEMO_PASSWORD)
-      throw new Error("DEMO_PASSWORD is required");
-    await page.goto("/");
-    await page
-      .getByTestId("auth-email")
-      .fill(process.env.DEMO_EMAIL ?? "alex@taff.local");
-    await page.getByTestId("auth-continue").click();
-    await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
-    await page.getByTestId("auth-submit").click();
-    await expect(page.getByTestId("today-heading")).toBeVisible({
-      timeout: 15000,
-    });
+    await demoSession(page);
     await selectLocale(page, locale);
     if (desktop) await page.setViewportSize({ width: 1440, height: 1000 });
     await page.goto("/calendar");

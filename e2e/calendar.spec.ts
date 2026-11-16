@@ -18,6 +18,7 @@ import {
   waitForCalendarSave,
   waitForCalendarView,
 } from "./support/calendar";
+import { demoSession } from "./support/demo-session";
 import { selectLocale } from "./support/preferences";
 import {
   closeFieldSheet,
@@ -119,23 +120,7 @@ test("calendar member fetch failure explains disabled editor and Retry restores 
   );
 });
 async function setup(page: Page, locale: Locale, withAgent = false) {
-  if (!process.env.DEMO_PASSWORD) throw new Error("DEMO_PASSWORD is required");
-  await page.goto("/");
-  await page
-    .getByTestId("auth-email")
-    .fill(process.env.DEMO_EMAIL ?? "alex@taff.local");
-  await page.getByTestId("auth-continue").click();
-  await page.getByTestId("auth-password").fill(process.env.DEMO_PASSWORD);
-  const signedIn = page.waitForResponse(
-    (response) =>
-      new URL(response.url()).pathname === "/api/auth/sign-in/email" &&
-      response.request().method() === "POST",
-  );
-  await page.getByTestId("auth-submit").click();
-  expect((await signedIn).status()).toBe(200);
-  await expect(page.getByTestId("today-heading")).toBeVisible({
-    timeout: 15000,
-  });
+  await demoSession(page);
   await selectLocale(page, locale);
   const me = meSchema.parse(await (await page.request.get("/api/me")).json());
   const agentIds: string[] = [];
@@ -1175,9 +1160,10 @@ test("calendar multi-day events keep 44px targets and aligned stacked rows", asy
   await page.goto("/calendar");
   for (const mode of ["day", "week"] as const) {
     await page.getByTestId(`calendar-${mode}`).click();
+    const native = await waitForCalendarView(page, mode);
     const boxes = [];
     for (const task of tasks) {
-      const event = page
+      const event = native
         .locator(".sx__date-grid-event")
         .filter({ hasText: task.title })
         .first();
@@ -1188,7 +1174,7 @@ test("calendar multi-day events keep 44px targets and aligned stacked rows", asy
       boxes.push(box!);
     }
     expect(Math.abs(boxes[1].y - boxes[0].y)).toBeGreaterThanOrEqual(44);
-    await page.locator(".sx__view-container").evaluate(async (element) => {
+    await native.locator(".sx__view-container").evaluate(async (element) => {
       await Promise.all(
         element
           .getAnimations({ subtree: true })
@@ -1199,7 +1185,7 @@ test("calendar multi-day events keep 44px targets and aligned stacked rows", asy
       path: info.outputPath(`calendar-${mode}-targets.png`),
     });
     // The newly enlarged lower edge is an actual tappable button, not just a visual box.
-    const first = page
+    const first = native
       .locator(".sx__date-grid-event")
       .filter({ hasText: tasks[0].title })
       .first();
