@@ -137,7 +137,7 @@ test(`${screen} uses the real Northwind fixture`, async ({
   }
   const routes: Record<string, string> = {
     sectors: "/projects?view=sectors",
-    "export-image": "/projects?view=sectors",
+    "export-image": "/projects",
     today: "/",
     projects: "/projects",
     inbox: "/inbox",
@@ -176,12 +176,11 @@ test(`${screen} uses the real Northwind fixture`, async ({
     const id = rows.map((row: { id: string }) => row.id).sort()[0];
     routes[screen] = `/${kind}/${id}`;
   }
-  const sectorFixture = ["sectors", "export-image"].includes(screen)
-    ? [...tasks].sort((a, b) => a.id.localeCompare(b.id)).slice(0, 6)
-    : [];
-  expect(sectorFixture.length).toBe(
-    ["sectors", "export-image"].includes(screen) ? 6 : 0,
-  );
+  const sectorFixture =
+    screen === "sectors"
+      ? [...tasks].sort((a, b) => a.id.localeCompare(b.id)).slice(0, 6)
+      : [];
+  expect(sectorFixture.length).toBe(screen === "sectors" ? 6 : 0);
   const labeledTasks: typeof sectorFixture = [];
   const reviewItem = inbox.items.find(
     (item) => item.taskId === prototypeId("task", "nw", 141),
@@ -319,28 +318,25 @@ test(`${screen} uses the real Northwind fixture`, async ({
             )
             .getByTestId("board-task"),
         ).toHaveCount(1);
-      if (screen === "export-image") {
-        const rendered = page.waitForResponse(
-          (response) =>
-            response.url().includes("/view-image?") &&
-            response.status() === 200,
-        );
-        await page.getByTestId("view-export-open").click();
-        expect((await rendered).headers()["content-type"]).toContain(
-          "image/png",
-        );
-        const preview = page.getByTestId("view-export-preview");
-        await expect(preview).toBeVisible();
-        await expect
-          .poll(() =>
-            preview.evaluate(
-              (image: HTMLImageElement) =>
-                image.complete && image.naturalWidth > 0,
-            ),
-          )
-          .toBe(true);
-        await expect(page.getByTestId("view-export-save")).toBeEnabled();
-      }
+    }
+    if (screen === "export-image") {
+      const rendered = page.waitForResponse(
+        (response) =>
+          response.url().includes("/view-image?") && response.status() === 200,
+      );
+      await page.getByTestId("view-export-open").click();
+      expect((await rendered).headers()["content-type"]).toContain("image/png");
+      const preview = page.getByTestId("view-export-preview");
+      await expect(preview).toBeVisible();
+      await expect
+        .poll(() =>
+          preview.evaluate(
+            (image: HTMLImageElement) =>
+              image.complete && image.naturalWidth > 0,
+          ),
+        )
+        .toBe(true);
+      await expect(page.getByTestId("view-export-save")).toBeEnabled();
     }
     if (screen === "search") {
       await page.keyboard.press("Control+k");
