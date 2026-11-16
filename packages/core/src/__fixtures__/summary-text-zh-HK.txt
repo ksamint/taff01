@@ -23,6 +23,6 @@ Northwind · 致 Pat Lee
 
 ────────────────────────────
 生成於 2026年10月8日 下午8:00 · Asia/Hong_Kong
-機密文件,致 Pat Lee。
+機密文件，致 Pat Lee。
 Pat Lee · Harbour Capital · 2026-10-08 · preview
 雜湊 405ddea38bb8513c2ab87c3afb96f4317ef016074d47cd2aea0db06e41303c21
