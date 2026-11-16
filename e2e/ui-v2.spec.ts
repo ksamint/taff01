@@ -20,7 +20,10 @@ import { messages } from "./support/messages";
 
 const screen = process.env.UI_SCREEN ?? "shell";
 const theme = process.env.UI_THEME === "dark" ? "dark" : "light";
-test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
+test(`${screen} uses the real Northwind fixture`, async ({
+  page,
+  request,
+}, info) => {
   if (screen === "home") {
     const locale = info.project.name.includes("zh-HK")
       ? "zh-HK"
@@ -57,7 +60,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       ? "zh-CN"
       : "en";
   const desktop = info.project.name.startsWith("desktop-");
-  const signedIn = await page.request.post("/api/auth/sign-in/email", {
+  const signedIn = await request.post("/api/auth/sign-in/email", {
     headers: { Origin: process.env.AUTH_URL! },
     data: {
       email: process.env.DEMO_EMAIL ?? "alex@taff.local",
@@ -65,7 +68,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     },
   });
   expect(signedIn.status()).toBe(200);
-  const meResponse = await page.request.get("/api/me");
+  const meResponse = await request.get("/api/me");
   expect(meResponse.status()).toBe(200);
   const me = meSchema.parse(await meResponse.json());
   const workspaceId = prototypeId("workspace", "nw");
@@ -74,21 +77,21 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     workspace,
     "Run db:seed in the isolated visual database first",
   ).toBeDefined();
-  const profile = await page.request.patch("/api/profile", {
+  const profile = await request.patch("/api/profile", {
     headers: { Origin: process.env.AUTH_URL! },
     data: { locale, tz: screen === "shell" ? "Asia/Shanghai" : "UTC" },
   });
   expect(profile.status()).toBe(200);
-  const tasksResponse = await page.request.get(
+  const tasksResponse = await request.get(
     `/api/tasks?workspaceId=${workspaceId}`,
   );
-  const membersResponse = await page.request.get(
+  const membersResponse = await request.get(
     `/api/members?workspaceId=${workspaceId}`,
   );
-  const inboxResponse = await page.request.get(
+  const inboxResponse = await request.get(
     `/api/inbox?workspaceId=${workspaceId}`,
   );
-  const runsResponse = await page.request.get(
+  const runsResponse = await request.get(
     `/api/runs?workspaceId=${workspaceId}`,
   );
   expect(tasksResponse.status()).toBe(200);
@@ -161,7 +164,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   };
   if (screen === "company-detail" || screen === "contact-detail") {
     const kind = screen === "company-detail" ? "companies" : "contacts";
-    const response = await page.request.get(
+    const response = await request.get(
       `/api/${kind}?workspaceId=${workspaceId}`,
     );
     expect(response.status()).toBe(200);
@@ -189,13 +192,14 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
   let openedReview = false;
   try {
     for (const [index, task] of sectorFixture.entries()) {
-      const response = await page.request.patch(`/api/tasks/${task.id}`, {
+      const response = await request.patch(`/api/tasks/${task.id}`, {
         headers: { Origin: process.env.AUTH_URL! },
         data: { labels: [GENERIC_OPERATION_SECTORS[index].label] },
       });
       expect(response.status()).toBe(200);
       labeledTasks.push(task);
     }
+    await page.context().addCookies((await request.storageState()).cookies);
     const loaded = await page.goto(
       screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
     );
@@ -404,9 +408,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         // shows the state the API reports, so the capture never races it.
         for (const card of await page.getByTestId("board-task").all()) {
           const taskId = await card.getAttribute("data-task-id");
-          const response = await page.request.get(
-            `/api/tasks/${taskId}/access`,
-          );
+          const response = await request.get(`/api/tasks/${taskId}/access`);
           expect(response.ok()).toBe(true);
           const { allowedStatuses } = (await response.json()) as {
             allowedStatuses: string[];
@@ -535,7 +537,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     }
   } finally {
     for (const task of labeledTasks) {
-      const response = await page.request.patch(`/api/tasks/${task.id}`, {
+      const response = await request.patch(`/api/tasks/${task.id}`, {
         headers: { Origin: process.env.AUTH_URL! },
         data: { labels: task.labels },
       });
@@ -543,17 +545,12 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     }
     if (openedReview) {
       // Opening the real Inbox pane marks this isolated recipient's item read.
-      const restored = await page.request.patch(
-        `/api/inbox/${reviewItem!.id}`,
-        {
-          headers: { Origin: process.env.AUTH_URL! },
-          data: { read: false },
-        },
-      );
+      const restored = await request.patch(`/api/inbox/${reviewItem!.id}`, {
+        headers: { Origin: process.env.AUTH_URL! },
+        data: { read: false },
+      });
       expect(restored.status()).toBe(200);
-      const after = await page.request.get(
-        `/api/inbox?workspaceId=${workspaceId}`,
-      );
+      const after = await request.get(`/api/inbox?workspaceId=${workspaceId}`);
       expect(after.status()).toBe(200);
       const restoredInbox = inboxSchema.parse(await after.json());
       expect(restoredInbox.unreadCount).toBe(inbox.unreadCount);

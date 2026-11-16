@@ -59,6 +59,9 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 - TT-4.6 The explicitly enabled visual API clock shall use the capture
   instant for real workspace image GETs as well as its existing read routes.
   Authentication, writes and unrelated reads shall retain native time.
+- TT-4.7 Remote-browser visual fixtures shall perform setup and cleanup HTTP
+  through the host-local request context and copy its real cookies into
+  browser memory before navigation, without disk session-state files.
 
 ### Service worker source (TT-5)
 
@@ -138,6 +141,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-4.4 | e2e/demo-session.spec.ts fresh-context identity and sign-in count; e2e/support/demo-session.ts |
 | TT-4.5 | e2e/token-grants.spec.ts exact policy-write acknowledgement before switch/grant assertions |
 | TT-4.6 | scripts/ui/visual-clock.test.ts scoped read clock and native-time isolation; pinned Export image dialog capture |
+| TT-4.7 | e2e/ui-v2.spec.ts pinned remote-browser Sectors and Export image captures |
 | TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; same headers passed on native deployment; milestones 100 and [104](../milestones/104-v0.2.20.md) |
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |
