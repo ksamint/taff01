@@ -10,7 +10,7 @@ Targets: TypeScript web/test drivers and existing CSS tokens; no backend or perm
 - Narrow phone-only CSS gives standalone review and summary-list cards the existing page gutter. Summary list reuses the organization toolbar/button; embedded review and summary detail remain unchanged.
 - Regression checks retain real MCP evidence and generated summary fixtures; measure phone bounds/overflow in all locales and retain desktop checks.
 - G3 fixes twelve real CJK commas and adds punctuation/font coverage; milestone 136 records its focused evidence.
-- G4 adds Sectors and Export image dialog captures using the existing pinned Linux pipeline; eight Linux references captured and visually inspected; unchanged-reference comparison pending.
+- G4 adds Sectors and Export image dialog captures using the existing pinned Linux pipeline; eight Linux references captured and visually inspected; all eight unchanged-reference comparisons passed.
 - G5 remains closed by design: desktop Me opens its Inbox tab.
 - Production RED: two phone cases failed on the demonstrated defects; screenshots and numeric bounds retained privately.
 - Candidate production GREEN: all six review/summary cases passed across en, zh-CN and zh-HK, including desktop checks.
