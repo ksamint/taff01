@@ -606,6 +606,13 @@ select:focus-visible,
 }
 
 /* Page headings and sections */
+.organization-toolbar {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--border-line);
+}
 .page-heading {
   display: grid;
   gap: var(--space-xs);
@@ -1278,6 +1285,9 @@ select,
   }
 }
 @media (max-width: 639px) {
+  .review-view > .review-layout {
+    padding-inline: var(--gutter);
+  }
   .wordmark {
     gap: 6px;
     flex-shrink: 0;

@@ -5,6 +5,7 @@ import {
   taskListSchema,
 } from "../packages/schemas/src/base";
 import { inboxSchema } from "../packages/schemas/src/inbox-read";
+import { GENERIC_OPERATION_SECTORS } from "../packages/schemas/src/index";
 import {
   prototypeAgents,
   prototypeId,
@@ -131,6 +132,8 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     await page.addInitScript(prepareTime);
   }
   const routes: Record<string, string> = {
+    sectors: "/projects?view=sectors",
+    "export-image": "/projects?view=sectors",
     today: "/",
     projects: "/projects",
     inbox: "/inbox",
@@ -169,96 +172,117 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     const id = rows.map((row: { id: string }) => row.id).sort()[0];
     routes[screen] = `/${kind}/${id}`;
   }
-  const loaded = await page.goto(
-    screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
+  const sectorFixture = ["sectors", "export-image"].includes(screen)
+    ? [...tasks].sort((a, b) => a.id.localeCompare(b.id)).slice(0, 6)
+    : [];
+  expect(sectorFixture.length).toBe(
+    ["sectors", "export-image"].includes(screen) ? 6 : 0,
   );
-  expect(loaded?.status()).toBe(200);
-  await page.evaluate(prepareFonts, undefined);
-  await expect(page.locator("main.content")).toBeVisible();
-  await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
-  // One count everywhere (ADR 0014): unresolved reviews and blockers.
+  const labeledTasks: typeof sectorFixture = [];
+  const reviewItem = inbox.items.find(
+    (item) => item.taskId === prototypeId("task", "nw", 141),
+  );
   const needsYou = inbox.items.filter(
     (item) =>
       !item.resolvedAt && (item.kind === "review" || item.kind === "blocker"),
   ).length;
-  if (desktop) {
-    await expect(page.locator(".sidebar")).toBeVisible();
-    // 今天 · 日曆 · 項目, with 公司 · 聯繫人 nested under 項目 (ADR 0014 §2).
-    await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(5);
-    await expect(page.locator(".sidebar-primary .sidebar-sublink")).toHaveCount(
-      2,
-    );
-    await expect(page.locator(".sidebar-me .nav-badge")).toHaveText(
-      String(needsYou),
-    );
-  }
-  const reviewItem = inbox.items.find(
-    (item) => item.taskId === prototypeId("task", "nw", 141),
-  );
-  if (
-    screen === "task-detail" ||
-    (screen === "review" && !desktop) ||
-    (desktop && (screen === "projects" || screen === "type"))
-  ) {
-    const id = prototypeId("task", "nw", screen === "task-detail" ? 145 : 141);
-    await page.locator(`a.task-title-link[href="/tasks/${id}"]`).click();
-    await expect(page.getByTestId("task-detail-heading")).toBeVisible();
-  }
-  if (screen === "task-detail") {
-    // The desktop panel edits the worker inline; the phone sheet opens a row.
-    await expect(
-      page.getByTestId(desktop ? "detail-worker" : "task-field-worker"),
-    ).toBeEnabled();
-    await expect(page.getByTestId("task-schedule")).toBeEnabled();
-    await expect(page.locator(".task-parent-link")).toContainText("NW-140");
-  }
-  const assertDesktopBoardActions = async () => {
-    const card = page.locator(
-      `.planning-board .board-card[data-task-id="${prototypeId("task", "nw", 141)}"]`,
-    );
-    await expect(card).toHaveClass(/is-selected/);
-    await card.locator("a.task-title-link").blur();
-    await page.mouse.move(0, 0);
-    const layout = () =>
-      card.evaluate((element) => {
-        const rect = (selector: string) => {
-          const target = element.querySelector(selector);
-          if (!target) throw new Error(`Missing board element: ${selector}`);
-          const { x, y, width, height } = target.getBoundingClientRect();
-          return { x, y, width, height };
-        };
-        return {
-          footer: rect(".projects-card-footer"),
-          status: rect(".projects-agent-state-desktop"),
-          handle: rect('[data-testid="drag-handle"]'),
-          menu: rect(".projects-card-menu > summary"),
-        };
-      });
-    const before = await layout();
-    await card.getByTestId("drag-handle").hover();
-    const after = await layout();
-    expect(after.handle, "Hover must not shift the drag target").toEqual(
-      before.handle,
-    );
-    expect(after.menu, "Hover must not shift the menu target").toEqual(
-      before.menu,
-    );
-    for (const state of [before, after]) {
-      for (const control of [state.handle, state.menu]) {
-        expect(control.width).toBeGreaterThanOrEqual(44);
-        expect(control.height).toBeGreaterThanOrEqual(44);
-        for (const label of [state.footer, state.status])
-          expect(
-            control.y,
-            "Board actions must sit below footer chips and run status",
-          ).toBeGreaterThanOrEqual(label.y + label.height);
-      }
-    }
-    await card.locator("a.task-title-link").focus();
-    await page.mouse.move(0, 0);
-  };
   let openedReview = false;
   try {
+    for (const [index, task] of sectorFixture.entries()) {
+      const response = await page.request.patch(`/api/tasks/${task.id}`, {
+        headers: { Origin: process.env.AUTH_URL! },
+        data: { labels: [GENERIC_OPERATION_SECTORS[index].label] },
+      });
+      expect(response.status()).toBe(200);
+      labeledTasks.push(task);
+    }
+    const loaded = await page.goto(
+      screen === "shell" ? (desktop ? "/projects" : "/") : routes[screen],
+    );
+    expect(loaded?.status()).toBe(200);
+    await page.evaluate(prepareFonts, undefined);
+    await expect(page.locator("main.content")).toBeVisible();
+    await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
+    // One count everywhere (ADR 0014): unresolved reviews and blockers.
+    if (desktop) {
+      await expect(page.locator(".sidebar")).toBeVisible();
+      // 今天 · 日曆 · 項目, with 公司 · 聯繫人 nested under 項目 (ADR 0014 §2).
+      await expect(page.locator(".sidebar-primary .sidebar-link")).toHaveCount(
+        5,
+      );
+      await expect(
+        page.locator(".sidebar-primary .sidebar-sublink"),
+      ).toHaveCount(2);
+      await expect(page.locator(".sidebar-me .nav-badge")).toHaveText(
+        String(needsYou),
+      );
+    }
+    if (
+      screen === "task-detail" ||
+      (screen === "review" && !desktop) ||
+      (desktop && (screen === "projects" || screen === "type"))
+    ) {
+      const id = prototypeId(
+        "task",
+        "nw",
+        screen === "task-detail" ? 145 : 141,
+      );
+      await page.locator(`a.task-title-link[href="/tasks/${id}"]`).click();
+      await expect(page.getByTestId("task-detail-heading")).toBeVisible();
+    }
+    if (screen === "task-detail") {
+      // The desktop panel edits the worker inline; the phone sheet opens a row.
+      await expect(
+        page.getByTestId(desktop ? "detail-worker" : "task-field-worker"),
+      ).toBeEnabled();
+      await expect(page.getByTestId("task-schedule")).toBeEnabled();
+      await expect(page.locator(".task-parent-link")).toContainText("NW-140");
+    }
+    const assertDesktopBoardActions = async () => {
+      const card = page.locator(
+        `.planning-board .board-card[data-task-id="${prototypeId("task", "nw", 141)}"]`,
+      );
+      await expect(card).toHaveClass(/is-selected/);
+      await card.locator("a.task-title-link").blur();
+      await page.mouse.move(0, 0);
+      const layout = () =>
+        card.evaluate((element) => {
+          const rect = (selector: string) => {
+            const target = element.querySelector(selector);
+            if (!target) throw new Error(`Missing board element: ${selector}`);
+            const { x, y, width, height } = target.getBoundingClientRect();
+            return { x, y, width, height };
+          };
+          return {
+            footer: rect(".projects-card-footer"),
+            status: rect(".projects-agent-state-desktop"),
+            handle: rect('[data-testid="drag-handle"]'),
+            menu: rect(".projects-card-menu > summary"),
+          };
+        });
+      const before = await layout();
+      await card.getByTestId("drag-handle").hover();
+      const after = await layout();
+      expect(after.handle, "Hover must not shift the drag target").toEqual(
+        before.handle,
+      );
+      expect(after.menu, "Hover must not shift the menu target").toEqual(
+        before.menu,
+      );
+      for (const state of [before, after]) {
+        for (const control of [state.handle, state.menu]) {
+          expect(control.width).toBeGreaterThanOrEqual(44);
+          expect(control.height).toBeGreaterThanOrEqual(44);
+          for (const label of [state.footer, state.status])
+            expect(
+              control.y,
+              "Board actions must sit below footer chips and run status",
+            ).toBeGreaterThanOrEqual(label.y + label.height);
+        }
+      }
+      await card.locator("a.task-title-link").focus();
+      await page.mouse.move(0, 0);
+    };
     if (screen === "review" && desktop) {
       expect(reviewItem).toBeDefined();
       expect(reviewItem!.readAt).toBeNull();
@@ -275,6 +299,39 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         .click();
       expect((await read).status()).toBe(200);
       await expect(page.getByTestId("task-detail-heading")).toBeVisible();
+    }
+    if (sectorFixture.length) {
+      await expect(page.getByTestId("sector-group")).toHaveCount(6);
+      for (const sector of GENERIC_OPERATION_SECTORS)
+        await expect(
+          page
+            .locator(
+              `[data-testid="sector-group"][data-sector="${sector.label}"]`,
+            )
+            .getByTestId("board-task"),
+        ).toHaveCount(1);
+      if (screen === "export-image") {
+        const rendered = page.waitForResponse(
+          (response) =>
+            response.url().includes("/view-image?") &&
+            response.status() === 200,
+        );
+        await page.getByTestId("view-export-open").click();
+        expect((await rendered).headers()["content-type"]).toContain(
+          "image/png",
+        );
+        const preview = page.getByTestId("view-export-preview");
+        await expect(preview).toBeVisible();
+        await expect
+          .poll(() =>
+            preview.evaluate(
+              (image: HTMLImageElement) =>
+                image.complete && image.naturalWidth > 0,
+            ),
+          )
+          .toBe(true);
+        await expect(page.getByTestId("view-export-save")).toBeEnabled();
+      }
     }
     if (screen === "search") {
       await page.keyboard.press("Control+k");
@@ -477,6 +534,13 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       return;
     }
   } finally {
+    for (const task of labeledTasks) {
+      const response = await page.request.patch(`/api/tasks/${task.id}`, {
+        headers: { Origin: process.env.AUTH_URL! },
+        data: { labels: task.labels },
+      });
+      expect(response.status()).toBe(200);
+    }
     if (openedReview) {
       // Opening the real Inbox pane marks this isolated recipient's item read.
       const restored = await page.request.patch(

@@ -29,10 +29,12 @@ export function SummariesView() {
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const summaries = useDailySummaries(workspace.id);
   return (
-    <div className="summaries-page">
-      <Link className="text-link" href="/me">
-        <ArrowLeft size={16} aria-hidden="true" /> {t("mcp.back")}
-      </Link>
+    <div className="summaries-page summaries-list-page">
+      <header className="organization-toolbar">
+        <Link className="button button-quiet" href="/me">
+          <ArrowLeft size={16} aria-hidden="true" /> {t("mcp.back")}
+        </Link>
+      </header>
       <section className="page-heading">
         <p className="eyebrow">{workspace.name}</p>
         <h1>{t("summary.title")}</h1>

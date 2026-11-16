@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (492 distinct, 2276 uses)
+## Test ids (493 distinct, 2285 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -490,7 +490,7 @@ several do). “Also rendered by” lists the other files.
 | `board-column-in_progress` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-column-todo` | 1 |  | planning.spec.ts |
 | `board-status` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `board-task` | 22 |  | live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
+| `board-task` | 23 |  | live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `manage-project` | 7 |  | project-profile.spec.ts, summaries.spec.ts |
 | `new-project` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
@@ -514,7 +514,7 @@ several do). “Also rendered by” lists the other files.
 | `project-view-list` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `project-view-more` | 1 |  | operation-templates.spec.ts |
 | `project-view-sectors` | 1 |  | operation-templates.spec.ts |
-| `sector-group` | 2 |  | operation-templates.spec.ts |
+| `sector-group` | 4 |  | operation-templates.spec.ts, ui-v2.spec.ts |
 | `sector-project` | 1 |  | operation-templates.spec.ts |
 | `sector-view-hint` | 1 |  | operation-templates.spec.ts |
 
@@ -569,7 +569,7 @@ several do). “Also rendered by” lists the other files.
 | `item-comment` | 5 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `item-comment-submit` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `review-approve` | 18 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
-| `review-artifact` | 16 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
+| `review-artifact` | 18 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `review-comment` | 5 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-readonly` | 10 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-request-changes` | 4 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
@@ -662,6 +662,12 @@ several do). “Also rendered by” lists the other files.
 | `summary-preview` | 1 |  | summaries.spec.ts |
 | `summary-preview-open` | 1 |  | summaries.spec.ts |
 | `summary-row` | 3 | summaries-view.tsx | summaries.spec.ts |
+
+### summaries-view.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `summary-empty` | 1 |  | summaries.spec.ts |
 
 ### summary-document.tsx
 
@@ -791,9 +797,9 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `view-export-copy` | 1 |  | view-export.spec.ts |
-| `view-export-open` | 11 |  | ssr-session.spec.ts, view-export.spec.ts |
-| `view-export-preview` | 2 |  | view-export.spec.ts |
-| `view-export-save` | 1 |  | view-export.spec.ts |
+| `view-export-open` | 12 |  | ssr-session.spec.ts, ui-v2.spec.ts, view-export.spec.ts |
+| `view-export-preview` | 3 |  | ui-v2.spec.ts, view-export.spec.ts |
+| `view-export-save` | 2 |  | ui-v2.spec.ts, view-export.spec.ts |
 | `view-export-send` | 1 |  | view-export.spec.ts |
 | `view-export-size` | 1 |  | view-export.spec.ts |
 
@@ -1002,6 +1008,8 @@ read (`data-event-id`, `data-date`).
 | `.relations-svg` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `.relations-svg > g` | 2 | timeline.spec.ts |
 | `.review-comments` | 3 | planning.spec.ts |
+| `.review-layout` | 1 | agent-review.spec.ts |
+| `.review-view` | 1 | agent-review.spec.ts |
 | `.section-hint` | 2 | optimistic-m4.spec.ts |
 | `.sidebar` | 4 | agent-creation.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `.sidebar a[href^="/agents/optimistic:"]` | 1 | agent-creation.spec.ts |
@@ -1011,6 +1019,8 @@ read (`data-event-id`, `data-date`).
 | `.sidebar-primary .sidebar-sublink[href="/companies"]` | 1 | ui-v2.spec.ts |
 | `.sidebar-primary .sidebar-sublink[href="/contacts"]` | 1 | ui-v2.spec.ts |
 | `.sidebar-workspace > summary` | 1 | ui-v2.spec.ts |
+| `.summaries-page .task-list > li` | 1 | summaries.spec.ts |
+| `.summaries-page > .organization-toolbar` | 1 | summaries.spec.ts |
 | `.tabbar` | 3 | live/platform.spec.ts, me.spec.ts, ui-v2.spec.ts |
 | `.tabbar a` | 1 | live/platform.spec.ts |
 | `.task-detail-sheet .task-detail-toolbar` | 1 | ui-v2.spec.ts |
@@ -1047,7 +1057,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="mind-node"][data-id="*"]` | 3 | live/mind.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts |
 | `[data-testid="project-audience-option"][data-tag="*"]` | 1 | summaries.spec.ts |
 | `[data-testid="relations-node"][data-key="task:*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
-| `[data-testid="sector-group"][data-sector="*"]` | 1 | operation-templates.spec.ts |
+| `[data-testid="sector-group"][data-sector="*"]` | 2 | operation-templates.spec.ts, ui-v2.spec.ts |
 | `[data-testid="summary-row"][data-summary="*"]` | 3 | summaries.spec.ts |
 | `[data-testid="timeline-bar"][data-id="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `[data-testid="timeline-dependency"][data-from="*"]` | 2 | live/timeline.spec.ts, timeline.spec.ts |
@@ -1071,6 +1081,7 @@ read (`data-event-id`, `data-date`).
 | `#password-hint` | 1 | username-auth.spec.ts |
 | `#scroll` | 1 | native-select-fonts.spec.ts |
 | `#team` | 1 | scripts/ui/app-shots.mts |
+| `a.button` | 1 | summaries.spec.ts |
 | `a.inbox-source-title[href="/tasks/*/review"]` | 2 | scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `a.task-title-link` | 2 | ui-v2.spec.ts |
 | `a.task-title-link[href="/tasks/*"]` | 3 | scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ui-v2.spec.ts |

@@ -11,6 +11,11 @@ graph data and isolation scope.
 
 ## Status
 
+**v0.2.26 GUI preparation:** phone review and summary-list gutters and the
+summary back header are corrected; locale punctuation and new visual references
+are part of the same candidate ([navigation](docs/spec/client-navigation.md),
+[summaries](docs/spec/daily-summary.md)). Production remains v0.2.25.
+
 **v0.2.26 preparation:** [run-detail continuity](docs/spec/client-navigation.md)
 and calendar acceptance readiness fixes are implemented; production stays v0.2.25.
 Token-policy browser acceptance also observes the server acknowledgement

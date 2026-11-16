@@ -1,7 +1,7 @@
 # 0002 · Agent queue: land the baseline, fix the GUI findings, build the Rust rails
 
-- **Status:** ready for the local dev agent (owner, 2026-11-15: "let agent
-  continue dev and fix"). Nothing below has started.
+- **Status:** executing; L1 merged as PR108 `96d037e` after all 18 local
+  gate steps passed. The related GUI findings are being completed together.
 - **Who executes:** the local dev agent on the operator machine. The planner
   (Claude) updates this file on a branch; the agent adopts it in its own PRs.
 - **Reads first:** `AGENTS.md`, then [plan 0001](0001-rust-backend-port.md)
@@ -13,7 +13,9 @@
 
 ## How to work this queue
 
-One task per branch and PR from the latest `main`. Gate **F** = the full
+One task per branch and PR from the latest `main`, except the related G1–G4
+GUI findings are grouped into one GUI PR to reduce repeated validation after
+the owner's 2026-11-16 request to accelerate. Gate **F** = the full
 `pnpm check` reports `passed` on the PR head rebased on `main`; paste
 `release-reports/check-report.md` into the PR. Merge your own PR on F.
 TypeScript or Rust only; no CI, no runners; milestone ≤ 40 lines per task
@@ -71,6 +73,10 @@ step that would write to production other than v0.2.26's X1–X2; a `pnpm check`
 that cannot reach `passed` without one of the forbidden moves above.
 
 ## Amendments
+
+- 2026-11-16: execution adjustment following the owner's request to speed up:
+  prepare related GUI fixes together and run gate F once on their combined
+  final head. Every required check and the production reproduction rule remain.
 
 - 2026-11-15: queue written by the planner after the repository review
   (`main` at `455c549`). Owner decisions of that day are in plan 0001.

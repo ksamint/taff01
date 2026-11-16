@@ -40,7 +40,7 @@ Server.prototype.emit = function (
   if (
     event === "request" &&
     request.method === "GET" &&
-    /^\/api\/(bootstrap\/today|brief|projects\/[0-9a-f-]{36}\/timeline)(?:\?|$)/i.test(
+    /^\/api\/(bootstrap\/today|brief|projects\/[0-9a-f-]{36}\/timeline|workspaces\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/view-image)(?:\?|$)/i.test(
       request.url!,
     )
   )

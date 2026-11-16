@@ -42,6 +42,13 @@ is implemented for v0.2.26, not yet deployed.
 - CN-3.2 Project management controls shall continue to use the current
   canManageProjects read; this regression does not grant new authority.
 
+### Standalone phone review (CN-4)
+
+- CN-4.1 At phone widths, the standalone review's deliverable heading and
+  cards shall keep the title's page gutter without horizontal overflow.
+- CN-4.2 The embedded task review and desktop review grid shall retain
+  their existing layout.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -54,6 +61,7 @@ is implemented for v0.2.26, not yet deployed.
 
 | Requirement | Evidence |
 | --- | --- |
+| CN-4 | e2e/agent-review.spec.ts standalone 390×844 gutters, overflow and desktop grid in all three locales |
 | CN-3 | e2e/project-filter-completion.spec.ts (browser pending) |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
