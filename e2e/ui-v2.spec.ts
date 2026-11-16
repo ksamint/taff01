@@ -3,6 +3,7 @@ import {
   memberListSchema,
   meSchema,
   taskListSchema,
+  taskSchema,
 } from "../packages/schemas/src/base";
 import { inboxSchema } from "../packages/schemas/src/inbox-read";
 import { GENERIC_OPERATION_SECTORS } from "../packages/schemas/src/index";
@@ -194,10 +195,14 @@ test(`${screen} uses the real Northwind fixture`, async ({
     for (const [index, task] of sectorFixture.entries()) {
       const response = await request.patch(`/api/tasks/${task.id}`, {
         headers: { Origin: process.env.AUTH_URL! },
-        data: { labels: [GENERIC_OPERATION_SECTORS[index].label] },
+        data: {
+          version: task.version,
+          labels: [GENERIC_OPERATION_SECTORS[index].label],
+        },
       });
       expect(response.status()).toBe(200);
-      labeledTasks.push(task);
+      const updated = taskSchema.parse(await response.json());
+      labeledTasks.push({ ...task, version: updated.version });
     }
     await page.context().addCookies((await request.storageState()).cookies);
     const loaded = await page.goto(
@@ -539,7 +544,7 @@ test(`${screen} uses the real Northwind fixture`, async ({
     for (const task of labeledTasks) {
       const response = await request.patch(`/api/tasks/${task.id}`, {
         headers: { Origin: process.env.AUTH_URL! },
-        data: { labels: task.labels },
+        data: { version: task.version, labels: task.labels },
       });
       expect(response.status()).toBe(200);
     }
