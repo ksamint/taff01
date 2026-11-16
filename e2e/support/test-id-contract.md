@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (492 distinct, 2277 uses)
+## Test ids (492 distinct, 2276 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -179,7 +179,7 @@ several do). “Also rendered by” lists the other files.
 | `archive-*` | 3 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `board-column-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `contact-search` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
-| `grant-confirm` | 5 | mcp-view.tsx, token-policy-control.tsx | access.spec.ts, token-grants.spec.ts |
+| `grant-confirm` | 4 | mcp-view.tsx, token-policy-control.tsx | access.spec.ts, token-grants.spec.ts |
 | `lifecycle-*` | 1 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx, relations-view.tsx, summaries-admin.tsx | me.spec.ts |
 | `open-search` | 3 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts |
