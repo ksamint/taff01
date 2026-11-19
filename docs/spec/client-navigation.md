@@ -56,12 +56,20 @@ is implemented for v0.2.26, not yet deployed.
 
 - Public-share layout and approved visual references.
 
+### Cold route reads (CN-8)
+
+- CN-8.1 A cold Today, project board or Organizations load shall fetch each
+  workspace data URL at most once while no realtime changes arrive. Today
+  shall issue at most six data GETs in addition to session confirmation and
+  the role check at the first realtime connection.
+
 ## Acceptance
 
 | Requirement | Evidence |
 | --- | --- |
 | CN-3.1–3.2 | `e2e/project-filter-completion.spec.ts` |
 | CN-3.3–3.4 | `e2e/project-header.spec.ts` in three locales |
+| CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |

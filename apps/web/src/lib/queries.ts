@@ -93,7 +93,6 @@ export function useInbox(workspaceId: string, snoozed = false) {
     refetchOnMount: () =>
       client.isMutating({ mutationKey: m3MutationKey }) === 0,
     enabled: currentSession(client)?.confirmed !== false,
-    staleTime: 0,
     queryKey: snoozed
       ? [...inboxKey(workspaceId), "snoozed"]
       : inboxKey(workspaceId),
