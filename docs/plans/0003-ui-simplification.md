@@ -1,8 +1,7 @@
 # 0003 · Agent queue: fix the screen-review findings and simplify the UI
 
-- **Status:** ready for the local dev agent (owner, 2026-11-19: "how we
-  optimize UI to simplify it"). Groups P, S and Q may start now. Group D
-  waits for the owner. Nothing below has started.
+- **Status:** P, S, Q and D are implemented in the integrated candidate.
+  The exact-tree gate, PR, merge and direct release are pending.
 - **Who executes:** the local dev agent on the operator machine. The planner
   (Claude) updates this file on a branch; the agent adopts it in its own PRs.
 - **Reads first:** `AGENTS.md`, then
@@ -102,3 +101,8 @@ After P5 and S6 print `NEEDS-DECISION: release P and S as v0.2.26 with the
   (`main` at `96d037e`). F8 is covered by S1 and S2, F11 by S5.
 - 2026-11-19: owner approved D1, D2 and D3. Existing view URLs retain
   their entry points.
+- 2026-11-19: owner approved keeping the initial realtime role check in
+  P2, fetching supervisor/capabilities under a P4 Details disclosure,
+  and using the template order for XIDING setup tasks in Q3.
+- 2026-11-19: owner approved one integrated PR with gate F on its exact tree,
+  then direct release of v0.2.26 with the plan 0002 GUI fixes after validation.

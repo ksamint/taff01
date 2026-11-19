@@ -5,6 +5,23 @@
 - Tooling only, nothing changes in the app: `pnpm check` runs the whole local gate in one command, binds the result to the tree and writes the table for pull requests. The repository now follows the tda01 Start baseline (version 1): a pull request template, a deploy runbook, a deploy report per attempt and a stop list in `AGENTS.md`.
 - Decided (owner, 2026-11-15; ADR 0032): from v0.2.27 new backend behaviour is written in Rust and the TypeScript backend takes fixes only. The plan is `docs/plans/0001-rust-backend-port.md`.
 
+## v0.2.26 — UI simplification (candidate)
+
+- Phone projects, board cards, task details and timeline finance use less
+  space. The timeline and AI Brief label computed task completion separately
+  from the saved project delivery progress.
+- Today separates undated tasks and uses two columns on wide screens.
+  XIDING setup tasks follow the operation template order.
+- Board and Organizations load access and agent details on demand. Cold
+  Inbox reads share one response and preserve the realtime role check.
+- Me groups settings and uses less font data. Settings pages share a back
+  header. Review and audit fit phone gutters.
+- Projects offers one Graph entry with Relations and Mind Map modes.
+  Sectors opens from the index and Stakeholders from project info. Existing
+  deep links and Graph exports continue to work.
+- The calendar keeps overnight events above the first hour, the mind canvas
+  separates its centre labels, and Search hides shortcut hints on touch.
+
 ## v0.2.25 — timeline, calendar, graph and Sectors views (deployed and accepted)
 
 - Timeline exports fit the full chart with the current critical-path highlight, task bars, milestones and dependencies; up to 60 rows with localized overflow.

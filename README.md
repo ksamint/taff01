@@ -11,17 +11,13 @@ graph data and isolation scope.
 
 ## Status
 
-**v0.2.26 GUI preparation:** standalone review keeps its phone gutter.
-The candidate also includes Chinese punctuation fixes and visual references
-for Sectors and the Export image dialog ([navigation](docs/spec/client-navigation.md),
-[summaries](docs/spec/daily-summary.md)). Production remains v0.2.25.
-
-**v0.2.26 preparation:** [run-detail continuity](docs/spec/client-navigation.md)
-and calendar acceptance readiness fixes are implemented; production stays v0.2.25.
-[Board task access](docs/spec/client-navigation.md#board-task-access-cn-4)
-loads on menu open or drag.
-Token-policy browser acceptance also observes the server acknowledgement
-before checking reconciled state ([tooling TT-4.5](docs/spec/tooling.md)).
+**v0.2.26 candidate:** Phone project headers, board cards, task sheets and
+timeline finance controls are more compact. Today separates undated tasks,
+Me links directly to settings, and project graph modes share one entry.
+The candidate includes the review gutter and Chinese punctuation fixes.
+The full local gate and direct release are pending. Production remains
+v0.2.25. [UI plan](docs/plans/0003-ui-simplification.md) ·
+[Navigation spec](docs/spec/client-navigation.md).
 
 **v0.2.25 (deployed and accepted) — all six image outputs.** Summary, timeline,
 week, month, mind and relations images use authorized data, saved locale and
