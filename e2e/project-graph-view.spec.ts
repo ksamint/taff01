@@ -1,12 +1,14 @@
 import { devices, expect, test } from "@playwright/test";
 import {
   issuedWorkspaceInviteSchema,
+  meSchema,
   projectSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
 import { verifyTestEmail } from "./support/email-verification";
+import { openProjectFilters } from "./support/task-fields";
 
-test("one Graph destination switches existing modes for a guest on phone and desktop", async ({
+test("project navigation keeps Graph, Sectors and Stakeholders within existing role access", async ({
   page,
   browser,
 }, info) => {
@@ -48,10 +50,11 @@ test("one Graph destination switches existing modes for a guest on phone and des
     await guest.goto("/orgs");
     await guest.getByTestId(`workspace-${workspace.id}`).click();
     const path = `/projects/${project.id}`;
-    for (const viewport of [
+    const viewports = [
       devices["Pixel 7"].viewport,
       { width: 1440, height: 900 },
-    ]) {
+    ];
+    for (const viewport of viewports) {
       await guest.setViewportSize(viewport);
       await guest.goto(path);
       const views = guest.getByRole("navigation", {
@@ -66,6 +69,9 @@ test("one Graph destination switches existing modes for a guest on phone and des
       await expect(entry).toHaveCount(1);
       await expect(views.getByTestId("project-view-mind")).toHaveCount(0);
       await expect(views.getByTestId("project-view-sectors")).toHaveCount(0);
+      await expect(views.getByTestId("project-view-stakeholders")).toHaveCount(
+        0,
+      );
       await entry.click();
       await expect(guest).toHaveURL(`${path}?view=relations`);
       await expect(guest.getByTestId("relations-view")).toBeVisible();
@@ -94,6 +100,39 @@ test("one Graph destination switches existing modes for a guest on phone and des
       await guest.getByTestId("project-view-sectors").click();
       await expect(guest).toHaveURL("/projects?view=sectors");
       await expect(guest.getByTestId("sector-view-hint")).toBeVisible();
+
+      await guest.goto(path);
+      await openProjectFilters(guest);
+      await expect(guest.getByTestId("project-info-stakeholders")).toHaveCount(
+        0,
+      );
+      await guest.goto(`${path}?view=stakeholders`);
+      await expect(guest.getByTestId("crm-no-access")).toBeVisible();
+    }
+
+    const current = meSchema.parse(
+      await (await guest.request.get("/api/me")).json(),
+    );
+    const membership = current.workspaces.find(
+      (item) => item.id === workspace.id,
+    );
+    if (!membership) throw new Error("Guest membership is required");
+    expect(
+      (
+        await page.request.patch(
+          `/api/workspaces/${workspace.id}/members/${membership.memberId}`,
+          { data: { role: "member" } },
+        )
+      ).status(),
+    ).toBe(200);
+    for (const viewport of viewports) {
+      await guest.setViewportSize(viewport);
+      await guest.goto(path);
+      await openProjectFilters(guest);
+      await guest.getByTestId("project-info-stakeholders").click();
+      await expect(guest).toHaveURL(`${path}?view=stakeholders`);
+      await expect(guest.getByTestId("stakeholders-view")).toBeVisible();
+      await expect(guest.getByTestId("client-company-select")).toHaveCount(0);
     }
   } finally {
     await context.close();

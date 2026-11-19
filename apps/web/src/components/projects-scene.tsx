@@ -796,6 +796,19 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 {t("projects.newProject")}
               </Button>
             )}
+            {selected && workspaceAccess.data?.canReadCrm && (
+              <Link
+                className="button"
+                href={viewHref("stakeholders")}
+                data-testid="project-info-stakeholders"
+                prefetch={false}
+                replace
+                scroll={false}
+                onClick={() => setSheetOpen(false)}
+              >
+                {t(VIEW_LABEL.stakeholders)}
+              </Link>
+            )}
             {admin && selected && (
               <Button
                 data-testid="manage-project"

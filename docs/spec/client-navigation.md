@@ -53,6 +53,10 @@ is implemented for v0.2.26, not yet deployed.
   with `?view=relations` and `?view=mind` shall retain their destinations.
   Editing and export shall retain each mode's existing authority.
 
+- CN-3.6 When a reader with CRM read access opens a project's title menu,
+  the menu shall link to Stakeholders. The view selector shall omit that link,
+  and `?view=stakeholders` shall retain its existing access checks.
+
 ### Board task access (CN-4)
 
 - CN-4.1 When a board card loads, the browser shall defer its task-access
@@ -135,6 +139,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-4 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
 | CN-5 | `e2e/settings-header.spec.ts` in en, zh-CN, and zh-HK; `e2e/mcp-oauth.spec.ts` |
 | CN-6 | `e2e/me.spec.ts`, settings links and workspace roles |
+| CN-3.6 | `e2e/project-graph-view.spec.ts` in three locales, guest denied and member allowed on phone and desktop |
 | CN-3.5 | `e2e/project-graph-view.spec.ts` and `e2e/view-export.spec.ts` in three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |

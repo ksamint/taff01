@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (507 distinct, 2358 uses)
+## Test ids (510 distinct, 2366 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -171,6 +171,7 @@ several do). “Also rendered by” lists the other files.
 | `company-contact-roles` | 10 | crm/contact-role-row.tsx | crm.spec.ts, live/crm.spec.ts |
 | `company-heading` | 3 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
 | `company-row` | 7 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
+| `crm-no-access` | 1 | crm/contacts-view.tsx, crm/stakeholders-view.tsx | project-graph-view.spec.ts |
 
 ### crm/contact-links.tsx
 
@@ -256,10 +257,10 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `client-company-select` | 2 |  | crm.spec.ts, live/crm.spec.ts |
+| `client-company-select` | 3 |  | crm.spec.ts, live/crm.spec.ts, project-graph-view.spec.ts |
 | `stakeholder` | 7 |  | crm.spec.ts, live/crm.spec.ts, ui-v2.spec.ts |
 | `stakeholders-count` | 2 |  | crm.spec.ts, live/crm.spec.ts |
-| `stakeholders-view` | 2 |  | crm.spec.ts, live/crm.spec.ts |
+| `stakeholders-view` | 4 |  | crm.spec.ts, live/crm.spec.ts, project-graph-view.spec.ts, project-header.spec.ts |
 
 ### digest-view.tsx
 
@@ -513,6 +514,7 @@ several do). “Also rendered by” lists the other files.
 | `project-filters` | 10 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts, timeline.spec.ts |
 | `project-graph-mode-mind` | 2 |  | project-graph-view.spec.ts, view-export.spec.ts |
 | `project-graph-mode-relations` | 2 |  | project-graph-view.spec.ts, view-export.spec.ts |
+| `project-info-stakeholders` | 3 |  | project-graph-view.spec.ts, project-header.spec.ts |
 | `project-label` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-lead` | 2 |  | project-profile.spec.ts |
 | `project-lead-select` | 5 |  | project-profile.spec.ts |
@@ -528,6 +530,7 @@ several do). “Also rendered by” lists the other files.
 | `project-view-mind` | 1 |  | project-graph-view.spec.ts |
 | `project-view-more` | 7 |  | operation-templates.spec.ts, project-graph-view.spec.ts, project-header.spec.ts, support/task-fields.ts |
 | `project-view-sectors` | 5 |  | operation-templates.spec.ts, project-graph-view.spec.ts, project-header.spec.ts |
+| `project-view-stakeholders` | 1 |  | project-graph-view.spec.ts |
 | `sector-group` | 2 |  | operation-templates.spec.ts |
 | `sector-project` | 1 |  | operation-templates.spec.ts |
 | `sector-view-hint` | 3 |  | operation-templates.spec.ts, project-graph-view.spec.ts |

@@ -46,19 +46,19 @@ test("phone project header fits the board and preserves views and CRM navigation
   await expect(viewNav.getByRole("link")).toHaveCount(0);
   await expect(page.getByTestId("project-meta")).toHaveCount(0);
   await expect(page.getByTestId("crm-section-projects")).toHaveCount(0);
-  for (const view of [
-    "list",
-    "timeline",
-    "stakeholders",
-    "relations",
-    "board",
-  ]) {
+  for (const view of ["list", "timeline", "relations", "board"]) {
     await viewNav.getByTestId("project-view-more").click();
     await viewNav.getByTestId(`project-view-${view}`).click();
     await expect(page).toHaveURL(
       view === "board" ? path : `${path}?view=${view}`,
     );
   }
+
+  await openProjectFilters(page);
+  await page.getByTestId("project-info-stakeholders").click();
+  await expect(page).toHaveURL(`${path}?view=stakeholders`);
+  await expect(page.getByTestId("stakeholders-view")).toBeVisible();
+  await page.goto(path);
 
   for (const section of ["companies", "contacts"] as const) {
     await openProjectFilters(page);
