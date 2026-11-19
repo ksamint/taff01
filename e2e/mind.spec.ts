@@ -435,6 +435,12 @@ test("the mind canvas separates the two centre labels at its default zoom", asyn
   const core = page.locator(".mind-core-label");
   const inner = page.locator(".mind-ring-label").first();
   await expect(core).toBeVisible();
+  await expect(core).toHaveCSS("paint-order", "stroke");
+  const screenStroke = await core.evaluate((element) => {
+    const scale = (element as SVGTextElement).getScreenCTM()?.a ?? 0;
+    return Number.parseFloat(getComputedStyle(element).strokeWidth) * scale;
+  });
+  expect(screenStroke).toBeCloseTo(3);
   await expect(inner).toBeVisible();
   await page.evaluate(() => document.fonts.ready);
   const coreBox = await core.boundingBox();

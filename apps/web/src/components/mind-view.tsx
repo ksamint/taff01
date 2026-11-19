@@ -571,6 +571,7 @@ function MindCanvas({
             <text
               y={Math.max(5, 15 / k)}
               fontSize={Math.max(13, 12 / k)}
+              strokeWidth={3 / k}
               className="mind-core-label"
             >
               {t("mind.centre")}

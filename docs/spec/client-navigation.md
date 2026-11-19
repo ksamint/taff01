@@ -144,7 +144,8 @@ is implemented for v0.2.26, not yet deployed.
 ### Mind map labels (CN-14)
 
 - CN-14.1 At default zoom, the interactive Mind Map shall keep the centre
-  and innermost ring labels separate on the phone viewport.
+  and innermost ring labels separate on the phone viewport. The centre label
+  shall stay legible if the offset places it beyond the centre circle.
 
 ## Non-functional
 
