@@ -3,6 +3,7 @@ import {
   memberListSchema,
   meSchema,
   taskListSchema,
+  taskSchema,
 } from "../packages/schemas/src/base";
 import { inboxSchema } from "../packages/schemas/src/inbox-read";
 import {
@@ -259,7 +260,28 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
     await page.mouse.move(0, 0);
   };
   let openedReview = false;
+  let restoreDue: { id: string; dueAt: string; version: number } | undefined;
   try {
+    if (screen === "today") {
+      const hostname = new URL(process.env.AUTH_URL!).hostname;
+      if (!["localhost", "127.0.0.1", "[::1]"].includes(hostname))
+        throw new Error("Today capture requires an isolated local fixture");
+      const task = tasks.find(
+        ({ id }) => id === prototypeId("task", "nw", 145),
+      );
+      if (!task?.dueAt)
+        throw new Error("The visual task needs its seeded due date");
+      const updated = await page.request.patch(`/api/tasks/${task.id}`, {
+        data: { dueAt: null, version: task.version },
+      });
+      expect(updated.status()).toBe(200);
+      restoreDue = {
+        id: task.id,
+        dueAt: task.dueAt,
+        version: taskSchema.parse(await updated.json()).version,
+      };
+      await page.reload();
+    }
     if (screen === "review" && desktop) {
       expect(reviewItem).toBeDefined();
       expect(reviewItem!.readAt).toBeNull();
@@ -337,7 +359,15 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         page.getByText(messages[locale].loading, { exact: true }),
       ).toHaveCount(0);
       if (screen === "today") {
-        await expect(page.getByTestId("task-card")).toHaveCount(2);
+        const due = page.getByRole("region", {
+          name: messages[locale].todayDue,
+        });
+        await expect(due.getByTestId("task-card")).toHaveCount(2);
+        const undated = page.getByTestId("today-undated");
+        await expect(undated.locator("summary")).toHaveText(
+          messages[locale].todayUndated.replace("{{count}}", "1"),
+        );
+        await expect(undated).toHaveJSProperty("open", false);
         await expect(
           page.getByTestId("today-needs-item").first(),
         ).toBeVisible();
@@ -478,6 +508,13 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
       return;
     }
   } finally {
+    if (restoreDue) {
+      const { id, dueAt, version } = restoreDue;
+      const restored = await page.request.patch(`/api/tasks/${id}`, {
+        data: { dueAt, version },
+      });
+      expect(restored.status()).toBe(200);
+    }
     if (openedReview) {
       // Opening the real Inbox pane marks this isolated recipient's item read.
       const restored = await page.request.patch(

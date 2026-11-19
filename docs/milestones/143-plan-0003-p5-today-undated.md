@@ -12,5 +12,12 @@ Plan 0003 P5 · 2026-11-19 · local candidate.
 Validation: lint, typecheck, and seven focused classifier, font and test-ID
 checks passed. All three production phone locale checks passed on the
 combined P5 and Q7 build. The realtime case opens the disclosure before
-each timed check, leaving its one-second assertions in place. Four pinned
-Linux Today references and the exact-tree full gate are pending.
+each timed check, leaving its one-second assertions in place. The exact-tree
+full gate is pending.
+
+The Today visual harness temporarily clears the date of seeded task NW-145
+and restores it after capture, so all four references show the closed
+disclosure and its count. Recorded from P5 render source `ef4529a` on Linux
+x86-64, Playwright 1.64.1 and Chromium 156.0.8078.80. Four regenerated and
+four unchanged comparisons passed. Paired captures are in
+`release-reports/today-layout`.
