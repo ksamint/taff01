@@ -65,6 +65,26 @@ is implemented for v0.2.26, not yet deployed.
   send the change only after the task-access response permits that status.
   A denied or cancelled drag shall leave the task in its current column.
 
+### Settings back navigation (CN-5)
+
+- CN-5.1 When a person opens Notifications, MCP, Organizations, Access,
+  Audit, summary administration, summary history, digest history, or an
+  agent profile, the standalone page shall show one bordered back header
+  with its existing destination and localized label. Organizations shall
+  retain its validated return to OAuth consent when present.
+- CN-5.2 On phones, those routes shall inset their body content and shall
+  fit the viewport without page-level horizontal scrolling.
+- CN-5.3 Notifications and agent profiles embedded in desktop Me shall
+  omit the standalone back header.
+
+### Me settings navigation (CN-6)
+
+- CN-6.1 On phones, Me shall show Inbox, AI Brief and agents before one
+  Settings group, followed by Preferences.
+- CN-6.2 Me shall provide direct settings links for Organizations, MCP,
+  notifications, digest history and shareholder summaries. Workspace admins
+  shall also have direct links to access, audit and summary administration.
+
 ### Organization agent rows (CN-7)
 
 - CN-7.1 When Organizations opens, the agent row shall show the name, profile
@@ -72,6 +92,27 @@ is implemented for v0.2.26, not yet deployed.
   agent's supervisor and capabilities through the existing profile read.
 - CN-7.2 The Details row shall use the same workspace read authority as the
   existing agent profile.
+
+### Cold route reads (CN-8)
+
+- CN-8.1 A cold Today, project board or Organizations load shall fetch each
+  workspace data URL at most once while no realtime changes arrive. Today
+  shall issue at most six data GETs in addition to session confirmation and
+  the role check at the first realtime connection.
+
+### Calendar day start (CN-9)
+
+- CN-9.1 When the day calendar opens, carried-over events shall stay in the
+  sticky date band above the time grid and the 08:00 label shall be visible
+  below that band on phone and desktop. Existing calendar gestures and the
+  schedule editor shall remain available.
+
+### Standalone phone review (CN-10)
+
+- CN-10.1 At phone widths, the standalone review's deliverable heading and
+  cards shall keep the title's page gutter without horizontal overflow.
+- CN-10.2 The embedded task review and desktop review grid shall retain
+  their existing layout.
 
 ### Tasks on Today (CN-11)
 
@@ -95,55 +136,6 @@ is implemented for v0.2.26, not yet deployed.
   beneath a More disclosure and show their set values in its closed
   summary. The existing permissions apply to all task editors.
 
-### Settings back navigation (CN-5)
-
-- CN-5.1 When a person opens Notifications, MCP, Organizations, Access,
-  Audit, summary administration, summary history, digest history, or an
-  agent profile, the standalone page shall show one bordered back header
-  with its existing destination and localized label. Organizations shall
-  retain its validated return to OAuth consent when present.
-- CN-5.2 On phones, those routes shall inset their body content and shall
-  fit the viewport without page-level horizontal scrolling.
-- CN-5.3 Notifications and agent profiles embedded in desktop Me shall
-  omit the standalone back header.
-
-### Calendar day start (CN-9)
-
-- CN-9.1 When the day calendar opens, carried-over events shall stay in the
-  sticky date band above the time grid and the 08:00 label shall be visible
-  below that band on phone and desktop. Existing calendar gestures and the
-  schedule editor shall remain available.
-
-### Standalone phone review (CN-10)
-
-- CN-10.1 At phone widths, the standalone review's deliverable heading and
-  cards shall keep the title's page gutter without horizontal overflow.
-- CN-10.2 The embedded task review and desktop review grid shall retain
-  their existing layout.
-
-## Non-functional
-
-- No new client dependency. Today's initial JavaScript remains within its budget.
-
-## Out of scope
-
-- Public-share layout and approved visual references.
-
-### Cold route reads (CN-8)
-
-- CN-8.1 A cold Today, project board or Organizations load shall fetch each
-  workspace data URL at most once while no realtime changes arrive. Today
-  shall issue at most six data GETs in addition to session confirmation and
-  the role check at the first realtime connection.
-
-### Me settings navigation (CN-6)
-
-- CN-6.1 On phones, Me shall show Inbox, AI Brief and agents before one
-  Settings group, followed by Preferences.
-- CN-6.2 Me shall provide direct settings links for Organizations, MCP,
-  notifications, digest history and shareholder summaries. Workspace admins
-  shall also have direct links to access, audit and summary administration.
-
 ### Search keyboard hint (CN-13)
 
 - CN-13.1 On a primary touch input without hover, Search shall hide its keyboard
@@ -154,28 +146,36 @@ is implemented for v0.2.26, not yet deployed.
 - CN-14.1 At default zoom, the interactive Mind Map shall keep the centre
   and innermost ring labels separate on the phone viewport.
 
+## Non-functional
+
+- No new client dependency. Today's initial JavaScript remains within its budget.
+
+## Out of scope
+
+- Public-share layout and approved visual references.
+
 ## Acceptance
 
 | Requirement | Evidence |
 | --- | --- |
-| CN-3.1–3.2 | `e2e/project-filter-completion.spec.ts` |
-| CN-3.3–3.4 | `e2e/project-header.spec.ts` in three locales |
-| CN-4 | `e2e/board-access.spec.ts` in en, zh-CN and zh-HK, and the existing board drag and menu cases in `e2e/planning.spec.ts` |
-| CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
-| CN-7 | `e2e/agent-creation.spec.ts`, guest disclosure and profile request counts in en, zh-CN, and zh-HK |
-| CN-11 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
-| CN-12 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
-| CN-5 | `e2e/settings-header.spec.ts` in en, zh-CN, and zh-HK; `e2e/mcp-oauth.spec.ts` |
-| CN-6 | `e2e/me.spec.ts`, settings links and workspace roles |
-| CN-3.6 | `e2e/project-graph-view.spec.ts` in three locales, guest denied and member allowed on phone and desktop |
-| CN-3.5 | `e2e/project-graph-view.spec.ts` and `e2e/view-export.spec.ts` in three locales |
-| CN-9 | `e2e/calendar.spec.ts`, overnight events and native target size in three locales |
-| CN-13 | `e2e/search-hint.spec.ts`, touch and desktop in three locales |
-| CN-14 | `e2e/mind.spec.ts`, centre label bounds on the phone |
-| CN-10 | e2e/agent-review.spec.ts standalone 390×844 gutters, overflow and desktop grid in all three locales |
+| CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
-| CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
+| CN-3.1–3.2 | `e2e/project-filter-completion.spec.ts` |
+| CN-3.3–3.4 | `e2e/project-header.spec.ts` in three locales |
+| CN-3.5 | `e2e/project-graph-view.spec.ts` and `e2e/view-export.spec.ts` in three locales |
+| CN-3.6 | `e2e/project-graph-view.spec.ts` in three locales, guest denied and member allowed on phone and desktop |
+| CN-4 | `e2e/board-access.spec.ts` in en, zh-CN and zh-HK, and the existing board drag and menu cases in `e2e/planning.spec.ts` |
+| CN-5 | `e2e/settings-header.spec.ts` in en, zh-CN, and zh-HK; `e2e/mcp-oauth.spec.ts` |
+| CN-6 | `e2e/me.spec.ts`, settings links and workspace roles |
+| CN-7 | `e2e/agent-creation.spec.ts`, guest disclosure and profile request counts in en, zh-CN, and zh-HK |
+| CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
+| CN-9 | `e2e/calendar.spec.ts`, overnight events and native target size in three locales |
+| CN-10 | e2e/agent-review.spec.ts standalone 390×844 gutters, overflow and desktop grid in all three locales |
+| CN-11 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
+| CN-12 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
+| CN-13 | `e2e/search-hint.spec.ts`, touch and desktop in three locales |
+| CN-14 | `e2e/mind.spec.ts`, centre label bounds on the phone |
 
 ## Open decisions
 
