@@ -4,8 +4,9 @@ RUN apk add --no-cache musl-dev
 WORKDIR /repo
 COPY backend ./backend
 COPY packages/schemas/generated ./packages/schemas/generated
+# Build with the pinned image toolchain. The local Rust gate runs rustfmt and Clippy.
 RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/repo/backend/target \
-    cd backend && cargo build --release --locked -p taff-render && cp target/release/taff-render /taff-render
+    cd backend && cargo +"$RUST_VERSION" build --release --locked -p taff-render && cp target/release/taff-render /taff-render
 
 FROM alpine:3.23
 RUN addgroup -S renderer && adduser -S -G renderer renderer
