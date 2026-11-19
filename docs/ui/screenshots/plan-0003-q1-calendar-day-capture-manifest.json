@@ -1,0 +1,68 @@
+{
+  "baselineSha": "96d037eb3ee1e7e6df2e14ba199b15ae55efe575",
+  "baselineTree": "9a6f242910bdadc7e17c8833daf66734114b0f69",
+  "sourceSha": "a70f5995a719917f57744eb5a22ee10933bd5b6d",
+  "sourceTree": "68a360d79a102dac09b3e0521f3d41a34d307598",
+  "browser": {
+    "image": "mcr.microsoft.com/playwright:v1.64.1-noble",
+    "imageId": "sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f",
+    "platform": "linux/arm64",
+    "playwright": "1.64.1",
+    "chromium": "156.0.8078.80"
+  },
+  "fixtureDate": "2026-10-08",
+  "fixtureClock": "2026-10-08T11:20:00Z",
+  "harness": "playwright.visual.config.ts, UI_SCREEN=calendar, loopback remote browser wrapper",
+  "reason": "The native hour-label inset keeps the full 08:00 label visible below the sticky date band.",
+  "unchanged": "The eight week and month captures were byte-identical across the matched builds.",
+  "captures": [
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/calendar.png",
+      "profile": "phone-en",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "previousApprovedSha256": "487e532f5330277d3b7eba63691de6aec1ef193c8d1f057857aa25618342a695",
+      "matchedBeforeSha256": "702f402c3f32a8a6a5f80ab863092709d45a6f648343ca68e574f0381c825831",
+      "sha256": "ee497a5e6adea3a26ad4c164a9aea67d9ba749190b1d41173c3c8865111a18d1"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/calendar.png",
+      "profile": "phone-zh-HK",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "theme": "light",
+      "previousApprovedSha256": "818ed7a563f4acd8538745ec6574bbc40172f68c0c69fd5a192def7a3ff47ccc",
+      "matchedBeforeSha256": "f052fbc48429f47a68610a7366d35900bfadf901ba22fdf31a200cf8f7f78493",
+      "sha256": "7aa4781a6bcd0d17a111d66f0f118ee8e37b9a4d01e82de09feb965848458c00"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/calendar.png",
+      "profile": "desktop-en",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "theme": "light",
+      "previousApprovedSha256": "3c357c55c481994d000bdc19501fa46643772866773c88f04820039b897efc40",
+      "matchedBeforeSha256": "c1d5db3345df6c548d891d28583b6e3eaa4bb7b3d095f08bd7f901ba7b5c6bc0",
+      "sha256": "bf8764b90ef3d110346fe462c7642d4c1069d715e7c0152c6eba98ae581b032b"
+    },
+    {
+      "file": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/calendar.png",
+      "profile": "desktop-zh-HK",
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "theme": "light",
+      "previousApprovedSha256": "0b450ed3edb5b6ae8080d587c82e049335dc2ea77d2e49b478d020289175f141",
+      "matchedBeforeSha256": "ae9b3aa64a9fe276866562094598dfb5e13c5f9f71cfdfd6ce24247e17031cd3",
+      "sha256": "349b1c749a03080e51d8004b5164e319255d1997df9f8ccd658dd8f054967153"
+    }
+  ]
+}
