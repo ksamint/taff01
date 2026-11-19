@@ -63,3 +63,72 @@
   min-height: 32px;
   padding: 2px 8px;
 }
+
+.audit-cell-label {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .access-scroll.audit-scroll {
+    overflow: visible;
+    border: 0;
+  }
+
+  .audit-table {
+    display: block;
+  }
+
+  .audit-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .audit-table tbody,
+  .audit-table tbody tr {
+    display: grid;
+  }
+
+  .audit-table tbody {
+    gap: var(--space-sm);
+  }
+
+  .audit-table tbody tr {
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-control);
+  }
+
+  .audit-table th[scope="row"],
+  .audit-table td {
+    position: static;
+    display: grid;
+    align-items: start;
+    grid-template-columns: minmax(4rem, 24%) minmax(0, 1fr);
+    gap: 8px;
+    min-width: 0;
+    max-width: none;
+    padding: 4px 0;
+    border: 0;
+    background: none;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .audit-cell-label {
+    display: block;
+    color: var(--text-muted);
+  }
+
+  .audit-table code {
+    white-space: normal;
+  }
+
+  .audit-trace {
+    justify-self: start;
+    min-height: 44px;
+  }
+}

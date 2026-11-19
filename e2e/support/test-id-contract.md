@@ -1180,6 +1180,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `audience.linkOnly` | 1 | summaries.spec.ts |
 | `audience.showPeople` | 1 | audience-editing.spec.ts |
 | `audience.tagsSaved` | 1 | summaries.spec.ts |
+| `audit.action` | 1 | audit.spec.ts |
 | `audit.invalid` | 1 | audit.spec.ts |
 | `audit.none` | 1 | audit.spec.ts |
 | `audit.title` | 1 | audit.spec.ts |

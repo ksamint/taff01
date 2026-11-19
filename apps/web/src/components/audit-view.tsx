@@ -175,54 +175,76 @@ export function AuditView() {
           )}
           {audit.data && audit.data.entries.length > 0 && (
             <div
-              className="access-scroll"
+              className="access-scroll audit-scroll"
               role="region"
               aria-label={t("audit.title")}
               tabIndex={0}
             >
-              <table className="access-table audit-table">
-                <thead>
-                  <tr>
-                    <th scope="col">{t("audit.time")}</th>
-                    <th scope="col">{t("audit.actor")}</th>
-                    <th scope="col">{t("audit.action")}</th>
-                    <th scope="col">{t("audit.resource")}</th>
-                    <th scope="col">{t("audit.trace")}</th>
+              <table className="access-table audit-table" role="table">
+                <thead role="rowgroup">
+                  <tr role="row">
+                    <th role="columnheader" scope="col">
+                      {t("audit.time")}
+                    </th>
+                    <th role="columnheader" scope="col">
+                      {t("audit.actor")}
+                    </th>
+                    <th role="columnheader" scope="col">
+                      {t("audit.action")}
+                    </th>
+                    <th role="columnheader" scope="col">
+                      {t("audit.resource")}
+                    </th>
+                    <th role="columnheader" scope="col">
+                      {t("audit.trace")}
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody role="rowgroup">
                   {audit.data.entries.map((entry) => (
                     <tr
                       key={entry.id}
+                      role="row"
                       data-testid="audit-row"
                       data-action={entry.action}
                       data-resource={entry.resourceId}
                     >
-                      <th scope="row">
+                      <th role="rowheader" scope="row">
+                        <AuditCellLabel>{t("audit.time")}</AuditCellLabel>
                         <time dateTime={entry.createdAt}>
                           {when(entry.createdAt)}
                         </time>
                       </th>
-                      <td>{names.get(entry.actorId) ?? entry.actorId}</td>
-                      <td>
-                        <code>
-                          {entry.action === "view.export"
-                            ? t("audit.viewExport")
-                            : entry.action}
-                        </code>
-                        {hasDetails(entry) && (
-                          <details>
-                            <summary>{t("audit.details")}</summary>
-                            <pre>{JSON.stringify(entry.details, null, 2)}</pre>
-                          </details>
-                        )}
+                      <td role="cell">
+                        <AuditCellLabel>{t("audit.actor")}</AuditCellLabel>
+                        {names.get(entry.actorId) ?? entry.actorId}
                       </td>
-                      <td>
+                      <td role="cell">
+                        <AuditCellLabel>{t("audit.action")}</AuditCellLabel>
+                        <div>
+                          <code>
+                            {entry.action === "view.export"
+                              ? t("audit.viewExport")
+                              : entry.action}
+                          </code>
+                          {hasDetails(entry) && (
+                            <details>
+                              <summary>{t("audit.details")}</summary>
+                              <pre>
+                                {JSON.stringify(entry.details, null, 2)}
+                              </pre>
+                            </details>
+                          )}
+                        </div>
+                      </td>
+                      <td role="cell">
+                        <AuditCellLabel>{t("audit.resource")}</AuditCellLabel>
                         <code title={entry.resourceId}>
                           {entry.resourceId.slice(0, 8)}
                         </code>
                       </td>
-                      <td>
+                      <td role="cell">
+                        <AuditCellLabel>{t("audit.trace")}</AuditCellLabel>
                         {entry.traceId ? (
                           <Button
                             type="button"
@@ -259,5 +281,13 @@ export function AuditView() {
         </>
       )}
     </div>
+  );
+}
+
+function AuditCellLabel({ children }: { children: string }) {
+  return (
+    <span className="audit-cell-label" aria-hidden="true">
+      {children}
+    </span>
   );
 }
