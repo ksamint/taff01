@@ -178,6 +178,7 @@ test("sign in, create a task and assign it to an agent", async ({
   await page.screenshot({ path: `/tmp/taff01-${locale}.png`, fullPage: true });
   const otherLocale: TestLocale = locale === "en" ? "zh-HK" : "en";
   await useLocale(page, otherLocale);
+  await openUndatedTasks(page);
   await expect(
     card
       .getByTestId("assignment-select")
