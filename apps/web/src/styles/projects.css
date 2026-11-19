@@ -1043,6 +1043,21 @@ select.projects-stage {
 }
 
 /* 營運視圖 (spec OT-1): sector groups, then project sub-headings. */
+@media (min-width: 1024px) {
+  .projects-sectors {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .projects-sectors-hint {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1440px) {
+  .projects-sectors {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 .projects-sectors-hint {
   margin: 0;
   padding: 10px 20px;
@@ -1062,8 +1077,8 @@ select.projects-stage {
   font-size: 12px;
 }
 .projects-sector-indicators div {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 4em minmax(0, 1fr);
   gap: 6px;
 }
 .projects-sector-indicators dt {

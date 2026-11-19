@@ -1619,13 +1619,14 @@ function SectorList({
   projectName: (id: string | null) => string;
 }) {
   const { t } = card;
+  const sectors = groupBySector(tasks, projectOrder);
   return (
     <div className="planning-list projects-list projects-sectors">
       <p className="projects-sectors-hint" data-testid="sector-view-hint">
         {t("projects.sectorsHint")}
       </p>
-      {groupBySector(tasks, projectOrder).map(
-        ({ sector, projects, count }, index) => (
+      {sectors.some(({ count }) => count > 0) &&
+        sectors.map(({ sector, projects, count }, index) => (
           <section
             key={sector.label}
             data-testid="sector-group"
@@ -1676,8 +1677,7 @@ function SectorList({
               ))
             )}
           </section>
-        ),
-      )}
+        ))}
     </div>
   );
 }

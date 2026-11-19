@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (510 distinct, 2367 uses)
+## Test ids (510 distinct, 2370 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -531,9 +531,9 @@ several do). “Also rendered by” lists the other files.
 | `project-view-more` | 7 |  | operation-templates.spec.ts, project-graph-view.spec.ts, project-header.spec.ts, support/task-fields.ts |
 | `project-view-sectors` | 5 |  | operation-templates.spec.ts, project-graph-view.spec.ts, project-header.spec.ts |
 | `project-view-stakeholders` | 1 |  | project-graph-view.spec.ts |
-| `sector-group` | 2 |  | operation-templates.spec.ts |
+| `sector-group` | 4 |  | operation-templates.spec.ts |
 | `sector-project` | 1 |  | operation-templates.spec.ts |
-| `sector-view-hint` | 3 |  | operation-templates.spec.ts, project-graph-view.spec.ts |
+| `sector-view-hint` | 4 |  | operation-templates.spec.ts, project-graph-view.spec.ts |
 
 ### quick-add-dialog.tsx
 
@@ -1026,6 +1026,8 @@ read (`data-event-id`, `data-date`).
 | `.organizations-view > .page-heading` | 3 | me.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `.planning-board` | 3 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `.planning-board .board-card[data-task-id="*"]` | 1 | ui-v2.spec.ts |
+| `.projects-sector-indicators dt` | 1 | operation-templates.spec.ts |
+| `.projects-sectors` | 1 | operation-templates.spec.ts |
 | `.projects-title-row .projects-org` | 1 | project-header.spec.ts |
 | `.projects-title-text` | 1 | ssr-session.spec.ts |
 | `.quick-fab` | 2 | ui-v2.spec.ts |
@@ -1296,7 +1298,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projects.graphView` | 1 | project-graph-view.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |
-| `projects.sectorsHint` | 1 | operation-templates.spec.ts |
+| `projects.sectorsHint` | 2 | operation-templates.spec.ts |
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
 | `projects.views` | 2 | project-graph-view.spec.ts, project-header.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |

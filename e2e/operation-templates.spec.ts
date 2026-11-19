@@ -15,6 +15,7 @@ test.use({ actionTimeout: 15000 });
 
 test("sector view regroups tagged tasks across projects and opens them on a phone", async ({
   page,
+  browser,
 }, info) => {
   test.setTimeout(120000);
   const locale = info.project.name as TestLocale;
@@ -46,6 +47,12 @@ test("sector view regroups tagged tasks across projects and opens them on a phon
         })
       ).json(),
     );
+  await page.goto("/projects?view=sectors");
+  await expect(page.getByTestId("sector-view-hint")).toHaveText(
+    m.projects.sectorsHint,
+  );
+  await expect(page.getByTestId("sector-group")).toHaveCount(0);
+
   const receivables = await task(
     "Chase overdue receivables",
     [finance.label],
@@ -92,6 +99,29 @@ test("sector view regroups tagged tasks across projects and opens them on a phon
 
   await addTaggedTask(page, "Capacity check", operations.label);
   await expect(titles(operations.label)).toHaveText(["Capacity check"]);
+
+  const desktop = await browser.newPage({
+    baseURL: process.env.AUTH_URL,
+    storageState: await page.context().storageState(),
+    viewport: { width: 1440, height: 900 },
+    hasTouch: false,
+    isMobile: false,
+  });
+  try {
+    await desktop.goto("/projects?view=sectors");
+    await expect(desktop.getByTestId("sector-group")).toHaveCount(6);
+    const columns = desktop.locator(".projects-sectors");
+    await expect(columns).toHaveCSS("grid-template-columns", /^(\S+ ){2}\S+$/);
+    const label = columns.locator(".projects-sector-indicators dt");
+    expect(
+      await label.evaluateAll(
+        (terms) =>
+          new Set(terms.map((term) => term.getBoundingClientRect().width)).size,
+      ),
+    ).toBe(1);
+  } finally {
+    await desktop.close();
+  }
 
   await group(finance.label)
     .getByRole("link", { name: receivables.title, exact: true })
