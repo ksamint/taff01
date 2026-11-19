@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (493 distinct, 2280 uses)
+## Test ids (494 distinct, 2288 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -211,7 +211,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-evidence-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-link-remove` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
 | `mind-source-edit` | 2 | mind-view.tsx | live/mind.spec.ts, mind.spec.ts |
-| `project-finance-edit` | 3 | project-finance-panel.tsx | project-finance.spec.ts |
+| `project-finance-edit` | 4 | project-finance-panel.tsx | project-finance.spec.ts, timeline.spec.ts |
 | `stakeholder-edit` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `stakeholder-remove` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `stakeholder-roles` | 2 | crm/stakeholders-view.tsx | crm.spec.ts, live/crm.spec.ts |
@@ -466,14 +466,14 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `project-finance` | 3 |  | project-finance.spec.ts |
+| `project-finance` | 4 |  | project-finance.spec.ts, timeline.spec.ts |
 | `project-finance-collected` | 1 |  | project-finance.spec.ts |
 | `project-finance-contract` | 1 |  | project-finance.spec.ts |
 | `project-finance-contract-input` | 2 |  | project-finance.spec.ts |
 | `project-finance-currency` | 2 |  | project-finance.spec.ts |
 | `project-finance-error` | 1 |  | project-finance.spec.ts |
 | `project-finance-form` | 2 |  | project-finance.spec.ts |
-| `project-finance-record` | 3 |  | project-finance.spec.ts |
+| `project-finance-record` | 4 |  | project-finance.spec.ts, timeline.spec.ts |
 | `project-finance-save` | 2 |  | project-finance.spec.ts |
 | `project-payment` | 3 |  | project-finance.spec.ts |
 | `project-payment-amount` | 2 |  | project-finance.spec.ts |
@@ -758,7 +758,8 @@ several do). “Also rendered by” lists the other files.
 | `timeline-dependency` | 6 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-dependency-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-duration` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline-finance` | 8 |  | finance-visibility.spec.ts, live/platform.spec.ts, timeline.spec.ts |
+| `timeline-finance` | 9 |  | finance-visibility.spec.ts, live/platform.spec.ts, timeline.spec.ts |
+| `timeline-finance-toggle` | 4 |  | project-finance.spec.ts, timeline.spec.ts |
 | `timeline-footer` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-hint` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-mode` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |

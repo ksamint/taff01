@@ -12,6 +12,7 @@ import type {
   TimelineItem,
 } from "@taff/schemas/plan";
 import {
+  ChevronDown,
   ExternalLink,
   Network,
   Pencil,
@@ -106,6 +107,11 @@ function ProjectTimeline({ project }: { project: Project }) {
   const addDependency = useAddDependency(project.id);
   const removeDependency = useRemoveDependency(project.id);
   const hintId = useId();
+  const financeId = useId();
+  const [openFinanceProject, setOpenFinanceProject] = useState<string | null>(
+    null,
+  );
+  const financeOpen = openFinanceProject === project.id;
   const [zoom, setZoom] = useState<Zoom>("day");
   const [critical, setCritical] = useState(true);
   const [linkMode, setLinkMode] = useState(false);
@@ -398,6 +404,14 @@ function ProjectTimeline({ project }: { project: Project }) {
     drag?.mode === "link" ? items[index.get(drag.id) ?? -1] : undefined;
   const risk = timeline.risk;
   const finance = risk.finance;
+  const financeSummary = finance?.contractAmount ? (
+    <FinanceSummary
+      finance={finance}
+      delivery={risk.deliveryPercent}
+      locale={locale}
+      t={t}
+    />
+  ) : null;
 
   return (
     <section
@@ -497,15 +511,37 @@ function ProjectTimeline({ project }: { project: Project }) {
           </ul>
         )}
       </div>
-      {finance?.contractAmount ? (
-        <FinanceSummary
-          finance={finance}
-          delivery={risk.deliveryPercent}
-          locale={locale}
-          t={t}
-        />
-      ) : null}
-      <ProjectFinancePanel project={project} />
+      {desktop ? (
+        <>
+          {financeSummary}
+          <ProjectFinancePanel project={project} />
+        </>
+      ) : (
+        access.data?.canReadFinance && (
+          <>
+            <div className="timeline-finance-disclosure">
+              {financeSummary}
+              <button
+                type="button"
+                className="timeline-finance-toggle"
+                data-testid="timeline-finance-toggle"
+                aria-label={t("projectFinance.title")}
+                aria-expanded={financeOpen}
+                aria-controls={financeId}
+                onClick={() =>
+                  setOpenFinanceProject(financeOpen ? null : project.id)
+                }
+              >
+                {!financeSummary && t("projectFinance.title")}
+                <ChevronDown size={16} aria-hidden="true" />
+              </button>
+            </div>
+            <div id={financeId} hidden={!financeOpen}>
+              {financeOpen && <ProjectFinancePanel project={project} />}
+            </div>
+          </>
+        )
+      )}
       {linkMode && (
         <div
           className="timeline-link-hint"

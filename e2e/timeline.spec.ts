@@ -472,3 +472,44 @@ test("saved delivery progress and computed task completion have distinct labels"
     briefProject.getByText(completion, { exact: true }).locator("+ dd"),
   ).toHaveText("0%");
 });
+test("the phone finance strip opens the panel and restores the chart on close", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const workspace = await setUp(page, locale);
+  const response = await page.request.post(
+    `/api/projects?workspaceId=${workspace.id}`,
+    {
+      data: {
+        name: `Compact ${locale}`,
+        contractAmount: "100.00",
+        currency: "HKD",
+      },
+    },
+  );
+  expect(response.status()).toBe(201);
+  const project = projectSchema.parse(await response.json());
+  const task = await createTask(page, workspace, "Planned row", project.id);
+  await plan(page, task.id, (await timeline(page, project.id)).today, 2);
+  await page.goto(`/projects/${project.id}?view=timeline`);
+
+  const toggle = page.getByTestId("timeline-finance-toggle");
+  const panel = page.getByTestId("project-finance");
+  const firstRow = row(page, task.id);
+  await expect(firstRow).toBeVisible();
+  await expect(page.getByTestId("timeline-finance")).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(panel).toHaveCount(0);
+  const collapsed = await firstRow.boundingBox();
+  if (!collapsed) throw new Error("Missing collapsed timeline row");
+  console.log(`First chart row: ${Math.round(collapsed.y)} px`);
+
+  await toggle.click();
+  await expect(panel.getByTestId("project-finance-edit")).toBeVisible();
+  await expect(panel.getByTestId("project-finance-record")).toBeEnabled();
+  const expanded = await firstRow.boundingBox();
+  expect(expanded?.y).toBeGreaterThan(collapsed.y);
+  await toggle.click();
+  await expect(panel).toHaveCount(0);
+  expect((await firstRow.boundingBox())?.y).toBeCloseTo(collapsed.y);
+});
