@@ -891,6 +891,7 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: title` | 1 | view-export.spec.ts |
 | `heading` | 8 | audit.spec.ts, board-access.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
+| `heading — name: heading` | 1 | font-loading.spec.ts |
 | `heading — name: m.agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
@@ -1258,7 +1259,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `me.preferences` | 5 | planning.spec.ts |
 | `me.signedInAs` | 2 | ssr-session.spec.ts |
 | `me.teamSummary` | 1 | me.spec.ts |
-| `me.title` | 1 | me.spec.ts |
+| `me.title` | 2 | font-loading.spec.ts, me.spec.ts |
 | `mind.coverage` | 12 | live/mind.spec.ts, mind.spec.ts |
 | `mind.edgeKind.contradicts` | 6 | live/mind.spec.ts, mind.spec.ts |
 | `mind.form.required` | 6 | live/mind.spec.ts, mind.spec.ts |
@@ -1353,7 +1354,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `timeline.depRemoved` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.rescheduled` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.resized` | 7 | live/timeline.spec.ts, timeline.spec.ts |
-| `today` | 25 | live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
+| `today` | 26 | font-loading.spec.ts, live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
 | `todayDue` | 3 | today.spec.ts, ui-v2.spec.ts |
 | `todayUndated` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `unknownMember` | 1 | optimistic-m4.spec.ts |

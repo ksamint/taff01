@@ -112,6 +112,14 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   refuse unknown names; `AGENTS.md` shall declare the tda01 Start baseline and
   name `pnpm check` as the check command.
 
+### Browser font budgets (TT-8)
+
+- TT-8.1 The Chinese first document shall preload only the common CJK subset,
+  capped at 70,716 bytes by `pnpm perf:budget`.
+- TT-8.2 In the signed-in cold-phone fixture, Me shall transfer no more font
+  bytes than Today. Me uses Manrope and the common CJK subset in Chinese,
+  with platform fallback for glyphs outside that subset.
+
 ## Non-functional
 
 - No new dependency name; web declares the same esbuild version already used
@@ -127,6 +135,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 
 | Requirement | Evidence |
 | --- | --- |
+| TT-8 | `pnpm perf:budget`, `e2e/font-loading.spec.ts`, `scripts/ui/fonts.test.ts` |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal on pinned production 9.1.2; native persisted-state proof in [milestone 104](../milestones/104-v0.2.20.md) |
