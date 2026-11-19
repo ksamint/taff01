@@ -73,25 +73,25 @@ is implemented for v0.2.26, not yet deployed.
 - CN-7.2 The Details row shall use the same workspace read authority as the
   existing agent profile.
 
-### Tasks on Today (CN-4)
+### Tasks on Today (CN-11)
 
-- CN-4.1 Today shall list unfinished tasks whose due date falls on the
+- CN-11.1 Today shall list unfinished tasks whose due date falls on the
   viewer's current calendar day under Due today.
-- CN-4.2 When unfinished tasks without a due date are present, Today shall
+- CN-11.2 When unfinished tasks without a due date are present, Today shall
   show them in a separate disclosure with their count, closed by default.
   Undated tasks marked `meeting` remain excluded.
-- CN-4.3 At a viewport of 1280 CSS pixels or wider, Today shall place its
+- CN-11.3 At a viewport of 1280 CSS pixels or wider, Today shall place its
   due and undated lists beside agent activity and items needing attention.
   When neither activity section has content, the task column shall span
   the available width. Smaller viewports shall retain the stacked layout.
 
-### Phone task details (CN-4)
+### Phone task details (CN-12)
 
-- CN-4.1 When a person opens task detail on a phone, the sheet shall place
+- CN-12.1 When a person opens task detail on a phone, the sheet shall place
   the description immediately below the title and above status, owner,
   worker and due date, in that order. For a one-line title, the start of
   the description shall be visible on a 412 × 915 viewport before scrolling.
-- CN-4.2 The sheet shall collapse schedule, priority, project and labels
+- CN-12.2 The sheet shall collapse schedule, priority, project and labels
   beneath a More disclosure and show their set values in its closed
   summary. The existing permissions apply to all task editors.
 
@@ -113,6 +113,13 @@ is implemented for v0.2.26, not yet deployed.
   sticky date band above the time grid and the 08:00 label shall be visible
   below that band on phone and desktop. Existing calendar gestures and the
   schedule editor shall remain available.
+
+### Standalone phone review (CN-10)
+
+- CN-10.1 At phone widths, the standalone review's deliverable heading and
+  cards shall keep the title's page gutter without horizontal overflow.
+- CN-10.2 The embedded task review and desktop review grid shall retain
+  their existing layout.
 
 ## Non-functional
 
@@ -137,14 +144,14 @@ is implemented for v0.2.26, not yet deployed.
   notifications, digest history and shareholder summaries. Workspace admins
   shall also have direct links to access, audit and summary administration.
 
-### Search keyboard hint (CN-7)
+### Search keyboard hint (CN-13)
 
-- CN-7.1 On a primary touch input without hover, Search shall hide its keyboard
+- CN-13.1 On a primary touch input without hover, Search shall hide its keyboard
   hint. On desktop pointer input the hint shall remain visible.
 
-### Mind map labels (CN-10)
+### Mind map labels (CN-14)
 
-- CN-10.1 At default zoom, the interactive Mind Map shall keep the centre
+- CN-14.1 At default zoom, the interactive Mind Map shall keep the centre
   and innermost ring labels separate on the phone viewport.
 
 ## Acceptance
@@ -156,15 +163,16 @@ is implemented for v0.2.26, not yet deployed.
 | CN-4 | `e2e/board-access.spec.ts` in en, zh-CN and zh-HK, and the existing board drag and menu cases in `e2e/planning.spec.ts` |
 | CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
 | CN-7 | `e2e/agent-creation.spec.ts`, guest disclosure and profile request counts in en, zh-CN, and zh-HK |
-| CN-4 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
-| CN-4 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
+| CN-11 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
+| CN-12 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
 | CN-5 | `e2e/settings-header.spec.ts` in en, zh-CN, and zh-HK; `e2e/mcp-oauth.spec.ts` |
 | CN-6 | `e2e/me.spec.ts`, settings links and workspace roles |
 | CN-3.6 | `e2e/project-graph-view.spec.ts` in three locales, guest denied and member allowed on phone and desktop |
 | CN-3.5 | `e2e/project-graph-view.spec.ts` and `e2e/view-export.spec.ts` in three locales |
 | CN-9 | `e2e/calendar.spec.ts`, overnight events and native target size in three locales |
-| CN-7 | `e2e/search-hint.spec.ts`, touch and desktop in three locales |
-| CN-10 | `e2e/mind.spec.ts`, centre label bounds on the phone |
+| CN-13 | `e2e/search-hint.spec.ts`, touch and desktop in three locales |
+| CN-14 | `e2e/mind.spec.ts`, centre label bounds on the phone |
+| CN-10 | e2e/agent-review.spec.ts standalone 390×844 gutters, overflow and desktop grid in all three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |

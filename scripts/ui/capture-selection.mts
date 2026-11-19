@@ -25,6 +25,8 @@ export const captureScreens = [
   "brief",
   "mind",
   "home",
+  "sectors",
+  "export-image",
 ];
 
 const projects = ["phone-en", "phone-zh-HK", "desktop-en", "desktop-zh-HK"];
@@ -62,8 +64,8 @@ export function resolveCaptureSelection(input = "") {
       }),
     )
     .sort();
-  if (!selected && expectedPaths.length !== 128)
-    throw new Error("Full capture must contain all 128 native PNGs");
+  if (!selected && expectedPaths.length !== 136)
+    throw new Error("Full capture must contain all 136 native PNGs");
   return {
     mode: selected ? "selected" : "all",
     screens,

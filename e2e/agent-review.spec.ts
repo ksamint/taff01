@@ -291,6 +291,49 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
       page.getByText("Tool discovery source", { exact: true }).first(),
     ).toBeVisible();
     const artifact = page.getByTestId("review-artifact");
+    const originalViewport = page.viewportSize();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/tasks/${taskId}/review`);
+    const standalone = page.locator(".review-view");
+    await expect(standalone.getByTestId("review-artifact")).toBeVisible();
+    const phone = await standalone.evaluate((element) => {
+      const bounds = (node: Element) => {
+        const rect = node.getBoundingClientRect();
+        return { left: rect.left, right: rect.right };
+      };
+      return {
+        root: bounds(element),
+        gutter: Number.parseFloat(
+          getComputedStyle(element).getPropertyValue("--gutter"),
+        ),
+        heading: bounds(element.querySelector(".deliverables > h2")!),
+        card: bounds(element.querySelector('[data-testid="review-artifact"]')!),
+        scrollWidth: document.documentElement.scrollWidth,
+        viewportWidth: window.innerWidth,
+      };
+    });
+    await page.screenshot({ path: info.outputPath("review-phone-gutter.png") });
+    expect(phone.gutter).toBeGreaterThan(0);
+    for (const bounds of [phone.heading, phone.card]) {
+      expect(bounds.left).toBeGreaterThanOrEqual(
+        phone.root.left + phone.gutter,
+      );
+      expect(bounds.right).toBeLessThanOrEqual(phone.root.right - phone.gutter);
+    }
+    expect(phone.scrollWidth).toBeLessThanOrEqual(phone.viewportWidth);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const desktop = await standalone
+      .locator(".review-layout")
+      .evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          left: style.paddingLeft,
+          right: style.paddingRight,
+          columns: style.gridTemplateColumns.split(" ").length,
+        };
+      });
+    expect(desktop).toEqual({ left: "0px", right: "0px", columns: 2 });
+    if (originalViewport) await page.setViewportSize(originalViewport);
     await artifact
       .getByTestId("item-comment")
       .fill("Verified the reported discovery output.");

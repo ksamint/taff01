@@ -1292,6 +1292,9 @@ select,
   }
 }
 @media (max-width: 639px) {
+  .review-view > .review-layout {
+    padding-inline: var(--gutter);
+  }
   .wordmark {
     gap: 6px;
     flex-shrink: 0;

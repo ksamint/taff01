@@ -11,6 +11,11 @@ graph data and isolation scope.
 
 ## Status
 
+**v0.2.26 GUI preparation:** standalone review keeps its phone gutter.
+The candidate also includes Chinese punctuation fixes and visual references
+for Sectors and the Export image dialog ([navigation](docs/spec/client-navigation.md),
+[summaries](docs/spec/daily-summary.md)). Production remains v0.2.25.
+
 **v0.2.26 preparation:** [run-detail continuity](docs/spec/client-navigation.md)
 and calendar acceptance readiness fixes are implemented; production stays v0.2.25.
 [Board task access](docs/spec/client-navigation.md#board-task-access-cn-4)

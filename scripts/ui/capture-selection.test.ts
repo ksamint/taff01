@@ -4,13 +4,13 @@ import {
   resolveCaptureSelection,
 } from "./capture-selection.mts";
 
-test("default native capture retains all 26 screens, 106 cases and 128 PNGs", () => {
+test("default native capture retains all 28 screens, 114 cases and 136 PNGs", () => {
   const selection = resolveCaptureSelection();
   expect(selection.mode).toBe("all");
-  expect(selection.screens).toHaveLength(26);
-  expect(selection.expectedCases).toBe(106);
-  expect(selection.expectedPngCount).toBe(128);
-  expect(new Set(selection.expectedPaths).size).toBe(128);
+  expect(selection.screens).toHaveLength(28);
+  expect(selection.expectedCases).toBe(114);
+  expect(selection.expectedPngCount).toBe(136);
+  expect(new Set(selection.expectedPaths).size).toBe(136);
   expect(selection.expectedPaths).toContain(
     "e2e/__screenshots__/ui-v2.spec.ts/phone-en/fab.png",
   );
@@ -64,4 +64,13 @@ test("home requires both viewports in all three locales", () => {
     expect(selection.expectedPaths).toContain(
       `e2e/__screenshots__/ui-v2.spec.ts/${device}-zh-CN/home.png`,
     );
+});
+
+test("sectors and real export dialog add eight light references", () => {
+  const selection = resolveCaptureSelection("sectors export-image");
+  expect(selection.expectedCases).toBe(8);
+  expect(selection.expectedPngCount).toBe(8);
+  expect(selection.expectedPaths.every((path) => !path.includes("dark"))).toBe(
+    true,
+  );
 });
