@@ -1,36 +1,8 @@
 import { defineConfig } from "@playwright/test";
 import behavior from "./playwright.config";
+import { captureScreens } from "./scripts/ui/capture-selection.mts";
 
-if (
-  ![
-    "shell",
-    "today",
-    "projects",
-    "task-detail",
-    "review",
-    "inbox",
-    "calendar",
-    "me",
-    "type",
-    "search",
-    "agent",
-    "mcp",
-    "organizations",
-    "team",
-    "notifications",
-    "quick-add",
-    "companies",
-    "company-detail",
-    "contacts",
-    "contact-detail",
-    "stakeholders",
-    "timeline",
-    "relations",
-    "brief",
-    "mind",
-    "home",
-  ].includes(process.env.UI_SCREEN ?? "")
-)
+if (!captureScreens.includes(process.env.UI_SCREEN ?? ""))
   throw new Error("Set UI_SCREEN to an implemented v2 screen.");
 
 const dark = process.env.UI_THEME === "dark";
@@ -61,6 +33,12 @@ export default defineConfig({
   use: {
     ...behavior.use,
     browserName: "chromium",
+    connectOptions: process.env.PW_TEST_CONNECT_WS_ENDPOINT
+      ? {
+          wsEndpoint: process.env.PW_TEST_CONNECT_WS_ENDPOINT,
+          exposeNetwork: "<loopback>",
+        }
+      : undefined,
     deviceScaleFactor: 1,
     colorScheme: dark ? "dark" : "light",
     timezoneId: process.env.UI_SCREEN === "shell" ? "Asia/Shanghai" : "UTC",

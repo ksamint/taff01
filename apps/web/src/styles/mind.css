@@ -130,6 +130,9 @@
 }
 .mind-core-label {
   fill: var(--bg);
+  stroke: var(--text);
+  stroke-linejoin: round;
+  paint-order: stroke;
   font-weight: var(--weight-heading);
   text-anchor: middle;
   pointer-events: none;

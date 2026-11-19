@@ -212,10 +212,10 @@
   --selection-text: var(--color-white);
   --shadow-lift: 0 20px 60px -15px rgba(10, 22, 38, 0.16);
   /* Type */
-  --font-sans:
-    "Manrope", "Noto Sans TC", "PingFang HK", "PingFang SC",
-    "Microsoft JhengHei", "Microsoft YaHei", "Noto Sans SC", system-ui,
-    -apple-system, "Segoe UI", sans-serif;
+  --font-platform:
+    "PingFang HK", "PingFang SC", "Microsoft JhengHei", "Microsoft YaHei",
+    "Noto Sans SC", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-sans: "Manrope", "Noto Sans TC", var(--font-platform);
   --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --text-headline-xl: 40px;
   --text-headline-lg: 32px;

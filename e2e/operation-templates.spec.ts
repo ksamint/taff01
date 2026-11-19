@@ -3,9 +3,11 @@ import {
   GENERIC_OPERATION_SECTORS,
   projectSchema,
   taskSchema,
+  workspaceSchema,
 } from "../packages/schemas/src/index";
 import { freshAccount } from "./support/account";
 import { messages, type TestLocale } from "./support/messages";
+import { openProjectFilters } from "./support/task-fields";
 import { openQuickAdd } from "./support/tasks";
 
 // Spec OT-1/OT-2 on the phone (Pixel 7 projects, i.e. H5): the 營運視圖
@@ -15,6 +17,7 @@ test.use({ actionTimeout: 15000 });
 
 test("sector view regroups tagged tasks across projects and opens them on a phone", async ({
   page,
+  browser,
 }, info) => {
   test.setTimeout(120000);
   const locale = info.project.name as TestLocale;
@@ -46,6 +49,12 @@ test("sector view regroups tagged tasks across projects and opens them on a phon
         })
       ).json(),
     );
+  await page.goto("/projects?view=sectors");
+  await expect(page.getByTestId("sector-view-hint")).toHaveText(
+    m.projects.sectorsHint,
+  );
+  await expect(page.getByTestId("sector-group")).toHaveCount(0);
+
   const receivables = await task(
     "Chase overdue receivables",
     [finance.label],
@@ -56,8 +65,14 @@ test("sector view regroups tagged tasks across projects and opens them on a phon
 
   await page.goto(`/projects/${alpha.id}`);
   await page.getByTestId("project-view-more").click();
+  await expect(page.getByTestId("project-view-sectors")).toHaveCount(0);
+
+  await page.goto(`/projects/${alpha.id}?view=sectors`);
+  await expect(page.getByTestId("sector-view-hint")).toBeVisible();
+  await page.goto("/projects");
+  await page.getByTestId("project-view-more").click();
   await page.getByTestId("project-view-sectors").click();
-  await expect(page).toHaveURL(/view=sectors/);
+  await expect(page).toHaveURL("/projects?view=sectors");
   await expect(page.getByTestId("sector-view-hint")).toHaveText(
     m.projects.sectorsHint,
   );
@@ -87,12 +102,91 @@ test("sector view regroups tagged tasks across projects and opens them on a phon
   await addTaggedTask(page, "Capacity check", operations.label);
   await expect(titles(operations.label)).toHaveText(["Capacity check"]);
 
+  const desktop = await browser.newPage({
+    baseURL: process.env.AUTH_URL,
+    storageState: await page.context().storageState(),
+    viewport: { width: 1440, height: 900 },
+    hasTouch: false,
+    isMobile: false,
+  });
+  try {
+    await desktop.goto("/projects?view=sectors");
+    await expect(desktop.getByTestId("sector-group")).toHaveCount(6);
+    const columns = desktop.locator(".projects-sectors");
+    await expect(columns).toHaveCSS("grid-template-columns", /^(\S+ ){2}\S+$/);
+    const label = columns.locator(".projects-sector-indicators dt");
+    expect(
+      await label.evaluateAll(
+        (terms) =>
+          new Set(terms.map((term) => term.getBoundingClientRect().width)).size,
+      ),
+    ).toBe(1);
+  } finally {
+    await desktop.close();
+  }
+
   await group(finance.label)
     .getByRole("link", { name: receivables.title, exact: true })
     .click();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(
     receivables.title,
   );
+});
+
+test("XIDING setup tasks follow template order on Board and Today despite different creation times", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  await freshAccount(page, locale);
+  const response = await page.request.post("/api/workspaces", {
+    data: { name: "XIDING" },
+  });
+  expect(response.status()).toBe(201);
+  const workspace = workspaceSchema.parse(await response.json());
+  const project = projectSchema.parse(
+    await (
+      await page.request.post(`/api/projects?workspaceId=${workspace.id}`, {
+        data: { name: "營運設置 Operation setup" },
+      })
+    ).json(),
+  );
+  const setup = [];
+  for (const { label } of GENERIC_OPERATION_SECTORS) {
+    const created = await page.request.post("/api/tasks", {
+      data: {
+        workspaceId: workspace.id,
+        projectId: project.id,
+        ownerId: workspace.memberId,
+        title: `設定指標目標 · ${label}`,
+        labels: [label],
+      },
+    });
+    expect(created.status()).toBe(201);
+    setup.push(taskSchema.parse(await created.json()));
+  }
+  expect(new Set(setup.map(({ createdAt }) => createdAt)).size).toBeGreaterThan(
+    1,
+  );
+  const titles = setup.map(({ title }) => title);
+  await page.goto("/orgs");
+  await page.getByTestId(`workspace-${workspace.id}`).click();
+
+  await page.goto(`/projects/${project.id}`);
+  const cards = page.getByTestId("board-column-todo").getByTestId("board-task");
+  await expect(cards.locator(".task-title-link")).toHaveText(titles);
+  await openProjectFilters(page);
+  await page.getByTestId("project-sort").selectOption("created");
+  await page.keyboard.press("Escape");
+  await expect(cards.locator(".task-title-link")).toHaveText(
+    [...titles].reverse(),
+  );
+
+  await page.goto("/");
+  const undated = page.getByTestId("today-undated");
+  await undated.locator("summary").click();
+  await expect(
+    undated.getByTestId("task-card").locator(".today-task-title"),
+  ).toHaveText(titles);
 });
 
 /** Quick Add on the phone with a `+label` sector tag. */

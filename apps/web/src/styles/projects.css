@@ -123,6 +123,10 @@
   align-items: center;
   gap: 4px;
 }
+.projects-graph-modes {
+  display: flex;
+  padding: 8px 20px 0;
+}
 .projects-segment {
   display: flex;
   gap: 2px;
@@ -409,8 +413,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px 12px 0;
+  gap: 6px;
+  padding: 4px 12px 10px;
   border: 1px solid var(--border);
   background: var(--bg);
   transition: border-color var(--dur-fast) var(--ease-standard);
@@ -426,11 +430,19 @@
   opacity: 0.4;
 }
 .projects-card-top {
+  position: relative;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   font-size: 12px;
   color: var(--text-subtle);
+}
+.projects-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 0 8px;
 }
 .projects-task-reference {
   font-family: var(--font-mono);
@@ -571,14 +583,14 @@
   display: none;
 }
 /* Keyboard and menu alternative to the drag (always reachable). */
-.projects-view .board-card-bottom {
-  position: relative;
+.projects-card-actions {
   z-index: 1;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin: -6px -12px 0;
+  flex: none;
+  margin-inline-end: -10px;
+}
+.projects-card-top:has(.projects-card-menu[open]) {
+  z-index: 2;
 }
 .projects-view .drag-handle.button {
   width: 44px;
@@ -587,15 +599,6 @@
   color: var(--text-subtle);
   touch-action: none;
   cursor: grab;
-}
-.projects-card-menu {
-  display: flex;
-  flex-direction: row-reverse;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  min-width: 44px;
 }
 .projects-card-menu > summary {
   display: flex;
@@ -616,9 +619,16 @@
   background: var(--bg-container-low);
 }
 .projects-card-menu-body {
+  position: absolute;
+  inset: 100% 0 auto auto;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
 }
 .projects-card-menu-body select {
   min-height: 44px;
@@ -977,10 +987,6 @@
     font-size: 13px;
     font-weight: 600;
   }
-  .projects-view .board-card {
-    gap: 8px;
-    padding: 10px 12px 0;
-  }
   .projects-card-title {
     font-size: 13px;
   }
@@ -1037,6 +1043,21 @@ select.projects-stage {
 }
 
 /* 營運視圖 (spec OT-1): sector groups, then project sub-headings. */
+@media (min-width: 1024px) {
+  .projects-sectors {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .projects-sectors-hint {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1440px) {
+  .projects-sectors {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
 .projects-sectors-hint {
   margin: 0;
   padding: 10px 20px;
@@ -1056,8 +1077,8 @@ select.projects-stage {
   font-size: 12px;
 }
 .projects-sector-indicators div {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 4em minmax(0, 1fr);
   gap: 6px;
 }
 .projects-sector-indicators dt {
@@ -1072,4 +1093,34 @@ select.projects-stage {
   color: var(--text-muted);
   font-size: 12px;
   font-weight: 500;
+}
+
+@media (max-width: 1023px) {
+  .projects-view[data-project-detail] .projects-title-row {
+    gap: 0 8px;
+  }
+  .projects-view[data-project-detail] .projects-title {
+    flex: 1;
+  }
+  .projects-view[data-project-detail] .projects-org {
+    align-self: center;
+    min-width: 0;
+    max-width: 42%;
+    margin: 0;
+  }
+  .projects-view[data-project-detail] .projects-org span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .projects-view[data-project-detail] .projects-title-actions {
+    flex-basis: 100%;
+  }
+  .projects-views .projects-more-menu {
+    right: auto;
+    left: 0;
+  }
+  .projects-meta select {
+    min-height: 44px;
+  }
 }

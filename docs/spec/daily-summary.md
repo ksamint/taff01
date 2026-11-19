@@ -88,7 +88,7 @@ Each statement is testable. "Shall" is a hard requirement.
   chip with the tag label, full localized date, "prepared for" line, KPI tiles, project cards with risk
   badge and accessible progress and finance bars, counted sections, and a confidential footer.
 - DS-5.3 Dates and times shall be formatted in the reader's locale and zone; all strings exist in en,
-  zh-CN and zh-HK.
+  zh-CN and zh-HK. Chinese summary copy shall use full-width commas and full stops between CJK characters.
 
 ### Share links (DS-6)
 
@@ -170,6 +170,7 @@ slipped as a list; a second audience kind.
 | DS-3.1, DS-3.3 | `apps/worker/src/summaries.test.ts` |
 | DS-6.5, DS-6.6 | `apps/api/src/summaries.test.ts` (7 cases) |
 | DS-1.3, DS-1.4, DS-5.2, DS-5.3, DS-6.4 | `e2e/summaries.spec.ts` in en, zh-CN and zh-HK (layout tiles, progress bar, confidential footer); summary visual references to be recaptured by the pinned Linux pipeline |
+| DS-5.3 Chinese punctuation | `apps/web/src/lib/i18n.test.ts`; `scripts/ui/fonts.test.ts` glyph coverage |
 | DS-3.1 end to end | live run recorded in `docs/milestones/87-daily-summary-delivery.md` |
 | DS-8.1, DS-8.5 | apps/worker/src/summaries.test.ts; summaries.integration.test.ts |
 | DS-8.2 | summary-layout.test.ts (7 cases); summary-text.test.ts; three locale text goldens |

@@ -98,6 +98,7 @@ test("keyboard alone creates, assigns, opens and approves a task with real agent
   const task = taskSchema.parse(await createdResponse.json());
   expect(task.workerId).toBeNull();
   await expect(openQuick).toBeFocused();
+  await activate(page, page.getByTestId("today-undated").locator("summary"));
   const row = page.getByTestId("task-card").filter({ hasText: title });
   const assignment = row.getByTestId("assignment-select");
   await tabTo(page, assignment);

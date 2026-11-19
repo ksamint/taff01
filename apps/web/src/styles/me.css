@@ -1,3 +1,10 @@
+@font-face {
+  font-family: "Noto Sans TC Common";
+  src: url("/fonts/NotoSansTC-ui-common.woff2") format("woff2");
+  font-weight: 300 600;
+  font-style: normal;
+  font-display: optional;
+}
 /* Prototype v2 Me: phone 414–496, desktop tabs 1230 and 1443–1537. */
 
 /* Shared pieces */
@@ -169,6 +176,14 @@
 }
 
 /* Phone */
+.me-view,
+.me-desk {
+  font-family: "Manrope", "Noto Sans TC Common", var(--font-platform);
+}
+.me-view:lang(en),
+.me-desk:lang(en) {
+  font-family: "Manrope", var(--font-platform);
+}
 .me-view {
   padding: 8px 0 24px;
 }

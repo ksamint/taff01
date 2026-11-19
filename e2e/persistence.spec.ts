@@ -10,7 +10,7 @@ import {
 import { freshAccount, messages, type TestLocale } from "./support/account";
 import { openCalendarTools } from "./support/calendar";
 import { holdRequest } from "./support/routes";
-import { openQuickAdd } from "./support/tasks";
+import { openQuickAdd, openUndatedTasks } from "./support/tasks";
 
 test.use({ actionTimeout: 15000 });
 // Fulfilled local documents need Chrome's loopback permission before hydration.
@@ -120,6 +120,7 @@ test.describe("durable fallback without server reads", () => {
         })
       ).json(),
     );
+    await openUndatedTasks(page);
     await expect(
       page.getByRole("link", { name: task.title, exact: true }),
     ).toBeVisible();
@@ -238,6 +239,7 @@ test.describe("durable fallback without server reads", () => {
     await expect(page.getByTestId("today-heading")).toHaveText(
       messages[locale].today,
     );
+    await openUndatedTasks(page);
     await expect(
       page.getByRole("link", { name: task.title, exact: true }),
     ).toBeVisible();
@@ -298,6 +300,7 @@ test("durable cache never records pending rollback data and revocation rejects a
       })
     ).json(),
   );
+  await openUndatedTasks(page);
   await expect(
     page.getByRole("link", { name: original.title, exact: true }),
   ).toBeVisible();

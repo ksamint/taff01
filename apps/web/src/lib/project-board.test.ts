@@ -1,4 +1,5 @@
 import type { Member, Task } from "@taff/schemas/base";
+import { GENERIC_OPERATION_SECTORS } from "@taff/schemas/operation-templates";
 import { describe, expect, it } from "vitest";
 import {
   agentShortName,
@@ -8,6 +9,8 @@ import {
   parseProjectView,
   sortProjectTasks,
 } from "./project-board";
+
+import { orderXidingSetupTasks } from "./xiding-setup-order";
 
 const workspaceId = crypto.randomUUID();
 const project = crypto.randomUUID();
@@ -166,4 +169,33 @@ describe("names", () => {
     expect(memberInitials("林曉")).toBe("林");
     expect(memberInitials(" ")).toBe("?");
   });
+});
+
+it("orders only exact XIDING setup rows in their existing slots", () => {
+  const setup = GENERIC_OPERATION_SECTORS.map(({ label }) =>
+    task({ title: `設定指標目標 · ${label}`, labels: [label] }),
+  );
+  const wrongLabel = { ...task(), title: setup[0].title };
+  const wrongTitle = task({ labels: setup[1].labels });
+  const newestFirst = [
+    setup[5],
+    wrongLabel,
+    setup[4],
+    setup[3],
+    wrongTitle,
+    setup[2],
+    setup[1],
+    setup[0],
+  ];
+  expect(orderXidingSetupTasks(newestFirst, "Northwind")).toBe(newestFirst);
+  expect(orderXidingSetupTasks(newestFirst, "XIDING")).toEqual([
+    setup[0],
+    wrongLabel,
+    setup[1],
+    setup[2],
+    wrongTitle,
+    setup[3],
+    setup[4],
+    setup[5],
+  ]);
 });

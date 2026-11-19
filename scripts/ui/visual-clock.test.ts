@@ -43,6 +43,11 @@ const scopedHttpProbe = `
       const cases = [
         ['/api/brief?scope=all','GET',true],
         ['/api/projects/11111111-1111-4111-8111-111111111111/timeline','GET',true],
+        ['/api/workspaces/11111111-1111-4111-8111-111111111111/view-image?view=sectors','GET',true],
+        ['/api/workspaces/11111111-1111-4111-8111-111111111111/view-image','POST',false],
+        ['/api/workspaces/11111111-1111-4111-8111-111111111111/view-image/other','GET',false],
+        ['/api/workspaces/------------------------------------/view-image','GET',false],
+        ['/api/workspaces/11111111-1111-4111-8111-111111111111/tasks','GET',false],
         ['/api/auth/get-session','GET',false], ['/api/health','GET',false],
         ['/api/brief','POST',false], ['/api/brief/other','GET',false],
         ['/api/projects/11111111-1111-4111-8111-111111111111/timeline','PATCH',false],
@@ -75,7 +80,7 @@ test("visual API clock fails closed without its dedicated capture flag", () => {
   expect(result.stdout).not.toContain("must not run");
 });
 
-test("only concurrent Brief/Timeline GET scopes fix implicit Date reads", () => {
+test("only concurrent Brief/Timeline/view-image GET scopes fix implicit Date reads", () => {
   const result = run(scopedHttpProbe);
   expect(result.stderr).toBe("");
   expect(result.status).toBe(0);

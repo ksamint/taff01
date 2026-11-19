@@ -8,15 +8,36 @@ export async function prepareFonts(
       (rule): rule is CSSFontFaceRule => rule.type === CSSRule.FONT_FACE_RULE,
     )
     .filter((rule) => /Manrope|Noto Sans TC/.test(rule.style.fontFamily));
-  if (rules.length !== 16)
-    throw new Error("Expected the 16 installed UI font faces");
+  const meRules = rules.filter(
+    ({ style }) =>
+      style.fontFamily.replace(/["']/g, "") === "Noto Sans TC Common",
+  );
+  if (
+    rules.length - meRules.length !== 16 ||
+    meRules.length > 1 ||
+    meRules.some(
+      ({ style }) =>
+        !style
+          .getPropertyValue("src")
+          .includes("/fonts/NotoSansTC-ui-common.woff2"),
+    )
+  )
+    throw new Error(
+      "Expected the 16 UI font faces and the optional Me common face",
+    );
   // A previously resolved ready promise does not cover newly inserted text.
   // Load this text's computed font stack before selecting capture faces; loading
   // every rule instead would fetch unrelated CJK subsets on English screens.
   document.body.getBoundingClientRect();
-  const text = document.body.innerText;
-  if (text)
-    await document.fonts.load(getComputedStyle(document.body).font, text);
+  // Me's separate common subset uses a different computed font stack.
+  const scopes = [
+    document.body,
+    ...document.querySelectorAll<HTMLElement>(".me-view, .me-desk"),
+  ];
+  for (const scope of scopes) {
+    const text = scope.innerText;
+    if (text) await document.fonts.load(getComputedStyle(scope).font, text);
+  }
   await document.fonts.ready;
   const active = [...document.fonts].filter((face) => face.status === "loaded");
   const state = window as typeof window & {
@@ -24,13 +45,16 @@ export async function prepareFonts(
     __taffActiveCaptureFaces?: FontFace[];
   };
   const cache = (state.__taffCaptureFaces ??= new Map());
+  // A CSS rule may omit unicode-range while FontFace reports its default.
+  const rangeOf = (style: CSSStyleDeclaration) =>
+    style.getPropertyValue("unicode-range") || "U+0-10FFFF";
   const faces = rules
     .filter(({ style }) =>
       active.some(
         (face) =>
           face.family.replace(/["']/g, "") ===
             style.fontFamily.replace(/["']/g, "") &&
-          face.unicodeRange === style.getPropertyValue("unicode-range"),
+          face.unicodeRange === rangeOf(style),
       ),
     )
     .map(({ style }) => {
@@ -44,7 +68,7 @@ export async function prepareFonts(
             {
               weight: style.fontWeight,
               style: style.fontStyle,
-              unicodeRange: style.getPropertyValue("unicode-range"),
+              unicodeRange: rangeOf(style),
               display: "block",
             },
           ),

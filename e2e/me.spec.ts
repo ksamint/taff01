@@ -1,8 +1,12 @@
 import { expect, test } from "@playwright/test";
 import { memberListSchema, meSchema } from "../packages/schemas/src/base";
-import { workspaceSchema } from "../packages/schemas/src/index";
+import {
+  issuedWorkspaceInviteSchema,
+  workspaceSchema,
+} from "../packages/schemas/src/index";
 import { notificationPreferencesSchema } from "../packages/schemas/src/notification-preferences";
 import { freshAccount, messages, type TestLocale } from "./support/account";
+import { verifyTestEmail } from "./support/email-verification";
 import { holdRequest } from "./support/routes";
 
 test("Me switches real organizations and preserves theme, time-zone rollback and notification preferences", async ({
@@ -182,4 +186,94 @@ test("Me switches real organizations and preserves theme, time-zone rollback and
   await expect(page.getByTestId("notification-review")).not.toBeChecked();
   await expect(page.getByTestId("notification-block")).toBeChecked();
   await expect(page.getByTestId("notification-time-18:00")).toBeChecked();
+});
+
+test("Me links directly to settings permitted for admin, member and guest", async ({
+  page,
+  browser,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const admin = await freshAccount(page, locale);
+  const workspace = admin.workspaces[0];
+  const publicSettings = [
+    "/orgs",
+    "/me/mcp",
+    "/me/notifications",
+    "/digests",
+    "/summaries",
+  ];
+  const adminSettings = ["/orgs/access", "/orgs/audit", "/orgs/summaries"];
+  await page.goto("/me");
+  for (const href of [...publicSettings, ...adminSettings]) {
+    await expect(page.locator(`.me-rows a[href="${href}"]`)).toBeVisible();
+  }
+  await expect(page.getByTestId("open-mcp")).toContainText(
+    messages[locale].mcp.title,
+  );
+
+  const context = await browser.newContext({
+    baseURL: process.env.AUTH_URL,
+    serviceWorkers: "block",
+    viewport: page.viewportSize(),
+  });
+  try {
+    const reader = await context.newPage();
+    const email = `me-settings-${crypto.randomUUID()}@example.test`;
+    const signup = await reader.request.post("/api/auth/sign-up/email", {
+      headers: { Origin: process.env.AUTH_URL! },
+      data: { name: "Reader", email, password: process.env.DEMO_PASSWORD },
+    });
+    expect(signup.status()).toBe(200);
+    const identity = meSchema.parse(
+      await (await reader.request.get("/api/me")).json(),
+    );
+    await verifyTestEmail(reader, identity.user.id);
+    const response = await page.request.post(
+      `/api/workspaces/${workspace.id}/invites`,
+      { data: { email, role: "member" } },
+    );
+    expect(response.status()).toBe(201);
+    const invite = issuedWorkspaceInviteSchema.parse(await response.json());
+    expect(
+      (
+        await reader.request.post("/api/workspace-invites/accept", {
+          data: { token: invite.token },
+        })
+      ).status(),
+    ).toBe(200);
+    const me = meSchema.parse(
+      await (await reader.request.get("/api/me")).json(),
+    );
+    const joined = me.workspaces.find(({ id }) => id === workspace.id);
+    if (!joined) throw new Error("The reader did not join");
+    await reader.goto("/orgs");
+    const selection = reader.getByTestId(`workspace-${workspace.id}`);
+    await selection.click();
+    await expect(selection).toHaveAttribute("aria-pressed", "true");
+    for (const role of ["member", "guest"] as const) {
+      if (role === "guest") {
+        expect(
+          (
+            await page.request.patch(
+              `/api/workspaces/${workspace.id}/members/${joined.memberId}`,
+              { data: { role } },
+            )
+          ).status(),
+        ).toBe(200);
+      }
+      await reader.goto("/me");
+      for (const href of publicSettings) {
+        await expect(
+          reader.locator(`.me-rows a[href="${href}"]`),
+        ).toBeVisible();
+      }
+      for (const href of adminSettings) {
+        await expect(reader.locator(`.me-rows a[href="${href}"]`)).toHaveCount(
+          0,
+        );
+      }
+    }
+  } finally {
+    await context.close();
+  }
 });

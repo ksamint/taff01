@@ -21,6 +21,7 @@ import {
 } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
+import { useTaskCalendar } from "../lib/calendar-queries";
 import { initials } from "../lib/initials";
 import {
   useEditTask,
@@ -37,6 +38,7 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useTasks } from "../lib/queries";
 import { deadlineFields, deadlineIso } from "../lib/task-date";
 import { useWorkspace } from "./app-shell";
+import { TaskScheduleButton } from "./task-schedule-button";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -49,7 +51,6 @@ export function TaskEditor({
   task,
   desktop = false,
   workerControl,
-  scheduleControl,
   runControl,
   contacts,
   afterDescription,
@@ -58,7 +59,6 @@ export function TaskEditor({
   /** The desktop right panel: inline controls instead of picker rows. */
   desktop?: boolean;
   workerControl: ReactNode;
-  scheduleControl: ReactNode;
   runControl: ReactNode;
   contacts?: ReactNode;
   afterDescription?: ReactNode;
@@ -73,6 +73,7 @@ export function TaskEditor({
   const access = useTaskAccess(task.id);
   const tasks = useTasks(task.workspaceId);
   const comments = useTaskComments(task.id);
+  const calendar = useTaskCalendar(task.id);
   const edit = useEditTask();
   const inline = useUndoableTaskEdit();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
@@ -178,7 +179,6 @@ export function TaskEditor({
   const parent = tasks.data?.find((item) => item.id === task.parentId);
   const owner = members.data?.find((item) => item.id === form.ownerId);
   const ownerName = owner ? owner.name : t("unknownMember");
-  const project = projects.data?.find((item) => item.id === task.projectId);
   const formProject = projects.data?.find((item) => item.id === form.projectId);
   const writable = access.data?.canEditMetadata ?? access.data?.canEdit;
   const inlineDisabled = busy || editing;
@@ -296,6 +296,71 @@ export function TaskEditor({
   );
   const saved = (key: string) => () =>
     t("taskDetail.fieldSaved", { field: fieldLabel(key) });
+  const priorityText = t(`planning.${PRIORITIES[Number(form.priority) - 1]}`);
+  const scheduleText = calendar.data?.schedule
+    ? new Intl.DateTimeFormat(me.user.locale, {
+        timeZone: me.user.tz,
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(new Date(calendar.data.schedule.startAt))
+    : undefined;
+  const secondaryFields = (
+    <>
+      <TaskScheduleButton
+        current={calendar.data}
+        error={calendar.error}
+        scheduleText={scheduleText}
+      />
+      {desktop
+        ? selectRow(
+            "priority",
+            String(task.priority),
+            PRIORITIES.map((key, index) => (
+              <option key={key} value={index + 1}>
+                {t(`planning.${key}`)}
+              </option>
+            )),
+            !!writable,
+            (priority) =>
+              inline.change(
+                task,
+                { priority: Number(priority) },
+                saved("priority"),
+              ),
+          )
+        : pickerRow("priority", priorityText, !!writable)}
+      {desktop
+        ? selectRow(
+            "project",
+            task.projectId ?? "",
+            <>
+              <option value="">{t("planning.noProject")}</option>
+              {projects.data
+                ?.filter((item) => !item.archived || item.id === task.projectId)
+                .map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+            </>,
+            !!writable && !!projects.data,
+            (projectId) =>
+              inline.change(
+                task,
+                { projectId: projectId || null },
+                saved("project"),
+              ),
+          )
+        : pickerRow(
+            "project",
+            formProject?.name ?? t("planning.noProject"),
+            !!writable,
+          )}
+      {pickerRow("labels", form.labels || "—", !!writable)}
+    </>
+  );
   return (
     <>
       {task.parentId && (
@@ -310,11 +375,6 @@ export function TaskEditor({
         </Link>
       )}
       <div className="task-source-heading">
-        {!desktop && (
-          <span className="task-project-label">
-            {project?.name ?? t("planning.noProject")}
-          </span>
-        )}
         <h1 data-testid="task-detail-heading">
           <Button
             type="button"
@@ -327,7 +387,10 @@ export function TaskEditor({
           </Button>
         </h1>
       </div>
-      {runControl}
+      {!desktop && task.description && (
+        <p className="task-description preserve-text">{task.description}</p>
+      )}
+      {desktop && runControl}
       <div className="task-field-rows">
         {statusRow}
         {desktop
@@ -347,60 +410,24 @@ export function TaskEditor({
           : pickerRow("owner", ownerValue, !!access.data?.canEdit)}
         {workerControl}
         {pickerRow("due", dueText, !!writable)}
-        {scheduleControl}
-        {desktop
-          ? selectRow(
-              "priority",
-              String(task.priority),
-              PRIORITIES.map((key, index) => (
-                <option key={key} value={index + 1}>
-                  {t(`planning.${key}`)}
-                </option>
-              )),
-              !!writable,
-              (priority) =>
-                inline.change(
-                  task,
-                  { priority: Number(priority) },
-                  saved("priority"),
-                ),
-            )
-          : pickerRow(
-              "priority",
-              t(`planning.${PRIORITIES[Number(form.priority) - 1]}`),
-              !!writable,
-            )}
-        {desktop
-          ? selectRow(
-              "project",
-              task.projectId ?? "",
-              <>
-                <option value="">{t("planning.noProject")}</option>
-                {projects.data
-                  ?.filter(
-                    (item) => !item.archived || item.id === task.projectId,
-                  )
-                  .map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-              </>,
-              !!writable && !!projects.data,
-              (projectId) =>
-                inline.change(
-                  task,
-                  { projectId: projectId || null },
-                  saved("project"),
-                ),
-            )
-          : pickerRow(
-              "project",
-              formProject?.name ?? t("planning.noProject"),
-              !!writable,
-            )}
-        {pickerRow("labels", form.labels || "—", !!writable)}
+        {desktop ? (
+          secondaryFields
+        ) : (
+          <details className="task-fields-more">
+            <summary data-testid="task-fields-more">
+              <span>{t("taskDetail.moreFields")}</span>
+              <span className="task-fields-summary">
+                {[scheduleText, priorityText, formProject?.name, form.labels]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </span>
+              <ChevronDown size={14} aria-hidden="true" />
+            </summary>
+            {secondaryFields}
+          </details>
+        )}
       </div>
+      {!desktop && runControl}
       {contacts}
       <form className="task-field-editor" onSubmit={save}>
         {editing && (
@@ -569,7 +596,7 @@ export function TaskEditor({
           </SheetDialog>
         )}
       </form>
-      {desktop ? (
+      {desktop && (
         <form
           className="task-description-form"
           onSubmit={(event) => {
@@ -616,10 +643,6 @@ export function TaskEditor({
             </div>
           )}
         </form>
-      ) : (
-        task.description && (
-          <p className="task-description preserve-text">{task.description}</p>
-        )
       )}
       {!access.data?.canEdit && (
         <p className="section-hint">{t("planning.readOnly")}</p>

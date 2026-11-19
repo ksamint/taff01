@@ -9,7 +9,7 @@ import { verifyTestEmail } from "./support/email-verification";
 import { selectLocale } from "./support/preferences";
 
 // Milestone 36 audit endpoints, now with a screen: workspace admins only.
-test.use({ actionTimeout: 15000 });
+test.use({ actionTimeout: 15000, viewport: { width: 412, height: 915 } });
 
 test("an admin reads and filters the audit log; a member is refused", async ({
   page,
@@ -45,13 +45,37 @@ test("an admin reads and filters the audit log; a member is refused", async ({
   await expect(row).toBeVisible();
   // The actor resolves to the admin's member name.
   await expect(row).toContainText(admin.user.name);
+  await expect(row.getByText("projects.insert", { exact: true })).toBeVisible();
   const exportRow = view.locator(
     `[data-testid="audit-row"][data-action="view.export"][data-resource="${project.id}"]`,
   );
   await expect(exportRow).toContainText(messages[locale].audit.viewExport);
   await expect(exportRow).toContainText(admin.user.name);
   await exportRow.locator("summary").click();
-  await expect(exportRow.locator("pre")).toContainText(contentHash);
+  const details = exportRow.locator("pre");
+  await expect(details).toContainText(contentHash);
+  await expect(
+    exportRow.getByText(m.audit.action, { exact: true }),
+  ).toBeVisible();
+  const fields = await exportRow.locator("th, td").evaluateAll((cells) =>
+    cells.map((cell) => {
+      const { top, left, right } = cell.getBoundingClientRect();
+      return { top, left, right, fits: cell.scrollWidth <= cell.clientWidth };
+    }),
+  );
+  expect(fields).toHaveLength(5);
+  expect(
+    fields.every(({ left, right, fits }) => fits && left >= 0 && right <= 412),
+  ).toBe(true);
+  expect(fields.map(({ left }) => left)).toEqual(Array(5).fill(fields[0].left));
+  for (let index = 1; index < fields.length; index++)
+    expect(fields[index].top).toBeGreaterThan(fields[index - 1].top);
+  expect(
+    await details.evaluate((pre) => pre.scrollWidth <= pre.clientWidth),
+  ).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(
+    412,
+  );
 
   await view.getByTestId("audit-kind").selectOption("trace_id");
   await view.getByTestId("audit-value").fill("not-a-trace");

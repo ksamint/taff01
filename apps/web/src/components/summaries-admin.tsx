@@ -9,7 +9,6 @@ import {
   type Locale,
   type SummaryPreview,
 } from "@taff/schemas";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,6 +27,7 @@ import {
   useUpdateAudienceTag,
 } from "../lib/summary-queries";
 import { useWorkspace } from "./app-shell";
+import { SettingsBackHeader } from "./settings-back-header";
 import { summaryDay } from "./summaries-view";
 import { SummaryDocument, type Translate } from "./summary-document";
 import { Button } from "./ui/button";
@@ -56,12 +56,10 @@ export function SummariesAdmin() {
     t("audience.chip", { kind: t(`audience.kind.${tag.kind}`), org: tag.org });
   return (
     <div
-      className="summaries-admin summaries-page"
+      className="summaries-admin summaries-page settings-page-gutter"
       data-testid="summaries-admin"
     >
-      <Link className="text-link" href="/orgs">
-        <ArrowLeft size={16} aria-hidden="true" /> {t("mcp.back")}
-      </Link>
+      <SettingsBackHeader href="/orgs" label={t("mcp.back")} />
       <section className="page-heading">
         <p className="eyebrow">{workspace.name}</p>
         <h1>{t("audience.adminTitle")}</h1>

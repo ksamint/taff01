@@ -140,3 +140,15 @@ it("reads browser languages from Accept-Language by preference", () => {
   expect(acceptedLanguages(null)).toEqual([]);
   expect(detectLocale(acceptedLanguages(undefined))).toBe("zh-HK");
 });
+
+it.each([
+  ["zh-CN", simplified],
+  ["zh-HK", traditional],
+])(
+  "%s uses Chinese commas and full stops between CJK characters",
+  (locale, dictionary) => {
+    expect(JSON.stringify(dictionary), locale).not.toMatch(
+      /[一-鿿][,.][一-鿿]/,
+    );
+  },
+);

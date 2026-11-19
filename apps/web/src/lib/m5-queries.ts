@@ -6,7 +6,12 @@ import {
   type UpdateTask,
   updateTaskSchema,
 } from "@taff/schemas";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { request } from "./api";
 import { invalidateM3 } from "./m3-queries";
 import { m3MutationKey, patchTask, snapshotM3 } from "./optimistic-m3";
@@ -39,17 +44,23 @@ export function useTaskComments(id: string) {
       ),
   });
 }
-export function useTaskAccess(id: string) {
-  const client = useQueryClient();
-  return useQuery({
+export function taskAccessQuery(id: string) {
+  return queryOptions({
     queryKey: accessKey(id),
-    enabled:
-      !id.startsWith("optimistic:") &&
-      currentSession(client)?.confirmed !== false,
     staleTime: 0,
     queryFn: async () =>
       taskAccessSchema.parse(await request(`/api/tasks/${id}/access`)),
     retry: false,
+  });
+}
+export function useTaskAccess(id: string, enabled = true) {
+  const client = useQueryClient();
+  return useQuery({
+    ...taskAccessQuery(id),
+    enabled:
+      enabled &&
+      !id.startsWith("optimistic:") &&
+      currentSession(client)?.confirmed !== false,
   });
 }
 export function useEditTask() {

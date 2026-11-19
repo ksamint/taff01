@@ -146,6 +146,7 @@
     "sortDue": "Due date",
     "sortPriority": "Priority",
     "sortTitle": "Title",
+    "sortTemplate": "Setup template order",
     "sortCreated": "Newest first",
     "filter": "Filter tasks",
     "newProject": "Create project",
@@ -175,6 +176,7 @@
     "moreViews": "More",
     "timelineView": "Timeline",
     "stakeholdersView": "Stakeholders",
+    "graphView": "Graph",
     "relationsView": "Relations",
     "mindView": "Mindscape",
     "sectorsView": "Sectors",
@@ -238,7 +240,6 @@
     "timeZoneHint": "Dates and times follow this zone on every device. It was detected from your first browser.",
     "teamSummary": "{{people}} people · {{agents}} agents",
     "settings": "Settings",
-    "mcpSettings": "Settings › MCP",
     "advanced": "More settings",
     "notificationSummary": "{{count}} on",
     "notificationsOff": "Off",
@@ -407,6 +408,7 @@
     }
   },
   "taskDetail": {
+    "moreFields": "More",
     "back": "Back to Today",
     "due": "Due",
     "unscheduled": "Unscheduled",
@@ -643,6 +645,7 @@
     "newTask": "New task"
   },
   "organization": {
+    "agentDetails": "Details",
     "archive": "Archive organization",
     "archived": "Archived organizations",
     "restore": "Restore organization",
@@ -781,6 +784,7 @@
     "view": "View"
   },
   "todayDue": "Due today",
+  "todayUndated": "No due date ({{count}})",
   "todayScheduleEmpty": "No appointments today.",
   "todayNow": "Now",
   "moreAgentWork": "{{count}} more in Projects",
@@ -978,7 +982,7 @@
     "dragLink": "Drag to add a dependency",
     "removeDependency": "Remove dependency: {{from}} → {{to}}",
     "forecast": "Forecast",
-    "delivery": "Delivered",
+    "delivery": "Task completion",
     "risk": {
       "level": {
         "low": "On track",
@@ -1154,7 +1158,7 @@
     "finance": {
       "total_one": "Total · {{count}} billable project",
       "total_other": "Total · {{count}} billable projects",
-      "delivery": "Delivered"
+      "delivery": "Task completion"
     },
     "actions": {
       "title": "Suggested actions",

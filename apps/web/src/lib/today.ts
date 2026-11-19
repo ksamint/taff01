@@ -4,7 +4,7 @@ export function todayTasks(
   tasks: Task[],
   timeZone: string,
   now = new Date(),
-): Task[] {
+): { due: Task[]; undated: Task[] } {
   const day = new Intl.DateTimeFormat("en-CA", {
     timeZone,
     year: "numeric",
@@ -12,9 +12,15 @@ export function todayTasks(
     day: "2-digit",
   });
   const today = day.format(now);
-  return tasks.filter(
-    (task) =>
-      task.status !== "done" &&
-      (!task.dueAt || day.format(new Date(task.dueAt)) === today),
-  );
+  const due: Task[] = [];
+  const undated: Task[] = [];
+  for (const task of tasks) {
+    if (task.status === "done") continue;
+    if (task.dueAt) {
+      if (day.format(new Date(task.dueAt)) === today) due.push(task);
+    } else if (!task.labels.includes("meeting")) {
+      undated.push(task);
+    }
+  }
+  return { due, undated };
 }

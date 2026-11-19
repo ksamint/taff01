@@ -12,8 +12,11 @@ const controls = {
 } as const;
 
 export async function openTaskField(page: Page, field: keyof typeof controls) {
-  await expect(page.getByTestId(`task-field-${field}`)).toBeEnabled();
-  await page.getByTestId(`task-field-${field}`).click();
+  const row = page.getByTestId(`task-field-${field}`);
+  await expect(row).toBeEnabled();
+  if (!(await row.isVisible()))
+    await page.getByTestId("task-fields-more").click();
+  await row.click();
   await expect(page.getByTestId(controls[field])).toBeVisible();
 }
 
@@ -32,4 +35,11 @@ export async function closeTaskField(page: Page, field: keyof typeof controls) {
 export async function openProjectFilters(page: Page) {
   await page.getByTestId("project-filters").click();
   await expect(page.getByTestId("project-select")).toBeVisible();
+}
+
+export async function openProjectView(page: Page, name: string) {
+  const view = page.getByTestId(`project-view-${name}`);
+  if (!(await view.isVisible()))
+    await page.getByTestId("project-view-more").click();
+  await view.click();
 }

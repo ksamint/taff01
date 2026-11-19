@@ -550,6 +550,7 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
     expect(
       await second.evaluate(() => document.documentElement.scrollWidth <= 393),
     ).toBe(true);
+    await second.getByTestId("task-fields-more").click();
     await second.getByTestId("task-schedule").click();
     await second.getByTestId("schedule-start").fill(`${date}T12:00`);
     await second.getByTestId("schedule-end").fill(`${date}T13:00`);
@@ -665,6 +666,7 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
   await closeTaskField(page, "text");
   await expect(page.getByTestId("edit-save")).toBeEnabled();
   await expect(page.getByTestId("task-schedule")).toBeEnabled();
+  await page.getByTestId("task-fields-more").click();
   await page.getByTestId("task-schedule").click();
   await expect(page.getByTestId("schedule-zone")).toHaveValue(
     "America/New_York",
@@ -1128,6 +1130,55 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
     path: `/tmp/taff-m6-${locale}-phone.png`,
     fullPage: true,
   });
+});
+
+test("calendar day keeps 08:00 visible below overnight events", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as Locale;
+  const { me, workspace, date } = await setup(page, locale);
+  const title = `Carried over ${locale}`;
+  expect(
+    (
+      await page.request.post("/api/tasks", {
+        data: {
+          workspaceId: workspace.id,
+          ownerId: workspace.memberId,
+          title,
+          calendar: {
+            startAt: calendarWallToInstant(
+              `${offsetDay(date, -1)}T23:00`,
+              me.user.tz,
+            ),
+            endAt: calendarWallToInstant(`${date}T09:00`, me.user.tz),
+            timeZone: me.user.tz,
+            rrule: null,
+          },
+        },
+      })
+    ).status(),
+  ).toBe(201);
+  for (const desktop of [false, true]) {
+    if (desktop) await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/calendar");
+    const native = await waitForCalendarView(page, "day");
+    const event = native
+      .locator(".sx__date-grid-event")
+      .filter({ hasText: title });
+    const firstHour = native
+      .locator(".sx__week-grid__hour-text")
+      .getByText("08:00", { exact: true });
+    await expect(event).toBeVisible();
+    await waitForCalendarMotion(event);
+    const labelBox = await firstHour.boundingBox();
+    const bandBox = await native.locator(".sx__week-header").boundingBox();
+    if (!labelBox || !bandBox)
+      throw new Error("Calendar day geometry unavailable");
+    expect(labelBox.y).toBeGreaterThanOrEqual(bandBox.y + bandBox.height);
+    await event.click();
+    await expect(page.getByTestId("schedule-end")).toHaveValue(`${date}T09:00`);
+    await page.keyboard.press("Escape");
+  }
 });
 
 test("calendar multi-day events keep 44px targets and aligned stacked rows", async ({

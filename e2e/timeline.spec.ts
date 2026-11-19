@@ -7,6 +7,7 @@ import {
   workspaceSchema,
 } from "../packages/schemas/src/index";
 import { type Timeline, timelineSchema } from "../packages/schemas/src/plan";
+import { freshAccount } from "./support/account";
 import { messages, type TestLocale } from "./support/messages";
 import { selectLocale } from "./support/preferences";
 
@@ -416,4 +417,102 @@ test("open a task from the relations graph and via the list", async ({
   await expect(page.getByTestId("task-detail-heading")).toHaveText(
     second.title,
   );
+});
+
+test("saved delivery progress and computed task completion have distinct labels", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const m = messages[locale];
+  const {
+    workspaces: [workspace],
+  } = await freshAccount(page, locale);
+  const response = await page.request.post(
+    `/api/projects?workspaceId=${workspace.id}`,
+    {
+      data: {
+        name: `Delivery ${locale}`,
+        deliveryProgress: 37,
+        contractAmount: "100.00",
+        currency: "HKD",
+      },
+    },
+  );
+  expect(response.status()).toBe(201);
+  const project = projectSchema.parse(await response.json());
+  const task = await createTask(page, workspace, "Unfinished work", project.id);
+  await plan(page, task.id, (await timeline(page, project.id)).today, 2);
+  const { risk } = await timeline(page, project.id);
+  expect(risk.deliveryPercent).toBe(0);
+  const completion = {
+    en: "Task completion",
+    "zh-CN": "任务完成度",
+    "zh-HK": "任務完成度",
+  }[locale];
+
+  await page.goto(`/projects/${project.id}?view=timeline`);
+  await page.getByTestId("project-filters").click();
+  await expect(page.getByTestId("project-progress")).toHaveText(
+    `${m.projects.deliveryProgress}: 37%`,
+  );
+  await page.keyboard.press("Escape");
+  await expect(page.getByTestId("timeline-risk")).toContainText(
+    `${completion} 0%`,
+  );
+  const finance = page.getByTestId("timeline-finance");
+  await expect(finance.getByText(completion, { exact: true })).toBeVisible();
+  await expect(finance.getByText("0%", { exact: true })).toBeVisible();
+
+  await page.goto("/brief");
+  const briefProject = page.locator(
+    `[data-testid="brief-risk"][data-project="${project.id}"]`,
+  );
+  await expect(
+    briefProject.getByText(completion, { exact: true }),
+  ).toBeVisible();
+  await expect(
+    briefProject.getByText(completion, { exact: true }).locator("+ dd"),
+  ).toHaveText("0%");
+});
+test("the phone finance strip opens the panel and restores the chart on close", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const workspace = await setUp(page, locale);
+  const response = await page.request.post(
+    `/api/projects?workspaceId=${workspace.id}`,
+    {
+      data: {
+        name: `Compact ${locale}`,
+        contractAmount: "100.00",
+        currency: "HKD",
+      },
+    },
+  );
+  expect(response.status()).toBe(201);
+  const project = projectSchema.parse(await response.json());
+  const task = await createTask(page, workspace, "Planned row", project.id);
+  await plan(page, task.id, (await timeline(page, project.id)).today, 2);
+  await page.goto(`/projects/${project.id}?view=timeline`);
+
+  const toggle = page.getByTestId("timeline-finance-toggle");
+  const panel = page.getByTestId("project-finance");
+  const firstRow = row(page, task.id);
+  await expect(firstRow).toBeVisible();
+  await expect(page.getByTestId("timeline-finance")).toBeVisible();
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(panel).toHaveCount(0);
+  const collapsed = await firstRow.boundingBox();
+  if (!collapsed) throw new Error("Missing collapsed timeline row");
+  expect(collapsed.y).toBeLessThan(480);
+  console.log(`First chart row: ${Math.round(collapsed.y)} px`);
+
+  await toggle.click();
+  await expect(panel.getByTestId("project-finance-edit")).toBeVisible();
+  await expect(panel.getByTestId("project-finance-record")).toBeEnabled();
+  const expanded = await firstRow.boundingBox();
+  expect(expanded?.y).toBeGreaterThan(collapsed.y);
+  await toggle.click();
+  await expect(panel).toHaveCount(0);
+  expect((await firstRow.boundingBox())?.y).toBeCloseTo(collapsed.y);
 });

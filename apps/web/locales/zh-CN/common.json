@@ -146,6 +146,7 @@
     "sortDue": "截止日期",
     "sortPriority": "优先级",
     "sortTitle": "标题",
+    "sortTemplate": "设置模板顺序",
     "sortCreated": "最新创建",
     "filter": "筛选任务",
     "newProject": "创建项目",
@@ -175,6 +176,7 @@
     "moreViews": "更多",
     "timelineView": "时间线",
     "stakeholdersView": "相关方",
+    "graphView": "关系图",
     "relationsView": "关系图",
     "mindView": "心智图",
     "sectorsView": "营运视图",
@@ -238,7 +240,6 @@
     "timeZoneHint": "所有设备上的日期和时间都按此时区显示；首次登录时已从浏览器检测。",
     "teamSummary": "{{people}} 人 · {{agents}} 个智能体",
     "settings": "设置",
-    "mcpSettings": "设置 › MCP",
     "advanced": "更多设置",
     "notificationSummary": "{{count}} 项已开启",
     "notificationsOff": "已关闭",
@@ -407,6 +408,7 @@
     }
   },
   "taskDetail": {
+    "moreFields": "更多",
     "back": "返回今天",
     "due": "到期时间",
     "unscheduled": "未安排日期",
@@ -643,6 +645,7 @@
     "newTask": "新建任务"
   },
   "organization": {
+    "agentDetails": "详情",
     "archive": "归档组织",
     "archived": "已归档组织",
     "restore": "恢复组织",
@@ -781,6 +784,7 @@
     "view": "查看"
   },
   "todayDue": "今天到期",
+  "todayUndated": "未定日期 ({{count}})",
   "todayScheduleEmpty": "今天没有日程。",
   "todayNow": "现在",
   "moreAgentWork": "还有 {{count}} 项，见项目",
@@ -978,7 +982,7 @@
     "dragLink": "拖出依赖连线",
     "removeDependency": "移除依赖：{{from}} → {{to}}",
     "forecast": "预计",
-    "delivery": "交付进度",
+    "delivery": "任务完成度",
     "risk": {
       "level": {
         "low": "按计划",
@@ -1154,7 +1158,7 @@
     "finance": {
       "total_one": "合计 · {{count}} 个收费项目",
       "total_other": "合计 · {{count}} 个收费项目",
-      "delivery": "交付进度"
+      "delivery": "任务完成度"
     },
     "actions": {
       "title": "待批准的建议",
@@ -1422,15 +1426,15 @@
     "title": "股东摘要",
     "hint": "为你标记的项目每日进度。",
     "empty": "暂无摘要",
-    "emptyHint": "管理员将你添加为收件人后,摘要会每天出现在这里。",
+    "emptyHint": "管理员将你添加为收件人后，摘要会每天出现在这里。",
     "historyLimit": "显示最新 31 份摘要。",
     "eyebrow": "{{kind}} · {{org}}",
     "heading": "每日进度",
     "forRecipient": "致 {{name}}",
     "generated": "生成于 {{date}} · {{zone}}",
     "hash": "内容哈希 {{hash}}",
-    "preview": "预览,不会保存或分享。",
-    "truncated": "列表最多显示 20 项,数量包括全部。",
+    "preview": "预览，不会保存或分享。",
+    "truncated": "列表最多显示 20 项，数量包括全部。",
     "noProjects": "该机构暂无已标记的项目。",
     "totals": {
       "projects": "项目",
@@ -1461,7 +1465,7 @@
     },
     "taskOwner": "{{task}} · {{owner}}",
     "print": "打印或保存为 PDF",
-    "confidential": "机密文件,致 {{name}}。",
+    "confidential": "机密文件，致 {{name}}。",
     "unavailableTitle": "该链接已无法使用",
     "unavailableHint": "链接可能已过期或被撤销。请向分享者索取新链接。",
     "copyText": "复制文本",
@@ -1477,7 +1481,7 @@
     "open": "股东摘要",
     "openHint": "为股东标记项目并分享每日进度。",
     "adminTitle": "股东摘要",
-    "adminHint": "为股东机构标记项目、添加收件人,然后预览并分享每日摘要。",
+    "adminHint": "为股东机构标记项目、添加收件人，然后预览并分享每日摘要。",
     "kind": {
       "shareholder": "股东"
     },
@@ -1525,7 +1529,7 @@
     "create": "创建链接",
     "validFor": "有效天数",
     "copy": "复制链接",
-    "onceHint": "请立即复制,链接只会显示一次。",
+    "onceHint": "请立即复制，链接只会显示一次。",
     "status": {
       "active": "有效",
       "expired": "已过期",

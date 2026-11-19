@@ -9,19 +9,6 @@
 .mcp-view :is(h1, h2, h3, p, dl, dd) {
   margin: 0;
 }
-.mcp-backbar {
-  display: flex;
-  align-items: center;
-  height: 52px;
-  padding: 0 8px;
-  border-bottom: var(--hairline) solid var(--border-line);
-}
-.mcp-view .mcp-back {
-  gap: 8px;
-  padding: 0 12px;
-  font-size: 13px;
-  text-decoration: none;
-}
 .mcp-page {
   display: flex;
   flex-direction: column;
@@ -424,7 +411,7 @@ code.mcp-row-title {
   .mcp-view {
     --gutter: 0px;
   }
-  .mcp-backbar {
+  .mcp-view > .settings-back-header {
     padding: 0 16px;
   }
   .mcp-page {

@@ -7,6 +7,7 @@ import {
 import { prototypeId } from "../packages/schemas/src/prototype-data";
 import { prepareFonts } from "../scripts/ui/prepare-fonts";
 import { prepareView } from "../scripts/ui/prepare-view";
+import { freshAccount, messages, type TestLocale } from "./support/account";
 
 // UI language does not determine user-content language. The Northwind visual
 // fixture has Chinese task/contact names even in English, so its CJK requests
@@ -179,4 +180,64 @@ test("Northwind English Relations downloads bounded CJK pages for its real busin
     ),
     contentType: "application/json",
   });
+});
+
+test("a cold signed-in Me loads no more font bytes than Today", async ({
+  page,
+  browser,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  await freshAccount(page, locale);
+  const storageState = await page.context().storageState();
+  const transfers = [];
+  for (const [path, heading] of [
+    ["/", messages[locale].today],
+    ["/me", messages[locale].me.title],
+  ]) {
+    const context = await browser.newContext({
+      baseURL: process.env.AUTH_URL,
+      storageState,
+      serviceWorkers: "block",
+      viewport: page.viewportSize(),
+      isMobile: true,
+      hasTouch: true,
+    });
+    try {
+      const cold = await context.newPage();
+      await cold.goto(path);
+      await expect(
+        cold.getByRole("heading", { name: heading, exact: true }).first(),
+      ).toBeVisible();
+      await cold.waitForLoadState("networkidle");
+      const fonts = await cold.evaluate(async () => {
+        await document.fonts.ready;
+        return [
+          ...new Map(
+            (
+              performance.getEntriesByType(
+                "resource",
+              ) as PerformanceResourceTiming[]
+            )
+              .filter((entry) =>
+                new URL(entry.name).pathname.endsWith(".woff2"),
+              )
+              .map((entry) => [
+                new URL(entry.name).pathname,
+                entry.encodedBodySize,
+              ]),
+          ),
+        ];
+      });
+      const bytes = fonts.reduce((sum, [, size]) => sum + size, 0);
+      expect(bytes).toBeGreaterThan(0);
+      transfers.push(bytes);
+      await info.attach(`font-network-${path === "/" ? "today" : "me"}.json`, {
+        body: JSON.stringify({ fonts, bytes }),
+        contentType: "application/json",
+      });
+    } finally {
+      await context.close();
+    }
+  }
+  expect(transfers[1]).toBeLessThanOrEqual(transfers[0]);
 });

@@ -247,7 +247,12 @@ test("matching browser confirmation retains the server task while protected read
   expect(
     (
       await page.request.post("/api/tasks", {
-        data: { workspaceId: workspace.id, ownerId: workspace.memberId, title },
+        data: {
+          workspaceId: workspace.id,
+          ownerId: workspace.memberId,
+          title,
+          dueAt: new Date().toISOString(),
+        },
       })
     ).status(),
   ).toBe(201);

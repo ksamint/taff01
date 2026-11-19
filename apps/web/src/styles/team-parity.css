@@ -2,13 +2,6 @@
 .organizations-view > .page-heading {
   padding: 16px 20px 8px;
 }
-.organization-toolbar {
-  min-height: 52px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  border-bottom: 1px solid var(--border-line);
-}
 .organizations-view > .org-grid,
 .organizations-view > .button,
 .organizations-view > .me-section,
@@ -86,7 +79,21 @@
   font-size: 12px;
   color: var(--text-body);
 }
-.team-member-copy .team-agent-capabilities {
+.team-agent-directory-entry {
+  flex: 1;
+  min-width: 0;
+}
+.team-agent-details {
+  margin-inline-start: 48px;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+.team-agent-details > summary {
+  min-height: 44px;
+  align-content: center;
+  cursor: pointer;
+}
+.team-agent-details .team-agent-capabilities {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;

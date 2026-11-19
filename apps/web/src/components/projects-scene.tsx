@@ -16,7 +16,7 @@ import {
   groupBySector,
   SECTOR_INDICATORS,
 } from "@taff/schemas/operation-templates";
-import { useIsMutating } from "@tanstack/react-query";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   GripVertical,
@@ -43,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { isLocale } from "../lib/i18n";
 import {
+  taskAccessQuery,
   useProjects,
   useTaskAccess,
   useWorkspaceAccess,
@@ -63,8 +64,13 @@ import {
   type TaskFilter,
 } from "../lib/project-board";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
+import { sessionVersion } from "../lib/session-cache";
 import { deadlineFields, deadlineIso } from "../lib/task-date";
 import { showToast } from "../lib/toast";
+import {
+  orderXidingSetupTasks,
+  XIDING_WORKSPACE,
+} from "../lib/xiding-setup-order";
 import { useWorkspace } from "./app-shell";
 import {
   ProjectAudienceChips,
@@ -96,6 +102,7 @@ const MindView = dynamic(
   { ssr: false },
 );
 const PRIORITIES = ["urgent", "high", "medium", "low"] as const;
+const GRAPH_MODES = ["relations", "mind"] as const;
 const VIEW_LABEL: Record<ProjectView, string> = {
   board: "projects.boardView",
   list: "projects.listView",
@@ -182,6 +189,7 @@ function StatusIcon({ status }: { status: Task["status"] }) {
 
 export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const { workspace, me, openSearch, openQuick, confirmed } = useWorkspace();
+  const client = useQueryClient();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -194,11 +202,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const workspaceAccess = useWorkspaceAccess(workspace.id);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const view = parseProjectView(searchParams.get("view"));
+  const showGraphModes = view === "relations" || view === "mind";
   const agentId = searchParams.get("agent");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeColumn, setActiveColumn] = useState<Task["status"]>("todo");
   const [filter, setFilter] = useState<TaskFilter>("all");
-  const [sort, setSort] = useState<ProjectSort>("created");
+  const [sort, setSort] = useState<ProjectSort | "">("");
+  const hasSetupOrder = view === "board" && workspace.name === XIDING_WORKSPACE;
   const [label, setLabel] = useState("");
   const [projectDialog, setProjectDialog] = useState<"new" | "edit" | null>(
     null,
@@ -275,7 +285,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       memberId: workspace.memberId,
       members: members.data ?? [],
     }),
-    sort,
+    sort || "created",
     locale,
   );
   /** The current URL with some query parameters set or removed. */
@@ -318,16 +328,16 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     width: number;
   } | null>(null);
   const dragCleanup = useRef<(() => void) | null>(null);
-  useEffect(() => () => dragCleanup.current?.(), []);
+  useEffect(
+    () => () => dragCleanup.current?.(),
+    [projectId, view, workspace.id],
+  );
   const dragStart = useCallback(
-    (
-      event: React.PointerEvent<HTMLButtonElement>,
-      task: Task,
-      allowed: Task["status"][],
-    ) => {
-      if (busy || event.button !== 0 || !allowed.length) return;
+    (event: React.PointerEvent<HTMLButtonElement>, task: Task) => {
+      if (busy || !confirmed || event.button !== 0) return;
       event.preventDefault();
       dragCleanup.current?.();
+      const version = sessionVersion(client);
       const board = columns.current;
       const handle = event.currentTarget;
       const pointerId = event.pointerId;
@@ -338,6 +348,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         y = startY,
         moved = false,
         frame = 0;
+      let allowed: Task["status"][] | undefined;
+      let drop: Task["status"] | undefined;
       const targetAt = (pointX: number, pointY: number) =>
         Array.from(
           board?.querySelectorAll<HTMLElement>("[data-board-status]") ?? [],
@@ -351,6 +363,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           );
         })?.dataset.boardStatus as Task["status"] | undefined;
       const update = () => {
+        if (!allowed?.length) return;
         const target = targetAt(x, y);
         setDrag({
           id: task.id,
@@ -363,7 +376,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         });
       };
       const scroll = () => {
-        if (moved && board) {
+        if (moved && allowed?.length && board) {
           const rect = board.getBoundingClientRect();
           if (y >= rect.top && y <= rect.bottom) {
             const left = Math.max(0, rect.left),
@@ -395,35 +408,72 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         handle.removeEventListener("pointerup", finish);
         handle.removeEventListener("pointercancel", finish);
         handle.removeEventListener("lostpointercapture", cancel);
-        window.removeEventListener("blur", cancel);
         if (handle.hasPointerCapture(pointerId))
           handle.releasePointerCapture(pointerId);
       };
       const cancel = () => {
+        window.removeEventListener("blur", cancel);
         cleanup();
         dragCleanup.current = null;
         setDrag(null);
+      };
+      const completeDrop = (target: Task["status"]) => {
+        cancel();
+        if (
+          allowed?.includes(target) &&
+          handle.isConnected &&
+          sessionVersion(client) === version &&
+          client.isMutating({ mutationKey: m3MutationKey }) === 0
+        )
+          move(task, target);
       };
       const finish = (current: PointerEvent) => {
         if (current.pointerId !== pointerId) return;
-        cleanup();
-        dragCleanup.current = null;
-        setDrag(null);
-        if (moved && current.type === "pointerup") {
-          const target = targetAt(current.clientX, current.clientY);
-          if (target && allowed.includes(target)) move(task, target);
+        drop =
+          moved && current.type === "pointerup"
+            ? targetAt(current.clientX, current.clientY)
+            : undefined;
+        if (!drop) {
+          cancel();
+        } else if (allowed) {
+          completeDrop(drop);
+        } else {
+          // Release the pointer while the pending drop waits for authorization.
+          cleanup();
         }
       };
-      dragCleanup.current = cleanup;
+      dragCleanup.current = cancel;
       handle.setPointerCapture(pointerId);
       handle.addEventListener("pointermove", pointerMove);
       handle.addEventListener("pointerup", finish);
       handle.addEventListener("pointercancel", finish);
       handle.addEventListener("lostpointercapture", cancel);
       window.addEventListener("blur", cancel);
-      frame = requestAnimationFrame(scroll);
+      void client.fetchQuery(taskAccessQuery(task.id)).then(
+        ({ allowedStatuses }) => {
+          if (dragCleanup.current !== cancel) return;
+          if (
+            !allowedStatuses.length ||
+            !handle.isConnected ||
+            sessionVersion(client) !== version
+          ) {
+            cancel();
+            return;
+          }
+          allowed = allowedStatuses;
+          if (drop) {
+            completeDrop(drop);
+          } else {
+            if (moved) update();
+            frame = requestAnimationFrame(scroll);
+          }
+        },
+        () => {
+          if (dragCleanup.current === cancel) cancel();
+        },
+      );
     },
-    [busy, move],
+    [busy, client, confirmed, move],
   );
   const filterValue = agentId ? `agent:${agentId}` : filter;
   const cardProps = useMemo(
@@ -447,35 +497,92 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     [workspace.key, dueLabel, members.data, tasks.data, runs.data, pathname],
   );
   const showFilters = view === "board" || view === "list" || view === "sectors";
-  return (
-    <div className={`projects-view projects-view-${view}`}>
-      <header className="projects-header">
-        <Link className="projects-org" href="/orgs">
-          {workspace.name}
-          <ChevronDown size={12} aria-hidden="true" />
-        </Link>
-        <nav className="projects-sections" aria-label={t("projects.sections")}>
+  const projectOrg = (
+    <Link className="projects-org" href="/orgs">
+      <span>{workspace.name}</span>
+      <ChevronDown size={12} aria-hidden="true" />
+    </Link>
+  );
+  const projectSections = (
+    <nav className="projects-sections" aria-label={t("projects.sections")}>
+      <Link
+        className={`projects-section${projectId ? "" : " is-active"}`}
+        href="/projects"
+        aria-current={projectId ? undefined : "page"}
+        data-testid="crm-section-projects"
+        onClick={() => setSheetOpen(false)}
+      >
+        {t("projects.title")}
+      </Link>
+      {workspaceAccess.data?.canReadCrm &&
+        (["companies", "contacts"] as const).map((section) => (
           <Link
-            className="projects-section is-active"
-            href="/projects"
-            aria-current="page"
-            data-testid="crm-section-projects"
+            key={section}
+            className="projects-section"
+            href={`/${section}`}
+            prefetch={false}
+            data-testid={`crm-section-${section}`}
           >
-            {t("projects.title")}
+            {t(`crm.${section}.title`)}
           </Link>
-          {workspaceAccess.data?.canReadCrm &&
-            (["companies", "contacts"] as const).map((section) => (
-              <Link
-                key={section}
-                className="projects-section"
-                href={`/${section}`}
-                prefetch={false}
-                data-testid={`crm-section-${section}`}
-              >
-                {t(`crm.${section}.title`)}
-              </Link>
-            ))}
-        </nav>
+        ))}
+    </nav>
+  );
+  const projectMeta =
+    selected && view !== "sectors" ? (
+      <p className="projects-meta" data-testid="project-meta">
+        {canMoveStage ? (
+          <ProjectStageControl
+            key={selected.id}
+            project={selected}
+            workspaceId={workspace.id}
+            confirmed={confirmed}
+          />
+        ) : (
+          selected.stage && (
+            <span
+              className="projects-stage"
+              data-testid="project-stage"
+              data-stage={selected.stage}
+            >
+              <span className="sr-only">{t("projects.stageLabel")}: </span>
+              {t(`projects.stages.${selected.stage}`)}
+            </span>
+          )
+        )}
+        {lead && (
+          <span className="projects-lead" data-testid="project-lead">
+            {t("projects.leadIs", { name: lead.name })}
+          </span>
+        )}
+        {selected.dueAt && (
+          <span data-testid="project-due">
+            {t("projects.dueDate")}:{" "}
+            <time dateTime={selected.dueAt}>
+              {new Intl.DateTimeFormat(locale, {
+                dateStyle: "medium",
+                timeZone: me.user.tz,
+              }).format(new Date(selected.dueAt))}
+            </time>
+          </span>
+        )}
+        <span data-testid="project-progress">
+          {t("projects.deliveryProgress")}:{" "}
+          {new Intl.NumberFormat(locale, {
+            style: "percent",
+            maximumFractionDigits: 0,
+          }).format(selected.deliveryProgress / 100)}
+        </span>
+      </p>
+    ) : null;
+  return (
+    <div
+      className={`projects-view projects-view-${view}`}
+      data-project-detail={projectId ? "" : undefined}
+    >
+      <header className="projects-header">
+        {!projectId && projectOrg}
+        {!projectId && projectSections}
         <div className="projects-title-row">
           <span className="projects-crumb" aria-hidden="true">
             {t("projects.title")}
@@ -494,24 +601,33 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               <ChevronDown size={16} aria-hidden="true" />
             </button>
           </h1>
+          {projectId ? projectOrg : null}
           <div className="projects-title-actions">
             <nav className="projects-views" aria-label={t("projects.views")}>
-              <span className="projects-segment">
-                {(["board", "list", "timeline"] as const).map((mode) => (
-                  <Link
-                    key={mode}
-                    className={`projects-view-tab${view === mode ? " is-active" : ""}`}
-                    data-testid={`project-view-${mode}`}
-                    href={viewHref(mode)}
-                    aria-current={view === mode ? "page" : undefined}
-                    replace
-                    scroll={false}
-                  >
-                    {t(VIEW_LABEL[mode])}
-                  </Link>
-                ))}
-              </span>
-              <MoreViews view={view} href={viewHref} t={t} />
+              {desktop && (
+                <span className="projects-segment">
+                  {PRIMARY_VIEWS.map((mode) => (
+                    <Link
+                      key={mode}
+                      className={`projects-view-tab${view === mode ? " is-active" : ""}`}
+                      data-testid={`project-view-${mode}`}
+                      href={viewHref(mode)}
+                      aria-current={view === mode ? "page" : undefined}
+                      replace
+                      scroll={false}
+                    >
+                      {t(VIEW_LABEL[mode])}
+                    </Link>
+                  ))}
+                </span>
+              )}
+              <MoreViews
+                view={view}
+                href={viewHref}
+                t={t}
+                compact={!desktop}
+                projectDetail={Boolean(projectId)}
+              />
             </nav>
             {confirmed &&
               workspace.role !== "guest" &&
@@ -542,52 +658,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </div>
         </div>
-        {selected && view !== "sectors" && (
-          <p className="projects-meta" data-testid="project-meta">
-            {canMoveStage ? (
-              <ProjectStageControl
-                key={selected.id}
-                project={selected}
-                workspaceId={workspace.id}
-                confirmed={confirmed}
-              />
-            ) : (
-              selected.stage && (
-                <span
-                  className="projects-stage"
-                  data-testid="project-stage"
-                  data-stage={selected.stage}
-                >
-                  <span className="sr-only">{t("projects.stageLabel")}: </span>
-                  {t(`projects.stages.${selected.stage}`)}
-                </span>
-              )
-            )}
-            {lead && (
-              <span className="projects-lead" data-testid="project-lead">
-                {t("projects.leadIs", { name: lead.name })}
-              </span>
-            )}
-            {selected.dueAt && (
-              <span data-testid="project-due">
-                {t("projects.dueDate")}:{" "}
-                <time dateTime={selected.dueAt}>
-                  {new Intl.DateTimeFormat(locale, {
-                    dateStyle: "medium",
-                    timeZone: me.user.tz,
-                  }).format(new Date(selected.dueAt))}
-                </time>
-              </span>
-            )}
-            <span data-testid="project-progress">
-              {t("projects.deliveryProgress")}:{" "}
-              {new Intl.NumberFormat(locale, {
-                style: "percent",
-                maximumFractionDigits: 0,
-              }).format(selected.deliveryProgress / 100)}
-            </span>
-          </p>
-        )}
+        {desktop && projectMeta}
         {selected && (
           <ProjectAudienceChips
             projectId={selected.id}
@@ -668,6 +739,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           title={t("projects.switchProject")}
           onClose={() => setSheetOpen(false)}
         >
+          {!desktop && projectMeta}
+          {!desktop && projectId ? projectSections : null}
           <div className="planning-toolbar">
             <div className="field">
               <Label htmlFor="project-select">{t("planning.project")}</Label>
@@ -728,6 +801,19 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                 {t("projects.newProject")}
               </Button>
             )}
+            {selected && workspaceAccess.data?.canReadCrm && (
+              <Link
+                className="button"
+                href={viewHref("stakeholders")}
+                data-testid="project-info-stakeholders"
+                prefetch={false}
+                replace
+                scroll={false}
+                onClick={() => setSheetOpen(false)}
+              >
+                {t(VIEW_LABEL.stakeholders)}
+              </Link>
+            )}
             {admin && selected && (
               <Button
                 data-testid="manage-project"
@@ -779,9 +865,14 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               <select
                 id="project-sort"
                 data-testid="project-sort"
-                value={sort}
-                onChange={(event) => setSort(event.target.value as ProjectSort)}
+                value={hasSetupOrder ? sort : sort || "created"}
+                onChange={(event) =>
+                  setSort(event.target.value as ProjectSort | "")
+                }
               >
+                {hasSetupOrder && (
+                  <option value="">{t("projects.sortTemplate")}</option>
+                )}
                 {(["created", "due", "priority", "title"] as const).map(
                   (key) => (
                     <option key={key} value={key}>
@@ -802,6 +893,33 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             </div>
           </div>
         </SheetDialog>
+      )}
+      {showGraphModes && (
+        <nav
+          className="projects-graph-modes"
+          aria-label={t("projects.graphView")}
+        >
+          <span className="projects-segment">
+            {GRAPH_MODES.map((mode) => (
+              <Link
+                key={mode}
+                className={`projects-view-tab${view === mode ? " is-active" : ""}`}
+                data-testid={`project-graph-mode-${mode}`}
+                href={
+                  view === mode
+                    ? viewHref(mode)
+                    : hrefWith({ view: mode, node: null })
+                }
+                aria-current={view === mode ? "page" : undefined}
+                prefetch={false}
+                replace
+                scroll={false}
+              >
+                {t(VIEW_LABEL[mode])}
+              </Link>
+            ))}
+          </span>
+        </nav>
       )}
       <p className="sr-only" id={dragHintId}>
         {t("projects.dragHint")}
@@ -835,7 +953,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               memberId: workspace.memberId,
               members: members.data ?? [],
             }),
-            sort,
+            sort || "created",
             locale,
           )}
           projectOrder={(projects.data ?? []).map((item) => item.id)}
@@ -928,7 +1046,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                   </p>
                 ) : (
                   <ul className="projects-cards">
-                    {items.map((task) => (
+                    {(hasSetupOrder && !sort
+                      ? orderXidingSetupTasks(items, workspace.name)
+                      : items
+                    ).map((task) => (
                       <BoardCard
                         confirmed={confirmed}
                         key={task.id}
@@ -1134,15 +1255,21 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   );
 }
 
-/** 更多 ›: 相關方 · 關係圖 · 心智圖 (prototype `moreMenu`). */
+const PRIMARY_VIEWS = ["board", "list", "timeline"] as const;
+
+/** Desktop overflow and the compact phone view switcher. */
 function MoreViews({
   view,
   href,
   t,
+  compact,
+  projectDetail,
 }: {
   view: ProjectView;
   href: (view: ProjectView) => string;
   t: Translate;
+  compact: boolean;
+  projectDetail: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -1164,7 +1291,14 @@ function MoreViews({
       document.removeEventListener("keydown", escape);
     };
   }, [open]);
-  const active = (MORE_VIEWS as readonly string[]).includes(view);
+  const selected = view === "mind" ? "relations" : view;
+  const active =
+    compact || (MORE_VIEWS as readonly string[]).includes(selected);
+  const options = (
+    compact ? [...PRIMARY_VIEWS, ...MORE_VIEWS] : MORE_VIEWS
+  ).filter((view) => view !== "sectors" || !projectDetail);
+  const label = (item: ProjectView) =>
+    item === "relations" ? "projects.graphView" : VIEW_LABEL[item];
   return (
     <div
       className="projects-more"
@@ -1182,22 +1316,22 @@ function MoreViews({
         aria-controls={menuId}
         onClick={() => setOpen(!open)}
       >
-        {t(active ? VIEW_LABEL[view] : "projects.moreViews")}
+        {t(active ? label(selected) : "projects.moreViews")}
         <ChevronDown size={12} aria-hidden="true" />
       </button>
       {open && (
         <ul className="projects-more-menu" id={menuId}>
-          {MORE_VIEWS.map((item) => (
+          {options.map((item) => (
             <li key={item}>
               <Link
-                href={href(item)}
+                href={href(selected === item ? view : item)}
                 data-testid={`project-view-${item}`}
-                aria-current={view === item ? "page" : undefined}
+                aria-current={selected === item ? "page" : undefined}
                 replace
                 scroll={false}
                 onClick={() => setOpen(false)}
               >
-                {t(VIEW_LABEL[item])}
+                {t(label(item))}
               </Link>
             </li>
           ))}
@@ -1301,16 +1435,16 @@ const BoardCard = memo(function BoardCard({
   busy: boolean;
   confirmed: boolean;
   move: (task: Task, status: Task["status"]) => void;
-  dragStart: (
-    event: React.PointerEvent<HTMLButtonElement>,
-    task: Task,
-    allowed: Task["status"][],
-  ) => void;
+  dragStart: (event: React.PointerEvent<HTMLButtonElement>, task: Task) => void;
   dragging: boolean;
   dragHintId: string;
 }) {
-  const access = useTaskAccess(task.id);
-  const allowed = confirmed ? (access.data?.allowedStatuses ?? []) : [];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const access = useTaskAccess(task.id, menuOpen);
+  const allowed =
+    menuOpen && confirmed && access.isSuccess && !access.isFetching
+      ? access.data.allowedStatuses
+      : [];
   const owner = member(task.ownerId);
   const worker = member(task.workerId);
   const ownerName = owner ? owner.name : t("unknownMember");
@@ -1326,13 +1460,56 @@ const BoardCard = memo(function BoardCard({
       data-task-id={task.id}
     >
       <div className="projects-card-top">
-        <span className="projects-task-reference">{reference(task)}</span>
-        <span
-          className="task-due"
-          aria-label={dueLabel ? undefined : t("taskDetail.unscheduled")}
-        >
-          {dueLabel}
-        </span>
+        <div className="projects-card-meta">
+          <span className="projects-task-reference">{reference(task)}</span>
+          <span
+            className="task-due"
+            aria-label={dueLabel ? undefined : t("taskDetail.unscheduled")}
+          >
+            {dueLabel}
+          </span>
+        </div>
+        <div className="projects-card-actions">
+          <Button
+            data-testid="drag-handle"
+            className="button-quiet drag-handle"
+            disabled={busy || !confirmed || task.id.startsWith("optimistic:")}
+            aria-label={t("projects.drag")}
+            aria-describedby={dragHintId}
+            onPointerDown={(event) => dragStart(event, task)}
+          >
+            <GripVertical size={16} aria-hidden="true" />
+          </Button>
+          <details
+            className="projects-card-menu"
+            onToggle={(event) => setMenuOpen(event.currentTarget.open)}
+          >
+            <summary aria-label={t("planning.status")}>
+              <MoreHorizontal size={16} aria-hidden="true" />
+            </summary>
+            <div className="projects-card-menu-body">
+              <select
+                data-testid="board-status"
+                aria-label={t("planning.status")}
+                disabled={busy || !allowed.length}
+                value={task.status}
+                onChange={(event) => {
+                  const status = event.target.value as Task["status"];
+                  if (allowed.includes(status)) move(task, status);
+                }}
+              >
+                {[...new Set([task.status, ...allowed])].map((status) => (
+                  <option key={status} value={status}>
+                    {t(`status.${status}`)}
+                  </option>
+                ))}
+              </select>
+              <span className="projects-card-priority">
+                {t(`planning.${PRIORITIES[task.priority - 1]}`)}
+              </span>
+            </div>
+          </details>
+        </div>
       </div>
       <h3 className="projects-card-title">
         <TaskLink task={task} />
@@ -1380,43 +1557,6 @@ const BoardCard = memo(function BoardCard({
             )}
           </>
         )}
-      </div>
-      <div className="board-card-bottom">
-        <Button
-          data-testid="drag-handle"
-          className="button-quiet drag-handle"
-          disabled={busy || !allowed.length}
-          aria-label={t("projects.drag")}
-          aria-describedby={dragHintId}
-          onPointerDown={(event) => dragStart(event, task, allowed)}
-        >
-          <GripVertical size={16} aria-hidden="true" />
-        </Button>
-        <details className="projects-card-menu">
-          <summary aria-label={t("planning.status")}>
-            <MoreHorizontal size={16} aria-hidden="true" />
-          </summary>
-          <div className="projects-card-menu-body">
-            <select
-              data-testid="board-status"
-              aria-label={t("planning.status")}
-              disabled={busy || !allowed.length}
-              value={task.status}
-              onChange={(event) =>
-                move(task, event.target.value as Task["status"])
-              }
-            >
-              {[...new Set([task.status, ...allowed])].map((status) => (
-                <option key={status} value={status}>
-                  {t(`status.${status}`)}
-                </option>
-              ))}
-            </select>
-            <span className="projects-card-priority">
-              {t(`planning.${PRIORITIES[task.priority - 1]}`)}
-            </span>
-          </div>
-        </details>
       </div>
     </li>
   );
@@ -1492,13 +1632,14 @@ function SectorList({
   projectName: (id: string | null) => string;
 }) {
   const { t } = card;
+  const sectors = groupBySector(tasks, projectOrder);
   return (
     <div className="planning-list projects-list projects-sectors">
       <p className="projects-sectors-hint" data-testid="sector-view-hint">
         {t("projects.sectorsHint")}
       </p>
-      {groupBySector(tasks, projectOrder).map(
-        ({ sector, projects, count }, index) => (
+      {sectors.some(({ count }) => count > 0) &&
+        sectors.map(({ sector, projects, count }, index) => (
           <section
             key={sector.label}
             data-testid="sector-group"
@@ -1549,8 +1690,7 @@ function SectorList({
               ))
             )}
           </section>
-        ),
-      )}
+        ))}
     </div>
   );
 }

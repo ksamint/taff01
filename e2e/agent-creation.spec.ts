@@ -7,7 +7,12 @@ import {
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
 import { verifyTestEmail } from "./support/email-verification";
-import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
+import {
+  closeQuickField,
+  openQuickAdd,
+  openQuickField,
+  openUndatedTasks,
+} from "./support/tasks";
 
 test("Team creates a real custom agent through UI and assigns it as a task worker", async ({
   page,
@@ -150,6 +155,7 @@ test("Team creates a real custom agent through UI and assigns it as a task worke
     const task = taskSchema.parse(await taskResponse.json());
     expect(task.workerId).toBe(member.id);
     expect(task.ownerId).toBe(workspace.memberId);
+    await openUndatedTasks(page);
     await expect(
       page.getByTestId("task-card").filter({ hasText: title }),
     ).toContainText(name);
@@ -304,4 +310,97 @@ test("MCP explains an empty agent roster and links to organization creation; API
     messages[locale].errors.forbidden,
   );
   await expect(page.getByTestId("issued-token")).toHaveCount(0);
+});
+
+test("organization agent details fetch only the row a guest opens", async ({
+  page,
+  browser,
+}, info) => {
+  test.setTimeout(90_000);
+  const locale = info.project.name as TestLocale;
+  const admin = await freshAccount(page, locale);
+  const workspace = admin.workspaces[0];
+  const agents = [];
+  for (const name of ["First directory agent", "Second directory agent"]) {
+    const added = await page.request.post(
+      `/api/workspaces/${workspace.id}/members`,
+      { data: { name, kind: "agent" } },
+    );
+    expect(added.status()).toBe(201);
+    agents.push(memberSchema.parse(await added.json()));
+  }
+
+  const context = await browser.newContext({
+    ...info.project.use,
+    baseURL: process.env.AUTH_URL,
+  });
+  try {
+    const guest = await context.newPage();
+    const me = await freshAccount(guest, locale);
+    await verifyTestEmail(guest, me.user.id);
+    const issued = await page.request.post(
+      `/api/workspaces/${workspace.id}/invites`,
+      { data: { email: me.user.email, role: "guest" } },
+    );
+    expect(issued.status()).toBe(201);
+    const invite = issuedWorkspaceInviteSchema.parse(await issued.json());
+    const accepted = await guest.request.post("/api/workspace-invites/accept", {
+      data: { token: invite.token },
+    });
+    expect(accepted.status()).toBe(200);
+    await guest.goto("/orgs");
+    const selection = guest.getByTestId(`workspace-${workspace.id}`);
+    await selection.click();
+    await expect(selection).toHaveAttribute("aria-pressed", "true");
+
+    const reads: string[] = [];
+    guest.on("request", (request) => {
+      const path = new URL(request.url()).pathname;
+      if (request.method() === "GET" && /^\/api\/agents\/[^/]+$/.test(path))
+        reads.push(path);
+    });
+    await guest.goto("/orgs");
+    for (const agent of agents) {
+      await expect(
+        guest.getByRole("link", { name: agent.name, exact: true }),
+      ).toHaveAttribute("href", `/agents/${agent.id}`);
+    }
+    const roster = memberListSchema.parse(
+      await (
+        await guest.request.get(`/api/members?workspaceId=${workspace.id}`)
+      ).json(),
+    );
+    const details = guest.locator(".team-agent-details");
+    await expect(details).toHaveCount(
+      roster.filter((member) => member.kind === "agent").length,
+    );
+    await expect(details.locator("[role=list]")).toHaveCount(0);
+    await guest.waitForLoadState("networkidle");
+    expect(reads).toEqual([]);
+
+    const [agent, unopened] = agents;
+    const profilePath = `/api/agents/${agent.id}`;
+    const loaded = guest.waitForResponse(
+      (response) =>
+        response.request().method() === "GET" &&
+        new URL(response.url()).pathname === profilePath,
+    );
+    const row = guest.locator(".member-role-row").filter({
+      has: guest.getByRole("link", { name: agent.name, exact: true }),
+    });
+    await row.locator("summary").click();
+    expect((await loaded).status()).toBe(200);
+    await expect(
+      guest.getByTestId(`team-supervisor-${agent.id}`),
+    ).toBeVisible();
+    await expect(
+      guest.getByTestId(`team-capabilities-${agent.id}`),
+    ).toBeVisible();
+    await expect(
+      guest.getByTestId(`team-capabilities-${unopened.id}`),
+    ).toHaveCount(0);
+    expect(reads).toEqual([profilePath]);
+  } finally {
+    await context.close();
+  }
 });

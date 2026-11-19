@@ -4,6 +4,9 @@
   min-width: 0;
   padding: var(--space-md) var(--gutter) var(--space-lg);
 }
+.access-page > .settings-back-header {
+  margin-top: calc(-1 * var(--space-md));
+}
 .access-tabs {
   display: flex;
   flex-wrap: wrap;

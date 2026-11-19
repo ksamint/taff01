@@ -99,6 +99,11 @@
 .today-due > .today-section-label {
   padding-top: 24px;
 }
+.today-undated > summary {
+  min-height: 44px;
+  padding-block: 14px;
+  cursor: pointer;
+}
 .today-due-list {
   border-top: 1px solid var(--border-line);
 }
@@ -452,5 +457,26 @@
   }
   .today-avatar-link {
     display: none;
+  }
+}
+
+@media (min-width: 1280px) {
+  .today-view {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--gutter);
+    max-width: none;
+  }
+  .today-header {
+    grid-column: 1 / -1;
+  }
+  .today-activity:not(:has(> :not([hidden]))) {
+    display: none;
+  }
+  .today-activity:not(:has(> :not([hidden]))) + .today-deadlines {
+    grid-column: 1 / -1;
+  }
+  .today-due > .today-section-label {
+    padding-top: 0;
   }
 }

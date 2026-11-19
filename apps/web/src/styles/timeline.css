@@ -125,6 +125,33 @@
   border-bottom: var(--hairline) solid var(--border);
   font-size: 12px;
 }
+.timeline-finance-disclosure {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: var(--hairline) solid var(--border);
+}
+.timeline-finance-disclosure .timeline-finance {
+  column-gap: 12px;
+  border-bottom: 0;
+}
+.timeline-finance-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  background: none;
+  color: var(--text-body);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.timeline-finance-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
 .timeline-finance div {
   display: flex;
   gap: 6px;

@@ -102,6 +102,7 @@ test("project deadline and delivery progress preserve time, export and reject st
   project = await save();
   expect(project.dueAt).toBe("2030-06-10T09:59:59.999Z");
   expect(project.deliveryProgress).toBe(100);
+  await openProjectFilters(page);
   const due = page.getByTestId("project-due");
   await expect(due).toContainText(messages[locale].projects.dueDate);
   await expect(due).toContainText(
@@ -138,6 +139,8 @@ test("project deadline and delivery progress preserve time, export and reject st
     messages[locale].errors.conflict,
   );
   await expect(page.getByTestId("project-submit")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await openProjectFilters(page);
   await expect(page.getByTestId("project-progress")).toContainText(
     new Intl.NumberFormat(locale, { style: "percent" }).format(0.8),
   );
@@ -148,6 +151,7 @@ test("project deadline and delivery progress preserve time, export and reject st
   project = await save();
   expect(project.dueAt).toBeNull();
   expect(project.deliveryProgress).toBe(0);
+  await openProjectFilters(page);
   await expect(page.getByTestId("project-due")).toHaveCount(0);
   await expect(page.getByTestId("project-progress")).toContainText(
     new Intl.NumberFormat(locale, { style: "percent" }).format(0),
@@ -202,12 +206,11 @@ test("an admin sets and changes a project's stage and person in charge", async (
   const project = projectSchema.parse(await (await createdProject).json());
   expect(project).toMatchObject({ stage: "lead", leadId: self.id });
   await expect(page).toHaveURL(`/projects/${project.id}`);
+  await openProjectFilters(page);
   await expect(page.getByTestId("project-stage-control")).toHaveValue("lead");
   await expect(page.getByTestId("project-lead")).toHaveText(
     m.projects.leadIs.replace("{{name}}", self.name),
   );
-
-  await openProjectFilters(page);
   await page.getByTestId("manage-project").click();
   await expect(page.getByTestId("project-stage-select")).toHaveValue("lead");
   await expect(page.getByTestId("project-lead-select")).toHaveValue(self.id);
@@ -223,6 +226,8 @@ test("an admin sets and changes a project's stage and person in charge", async (
     leadId: self.id,
     version: project.version + 1,
   });
+  await expect(page.getByTestId("project-submit")).toHaveCount(0);
+  await openProjectFilters(page);
   await expect(page.getByTestId("project-stage-control")).toHaveValue(
     "in_service",
   );
@@ -327,10 +332,13 @@ test("the person in charge moves the pipeline and Brief filters rows and totals"
     await page.getByTestId("manage-project").click();
     await page.getByTestId("project-lead-select").selectOption(lead.member.id);
     await page.getByTestId("project-submit").click();
+    await expect(page.getByTestId("project-submit")).toHaveCount(0);
+    await openProjectFilters(page);
     await expect(page.getByTestId("project-lead")).toContainText(
       lead.member.name,
     );
     await lead.person.goto(`/projects/${project.id}`);
+    await openProjectFilters(lead.person);
     const control = lead.person.getByTestId("project-stage-control");
     await expect(control).toHaveValue("lead");
     // A rejected optimistic edit restores the previous stage.
@@ -353,16 +361,16 @@ test("the person in charge moves the pipeline and Brief filters rows and totals"
     await control.selectOption("proposal_sent");
     await expect(control).toBeEnabled();
     await lead.person.reload();
+    await openProjectFilters(lead.person);
     await expect(control).toHaveValue("proposal_sent");
     await other.person.goto(`/projects/${project.id}`);
+    await openProjectFilters(other.person);
     for (const reader of [lead.person, other.person]) {
       await expect(reader.getByTestId("project-due")).toContainText(
         messages[locale].projects.dueDate,
       );
       await expect(reader.getByTestId("project-progress")).toContainText("64");
-      await openProjectFilters(reader);
       await expect(reader.getByTestId("manage-project")).toHaveCount(0);
-      await reader.keyboard.press("Escape");
       expect(
         (
           await reader.request.patch(`/api/projects/${project.id}`, {

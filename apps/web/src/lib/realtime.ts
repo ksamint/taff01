@@ -91,7 +91,12 @@ export function connectWorkspace(
   const invalidate = (options?: { refetchType: "none" }) => {
     if (options?.refetchType === "none") {
       // Stale-only marking neither queues reads nor consumes pending changes.
-      void client.invalidateQueries({ predicate: families, ...options });
+      void client.invalidateQueries({
+        // The shell and route mount Inbox in separate renders. Keep its
+        // browser-confirmed read fresh across that first connection.
+        predicate: (query) => query.queryKey[0] !== "inbox" && families(query),
+        ...options,
+      });
       return;
     }
     dirty = true;

@@ -36,7 +36,10 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 ### Regrouping (OT-1)
 
 - OT-1.1 The template shall define the six sectors in the table's order; each sector label shall be a valid task label.
-- OT-1.2 When the Sectors view opens, it shall show every sector, in order, with its name, English name, leading and result indicators and a task count, including sectors with no tasks.
+- OT-1.2 When the Sectors view has tagged tasks, it shall show every sector,
+  in order, with its names, indicators and count. Without tagged tasks the
+  view shall show one tagging hint. Desktop shall arrange the groups in two
+  or three columns and align each of the two indicator labels in one column.
 - OT-1.3 A task whose labels include a sector label exactly shall appear under that sector, under a heading of its project (or "No project"); a task with several sector labels shall appear under each of them.
 - OT-1.4 A task with no sector label shall not appear in the view.
 - OT-1.5 The view shall cover every project in the workspace regardless of the selected project; the header shall read All projects without a single project's stage or progress, and image export shall not be offered there. The existing filter (all, mine, agents, agent), label search and sort shall apply.
@@ -44,9 +47,20 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 
 ### Phone and tagging (OT-2)
 
-- OT-2.1 The view shall be reachable from Projects → More → Sectors on phone (H5) and desktop, and by `?view=sectors`.
+- OT-2.1 The view shall be reachable from the Projects index view selector on
+  phone (H5) and desktop at `/projects?view=sectors`. Per-project selectors
+  shall omit Sectors, and existing `/projects/:id?view=sectors` links shall
+  continue to open the workspace view.
 - OT-2.2 When a person adds a task with a sector tag (Quick Add `+財務與現金`, or the task editor's labels), it shall appear under that sector; opening a row shall open the task.
 - OT-2.3 Every CJK character in the view's UI labels shall be in the bundled font subset; sector and indicator text is template data shown with the system font fallback.
+
+### XIDING setup order (OT-3)
+
+- OT-3.1 In XIDING, the default project board and the Today task lists shall
+  order the setup tasks by template sector. The exact title `設定指標目標 · <sector>`
+  and matching sector label identify a setup task.
+- OT-3.2 Ordinary tasks shall retain their positions. Explicit project board
+  sort choices shall continue to apply to all cards.
 
 ## Non-functional
 
@@ -67,6 +81,8 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 | --- | --- |
 | OT-1.1–1.4 | `packages/schemas/src/operation-templates.test.ts` |
 | OT-1.2–1.5, OT-2.1–2.2 | `e2e/operation-templates.spec.ts`, Pixel 7 profile, en, zh-CN, zh-HK |
+| OT-2.1 | `e2e/project-graph-view.spec.ts`, guest on phone and desktop in three locales |
+| OT-3 | `e2e/operation-templates.spec.ts` in three locales and `apps/web/src/lib/project-board.test.ts` |
 | OT-1.6 | no test; the view issues only the existing task and project reads |
 | OT-2.3 | `scripts/ui/fonts.test.ts` |
 

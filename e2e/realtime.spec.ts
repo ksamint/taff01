@@ -1,7 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
 import { memberListSchema, meSchema } from "../packages/schemas/src/index";
 import { chooseLocale, selectLocale } from "./support/preferences";
-import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
+import {
+  closeQuickField,
+  openQuickAdd,
+  openQuickField,
+  openUndatedTasks,
+} from "./support/tasks";
 
 const labels = {
   en: { today: "Today", running: "Working", paused: "Paused" },
@@ -73,6 +78,7 @@ test("two authenticated browsers converge through real workspace WebSockets with
   try {
     await trackConnection(other);
     await signIn(other, locale);
+    await openUndatedTasks(other);
     const title = `Realtime ${locale} ${Date.now()}`;
     await openQuickAdd(page);
     await page.getByTestId("quick-title").fill(title);
@@ -123,6 +129,7 @@ test("two authenticated browsers converge through real workspace WebSockets with
     );
     // A real disconnect misses the write; reopening must refresh the workspace.
     await other.goto("/");
+    await openUndatedTasks(other);
     await expect(other.locator("html")).toHaveAttribute(
       "data-realtime",
       "open",

@@ -1,0 +1,204 @@
+{
+  "sourceSha": "827b12c1354b3f8243fe97840949409f6ef4c74f",
+  "sourceTree": "5c05184fa61901ab2401e2f7922346d1b785e88b",
+  "mode": "local direct capture; no CI runner",
+  "runtime": {
+    "platform": "linux",
+    "arch": "arm64",
+    "node": "v26.12.1",
+    "playwright": "1.64.1",
+    "executable": "/ms-playwright/chromium-1248/chrome-linux-arm64/chrome",
+    "browserPresent": true,
+    "chromium": "156.0.8078.80"
+  },
+  "image": "mcr.microsoft.com/playwright:v1.64.1-noble",
+  "imageDigest": "sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f",
+  "browserServer": "Pinned Playwright 1.64.1 Linux ARM64 server using local loopback forwarding",
+  "clock": "2026-10-08T11:20:00Z",
+  "screenResults": [
+    {
+      "screen": "sectors",
+      "stats": {
+        "startTime": "2026-11-19T14:37:38.074Z",
+        "duration": 5752.204,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    },
+    {
+      "screen": "export-image",
+      "stats": {
+        "startTime": "2026-11-19T14:37:44.101Z",
+        "duration": 15149.126,
+        "expected": 4,
+        "skipped": 0,
+        "unexpected": 0,
+        "flaky": 0
+      }
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "playwright.visual.config.ts",
+      "sha256": "db669b19dee5db56e5419eb95a1eed5385d5c2edbd162c640c417482e9ea0ab3"
+    },
+    {
+      "path": "e2e/ui-v2.spec.ts",
+      "sha256": "68a4b19ad724fdb558f5a60c982cd521d51714526765b6946771d80699044b3f"
+    },
+    {
+      "path": "scripts/ui/visual-clock.mts",
+      "sha256": "ff6450ef587c91fda34fa7a297a6a6cce1232d627f1ed399f8e8cf57251cdae6"
+    },
+    {
+      "path": "apps/web/public/fonts/Manrope-OFL.txt",
+      "sha256": "d6a309fcfb963d329a93baf9df66fa5f3c23a4be2b5f67edf24d6cafecde12ac"
+    },
+    {
+      "path": "apps/web/public/fonts/Manrope-latin.woff2",
+      "sha256": "a3af87e87699db011014cee738bce19c161d6f72ac55d7457050824aaf7b673c"
+    },
+    {
+      "path": "apps/web/public/fonts/Manrope.ttf",
+      "sha256": "3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6"
+    },
+    {
+      "path": "apps/web/public/fonts/Manrope.woff2",
+      "sha256": "30b83738add8c9edd9e3450b98036a9a8fb5668d0cbd4eb0ce5fe6761197f21f"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansMath-OFL.txt",
+      "sha256": "c9c63b8ed6cf76b2ce0c58b241acfc1195c2c928334c989c7047cbdac58773d9"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansMath-ui.woff2",
+      "sha256": "d343a9e8374cccacb10522e50fe909b46f46bb5c033b4f93f397ec84de2e5749"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansSC-OFL.txt",
+      "sha256": "1c05c68c34f9708415aada51f17e1b0092d2cea709bf4a94cd38114f9e73d7d9"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansSC-ui.woff2",
+      "sha256": "8b10a54cf6f6032294d231e34f0a34e2179d7892a383754f7889dd52710d5641"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-OFL.txt",
+      "sha256": "babcfe66c8a098b2fa279bc724a3a342f8124f77ce18941fbcc1bbb39823cded"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-common.woff2",
+      "sha256": "37ad32a472c41f4437229203438fa50c74a87d9ad58130ef48795ee138e989bf"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-content-00.woff2",
+      "sha256": "29c646ded1025d558cfaac470b8914838b4d8cf6e2e91f2a4d447a8062509733"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-content-01.woff2",
+      "sha256": "44fb8aeaeffccf7f77d5e01f3d6210ae8b4d2fa3fc29c8162f6a5f56f0d33d33"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-content-02.woff2",
+      "sha256": "5ddb9879e55349d6593c7907f5d59973166a03ca29d4711bdeda3ab0604f1539"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-content-03.woff2",
+      "sha256": "4ca29dafdc11e13bf280844807e7e69185a87551226ddc40fc248c92eeef9d05"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-content-04.woff2",
+      "sha256": "e30633bcf9b1b19208db1aeaf0bfc61a0925f970357fc5c46e2261a96a93fe9c"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-content-05.woff2",
+      "sha256": "68f1423da88948d53b88185938133f2e6091fe8cae756ee1644c3be7a0a4382e"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-content-06.woff2",
+      "sha256": "10ca29b1ca0d6a039f376372e24af9c4e2224eeeafe874e84c2d279a5b176038"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-details-00.woff2",
+      "sha256": "d5fc9cf55e9d41c286e46496c4e851933d0f027336b8269a6373b5c05f2de85c"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-details-01.woff2",
+      "sha256": "d6eac9da73159cf51e39eba146ca9057c085112daf062800fe717f0fdc55ac72"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-details-02.woff2",
+      "sha256": "efd2055b69340e9e4ca2ded0cb603d52d852337492220a609f573a59144fb67e"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui-symbols.woff2",
+      "sha256": "79c8007745084d24db084ca65b2b99c4b4f4ce01545ac16cc3013157329a45ab"
+    },
+    {
+      "path": "apps/web/public/fonts/NotoSansTC-ui.woff2",
+      "sha256": "5f0b1aa25010879e43191024b18eebf6dc25acab3e49a09639d7fc07ab642d9f"
+    },
+    {
+      "path": "apps/web/public/fonts/README.md",
+      "sha256": "411b7ad23ca37aaaab45d3e85867d6c25211e36ba169c6ed08c511a59a8951d3"
+    },
+    {
+      "path": "apps/web/public/fonts/v021-subsets.json",
+      "sha256": "df8f0bbdb5083f334a37f05a404df2a28a3d07f64e6b9491884acb51ff5414bd"
+    }
+  ],
+  "files": [
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/sectors.png",
+      "sha256": "7e599d13a11743552c4657d61ab86094aeb8f06c47d7941c46128ca171685821",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/export-image.png",
+      "sha256": "1e0e2bd5d6b41b4d7dbf3be661f574200b38fb13c743b4649f576c2696a67d5d",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/sectors.png",
+      "sha256": "95e63d918873626aa56a537a239abf7617b20ed0462fa390bc5d3793e450244e",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/export-image.png",
+      "sha256": "4866113ee26d197e84ef55a0ed1f1017f1ac0f705a8d24744bdc7338a6e67b77",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/sectors.png",
+      "sha256": "bb9b8634ae90979aef5706872838c59188afb34c5e41e04069e5c648eefa0300",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/export-image.png",
+      "sha256": "ad836cb35f89a3fededcaf7b2f0acfaf0c367191d5a63b8d3afaad36104a9654",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/sectors.png",
+      "sha256": "84047e05cc376a2875d58b9ac91d187ab7bf2691257d4383bce5d949ef0d0306",
+      "width": 1280,
+      "height": 800
+    },
+    {
+      "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/export-image.png",
+      "sha256": "be7f2ef8e0de25171ccad6c08abdd59fbf08f958fdb90878452c02a9a19dcee4",
+      "width": 1280,
+      "height": 800
+    }
+  ],
+  "previousSourceSha": "49991994bf23d024a45e10ba6b6ee6cd68242efa",
+  "comparisonSha": "0c21908bb8ed363db1900013b8b1224a4fdb2366"
+}

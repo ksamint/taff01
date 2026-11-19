@@ -14,15 +14,7 @@ import {
   scopeSchema,
 } from "@taff/schemas";
 import { useIsMutating, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-  ArrowLeft,
-  Check,
-  ChevronDown,
-  Copy,
-  Cpu,
-  RefreshCw,
-  X,
-} from "lucide-react";
+import { Check, ChevronDown, Copy, Cpu, RefreshCw, X } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useState, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
@@ -39,6 +31,7 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
+import { SettingsBackHeader } from "./settings-back-header";
 import { TokenPolicyControl } from "./token-policy-control";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -272,12 +265,7 @@ export function McpView({ origin }: { origin?: string }) {
 
   return (
     <div className="mcp-view">
-      <header className="mcp-backbar">
-        <Link href="/me" className="button button-quiet mcp-back">
-          <ArrowLeft size={16} aria-hidden="true" />
-          {t("mcp.back")}
-        </Link>
-      </header>
+      <SettingsBackHeader href="/me" label={t("mcp.back")} />
       <div className="mcp-page">
         <div className="mcp-intro">
           <p className="mcp-eyebrow">{t("me.settings")}</p>

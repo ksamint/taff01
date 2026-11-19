@@ -41,6 +41,12 @@ Status: audit screen deployed in v0.2.22; export audit additions implemented for
 - AU-2.4 Export audit rows shall show a localized view-image export label in
   en, zh-CN and zh-HK; their metadata shall expand through the existing details control.
 
+- AU-2.5 On a phone, each audit row shall display as a card with labeled
+  time, actor, change, record and trace fields. Long changes and expanded
+  details shall wrap within the card without horizontal scrolling. Action
+  labels defined by this specification shall be localized. Other actions
+  shall show their recorded keys.
+
 ## Non-functional
 
 - No migration or new route; the screen is a lazy route outside Today's budget.

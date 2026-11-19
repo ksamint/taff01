@@ -4,6 +4,7 @@ import { spawn } from "node:child_process";
 import { gzipSync } from "node:zlib";
 
 const BUDGET = 200 * 1024;
+const FONT_PRELOAD_BUDGET = 70_716;
 const port = Number(process.env.BUDGET_PORT ?? 3105);
 const origin = `http://127.0.0.1:${port}`;
 const server = spawn(
@@ -44,6 +45,35 @@ try {
   console.log(
     `Today initial JS: ${total} bytes gzipped (${kib} KiB); budget ${BUDGET}`,
   );
+  const cjkHtml = await (
+    await fetch(`${origin}/`, { headers: { "Accept-Language": "zh-HK" } })
+  ).text();
+  const fontPreloads = [...cjkHtml.matchAll(/<link[^>]*>/g)]
+    .map(([tag]) => tag)
+    .filter((tag) => /rel="preload"/.test(tag) && /as="font"/.test(tag))
+    .map((tag) => tag.match(/href="([^"]+)"/)?.[1])
+    .filter((href): href is string => Boolean(href));
+  const preloadedFonts = [...new Set(fontPreloads)];
+  let fontBytes = 0;
+  for (const href of preloadedFonts) {
+    const response = await fetch(new URL(href, origin));
+    if (!response.ok)
+      throw new Error(`Font preload returned ${response.status}`);
+    fontBytes += (await response.arrayBuffer()).byteLength;
+  }
+  console.log(
+    `CJK first-document font preloads: ${fontBytes} bytes; budget ${FONT_PRELOAD_BUDGET}`,
+  );
+  if (
+    preloadedFonts.some(
+      (href) => href !== "/fonts/NotoSansTC-ui-common.woff2",
+    ) ||
+    fontBytes > FONT_PRELOAD_BUDGET
+  ) {
+    console.error("Font preload budget exceeded");
+    process.exitCode = 1;
+  }
+
   if (total > BUDGET) {
     console.error("Bundle budget exceeded");
     process.exitCode = 1;

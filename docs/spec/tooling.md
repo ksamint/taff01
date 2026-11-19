@@ -56,6 +56,12 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   write response before checking the reconciled switch and grant state.
   Pending writes shall retain the existing disabled control behavior; the
   response status, switch, grant-origin and revocation assertions remain.
+- TT-4.6 The explicitly enabled visual API clock shall use the capture
+  instant for real workspace image GETs as well as its existing read routes.
+  Authentication, writes and unrelated reads shall retain native time.
+- TT-4.7 Remote-browser visual fixtures shall perform setup and cleanup HTTP
+  through the host-local request context and copy its real cookies into
+  browser memory before navigation, without disk session-state files.
 
 ### Service worker source (TT-5)
 
@@ -112,6 +118,14 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   refuse unknown names; `AGENTS.md` shall declare the tda01 Start baseline and
   name `pnpm check` as the check command.
 
+### Browser font budgets (TT-8)
+
+- TT-8.1 The Chinese first document shall preload only the common CJK subset,
+  capped at 70,716 bytes by `pnpm perf:budget`.
+- TT-8.2 In the signed-in cold-phone fixture, Me shall transfer no more font
+  bytes than Today. Me uses Manrope and the common CJK subset in Chinese,
+  with platform fallback for glyphs outside that subset.
+
 ## Non-functional
 
 - No new dependency name; web declares the same esbuild version already used
@@ -127,6 +141,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 
 | Requirement | Evidence |
 | --- | --- |
+| TT-8 | `pnpm perf:budget`, `e2e/font-loading.spec.ts`, `scripts/ui/fonts.test.ts` |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal on pinned production 9.1.2; native persisted-state proof in [milestone 104](../milestones/104-v0.2.20.md) |
@@ -134,6 +149,8 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-4.3 | e2e/calendar.spec.ts multi-day 44px targets and stacked rows; e2e/support/calendar.ts native view readiness |
 | TT-4.4 | e2e/demo-session.spec.ts fresh-context identity and sign-in count; e2e/support/demo-session.ts |
 | TT-4.5 | e2e/token-grants.spec.ts exact policy-write acknowledgement before switch/grant assertions |
+| TT-4.6 | scripts/ui/visual-clock.test.ts scoped read clock and native-time isolation; pinned Export image dialog capture |
+| TT-4.7 | e2e/ui-v2.spec.ts pinned remote-browser Sectors and Export image captures |
 | TT-5 | Canonical emitted-code comparison; three-locale persistence PWA test passed against production build; /sw.js 200, application/javascript, no-cache, Service-Worker-Allowed /; same headers passed on native deployment; milestones 100 and [104](../milestones/104-v0.2.20.md) |
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |

@@ -1,9 +1,19 @@
 import { expect, type Page, test } from "@playwright/test";
-import type { Me, Task } from "../packages/schemas/src/index";
+import {
+  type Me,
+  memberListSchema,
+  type Task,
+  taskSchema,
+} from "../packages/schemas/src/index";
 import { freshAccount, messages } from "./support/account";
 import { selectLocale, signOutFromMe } from "./support/preferences";
 import { closeTaskField, openTaskField } from "./support/task-fields";
-import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
+import {
+  closeQuickField,
+  openQuickAdd,
+  openQuickField,
+  openUndatedTasks,
+} from "./support/tasks";
 
 const labels = {
   en: {
@@ -54,7 +64,10 @@ test("loading the desktop sidebar keeps Today visible and resizing restores phon
   page,
 }) => {
   await signIn(page);
-  await expect(page.getByTestId("task-card").first()).toBeVisible();
+  await openUndatedTasks(page);
+  await expect(
+    page.getByTestId("task-card").filter({ visible: true }).first(),
+  ).toBeVisible();
   await expect(page.locator("aside.sidebar")).toHaveCount(0);
   let release!: () => void;
   const pending = new Promise<void>((resolve) => {
@@ -69,14 +82,18 @@ test("loading the desktop sidebar keeps Today visible and resizing restores phon
     // Any sidebar chunk the resize requests stays held; the development server
     // may already have it loaded, so the hold is not itself asserted.
     await expect(page.getByTestId("today-heading")).toBeVisible();
-    await expect(page.getByTestId("task-card").first()).toBeVisible();
+    await expect(
+      page.getByTestId("task-card").filter({ visible: true }).first(),
+    ).toBeVisible();
     await expect(page.locator("main.content")).not.toHaveAttribute("inert", "");
     release();
     await expect(page.locator("aside.sidebar")).toBeVisible();
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.locator("aside.sidebar")).toHaveCount(0);
     await expect(page.locator("nav.tabbar")).toBeVisible();
-    await expect(page.getByTestId("task-card").first()).toBeVisible();
+    await expect(
+      page.getByTestId("task-card").filter({ visible: true }).first(),
+    ).toBeVisible();
   } finally {
     release();
     await page.unrouteAll({ behavior: "wait" });
@@ -139,6 +156,7 @@ test("sign in, create a task and assign it to an agent", async ({
     .getByTestId("task-card")
     .filter({ has: page.getByRole("link", { name: title, exact: true }) });
   await expect(page.getByRole("dialog")).toHaveCount(0);
+  await openUndatedTasks(page);
   await expect(card).toBeVisible();
   await openQuickAdd(page);
   await expect(page.getByTestId("quick-title")).toHaveValue("");
@@ -153,12 +171,14 @@ test("sign in, create a task and assign it to an agent", async ({
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
+  await openUndatedTasks(page);
   await expect(card.getByTestId("assignment-select")).toHaveValue(
     agentId as string,
   );
   await page.screenshot({ path: `/tmp/taff01-${locale}.png`, fullPage: true });
   const otherLocale: TestLocale = locale === "en" ? "zh-HK" : "en";
   await useLocale(page, otherLocale);
+  await openUndatedTasks(page);
   await expect(
     card
       .getByTestId("assignment-select")
@@ -171,6 +191,7 @@ test("sign in, create a task and assign it to an agent", async ({
   );
   await page.waitForLoadState("networkidle");
   expect(taskNavigations).toEqual([]);
+  await openUndatedTasks(page);
   await card.getByRole("link", { name: title, exact: true }).click();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(title);
   await openTaskField(page, "worker");
@@ -206,6 +227,7 @@ test("create an account with a workspace, then sign in again", async ({
   await page.getByTestId("quick-title").fill(`First task ${locale}`);
   await expect(page.getByTestId("quick-create")).toBeEnabled();
   await page.getByTestId("quick-create").click();
+  await openUndatedTasks(page);
   await expect(
     page.getByRole("link", { name: `First task ${locale}`, exact: true }),
   ).toBeVisible();
@@ -224,6 +246,7 @@ test("create an account with a workspace, then sign in again", async ({
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
+  await openUndatedTasks(page);
   await expect(
     page.getByRole("link", { name: `First task ${locale}`, exact: true }),
   ).toBeVisible();
@@ -335,6 +358,7 @@ test("failed optimistic creation and assignment restore the previous list", asyn
   await expect(page.getByTestId("today-heading")).toHaveText(
     labels[locale].today,
   );
+  await openUndatedTasks(page);
   await openQuickAdd(page);
   await page.getByTestId("quick-title").fill("Rejected task");
   await expect(page.getByTestId("quick-create")).toBeEnabled();
@@ -371,4 +395,115 @@ test("failed optimistic creation and assignment restore the previous list", asyn
     page.getByRole("alert").filter({ hasText: labels[locale].failure }),
   ).toHaveText(labels[locale].failure);
   await expect(page.getByTestId("task-card")).toHaveCount(1);
+});
+
+test("Today puts undated tasks behind a closed disclosure", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const {
+    workspaces: [workspace],
+  } = await freshAccount(page, locale);
+  for (const [title, dueAt] of [
+    ["Today date fixture", new Date().toISOString()],
+    ["Undated fixture", null],
+  ] as const) {
+    const created = await page.request.post("/api/tasks", {
+      data: {
+        workspaceId: workspace.id,
+        ownerId: workspace.memberId,
+        title,
+        dueAt,
+      },
+    });
+    expect(created.status()).toBe(201);
+  }
+  await page.goto("/");
+  const due = page.getByRole("region", { name: messages[locale].todayDue });
+  const undated = page.getByTestId("today-undated");
+  const summary = undated.locator("summary");
+  await expect(
+    due.getByRole("link", { name: "Today date fixture" }),
+  ).toBeVisible();
+  await expect(due.getByText("Undated fixture")).toHaveCount(0);
+  await expect(summary).toHaveText(
+    messages[locale].todayUndated.replace("{{count}}", "1"),
+  );
+  await expect(undated).toHaveJSProperty("open", false);
+  await expect(
+    undated.getByText("Undated fixture", { exact: true }),
+  ).toBeHidden();
+  await summary.click();
+  await expect(
+    undated.getByRole("link", { name: "Undated fixture" }),
+  ).toBeVisible();
+  await expect(undated.getByText("Today date fixture")).toHaveCount(0);
+});
+
+test("Today uses a second column at 1280 pixels and stacks on a phone", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const {
+    workspaces: [workspace],
+  } = await freshAccount(page, locale);
+  const members = await page.request.get(
+    `/api/members?workspaceId=${workspace.id}`,
+  );
+  expect(members.status()).toBe(200);
+  const agent = memberListSchema
+    .parse(await members.json())
+    .find((member) => member.kind === "agent");
+  if (!agent) throw new Error("The fresh workspace needs its default agent");
+  const created = await page.request.post("/api/tasks", {
+    data: {
+      workspaceId: workspace.id,
+      ownerId: workspace.memberId,
+      workerId: agent.id,
+      title: "Today two-column task",
+      dueAt: new Date().toISOString(),
+    },
+  });
+  expect(created.status()).toBe(201);
+  const task = taskSchema.parse(await created.json());
+  const due = page.getByRole("region", { name: messages[locale].todayDue });
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(page.locator("aside.sidebar")).toBeVisible();
+  await expect(due.getByRole("link", { name: task.title })).toBeVisible();
+  await expect(page.locator(".today-activity")).toBeHidden();
+  const content = await page.locator("main.content").boundingBox();
+  expect((await due.boundingBox())?.width).toBe(content?.width);
+
+  const started = await page.request.post(`/api/tasks/${task.id}/runs`, {
+    data: {},
+  });
+  expect(started.status()).toBe(201);
+  await page.reload();
+  await expect(page.getByTestId("today-agent-work")).toBeVisible();
+  const activity = page.locator(".today-activity");
+
+  for (const width of [1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [left, right] = await Promise.all([
+      activity.boundingBox(),
+      due.boundingBox(),
+    ]);
+    if (!left || !right) throw new Error("Both Today columns must be visible");
+    expect(right.x).toBeGreaterThan(left.x + left.width);
+    expect(right.y).toBeCloseTo(left.y);
+    expect(right.x + right.width).toBeCloseTo(width);
+  }
+
+  await page.setViewportSize({ width: 412, height: 915 });
+  await expect(page.locator("aside.sidebar")).toHaveCount(0);
+  const [upper, lower] = await Promise.all([
+    activity.boundingBox(),
+    due.boundingBox(),
+  ]);
+  if (!upper || !lower) throw new Error("Both Today sections must be visible");
+  expect(lower.x).toBeCloseTo(upper.x);
+  expect(lower.width).toBeCloseTo(upper.width);
+  expect(lower.y).toBeGreaterThanOrEqual(upper.y + upper.height);
 });

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
-import { useSetCalendar, useTaskCalendar } from "../lib/calendar-queries";
+import { useSetCalendar } from "../lib/calendar-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useWorkspace } from "./app-shell";
 import { Button } from "./ui/button";
@@ -14,10 +14,17 @@ const Editor = dynamic(
   () => import("./schedule-editor").then((module) => module.ScheduleEditor),
   { ssr: false },
 );
-export function TaskScheduleButton({ taskId }: { taskId: string }) {
+export function TaskScheduleButton({
+  current,
+  error,
+  scheduleText,
+}: {
+  current: TaskCalendar | undefined;
+  error: Error | null;
+  scheduleText: string | undefined;
+}) {
   const { me } = useWorkspace();
   const { t } = useTranslation();
-  const current = useTaskCalendar(taskId);
   const update = useSetCalendar();
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const [editing, setEditing] = useState<TaskCalendar>();
@@ -27,35 +34,25 @@ export function TaskScheduleButton({ taskId }: { taskId: string }) {
         type="button"
         className="task-field-row"
         data-testid="task-schedule"
-        disabled={busy || !current.data?.canSchedule}
+        disabled={busy || !current?.canSchedule}
         onClick={() => {
           update.reset();
-          setEditing(current.data);
+          setEditing(current);
         }}
       >
         <span>{t("calendar.schedule")}</span>
-        <span>
-          {current.data?.schedule
-            ? new Intl.DateTimeFormat(me.user.locale, {
-                timeZone: me.user.tz,
-                month: "short",
-                day: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              }).format(new Date(current.data.schedule.startAt))
-            : t("taskDetail.unscheduled")}
-        </span>
+        <span>{scheduleText ?? t("taskDetail.unscheduled")}</span>
       </Button>
-      {current.error && (
+      {error && (
         <p role="alert" className="alert">
-          {t(errorKey(current.error))}
+          {t(errorKey(error))}
         </p>
       )}
       {editing && (
         <Editor
           current={{
             ...editing,
-            canSchedule: current.data?.canSchedule ?? false,
+            canSchedule: current?.canSchedule ?? false,
           }}
           timeZone={me.user.tz}
           startAt={new Date().toISOString()}

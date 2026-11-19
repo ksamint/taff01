@@ -146,6 +146,7 @@
     "sortDue": "截止日期",
     "sortPriority": "優先級",
     "sortTitle": "標題",
+    "sortTemplate": "設置模板順序",
     "sortCreated": "最新建立",
     "filter": "篩選任務",
     "newProject": "建立項目",
@@ -175,6 +176,7 @@
     "moreViews": "更多",
     "timelineView": "時間線",
     "stakeholdersView": "相關方",
+    "graphView": "關係圖",
     "relationsView": "關係圖",
     "mindView": "心智圖",
     "sectorsView": "營運視圖",
@@ -238,7 +240,6 @@
     "timeZoneHint": "所有裝置上的日期和時間都按此時區顯示；首次登入時已從瀏覽器偵測。",
     "teamSummary": "{{people}} 人 · {{agents}} 個智能體",
     "settings": "設定",
-    "mcpSettings": "設定 › MCP",
     "advanced": "更多設定",
     "notificationSummary": "{{count}} 項已開啟",
     "notificationsOff": "已關閉",
@@ -407,6 +408,7 @@
     }
   },
   "taskDetail": {
+    "moreFields": "更多",
     "back": "返回今天",
     "due": "到期時間",
     "unscheduled": "未安排日期",
@@ -643,6 +645,7 @@
     "newTask": "新建任務"
   },
   "organization": {
+    "agentDetails": "詳情",
     "archive": "封存組織",
     "archived": "已封存組織",
     "restore": "恢復組織",
@@ -781,6 +784,7 @@
     "view": "查看"
   },
   "todayDue": "今天到期",
+  "todayUndated": "未定日期 ({{count}})",
   "todayScheduleEmpty": "今天沒有日程。",
   "todayNow": "現在",
   "moreAgentWork": "還有 {{count}} 項，見項目",
@@ -978,7 +982,7 @@
     "dragLink": "拖出依賴連線",
     "removeDependency": "移除依賴：{{from}} → {{to}}",
     "forecast": "預計",
-    "delivery": "交付進度",
+    "delivery": "任務完成度",
     "risk": {
       "level": {
         "low": "按計劃",
@@ -1154,7 +1158,7 @@
     "finance": {
       "total_one": "合計 · {{count}} 個收費項目",
       "total_other": "合計 · {{count}} 個收費項目",
-      "delivery": "交付進度"
+      "delivery": "任務完成度"
     },
     "actions": {
       "title": "待批准的建議",
@@ -1422,15 +1426,15 @@
     "title": "股東摘要",
     "hint": "為你標記的項目每日進度。",
     "empty": "暫未有摘要",
-    "emptyHint": "管理員將你加為收件人後,摘要會每日出現在這裡。",
+    "emptyHint": "管理員將你加為收件人後，摘要會每日出現在這裡。",
     "historyLimit": "顯示最新 31 份摘要。",
     "eyebrow": "{{kind}} · {{org}}",
     "heading": "每日進度",
     "forRecipient": "致 {{name}}",
     "generated": "生成於 {{date}} · {{zone}}",
     "hash": "內容雜湊 {{hash}}",
-    "preview": "預覽,不會儲存或分享。",
-    "truncated": "清單最多顯示 20 項,數目包括全部。",
+    "preview": "預覽，不會儲存或分享。",
+    "truncated": "清單最多顯示 20 項，數目包括全部。",
     "noProjects": "此機構暫未有已標記的項目。",
     "totals": {
       "projects": "項目",
@@ -1461,7 +1465,7 @@
     },
     "taskOwner": "{{task}} · {{owner}}",
     "print": "列印或儲存為 PDF",
-    "confidential": "機密文件,致 {{name}}。",
+    "confidential": "機密文件，致 {{name}}。",
     "unavailableTitle": "此連結已無法使用",
     "unavailableHint": "連結可能已過期或被撤銷。請向分享者索取新連結。",
     "copyText": "複製文字",
@@ -1477,7 +1481,7 @@
     "open": "股東摘要",
     "openHint": "為股東標記項目並分享每日進度。",
     "adminTitle": "股東摘要",
-    "adminHint": "為股東機構標記項目、加入收件人,然後預覽及分享每日摘要。",
+    "adminHint": "為股東機構標記項目、加入收件人，然後預覽及分享每日摘要。",
     "kind": {
       "shareholder": "股東"
     },
@@ -1525,7 +1529,7 @@
     "create": "建立連結",
     "validFor": "有效日數",
     "copy": "複製連結",
-    "onceHint": "請立即複製,連結只會顯示一次。",
+    "onceHint": "請立即複製，連結只會顯示一次。",
     "status": {
       "active": "有效",
       "expired": "已過期",

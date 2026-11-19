@@ -33,6 +33,11 @@ test("an admin sets the contract and records a payment; a member reads it and a 
 
   await page.goto(`/projects/${project.id}?view=timeline`);
   const panel = page.getByTestId("project-finance");
+  const toggle = page.getByTestId("timeline-finance-toggle");
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await expect(panel).toHaveCount(0);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
   await expect(panel).toBeVisible();
   await expect(panel.getByTestId("project-finance-contract")).toHaveText(
     m.projectFinance.noContract,
@@ -140,6 +145,7 @@ test("an admin sets the contract and records a payment; a member reads it and a 
     ).toHaveAttribute("aria-pressed", "true");
     await member.goto(`/projects/${project.id}?view=timeline`);
     const readOnly = member.getByTestId("project-finance");
+    await member.getByTestId("timeline-finance-toggle").click();
     await expect(readOnly).toBeVisible();
     await expect(readOnly).toContainText(m.projectFinance.readOnly);
     await expect(readOnly.getByTestId("project-payment")).toHaveCount(1);
@@ -165,6 +171,7 @@ test("an admin sets the contract and records a payment; a member reads it and a 
     await member.reload();
     await expect(member.getByTestId("timeline-view")).toBeVisible();
     await expect(member.getByTestId("project-finance")).toHaveCount(0);
+    await expect(member.getByTestId("timeline-finance-toggle")).toHaveCount(0);
   } finally {
     await context.close();
   }

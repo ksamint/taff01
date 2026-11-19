@@ -313,12 +313,10 @@ try {
               await expect(
                 page.locator(".team-directory-list > li"),
               ).toHaveCount(members.length);
-              await expect(page.locator(".team-agent-supervisor")).toHaveCount(
-                3,
-              );
+              await expect(page.locator(".team-agent-details")).toHaveCount(3);
               await expect(
                 page.locator(".team-agent-capabilities"),
-              ).toHaveCount(3);
+              ).toHaveCount(0);
               await expect(page.getByTestId("team-invite")).toBeEnabled();
             } else if (view === "quick-add") {
               // Desktop Today opens quick add from 新建任務 (ADR 0014).
