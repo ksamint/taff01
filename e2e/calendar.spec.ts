@@ -550,6 +550,7 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
     expect(
       await second.evaluate(() => document.documentElement.scrollWidth <= 393),
     ).toBe(true);
+    await second.getByTestId("task-fields-more").click();
     await second.getByTestId("task-schedule").click();
     await second.getByTestId("schedule-start").fill(`${date}T12:00`);
     await second.getByTestId("schedule-end").fill(`${date}T13:00`);
@@ -665,6 +666,7 @@ test("calendar stale edits retain draft, failures restore cache, saved fold zone
   await closeTaskField(page, "text");
   await expect(page.getByTestId("edit-save")).toBeEnabled();
   await expect(page.getByTestId("task-schedule")).toBeEnabled();
+  await page.getByTestId("task-fields-more").click();
   await page.getByTestId("task-schedule").click();
   await expect(page.getByTestId("schedule-zone")).toHaveValue(
     "America/New_York",

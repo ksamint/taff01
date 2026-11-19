@@ -72,6 +72,16 @@ is implemented for v0.2.26, not yet deployed.
   show them in a separate disclosure with their count, closed by default.
   Undated tasks marked `meeting` remain excluded.
 
+### Phone task details (CN-4)
+
+- CN-4.1 When a person opens task detail on a phone, the sheet shall place
+  the description immediately below the title and above status, owner,
+  worker and due date, in that order. For a one-line title, the start of
+  the description shall be visible on a 412 × 915 viewport before scrolling.
+- CN-4.2 The sheet shall collapse schedule, priority, project and labels
+  beneath a More disclosure and show their set values in its closed
+  summary. The existing permissions apply to all task editors.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -97,6 +107,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
 | CN-7 | `e2e/agent-creation.spec.ts`, guest disclosure and profile request counts in en, zh-CN, and zh-HK |
 | CN-4 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
+| CN-4 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |

@@ -20,7 +20,6 @@ import { ReviewView } from "./review-view";
 import { RunPanel } from "./run-panel";
 import { TaskContacts } from "./task-contacts";
 import { TaskEditor } from "./task-editor";
-import { TaskScheduleButton } from "./task-schedule-button";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -252,7 +251,6 @@ export function TaskDetailView({
           task={task.data}
           desktop={desktop}
           workerControl={workerControl}
-          scheduleControl={<TaskScheduleButton taskId={taskId} />}
           contacts={<TaskContacts task={task.data} />}
           runControl={
             detail.isError ? (

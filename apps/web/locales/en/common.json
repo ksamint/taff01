@@ -407,6 +407,7 @@
     }
   },
   "taskDetail": {
+    "moreFields": "More",
     "back": "Back to Today",
     "due": "Due",
     "unscheduled": "Unscheduled",

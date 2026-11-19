@@ -407,6 +407,7 @@
     }
   },
   "taskDetail": {
+    "moreFields": "更多",
     "back": "返回今天",
     "due": "到期时间",
     "unscheduled": "未安排日期",

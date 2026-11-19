@@ -144,12 +144,6 @@
 .task-detail-view.is-panel .task-source-heading {
   margin: 0;
 }
-.task-project-label {
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: var(--ls-track-sm);
-  color: var(--text-muted);
-}
 .task-source-heading h1 {
   margin: 6px 0 0;
   font-size: 22px;
@@ -188,6 +182,37 @@
 /* Field rows ------------------------------------------------------------ */
 .task-field-rows {
   border-top: var(--hairline) solid var(--border-line);
+}
+.task-fields-more > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 4px 8px 0;
+  border-bottom: var(--hairline) solid var(--border-line);
+  cursor: pointer;
+}
+.task-fields-more > summary::-webkit-details-marker {
+  display: none;
+}
+.task-fields-more > summary > span:first-child {
+  width: 88px;
+  flex: none;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.task-fields-summary {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.task-fields-more > summary > svg {
+  flex: none;
+  color: var(--text-subtle);
+}
+.task-fields-more[open] > summary > svg {
+  transform: rotate(180deg);
 }
 .task-field-row {
   display: flex;
@@ -382,7 +407,7 @@
 }
 .task-description {
   margin: 0;
-  padding: 20px 0 4px;
+  padding: 0 0 16px;
   font-size: 14px;
   line-height: 1.7;
   color: var(--text-body);
