@@ -8,8 +8,23 @@ export async function prepareFonts(
       (rule): rule is CSSFontFaceRule => rule.type === CSSRule.FONT_FACE_RULE,
     )
     .filter((rule) => /Manrope|Noto Sans TC/.test(rule.style.fontFamily));
-  if (rules.length !== 16)
-    throw new Error("Expected the 16 installed UI font faces");
+  const meRules = rules.filter(
+    ({ style }) =>
+      style.fontFamily.replace(/["']/g, "") === "Noto Sans TC Common",
+  );
+  if (
+    rules.length - meRules.length !== 16 ||
+    meRules.length > 1 ||
+    meRules.some(
+      ({ style }) =>
+        !style
+          .getPropertyValue("src")
+          .includes("/fonts/NotoSansTC-ui-common.woff2"),
+    )
+  )
+    throw new Error(
+      "Expected the 16 UI font faces and the optional Me common face",
+    );
   // A previously resolved ready promise does not cover newly inserted text.
   // Load this text's computed font stack before selecting capture faces; loading
   // every rule instead would fetch unrelated CJK subsets on English screens.
