@@ -451,9 +451,11 @@ test("saved delivery progress and computed task completion have distinct labels"
   }[locale];
 
   await page.goto(`/projects/${project.id}?view=timeline`);
+  await page.getByTestId("project-filters").click();
   await expect(page.getByTestId("project-progress")).toHaveText(
     `${m.projects.deliveryProgress}: 37%`,
   );
+  await page.keyboard.press("Escape");
   await expect(page.getByTestId("timeline-risk")).toContainText(
     `${completion} 0%`,
   );
@@ -502,6 +504,7 @@ test("the phone finance strip opens the panel and restores the chart on close", 
   await expect(panel).toHaveCount(0);
   const collapsed = await firstRow.boundingBox();
   if (!collapsed) throw new Error("Missing collapsed timeline row");
+  expect(collapsed.y).toBeLessThan(480);
   console.log(`First chart row: ${Math.round(collapsed.y)} px`);
 
   await toggle.click();

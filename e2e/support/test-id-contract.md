@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (494 distinct, 2288 uses)
+## Test ids (498 distinct, 2299 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -179,11 +179,13 @@ several do). “Also rendered by” lists the other files.
 | `archive-*` | 3 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `board-column-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `contact-search` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
+| `crm-section-*` | 1 | crm/contact-role-row.tsx, crm/crm-sections.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | project-header.spec.ts |
 | `grant-confirm` | 4 | mcp-view.tsx, token-policy-control.tsx | access.spec.ts, token-grants.spec.ts |
 | `lifecycle-*` | 1 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx, relations-view.tsx, summaries-admin.tsx | me.spec.ts |
 | `open-search` | 3 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts |
 | `project-audience-option` | 1 | project-audience-tags.tsx | summaries.spec.ts |
+| `project-view-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | project-header.spec.ts, support/task-fields.ts |
 | `quick-field-*` | 2 | crm/contact-role-row.tsx, quick-add-dialog.tsx, relations-view.tsx, summaries-admin.tsx | support/tasks.ts |
 | `restore-*` | 8 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `review-check-*` | 12 | crm/contact-role-row.tsx, relations-view.tsx, review-view.tsx, summaries-admin.tsx | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
@@ -239,6 +241,14 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `crm-confirm-body` | 2 |  | crm.spec.ts, live/crm.spec.ts |
 | `crm-confirm-ok` | 4 |  | crm.spec.ts, live/crm.spec.ts |
+
+### crm/crm-sections.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `crm-section-companies` | 1 | projects-scene.tsx | project-header.spec.ts |
+| `crm-section-contacts` | 1 | projects-scene.tsx | project-header.spec.ts |
+| `crm-section-projects` | 2 | projects-scene.tsx | project-header.spec.ts |
 
 ### crm/stakeholders-view.tsx
 
@@ -490,7 +500,7 @@ several do). “Also rendered by” lists the other files.
 | `board-column-in_progress` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-column-todo` | 1 |  | planning.spec.ts |
 | `board-status` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `board-task` | 22 |  | live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
+| `board-task` | 23 |  | live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, project-header.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `manage-project` | 7 |  | project-profile.spec.ts, summaries.spec.ts |
 | `new-project` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
@@ -498,21 +508,20 @@ several do). “Also rendered by” lists the other files.
 | `project-due` | 3 |  | project-profile.spec.ts |
 | `project-due-date` | 5 |  | project-profile.spec.ts |
 | `project-filter` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, release/checklist.spec.ts |
-| `project-filters` | 9 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts |
+| `project-filters` | 10 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts, timeline.spec.ts |
 | `project-label` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-lead` | 2 |  | project-profile.spec.ts |
 | `project-lead-select` | 5 |  | project-profile.spec.ts |
-| `project-meta` | 1 |  | operation-templates.spec.ts |
+| `project-meta` | 2 |  | operation-templates.spec.ts, project-header.spec.ts |
 | `project-name` | 6 | summaries-admin.tsx | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
-| `project-progress` | 6 |  | project-profile.spec.ts, timeline.spec.ts |
+| `project-progress` | 7 |  | project-header.spec.ts, project-profile.spec.ts, timeline.spec.ts |
 | `project-select` | 1 |  | support/task-fields.ts |
 | `project-sort` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-stage` | 1 |  | project-profile.spec.ts |
 | `project-stage-control` | 4 |  | project-profile.spec.ts |
 | `project-stage-select` | 3 |  | project-profile.spec.ts |
-| `project-submit` | 14 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
-| `project-view-list` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
-| `project-view-more` | 1 |  | operation-templates.spec.ts |
+| `project-submit` | 16 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
+| `project-view-more` | 3 |  | operation-templates.spec.ts, project-header.spec.ts, support/task-fields.ts |
 | `project-view-sectors` | 1 |  | operation-templates.spec.ts |
 | `sector-group` | 2 |  | operation-templates.spec.ts |
 | `sector-project` | 1 |  | operation-templates.spec.ts |
@@ -818,7 +827,7 @@ several do). “Also rendered by” lists the other files.
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
 | `alert` | 40 | agent-creation.spec.ts, audience-editing.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts, workspace-lifecycle.spec.ts |
-| `button` | 11 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
+| `button` | 12 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, project-header.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
@@ -878,7 +887,7 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: messages[locale].notifications.title` | 1 | notifications.spec.ts |
 | `heading — name: messages[locale].pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `heading — name: project.name` | 2 | persistence.spec.ts |
-| `link` | 3 | agent-creation.spec.ts, calendar.spec.ts, ui-v2.spec.ts |
+| `link` | 4 | agent-creation.spec.ts, calendar.spec.ts, project-header.spec.ts, ui-v2.spec.ts |
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
 | `link — name: /M7 reviewer/` | 3 | delivery-visual.spec.ts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
@@ -900,6 +909,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `list` | 1 | planning.spec.ts |
+| `navigation — name: m.projects.views` | 1 | project-header.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `progressbar` | 1 | summaries.spec.ts |
 | `region — name: m.access.agents` | 1 | access.spec.ts |
@@ -996,6 +1006,7 @@ read (`data-event-id`, `data-date`).
 | `.organizations-view > .page-heading` | 3 | me.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `.planning-board` | 3 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `.planning-board .board-card[data-task-id="*"]` | 1 | ui-v2.spec.ts |
+| `.projects-title-row .projects-org` | 1 | project-header.spec.ts |
 | `.projects-title-text` | 1 | ssr-session.spec.ts |
 | `.quick-fab` | 2 | ui-v2.spec.ts |
 | `.relations-label` | 2 | timeline.spec.ts |
@@ -1260,6 +1271,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projects.leadIs` | 4 | project-profile.spec.ts |
 | `projects.sectorsHint` | 1 | operation-templates.spec.ts |
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
+| `projects.views` | 1 | project-header.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `pwa.reconnect` | 1 | persistence.spec.ts |
 | `relations.edge.depends_on.out` | 14 | live/timeline.spec.ts, timeline.spec.ts |
