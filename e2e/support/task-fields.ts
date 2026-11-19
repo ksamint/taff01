@@ -33,3 +33,10 @@ export async function openProjectFilters(page: Page) {
   await page.getByTestId("project-filters").click();
   await expect(page.getByTestId("project-select")).toBeVisible();
 }
+
+export async function openProjectView(page: Page, name: string) {
+  const view = page.getByTestId(`project-view-${name}`);
+  if (!(await view.isVisible()))
+    await page.getByTestId("project-view-more").click();
+  await view.click();
+}

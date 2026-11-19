@@ -1073,3 +1073,33 @@ select.projects-stage {
   font-size: 12px;
   font-weight: 500;
 }
+
+@media (max-width: 1023px) {
+  .projects-view[data-project-detail] .projects-title-row {
+    gap: 0 8px;
+  }
+  .projects-view[data-project-detail] .projects-title {
+    flex: 1;
+  }
+  .projects-view[data-project-detail] .projects-org {
+    align-self: center;
+    min-width: 0;
+    max-width: 42%;
+    margin: 0;
+  }
+  .projects-view[data-project-detail] .projects-org span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .projects-view[data-project-detail] .projects-title-actions {
+    flex-basis: 100%;
+  }
+  .projects-views .projects-more-menu {
+    right: auto;
+    left: 0;
+  }
+  .projects-meta select {
+    min-height: 44px;
+  }
+}

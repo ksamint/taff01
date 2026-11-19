@@ -29,6 +29,7 @@ import {
 import {
   closeFieldSheet,
   closeTaskField,
+  openProjectView,
   openTaskField,
 } from "../support/task-fields";
 import {
@@ -723,7 +724,7 @@ test("[item 4] Projects", async ({ page }, info) => {
   expect(await stored(dragged.id)).toBe("in_progress");
   expect(await stored(controlled.id)).toBe("done");
   // List view with filters.
-  await page.getByTestId("project-view-list").click();
+  await openProjectView(page, "list");
   await expect(page).toHaveURL(/view=list/);
   await expect(page.getByTestId("board-task")).toHaveCount(2);
   await page.getByTestId("project-filters").click();

@@ -447,35 +447,92 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     [workspace.key, dueLabel, members.data, tasks.data, runs.data, pathname],
   );
   const showFilters = view === "board" || view === "list" || view === "sectors";
-  return (
-    <div className={`projects-view projects-view-${view}`}>
-      <header className="projects-header">
-        <Link className="projects-org" href="/orgs">
-          {workspace.name}
-          <ChevronDown size={12} aria-hidden="true" />
-        </Link>
-        <nav className="projects-sections" aria-label={t("projects.sections")}>
+  const projectOrg = (
+    <Link className="projects-org" href="/orgs">
+      <span>{workspace.name}</span>
+      <ChevronDown size={12} aria-hidden="true" />
+    </Link>
+  );
+  const projectSections = (
+    <nav className="projects-sections" aria-label={t("projects.sections")}>
+      <Link
+        className={`projects-section${projectId ? "" : " is-active"}`}
+        href="/projects"
+        aria-current={projectId ? undefined : "page"}
+        data-testid="crm-section-projects"
+        onClick={() => setSheetOpen(false)}
+      >
+        {t("projects.title")}
+      </Link>
+      {workspaceAccess.data?.canReadCrm &&
+        (["companies", "contacts"] as const).map((section) => (
           <Link
-            className="projects-section is-active"
-            href="/projects"
-            aria-current="page"
-            data-testid="crm-section-projects"
+            key={section}
+            className="projects-section"
+            href={`/${section}`}
+            prefetch={false}
+            data-testid={`crm-section-${section}`}
           >
-            {t("projects.title")}
+            {t(`crm.${section}.title`)}
           </Link>
-          {workspaceAccess.data?.canReadCrm &&
-            (["companies", "contacts"] as const).map((section) => (
-              <Link
-                key={section}
-                className="projects-section"
-                href={`/${section}`}
-                prefetch={false}
-                data-testid={`crm-section-${section}`}
-              >
-                {t(`crm.${section}.title`)}
-              </Link>
-            ))}
-        </nav>
+        ))}
+    </nav>
+  );
+  const projectMeta =
+    selected && view !== "sectors" ? (
+      <p className="projects-meta" data-testid="project-meta">
+        {canMoveStage ? (
+          <ProjectStageControl
+            key={selected.id}
+            project={selected}
+            workspaceId={workspace.id}
+            confirmed={confirmed}
+          />
+        ) : (
+          selected.stage && (
+            <span
+              className="projects-stage"
+              data-testid="project-stage"
+              data-stage={selected.stage}
+            >
+              <span className="sr-only">{t("projects.stageLabel")}: </span>
+              {t(`projects.stages.${selected.stage}`)}
+            </span>
+          )
+        )}
+        {lead && (
+          <span className="projects-lead" data-testid="project-lead">
+            {t("projects.leadIs", { name: lead.name })}
+          </span>
+        )}
+        {selected.dueAt && (
+          <span data-testid="project-due">
+            {t("projects.dueDate")}:{" "}
+            <time dateTime={selected.dueAt}>
+              {new Intl.DateTimeFormat(locale, {
+                dateStyle: "medium",
+                timeZone: me.user.tz,
+              }).format(new Date(selected.dueAt))}
+            </time>
+          </span>
+        )}
+        <span data-testid="project-progress">
+          {t("projects.deliveryProgress")}:{" "}
+          {new Intl.NumberFormat(locale, {
+            style: "percent",
+            maximumFractionDigits: 0,
+          }).format(selected.deliveryProgress / 100)}
+        </span>
+      </p>
+    ) : null;
+  return (
+    <div
+      className={`projects-view projects-view-${view}`}
+      data-project-detail={projectId ? "" : undefined}
+    >
+      <header className="projects-header">
+        {!projectId && projectOrg}
+        {!projectId && projectSections}
         <div className="projects-title-row">
           <span className="projects-crumb" aria-hidden="true">
             {t("projects.title")}
@@ -494,24 +551,27 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               <ChevronDown size={16} aria-hidden="true" />
             </button>
           </h1>
+          {projectId ? projectOrg : null}
           <div className="projects-title-actions">
             <nav className="projects-views" aria-label={t("projects.views")}>
-              <span className="projects-segment">
-                {(["board", "list", "timeline"] as const).map((mode) => (
-                  <Link
-                    key={mode}
-                    className={`projects-view-tab${view === mode ? " is-active" : ""}`}
-                    data-testid={`project-view-${mode}`}
-                    href={viewHref(mode)}
-                    aria-current={view === mode ? "page" : undefined}
-                    replace
-                    scroll={false}
-                  >
-                    {t(VIEW_LABEL[mode])}
-                  </Link>
-                ))}
-              </span>
-              <MoreViews view={view} href={viewHref} t={t} />
+              {desktop && (
+                <span className="projects-segment">
+                  {PRIMARY_VIEWS.map((mode) => (
+                    <Link
+                      key={mode}
+                      className={`projects-view-tab${view === mode ? " is-active" : ""}`}
+                      data-testid={`project-view-${mode}`}
+                      href={viewHref(mode)}
+                      aria-current={view === mode ? "page" : undefined}
+                      replace
+                      scroll={false}
+                    >
+                      {t(VIEW_LABEL[mode])}
+                    </Link>
+                  ))}
+                </span>
+              )}
+              <MoreViews view={view} href={viewHref} t={t} compact={!desktop} />
             </nav>
             {confirmed &&
               workspace.role !== "guest" &&
@@ -542,52 +602,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
             )}
           </div>
         </div>
-        {selected && view !== "sectors" && (
-          <p className="projects-meta" data-testid="project-meta">
-            {canMoveStage ? (
-              <ProjectStageControl
-                key={selected.id}
-                project={selected}
-                workspaceId={workspace.id}
-                confirmed={confirmed}
-              />
-            ) : (
-              selected.stage && (
-                <span
-                  className="projects-stage"
-                  data-testid="project-stage"
-                  data-stage={selected.stage}
-                >
-                  <span className="sr-only">{t("projects.stageLabel")}: </span>
-                  {t(`projects.stages.${selected.stage}`)}
-                </span>
-              )
-            )}
-            {lead && (
-              <span className="projects-lead" data-testid="project-lead">
-                {t("projects.leadIs", { name: lead.name })}
-              </span>
-            )}
-            {selected.dueAt && (
-              <span data-testid="project-due">
-                {t("projects.dueDate")}:{" "}
-                <time dateTime={selected.dueAt}>
-                  {new Intl.DateTimeFormat(locale, {
-                    dateStyle: "medium",
-                    timeZone: me.user.tz,
-                  }).format(new Date(selected.dueAt))}
-                </time>
-              </span>
-            )}
-            <span data-testid="project-progress">
-              {t("projects.deliveryProgress")}:{" "}
-              {new Intl.NumberFormat(locale, {
-                style: "percent",
-                maximumFractionDigits: 0,
-              }).format(selected.deliveryProgress / 100)}
-            </span>
-          </p>
-        )}
+        {desktop && projectMeta}
         {selected && (
           <ProjectAudienceChips
             projectId={selected.id}
@@ -668,6 +683,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           title={t("projects.switchProject")}
           onClose={() => setSheetOpen(false)}
         >
+          {!desktop && projectMeta}
+          {!desktop && projectId ? projectSections : null}
           <div className="planning-toolbar">
             <div className="field">
               <Label htmlFor="project-select">{t("planning.project")}</Label>
@@ -1134,15 +1151,19 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   );
 }
 
-/** 更多 ›: 相關方 · 關係圖 · 心智圖 (prototype `moreMenu`). */
+const PRIMARY_VIEWS = ["board", "list", "timeline"] as const;
+
+/** Desktop overflow and the compact phone view switcher. */
 function MoreViews({
   view,
   href,
   t,
+  compact,
 }: {
   view: ProjectView;
   href: (view: ProjectView) => string;
   t: Translate;
+  compact: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -1164,7 +1185,8 @@ function MoreViews({
       document.removeEventListener("keydown", escape);
     };
   }, [open]);
-  const active = (MORE_VIEWS as readonly string[]).includes(view);
+  const active = compact || (MORE_VIEWS as readonly string[]).includes(view);
+  const options = compact ? [...PRIMARY_VIEWS, ...MORE_VIEWS] : MORE_VIEWS;
   return (
     <div
       className="projects-more"
@@ -1187,7 +1209,7 @@ function MoreViews({
       </button>
       {open && (
         <ul className="projects-more-menu" id={menuId}>
-          {MORE_VIEWS.map((item) => (
+          {options.map((item) => (
             <li key={item}>
               <Link
                 href={href(item)}

@@ -16,6 +16,7 @@ import { prepareFonts } from "../scripts/ui/prepare-fonts";
 import { prepareTime } from "../scripts/ui/prepare-time.mts";
 import { prepareView } from "../scripts/ui/prepare-view";
 import { messages } from "./support/messages";
+import { openProjectView } from "./support/task-fields";
 
 const screen = process.env.UI_SCREEN ?? "shell";
 const theme = process.env.UI_THEME === "dark" ? "dark" : "light";
@@ -431,7 +432,7 @@ test(`${screen} uses the real Northwind fixture`, async ({ page }, info) => {
         });
       }
       if (screen === "projects") {
-        await page.getByTestId("project-view-list").click();
+        await openProjectView(page, "list");
         await page.mouse.move(0, 0);
         await expect(page).toHaveScreenshot("projects-list.png", {
           animations: "disabled",

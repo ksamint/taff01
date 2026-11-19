@@ -18,6 +18,7 @@ import {
   closeFieldSheet,
   closeTaskField,
   openProjectFilters,
+  openProjectView,
   openTaskField,
 } from "./support/task-fields";
 import { closeQuickField, openQuickField } from "./support/tasks";
@@ -289,7 +290,7 @@ test("planning edits, actual subtasks/comments, board drag, editable Quick Add a
   expect(
     await page.evaluate(() => document.documentElement.scrollWidth),
   ).toBeLessThanOrEqual(393);
-  await page.getByTestId("project-view-list").click();
+  await openProjectView(page, "list");
   await openProjectFilters(page);
   await page.getByTestId("project-filter").selectOption("mine");
   await page.getByTestId("project-sort").selectOption("priority");

@@ -41,6 +41,12 @@ is implemented for v0.2.26, not yet deployed.
   the existing project form in en, zh-CN and zh-HK.
 - CN-3.2 Project management controls shall continue to use the current
   canManageProjects read; this regression does not grant new authority.
+- CN-3.3 The phone project header shall show one view selector. On a project
+  page the organization link shall share the title row, and the title menu
+  shall link to Companies and Contacts for people with CRM read access.
+  The Projects index shall keep its section links directly visible.
+- CN-3.4 When a phone project board has a task in its first column, the first
+  card shall start above 240 CSS px on the 412 × 915 phone profile.
 
 ## Non-functional
 
@@ -54,7 +60,8 @@ is implemented for v0.2.26, not yet deployed.
 
 | Requirement | Evidence |
 | --- | --- |
-| CN-3 | e2e/project-filter-completion.spec.ts (browser pending) |
+| CN-3.1–3.2 | `e2e/project-filter-completion.spec.ts` |
+| CN-3.3–3.4 | `e2e/project-header.spec.ts` in three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
