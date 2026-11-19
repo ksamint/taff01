@@ -67,6 +67,10 @@ import { useMembers, useRuns, useTasks } from "../lib/queries";
 import { sessionVersion } from "../lib/session-cache";
 import { deadlineFields, deadlineIso } from "../lib/task-date";
 import { showToast } from "../lib/toast";
+import {
+  orderXidingSetupTasks,
+  XIDING_WORKSPACE,
+} from "../lib/xiding-setup-order";
 import { useWorkspace } from "./app-shell";
 import {
   ProjectAudienceChips,
@@ -203,7 +207,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeColumn, setActiveColumn] = useState<Task["status"]>("todo");
   const [filter, setFilter] = useState<TaskFilter>("all");
-  const [sort, setSort] = useState<ProjectSort>("created");
+  const [sort, setSort] = useState<ProjectSort | "">("");
+  const hasSetupOrder = view === "board" && workspace.name === XIDING_WORKSPACE;
   const [label, setLabel] = useState("");
   const [projectDialog, setProjectDialog] = useState<"new" | "edit" | null>(
     null,
@@ -280,7 +285,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
       memberId: workspace.memberId,
       members: members.data ?? [],
     }),
-    sort,
+    sort || "created",
     locale,
   );
   /** The current URL with some query parameters set or removed. */
@@ -860,9 +865,14 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               <select
                 id="project-sort"
                 data-testid="project-sort"
-                value={sort}
-                onChange={(event) => setSort(event.target.value as ProjectSort)}
+                value={hasSetupOrder ? sort : sort || "created"}
+                onChange={(event) =>
+                  setSort(event.target.value as ProjectSort | "")
+                }
               >
+                {hasSetupOrder && (
+                  <option value="">{t("projects.sortTemplate")}</option>
+                )}
                 {(["created", "due", "priority", "title"] as const).map(
                   (key) => (
                     <option key={key} value={key}>
@@ -943,7 +953,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
               memberId: workspace.memberId,
               members: members.data ?? [],
             }),
-            sort,
+            sort || "created",
             locale,
           )}
           projectOrder={(projects.data ?? []).map((item) => item.id)}
@@ -1036,7 +1046,10 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                   </p>
                 ) : (
                   <ul className="projects-cards">
-                    {items.map((task) => (
+                    {(hasSetupOrder && !sort
+                      ? orderXidingSetupTasks(items, workspace.name)
+                      : items
+                    ).map((task) => (
                       <BoardCard
                         confirmed={confirmed}
                         key={task.id}

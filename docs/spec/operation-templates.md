@@ -54,6 +54,14 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 - OT-2.2 When a person adds a task with a sector tag (Quick Add `+財務與現金`, or the task editor's labels), it shall appear under that sector; opening a row shall open the task.
 - OT-2.3 Every CJK character in the view's UI labels shall be in the bundled font subset; sector and indicator text is template data shown with the system font fallback.
 
+### XIDING setup order (OT-3)
+
+- OT-3.1 In XIDING, the default project board and the Today task lists shall
+  order the setup tasks by template sector. The exact title `設定指標目標 · <sector>`
+  and matching sector label identify a setup task.
+- OT-3.2 Ordinary tasks shall retain their positions. Explicit project board
+  sort choices shall continue to apply to all cards.
+
 ## Non-functional
 
 - Client only: no route, migration, dependency, permission action or MCP tool.
@@ -74,6 +82,7 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 | OT-1.1–1.4 | `packages/schemas/src/operation-templates.test.ts` |
 | OT-1.2–1.5, OT-2.1–2.2 | `e2e/operation-templates.spec.ts`, Pixel 7 profile, en, zh-CN, zh-HK |
 | OT-2.1 | `e2e/project-graph-view.spec.ts`, guest on phone and desktop in three locales |
+| OT-3 | `e2e/operation-templates.spec.ts` in three locales and `apps/web/src/lib/project-board.test.ts` |
 | OT-1.6 | no test; the view issues only the existing task and project reads |
 | OT-2.3 | `scripts/ui/fonts.test.ts` |
 

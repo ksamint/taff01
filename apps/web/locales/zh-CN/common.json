@@ -146,6 +146,7 @@
     "sortDue": "截止日期",
     "sortPriority": "优先级",
     "sortTitle": "标题",
+    "sortTemplate": "设置模板顺序",
     "sortCreated": "最新创建",
     "filter": "筛选任务",
     "newProject": "创建项目",

@@ -146,6 +146,7 @@
     "sortDue": "Due date",
     "sortPriority": "Priority",
     "sortTitle": "Title",
+    "sortTemplate": "Setup template order",
     "sortCreated": "Newest first",
     "filter": "Filter tasks",
     "newProject": "Create project",

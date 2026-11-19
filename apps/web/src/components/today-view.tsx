@@ -25,6 +25,7 @@ import {
 } from "../lib/queries";
 import { currentSession } from "../lib/session-cache";
 import { todayTasks } from "../lib/today";
+import { orderXidingSetupTasks } from "../lib/xiding-setup-order";
 import { useWorkspace } from "./app-shell";
 import { useInitialTodayTime } from "./providers";
 import { Button } from "./ui/button";
@@ -367,7 +368,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
             <p className="today-message quiet">{t("emptyTitle")}</p>
           ) : (
             <TodayTaskList
-              tasks={due}
+              tasks={orderXidingSetupTasks(due, workspace.name)}
               renderTask={renderTask}
               numbers={numbers}
             />
@@ -379,7 +380,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
               {t("todayUndated", { count: numbers.format(undated.length) })}
             </summary>
             <TodayTaskList
-              tasks={undated}
+              tasks={orderXidingSetupTasks(undated, workspace.name)}
               renderTask={renderTask}
               numbers={numbers}
             />
