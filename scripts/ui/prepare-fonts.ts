@@ -45,13 +45,16 @@ export async function prepareFonts(
     __taffActiveCaptureFaces?: FontFace[];
   };
   const cache = (state.__taffCaptureFaces ??= new Map());
+  // A CSS rule may omit unicode-range while FontFace reports its default.
+  const rangeOf = (style: CSSStyleDeclaration) =>
+    style.getPropertyValue("unicode-range") || "U+0-10FFFF";
   const faces = rules
     .filter(({ style }) =>
       active.some(
         (face) =>
           face.family.replace(/["']/g, "") ===
             style.fontFamily.replace(/["']/g, "") &&
-          face.unicodeRange === style.getPropertyValue("unicode-range"),
+          face.unicodeRange === rangeOf(style),
       ),
     )
     .map(({ style }) => {
@@ -65,7 +68,7 @@ export async function prepareFonts(
             {
               weight: style.fontWeight,
               style: style.fontStyle,
-              unicodeRange: style.getPropertyValue("unicode-range"),
+              unicodeRange: rangeOf(style),
               display: "block",
             },
           ),
