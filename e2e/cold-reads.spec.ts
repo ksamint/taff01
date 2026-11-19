@@ -14,6 +14,17 @@ test("cold routes read workspace data once and recheck roles on first socket ope
   );
   expect(result.status()).toBe(201);
   const project = projectSchema.parse(await result.json());
+  for (let index = 1; index <= 12; index++) {
+    const response = await page.request.post("/api/tasks", {
+      data: {
+        workspaceId: workspace.id,
+        projectId: project.id,
+        ownerId: workspace.memberId,
+        title: `Cold-read card ${index}`,
+      },
+    });
+    expect(response.status()).toBe(201);
+  }
   // Use the signed-in browser's saved preferences with a cold HTTP cache.
   const storageState = await page.context().storageState();
   for (const [path, ready] of [
@@ -43,6 +54,9 @@ test("cold routes read workspace data once and recheck roles on first socket ope
       });
       await cold.goto(path);
       await expect(cold.getByTestId(ready)).toBeVisible();
+      if (path.startsWith("/projects/")) {
+        await expect(cold.getByTestId("board-task")).toHaveCount(12);
+      }
       await expect.poll(() => reads.get("/api/me")).toBe(2);
       await cold.waitForLoadState("networkidle");
       const dataReads = [...reads].filter(([url]) => url !== "/api/me");
@@ -50,7 +64,11 @@ test("cold routes read workspace data once and recheck roles on first socket ope
         dataReads.filter(([, count]) => count > 1),
         path,
       ).toEqual([]);
-      if (path === "/") expect(dataReads.length).toBeLessThanOrEqual(6);
+      if (path === "/") {
+        expect(dataReads.length).toBeLessThanOrEqual(6);
+      } else {
+        expect(dataReads.length + 2).toBeLessThanOrEqual(10);
+      }
     } finally {
       await context.close();
     }

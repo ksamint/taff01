@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (511 distinct, 2389 uses)
+## Test ids (511 distinct, 2390 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -503,7 +503,7 @@ several do). “Also rendered by” lists the other files.
 | `board-column-in_progress` | 7 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-column-todo` | 3 |  | board-access.spec.ts, operation-templates.spec.ts, planning.spec.ts |
 | `board-status` | 6 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `board-task` | 26 |  | board-access.spec.ts, live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, project-header.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
+| `board-task` | 27 |  | board-access.spec.ts, cold-reads.spec.ts, live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, project-header.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
 | `drag-handle` | 9 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `manage-project` | 7 |  | project-profile.spec.ts, summaries.spec.ts |
 | `new-project` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
