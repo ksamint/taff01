@@ -1,25 +1,26 @@
 {
-  "sourceSha": "49991994bf23d024a45e10ba6b6ee6cd68242efa",
-  "sourceTree": "e2a5b0fb192a807fc61d7895f939c8ad64391c1e",
+  "sourceSha": "827b12c1354b3f8243fe97840949409f6ef4c74f",
+  "sourceTree": "5c05184fa61901ab2401e2f7922346d1b785e88b",
   "mode": "local direct capture; no CI runner",
   "runtime": {
     "platform": "linux",
     "arch": "arm64",
-    "node": "v26.13.0",
+    "node": "v26.12.1",
     "playwright": "1.64.1",
     "executable": "/ms-playwright/chromium-1248/chrome-linux-arm64/chrome",
-    "browserPresent": true
+    "browserPresent": true,
+    "chromium": "156.0.8078.80"
   },
   "image": "mcr.microsoft.com/playwright:v1.64.1-noble",
   "imageDigest": "sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f",
-  "browserServer": "Pinned Playwright run-server; loopback forwarding verified HTTP 200",
+  "browserServer": "Pinned Playwright 1.64.1 Linux ARM64 server using local loopback forwarding",
   "clock": "2026-10-08T11:20:00Z",
   "screenResults": [
     {
       "screen": "sectors",
       "stats": {
-        "startTime": "2026-11-16T11:16:43.556Z",
-        "duration": 6826.506,
+        "startTime": "2026-11-19T14:37:38.074Z",
+        "duration": 5752.204,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
@@ -29,8 +30,8 @@
     {
       "screen": "export-image",
       "stats": {
-        "startTime": "2026-11-16T11:20:41.433Z",
-        "duration": 13573.771,
+        "startTime": "2026-11-19T14:37:44.101Z",
+        "duration": 15149.126,
         "expected": 4,
         "skipped": 0,
         "unexpected": 0,
@@ -45,7 +46,7 @@
     },
     {
       "path": "e2e/ui-v2.spec.ts",
-      "sha256": "a68c0f3705a8b6af2149eb257730dd9527caf7c25ed3d41b7f9888ba6bd679ce"
+      "sha256": "68a4b19ad724fdb558f5a60c982cd521d51714526765b6946771d80699044b3f"
     },
     {
       "path": "scripts/ui/visual-clock.mts",
@@ -151,51 +152,53 @@
   "files": [
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/sectors.png",
-      "sha256": "29108bcd4512bd7b6c2db1c7364533f56bbe15ba68bd3ce20735f6162383922d",
+      "sha256": "7e599d13a11743552c4657d61ab86094aeb8f06c47d7941c46128ca171685821",
       "width": 390,
       "height": 844
     },
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-en/export-image.png",
-      "sha256": "3fb955dc9ed07b23bde7501db9d4728be374ea4a8718a176de7e25d60d19772d",
+      "sha256": "1e0e2bd5d6b41b4d7dbf3be661f574200b38fb13c743b4649f576c2696a67d5d",
       "width": 390,
       "height": 844
     },
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/sectors.png",
-      "sha256": "e7647f75fb16f5071aee5888aae085b4d2f13227b8be3be695d336ca35de1e16",
+      "sha256": "95e63d918873626aa56a537a239abf7617b20ed0462fa390bc5d3793e450244e",
       "width": 390,
       "height": 844
     },
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/phone-zh-HK/export-image.png",
-      "sha256": "5d5c2a642d7ee11445c5e4ad609cd603b5ba017389f5f0f9a4c1bac23b37c521",
+      "sha256": "4866113ee26d197e84ef55a0ed1f1017f1ac0f705a8d24744bdc7338a6e67b77",
       "width": 390,
       "height": 844
     },
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/sectors.png",
-      "sha256": "646e3ef98df7f486b297587e7ec4739262bd01e32f3bc309742e02beea710dc9",
+      "sha256": "bb9b8634ae90979aef5706872838c59188afb34c5e41e04069e5c648eefa0300",
       "width": 1280,
       "height": 800
     },
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-en/export-image.png",
-      "sha256": "8bab23ac7c0362e4d1f0bb5f2ef0a4b2f12b44c0d63712b78e09a6d513f9d9e4",
+      "sha256": "ad836cb35f89a3fededcaf7b2f0acfaf0c367191d5a63b8d3afaad36104a9654",
       "width": 1280,
       "height": 800
     },
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/sectors.png",
-      "sha256": "605e04d6603bdb64e3281c69cf86ca49d94f7d1050d719a88ccf22623e83b551",
+      "sha256": "84047e05cc376a2875d58b9ac91d187ab7bf2691257d4383bce5d949ef0d0306",
       "width": 1280,
       "height": 800
     },
     {
       "path": "e2e/__screenshots__/ui-v2.spec.ts/desktop-zh-HK/export-image.png",
-      "sha256": "73749e5a169d6d3945e1195efdf79fa0a64f350b2f5f97a7b33e005fcbcfbff8",
+      "sha256": "be7f2ef8e0de25171ccad6c08abdd59fbf08f958fdb90878452c02a9a19dcee4",
       "width": 1280,
       "height": 800
     }
-  ]
+  ],
+  "previousSourceSha": "49991994bf23d024a45e10ba6b6ee6cd68242efa",
+  "comparisonSha": "0c21908bb8ed363db1900013b8b1224a4fdb2366"
 }
