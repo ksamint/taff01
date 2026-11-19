@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (510 distinct, 2370 uses)
+## Test ids (510 distinct, 2374 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -184,7 +184,7 @@ several do). “Also rendered by” lists the other files.
 | `grant-confirm` | 4 | mcp-view.tsx, token-policy-control.tsx | access.spec.ts, token-grants.spec.ts |
 | `lifecycle-*` | 1 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
 | `me-workspace-*` | 1 | crm/contact-role-row.tsx, me-view.tsx, relations-view.tsx, summaries-admin.tsx | me.spec.ts |
-| `open-search` | 3 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts |
+| `open-search` | 5 | inbox-view.tsx, projects-scene.tsx, today-view.tsx | planning.spec.ts, search-hint.spec.ts |
 | `project-audience-option` | 1 | project-audience-tags.tsx | summaries.spec.ts |
 | `project-view-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | project-header.spec.ts, support/task-fields.ts |
 | `quick-field-*` | 2 | crm/contact-role-row.tsx, quick-add-dialog.tsx, relations-view.tsx, summaries-admin.tsx | support/tasks.ts |
@@ -621,7 +621,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `search-input` | 10 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, summaries.spec.ts, ui-v2.spec.ts |
+| `search-input` | 12 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, search-hint.spec.ts, summaries.spec.ts, ui-v2.spec.ts |
 | `search-result` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `search-setting` | 2 |  | planning.spec.ts, summaries.spec.ts |
 | `search-type-comment` | 1 |  | planning.spec.ts |
@@ -1037,6 +1037,8 @@ read (`data-event-id`, `data-date`).
 | `.relations-svg` | 2 | live/timeline.spec.ts, timeline.spec.ts |
 | `.relations-svg > g` | 2 | timeline.spec.ts |
 | `.review-comments` | 3 | planning.spec.ts |
+| `.search-footer` | 1 | search-hint.spec.ts |
+| `.search-footer kbd` | 1 | search-hint.spec.ts |
 | `.section-hint` | 2 | optimistic-m4.spec.ts |
 | `.sidebar` | 4 | agent-creation.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `.sidebar a[href^="/agents/optimistic:"]` | 1 | agent-creation.spec.ts |

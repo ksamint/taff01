@@ -336,6 +336,11 @@
   color: var(--text-subtle);
   font-size: 12px;
 }
+@media (hover: none) and (pointer: coarse) {
+  .search-footer {
+    display: none;
+  }
+}
 .search-footer kbd {
   flex: none;
   font-family: var(--font-mono);

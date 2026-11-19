@@ -133,6 +133,11 @@ is implemented for v0.2.26, not yet deployed.
   notifications, digest history and shareholder summaries. Workspace admins
   shall also have direct links to access, audit and summary administration.
 
+### Search keyboard hint (CN-7)
+
+- CN-7.1 On a primary touch input without hover, Search shall hide its keyboard
+  hint. On desktop pointer input the hint shall remain visible.
+
 ## Acceptance
 
 | Requirement | Evidence |
@@ -149,6 +154,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-3.6 | `e2e/project-graph-view.spec.ts` in three locales, guest denied and member allowed on phone and desktop |
 | CN-3.5 | `e2e/project-graph-view.spec.ts` and `e2e/view-export.spec.ts` in three locales |
 | CN-9 | `e2e/calendar.spec.ts`, overnight events and native target size in three locales |
+| CN-7 | `e2e/search-hint.spec.ts`, touch and desktop in three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
