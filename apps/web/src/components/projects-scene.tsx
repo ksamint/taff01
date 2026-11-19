@@ -616,7 +616,13 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
                   ))}
                 </span>
               )}
-              <MoreViews view={view} href={viewHref} t={t} compact={!desktop} />
+              <MoreViews
+                view={view}
+                href={viewHref}
+                t={t}
+                compact={!desktop}
+                projectDetail={Boolean(projectId)}
+              />
             </nav>
             {confirmed &&
               workspace.role !== "guest" &&
@@ -1231,11 +1237,13 @@ function MoreViews({
   href,
   t,
   compact,
+  projectDetail,
 }: {
   view: ProjectView;
   href: (view: ProjectView) => string;
   t: Translate;
   compact: boolean;
+  projectDetail: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -1260,7 +1268,9 @@ function MoreViews({
   const selected = view === "mind" ? "relations" : view;
   const active =
     compact || (MORE_VIEWS as readonly string[]).includes(selected);
-  const options = compact ? [...PRIMARY_VIEWS, ...MORE_VIEWS] : MORE_VIEWS;
+  const options = (
+    compact ? [...PRIMARY_VIEWS, ...MORE_VIEWS] : MORE_VIEWS
+  ).filter((view) => view !== "sectors" || !projectDetail);
   const label = (item: ProjectView) =>
     item === "relations" ? "projects.graphView" : VIEW_LABEL[item];
   return (

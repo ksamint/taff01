@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (504 distinct, 2334 uses)
+## Test ids (507 distinct, 2358 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -202,7 +202,7 @@ several do). “Also rendered by” lists the other files.
 | `team-supervisor-*` | 1 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | agent-creation.spec.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 52 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, board-access.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, me.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts, workspace-lifecycle.spec.ts |
+| `workspace-*` | 53 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, board-access.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, me.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-graph-view.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts, workspace-lifecycle.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -367,8 +367,8 @@ several do). “Also rendered by” lists the other files.
 | `mind-list-node` | 6 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-make-task` | 4 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-new-evidence` | 2 |  | live/mind.spec.ts, mind.spec.ts |
-| `mind-new-node` | 4 |  | live/mind.spec.ts, mind.spec.ts |
-| `mind-new-source` | 2 |  | live/mind.spec.ts, mind.spec.ts |
+| `mind-new-node` | 5 |  | live/mind.spec.ts, mind.spec.ts, project-graph-view.spec.ts |
+| `mind-new-source` | 3 |  | live/mind.spec.ts, mind.spec.ts, project-graph-view.spec.ts |
 | `mind-no-evidence` | 4 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-node` | 7 |  | live/mind.spec.ts, live/v021-feature-gaps.spec.ts, mind.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts |
 | `mind-node-form` | 2 |  | live/mind.spec.ts, mind.spec.ts |
@@ -397,7 +397,7 @@ several do). “Also rendered by” lists the other files.
 | `mind-task-title` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-tasked` | 2 |  | live/mind.spec.ts, mind.spec.ts |
 | `mind-to-node` | 2 |  | live/mind.spec.ts, mind.spec.ts |
-| `mind-view` | 3 |  | live/mind.spec.ts, mind.spec.ts, view-export.spec.ts |
+| `mind-view` | 5 |  | live/mind.spec.ts, mind.spec.ts, project-graph-view.spec.ts, view-export.spec.ts |
 
 ### notification-alerts.tsx
 
@@ -511,6 +511,8 @@ several do). “Also rendered by” lists the other files.
 | `project-due-date` | 5 |  | project-profile.spec.ts |
 | `project-filter` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, release/checklist.spec.ts |
 | `project-filters` | 10 |  | live/release/checklist.spec.ts, release/checklist.spec.ts, support/task-fields.ts, timeline.spec.ts |
+| `project-graph-mode-mind` | 2 |  | project-graph-view.spec.ts, view-export.spec.ts |
+| `project-graph-mode-relations` | 2 |  | project-graph-view.spec.ts, view-export.spec.ts |
 | `project-label` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-lead` | 2 |  | project-profile.spec.ts |
 | `project-lead-select` | 5 |  | project-profile.spec.ts |
@@ -523,11 +525,12 @@ several do). “Also rendered by” lists the other files.
 | `project-stage-control` | 4 |  | project-profile.spec.ts |
 | `project-stage-select` | 3 |  | project-profile.spec.ts |
 | `project-submit` | 16 |  | live/release/checklist.spec.ts, planning.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
-| `project-view-more` | 3 |  | operation-templates.spec.ts, project-header.spec.ts, support/task-fields.ts |
-| `project-view-sectors` | 1 |  | operation-templates.spec.ts |
+| `project-view-mind` | 1 |  | project-graph-view.spec.ts |
+| `project-view-more` | 7 |  | operation-templates.spec.ts, project-graph-view.spec.ts, project-header.spec.ts, support/task-fields.ts |
+| `project-view-sectors` | 5 |  | operation-templates.spec.ts, project-graph-view.spec.ts, project-header.spec.ts |
 | `sector-group` | 2 |  | operation-templates.spec.ts |
 | `sector-project` | 1 |  | operation-templates.spec.ts |
-| `sector-view-hint` | 1 |  | operation-templates.spec.ts |
+| `sector-view-hint` | 3 |  | operation-templates.spec.ts, project-graph-view.spec.ts |
 
 ### quick-add-dialog.tsx
 
@@ -565,7 +568,7 @@ several do). “Also rendered by” lists the other files.
 | `relations-open-task` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-relation` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `relations-scope` | 1 |  | view-export.spec.ts |
-| `relations-view` | 3 |  | live/timeline.spec.ts, timeline.spec.ts, view-export.spec.ts |
+| `relations-view` | 5 |  | live/timeline.spec.ts, project-graph-view.spec.ts, timeline.spec.ts, view-export.spec.ts |
 | `relations-zoom-in` | 1 |  | timeline.spec.ts |
 | `relations-zoom-out` | 1 |  | timeline.spec.ts |
 
@@ -808,7 +811,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `view-export-copy` | 1 |  | view-export.spec.ts |
-| `view-export-open` | 11 |  | ssr-session.spec.ts, view-export.spec.ts |
+| `view-export-open` | 13 |  | project-graph-view.spec.ts, ssr-session.spec.ts, view-export.spec.ts |
 | `view-export-preview` | 2 |  | view-export.spec.ts |
 | `view-export-save` | 1 |  | view-export.spec.ts |
 | `view-export-send` | 1 |  | view-export.spec.ts |
@@ -909,6 +912,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: label` | 1 | settings-header.spec.ts |
 | `link — name: m.organization.accept` | 1 | planning.spec.ts |
 | `link — name: m.organization.create` | 1 | me.spec.ts |
+| `link — name: m.projects.graphView` | 1 | project-graph-view.spec.ts |
 | `link — name: messages[locale].nav.calendar` | 1 | calendar.spec.ts |
 | `link — name: messages[locale].pwa.reconnect` | 1 | persistence.spec.ts |
 | `link — name: missed` | 1 | realtime.spec.ts |
@@ -918,7 +922,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `list` | 1 | planning.spec.ts |
-| `navigation — name: m.projects.views` | 1 | project-header.spec.ts |
+| `navigation — name: m.projects.views` | 2 | project-graph-view.spec.ts, project-header.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `progressbar` | 1 | summaries.spec.ts |
 | `region — name: m.access.agents` | 1 | access.spec.ts |
@@ -1285,11 +1289,12 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projects.archive` | 2 | project-profile.spec.ts |
 | `projects.deliveryProgress` | 5 | project-profile.spec.ts, timeline.spec.ts |
 | `projects.dueDate` | 2 | project-profile.spec.ts |
+| `projects.graphView` | 1 | project-graph-view.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |
 | `projects.sectorsHint` | 1 | operation-templates.spec.ts |
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
-| `projects.views` | 1 | project-header.spec.ts |
+| `projects.views` | 2 | project-graph-view.spec.ts, project-header.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `pwa.reconnect` | 1 | persistence.spec.ts |
 | `relations.edge.depends_on.out` | 14 | live/timeline.spec.ts, timeline.spec.ts |

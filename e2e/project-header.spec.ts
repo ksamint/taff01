@@ -51,7 +51,6 @@ test("phone project header fits the board and preserves views and CRM navigation
     "timeline",
     "stakeholders",
     "relations",
-    "sectors",
     "board",
   ]) {
     await viewNav.getByTestId("project-view-more").click();
@@ -73,4 +72,9 @@ test("phone project header fits the board and preserves views and CRM navigation
   await expect(page.getByTestId("crm-section-projects")).toBeVisible();
   await expect(page.getByTestId("crm-section-companies")).toBeVisible();
   await expect(page.getByTestId("crm-section-contacts")).toBeVisible();
+  await page.getByTestId("project-view-more").click();
+  await expect(page.getByTestId("project-view-sectors")).toHaveAttribute(
+    "href",
+    "/projects?view=sectors",
+  );
 });

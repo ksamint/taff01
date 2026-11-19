@@ -56,8 +56,14 @@ test("sector view regroups tagged tasks across projects and opens them on a phon
 
   await page.goto(`/projects/${alpha.id}`);
   await page.getByTestId("project-view-more").click();
+  await expect(page.getByTestId("project-view-sectors")).toHaveCount(0);
+
+  await page.goto(`/projects/${alpha.id}?view=sectors`);
+  await expect(page.getByTestId("sector-view-hint")).toBeVisible();
+  await page.goto("/projects");
+  await page.getByTestId("project-view-more").click();
   await page.getByTestId("project-view-sectors").click();
-  await expect(page).toHaveURL(/view=sectors/);
+  await expect(page).toHaveURL("/projects?view=sectors");
   await expect(page.getByTestId("sector-view-hint")).toHaveText(
     m.projects.sectorsHint,
   );

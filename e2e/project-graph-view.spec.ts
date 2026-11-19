@@ -65,6 +65,7 @@ test("one Graph destination switches existing modes for a guest on phone and des
       });
       await expect(entry).toHaveCount(1);
       await expect(views.getByTestId("project-view-mind")).toHaveCount(0);
+      await expect(views.getByTestId("project-view-sectors")).toHaveCount(0);
       await entry.click();
       await expect(guest).toHaveURL(`${path}?view=relations`);
       await expect(guest.getByTestId("relations-view")).toBeVisible();
@@ -87,6 +88,12 @@ test("one Graph destination switches existing modes for a guest on phone and des
       await expect(guest).toHaveURL(`${path}?view=relations`);
       await guest.reload();
       await expect(guest.getByTestId("relations-view")).toBeVisible();
+
+      await guest.goto("/projects");
+      await guest.getByTestId("project-view-more").click();
+      await guest.getByTestId("project-view-sectors").click();
+      await expect(guest).toHaveURL("/projects?view=sectors");
+      await expect(guest.getByTestId("sector-view-hint")).toBeVisible();
     }
   } finally {
     await context.close();

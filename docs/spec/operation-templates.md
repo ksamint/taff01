@@ -44,7 +44,10 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 
 ### Phone and tagging (OT-2)
 
-- OT-2.1 The view shall be reachable from Projects → More → Sectors on phone (H5) and desktop, and by `?view=sectors`.
+- OT-2.1 The view shall be reachable from the Projects index view selector on
+  phone (H5) and desktop at `/projects?view=sectors`. Per-project selectors
+  shall omit Sectors, and existing `/projects/:id?view=sectors` links shall
+  continue to open the workspace view.
 - OT-2.2 When a person adds a task with a sector tag (Quick Add `+財務與現金`, or the task editor's labels), it shall appear under that sector; opening a row shall open the task.
 - OT-2.3 Every CJK character in the view's UI labels shall be in the bundled font subset; sector and indicator text is template data shown with the system font fallback.
 
@@ -67,6 +70,7 @@ The data lives in `packages/schemas/src/operation-templates.ts`.
 | --- | --- |
 | OT-1.1–1.4 | `packages/schemas/src/operation-templates.test.ts` |
 | OT-1.2–1.5, OT-2.1–2.2 | `e2e/operation-templates.spec.ts`, Pixel 7 profile, en, zh-CN, zh-HK |
+| OT-2.1 | `e2e/project-graph-view.spec.ts`, guest on phone and desktop in three locales |
 | OT-1.6 | no test; the view issues only the existing task and project reads |
 | OT-2.3 | `scripts/ui/fonts.test.ts` |
 
