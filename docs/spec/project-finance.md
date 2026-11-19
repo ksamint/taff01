@@ -25,6 +25,9 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
   date, amount and note. Money and dates use the reader's locale.
 - PF-1.2 Guests and agents shall not see the panel; `/api/projects/:id/payments`
   requires `finance:read`.
+- PF-1.3 The timeline finance strip shall label the computed percentage as
+  Task completion. Delivery progress shall refer to the saved project field
+  documented in [project profiles](projects.md).
 
 ### Managing (PF-2)
 
@@ -52,6 +55,7 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
 | --- | --- |
 | PF-1, PF-2 | `e2e/project-finance.spec.ts` in en, zh-CN and zh-HK |
 | PF-1.2 | `e2e/finance-visibility.spec.ts`; `packages/core/src/planning.integration.test.ts` |
+| PF-1.3 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
 | PF-2.1 | `packages/core/src/planning.integration.test.ts` (admin, member, guest flags) |
 
 ## Sources

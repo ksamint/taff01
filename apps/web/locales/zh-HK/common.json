@@ -978,7 +978,7 @@
     "dragLink": "拖出依賴連線",
     "removeDependency": "移除依賴：{{from}} → {{to}}",
     "forecast": "預計",
-    "delivery": "交付進度",
+    "delivery": "任務完成度",
     "risk": {
       "level": {
         "low": "按計劃",
@@ -1154,7 +1154,7 @@
     "finance": {
       "total_one": "合計 · {{count}} 個收費項目",
       "total_other": "合計 · {{count}} 個收費項目",
-      "delivery": "交付進度"
+      "delivery": "任務完成度"
     },
     "actions": {
       "title": "待批准的建議",

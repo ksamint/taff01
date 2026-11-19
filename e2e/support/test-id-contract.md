@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (492 distinct, 2276 uses)
+## Test ids (493 distinct, 2280 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -127,7 +127,7 @@ several do). “Also rendered by” lists the other files.
 | `brief-proposal-apply` | 5 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-dismiss` | 3 |  | brief.spec.ts, live/brief.spec.ts |
 | `brief-proposal-subtasks` | 2 |  | brief.spec.ts, live/brief.spec.ts |
-| `brief-risk` | 4 |  | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, ui-v2.spec.ts |
+| `brief-risk` | 5 |  | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, timeline.spec.ts, ui-v2.spec.ts |
 | `brief-stage-all` | 1 |  | project-profile.spec.ts |
 | `brief-stage-in_service` | 1 |  | project-profile.spec.ts |
 | `brief-stage-proposal_sent` | 2 |  | project-profile.spec.ts |
@@ -504,7 +504,7 @@ several do). “Also rendered by” lists the other files.
 | `project-lead-select` | 5 |  | project-profile.spec.ts |
 | `project-meta` | 1 |  | operation-templates.spec.ts |
 | `project-name` | 6 | summaries-admin.tsx | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
-| `project-progress` | 5 |  | project-profile.spec.ts |
+| `project-progress` | 6 |  | project-profile.spec.ts, timeline.spec.ts |
 | `project-select` | 1 |  | support/task-fields.ts |
 | `project-sort` | 3 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `project-stage` | 1 |  | project-profile.spec.ts |
@@ -758,13 +758,14 @@ several do). “Also rendered by” lists the other files.
 | `timeline-dependency` | 6 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-dependency-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-duration` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline-finance` | 7 |  | finance-visibility.spec.ts, live/platform.spec.ts |
+| `timeline-finance` | 8 |  | finance-visibility.spec.ts, live/platform.spec.ts, timeline.spec.ts |
 | `timeline-footer` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-hint` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-mode` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-new-milestone` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-predecessor` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-rename-milestone` | 6 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `timeline-risk` | 1 |  | timeline.spec.ts |
 | `timeline-row` | 5 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-save` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-start` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -1041,6 +1042,7 @@ read (`data-event-id`, `data-date`).
 | `[data-testid="audience-tag-row"][data-tag="*"]` | 1 | audience-editing.spec.ts |
 | `[data-testid="audit-row"][data-action="projects.insert"][data-resource="*"]` | 1 | audit.spec.ts |
 | `[data-testid="audit-row"][data-action="view.export"][data-resource="*"]` | 1 | audit.spec.ts |
+| `[data-testid="brief-risk"][data-project="*"]` | 1 | timeline.spec.ts |
 | `[data-testid="contact-link"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="contact-row"][data-id="*"]` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `[data-testid="desktop-new-task"]` | 1 | ui-v2.spec.ts |
@@ -1251,7 +1253,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projectFinance.positiveAmount` | 1 | project-finance.spec.ts |
 | `projectFinance.readOnly` | 1 | project-finance.spec.ts |
 | `projects.archive` | 2 | project-profile.spec.ts |
-| `projects.deliveryProgress` | 1 | project-profile.spec.ts |
+| `projects.deliveryProgress` | 5 | project-profile.spec.ts, timeline.spec.ts |
 | `projects.dueDate` | 2 | project-profile.spec.ts |
 | `projects.leadGuest` | 2 | project-profile.spec.ts |
 | `projects.leadIs` | 4 | project-profile.spec.ts |
@@ -1259,7 +1261,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `pwa.reconnect` | 1 | persistence.spec.ts |
-| `relations.edge.depends_on.out` | 12 | live/timeline.spec.ts, timeline.spec.ts |
+| `relations.edge.depends_on.out` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `retry` | 2 | calendar.spec.ts, ssr-session.spec.ts |
 | `review.approved` | 1 | accessibility.spec.ts |
 | `run.cancel` | 2 | optimistic-m4.spec.ts |
@@ -1295,11 +1297,11 @@ Keys read from `apps/web/locales/*/common.json` through
 | `summary.unavailableTitle` | 1 | summaries.spec.ts |
 | `taskDetail.back` | 1 | calendar.spec.ts |
 | `taskDetail.statusChanged` | 1 | optimistic-m4.spec.ts |
-| `timeline.cycle` | 6 | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline.depAdded` | 18 | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline.depRemoved` | 12 | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline.rescheduled` | 12 | live/timeline.spec.ts, timeline.spec.ts |
-| `timeline.resized` | 6 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline.cycle` | 7 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline.depAdded` | 21 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline.depRemoved` | 14 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline.rescheduled` | 14 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline.resized` | 7 | live/timeline.spec.ts, timeline.spec.ts |
 | `today` | 25 | live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |

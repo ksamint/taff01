@@ -7,6 +7,7 @@ import {
   workspaceSchema,
 } from "../packages/schemas/src/index";
 import { type Timeline, timelineSchema } from "../packages/schemas/src/plan";
+import { freshAccount } from "./support/account";
 import { messages, type TestLocale } from "./support/messages";
 import { selectLocale } from "./support/preferences";
 
@@ -416,4 +417,58 @@ test("open a task from the relations graph and via the list", async ({
   await expect(page.getByTestId("task-detail-heading")).toHaveText(
     second.title,
   );
+});
+
+test("saved delivery progress and computed task completion have distinct labels", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const m = messages[locale];
+  const {
+    workspaces: [workspace],
+  } = await freshAccount(page, locale);
+  const response = await page.request.post(
+    `/api/projects?workspaceId=${workspace.id}`,
+    {
+      data: {
+        name: `Delivery ${locale}`,
+        deliveryProgress: 37,
+        contractAmount: "100.00",
+        currency: "HKD",
+      },
+    },
+  );
+  expect(response.status()).toBe(201);
+  const project = projectSchema.parse(await response.json());
+  const task = await createTask(page, workspace, "Unfinished work", project.id);
+  await plan(page, task.id, (await timeline(page, project.id)).today, 2);
+  const { risk } = await timeline(page, project.id);
+  expect(risk.deliveryPercent).toBe(0);
+  const completion = {
+    en: "Task completion",
+    "zh-CN": "任务完成度",
+    "zh-HK": "任務完成度",
+  }[locale];
+
+  await page.goto(`/projects/${project.id}?view=timeline`);
+  await expect(page.getByTestId("project-progress")).toHaveText(
+    `${m.projects.deliveryProgress}: 37%`,
+  );
+  await expect(page.getByTestId("timeline-risk")).toContainText(
+    `${completion} 0%`,
+  );
+  const finance = page.getByTestId("timeline-finance");
+  await expect(finance.getByText(completion, { exact: true })).toBeVisible();
+  await expect(finance.getByText("0%", { exact: true })).toBeVisible();
+
+  await page.goto("/brief");
+  const briefProject = page.locator(
+    `[data-testid="brief-risk"][data-project="${project.id}"]`,
+  );
+  await expect(
+    briefProject.getByText(completion, { exact: true }),
+  ).toBeVisible();
+  await expect(
+    briefProject.getByText(completion, { exact: true }).locator("+ dd"),
+  ).toHaveText("0%");
 });

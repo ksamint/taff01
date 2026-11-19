@@ -978,7 +978,7 @@
     "dragLink": "拖出依赖连线",
     "removeDependency": "移除依赖：{{from}} → {{to}}",
     "forecast": "预计",
-    "delivery": "交付进度",
+    "delivery": "任务完成度",
     "risk": {
       "level": {
         "low": "按计划",
@@ -1154,7 +1154,7 @@
     "finance": {
       "total_one": "合计 · {{count}} 个收费项目",
       "total_other": "合计 · {{count}} 个收费项目",
-      "delivery": "交付进度"
+      "delivery": "任务完成度"
     },
     "actions": {
       "title": "待批准的建议",

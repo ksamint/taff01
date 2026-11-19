@@ -978,7 +978,7 @@
     "dragLink": "Drag to add a dependency",
     "removeDependency": "Remove dependency: {{from}} → {{to}}",
     "forecast": "Forecast",
-    "delivery": "Delivered",
+    "delivery": "Task completion",
     "risk": {
       "level": {
         "low": "On track",
@@ -1154,7 +1154,7 @@
     "finance": {
       "total_one": "Total · {{count}} billable project",
       "total_other": "Total · {{count}} billable projects",
-      "delivery": "Delivered"
+      "delivery": "Task completion"
     },
     "actions": {
       "title": "Suggested actions",
