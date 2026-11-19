@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (498 distinct, 2299 uses)
+## Test ids (500 distinct, 2314 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -177,7 +177,7 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `archive-*` | 3 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | workspace-lifecycle.spec.ts |
-| `board-column-*` | 2 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `board-column-*` | 3 | crm/contact-role-row.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | board-access.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `contact-search` | 2 | crm/contacts-view.tsx | crm.spec.ts, live/crm.spec.ts |
 | `crm-section-*` | 1 | crm/contact-role-row.tsx, crm/crm-sections.tsx, projects-scene.tsx, relations-view.tsx, summaries-admin.tsx | project-header.spec.ts |
 | `grant-confirm` | 4 | mcp-view.tsx, token-policy-control.tsx | access.spec.ts, token-grants.spec.ts |
@@ -198,9 +198,11 @@ several do). “Also rendered by” lists the other files.
 | `task-contact-option` | 4 | task-contacts.tsx | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `task-contact-search` | 3 | task-contacts.tsx | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts |
+| `team-capabilities-*` | 2 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | agent-creation.spec.ts |
+| `team-supervisor-*` | 1 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | agent-creation.spec.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 49 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts, workspace-lifecycle.spec.ts |
+| `workspace-*` | 51 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, board-access.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts, workspace-lifecycle.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -497,11 +499,11 @@ several do). “Also rendered by” lists the other files.
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
 | `board-column-done` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `board-column-in_progress` | 5 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `board-column-todo` | 1 |  | planning.spec.ts |
-| `board-status` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `board-task` | 23 |  | live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, project-header.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
-| `drag-handle` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `board-column-in_progress` | 7 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
+| `board-column-todo` | 2 |  | board-access.spec.ts, planning.spec.ts |
+| `board-status` | 6 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
+| `board-task` | 25 |  | board-access.spec.ts, live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, project-header.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
+| `drag-handle` | 8 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `manage-project` | 7 |  | project-profile.spec.ts, summaries.spec.ts |
 | `new-project` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-delivery-progress` | 1 |  | project-profile.spec.ts |
@@ -742,7 +744,7 @@ several do). “Also rendered by” lists the other files.
 | `task-detail-heading` | 44 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, operation-templates.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, task-contacts.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
 | `task-field-due` | 2 |  | planning.spec.ts |
 | `task-field-status` | 1 |  | optimistic-m4.spec.ts |
-| `task-field-text` | 5 |  | planning.spec.ts |
+| `task-field-text` | 6 |  | board-access.spec.ts, planning.spec.ts |
 
 ### task-schedule-button.tsx
 
@@ -891,7 +893,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
 | `link — name: /M7 reviewer/` | 3 | delivery-visual.spec.ts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
-| `link — name: agent.name` | 2 | access.spec.ts |
+| `link — name: agent.name` | 4 | access.spec.ts, agent-creation.spec.ts |
 | `link — name: childTitle` | 7 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `link — name: controlled.title` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `link — name: dragged.title` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -1000,6 +1002,7 @@ read (`data-event-id`, `data-date`).
 | `.me-desk-panel` | 1 | completion.spec.ts |
 | `.me-profile-copy strong` | 1 | me.spec.ts |
 | `.me-section` | 1 | planning.spec.ts |
+| `.member-role-row` | 1 | agent-creation.spec.ts |
 | `.notifications-body` | 1 | notifications.spec.ts |
 | `.organization-choices` | 1 | scripts/ui/app-shots.mts |
 | `.organizations-view` | 1 | planning.spec.ts |
@@ -1032,8 +1035,8 @@ read (`data-event-id`, `data-date`).
 | `.task-review-block` | 1 | optimistic-m4.spec.ts |
 | `.task-title-link` | 1 | operation-templates.spec.ts |
 | `.team-agent-capabilities` | 2 | scripts/ui/app-shots.mts, ui-v2.spec.ts |
+| `.team-agent-details` | 3 | agent-creation.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `.team-agent-link[href="/agents/*"]` | 3 | agent-creation.spec.ts, release/support.ts |
-| `.team-agent-supervisor` | 2 | scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `.team-directory .member-role-row` | 2 | agent-creation.spec.ts |
 | `.team-directory [data-testid^="role-"]` | 1 | planning.spec.ts |
 | `.team-directory > h1` | 3 | agent-creation.spec.ts, planning.spec.ts, ui-v2.spec.ts |
@@ -1070,6 +1073,7 @@ read (`data-event-id`, `data-date`).
 | `[data-time-grid-date]` | 1 | calendar-accessibility.spec.ts |
 | `[data-total]` | 1 | summaries.spec.ts |
 | `[data-workspace-id="*"]` | 4 | access.spec.ts, token-grants.spec.ts |
+| `[role=list]` | 1 | agent-creation.spec.ts |
 | `#add-agent-reason` | 1 | agent-creation.spec.ts |
 | `#auth-name` | 7 | optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `#default-workspace` | 6 | organization-default.spec.ts, workspace-lifecycle.spec.ts |

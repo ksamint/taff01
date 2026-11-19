@@ -643,6 +643,7 @@
     "newTask": "New task"
   },
   "organization": {
+    "agentDetails": "Details",
     "archive": "Archive organization",
     "archived": "Archived organizations",
     "restore": "Restore organization",

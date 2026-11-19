@@ -643,6 +643,7 @@
     "newTask": "新建任務"
   },
   "organization": {
+    "agentDetails": "詳情",
     "archive": "封存組織",
     "archived": "已封存組織",
     "restore": "恢復組織",

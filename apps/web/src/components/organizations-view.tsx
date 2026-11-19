@@ -4,7 +4,6 @@ import "../styles/organizations.css";
 import {
   type Locale,
   type Member,
-  type Run,
   workspaceAgentInputSchema,
 } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
@@ -42,16 +41,35 @@ import { Label } from "./ui/label";
 import { SheetDialog } from "./ui/sheet-dialog";
 import { OrganizationLifecycle } from "./workspace-lifecycle";
 
-function TeamAgentDetails({
+function TeamAgentDisclosure({
   member,
   members,
-  locale,
-  status,
 }: {
   member: Member;
   members: Member[];
-  locale: Locale;
-  status: Run["status"] | undefined;
+}) {
+  const { t } = useTranslation();
+  const [open, setOpen] = useState(false);
+  return (
+    <details
+      className="team-agent-details"
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary>
+        {t("organization.agentDetails")}
+        <span className="sr-only"> {member.name}</span>
+      </summary>
+      {open && <TeamAgentDetails member={member} members={members} />}
+    </details>
+  );
+}
+
+function TeamAgentDetails({
+  member,
+  members,
+}: {
+  member: Member;
+  members: Member[];
 }) {
   const profile = useAgent(member.id);
   const { t } = useTranslation();
@@ -61,7 +79,7 @@ function TeamAgentDetails({
       : undefined;
   if (profile.error)
     return <span role="alert">{t(errorKey(profile.error))}</span>;
-  if (!data) return <span>{t("loading")}</span>;
+  if (!data) return <span role="status">{t("loading")}</span>;
   const supervisor = members.find((item) => item.id === data.supervisorId);
   const name = supervisor
     ? supervisor.name
@@ -74,15 +92,6 @@ function TeamAgentDetails({
       >
         {t("agentProfile.supervisedBy", { name })}
       </span>
-      {status && (
-        <span className="team-agent-status">
-          <span
-            className={`agent-status-dot agent-status-${status}`}
-            aria-hidden="true"
-          />
-          {t(`run.status.${status}`)}
-        </span>
-      )}
       <span
         className="team-agent-capabilities"
         role="list"
@@ -380,12 +389,15 @@ export function OrganizationsView() {
                         {pending ? (
                           <span>{t("adding")}</span>
                         ) : kind === "agent" ? (
-                          <TeamAgentDetails
-                            member={member}
-                            members={members.data ?? []}
-                            locale={locale}
-                            status={latest?.status}
-                          />
+                          latest && (
+                            <span className="team-agent-status">
+                              <span
+                                className={`agent-status-dot agent-status-${latest.status}`}
+                                aria-hidden="true"
+                              />
+                              {t(`run.status.${latest.status}`)}
+                            </span>
+                          )
                         ) : (
                           <span>{t(`organization.${member.role}`)}</span>
                         )}
@@ -395,12 +407,18 @@ export function OrganizationsView() {
                   return (
                     <li key={member.id} className="member-role-row">
                       {kind === "agent" && !pending ? (
-                        <Link
-                          className="team-agent-link"
-                          href={`/agents/${member.id}`}
-                        >
-                          {content}
-                        </Link>
+                        <div className="team-agent-directory-entry">
+                          <Link
+                            className="team-agent-link"
+                            href={`/agents/${member.id}`}
+                          >
+                            {content}
+                          </Link>
+                          <TeamAgentDisclosure
+                            member={member}
+                            members={members.data ?? []}
+                          />
+                        </div>
                       ) : kind === "agent" ? (
                         <span className="team-agent-link" aria-busy="true">
                           {content}

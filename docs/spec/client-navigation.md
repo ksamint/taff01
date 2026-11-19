@@ -56,6 +56,14 @@ is implemented for v0.2.26, not yet deployed.
   send the change only after the task-access response permits that status.
   A denied or cancelled drag shall leave the task in its current column.
 
+### Organization agent rows (CN-7)
+
+- CN-7.1 When Organizations opens, the agent row shall show the name, profile
+  link, and latest run status when available. Opening Details shall load that
+  agent's supervisor and capabilities through the existing profile read.
+- CN-7.2 The Details row shall use the same workspace read authority as the
+  existing agent profile.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -79,6 +87,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-3.3–3.4 | `e2e/project-header.spec.ts` in three locales |
 | CN-4 | `e2e/board-access.spec.ts` in en, zh-CN and zh-HK, and the existing board drag and menu cases in `e2e/planning.spec.ts` |
 | CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
+| CN-7 | `e2e/agent-creation.spec.ts`, guest disclosure and profile request counts in en, zh-CN, and zh-HK |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
