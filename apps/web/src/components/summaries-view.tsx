@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { useDailySummaries, useDailySummary } from "../lib/summary-queries";
 import { useWorkspace } from "./app-shell";
+import { SettingsBackHeader } from "./settings-back-header";
 import { SummaryDocument, type Translate } from "./summary-document";
 import { SummaryRenderActions } from "./summary-render-actions";
 import { SummarySharePanel } from "./summary-share-panel";
@@ -29,10 +30,8 @@ export function SummariesView() {
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   const summaries = useDailySummaries(workspace.id);
   return (
-    <div className="summaries-page">
-      <Link className="text-link" href="/me">
-        <ArrowLeft size={16} aria-hidden="true" /> {t("mcp.back")}
-      </Link>
+    <div className="summaries-page settings-page-gutter">
+      <SettingsBackHeader href="/me" label={t("mcp.back")} />
       <section className="page-heading">
         <p className="eyebrow">{workspace.name}</p>
         <h1>{t("summary.title")}</h1>

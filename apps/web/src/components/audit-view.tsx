@@ -7,12 +7,12 @@ import {
   integrationAuditResultSchema,
 } from "@taff/schemas";
 import { useQuery } from "@tanstack/react-query";
-import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
 import { useMembers } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
+import { SettingsBackHeader } from "./settings-back-header";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -78,9 +78,7 @@ export function AuditView() {
 
   return (
     <div className="access-page audit-page" data-testid="audit-view">
-      <Link className="text-link" href="/orgs">
-        {t("mcp.back")}
-      </Link>
+      <SettingsBackHeader href="/orgs" label={t("mcp.back")} />
       <section className="page-heading">
         <p className="eyebrow">{workspace.name}</p>
         <h1>{t("audit.title")}</h1>

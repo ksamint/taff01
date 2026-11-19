@@ -10,7 +10,7 @@ import {
   taskReference,
 } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
-import { ArrowLeft, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,6 +27,7 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers, useTasks } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
 import { GrantActions } from "./grant-actions";
+import { SettingsBackHeader } from "./settings-back-header";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -205,12 +206,7 @@ function AgentEditor({
   return (
     <div className={`agent-profile-parity${embedded ? " is-embedded" : ""}`}>
       {!embedded && (
-        <div className="agent-profile-toolbar">
-          <Link className="back-link" href="/me">
-            <ArrowLeft size={16} aria-hidden="true" />
-            {t("agentProfile.back")}
-          </Link>
-        </div>
+        <SettingsBackHeader href="/me" label={t("agentProfile.back")} />
       )}
       <div className="agent-profile-body">
         <div className="agent-profile-layout">

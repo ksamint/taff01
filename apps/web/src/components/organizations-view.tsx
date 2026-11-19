@@ -7,7 +7,7 @@ import {
   workspaceAgentInputSchema,
 } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Sparkles } from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,7 @@ import {
   useWorkspaceInvites,
 } from "./organization-dialogs";
 import { useWorkspaceSelection } from "./providers";
+import { SettingsBackHeader } from "./settings-back-header";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -192,16 +193,11 @@ export function OrganizationsView() {
     invites.error;
   return (
     <div className={`organizations-view${teamOnly ? " team-only" : ""}`}>
-      <header className="organization-toolbar">
-        <Link
-          className="button button-quiet"
-          href={oauthReturn ?? "/me"}
-          data-testid={oauthReturn ? "oauth-return-consent" : undefined}
-        >
-          <ArrowLeft size={16} aria-hidden="true" />
-          {t(oauthReturn ? "oauth.returnToConsent" : "mcp.back")}
-        </Link>
-      </header>
+      <SettingsBackHeader
+        href={oauthReturn ?? "/me"}
+        label={t(oauthReturn ? "oauth.returnToConsent" : "mcp.back")}
+        data-testid={oauthReturn ? "oauth-return-consent" : undefined}
+      />
       <section className="page-heading">
         <h1>{t("organization.title")}</h1>
         <p className="section-hint">{t("organization.switchHint")}</p>
@@ -327,12 +323,6 @@ export function OrganizationsView() {
         </Link>
       )}
       <section className="team-directory" id="team">
-        <header className="organization-toolbar">
-          <Link className="button button-quiet" href="/me">
-            <ArrowLeft size={16} aria-hidden="true" />
-            {t("mcp.back")}
-          </Link>
-        </header>
         <h1>{t("organization.team")}</h1>
         {(["person", "agent"] as const).map((kind) => (
           <section key={kind}>

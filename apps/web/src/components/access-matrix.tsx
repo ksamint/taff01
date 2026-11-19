@@ -27,6 +27,7 @@ import { useTasks } from "../lib/queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
 import { GrantActions } from "./grant-actions";
+import { SettingsBackHeader } from "./settings-back-header";
 import { TokenPolicyControl } from "./token-policy-control";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
@@ -79,9 +80,7 @@ export function AccessMatrix() {
   });
   return (
     <div className="access-page" data-testid="access-matrix">
-      <Link className="text-link" href="/orgs">
-        {t("mcp.back")}
-      </Link>
+      <SettingsBackHeader href="/orgs" label={t("mcp.back")} />
       <section className="page-heading">
         <p className="eyebrow">{workspace.name}</p>
         <h1>{t("access.title")}</h1>

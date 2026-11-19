@@ -1,7 +1,6 @@
 "use client";
 import type { NotificationPreferences } from "@taff/schemas";
 import { useIsMutating } from "@tanstack/react-query";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -14,6 +13,7 @@ import {
 } from "../lib/notification-queries";
 import { m3MutationKey } from "../lib/optimistic-m3";
 import { useWorkspace } from "./app-shell";
+import { SettingsBackHeader } from "./settings-back-header";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
 import { Switch } from "./ui/switch";
@@ -68,12 +68,7 @@ export function NotificationsView({
   return (
     <div className={`notifications-parity${embedded ? " is-embedded" : ""}`}>
       {!embedded && (
-        <div className="notifications-toolbar">
-          <Link className="back-link" href="/me">
-            <ArrowLeft size={16} aria-hidden="true" />
-            {t("agentProfile.back")}
-          </Link>
-        </div>
+        <SettingsBackHeader href="/me" label={t("agentProfile.back")} />
       )}
       <div className="notifications-body">
         {!embedded && <h1>{t("notifications.title")}</h1>}

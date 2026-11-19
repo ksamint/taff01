@@ -82,6 +82,18 @@ is implemented for v0.2.26, not yet deployed.
   beneath a More disclosure and show their set values in its closed
   summary. The existing permissions apply to all task editors.
 
+### Settings back navigation (CN-5)
+
+- CN-5.1 When a person opens Notifications, MCP, Organizations, Access,
+  Audit, summary administration, summary history, digest history, or an
+  agent profile, the standalone page shall show one bordered back header
+  with its existing destination and localized label. Organizations shall
+  retain its validated return to OAuth consent when present.
+- CN-5.2 On phones, those routes shall inset their body content and shall
+  fit the viewport without page-level horizontal scrolling.
+- CN-5.3 Notifications and agent profiles embedded in desktop Me shall
+  omit the standalone back header.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -108,6 +120,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-7 | `e2e/agent-creation.spec.ts`, guest disclosure and profile request counts in en, zh-CN, and zh-HK |
 | CN-4 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
 | CN-4 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
+| CN-5 | `e2e/settings-header.spec.ts` in en, zh-CN, and zh-HK; `e2e/mcp-oauth.spec.ts` |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |

@@ -906,6 +906,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: due.title` | 2 | notifications.spec.ts |
 | `link — name: edited` | 1 | live/platform.spec.ts |
 | `link — name: editedTitle` | 2 | planning.spec.ts |
+| `link — name: label` | 1 | settings-header.spec.ts |
 | `link — name: m.organization.accept` | 1 | planning.spec.ts |
 | `link — name: m.organization.create` | 1 | me.spec.ts |
 | `link — name: messages[locale].nav.calendar` | 1 | calendar.spec.ts |
@@ -1116,6 +1117,7 @@ read (`data-event-id`, `data-date`).
 | `head link[rel="preload"][as="font"][href="/fonts/NotoSansTC-ui-common.woff2"]` | 1 | i18n.spec.ts |
 | `head link[rel="preload"][href="/api/me"]` | 1 | ssr-session.spec.ts |
 | `main.content` | 15 | live/platform.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, summaries.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
+| `main.content .settings-back-header` | 1 | settings-header.spec.ts |
 | `main.loading` | 2 | i18n.spec.ts |
 | `meta[name="robots"]` | 1 | summaries.spec.ts |
 | `nav.tabbar` | 2 | today.spec.ts, ui-v2.spec.ts |
@@ -1150,6 +1152,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `accountIdentifier` | 5 | sms-auth.spec.ts, username-auth.spec.ts |
 | `actions.undo` | 18 | brief.spec.ts, live/brief.spec.ts, project-profile.spec.ts, task-contacts.spec.ts |
 | `agent` | 6 | agent-creation.spec.ts, planning.spec.ts |
+| `agentProfile.back` | 2 | settings-header.spec.ts |
 | `agentProfile.noSupervisor` | 1 | agent-creation.spec.ts |
 | `agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `agentProfile.supervisedBy` | 1 | agent-creation.spec.ts |
@@ -1215,6 +1218,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `home.headline2` | 3 | home-layout.spec.ts, landing.spec.ts |
 | `home.headline3` | 2 | home-layout.spec.ts, landing.spec.ts |
 | `loading` | 4 | completion.spec.ts, i18n.spec.ts, ui-v2.spec.ts |
+| `mcp.back` | 6 | settings-header.spec.ts |
 | `mcp.cancel` | 7 | access.spec.ts, token-grants.spec.ts |
 | `mcp.confirmRevoke` | 5 | access.spec.ts |
 | `mcp.grantActive` | 12 | access.spec.ts, token-grants.spec.ts |
@@ -1256,7 +1260,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `nav.calendar` | 1 | calendar.spec.ts |
 | `nav.label` | 1 | calendar.spec.ts |
 | `nav.me` | 1 | ui-v2.spec.ts |
-| `notifications.title` | 1 | notifications.spec.ts |
+| `notifications.title` | 2 | notifications.spec.ts, settings-header.spec.ts |
 | `oauth.approve` | 1 | mcp-oauth.spec.ts |
 | `oauth.invalid` | 1 | mcp-oauth.spec.ts |
 | `oauth.noAgent` | 1 | agent-creation.spec.ts |

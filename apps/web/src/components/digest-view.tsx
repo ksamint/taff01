@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { useDailyDigest, useDailyDigests } from "../lib/notification-queries";
 import { useWorkspace } from "./app-shell";
+import { SettingsBackHeader } from "./settings-back-header";
 import { Button } from "./ui/button";
 
 function localDay(digest: DailyDigest, locale: string) {
@@ -23,10 +24,11 @@ export function DailyDigestsView() {
   const digests = useDailyDigests(workspace.id);
   const locale = i18n.resolvedLanguage ?? me.user.locale;
   return (
-    <>
-      <Link className="text-link" href="/me/notifications">
-        {t("notifications.title")}
-      </Link>
+    <div className="settings-page-gutter">
+      <SettingsBackHeader
+        href="/me/notifications"
+        label={t("notifications.title")}
+      />
       <section className="page-heading">
         <p className="eyebrow">{workspace.name}</p>
         <h1>{t("notifications.history")}</h1>
@@ -74,7 +76,7 @@ export function DailyDigestsView() {
           <p>{t("digest.emptyHint")}</p>
         </div>
       )}
-    </>
+    </div>
   );
 }
 export function DailyDigestView({ id }: { id: string }) {

@@ -3,22 +3,6 @@
   min-width: 0;
   background: var(--bg);
 }
-.agent-profile-toolbar {
-  height: 52px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  border-bottom: 1px solid var(--border-line);
-}
-.agent-profile-parity .agent-profile-toolbar .back-link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  padding: 0 8px;
-  min-height: 44px;
-  font-size: 13px;
-}
 .agent-profile-body {
   padding: 20px 20px 48px;
   display: flex;

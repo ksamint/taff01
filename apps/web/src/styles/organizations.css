@@ -4,7 +4,7 @@ button.org-card {
   min-height: 44px;
 }
 .organizations-view.team-only
-  > :is(.organization-toolbar, .page-heading, .org-grid, .button, .me-section) {
+  > :is(.page-heading, .org-grid, .button, .me-section) {
   display: none;
 }
 
