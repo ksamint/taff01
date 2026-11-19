@@ -31,6 +31,7 @@ test("board reads task access on demand and keeps a non-owner member read-only",
   browser,
 }, info) => {
   const locale = info.project.name as TestLocale;
+  await page.setViewportSize({ width: 412, height: 915 });
   const admin = await freshAccount(page, locale);
   await verifyTestEmail(page, admin.user.id);
   const [workspace] = admin.workspaces;
@@ -48,7 +49,8 @@ test("board reads task access on demand and keeps a non-owner member read-only",
           workspaceId: workspace.id,
           projectId: project.id,
           ownerId: workspace.memberId,
-          title: "Owned by the administrator",
+          title: "Prepare the brief",
+          dueAt: "2026-11-19T07:00:00.000Z",
         },
       })
     ).json(),
@@ -71,7 +73,18 @@ test("board reads task access on demand and keeps a non-owner member read-only",
   await expect(card).toBeVisible();
   await page.waitForLoadState("networkidle");
   expect(accessReads).toEqual([]);
-  await card.locator("summary").click();
+  const menu = card.locator("summary");
+  const title = await card.getByRole("heading").boundingBox();
+  expect((await card.boundingBox())!.height).toBeLessThanOrEqual(120);
+  for (const target of [card.getByTestId("drag-handle"), menu]) {
+    const box = (await target.boundingBox())!;
+    expect(box.width).toBeGreaterThanOrEqual(44);
+    expect(box.height).toBeGreaterThanOrEqual(44);
+    expect(box.y + box.height).toBeLessThanOrEqual(title!.y);
+  }
+
+  await menu.focus();
+  await menu.press("Enter");
   await expect(card.getByTestId("board-status")).toBeEnabled();
   expect(accessReads).toEqual([accessPath]);
 

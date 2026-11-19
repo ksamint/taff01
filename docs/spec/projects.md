@@ -37,6 +37,13 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
 - PR-2.2 When a person loses admin authority with a profile dialog open, the client shall remove the editor after the confirmed access state updates.
 - PR-2.3 When a non-guest project lead has stage authority, the existing stage-only control shall remain available without granting profile-edit authority.
 
+### Board cards (PR-3)
+
+- PR-3.1 The board card shall place its drag handle and status menu on
+  the first row. Both targets shall be at least 44 × 44 CSS px.
+- PR-3.2 On a 412 × 915 phone viewport, a card with a one-line title, a
+  due date and one owner shall be at most 120 CSS px tall when closed.
+
 ## Non-functional
 
 - The existing `POST /api/projects` and versioned `PATCH /api/projects/:id`
@@ -61,6 +68,7 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
 | PR-1.6–1.7 | `e2e/project-profile.spec.ts` rejected stage rollback and stale delivery edit; `apps/web/src/lib/mutations/cache-updates.test.ts` |
 | PR-1.8 | `e2e/project-profile.spec.ts` real PNG/header-hash before/after; `packages/core/src/summary-model.test.ts`; `packages/core/src/view-export.integration.test.ts` |
 | PR-1.9 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
+| PR-3 | `e2e/board-access.spec.ts`, card height, target sizes and controls in three locales |
 | PR-2.1–2.3 | `e2e/project-profile.spec.ts` member/lead reads, rejected field writes, stage control and open-editor authority loss; `packages/core/src/permissions.test.ts` |
 
 ## Open decisions

@@ -1391,13 +1391,56 @@ const BoardCard = memo(function BoardCard({
       data-task-id={task.id}
     >
       <div className="projects-card-top">
-        <span className="projects-task-reference">{reference(task)}</span>
-        <span
-          className="task-due"
-          aria-label={dueLabel ? undefined : t("taskDetail.unscheduled")}
-        >
-          {dueLabel}
-        </span>
+        <div className="projects-card-meta">
+          <span className="projects-task-reference">{reference(task)}</span>
+          <span
+            className="task-due"
+            aria-label={dueLabel ? undefined : t("taskDetail.unscheduled")}
+          >
+            {dueLabel}
+          </span>
+        </div>
+        <div className="projects-card-actions">
+          <Button
+            data-testid="drag-handle"
+            className="button-quiet drag-handle"
+            disabled={busy || !confirmed || task.id.startsWith("optimistic:")}
+            aria-label={t("projects.drag")}
+            aria-describedby={dragHintId}
+            onPointerDown={(event) => dragStart(event, task)}
+          >
+            <GripVertical size={16} aria-hidden="true" />
+          </Button>
+          <details
+            className="projects-card-menu"
+            onToggle={(event) => setMenuOpen(event.currentTarget.open)}
+          >
+            <summary aria-label={t("planning.status")}>
+              <MoreHorizontal size={16} aria-hidden="true" />
+            </summary>
+            <div className="projects-card-menu-body">
+              <select
+                data-testid="board-status"
+                aria-label={t("planning.status")}
+                disabled={busy || !allowed.length}
+                value={task.status}
+                onChange={(event) => {
+                  const status = event.target.value as Task["status"];
+                  if (allowed.includes(status)) move(task, status);
+                }}
+              >
+                {[...new Set([task.status, ...allowed])].map((status) => (
+                  <option key={status} value={status}>
+                    {t(`status.${status}`)}
+                  </option>
+                ))}
+              </select>
+              <span className="projects-card-priority">
+                {t(`planning.${PRIORITIES[task.priority - 1]}`)}
+              </span>
+            </div>
+          </details>
+        </div>
       </div>
       <h3 className="projects-card-title">
         <TaskLink task={task} />
@@ -1445,47 +1488,6 @@ const BoardCard = memo(function BoardCard({
             )}
           </>
         )}
-      </div>
-      <div className="board-card-bottom">
-        <Button
-          data-testid="drag-handle"
-          className="button-quiet drag-handle"
-          disabled={busy || !confirmed || task.id.startsWith("optimistic:")}
-          aria-label={t("projects.drag")}
-          aria-describedby={dragHintId}
-          onPointerDown={(event) => dragStart(event, task)}
-        >
-          <GripVertical size={16} aria-hidden="true" />
-        </Button>
-        <details
-          className="projects-card-menu"
-          onToggle={(event) => setMenuOpen(event.currentTarget.open)}
-        >
-          <summary aria-label={t("planning.status")}>
-            <MoreHorizontal size={16} aria-hidden="true" />
-          </summary>
-          <div className="projects-card-menu-body">
-            <select
-              data-testid="board-status"
-              aria-label={t("planning.status")}
-              disabled={busy || !allowed.length}
-              value={task.status}
-              onChange={(event) => {
-                const status = event.target.value as Task["status"];
-                if (allowed.includes(status)) move(task, status);
-              }}
-            >
-              {[...new Set([task.status, ...allowed])].map((status) => (
-                <option key={status} value={status}>
-                  {t(`status.${status}`)}
-                </option>
-              ))}
-            </select>
-            <span className="projects-card-priority">
-              {t(`planning.${PRIORITIES[task.priority - 1]}`)}
-            </span>
-          </div>
-        </details>
       </div>
     </li>
   );

@@ -409,8 +409,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 12px 12px 0;
+  gap: 6px;
+  padding: 4px 12px 10px;
   border: 1px solid var(--border);
   background: var(--bg);
   transition: border-color var(--dur-fast) var(--ease-standard);
@@ -426,11 +426,19 @@
   opacity: 0.4;
 }
 .projects-card-top {
+  position: relative;
   display: flex;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
   font-size: 12px;
   color: var(--text-subtle);
+}
+.projects-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: 0 8px;
 }
 .projects-task-reference {
   font-family: var(--font-mono);
@@ -571,14 +579,14 @@
   display: none;
 }
 /* Keyboard and menu alternative to the drag (always reachable). */
-.projects-view .board-card-bottom {
-  position: relative;
+.projects-card-actions {
   z-index: 1;
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin: -6px -12px 0;
+  flex: none;
+  margin-inline-end: -10px;
+}
+.projects-card-top:has(.projects-card-menu[open]) {
+  z-index: 2;
 }
 .projects-view .drag-handle.button {
   width: 44px;
@@ -587,15 +595,6 @@
   color: var(--text-subtle);
   touch-action: none;
   cursor: grab;
-}
-.projects-card-menu {
-  display: flex;
-  flex-direction: row-reverse;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  min-width: 44px;
 }
 .projects-card-menu > summary {
   display: flex;
@@ -616,9 +615,16 @@
   background: var(--bg-container-low);
 }
 .projects-card-menu-body {
+  position: absolute;
+  inset: 100% 0 auto auto;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-control);
+  background: var(--bg);
 }
 .projects-card-menu-body select {
   min-height: 44px;
@@ -976,10 +982,6 @@
     padding: 0 4px;
     font-size: 13px;
     font-weight: 600;
-  }
-  .projects-view .board-card {
-    gap: 8px;
-    padding: 10px 12px 0;
   }
   .projects-card-title {
     font-size: 13px;

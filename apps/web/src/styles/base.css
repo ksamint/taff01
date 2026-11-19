@@ -1183,15 +1183,6 @@ time {
   touch-action: none;
   cursor: grab;
 }
-.board-card-bottom {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.board-card-bottom select {
-  flex: 1;
-  min-width: 0;
-}
 .quick-preview {
   padding: 16px;
   background: var(--bg-surface);

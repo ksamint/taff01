@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (501 distinct, 2317 uses)
+## Test ids (501 distinct, 2318 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -503,7 +503,7 @@ several do). “Also rendered by” lists the other files.
 | `board-column-todo` | 2 |  | board-access.spec.ts, planning.spec.ts |
 | `board-status` | 6 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `board-task` | 25 |  | board-access.spec.ts, live/release/checklist.spec.ts, operation-templates.spec.ts, planning.spec.ts, project-header.spec.ts, release/checklist.spec.ts, scripts/perf-lcp.mts, ui-v2.spec.ts |
-| `drag-handle` | 8 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
+| `drag-handle` | 9 |  | board-access.spec.ts, live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts, ui-v2.spec.ts |
 | `manage-project` | 7 |  | project-profile.spec.ts, summaries.spec.ts |
 | `new-project` | 7 |  | live/release/checklist.spec.ts, planning.spec.ts, project-filter-completion.spec.ts, project-profile.spec.ts, release/checklist.spec.ts |
 | `project-delivery-progress` | 1 |  | project-profile.spec.ts |
@@ -880,7 +880,7 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.crm.contacts.add` | 3 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: title` | 1 | view-export.spec.ts |
-| `heading` | 7 | audit.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
+| `heading` | 8 | audit.spec.ts, board-access.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
 | `heading — name: m.agentProfile.permissions` | 1 | delivery-visual.spec.ts |
 | `heading — name: m.me.preferences` | 1 | planning.spec.ts |
 | `heading — name: m.me.title` | 1 | me.spec.ts |
