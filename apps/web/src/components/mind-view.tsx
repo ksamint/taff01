@@ -569,7 +569,7 @@ function MindCanvas({
             })}
             <circle r={36} className="mind-core" />
             <text
-              y={5}
+              y={Math.max(5, 15 / k)}
               fontSize={Math.max(13, 12 / k)}
               className="mind-core-label"
             >

@@ -423,3 +423,22 @@ test("turn a node into a validation task owned by the person", async ({
   await expect(page).toHaveURL(new RegExp(`/tasks/${task.id}`));
   await expect(page.getByTestId("task-detail-heading")).toBeVisible();
 });
+
+test("the mind canvas separates the two centre labels at its default zoom", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const workspace = await setUp(page, locale);
+  await addNode(page, workspace, { title: "Probe", layer: 0, angle: 90 });
+  await addNode(page, workspace, { title: "Outer", layer: 7, angle: 90 });
+  await page.goto("/projects?view=mind");
+  const core = page.locator(".mind-core-label");
+  const inner = page.locator(".mind-ring-label").first();
+  await expect(core).toBeVisible();
+  await expect(inner).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  const coreBox = await core.boundingBox();
+  const innerBox = await inner.boundingBox();
+  if (!coreBox || !innerBox) throw new Error("Missing centre labels");
+  expect(coreBox.y).toBeGreaterThanOrEqual(innerBox.y + innerBox.height);
+});

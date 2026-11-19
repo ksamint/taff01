@@ -1020,6 +1020,8 @@ read (`data-event-id`, `data-date`).
 | `.me-rows a[href="*"]` | 3 | me.spec.ts |
 | `.me-section` | 1 | planning.spec.ts |
 | `.member-role-row` | 1 | agent-creation.spec.ts |
+| `.mind-core-label` | 1 | mind.spec.ts |
+| `.mind-ring-label` | 1 | mind.spec.ts |
 | `.notifications-body` | 1 | notifications.spec.ts |
 | `.organization-choices` | 1 | scripts/ui/app-shots.mts |
 | `.organizations-view` | 1 | planning.spec.ts |
