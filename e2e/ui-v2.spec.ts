@@ -262,8 +262,8 @@ test(`${screen} uses the real Northwind fixture`, async ({
             return { x, y, width, height };
           };
           return {
-            footer: rect(".projects-card-footer"),
-            status: rect(".projects-agent-state-desktop"),
+            firstRow: rect(".projects-card-top"),
+            title: rect(".projects-card-title"),
             handle: rect('[data-testid="drag-handle"]'),
             menu: rect(".projects-card-menu > summary"),
           };
@@ -281,11 +281,13 @@ test(`${screen} uses the real Northwind fixture`, async ({
         for (const control of [state.handle, state.menu]) {
           expect(control.width).toBeGreaterThanOrEqual(44);
           expect(control.height).toBeGreaterThanOrEqual(44);
-          for (const label of [state.footer, state.status])
-            expect(
-              control.y,
-              "Board actions must sit below footer chips and run status",
-            ).toBeGreaterThanOrEqual(label.y + label.height);
+          expect(control.y).toBeGreaterThanOrEqual(state.firstRow.y);
+          expect(
+            control.y + control.height,
+            "Board actions must fit in the first row above the title",
+          ).toBeLessThanOrEqual(
+            Math.min(state.firstRow.y + state.firstRow.height, state.title.y),
+          );
         }
       }
       await card.locator("a.task-title-link").focus();
