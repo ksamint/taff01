@@ -29,9 +29,15 @@ export async function prepareFonts(
   // Load this text's computed font stack before selecting capture faces; loading
   // every rule instead would fetch unrelated CJK subsets on English screens.
   document.body.getBoundingClientRect();
-  const text = document.body.innerText;
-  if (text)
-    await document.fonts.load(getComputedStyle(document.body).font, text);
+  // Me's separate common subset uses a different computed font stack.
+  const scopes = [
+    document.body,
+    ...document.querySelectorAll<HTMLElement>(".me-view, .me-desk"),
+  ];
+  for (const scope of scopes) {
+    const text = scope.innerText;
+    if (text) await document.fonts.load(getComputedStyle(scope).font, text);
+  }
   await document.fonts.ready;
   const active = [...document.fonts].filter((face) => face.status === "loaded");
   const state = window as typeof window & {
