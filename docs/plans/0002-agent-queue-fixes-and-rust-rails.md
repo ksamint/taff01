@@ -13,7 +13,7 @@
 
 ## How to work this queue
 
-One task per branch and PR from the latest `main`, except the related G1–G4
+One task per branch and PR from the latest `main`, except the related G1, G3 and G4
 GUI findings are grouped into one GUI PR to reduce repeated validation after
 the owner's 2026-11-16 request to accelerate. Gate **F** = the full
 `pnpm check` reports `passed` on the PR head rebased on `main`; paste
@@ -43,9 +43,9 @@ does not apply. Release as v0.2.26 with H1–H4 if any ships.
 | ID | Task | Deps | Tests | Acceptance | Gate |
 | --- | --- | --- | --- | --- | --- |
 | G1 | Review workspace on a phone (`/tasks/:id/review`, `review-view.tsx`): the 交付物 heading and the deliverable card touch the screen edge while the title above keeps the page gutter. Give the layout the same gutter as the title. | L1 | A phone case in three locales asserting the card's left and right edges sit inside the page gutter | No horizontal scroll; desktop unchanged | F |
-| G2 | Shareholder summaries list on a phone (`/summaries`, `summaries-view.tsx`): the back link is an unstyled arrow and text in the corner, and the empty card runs edge to edge. Use the bordered back header the other Me pages use and the page gutter. | L1 | Phone case, three locales, empty and one-summary states | Back header matches `/orgs`; empty card inside the gutter | F |
+| G2 | Superseded by plan 0003 S5, which adds the shared settings back header and page gutter. | — | See plan 0003 S5 | See plan 0003 S5 | — |
 | G3 | `summary.emptyHint` uses a half-width comma in zh-HK and zh-CN (`收件人後,摘要`). Use `，`. Six strings in each locale have a half-width comma or full stop between CJK characters on `455c549`; fix each real one. | — | A locale test that fails on `[一-鿿],[一-鿿]` in zh-CN and zh-HK | Zero matches; font subsets still cover every glyph (`fonts.test.ts`) | F |
-| G4 | Visual references for the two newest screens: Sectors (with six tagged tasks seeded in the test) and the Export image dialog, phone and desktop, en and zh-HK, light. | G1, G2 | The pinned Linux visual run, new references committed with their capture manifest | References reviewed by eye and attached to the milestone | F |
+| G4 | Visual references for the two newest screens: Sectors (with six tagged tasks seeded in the test) and the Export image dialog, phone and desktop, en and zh-HK, light. | G1, 0003 S5 | The pinned Linux visual run, new references committed with their capture manifest | References reviewed by eye and attached to the milestone | F |
 | G5 | Desktop `/me` and `/inbox` rendered the identical page. Report whether that is the designed Me hub opening on its Inbox tab. No code change without an answer. | — | — | One line in the milestone; `NEEDS-DECISION` only if it is not by design | — |
 
 ## R0 · Rust rails (plan 0001, Wave 0)

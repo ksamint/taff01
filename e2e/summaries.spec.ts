@@ -47,47 +47,7 @@ test("a linked recipient reaches summaries from desktop Me and search", async ({
 }, info) => {
   const locale = info.project.name as TestLocale;
   const me = await freshAccount(page, locale);
-  await page.setViewportSize({ width: 390, height: 844 });
-  const checkPhoneLayout = async (state: "empty" | "one") => {
-    const target =
-      state === "empty"
-        ? page.getByTestId("summary-empty")
-        : page.locator(".summaries-page .task-list > li").first();
-    await expect(target).toBeVisible();
-    const bounds = await target.evaluate((element) => {
-      const root = element.closest(".summaries-page")!;
-      const page = root.getBoundingClientRect();
-      const card = element.getBoundingClientRect();
-      return {
-        pageLeft: page.left,
-        pageRight: page.right,
-        left: card.left,
-        right: card.right,
-        gutter: Number.parseFloat(
-          getComputedStyle(root).getPropertyValue("--gutter"),
-        ),
-        scrollWidth: document.documentElement.scrollWidth,
-        viewportWidth: window.innerWidth,
-      };
-    });
-    await info.attach(`summary-${state}-phone-bounds`, {
-      body: JSON.stringify(bounds),
-      contentType: "application/json",
-    });
-    await page.screenshot({
-      path: info.outputPath(`summary-${state}-phone.png`),
-    });
-    const toolbar = page.locator(".summaries-page > .organization-toolbar");
-    await expect(toolbar).toBeVisible();
-    await expect(toolbar).toHaveCSS("border-bottom-width", "1px");
-    await expect(toolbar.locator("a.button")).toHaveAttribute("href", "/me");
-    expect(bounds.gutter).toBeGreaterThan(0);
-    expect(bounds.left).toBeGreaterThanOrEqual(bounds.pageLeft + bounds.gutter);
-    expect(bounds.right).toBeLessThanOrEqual(bounds.pageRight - bounds.gutter);
-    expect(bounds.scrollWidth).toBeLessThanOrEqual(bounds.viewportWidth);
-  };
-  await page.goto("/summaries");
-  await checkPhoneLayout("empty");
+  await page.setViewportSize({ width: 1440, height: 1000 });
   const workspace = me.workspaces[0];
   const tagResponse = await page.request.post(
     `/api/workspaces/${workspace.id}/audience-tags`,
@@ -122,10 +82,6 @@ test("a linked recipient reaches summaries from desktop Me and search", async ({
   const row = page.locator(
     `[data-testid="summary-row"][data-summary="${summaryId}"]`,
   );
-  await page.reload();
-  await expect(row).toBeVisible();
-  await checkPhoneLayout("one");
-  await page.setViewportSize({ width: 1440, height: 1000 });
 
   await page.goto("/me?tab=settings");
   await page.getByTestId("open-summaries").click();

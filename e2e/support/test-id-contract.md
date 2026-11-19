@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (493 distinct, 2285 uses)
+## Test ids (492 distinct, 2284 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -663,12 +663,6 @@ several do). “Also rendered by” lists the other files.
 | `summary-preview-open` | 1 |  | summaries.spec.ts |
 | `summary-row` | 3 | summaries-view.tsx | summaries.spec.ts |
 
-### summaries-view.tsx
-
-| Test id | Uses | Also rendered by | Used in |
-| --- | ---: | --- | --- |
-| `summary-empty` | 1 |  | summaries.spec.ts |
-
 ### summary-document.tsx
 
 | Test id | Uses | Also rendered by | Used in |
@@ -1019,8 +1013,6 @@ read (`data-event-id`, `data-date`).
 | `.sidebar-primary .sidebar-sublink[href="/companies"]` | 1 | ui-v2.spec.ts |
 | `.sidebar-primary .sidebar-sublink[href="/contacts"]` | 1 | ui-v2.spec.ts |
 | `.sidebar-workspace > summary` | 1 | ui-v2.spec.ts |
-| `.summaries-page .task-list > li` | 1 | summaries.spec.ts |
-| `.summaries-page > .organization-toolbar` | 1 | summaries.spec.ts |
 | `.tabbar` | 3 | live/platform.spec.ts, me.spec.ts, ui-v2.spec.ts |
 | `.tabbar a` | 1 | live/platform.spec.ts |
 | `.task-detail-sheet .task-detail-toolbar` | 1 | ui-v2.spec.ts |
@@ -1081,7 +1073,6 @@ read (`data-event-id`, `data-date`).
 | `#password-hint` | 1 | username-auth.spec.ts |
 | `#scroll` | 1 | native-select-fonts.spec.ts |
 | `#team` | 1 | scripts/ui/app-shots.mts |
-| `a.button` | 1 | summaries.spec.ts |
 | `a.inbox-source-title[href="/tasks/*/review"]` | 2 | scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `a.task-title-link` | 2 | ui-v2.spec.ts |
 | `a.task-title-link[href="/tasks/*"]` | 3 | scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ui-v2.spec.ts |

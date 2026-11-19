@@ -89,9 +89,6 @@ Each statement is testable. "Shall" is a hard requirement.
   badge and accessible progress and finance bars, counted sections, and a confidential footer.
 - DS-5.3 Dates and times shall be formatted in the reader's locale and zone; all strings exist in en,
   zh-CN and zh-HK. Chinese summary copy shall use full-width commas and full stops between CJK characters.
-- DS-5.4 The summary list shall use the bordered organization back header.
-  On phones its empty card and populated rows shall retain the page gutter
-  without horizontal overflow in en, zh-CN and zh-HK.
 
 ### Share links (DS-6)
 
@@ -174,7 +171,6 @@ slipped as a list; a second audience kind.
 | DS-6.5, DS-6.6 | `apps/api/src/summaries.test.ts` (7 cases) |
 | DS-1.3, DS-1.4, DS-5.2, DS-5.3, DS-6.4 | `e2e/summaries.spec.ts` in en, zh-CN and zh-HK (layout tiles, progress bar, confidential footer); summary visual references to be recaptured by the pinned Linux pipeline |
 | DS-5.3 Chinese punctuation | `apps/web/src/lib/i18n.test.ts`; `scripts/ui/fonts.test.ts` glyph coverage |
-| DS-5.4 | `e2e/summaries.spec.ts` empty and populated 390×844 list, bordered back header and desktop navigation in all three locales |
 | DS-3.1 end to end | live run recorded in `docs/milestones/87-daily-summary-delivery.md` |
 | DS-8.1, DS-8.5 | apps/worker/src/summaries.test.ts; summaries.integration.test.ts |
 | DS-8.2 | summary-layout.test.ts (7 cases); summary-text.test.ts; three locale text goldens |

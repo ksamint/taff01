@@ -289,11 +289,6 @@
   gap: var(--space-md);
   padding-bottom: var(--space-xxl);
 }
-@media (max-width: 639px) {
-  .summaries-list-page > :is(.task-list, .empty-state) {
-    margin-inline: var(--gutter);
-  }
-}
 .summary-share-panel,
 .summaries-admin section {
   display: grid;
