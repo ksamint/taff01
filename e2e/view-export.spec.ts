@@ -234,7 +234,8 @@ for (const graphKind of ["mind", "relations"] as const)
       return { hash, query, png };
     };
     if (graphKind === "mind") {
-      await page.goto(`/projects/${project.id}?view=mind`);
+      await page.goto(`/projects/${project.id}?view=relations`);
+      await page.getByTestId("project-graph-mode-mind").click();
       await expect(page.getByTestId("mind-view")).toBeVisible();
       const mind = await exportGraph("mind", "mind-current");
       expect(mind.query.get("archived")).toBe("exclude");
@@ -246,7 +247,8 @@ for (const graphKind of ["mind", "relations"] as const)
       expect(included.png.equals(mind.png)).toBe(false);
       return;
     }
-    await page.goto(`/projects/${project.id}?view=relations`);
+    await page.goto(`/projects/${project.id}?view=mind`);
+    await page.getByTestId("project-graph-mode-relations").click();
     await expect(page.getByTestId("relations-view")).toBeVisible();
     await page.getByTestId("relations-as-list").click();
     await expect(page.getByTestId("view-export-open")).toHaveCount(0);

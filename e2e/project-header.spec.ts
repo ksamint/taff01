@@ -51,7 +51,6 @@ test("phone project header fits the board and preserves views and CRM navigation
     "timeline",
     "stakeholders",
     "relations",
-    "mind",
     "sectors",
     "board",
   ]) {

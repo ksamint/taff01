@@ -98,6 +98,7 @@ const MindView = dynamic(
   { ssr: false },
 );
 const PRIORITIES = ["urgent", "high", "medium", "low"] as const;
+const GRAPH_MODES = ["relations", "mind"] as const;
 const VIEW_LABEL: Record<ProjectView, string> = {
   board: "projects.boardView",
   list: "projects.listView",
@@ -197,6 +198,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const workspaceAccess = useWorkspaceAccess(workspace.id);
   const busy = useIsMutating({ mutationKey: m3MutationKey }) > 0;
   const view = parseProjectView(searchParams.get("view"));
+  const showGraphModes = view === "relations" || view === "mind";
   const agentId = searchParams.get("agent");
   const [sheetOpen, setSheetOpen] = useState(false);
   const [activeColumn, setActiveColumn] = useState<Task["status"]>("todo");
@@ -863,6 +865,33 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           </div>
         </SheetDialog>
       )}
+      {showGraphModes && (
+        <nav
+          className="projects-graph-modes"
+          aria-label={t("projects.graphView")}
+        >
+          <span className="projects-segment">
+            {GRAPH_MODES.map((mode) => (
+              <Link
+                key={mode}
+                className={`projects-view-tab${view === mode ? " is-active" : ""}`}
+                data-testid={`project-graph-mode-${mode}`}
+                href={
+                  view === mode
+                    ? viewHref(mode)
+                    : hrefWith({ view: mode, node: null })
+                }
+                aria-current={view === mode ? "page" : undefined}
+                prefetch={false}
+                replace
+                scroll={false}
+              >
+                {t(VIEW_LABEL[mode])}
+              </Link>
+            ))}
+          </span>
+        </nav>
+      )}
       <p className="sr-only" id={dragHintId}>
         {t("projects.dragHint")}
       </p>
@@ -1228,8 +1257,12 @@ function MoreViews({
       document.removeEventListener("keydown", escape);
     };
   }, [open]);
-  const active = compact || (MORE_VIEWS as readonly string[]).includes(view);
+  const selected = view === "mind" ? "relations" : view;
+  const active =
+    compact || (MORE_VIEWS as readonly string[]).includes(selected);
   const options = compact ? [...PRIMARY_VIEWS, ...MORE_VIEWS] : MORE_VIEWS;
+  const label = (item: ProjectView) =>
+    item === "relations" ? "projects.graphView" : VIEW_LABEL[item];
   return (
     <div
       className="projects-more"
@@ -1247,7 +1280,7 @@ function MoreViews({
         aria-controls={menuId}
         onClick={() => setOpen(!open)}
       >
-        {t(active ? VIEW_LABEL[view] : "projects.moreViews")}
+        {t(active ? label(selected) : "projects.moreViews")}
         <ChevronDown size={12} aria-hidden="true" />
       </button>
       {open && (
@@ -1255,14 +1288,14 @@ function MoreViews({
           {options.map((item) => (
             <li key={item}>
               <Link
-                href={href(item)}
+                href={href(selected === item ? view : item)}
                 data-testid={`project-view-${item}`}
-                aria-current={view === item ? "page" : undefined}
+                aria-current={selected === item ? "page" : undefined}
                 replace
                 scroll={false}
                 onClick={() => setOpen(false)}
               >
-                {t(VIEW_LABEL[item])}
+                {t(label(item))}
               </Link>
             </li>
           ))}

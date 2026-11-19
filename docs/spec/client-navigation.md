@@ -48,6 +48,11 @@ is implemented for v0.2.26, not yet deployed.
 - CN-3.4 When a phone project board has a task in its first column, the first
   card shall start above 240 CSS px on the 412 × 915 phone profile.
 
+- CN-3.5 The Projects selector shall offer one Graph entry. The Graph view
+  shall allow readers to switch between Relations and Mind map, and links
+  with `?view=relations` and `?view=mind` shall retain their destinations.
+  Editing and export shall retain each mode's existing authority.
+
 ### Board task access (CN-4)
 
 - CN-4.1 When a board card loads, the browser shall defer its task-access
@@ -130,6 +135,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-4 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
 | CN-5 | `e2e/settings-header.spec.ts` in en, zh-CN, and zh-HK; `e2e/mcp-oauth.spec.ts` |
 | CN-6 | `e2e/me.spec.ts`, settings links and workspace roles |
+| CN-3.5 | `e2e/project-graph-view.spec.ts` and `e2e/view-export.spec.ts` in three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |
