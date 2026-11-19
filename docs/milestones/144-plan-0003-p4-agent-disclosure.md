@@ -10,7 +10,6 @@ Plan 0003 P4 · 2026-11-19 · local candidate.
   records the existing workspace authority and new request timing.
 
 Validation: lint, typecheck, font coverage and test-ID contract passed (6
-focused tests). The English phone case passed on the local production build
+focused tests). The production phone case passed in en, zh-CN, and zh-HK
 with a guest, zero profile reads on entry, and one read on opening Details.
-The two Chinese locale runs, pinned visual references, and full gate are
-pending.
+Pinned Linux references and the exact-tree full gate are pending.
