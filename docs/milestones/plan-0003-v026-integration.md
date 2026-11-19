@@ -16,3 +16,6 @@
   Hub access failed. The integration uses an isolated Taff builder with
   Google's public registry mirror. The full gate on the integrated tree
   and the direct release are pending.
+- The integrated gate stopped before Playwright when Next.js reported a
+  security advisory on 16.4.2. The candidate now locks 16.4.5, the patch
+  listed in GHSA-mfr8-8qww-v76h and GHSA-vc7v-qv4w-wrv8.
