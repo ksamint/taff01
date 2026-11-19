@@ -3222,3 +3222,20 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Annotated `v0.2.25` verified on origin: tag object `d4ff2994e2ab918a07d3e5962ad7aeee22691504` peels to the exact deployed source. Check6 docs PR105 merged as `a67520db105ca048036453b9842641a33ca93fd9`. Checks 7–8 then passed: receipt accepted, deployment.done contains only the source SHA, keeper logged LOCK_RELEASED and removed its owner file; independent nonblocking flock at 2026-11-14T04:03:01.786Z acquired the lock and confirmed accepted images stable and API healthy. No lock held. Native receipt location: `/srv/taff/v25-direct-e5a42c51eb8f096b94c34eaa052657afbb00a3d3/receipt.json`.
 - Owner decisions: 2026-11-13 “yes for all”; Claude.ai “Run that check later without the lock.” All four [owner checks](owner-checks.md) remain pending after unlock: actual summary download, Claude.ai usage, native phone image sharing and Twin image-to-chat. They never hold the keeper or enter `deployment.done`.
 - Rollback retains accepted v0.2.24 `ff411c6d035a64bb5ad1d91388245e910a81eb6b` four images and env backup, preserving current data; no rollback was needed. Original `25bb821` PNG failure remains unexplained despite one focused and 12 unchanged diagnostic passes; the independent audit-status defect was fixed without a causal claim. Known native-select capture variation remains recorded; assertions, retries, tolerances and baselines were not weakened. Old branches retained.
+
+### UI simplification v0.2.26 checkpoint · 2026-11-20 SGT
+
+- Source `f4492d4a1970833d944fb58d0415cbb4c68ca8f6`, tree
+  `6ec3699f9968d3ceccd99564a5d85fd9e0c7e43e`. The [integrated PR](https://github.com/ksamint/taff01/pull/111)
+  merged with the exact same tree. The annotated v0.2.26 tag on origin
+  resolves to the deployed source.
+- The 18-step local gate and six pinned delivery comparisons passed. The
+  [milestone](milestones/156-v0.2.26.md) records behavior and test counts.
+- The [deploy report](../deploy/reports/20261119T163932Z-6ec3699f9968.md)
+  records archive and backup hashes, the unchanged journal and the
+  replacement identities. The four versioned images passed runtime checks,
+  live read-only acceptance passed and 31 neighboring containers matched
+  the snapshot. v0.2.25 remains available for rollback.
+- Closeout checks 7–8 record the receipt, accepted marker, keeper release
+  and independent lock probe after this docs checkpoint. Owner-only checks
+  are tracked in [owner checks](owner-checks.md).
