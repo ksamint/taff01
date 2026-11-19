@@ -436,20 +436,12 @@ test(`${screen} uses the real Northwind fixture`, async ({
         ).toBeVisible();
       } else if (screen === "projects" || screen === "type") {
         await expect(page.getByTestId("board-task")).toHaveCount(12);
-        // Each card reads its own task access; its drag handle stays
-        // disabled (lighter) until that read lands. Wait until every handle
-        // shows the state the API reports, so the capture never races it.
-        for (const card of await page.getByTestId("board-task").all()) {
-          const taskId = await card.getAttribute("data-task-id");
-          const response = await request.get(`/api/tasks/${taskId}/access`);
-          expect(response.ok()).toBe(true);
-          const { allowedStatuses } = (await response.json()) as {
-            allowedStatuses: string[];
-          };
-          const handle = card.getByTestId("drag-handle");
-          if (allowedStatuses.length) await expect(handle).toBeEnabled();
-          else await expect(handle).toBeDisabled();
-        }
+        // Drag targets become active with the confirmed workspace. Individual
+        // task permissions are read when the viewer starts a drag or opens a menu.
+        const handles = page.getByTestId("drag-handle");
+        await expect(handles).toHaveCount(12);
+        for (const handle of await handles.all())
+          await expect(handle).toBeEnabled();
       } else if (screen === "task-detail" || screen === "review") {
         await expect(page.getByTestId("task-detail-heading")).toBeVisible();
       } else if (screen === "calendar") {
