@@ -9,6 +9,8 @@ Plan 0003 P5 · 2026-11-19 · local candidate.
 - [Client navigation CN-4](../spec/client-navigation.md#tasks-on-today-cn-4)
   records the contract. The phone case covers en, zh-CN and zh-HK.
 
-Validation: focused Today classifier, font and test-ID checks passed (7 tests).
-`pnpm typecheck` and `git diff --check` passed. Production-mode browser cases,
-four pinned Linux Today references and the full local gate are pending.
+Validation: lint, typecheck, and seven focused classifier, font and test-ID
+checks passed. All three production phone locale checks passed on the
+combined P5 and Q7 build. The realtime case opens the disclosure before
+each timed check, leaving its one-second assertions in place. Four pinned
+Linux Today references and the exact-tree full gate are pending.

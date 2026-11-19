@@ -423,7 +423,10 @@ test("Today puts undated tasks behind a closed disclosure", async ({
   await expect(summary).toHaveText(
     messages[locale].todayUndated.replace("{{count}}", "1"),
   );
-  await expect(undated.getByText("Undated fixture")).toBeHidden();
+  await expect(undated).toHaveJSProperty("open", false);
+  await expect(
+    undated.getByText("Undated fixture", { exact: true }),
+  ).toBeHidden();
   await summary.click();
   await expect(
     undated.getByRole("link", { name: "Undated fixture" }),

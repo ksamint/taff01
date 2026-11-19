@@ -78,6 +78,7 @@ test("two authenticated browsers converge through real workspace WebSockets with
   try {
     await trackConnection(other);
     await signIn(other, locale);
+    await openUndatedTasks(other);
     const title = `Realtime ${locale} ${Date.now()}`;
     await openQuickAdd(page);
     await page.getByTestId("quick-title").fill(title);
@@ -93,7 +94,6 @@ test("two authenticated browsers converge through real workspace WebSockets with
     const response = await created;
     expect(response.status()).toBe(201);
     const task = await response.json();
-    await openUndatedTasks(other);
     await expect(
       other.getByRole("link", { name: title, exact: true }),
     ).toBeVisible({ timeout: 1000 });
@@ -129,6 +129,7 @@ test("two authenticated browsers converge through real workspace WebSockets with
     );
     // A real disconnect misses the write; reopening must refresh the workspace.
     await other.goto("/");
+    await openUndatedTasks(other);
     await expect(other.locator("html")).toHaveAttribute(
       "data-realtime",
       "open",
