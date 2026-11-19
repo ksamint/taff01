@@ -80,6 +80,10 @@ is implemented for v0.2.26, not yet deployed.
 - CN-4.2 When unfinished tasks without a due date are present, Today shall
   show them in a separate disclosure with their count, closed by default.
   Undated tasks marked `meeting` remain excluded.
+- CN-4.3 At a viewport of 1280 CSS pixels or wider, Today shall place its
+  due and undated lists beside agent activity and items needing attention.
+  When neither activity section has content, the task column shall span
+  the available width. Smaller viewports shall retain the stacked layout.
 
 ### Phone task details (CN-4)
 

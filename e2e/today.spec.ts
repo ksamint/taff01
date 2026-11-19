@@ -1,5 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
-import type { Me, Task } from "../packages/schemas/src/index";
+import {
+  type Me,
+  memberListSchema,
+  type Task,
+  taskSchema,
+} from "../packages/schemas/src/index";
 import { freshAccount, messages } from "./support/account";
 import { selectLocale, signOutFromMe } from "./support/preferences";
 import { closeTaskField, openTaskField } from "./support/task-fields";
@@ -432,4 +437,72 @@ test("Today puts undated tasks behind a closed disclosure", async ({
     undated.getByRole("link", { name: "Undated fixture" }),
   ).toBeVisible();
   await expect(undated.getByText("Today date fixture")).toHaveCount(0);
+});
+
+test("Today uses a second column at 1280 pixels and stacks on a phone", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as TestLocale;
+  const {
+    workspaces: [workspace],
+  } = await freshAccount(page, locale);
+  const members = await page.request.get(
+    `/api/members?workspaceId=${workspace.id}`,
+  );
+  expect(members.status()).toBe(200);
+  const agent = memberListSchema
+    .parse(await members.json())
+    .find((member) => member.kind === "agent");
+  if (!agent) throw new Error("The fresh workspace needs its default agent");
+  const created = await page.request.post("/api/tasks", {
+    data: {
+      workspaceId: workspace.id,
+      ownerId: workspace.memberId,
+      workerId: agent.id,
+      title: "Today two-column task",
+      dueAt: new Date().toISOString(),
+    },
+  });
+  expect(created.status()).toBe(201);
+  const task = taskSchema.parse(await created.json());
+  const due = page.getByRole("region", { name: messages[locale].todayDue });
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+  await expect(page.locator("aside.sidebar")).toBeVisible();
+  await expect(due.getByRole("link", { name: task.title })).toBeVisible();
+  await expect(page.locator(".today-activity")).toBeHidden();
+  const content = await page.locator("main.content").boundingBox();
+  expect((await due.boundingBox())?.width).toBe(content?.width);
+
+  const started = await page.request.post(`/api/tasks/${task.id}/runs`, {
+    data: {},
+  });
+  expect(started.status()).toBe(201);
+  await page.reload();
+  await expect(page.getByTestId("today-agent-work")).toBeVisible();
+  const activity = page.locator(".today-activity");
+
+  for (const width of [1280, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const [left, right] = await Promise.all([
+      activity.boundingBox(),
+      due.boundingBox(),
+    ]);
+    if (!left || !right) throw new Error("Both Today columns must be visible");
+    expect(right.x).toBeGreaterThan(left.x + left.width);
+    expect(right.y).toBeCloseTo(left.y);
+    expect(right.x + right.width).toBeCloseTo(width);
+  }
+
+  await page.setViewportSize({ width: 412, height: 915 });
+  await expect(page.locator("aside.sidebar")).toHaveCount(0);
+  const [upper, lower] = await Promise.all([
+    activity.boundingBox(),
+    due.boundingBox(),
+  ]);
+  if (!upper || !lower) throw new Error("Both Today sections must be visible");
+  expect(lower.x).toBeCloseTo(upper.x);
+  expect(lower.width).toBeCloseTo(upper.width);
+  expect(lower.y).toBeGreaterThanOrEqual(upper.y + upper.height);
 });

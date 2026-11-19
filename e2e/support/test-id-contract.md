@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (510 distinct, 2375 uses)
+## Test ids (511 distinct, 2376 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -799,6 +799,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `assignment-select` | 7 |  | accessibility.spec.ts, today.spec.ts |
 | `task-card` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-v2.spec.ts |
+| `today-agent-work` | 1 |  | today.spec.ts |
 | `today-heading` | 71 |  | agent-review.spec.ts, audit.spec.ts, brief.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, support/demo-session.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
 | `today-undated` | 4 |  | accessibility.spec.ts, support/tasks.ts, today.spec.ts, ui-v2.spec.ts |
@@ -922,7 +923,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: original.title` | 2 | persistence.spec.ts |
 | `link — name: receivables.title` | 1 | operation-templates.spec.ts |
 | `link — name: renamed` | 2 | persistence.spec.ts |
-| `link — name: task.title` | 7 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
+| `link — name: task.title` | 8 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `list` | 1 | planning.spec.ts |
 | `navigation — name: m.projects.views` | 2 | project-graph-view.spec.ts, project-header.spec.ts |
@@ -932,7 +933,7 @@ several do). “Also rendered by” lists the other files.
 | `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
-| `region — name: messages[locale].todayDue` | 2 | today.spec.ts, ui-v2.spec.ts |
+| `region — name: messages[locale].todayDue` | 3 | today.spec.ts, ui-v2.spec.ts |
 | `region — name: text.workspaceGrants` | 1 | mcp.spec.ts |
 | `row` | 3 | access.spec.ts |
 | `rowheader — name: client.client_name` | 1 | access.spec.ts |
@@ -1066,6 +1067,7 @@ read (`data-event-id`, `data-date`).
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mts |
 | `.team-directory-list li` | 1 | ui-v2.spec.ts |
 | `.toast-region` | 14 | brief.spec.ts, live/brief.spec.ts |
+| `.today-activity` | 2 | today.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
 | `.today-task-title` | 5 | ssr-session.spec.ts, today.spec.ts |
 | `[aria-busy="true"]` | 2 | agent-creation.spec.ts |
@@ -1123,7 +1125,7 @@ read (`data-event-id`, `data-date`).
 | `a[href="/me"] .nav-badge` | 2 | ui-v2.spec.ts |
 | `a[href="/me"]:visible` | 1 | support/preferences.ts |
 | `a[href="/tasks/*"]` | 2 | access.spec.ts, accessibility.spec.ts |
-| `aside.sidebar` | 4 | today.spec.ts, ui-v2.spec.ts |
+| `aside.sidebar` | 6 | today.spec.ts, ui-v2.spec.ts |
 | `dd[data-status="rate_limited"]` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `dialog.confirm-dialog` | 7 | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `dialog.task-detail-sheet` | 2 | calendar.spec.ts, planning.spec.ts |
@@ -1131,7 +1133,7 @@ read (`data-event-id`, `data-date`).
 | `form input[autocomplete="username"]` | 1 | username-auth.spec.ts |
 | `head link[rel="preload"][as="font"][href="/fonts/NotoSansTC-ui-common.woff2"]` | 1 | i18n.spec.ts |
 | `head link[rel="preload"][href="/api/me"]` | 1 | ssr-session.spec.ts |
-| `main.content` | 15 | live/platform.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, summaries.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
+| `main.content` | 16 | live/platform.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, summaries.spec.ts, support/preferences.ts, today.spec.ts, ui-v2.spec.ts |
 | `main.content .settings-back-header` | 1 | settings-header.spec.ts |
 | `main.loading` | 2 | i18n.spec.ts |
 | `meta[name="robots"]` | 1 | summaries.spec.ts |
@@ -1352,7 +1354,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `timeline.rescheduled` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.resized` | 7 | live/timeline.spec.ts, timeline.spec.ts |
 | `today` | 25 | live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
-| `todayDue` | 2 | today.spec.ts, ui-v2.spec.ts |
+| `todayDue` | 3 | today.spec.ts, ui-v2.spec.ts |
 | `todayUndated` | 2 | today.spec.ts, ui-v2.spec.ts |
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
