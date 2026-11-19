@@ -99,6 +99,11 @@
 .today-due > .today-section-label {
   padding-top: 24px;
 }
+.today-undated > summary {
+  min-height: 44px;
+  padding-block: 14px;
+  cursor: pointer;
+}
 .today-due-list {
   border-top: 1px solid var(--border-line);
 }

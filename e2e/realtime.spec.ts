@@ -1,7 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
 import { memberListSchema, meSchema } from "../packages/schemas/src/index";
 import { chooseLocale, selectLocale } from "./support/preferences";
-import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
+import {
+  closeQuickField,
+  openQuickAdd,
+  openQuickField,
+  openUndatedTasks,
+} from "./support/tasks";
 
 const labels = {
   en: { today: "Today", running: "Working", paused: "Paused" },
@@ -88,6 +93,7 @@ test("two authenticated browsers converge through real workspace WebSockets with
     const response = await created;
     expect(response.status()).toBe(201);
     const task = await response.json();
+    await openUndatedTasks(other);
     await expect(
       other.getByRole("link", { name: title, exact: true }),
     ).toBeVisible({ timeout: 1000 });

@@ -64,6 +64,14 @@ is implemented for v0.2.26, not yet deployed.
 - CN-7.2 The Details row shall use the same workspace read authority as the
   existing agent profile.
 
+### Tasks on Today (CN-4)
+
+- CN-4.1 Today shall list unfinished tasks whose due date falls on the
+  viewer's current calendar day under Due today.
+- CN-4.2 When unfinished tasks without a due date are present, Today shall
+  show them in a separate disclosure with their count, closed by default.
+  Undated tasks marked `meeting` remain excluded.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -88,6 +96,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-4 | `e2e/board-access.spec.ts` in en, zh-CN and zh-HK, and the existing board drag and menu cases in `e2e/planning.spec.ts` |
 | CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
 | CN-7 | `e2e/agent-creation.spec.ts`, guest disclosure and profile request counts in en, zh-CN, and zh-HK |
+| CN-4 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |

@@ -782,6 +782,7 @@
     "view": "View"
   },
   "todayDue": "Due today",
+  "todayUndated": "No due date ({{count}})",
   "todayScheduleEmpty": "No appointments today.",
   "todayNow": "Now",
   "moreAgentWork": "{{count}} more in Projects",

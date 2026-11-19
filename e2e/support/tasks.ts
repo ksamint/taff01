@@ -38,3 +38,10 @@ export async function closeQuickField(
   await closeFieldSheet(page, quickControls[field]);
   await expect(page.getByTestId("quick-title")).toBeEnabled();
 }
+
+export async function openUndatedTasks(page: Page) {
+  const undated = page.getByTestId("today-undated");
+  await expect(undated).toBeVisible();
+  if ((await undated.getAttribute("open")) === null)
+    await undated.locator("summary").click();
+}

@@ -37,6 +37,7 @@ import {
   openProjectView,
   openTaskField,
 } from "../../support/task-fields";
+import { openUndatedTasks } from "../../support/tasks";
 import {
   credentialAccount,
   selectVerificationWorkspace,
@@ -246,6 +247,7 @@ test("[item 2] Tasks", async ({ page, browser }, info) => {
     expect(createdResponse.status()).toBe(201);
     const task = taskSchema.parse(await createdResponse.json());
     await expect(page.getByRole("dialog")).toHaveCount(0);
+    await openUndatedTasks(page);
     await expect(
       page.getByTestId("task-card").filter({ hasText: title }),
     ).toBeVisible();
@@ -1104,6 +1106,7 @@ test("[item 6] Search and organizations", async ({ page, browser }, info) => {
     "true",
   );
   await page.goto("/");
+  await openUndatedTasks(page);
   await expect(
     page.getByTestId("task-card").filter({ hasText: title }),
   ).toBeVisible();

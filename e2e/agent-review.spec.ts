@@ -13,7 +13,12 @@ import {
 } from "../packages/schemas/src/index";
 import { openDisclosure } from "./support/disclosures";
 import { selectLocale } from "./support/preferences";
-import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
+import {
+  closeQuickField,
+  openQuickAdd,
+  openQuickField,
+  openUndatedTasks,
+} from "./support/tasks";
 
 const labels = {
   en: {
@@ -123,6 +128,7 @@ test("agent reports real MCP evidence and a person approves it from Inbox", asyn
   await page.getByTestId("quick-create").click();
   await expect(page.getByRole("dialog")).toHaveCount(0);
   await expect(page.getByTestId("open-quick")).toBeEnabled();
+  await openUndatedTasks(page);
   await page.getByRole("link", { name: title, exact: true }).click();
   await expect(page.getByTestId("task-detail-heading")).toHaveText(title);
   await page.getByTestId("run-start").click();

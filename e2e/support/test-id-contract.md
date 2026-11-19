@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (500 distinct, 2314 uses)
+## Test ids (501 distinct, 2317 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -792,6 +792,7 @@ several do). “Also rendered by” lists the other files.
 | `task-card` | 16 |  | accessibility.spec.ts, agent-creation.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, ssr-session.spec.ts, today.spec.ts, ui-v2.spec.ts |
 | `today-heading` | 71 |  | agent-review.spec.ts, audit.spec.ts, brief.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mcp.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, persistence.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, realtime.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/perf-lcp.mts, sms-auth.spec.ts, ssr-session.spec.ts, summaries.spec.ts, support/account.ts, support/demo-session.ts, timeline.spec.ts, today.spec.ts, username-auth.spec.ts |
 | `today-needs-item` | 1 |  | ui-v2.spec.ts |
+| `today-undated` | 3 |  | accessibility.spec.ts, support/tasks.ts, today.spec.ts |
 
 ### token-policy-control.tsx
 
@@ -891,6 +892,8 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: project.name` | 2 | persistence.spec.ts |
 | `link` | 4 | agent-creation.spec.ts, calendar.spec.ts, project-header.spec.ts, ui-v2.spec.ts |
 | `link — name: "Rejected task"` | 1 | today.spec.ts |
+| `link — name: "Today date fixture"` | 1 | today.spec.ts |
+| `link — name: "Undated fixture"` | 1 | today.spec.ts |
 | `link — name: /M7 reviewer/` | 3 | delivery-visual.spec.ts |
 | `` link — name: `First task ${locale}` `` | 2 | today.spec.ts |
 | `link — name: agent.name` | 4 | access.spec.ts, agent-creation.spec.ts |
@@ -918,6 +921,7 @@ several do). “Also rendered by” lists the other files.
 | `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
+| `region — name: messages[locale].todayDue` | 1 | today.spec.ts |
 | `region — name: text.workspaceGrants` | 1 | mcp.spec.ts |
 | `row` | 3 | access.spec.ts |
 | `rowheader — name: client.client_name` | 1 | access.spec.ts |
@@ -1320,6 +1324,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `timeline.rescheduled` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.resized` | 7 | live/timeline.spec.ts, timeline.spec.ts |
 | `today` | 25 | live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
+| `todayDue` | 1 | today.spec.ts |
+| `todayUndated` | 1 | today.spec.ts |
 | `unknownMember` | 1 | optimistic-m4.spec.ts |
 | `usernameOptional` | 3 | username-auth.spec.ts |
 | `viewExport.copied` | 1 | view-export.spec.ts |

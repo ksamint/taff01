@@ -65,16 +65,7 @@ export function TodayView({ initialNow }: { initialNow: number }) {
     .toISOString()
     .slice(0, 10);
   const mutation = useAssignTodayTask();
-  const visibleTasks = todayTasks(
-    (tasks.data ?? []).filter(
-      (task) => task.dueAt || !task.labels.includes("meeting"),
-    ),
-    me.user.tz,
-    now,
-  );
-  const [showAll, setShowAll] = useState(false);
-  const shownTasks = showAll ? visibleTasks : visibleTasks.slice(0, TODAY_PAGE);
-  const hiddenCount = visibleTasks.length - shownTasks.length;
+  const { due, undated } = todayTasks(tasks.data ?? [], me.user.tz, now);
   const locale = (i18n.resolvedLanguage ?? me.user.locale) as Locale;
   const { date, time, numbers } = useMemo(
     () => ({
@@ -105,6 +96,76 @@ export function TodayView({ initialNow }: { initialNow: number }) {
   const needs = needsYouItems(inbox.data);
   const readError = tasks.error ?? members.error ?? access.error;
   const reference = (task: Task) => taskReference(workspace.key, task.number);
+  const renderTask = (task: Task) => {
+    const pending = task.id.startsWith("optimistic:");
+    const worker = members.data?.find((member) => member.id === task.workerId);
+    return (
+      <li
+        className="today-due-row"
+        key={task.id}
+        data-testid="task-card"
+        data-status={task.status}
+      >
+        <StatusGlyph status={task.status} />
+        <div className="today-task-copy">
+          {pending ? (
+            <span className="today-task-title" aria-busy="true">
+              {present(task)}
+            </span>
+          ) : (
+            <Link
+              className="today-task-title"
+              href={`/tasks/${task.id}`}
+              prefetch={false}
+            >
+              {present(task)}
+            </Link>
+          )}
+          <span className="today-task-meta">
+            {pending ? t("adding") : reference(task)} ·{" "}
+            {t(`status.${task.status}`)}
+          </span>
+        </div>
+        <div
+          className={`today-worker${worker?.kind === "agent" ? " today-worker-agent" : ""}`}
+        >
+          <span className="today-worker-label" aria-hidden="true">
+            {worker?.kind === "agent" && (
+              <Sparkles size={12} strokeWidth={1.5} />
+            )}
+            <span>{worker ? worker.name : t("unassigned")}</span>
+          </span>
+          <label className="sr-only" htmlFor={`worker-${task.id}`}>
+            {t("worker")} · {present(task)}
+          </label>
+          <select
+            id={`worker-${task.id}`}
+            data-testid="assignment-select"
+            value={task.workerId ?? ""}
+            disabled={
+              pending || !access.data?.canCreateTasks || busy || !members.data
+            }
+            onChange={(event) =>
+              mutation.mutate({
+                id: task.id,
+                body: {
+                  workerId: event.target.value || null,
+                  version: task.version,
+                },
+              })
+            }
+          >
+            <option value="">{t("unassigned")}</option>
+            {(members.data ?? []).map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.name} · {t(member.kind)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </li>
+    );
+  };
   return (
     <div className="today-view">
       <header className="today-header">
@@ -294,97 +355,57 @@ export function TodayView({ initialNow }: { initialNow: number }) {
         )}
         {tasks.isPending ? (
           <p className="today-message quiet">{t("loading")}</p>
-        ) : shownTasks.length === 0 ? (
+        ) : due.length === 0 ? (
           <p className="today-message quiet">{t("emptyTitle")}</p>
         ) : (
-          <ul className="today-due-list">
-            {shownTasks.map((task) => {
-              const pending = task.id.startsWith("optimistic:");
-              const worker = members.data?.find(
-                (member) => member.id === task.workerId,
-              );
-              return (
-                <li
-                  className="today-due-row"
-                  key={task.id}
-                  data-testid="task-card"
-                  data-status={task.status}
-                >
-                  <StatusGlyph status={task.status} />
-                  <div className="today-task-copy">
-                    {pending ? (
-                      <span className="today-task-title" aria-busy="true">
-                        {present(task)}
-                      </span>
-                    ) : (
-                      <Link
-                        className="today-task-title"
-                        href={`/tasks/${task.id}`}
-                        prefetch={false}
-                      >
-                        {present(task)}
-                      </Link>
-                    )}
-                    <span className="today-task-meta">
-                      {pending ? t("adding") : reference(task)} ·{" "}
-                      {t(`status.${task.status}`)}
-                    </span>
-                  </div>
-                  <div
-                    className={`today-worker${worker?.kind === "agent" ? " today-worker-agent" : ""}`}
-                  >
-                    <span className="today-worker-label" aria-hidden="true">
-                      {worker?.kind === "agent" && (
-                        <Sparkles size={12} strokeWidth={1.5} />
-                      )}
-                      <span>{worker ? worker.name : t("unassigned")}</span>
-                    </span>
-                    <label className="sr-only" htmlFor={`worker-${task.id}`}>
-                      {t("worker")} · {present(task)}
-                    </label>
-                    <select
-                      id={`worker-${task.id}`}
-                      data-testid="assignment-select"
-                      value={task.workerId ?? ""}
-                      disabled={
-                        pending ||
-                        !access.data?.canCreateTasks ||
-                        busy ||
-                        !members.data
-                      }
-                      onChange={(event) =>
-                        mutation.mutate({
-                          id: task.id,
-                          body: {
-                            workerId: event.target.value || null,
-                            version: task.version,
-                          },
-                        })
-                      }
-                    >
-                      <option value="">{t("unassigned")}</option>
-                      {(members.data ?? []).map((member) => (
-                        <option key={member.id} value={member.id}>
-                          {member.name} · {t(member.kind)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-        {hiddenCount > 0 && (
-          <Button
-            className="today-show-more button-quiet"
-            data-testid="today-show-more"
-            onClick={() => setShowAll(true)}
-          >
-            {t("showMore", { count: numbers.format(hiddenCount) })}
-          </Button>
+          <TodayTaskList
+            tasks={due}
+            renderTask={renderTask}
+            numbers={numbers}
+          />
         )}
       </section>
+      {undated.length > 0 && (
+        <details className="today-undated" data-testid="today-undated">
+          <summary className="today-section-label">
+            {t("todayUndated", { count: numbers.format(undated.length) })}
+          </summary>
+          <TodayTaskList
+            tasks={undated}
+            renderTask={renderTask}
+            numbers={numbers}
+          />
+        </details>
+      )}
     </div>
+  );
+}
+
+function TodayTaskList({
+  tasks,
+  renderTask,
+  numbers,
+}: {
+  tasks: Task[];
+  renderTask: (task: Task) => React.ReactNode;
+  numbers: Intl.NumberFormat;
+}) {
+  const { t } = useTranslation();
+  const [showAll, setShowAll] = useState(false);
+  const shownTasks = showAll ? tasks : tasks.slice(0, TODAY_PAGE);
+  const hiddenCount = tasks.length - shownTasks.length;
+  return (
+    <>
+      <ul className="today-due-list">{shownTasks.map(renderTask)}</ul>
+      {hiddenCount > 0 && (
+        <Button
+          className="today-show-more button-quiet"
+          data-testid="today-show-more"
+          onClick={() => setShowAll(true)}
+        >
+          {t("showMore", { count: numbers.format(hiddenCount) })}
+        </Button>
+      )}
+    </>
   );
 }

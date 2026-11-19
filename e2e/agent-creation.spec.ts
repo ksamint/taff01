@@ -7,7 +7,12 @@ import {
 } from "../packages/schemas/src/index";
 import { freshAccount, messages, type TestLocale } from "./support/account";
 import { verifyTestEmail } from "./support/email-verification";
-import { closeQuickField, openQuickAdd, openQuickField } from "./support/tasks";
+import {
+  closeQuickField,
+  openQuickAdd,
+  openQuickField,
+  openUndatedTasks,
+} from "./support/tasks";
 
 test("Team creates a real custom agent through UI and assigns it as a task worker", async ({
   page,
@@ -150,6 +155,7 @@ test("Team creates a real custom agent through UI and assigns it as a task worke
     const task = taskSchema.parse(await taskResponse.json());
     expect(task.workerId).toBe(member.id);
     expect(task.ownerId).toBe(workspace.memberId);
+    await openUndatedTasks(page);
     await expect(
       page.getByTestId("task-card").filter({ hasText: title }),
     ).toContainText(name);
