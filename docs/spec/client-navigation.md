@@ -103,6 +103,13 @@ is implemented for v0.2.26, not yet deployed.
 - CN-5.3 Notifications and agent profiles embedded in desktop Me shall
   omit the standalone back header.
 
+### Calendar day start (CN-9)
+
+- CN-9.1 When the day calendar opens, carried-over events shall stay in the
+  sticky date band above the time grid and the 08:00 label shall be visible
+  below that band on phone and desktop. Existing calendar gestures and the
+  schedule editor shall remain available.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -141,6 +148,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-6 | `e2e/me.spec.ts`, settings links and workspace roles |
 | CN-3.6 | `e2e/project-graph-view.spec.ts` in three locales, guest denied and member allowed on phone and desktop |
 | CN-3.5 | `e2e/project-graph-view.spec.ts` and `e2e/view-export.spec.ts` in three locales |
+| CN-9 | `e2e/calendar.spec.ts`, overnight events and native target size in three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |

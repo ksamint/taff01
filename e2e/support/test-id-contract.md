@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (510 distinct, 2366 uses)
+## Test ids (510 distinct, 2367 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -610,7 +610,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- | --- |
 | `schedule-clear` | 4 |  | calendar.spec.ts |
 | `schedule-count` | 3 |  | calendar.spec.ts |
-| `schedule-end` | 7 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
+| `schedule-end` | 8 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `schedule-repeat` | 3 |  | calendar.spec.ts |
 | `schedule-save` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts |
 | `schedule-start` | 16 |  | calendar.spec.ts, live/release/checklist.spec.ts, release/checklist.spec.ts, task-detail.spec.ts |
@@ -972,7 +972,7 @@ read (`data-event-id`, `data-date`).
 | `.sx__calendar` | 3 | calendar.spec.ts, ssr-session.spec.ts, ui-v2.spec.ts |
 | `.sx__calendar-wrapper` | 1 | support/calendar.ts |
 | `.sx__date-grid` | 1 | calendar-accessibility.spec.ts |
-| `.sx__date-grid-event` | 3 | calendar.spec.ts, live/release/checklist.spec.ts |
+| `.sx__date-grid-event` | 4 | calendar.spec.ts, live/release/checklist.spec.ts |
 | `.sx__event` | 7 | calendar.spec.ts, live/release/checklist.spec.ts, persistence.spec.ts, release/checklist.spec.ts, scripts/perf-lighthouse.mts |
 | `.sx__is-resizing` | 1 | calendar.spec.ts |
 | `.sx__month-grid-day__header` | 1 | calendar.spec.ts |
@@ -986,7 +986,8 @@ read (`data-event-id`, `data-date`).
 | `.sx__time-grid-event[data-event-id=…]` | 9 | calendar.spec.ts, ui-v2.spec.ts |
 | `.sx__view-container` | 6 | calendar.spec.ts, live/release/checklist.spec.ts |
 | `.sx__week-grid__date` | 1 | calendar.spec.ts |
-| `.sx__week-grid__hour-text` | 1 | calendar.spec.ts |
+| `.sx__week-grid__hour-text` | 2 | calendar.spec.ts |
+| `.sx__week-header` | 1 | calendar.spec.ts |
 
 ## CSS locators
 

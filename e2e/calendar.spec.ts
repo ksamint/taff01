@@ -1132,6 +1132,55 @@ test("calendar phone touch, cancellation, month move, tray scheduling, empty-slo
   });
 });
 
+test("calendar day keeps 08:00 visible below overnight events", async ({
+  page,
+}, info) => {
+  const locale = info.project.name as Locale;
+  const { me, workspace, date } = await setup(page, locale);
+  const title = `Carried over ${locale}`;
+  expect(
+    (
+      await page.request.post("/api/tasks", {
+        data: {
+          workspaceId: workspace.id,
+          ownerId: workspace.memberId,
+          title,
+          calendar: {
+            startAt: calendarWallToInstant(
+              `${offsetDay(date, -1)}T23:00`,
+              me.user.tz,
+            ),
+            endAt: calendarWallToInstant(`${date}T09:00`, me.user.tz),
+            timeZone: me.user.tz,
+            rrule: null,
+          },
+        },
+      })
+    ).status(),
+  ).toBe(201);
+  for (const desktop of [false, true]) {
+    if (desktop) await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/calendar");
+    const native = await waitForCalendarView(page, "day");
+    const event = native
+      .locator(".sx__date-grid-event")
+      .filter({ hasText: title });
+    const firstHour = native
+      .locator(".sx__week-grid__hour-text")
+      .getByText("08:00", { exact: true });
+    await expect(event).toBeVisible();
+    await waitForCalendarMotion(event);
+    const labelBox = await firstHour.boundingBox();
+    const bandBox = await native.locator(".sx__week-header").boundingBox();
+    if (!labelBox || !bandBox)
+      throw new Error("Calendar day geometry unavailable");
+    expect(labelBox.y).toBeGreaterThanOrEqual(bandBox.y + bandBox.height);
+    await event.click();
+    await expect(page.getByTestId("schedule-end")).toHaveValue(`${date}T09:00`);
+    await page.keyboard.press("Escape");
+  }
+});
+
 test("calendar multi-day events keep 44px targets and aligned stacked rows", async ({
   page,
 }, info) => {

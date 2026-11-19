@@ -189,10 +189,23 @@ export function CalendarEngine(props: CalendarEngineProps) {
         frame = requestAnimationFrame(positionView);
         return;
       }
+      // Hour text sits above its grid line, so reserve that inset below
+      // the native sticky date band when the day opens at 08:00.
+      const hourLabel = container.querySelector(".sx__week-grid__hour-text");
+      if (props.view === "day" && !hourLabel) {
+        frame = requestAnimationFrame(positionView);
+        return;
+      }
+      const dayInset =
+        props.view === "day" && hourLabel
+          ? Math.ceil(
+              Math.max(0, -Number.parseFloat(getComputedStyle(hourLabel).top)),
+            )
+          : 0;
       container.scrollTop =
         props.view === "month-grid"
           ? 0
-          : 8 * hourHeight(props.view, props.desktop);
+          : 8 * hourHeight(props.view, props.desktop) - dayInset;
     };
     frame = requestAnimationFrame(positionView);
     return () => cancelAnimationFrame(frame);
