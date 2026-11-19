@@ -13,5 +13,8 @@ Plan 0003 Q7 · 2026-11-19 · local candidate.
 Validation: lint, typecheck, four focused Vitest tests and all three
 production phone/desktop locale cases passed. The initial JavaScript
 budget passed at 197,557 compressed bytes of 204,800. Local before/after
-captures are in `release-reports/today-layout`. The pinned Linux visual
-references and exact-tree full gate are pending.
+captures are in `release-reports/today-layout`. Four pinned Linux captures
+and four unchanged comparisons passed on source `c6bfb10` with Chromium
+156.0.8078.80 (Playwright 1.64.1, Linux x86-64). Only the two desktop
+references changed from P5. The two phone references matched byte-for-byte.
+The exact-tree full gate is pending.
