@@ -16,7 +16,7 @@ import {
   groupBySector,
   SECTOR_INDICATORS,
 } from "@taff/schemas/operation-templates";
-import { useIsMutating } from "@tanstack/react-query";
+import { useIsMutating, useQueryClient } from "@tanstack/react-query";
 import {
   ChevronDown,
   GripVertical,
@@ -43,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { isLocale } from "../lib/i18n";
 import {
+  taskAccessQuery,
   useProjects,
   useTaskAccess,
   useWorkspaceAccess,
@@ -63,6 +64,7 @@ import {
   type TaskFilter,
 } from "../lib/project-board";
 import { useMembers, useRuns, useTasks } from "../lib/queries";
+import { sessionVersion } from "../lib/session-cache";
 import { deadlineFields, deadlineIso } from "../lib/task-date";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
@@ -182,6 +184,7 @@ function StatusIcon({ status }: { status: Task["status"] }) {
 
 export function ProjectsView({ projectId = "" }: { projectId?: string }) {
   const { workspace, me, openSearch, openQuick, confirmed } = useWorkspace();
+  const client = useQueryClient();
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
@@ -318,16 +321,16 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
     width: number;
   } | null>(null);
   const dragCleanup = useRef<(() => void) | null>(null);
-  useEffect(() => () => dragCleanup.current?.(), []);
+  useEffect(
+    () => () => dragCleanup.current?.(),
+    [projectId, view, workspace.id],
+  );
   const dragStart = useCallback(
-    (
-      event: React.PointerEvent<HTMLButtonElement>,
-      task: Task,
-      allowed: Task["status"][],
-    ) => {
-      if (busy || event.button !== 0 || !allowed.length) return;
+    (event: React.PointerEvent<HTMLButtonElement>, task: Task) => {
+      if (busy || !confirmed || event.button !== 0) return;
       event.preventDefault();
       dragCleanup.current?.();
+      const version = sessionVersion(client);
       const board = columns.current;
       const handle = event.currentTarget;
       const pointerId = event.pointerId;
@@ -338,6 +341,8 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         y = startY,
         moved = false,
         frame = 0;
+      let allowed: Task["status"][] | undefined;
+      let drop: Task["status"] | undefined;
       const targetAt = (pointX: number, pointY: number) =>
         Array.from(
           board?.querySelectorAll<HTMLElement>("[data-board-status]") ?? [],
@@ -351,6 +356,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
           );
         })?.dataset.boardStatus as Task["status"] | undefined;
       const update = () => {
+        if (!allowed?.length) return;
         const target = targetAt(x, y);
         setDrag({
           id: task.id,
@@ -363,7 +369,7 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         });
       };
       const scroll = () => {
-        if (moved && board) {
+        if (moved && allowed?.length && board) {
           const rect = board.getBoundingClientRect();
           if (y >= rect.top && y <= rect.bottom) {
             const left = Math.max(0, rect.left),
@@ -395,35 +401,72 @@ export function ProjectsView({ projectId = "" }: { projectId?: string }) {
         handle.removeEventListener("pointerup", finish);
         handle.removeEventListener("pointercancel", finish);
         handle.removeEventListener("lostpointercapture", cancel);
-        window.removeEventListener("blur", cancel);
         if (handle.hasPointerCapture(pointerId))
           handle.releasePointerCapture(pointerId);
       };
       const cancel = () => {
+        window.removeEventListener("blur", cancel);
         cleanup();
         dragCleanup.current = null;
         setDrag(null);
+      };
+      const completeDrop = (target: Task["status"]) => {
+        cancel();
+        if (
+          allowed?.includes(target) &&
+          handle.isConnected &&
+          sessionVersion(client) === version &&
+          client.isMutating({ mutationKey: m3MutationKey }) === 0
+        )
+          move(task, target);
       };
       const finish = (current: PointerEvent) => {
         if (current.pointerId !== pointerId) return;
-        cleanup();
-        dragCleanup.current = null;
-        setDrag(null);
-        if (moved && current.type === "pointerup") {
-          const target = targetAt(current.clientX, current.clientY);
-          if (target && allowed.includes(target)) move(task, target);
+        drop =
+          moved && current.type === "pointerup"
+            ? targetAt(current.clientX, current.clientY)
+            : undefined;
+        if (!drop) {
+          cancel();
+        } else if (allowed) {
+          completeDrop(drop);
+        } else {
+          // Release the pointer while the pending drop waits for authorization.
+          cleanup();
         }
       };
-      dragCleanup.current = cleanup;
+      dragCleanup.current = cancel;
       handle.setPointerCapture(pointerId);
       handle.addEventListener("pointermove", pointerMove);
       handle.addEventListener("pointerup", finish);
       handle.addEventListener("pointercancel", finish);
       handle.addEventListener("lostpointercapture", cancel);
       window.addEventListener("blur", cancel);
-      frame = requestAnimationFrame(scroll);
+      void client.fetchQuery(taskAccessQuery(task.id)).then(
+        ({ allowedStatuses }) => {
+          if (dragCleanup.current !== cancel) return;
+          if (
+            !allowedStatuses.length ||
+            !handle.isConnected ||
+            sessionVersion(client) !== version
+          ) {
+            cancel();
+            return;
+          }
+          allowed = allowedStatuses;
+          if (drop) {
+            completeDrop(drop);
+          } else {
+            if (moved) update();
+            frame = requestAnimationFrame(scroll);
+          }
+        },
+        () => {
+          if (dragCleanup.current === cancel) cancel();
+        },
+      );
     },
-    [busy, move],
+    [busy, client, confirmed, move],
   );
   const filterValue = agentId ? `agent:${agentId}` : filter;
   const cardProps = useMemo(
@@ -1323,16 +1366,16 @@ const BoardCard = memo(function BoardCard({
   busy: boolean;
   confirmed: boolean;
   move: (task: Task, status: Task["status"]) => void;
-  dragStart: (
-    event: React.PointerEvent<HTMLButtonElement>,
-    task: Task,
-    allowed: Task["status"][],
-  ) => void;
+  dragStart: (event: React.PointerEvent<HTMLButtonElement>, task: Task) => void;
   dragging: boolean;
   dragHintId: string;
 }) {
-  const access = useTaskAccess(task.id);
-  const allowed = confirmed ? (access.data?.allowedStatuses ?? []) : [];
+  const [menuOpen, setMenuOpen] = useState(false);
+  const access = useTaskAccess(task.id, menuOpen);
+  const allowed =
+    menuOpen && confirmed && access.isSuccess && !access.isFetching
+      ? access.data.allowedStatuses
+      : [];
   const owner = member(task.ownerId);
   const worker = member(task.workerId);
   const ownerName = owner ? owner.name : t("unknownMember");
@@ -1407,14 +1450,17 @@ const BoardCard = memo(function BoardCard({
         <Button
           data-testid="drag-handle"
           className="button-quiet drag-handle"
-          disabled={busy || !allowed.length}
+          disabled={busy || !confirmed || task.id.startsWith("optimistic:")}
           aria-label={t("projects.drag")}
           aria-describedby={dragHintId}
-          onPointerDown={(event) => dragStart(event, task, allowed)}
+          onPointerDown={(event) => dragStart(event, task)}
         >
           <GripVertical size={16} aria-hidden="true" />
         </Button>
-        <details className="projects-card-menu">
+        <details
+          className="projects-card-menu"
+          onToggle={(event) => setMenuOpen(event.currentTarget.open)}
+        >
           <summary aria-label={t("planning.status")}>
             <MoreHorizontal size={16} aria-hidden="true" />
           </summary>
@@ -1424,9 +1470,10 @@ const BoardCard = memo(function BoardCard({
               aria-label={t("planning.status")}
               disabled={busy || !allowed.length}
               value={task.status}
-              onChange={(event) =>
-                move(task, event.target.value as Task["status"])
-              }
+              onChange={(event) => {
+                const status = event.target.value as Task["status"];
+                if (allowed.includes(status)) move(task, status);
+              }}
             >
               {[...new Set([task.status, ...allowed])].map((status) => (
                 <option key={status} value={status}>

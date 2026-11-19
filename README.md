@@ -13,6 +13,8 @@ graph data and isolation scope.
 
 **v0.2.26 preparation:** [run-detail continuity](docs/spec/client-navigation.md)
 and calendar acceptance readiness fixes are implemented; production stays v0.2.25.
+[Board task access](docs/spec/client-navigation.md#board-task-access-cn-4)
+loads on menu open or drag.
 Token-policy browser acceptance also observes the server acknowledgement
 before checking reconciled state ([tooling TT-4.5](docs/spec/tooling.md)).
 

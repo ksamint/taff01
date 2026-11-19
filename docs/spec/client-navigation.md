@@ -48,6 +48,14 @@ is implemented for v0.2.26, not yet deployed.
 - CN-3.4 When a phone project board has a task in its first column, the first
   card shall start above 240 CSS px on the 412 × 915 phone profile.
 
+### Board task access (CN-4)
+
+- CN-4.1 When a board card loads, the browser shall defer its task-access
+  request until the card menu opens or a pointer drag starts.
+- CN-4.2 When a person chooses or drops a new status, the browser shall
+  send the change only after the task-access response permits that status.
+  A denied or cancelled drag shall leave the task in its current column.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -69,6 +77,7 @@ is implemented for v0.2.26, not yet deployed.
 | --- | --- |
 | CN-3.1–3.2 | `e2e/project-filter-completion.spec.ts` |
 | CN-3.3–3.4 | `e2e/project-header.spec.ts` in three locales |
+| CN-4 | `e2e/board-access.spec.ts` in en, zh-CN and zh-HK, and the existing board drag and menu cases in `e2e/planning.spec.ts` |
 | CN-8 | `e2e/cold-reads.spec.ts`, cold route reads in three locales |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
