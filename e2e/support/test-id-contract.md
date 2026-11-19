@@ -197,7 +197,7 @@ several do). “Also rendered by” lists the other files.
 | `task-contact-new-role-tech` | 2 | crm/contact-role-row.tsx, task-contacts.tsx | crm.spec.ts, live/crm.spec.ts |
 | `task-contact-option` | 4 | task-contacts.tsx | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `task-contact-search` | 3 | task-contacts.tsx | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
-| `task-field-*` | 3 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts, task-detail.spec.ts |
+| `task-field-*` | 2 | crm/contact-role-row.tsx, relations-view.tsx, summaries-admin.tsx, task-detail-view.tsx, task-editor.tsx | support/task-fields.ts, task-detail.spec.ts |
 | `team-capabilities-*` | 2 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | agent-creation.spec.ts |
 | `team-supervisor-*` | 1 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | agent-creation.spec.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
@@ -747,7 +747,7 @@ several do). “Also rendered by” lists the other files.
 | `task-field-owner` | 1 |  | task-detail.spec.ts |
 | `task-field-status` | 2 |  | optimistic-m4.spec.ts, task-detail.spec.ts |
 | `task-field-text` | 6 |  | board-access.spec.ts, planning.spec.ts |
-| `task-fields-more` | 3 |  | calendar.spec.ts, task-detail.spec.ts |
+| `task-fields-more` | 4 |  | calendar.spec.ts, support/task-fields.ts, task-detail.spec.ts |
 
 ### task-schedule-button.tsx
 

@@ -12,8 +12,11 @@ const controls = {
 } as const;
 
 export async function openTaskField(page: Page, field: keyof typeof controls) {
-  await expect(page.getByTestId(`task-field-${field}`)).toBeEnabled();
-  await page.getByTestId(`task-field-${field}`).click();
+  const row = page.getByTestId(`task-field-${field}`);
+  await expect(row).toBeEnabled();
+  if (!(await row.isVisible()))
+    await page.getByTestId("task-fields-more").click();
+  await row.click();
   await expect(page.getByTestId(controls[field])).toBeVisible();
 }
 
