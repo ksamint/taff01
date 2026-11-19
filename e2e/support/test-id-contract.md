@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (504 distinct, 2332 uses)
+## Test ids (504 distinct, 2334 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -202,7 +202,7 @@ several do). “Also rendered by” lists the other files.
 | `team-supervisor-*` | 1 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx | agent-creation.spec.ts |
 | `token-confirm` | 8 | mcp-view.tsx | live/oauth-member.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, release/checklist.spec.ts |
 | `verify-email-confirm` | 3 | email-verification.tsx | planning.spec.ts |
-| `workspace-*` | 51 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, board-access.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts, workspace-lifecycle.spec.ts |
+| `workspace-*` | 52 | crm/contact-role-row.tsx, organizations-view.tsx, relations-view.tsx, summaries-admin.tsx, workspace-lifecycle.tsx | access.spec.ts, agent-creation.spec.ts, audience-editing.spec.ts, audit.spec.ts, board-access.spec.ts, calendar.spec.ts, crm.spec.ts, finance-visibility.spec.ts, live/live.ts, live/oauth-member.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, mcp-oauth.spec.ts, me.spec.ts, mind.spec.ts, optimistic-m4.spec.ts, organization-default.spec.ts, planning.spec.ts, project-finance.spec.ts, project-profile.spec.ts, release/checklist.spec.ts, support/agent-workspace.ts, timeline.spec.ts, workspace-lifecycle.spec.ts |
 
 ### crm/contact-role-row.tsx
 
@@ -328,7 +328,7 @@ several do). “Also rendered by” lists the other files.
 | `me-organization` | 5 | me-view.tsx | me.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
 | `me-tab-brief` | 4 |  | brief.spec.ts, completion.spec.ts, live/brief.spec.ts |
 | `me-tab-inbox` | 4 |  | brief.spec.ts, live/brief.spec.ts |
-| `open-mcp` | 4 | me-view.tsx | live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts |
+| `open-mcp` | 5 | me-view.tsx | live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, release/checklist.spec.ts |
 | `open-summaries` | 2 | me-view.tsx | summaries.spec.ts |
 
 ### me-view.tsx
@@ -1009,6 +1009,7 @@ read (`data-event-id`, `data-date`).
 | `.me-agent-card` | 2 | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `.me-desk-panel` | 1 | completion.spec.ts |
 | `.me-profile-copy strong` | 1 | me.spec.ts |
+| `.me-rows a[href="*"]` | 3 | me.spec.ts |
 | `.me-section` | 1 | planning.spec.ts |
 | `.member-role-row` | 1 | agent-creation.spec.ts |
 | `.notifications-body` | 1 | notifications.spec.ts |
@@ -1229,6 +1230,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `mcp.revoked` | 18 | access.spec.ts, token-grants.spec.ts |
 | `mcp.revokeGrant` | 5 | access.spec.ts |
 | `mcp.saveGrant` | 5 | access.spec.ts |
+| `mcp.title` | 1 | me.spec.ts |
 | `mcp.undo` | 10 | access.spec.ts |
 | `mcp.workspaceGrants` | 5 | access.spec.ts |
 | `me.appearance` | 10 | planning.spec.ts |

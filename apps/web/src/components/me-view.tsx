@@ -4,6 +4,8 @@ import "../styles/me.css";
 import { type Locale, taskReference } from "@taff/schemas";
 import {
   Bell,
+  Building2,
+  CalendarDays,
   ChevronDown,
   ChevronRight,
   FileText,
@@ -13,6 +15,7 @@ import {
   Moon,
   Plug,
   Settings2,
+  Shield,
   Sparkles,
   Users,
 } from "lucide-react";
@@ -372,6 +375,42 @@ export function OrganizationSheet({ onClose }: { onClose: () => void }) {
   );
 }
 
+export function MeSettingsLinks({ desktop = false }: { desktop?: boolean }) {
+  const { workspace } = useWorkspace();
+  const { t } = useTranslation();
+  const links = [
+    { href: "/orgs", title: "organization.title", icon: Building2 },
+    { href: "/digests", title: "notifications.history", icon: CalendarDays },
+    ...(workspace.role === "admin"
+      ? [
+          { href: "/orgs/access", title: "access.title", icon: Shield },
+          { href: "/orgs/audit", title: "audit.title", icon: FileText },
+          {
+            href: "/orgs/summaries",
+            title: "audience.adminTitle",
+            icon: FileText,
+          },
+        ]
+      : []),
+  ];
+  return links.map(({ href, title, icon: Icon }) => (
+    <Link
+      key={href}
+      className={
+        desktop ? "me-settings-row me-settings-link" : "me-row-control"
+      }
+      href={href}
+      prefetch={false}
+    >
+      <Icon size={20} strokeWidth={1.5} aria-hidden="true" />
+      <span className={desktop ? "me-settings-name" : "me-row-label"}>
+        {t(title)}
+      </span>
+      <ChevronRight size={16} aria-hidden="true" />
+    </Link>
+  ));
+}
+
 // Prototype v2 phone Me, Team Tasks.dc.html lines 414–496.
 function MePhone() {
   const { workspace, signOut, signOutPending } = useWorkspace();
@@ -494,39 +533,16 @@ function MePhone() {
           href="/me/mcp"
           prefetch={false}
           data-testid="open-mcp"
-          aria-label={`${t("me.mcpSettings")} · ${t("mcp.running")}`}
+          aria-label={`${t("mcp.title")} · ${t("mcp.running")}`}
         >
           <Plug size={20} strokeWidth={1.5} aria-hidden="true" />
-          <span className="me-row-label">{t("me.mcpSettings")}</span>
+          <span className="me-row-label">{t("mcp.title")}</span>
           <span className="me-row-value me-running">
             <span className="me-running-dot" aria-hidden="true" />
             {t("mcp.running")}
           </span>
           <ChevronRight size={16} aria-hidden="true" />
         </Link>
-      </div>
-      <h2 id="preferences-heading" className="me-section-label">
-        {t("me.preferences")}
-      </h2>
-      <div className="me-rows">
-        <div className="me-preference-row">
-          <Languages size={20} strokeWidth={1.5} aria-hidden="true" />
-          <span id="me-language-label" className="me-row-label">
-            {t("language")}
-          </span>
-          <LanguageControl labelId="me-language-label" />
-        </div>
-        <div className="me-preference-row">
-          <Moon size={20} strokeWidth={1.5} aria-hidden="true" />
-          <span id="me-appearance-label" className="me-row-label">
-            {t("me.appearance")}
-          </span>
-          <AppearanceControl
-            labelId="me-appearance-label"
-            theme={appearance ?? "system"}
-            onChange={changeTheme}
-          />
-        </div>
         <Link
           className="me-row-control me-tall-row"
           href="/me/notifications"
@@ -553,6 +569,30 @@ function MePhone() {
           </span>
           <ChevronRight size={16} aria-hidden="true" />
         </Link>
+        <MeSettingsLinks />
+      </div>
+      <h2 id="preferences-heading" className="me-section-label">
+        {t("me.preferences")}
+      </h2>
+      <div className="me-rows">
+        <div className="me-preference-row">
+          <Languages size={20} strokeWidth={1.5} aria-hidden="true" />
+          <span id="me-language-label" className="me-row-label">
+            {t("language")}
+          </span>
+          <LanguageControl labelId="me-language-label" />
+        </div>
+        <div className="me-preference-row">
+          <Moon size={20} strokeWidth={1.5} aria-hidden="true" />
+          <span id="me-appearance-label" className="me-row-label">
+            {t("me.appearance")}
+          </span>
+          <AppearanceControl
+            labelId="me-appearance-label"
+            theme={appearance ?? "system"}
+            onChange={changeTheme}
+          />
+        </div>
         <Button
           type="button"
           className="me-row-control"

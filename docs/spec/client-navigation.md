@@ -109,6 +109,14 @@ is implemented for v0.2.26, not yet deployed.
   shall issue at most six data GETs in addition to session confirmation and
   the role check at the first realtime connection.
 
+### Me settings navigation (CN-6)
+
+- CN-6.1 On phones, Me shall show Inbox, AI Brief and agents before one
+  Settings group, followed by Preferences.
+- CN-6.2 Me shall provide direct settings links for Organizations, MCP,
+  notifications, digest history and shareholder summaries. Workspace admins
+  shall also have direct links to access, audit and summary administration.
+
 ## Acceptance
 
 | Requirement | Evidence |
@@ -121,6 +129,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-4 | `e2e/today.spec.ts` in en, zh-CN, and zh-HK, and `apps/web/src/lib/today.test.ts` |
 | CN-4 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
 | CN-5 | `e2e/settings-header.spec.ts` in en, zh-CN, and zh-HK; `e2e/mcp-oauth.spec.ts` |
+| CN-6 | `e2e/me.spec.ts`, settings links and workspace roles |
 | CN-2 | optimistic-m3.test.ts (13 tests); inherited fixes a30b779, bf7e0b5, deaf815 and 7ff9762 |
 | CN-2.3 | mutations/start-run.test.ts; e2e/accessibility.spec.ts deferred real-detail read and keyboard/MCP approval flow |
 | CN-1 | e2e/completion.spec.ts delayed chunk test (browser pending); i18n.test.ts |

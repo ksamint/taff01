@@ -29,6 +29,7 @@ import {
   initial,
   LanguageControl,
   MeProfile,
+  MeSettingsLinks,
   OrganizationSheet,
   useAgentRows,
   useLocaleFormat,
@@ -461,6 +462,7 @@ function SettingsTab() {
           <span className="me-row-summary">{t("summary.meHint")}</span>
         </span>
       </Link>
+      <MeSettingsLinks desktop />
       <section aria-labelledby="preferences-heading">
         <h2 id="preferences-heading" className="me-settings-label">
           {t("me.preferences")}
