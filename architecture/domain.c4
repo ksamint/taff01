@@ -1,0 +1,59 @@
+// How work is organized: the levels, who holds a role at each, and the two
+// levels people ask about that the data does not have. Hand-written.
+// `fn` is the root of the function modules; generated/modules.c4 extends it.
+model {
+  fn = area 'Function modules' {
+    description 'Vertical slices of the product. Each owns its screens, routes, tools, rules and tables.'
+  }
+
+  domain = area 'How work is organized' {
+    user = concept 'User' {
+      description 'A person who can sign in. May carry the system administrator flag. Has a login-default organization, locale and time zone.'
+    }
+    org_group = concept 'Group of organizations' {
+      #not_modelled
+      description 'Not modelled. Nothing groups several organizations; a person simply has several memberships.'
+      style {
+        color red
+        border dashed
+        opacity 20%
+      }
+    }
+    org = concept 'Organization' {
+      description 'Called workspace in code. Has a short key for task numbers, can be personal, can be archived.'
+    }
+    member = concept 'Member' {
+      description 'A person or an agent inside one organization. A person holds one role there: admin, member or guest. An agent has a supervisor, who is another member.'
+    }
+    project = concept 'Project' {
+      description 'Flat. Name, due date, saved delivery progress, commercial stage, contract amount, client company, one person in charge.'
+    }
+    subproject = concept 'Sub-project or phase' {
+      #not_modelled
+      description 'Not modelled. A project has no parent and no children. Grouping inside a project is by parent task, label or milestone.'
+      style {
+        color red
+        border dashed
+        opacity 20%
+      }
+    }
+    task = concept 'Task' {
+      description 'Numbered per organization. Four statuses. Always has an owner; may have a worker. Carries three separate dates: due, scheduled and planned.'
+    }
+    subtask = concept 'Subtask' {
+      description 'A task whose parent is another task. Inherits project, priority and due date unless given its own.'
+    }
+
+    user -[contains]-> member 'is, per organization'
+    org -[contains]-> member 'has'
+    org -[contains]-> project 'has'
+    org -[contains]-> task 'has'
+    project -[contains]-> task 'groups, optional'
+    task -[contains]-> subtask 'parent of'
+    member -[holds_role]-> project 'person in charge'
+    member -[holds_role]-> task 'owner (a person)'
+    member -[holds_role]-> task 'worker (person or agent)'
+    org_group -[planned]-> org 'would group'
+    project -[planned]-> subproject 'would split into'
+  }
+}
