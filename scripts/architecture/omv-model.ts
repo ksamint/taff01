@@ -171,7 +171,7 @@ export function omv(inventory: Inventory): {
         type: "step",
         title: step.title,
         summary: step.text,
-        attrs: { order: index + 1 },
+        attrs: { order: index + 1, ...(step.lane ? { lane: step.lane } : {}) },
       });
       link(id, "step_of", `flow:${flow.id}`);
       link(id, "happens_in", `module:${step.module}`);

@@ -165,7 +165,8 @@ export const LEVELS: {
 export type Flow = {
   id: string;
   title: string;
-  steps: { module: string; title: string; text: string }[];
+  /** `lane` is who acts in the step: Person, Agent or System. */
+  steps: { lane: string; module: string; title: string; text: string }[];
 };
 export const FLOWS: Flow[] = [
   {
@@ -173,31 +174,37 @@ export const FLOWS: Flow[] = [
     title: "A person hands work to an agent and approves it",
     steps: [
       {
+        lane: "Person",
         module: "tasks",
         title: "Task",
         text: "A person creates a task and sets an agent as worker.",
       },
       {
+        lane: "Agent",
         module: "agents",
         title: "Run",
         text: "The agent starts a run; events and deliverables are recorded.",
       },
       {
+        lane: "System",
         module: "access",
         title: "Permission",
         text: "Each step is checked against scopes and capabilities. An “ask” capability pauses the run.",
       },
       {
+        lane: "Person",
         module: "inbox",
         title: "Inbox",
         text: "The request, and later the finished work, reach the supervisor's inbox.",
       },
       {
+        lane: "Person",
         module: "agents",
         title: "Review",
         text: "The owner or supervisor approves or asks for changes in the review workspace.",
       },
       {
+        lane: "Person",
         module: "tasks",
         title: "Done",
         text: "Only a person moves the task to done.",
@@ -209,26 +216,31 @@ export const FLOWS: Flow[] = [
     title: "A plan becomes a risk line and a report",
     steps: [
       {
+        lane: "Person",
         module: "tasks",
         title: "Tasks",
         text: "Status, due dates and subtasks.",
       },
       {
+        lane: "Person",
         module: "planning",
         title: "Plan",
         text: "Start, duration, milestones and dependencies; the model computes critical path, forecast and risk.",
       },
       {
+        lane: "System",
         module: "assistant",
         title: "Brief",
         text: "The AI brief reports risk and finance per project.",
       },
       {
+        lane: "System",
         module: "summaries",
         title: "Summary",
         text: "The shareholder summary reuses the same model.",
       },
       {
+        lane: "System",
         module: "export",
         title: "Image",
         text: "The timeline exports as a watermarked PNG.",
@@ -240,26 +252,31 @@ export const FLOWS: Flow[] = [
     title: "A project reaches a shareholder",
     steps: [
       {
+        lane: "Person",
         module: "projects",
         title: "Project",
         text: "Progress, stage, contract and payments are kept on the project.",
       },
       {
+        lane: "Person",
         module: "summaries",
         title: "Audience",
         text: "An admin creates an audience tag, adds recipients and tags projects.",
       },
       {
+        lane: "System",
         module: "summaries",
         title: "Snapshot",
         text: "At each recipient's delivery time the worker stores a snapshot with a content hash.",
       },
       {
+        lane: "System",
         module: "export",
         title: "Render",
         text: "Text in core, PNG from the Rust renderer, both watermarked.",
       },
       {
+        lane: "Person",
         module: "identity",
         title: "Read",
         text: "The recipient signs in to read it, or an admin shares an expiring link.",
@@ -271,26 +288,31 @@ export const FLOWS: Flow[] = [
     title: "An outside agent gets access",
     steps: [
       {
+        lane: "Agent",
         module: "access",
         title: "Connect",
         text: "The agent's client opens the OAuth flow at /mcp.",
       },
       {
+        lane: "Person",
         module: "orgs",
         title: "Role cap",
         text: "An admin approves scopes, never above their own role in that organization.",
       },
       {
+        lane: "System",
         module: "access",
         title: "Token",
         text: "The token is tied to one agent member, with grants per organization.",
       },
       {
+        lane: "Agent",
         module: "tasks",
         title: "Call",
         text: "Each tool call runs as that member through the same rules as a person.",
       },
       {
+        lane: "System",
         module: "audit",
         title: "Record",
         text: "The call is logged and the write is audited.",
@@ -302,21 +324,25 @@ export const FLOWS: Flow[] = [
     title: "A change appears on another screen",
     steps: [
       {
+        lane: "Person",
         module: "tasks",
         title: "Write",
         text: "REST or MCP calls core inside one transaction.",
       },
       {
+        lane: "System",
         module: "kernel",
         title: "Core",
         text: "The mutation helper applies the rule and the version check.",
       },
       {
+        lane: "System",
         module: "audit",
         title: "Audit",
         text: "A trigger writes the activity row and sends a notification with ids only.",
       },
       {
+        lane: "System",
         module: "audit",
         title: "Socket",
         text: "The API forwards it to that organization's open browsers, which refetch what changed.",

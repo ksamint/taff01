@@ -61,8 +61,9 @@ Four consequences:
   selects from O. Adding a question never needs new data, and adding a
   relation type makes it available to every question that names it.
 - **The form follows the shape of the relation.** Containment is a tree. A
-  relation between two sets is a matrix. An order is a path or a timeline.
-  Anything else is groups. The form is not a matter of taste.
+  relation between two sets is a matrix. An order is a path or a timeline;
+  when each step names who acts, the path is drawn as a swimlane, one row
+  per actor. Anything else is groups. The form is not a matter of taste.
 - **The centre is not the viewer.** A manager looking at project P1 has P1 as
   centre and themselves as context. What they may see is decided by c.
 - **Every view carries its provenance:** its centre, question, model version

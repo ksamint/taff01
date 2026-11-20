@@ -2402,7 +2402,8 @@
     "title": "Task",
     "summary": "A person creates a task and sets an agent as worker.",
     "attrs": {
-     "order": 1
+     "order": 1,
+     "lane": "Person"
     }
    },
    {
@@ -2411,7 +2412,8 @@
     "title": "Run",
     "summary": "The agent starts a run; events and deliverables are recorded.",
     "attrs": {
-     "order": 2
+     "order": 2,
+     "lane": "Agent"
     }
    },
    {
@@ -2420,7 +2422,8 @@
     "title": "Permission",
     "summary": "Each step is checked against scopes and capabilities. An “ask” capability pauses the run.",
     "attrs": {
-     "order": 3
+     "order": 3,
+     "lane": "System"
     }
    },
    {
@@ -2429,7 +2432,8 @@
     "title": "Inbox",
     "summary": "The request, and later the finished work, reach the supervisor's inbox.",
     "attrs": {
-     "order": 4
+     "order": 4,
+     "lane": "Person"
     }
    },
    {
@@ -2438,7 +2442,8 @@
     "title": "Review",
     "summary": "The owner or supervisor approves or asks for changes in the review workspace.",
     "attrs": {
-     "order": 5
+     "order": 5,
+     "lane": "Person"
     }
    },
    {
@@ -2447,7 +2452,8 @@
     "title": "Done",
     "summary": "Only a person moves the task to done.",
     "attrs": {
-     "order": 6
+     "order": 6,
+     "lane": "Person"
     }
    },
    {
@@ -2461,7 +2467,8 @@
     "title": "Tasks",
     "summary": "Status, due dates and subtasks.",
     "attrs": {
-     "order": 1
+     "order": 1,
+     "lane": "Person"
     }
    },
    {
@@ -2470,7 +2477,8 @@
     "title": "Plan",
     "summary": "Start, duration, milestones and dependencies; the model computes critical path, forecast and risk.",
     "attrs": {
-     "order": 2
+     "order": 2,
+     "lane": "Person"
     }
    },
    {
@@ -2479,7 +2487,8 @@
     "title": "Brief",
     "summary": "The AI brief reports risk and finance per project.",
     "attrs": {
-     "order": 3
+     "order": 3,
+     "lane": "System"
     }
    },
    {
@@ -2488,7 +2497,8 @@
     "title": "Summary",
     "summary": "The shareholder summary reuses the same model.",
     "attrs": {
-     "order": 4
+     "order": 4,
+     "lane": "System"
     }
    },
    {
@@ -2497,7 +2507,8 @@
     "title": "Image",
     "summary": "The timeline exports as a watermarked PNG.",
     "attrs": {
-     "order": 5
+     "order": 5,
+     "lane": "System"
     }
    },
    {
@@ -2511,7 +2522,8 @@
     "title": "Project",
     "summary": "Progress, stage, contract and payments are kept on the project.",
     "attrs": {
-     "order": 1
+     "order": 1,
+     "lane": "Person"
     }
    },
    {
@@ -2520,7 +2532,8 @@
     "title": "Audience",
     "summary": "An admin creates an audience tag, adds recipients and tags projects.",
     "attrs": {
-     "order": 2
+     "order": 2,
+     "lane": "Person"
     }
    },
    {
@@ -2529,7 +2542,8 @@
     "title": "Snapshot",
     "summary": "At each recipient's delivery time the worker stores a snapshot with a content hash.",
     "attrs": {
-     "order": 3
+     "order": 3,
+     "lane": "System"
     }
    },
    {
@@ -2538,7 +2552,8 @@
     "title": "Render",
     "summary": "Text in core, PNG from the Rust renderer, both watermarked.",
     "attrs": {
-     "order": 4
+     "order": 4,
+     "lane": "System"
     }
    },
    {
@@ -2547,7 +2562,8 @@
     "title": "Read",
     "summary": "The recipient signs in to read it, or an admin shares an expiring link.",
     "attrs": {
-     "order": 5
+     "order": 5,
+     "lane": "Person"
     }
    },
    {
@@ -2561,7 +2577,8 @@
     "title": "Connect",
     "summary": "The agent's client opens the OAuth flow at /mcp.",
     "attrs": {
-     "order": 1
+     "order": 1,
+     "lane": "Agent"
     }
    },
    {
@@ -2570,7 +2587,8 @@
     "title": "Role cap",
     "summary": "An admin approves scopes, never above their own role in that organization.",
     "attrs": {
-     "order": 2
+     "order": 2,
+     "lane": "Person"
     }
    },
    {
@@ -2579,7 +2597,8 @@
     "title": "Token",
     "summary": "The token is tied to one agent member, with grants per organization.",
     "attrs": {
-     "order": 3
+     "order": 3,
+     "lane": "System"
     }
    },
    {
@@ -2588,7 +2607,8 @@
     "title": "Call",
     "summary": "Each tool call runs as that member through the same rules as a person.",
     "attrs": {
-     "order": 4
+     "order": 4,
+     "lane": "Agent"
     }
    },
    {
@@ -2597,7 +2617,8 @@
     "title": "Record",
     "summary": "The call is logged and the write is audited.",
     "attrs": {
-     "order": 5
+     "order": 5,
+     "lane": "System"
     }
    },
    {
@@ -2611,7 +2632,8 @@
     "title": "Write",
     "summary": "REST or MCP calls core inside one transaction.",
     "attrs": {
-     "order": 1
+     "order": 1,
+     "lane": "Person"
     }
    },
    {
@@ -2620,7 +2642,8 @@
     "title": "Core",
     "summary": "The mutation helper applies the rule and the version check.",
     "attrs": {
-     "order": 2
+     "order": 2,
+     "lane": "System"
     }
    },
    {
@@ -2629,7 +2652,8 @@
     "title": "Audit",
     "summary": "A trigger writes the activity row and sends a notification with ids only.",
     "attrs": {
-     "order": 3
+     "order": 3,
+     "lane": "System"
     }
    },
    {
@@ -2638,7 +2662,8 @@
     "title": "Socket",
     "summary": "The API forwards it to that organization's open browsers, which refetch what changed.",
     "attrs": {
-     "order": 4
+     "order": 4,
+     "lane": "System"
     }
    },
    {
