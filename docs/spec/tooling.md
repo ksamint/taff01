@@ -173,6 +173,13 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 - TT-9.10 `scripts/omv/` (format, validation, view function, viewer, page
   builder, standard repository vocabulary) shall import nothing from outside
   its folder, so it can move to another repository unchanged.
+- TT-9.11 `pnpm arch:benchmark` shall write `docs/benchmark/function-map.md`
+  from `scripts/architecture/benchmark.ts`: functions that other products
+  offer, by group and category, the products each is seen in, and whether
+  Taff has it. Each function Taff has or partly has shall name objects of the
+  OMV model. The unit tests shall fail when a named object does not exist or
+  when the committed table is stale. The table states what the reading
+  material says about other products; it does not claim to have tested them.
 - TT-9.5 The model describes the code; it grants nothing and no runtime reads
   it. A sub-project level and a level above the organization appear in
   `domain.c4` marked `not_modelled` until the owner decides them.
@@ -206,7 +213,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |
 | TT-6.3 | scripts/neighbor-preservation.test.ts (10, incl. CLI exit code; 6,000-case differential run in [milestone 107](../milestones/107-report-web-and-ports.md)); scripts/live-email-proof.test.ts (4); scripts/audit-contract.test.ts (5) |
-| TT-9 | scripts/architecture/architecture.test.ts (10); eight questions exercised from three centres in Chromium ([milestone 160](../milestones/160-omv-map.md)); function map opened in Chromium at 1440 and 400 px with no page error ([milestone 158](../milestones/158-function-map.md)); `pnpm arch:check` valid on LikeC4 1.60.0 ([milestone 157](../milestones/157-architecture-model.md)) |
+| TT-9 | scripts/architecture/architecture.test.ts (11); eight questions exercised from three centres in Chromium ([milestone 160](../milestones/160-omv-map.md)); function map opened in Chromium at 1440 and 400 px with no page error ([milestone 158](../milestones/158-function-map.md)); `pnpm arch:check` valid on LikeC4 1.60.0 ([milestone 157](../milestones/157-architecture-model.md)) |
 | TT-7 | scripts/check-plan.test.ts (9); full run recorded in [milestone 131](../milestones/131-tda01-start-baseline.md) |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
