@@ -1,0 +1,103 @@
+// The vocabulary of the Taff architecture model: what kinds of things exist
+// and what kinds of links may join them. Hand-written.
+specification {
+  // Who and what runs
+  element actor {
+    style {
+      shape person
+      color amber
+    }
+  }
+  element system
+  element service {
+    style {
+      color blue
+    }
+  }
+  element library {
+    style {
+      color indigo
+    }
+  }
+  element store {
+    style {
+      shape storage
+      color slate
+    }
+  }
+
+  // How work is organized (the domain)
+  element area {
+    style {
+      color muted
+    }
+  }
+  element concept {
+    style {
+      color green
+    }
+  }
+
+  // What the code is made of (generated)
+  element module {
+    style {
+      color sky
+    }
+  }
+  element layer {
+    style {
+      color muted
+    }
+  }
+  element screen {
+    style {
+      shape browser
+      color blue
+    }
+  }
+  element routes {
+    style {
+      color indigo
+    }
+  }
+  element tool {
+    style {
+      color amber
+    }
+  }
+  element code {
+    style {
+      color secondary
+    }
+  }
+  element table {
+    style {
+      shape storage
+      color slate
+    }
+  }
+
+  relationship contains
+  relationship holds_role {
+    color amber
+    line dashed
+  }
+  relationship uses {
+    color slate
+    line dashed
+  }
+  relationship planned {
+    color red
+    line dotted
+  }
+
+  tag web
+  tag api
+  tag mcp
+  tag core
+  tag db
+  tag typescript
+  tag rust
+  tag moves_to_rust
+  tag not_modelled
+}

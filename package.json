@@ -30,6 +30,10 @@
     "ui:app-shots": "node --env-file=.env scripts/ui/app-shots.mts",
     "rust:fixtures": "node --env-file-if-exists=.env node_modules/tsx/dist/cli.mjs scripts/rust-fixtures.mts",
     "rust:gate": "node node_modules/tsx/dist/cli.mjs scripts/rust-gate.mts",
+    "arch:gen": "node node_modules/tsx/dist/cli.mjs scripts/architecture/generate.mts",
+    "arch:check": "node node_modules/tsx/dist/cli.mjs scripts/architecture/generate.mts --check && pnpm dlx likec4@1.60.0 validate architecture",
+    "arch:view": "pnpm dlx likec4@1.60.0 start architecture",
+    "arch:build": "pnpm dlx likec4@1.60.0 build architecture --output architecture/.site --output-single-file --use-hash-history --title \"Taff Architecture\"",
     "schema:gen": "node node_modules/tsx/dist/cli.mjs apps/api/scripts/summary-schema-gen.mts"
   },
   "devDependencies": {

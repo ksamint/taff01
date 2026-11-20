@@ -1,0 +1,119 @@
+// What runs in production and how a request travels. Hand-written.
+model {
+  person = actor 'Person' {
+    description 'Signs in on a phone or desktop browser. Admin, member or guest in each organization.'
+  }
+  agent_client = actor 'Outside agent' {
+    description 'Claude.ai, Codex, Twin or another MCP client, holding an OAuth token.'
+  }
+  shareholder = actor 'Summary recipient' {
+    description 'Opens one shared summary by link, without an account.'
+  }
+
+  taff = system 'Taff' {
+    description 'People and agents working on the same tasks, with a person approving agent output.'
+
+    edge = service 'Caddy' {
+      description 'Sends /api and /mcp to the API and everything else to the web server. Shared infrastructure: agents do not change it.'
+      link ../deploy/Caddyfile
+    }
+    web = service 'Web' {
+      #typescript
+      technology 'Next.js 16, React 19'
+      description 'Renders signed-in pages on the server, then keeps a query cache in the browser with optimistic writes. Stays TypeScript.'
+      link ../apps/web
+    }
+    api = service 'API' {
+      #typescript, #moves_to_rust
+      technology 'Hono on Node'
+      description 'Four doors into the same rules. Thin adapters: no rule lives here.'
+      link ../apps/api/src/app.ts
+
+      rest = service 'REST' {
+        #api
+        description 'JSON routes the web client calls.'
+        link ../apps/api/src/app.ts
+      }
+      mcp = service 'MCP server' {
+        #mcp
+        description 'Tools for agents, over the same permission function.'
+        link ../apps/api/src/mcp.ts
+      }
+      oauth = service 'OAuth server' {
+        description 'OAuth 2.1 authorization for MCP clients.'
+        link ../apps/api/src/oauth.ts
+      }
+      realtime = service 'Realtime socket' {
+        description 'Tells open browsers which caches to refresh. Carries ids, never content.'
+        link ../apps/api/src/realtime.ts
+      }
+    }
+    worker = service 'Worker' {
+      #typescript, #moves_to_rust
+      technology 'BullMQ on Node'
+      description 'Two scheduled jobs: personal daily digests and shareholder summaries.'
+      link ../apps/worker/src/index.ts
+    }
+    core = library 'Core' {
+      #typescript, #moves_to_rust, #core
+      technology 'TypeScript, Drizzle, better-auth'
+      description 'Every business rule, every permission check, sign-in, and the only TypeScript that reads or writes the database.'
+      link ../packages/core/src/index.ts
+    }
+    contract = library 'Contract' {
+      #typescript
+      technology 'Zod'
+      description 'Schemas for every request and response, shared by web, API and core. Stays TypeScript and will emit the JSON Schema Rust reads.'
+      link ../packages/schemas/src/index.ts
+    }
+    render = service 'Renderer' {
+      #rust
+      technology 'Rust'
+      description 'Stateless. Turns a snapshot into a watermarked PNG. The one Rust service in production.'
+      link ../backend/crates/taff-render/src/main.rs
+    }
+    rust_domain = library 'Rust domain crates' {
+      #rust
+      technology 'Rust: taff-domain, taff-db, taff-core'
+      description 'A port of the permission function, calendar rules and time zones, tested against the TypeScript. Serves no request yet.'
+      link ../backend/crates/taff-domain/src/lib.rs
+    }
+    db = store 'PostgreSQL' {
+      #db
+      technology 'PostgreSQL 18'
+      description 'One schema. Triggers write the audit row and send the change notification.'
+      link ../packages/db/src/schema.ts
+    }
+    queue = store 'Valkey' {
+      technology 'Valkey 9'
+      description 'Job queues and rate limits. Holds nothing that cannot be rebuilt.'
+    }
+
+    edge -> web 'pages'
+    edge -> api.rest '/api'
+    edge -> api.mcp '/mcp'
+    edge -> api.oauth '/api/oauth'
+    web -> api.rest 'server render and browser calls'
+    web -> api.realtime 'WebSocket'
+    web -> contract 'validates with'
+    api.rest -> core 'calls'
+    api.mcp -> core 'calls'
+    api.oauth -> core 'calls'
+    api.realtime -> core 'listens for changes'
+    api.rest -> render 'PNG request'
+    api.mcp -> render 'PNG request'
+    api -> contract 'validates with'
+    api.rest -> queue 'rate limits'
+    worker -> core 'calls'
+    worker -> queue 'jobs'
+    worker -> render 'PNG request'
+    core -> contract 'types from'
+    core -> db 'reads and writes'
+    db -> core 'change notification'
+    rust_domain -[planned]-> core 'replaces, from v0.2.27'
+  }
+
+  person -> taff.edge 'HTTPS'
+  agent_client -> taff.edge 'MCP over HTTPS'
+  shareholder -> taff.edge '/s/:token'
+}

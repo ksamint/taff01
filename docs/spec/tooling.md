@@ -126,6 +126,29 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   bytes than Today. Me uses Manrope and the common CJK subset in Chinese,
   with platform fallback for glyphs outside that subset.
 
+### Architecture model (TT-9)
+
+- TT-9.1 The repository shall hold one architecture model in LikeC4 source
+  files under `architecture/`. `spec.c4` names the kinds of element and
+  relationship; `runtime.c4`, `domain.c4` and `views.c4` are written by
+  hand; `generated/modules.c4` is generated.
+- TT-9.2 `pnpm arch:gen` shall build the generated file from the code: every
+  table in `packages/db/src/schema.ts`, every REST route and MCP tool in
+  `apps/api/src`, every source file in `packages/core/src`, every page in
+  `apps/web/app`, and which tables each core file imports.
+- TT-9.3 `scripts/architecture/modules.ts` shall assign each of those to
+  exactly one function module. The unit tests shall fail when the code gains a
+  table, core file, route, tool or page that no module claims, when two
+  modules claim one, when a module names a file that does not exist, or when
+  the committed generated file differs from a fresh run.
+- TT-9.4 `pnpm arch:view`, `pnpm arch:build` and `pnpm arch:check` shall
+  run LikeC4 1.60.0 on demand through `pnpm dlx`. LikeC4 shall not be a
+  dependency of any package, and `pnpm check` shall not need it or the
+  network: the gate covers TT-9.3 through the unit tests only.
+- TT-9.5 The model describes the code; it grants nothing and no runtime reads
+  it. A sub-project level and a level above the organization appear in
+  `domain.c4` marked `not_modelled` until the owner decides them.
+
 ## Non-functional
 
 - No new dependency name; web declares the same esbuild version already used
@@ -155,6 +178,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |
 | TT-6.3 | scripts/neighbor-preservation.test.ts (10, incl. CLI exit code; 6,000-case differential run in [milestone 107](../milestones/107-report-web-and-ports.md)); scripts/live-email-proof.test.ts (4); scripts/audit-contract.test.ts (5) |
+| TT-9 | scripts/architecture/architecture.test.ts (4); `pnpm arch:check` valid on LikeC4 1.60.0 ([milestone 157](../milestones/157-architecture-model.md)) |
 | TT-7 | scripts/check-plan.test.ts (9); full run recorded in [milestone 131](../milestones/131-tda01-start-baseline.md) |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
