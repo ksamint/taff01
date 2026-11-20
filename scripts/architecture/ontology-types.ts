@@ -1,7 +1,4 @@
-// unlikec4: the document format. One ontology (ranked things and typed
-// relations), one mapping (which module and which storage holds each thing),
-// and the perspectives that redraw the same things for one question each.
-// Nothing in this folder knows the repository it describes.
+// The intermediate shape of the ontology before it becomes an OMV graph.
 
 export type ThingKind =
   | "kind" // exists on its own: a user, a task

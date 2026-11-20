@@ -7,7 +7,7 @@ import type {
   Thing,
   ThingKind,
   Tier,
-} from "../unlikec4/schema.ts";
+} from "./ontology-types.ts";
 
 export const TIERS: Tier[] = [
   {
@@ -658,4 +658,16 @@ export const PERSPECTIVES: Perspective[] = [
     form: "Layer diagram",
     built: false,
   },
+];
+
+/** Which things give a time or an order to which. Pairs of [source, target]. */
+export const DATES: [string, string, string][] = [
+  ["due_date", "task", "a deadline, an instant"],
+  ["schedule_block", "task", "a block on the calendar, may repeat"],
+  ["plan", "task", "a start day and a number of days"],
+  ["dependency", "task", "an order: this before that"],
+  ["milestone", "project", "a named date"],
+  ["payment", "project", "the day money arrived"],
+  ["run", "task", "when an agent worked on it"],
+  ["audit_record", "organization", "when each change happened"],
 ];

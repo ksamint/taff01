@@ -62,6 +62,21 @@ remember this unlikec4 we will merge it into tda01".
 4. `architecture/ontology.json` is committed, so a change to the ontology
    or to the code it maps appears as a diff.
 
+## Amendment, 2026-11-20: OMV
+
+Owner: "optimize and build up OMV theory, and update the ontology map into
+OMV Map". The engine is renamed from unlikec4 to omv and now implements the
+method written in `scripts/omv/THEORY.md`:
+
+1. O defines object types and relation types; a relation type has a meaning,
+   the types it may join and a reading in both directions.
+2. M is one typed graph. Structure, authority, flow and the rest are parts of
+   that graph, not separate models. Derived relations are marked.
+3. V is a function, View(M; o, q, c, r). A question is a choice of relation
+   types, so a view invents no meaning; the form follows the shape of the
+   relation; the centre is not the viewer; every view states its provenance.
+4. `architecture/omv.json` replaces `architecture/ontology.json`.
+
 ## Consequences
 
 - A change that adds a table, route, tool, core file or page must also name
