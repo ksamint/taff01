@@ -2,9 +2,9 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { build } from "esbuild";
-import { type Ontology, validate } from "./schema.ts";
+import { type OmvDocument, validate } from "./omv.ts";
 
-export async function buildPage(doc: Ontology, title: string) {
+export async function buildPage(doc: OmvDocument, title: string) {
   const problems = validate(doc);
   if (problems.length) throw new Error(problems.join("\n"));
   const bundle = await build({
@@ -26,7 +26,7 @@ export async function buildPage(doc: Ontology, title: string) {
 <style>
 ${css}</style>
 <div id="app"></div>
-<script type="application/json" id="unlikec4">${JSON.stringify(doc).replace(/</g, "\\u003c")}</script>
+<script type="application/json" id="omv">${JSON.stringify(doc).replace(/</g, "\\u003c")}</script>
 <script>
 ${script.replace(/<\/script/g, "<\\/script")}</script>
 `;

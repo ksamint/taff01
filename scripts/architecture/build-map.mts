@@ -1,26 +1,37 @@
-// Builds Taff's unlikec4 page: one ontology, five perspectives, one file.
-//   pnpm arch:map    writes architecture/.site/map.html (open it in a browser)
-// and map.fragment.html, the same page without the document shell.
+// Builds Taff's OMV map: one document (O, M, V) and one page that views it.
+//   pnpm arch:map    writes architecture/omv.json and architecture/.site/map.html
+import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { buildPage } from "../unlikec4/build.ts";
+import { buildPage } from "../omv/build.ts";
 import { inventory, repoRoot } from "./inventory.ts";
-import { ontology } from "./ontology-model.ts";
+import { omv } from "./omv-model.ts";
 
-const { doc, problems } = ontology(inventory());
+const { doc, problems } = omv(inventory());
 if (problems.length) {
   for (const line of problems) console.error(`problem: ${line}`);
   process.exit(1);
 }
-const page = await buildPage(doc, "Taff Ontology Map");
+writeFileSync(
+  path.join(repoRoot, "architecture/omv.json"),
+  `${JSON.stringify(doc, null, 1)}\n`,
+);
+// The page names the commit it was built from; the committed document does not.
+let version = "";
+try {
+  version = execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+    cwd: repoRoot,
+    encoding: "utf8",
+  }).trim();
+} catch {}
+const page = await buildPage(
+  version ? { ...doc, version } : doc,
+  "Taff OMV Map",
+);
 const out = path.join(repoRoot, "architecture/.site");
 mkdirSync(out, { recursive: true });
 writeFileSync(path.join(out, "map.fragment.html"), page.fragment);
 writeFileSync(path.join(out, "map.html"), page.standalone);
-writeFileSync(
-  path.join(repoRoot, "architecture/ontology.json"),
-  `${JSON.stringify(doc, null, 2)}\n`,
-);
 console.info(
-  `wrote architecture/.site/map.html and architecture/ontology.json: ${doc.things.length} things in ${doc.tiers.length} tiers, ${doc.modules.length} modules, ${doc.perspectives.filter((p) => p.built).length} perspectives`,
+  `wrote architecture/omv.json and architecture/.site/map.html: ${doc.m.objects.length} objects, ${doc.m.relations.length} relations, ${doc.o.relationTypes.length} relation types, ${doc.v.questions.length} questions`,
 );

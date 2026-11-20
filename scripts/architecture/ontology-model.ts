@@ -1,11 +1,12 @@
-// Joins Taff's ontology with what the code declares, into one unlikec4
+// Joins Taff's ontology with what the code declares, into one intermediate
 // document: dependents and referrers from the schema, owning modules from the
 // module map, functions and roles from the permissions matrix.
-import type { Ontology } from "../unlikec4/schema.ts";
+
 import { focusModel } from "./focus-model.ts";
 import { type Inventory, references } from "./inventory.ts";
 import { assign } from "./model.ts";
 import { PERSPECTIVES, ROLES_AT, THINGS, TIERS } from "./ontology.ts";
+import type { Ontology } from "./ontology-types.ts";
 
 export function ontology(inventory: Inventory): {
   doc: Ontology;

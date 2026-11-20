@@ -11,21 +11,19 @@ Contract: `docs/spec/tooling.md` TT-9.
 pnpm arch:map
 ```
 
-Writes `architecture/.site/map.html`, the **ontology map**: one page to open
-in a browser. This is the place to start. It is built by the unlikec4 engine
-(`scripts/unlikec4/`) from `architecture/ontology.json`, and has a
-perspective switch:
+Writes `architecture/.site/map.html`, the **OMV map**: one page to open in
+a browser. This is the place to start. It is built by the OMV engine
+(`scripts/omv/`, method in `scripts/omv/THEORY.md`) from
+`architecture/omv.json`:
 
-| Perspective | Question | Form |
-| --- | --- | --- |
-| Things | What exists, and what matters most? | 48 things in 8 tiers, ordered by how many others need them |
-| Structure | What contains what, and who holds a role there? | Tree from system to subtask |
-| Authority | Who may do what? | 60 functions by 4 roles |
-| Dependency | Which module needs which? | 18 modules with arrows |
-| Flow | How does it happen? | Five numbered paths |
-
-Click a thing or a module to read its mapping: where it is stored, which
-module owns it, its functions, requirements, flows and code.
+- **O** defines 14 object types and 19 relation types, each with a meaning.
+- **M** is one typed graph: 592 objects and 1,818 relations, from the 48
+  ranked concepts down to every table, route, tool and file.
+- **V** is a function. Pick a centre on the left (any object, concepts ranked
+  by importance), pick one of eight questions (Structure, Responsibility,
+  Authority, Flow, Time, Resource, Dependency, Value and proof), and
+  optionally a viewer. The page shows that view and states its centre,
+  question, context, form and model version.
 
 ```bash
 pnpm arch:view
@@ -68,6 +66,8 @@ folds away. Start at **Taff · landscape**.
 
 - **A new kind of thing, a new tier, or a decided level.** Edit
   `scripts/architecture/ontology.ts`. Every table must belong to one thing.
+- **A new relation type or question.** Edit `scripts/omv/repo-o.ts`, then emit
+  the relation in `scripts/architecture/omv-model.ts`.
 - **A new permission action or specification.** Name its module in
   `scripts/architecture/focus.ts`. `pnpm test` fails until you do.
 - **A new flow.** Add it to `FLOWS`; each step names a module.

@@ -1,12 +1,14 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "vitest";
-import { validate } from "../unlikec4/schema.ts";
+import { tree, validate as validateOmv, view } from "../omv/omv.ts";
 import { focusModel } from "./focus-model.ts";
 import { inventory, repoRoot } from "./inventory.ts";
 import { assign, render } from "./model.ts";
 import { MODULES } from "./modules.ts";
+import { omv } from "./omv-model.ts";
 import { ontology } from "./ontology-model.ts";
+import { validate } from "./ontology-types.ts";
 
 // Spec docs/spec/tooling.md TT-9: the architecture model follows the code.
 const found = inventory();
@@ -100,12 +102,6 @@ test("the ontology places every table in one thing and every reference resolves"
   ).toEqual(["org_group", "subproject"]);
 });
 
-test("the committed ontology document is current", () => {
-  expect(
-    readFileSync(path.join(repoRoot, "architecture/ontology.json"), "utf8"),
-  ).toBe(`${JSON.stringify(ontology(found).doc, null, 2)}\n`);
-});
-
 test("validate reports a reference that does not resolve", () => {
   const { doc } = ontology(found);
   const broken = {
@@ -118,8 +114,8 @@ test("validate reports a reference that does not resolve", () => {
   expect(validate(broken)).toContain("thing orphan is part of unknown nowhere");
 });
 
-test("the unlikec4 engine imports nothing from the repository it describes", () => {
-  const folder = path.join(repoRoot, "scripts/unlikec4");
+test("the omv engine imports nothing from the repository it describes", () => {
+  const folder = path.join(repoRoot, "scripts/omv");
   const outside = readdirSync(folder)
     .filter((file) => file.endsWith(".ts"))
     .flatMap((file) =>
@@ -130,4 +126,64 @@ test("the unlikec4 engine imports nothing from the repository it describes", () 
       ].map((match) => `${file}: ${match[1]}`),
     );
   expect(outside).toEqual([]);
+});
+
+// Spec TT-9.7: O, M and V are one document, and every view comes from view().
+const built = omv(found);
+test("the OMV document obeys its own O and the committed copy is current", () => {
+  expect(built.problems).toEqual([]);
+  expect(validateOmv(built.doc)).toEqual([]);
+  expect(
+    readFileSync(path.join(repoRoot, "architecture/omv.json"), "utf8"),
+  ).toBe(`${JSON.stringify(built.doc, null, 1)}\n`);
+  // A relation between types O does not allow is reported.
+  const broken = {
+    ...built.doc,
+    m: {
+      ...built.doc.m,
+      relations: [
+        ...built.doc.m.relations,
+        { from: "concept:task", to: "concept:project", type: "may_do" },
+      ],
+    },
+  };
+  expect(validateOmv(broken)).toContain(
+    "concept:task -may_do-> concept:project: concept may not be its source",
+  );
+});
+
+test("a view is one centre, one question, and says what produced it", () => {
+  const structure = view(built.doc, "concept:task", "structure");
+  expect(structure.provenance).toEqual({
+    centre: "Task",
+    question: "Structure",
+    source: "taff01",
+    conditions: ["viewer: anyone", "depth: one relation from the centre"],
+    form: "tree",
+  });
+  const contains = structure.groups.find((group) => group.direction === "in");
+  expect(contains?.items.map((item) => item.id)).toContain("concept:subtask");
+  expect(tree(built.doc, "concept:task", "part_of").up).toEqual([
+    "product:taff",
+    "concept:system",
+    "concept:organization",
+    "concept:project",
+  ]);
+  // The same model answers another question from another centre.
+  const guest = view(built.doc, "role:guest", "authority", {
+    viewer: "role:guest",
+  });
+  expect(guest.provenance.conditions[0]).toBe("viewer: Guest");
+  expect(
+    guest.groups.find((group) => group.relation === "may_do")?.items.length,
+  ).toBeGreaterThan(0);
+  const needs = view(built.doc, "module:planning", "dependency");
+  expect(
+    needs.groups
+      .find(
+        (group) => group.relation === "depends_on" && group.direction === "out",
+      )
+      ?.items.map((item) => item.id),
+  ).toContain("module:tasks");
+  expect(() => view(built.doc, "concept:task", "nonsense")).toThrow();
 });

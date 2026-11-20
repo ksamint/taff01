@@ -86,11 +86,12 @@ that goal, and the full `pnpm check` runs once on each release head before
 the deploy. The hard limits under "Stop and report" still apply.
 
 Architecture model (owner, 2026-11-20; ADR 0033, spec `tooling.md` TT-9):
-- `pnpm arch:map` builds the ontology map; read `architecture/README.md`
+- `pnpm arch:map` builds the OMV map (O defines, M holds, V views; method in
+  `scripts/omv/THEORY.md`); read `architecture/README.md`
   before changing structure. A new table, route, MCP tool, core file, page,
   permission action or specification must be placed in
   `scripts/architecture/` in the same commit; `pnpm test` fails otherwise.
-- `scripts/unlikec4/` is the portable engine and will be merged into tda01.
+- `scripts/omv/` is the portable engine and will be merged into tda01.
   Keep it free of any import from the rest of this repository.
 
 ## Stop and report
