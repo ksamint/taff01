@@ -11,12 +11,21 @@ Contract: `docs/spec/tooling.md` TT-9.
 pnpm arch:map
 ```
 
-Writes `architecture/.site/map.html`, the **function map**: one page to open
-in a browser. This is the place to start. It shows the 18 modules in five
-lanes and, for the module you click, its functions and who may use them, the
-requirements it must satisfy, the flows it takes part in and the modules it
-depends on. A role switch and a flow switch light up the map. Tables, routes,
-tools and files are folded under each module.
+Writes `architecture/.site/map.html`, the **ontology map**: one page to open
+in a browser. This is the place to start. It is built by the unlikec4 engine
+(`scripts/unlikec4/`) from `architecture/ontology.json`, and has a
+perspective switch:
+
+| Perspective | Question | Form |
+| --- | --- | --- |
+| Things | What exists, and what matters most? | 48 things in 8 tiers, ordered by how many others need them |
+| Structure | What contains what, and who holds a role there? | Tree from system to subtask |
+| Authority | Who may do what? | 60 functions by 4 roles |
+| Dependency | Which module needs which? | 18 modules with arrows |
+| Flow | How does it happen? | Five numbered paths |
+
+Click a thing or a module to read its mapping: where it is stored, which
+module owns it, its functions, requirements, flows and code.
 
 ```bash
 pnpm arch:view
@@ -57,13 +66,15 @@ folds away. Start at **Taff · landscape**.
 
 ## Change it
 
+- **A new kind of thing, a new tier, or a decided level.** Edit
+  `scripts/architecture/ontology.ts`. Every table must belong to one thing.
 - **A new permission action or specification.** Name its module in
   `scripts/architecture/focus.ts`. `pnpm test` fails until you do.
 - **A new flow.** Add it to `FLOWS`; each step names a module.
 
 - **A new table, route, MCP tool, core file or page.** Add it to the module
   that owns it in `scripts/architecture/modules.ts`, then run `pnpm arch:gen`
-  and commit both. `pnpm test` fails until you do.
+  and `pnpm arch:map`, and commit the results. `pnpm test` fails until you do.
 - **A new service, store, actor or level.** Edit `runtime.c4` or `domain.c4`.
 - **A new picture.** Add a `view` to `views.c4`.
 - **Layout and colours.** Drag and restyle in `pnpm arch:view` or the LikeC4

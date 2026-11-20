@@ -1,0 +1,3515 @@
+{
+  "name": "Taff",
+  "source": "taff01",
+  "tiers": [
+    {
+      "id": 1,
+      "title": "Boundary and identity",
+      "summary": "Nothing exists without these."
+    },
+    {
+      "id": 2,
+      "title": "Work",
+      "summary": "What people and agents are here to do."
+    },
+    {
+      "id": 3,
+      "title": "The agent loop",
+      "summary": "An agent works, a person accepts. What makes Taff different."
+    },
+    {
+      "id": 4,
+      "title": "Control and trust",
+      "summary": "Who may act, and proof of what happened."
+    },
+    {
+      "id": 5,
+      "title": "Time and money on work",
+      "summary": "Attributes of work: when, in what order, for how much."
+    },
+    {
+      "id": 6,
+      "title": "Context",
+      "summary": "Enriches work. Work survives without it."
+    },
+    {
+      "id": 7,
+      "title": "Messages and outputs",
+      "summary": "Produced from the tiers above."
+    },
+    {
+      "id": 8,
+      "title": "Views, not things",
+      "summary": "Recomputed on read. Nothing is stored."
+    }
+  ],
+  "things": [
+    {
+      "id": "system",
+      "title": "System",
+      "tier": 1,
+      "kind": "kind",
+      "stored": [],
+      "summary": "One installation of Taff. Holds users and organizations.",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "user",
+      "title": "User",
+      "tier": 1,
+      "kind": "kind",
+      "stored": [
+        "users",
+        "sessions",
+        "accounts",
+        "verifications",
+        "sms_auth_challenges",
+        "sms_auth_limits"
+      ],
+      "summary": "A person who can sign in. May carry the system administrator flag.",
+      "partOf": "system",
+      "dependents": 6,
+      "referredBy": [
+        "audience",
+        "digest",
+        "member",
+        "notification_setting",
+        "organization"
+      ],
+      "modules": [
+        "identity"
+      ]
+    },
+    {
+      "id": "org_group",
+      "title": "Group of organizations",
+      "tier": 1,
+      "kind": "kind",
+      "stored": [],
+      "summary": "Not modelled. Nothing groups several organizations.",
+      "partOf": "system",
+      "missing": true,
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "organization",
+      "title": "Organization",
+      "tier": 1,
+      "kind": "kind",
+      "stored": [
+        "workspaces",
+        "workspace_invites"
+      ],
+      "summary": "Called workspace in code. The boundary of data and permission.",
+      "partOf": "system",
+      "dependents": 15,
+      "referredBy": [
+        "agent",
+        "audience",
+        "company",
+        "contact",
+        "member",
+        "mind_node",
+        "project",
+        "review",
+        "source",
+        "task",
+        "token",
+        "tool_call"
+      ],
+      "modules": [
+        "orgs"
+      ]
+    },
+    {
+      "id": "member",
+      "title": "Member",
+      "tier": 1,
+      "kind": "role",
+      "stored": [
+        "members"
+      ],
+      "summary": "A user or an agent inside one organization, with one role there.",
+      "partOf": "organization",
+      "dependents": 19,
+      "referredBy": [
+        "agent",
+        "audience",
+        "capability",
+        "comment",
+        "digest",
+        "grant",
+        "inbox_item",
+        "organization",
+        "payment",
+        "project",
+        "review",
+        "run",
+        "share_link",
+        "suggestion",
+        "task",
+        "token"
+      ],
+      "modules": [
+        "orgs"
+      ]
+    },
+    {
+      "id": "agent",
+      "title": "Agent",
+      "tier": 1,
+      "kind": "kind",
+      "stored": [
+        "agent_profiles"
+      ],
+      "summary": "A member of kind agent, with a supervisor and a review policy.",
+      "partOf": "organization",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "agents"
+      ]
+    },
+    {
+      "id": "project",
+      "title": "Project",
+      "tier": 2,
+      "kind": "kind",
+      "stored": [
+        "projects"
+      ],
+      "summary": "Flat. Stage, person in charge, saved progress, client company.",
+      "partOf": "organization",
+      "dependents": 5,
+      "referredBy": [
+        "audience",
+        "milestone",
+        "payment",
+        "stakeholder",
+        "task"
+      ],
+      "modules": [
+        "projects"
+      ]
+    },
+    {
+      "id": "subproject",
+      "title": "Sub-project or phase",
+      "tier": 2,
+      "kind": "kind",
+      "stored": [],
+      "summary": "Not modelled. A project has no parent and no children.",
+      "partOf": "project",
+      "missing": true,
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "task",
+      "title": "Task",
+      "tier": 2,
+      "kind": "kind",
+      "stored": [
+        "tasks"
+      ],
+      "summary": "A unit of work with an owner and an optional worker. May sit directly in the organization.",
+      "partOf": "project",
+      "dependents": 10,
+      "referredBy": [
+        "comment",
+        "dependency",
+        "grant",
+        "inbox_item",
+        "mind_node",
+        "plan",
+        "run",
+        "schedule_block",
+        "stakeholder",
+        "suggestion"
+      ],
+      "modules": [
+        "tasks"
+      ]
+    },
+    {
+      "id": "subtask",
+      "title": "Subtask",
+      "tier": 2,
+      "kind": "kind",
+      "stored": [
+        "tasks.parent_id"
+      ],
+      "summary": "A task whose parent is another task.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "tasks"
+      ]
+    },
+    {
+      "id": "comment",
+      "title": "Comment",
+      "tier": 2,
+      "kind": "event",
+      "stored": [
+        "task_comments"
+      ],
+      "summary": "What someone said on a task.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "tasks"
+      ]
+    },
+    {
+      "id": "run",
+      "title": "Run",
+      "tier": 3,
+      "kind": "event",
+      "stored": [
+        "runs"
+      ],
+      "summary": "One attempt by an agent to do a task.",
+      "partOf": "task",
+      "dependents": 6,
+      "referredBy": [
+        "deliverable",
+        "grant",
+        "inbox_item",
+        "review",
+        "run_event"
+      ],
+      "modules": [
+        "agents"
+      ]
+    },
+    {
+      "id": "run_event",
+      "title": "Run event",
+      "tier": 3,
+      "kind": "event",
+      "stored": [
+        "run_events"
+      ],
+      "summary": "A step the agent took, with its cost and duration.",
+      "partOf": "run",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "agents"
+      ]
+    },
+    {
+      "id": "deliverable",
+      "title": "Deliverable",
+      "tier": 3,
+      "kind": "output",
+      "stored": [
+        "run_artifacts"
+      ],
+      "summary": "What the run produced, kept for review.",
+      "partOf": "run",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "agents"
+      ]
+    },
+    {
+      "id": "review",
+      "title": "Review decision",
+      "tier": 3,
+      "kind": "event",
+      "stored": [
+        "review_checks",
+        "review_comments",
+        "review_items",
+        "trusted_review_receipts",
+        "approved_agent_receipts"
+      ],
+      "summary": "A person's approval or request for changes, with the checklist.",
+      "partOf": "run",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "agents"
+      ]
+    },
+    {
+      "id": "grant",
+      "title": "Permission request",
+      "tier": 3,
+      "kind": "relator",
+      "stored": [
+        "grants"
+      ],
+      "summary": "An agent asks to use a capability; a person allows or denies it.",
+      "partOf": "run",
+      "dependents": 1,
+      "referredBy": [
+        "inbox_item"
+      ],
+      "modules": [
+        "agents"
+      ]
+    },
+    {
+      "id": "suggestion",
+      "title": "Suggestion",
+      "tier": 3,
+      "kind": "event",
+      "stored": [
+        "suggestions"
+      ],
+      "summary": "A change an agent proposes; a person applies or undoes it.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "assistant"
+      ]
+    },
+    {
+      "id": "role",
+      "title": "Organization role",
+      "tier": 4,
+      "kind": "rule",
+      "stored": [
+        "members.role"
+      ],
+      "summary": "Admin, member or guest. The first input of every permission check.",
+      "partOf": "member",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "orgs"
+      ]
+    },
+    {
+      "id": "capability",
+      "title": "Capability",
+      "tier": 4,
+      "kind": "rule",
+      "stored": [
+        "agent_permissions"
+      ],
+      "summary": "What an agent may do: allow, ask or deny, per kind of action.",
+      "partOf": "agent",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "agents"
+      ]
+    },
+    {
+      "id": "token",
+      "title": "Token",
+      "tier": 4,
+      "kind": "relator",
+      "stored": [
+        "agent_tokens",
+        "agent_token_workspaces",
+        "oauth_clients",
+        "oauth_codes",
+        "oauth_refresh_history"
+      ],
+      "summary": "How an outside client acts as an agent, with scopes per organization.",
+      "partOf": "agent",
+      "dependents": 2,
+      "referredBy": [
+        "review",
+        "tool_call"
+      ],
+      "modules": [
+        "access"
+      ]
+    },
+    {
+      "id": "tool_call",
+      "title": "Tool call",
+      "tier": 4,
+      "kind": "event",
+      "stored": [
+        "mcp_calls"
+      ],
+      "summary": "One MCP call and how it ended.",
+      "partOf": "token",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "access"
+      ]
+    },
+    {
+      "id": "audit_record",
+      "title": "Audit record",
+      "tier": 4,
+      "kind": "event",
+      "stored": [
+        "activity"
+      ],
+      "summary": "Who did what to which thing. Also drives live refresh.",
+      "partOf": "organization",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "audit"
+      ]
+    },
+    {
+      "id": "due_date",
+      "title": "Due date",
+      "tier": 5,
+      "kind": "attribute",
+      "stored": [
+        "tasks.due_at"
+      ],
+      "summary": "The deadline, an instant.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "tasks"
+      ]
+    },
+    {
+      "id": "schedule_block",
+      "title": "Scheduled block",
+      "tier": 5,
+      "kind": "attribute",
+      "stored": [
+        "task_calendar"
+      ],
+      "summary": "A time block on the calendar, with optional repeat.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "calendar"
+      ]
+    },
+    {
+      "id": "plan",
+      "title": "Plan",
+      "tier": 5,
+      "kind": "attribute",
+      "stored": [
+        "task_plans"
+      ],
+      "summary": "A start day and a number of days. The bar on the Gantt.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "planning"
+      ]
+    },
+    {
+      "id": "dependency",
+      "title": "Dependency",
+      "tier": 5,
+      "kind": "relator",
+      "stored": [
+        "task_dependencies"
+      ],
+      "summary": "This cannot start or finish before that.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "planning"
+      ]
+    },
+    {
+      "id": "milestone",
+      "title": "Milestone",
+      "tier": 5,
+      "kind": "kind",
+      "stored": [
+        "milestones"
+      ],
+      "summary": "A named date on a project.",
+      "partOf": "project",
+      "dependents": 1,
+      "referredBy": [
+        "dependency"
+      ],
+      "modules": [
+        "planning"
+      ]
+    },
+    {
+      "id": "contract",
+      "title": "Contract",
+      "tier": 5,
+      "kind": "attribute",
+      "stored": [
+        "projects.contract_amount"
+      ],
+      "summary": "The agreed amount and currency.",
+      "partOf": "project",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "projects"
+      ]
+    },
+    {
+      "id": "payment",
+      "title": "Payment",
+      "tier": 5,
+      "kind": "event",
+      "stored": [
+        "project_payments"
+      ],
+      "summary": "Money received. Append-only.",
+      "partOf": "project",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "projects"
+      ]
+    },
+    {
+      "id": "company",
+      "title": "Company",
+      "tier": 6,
+      "kind": "kind",
+      "stored": [
+        "companies"
+      ],
+      "summary": "A client or partner.",
+      "partOf": "organization",
+      "dependents": 2,
+      "referredBy": [
+        "contact",
+        "project"
+      ],
+      "modules": [
+        "crm"
+      ]
+    },
+    {
+      "id": "contact",
+      "title": "Contact",
+      "tier": 6,
+      "kind": "kind",
+      "stored": [
+        "contacts",
+        "company_contacts"
+      ],
+      "summary": "A person outside the organization.",
+      "partOf": "company",
+      "dependents": 2,
+      "referredBy": [
+        "audience",
+        "stakeholder"
+      ],
+      "modules": [
+        "crm"
+      ]
+    },
+    {
+      "id": "stakeholder",
+      "title": "Stakeholder role",
+      "tier": 6,
+      "kind": "role",
+      "stored": [
+        "project_contacts",
+        "task_contacts",
+        "contact_roles"
+      ],
+      "summary": "What a contact is to a company, a project or a task.",
+      "partOf": "contact",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "crm"
+      ]
+    },
+    {
+      "id": "mind_node",
+      "title": "Mind-map node",
+      "tier": 6,
+      "kind": "kind",
+      "stored": [
+        "mind_nodes",
+        "mind_edges"
+      ],
+      "summary": "An idea on the mind map, with links to others.",
+      "partOf": "organization",
+      "dependents": 1,
+      "referredBy": [
+        "source"
+      ],
+      "modules": [
+        "mind"
+      ]
+    },
+    {
+      "id": "source",
+      "title": "Evidence source",
+      "tier": 6,
+      "kind": "kind",
+      "stored": [
+        "mind_sources",
+        "mind_node_sources"
+      ],
+      "summary": "Where a mind-map node's claim comes from.",
+      "partOf": "mind_node",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "mind"
+      ]
+    },
+    {
+      "id": "label",
+      "title": "Label",
+      "tier": 6,
+      "kind": "attribute",
+      "stored": [
+        "tasks.labels"
+      ],
+      "summary": "Free tags on a task. Six of them name the sectors.",
+      "partOf": "task",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "tasks"
+      ]
+    },
+    {
+      "id": "inbox_item",
+      "title": "Inbox item",
+      "tier": 7,
+      "kind": "output",
+      "stored": [
+        "inbox_items"
+      ],
+      "summary": "Something that needs a person: a mention, a blocked agent, a review.",
+      "partOf": "member",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "inbox"
+      ]
+    },
+    {
+      "id": "notification_setting",
+      "title": "Notification setting",
+      "tier": 7,
+      "kind": "attribute",
+      "stored": [
+        "notification_preferences"
+      ],
+      "summary": "What a person wants to be told, and when.",
+      "partOf": "user",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "inbox"
+      ]
+    },
+    {
+      "id": "digest",
+      "title": "Daily digest",
+      "tier": 7,
+      "kind": "output",
+      "stored": [
+        "daily_digests"
+      ],
+      "summary": "A person's own daily summary.",
+      "partOf": "member",
+      "dependents": 1,
+      "referredBy": [
+        "inbox_item"
+      ],
+      "modules": [
+        "inbox"
+      ]
+    },
+    {
+      "id": "audience",
+      "title": "Audience",
+      "tier": 7,
+      "kind": "relator",
+      "stored": [
+        "audience_tags",
+        "project_audience_tags",
+        "audience_recipients"
+      ],
+      "summary": "Which recipients get the summary of which projects.",
+      "partOf": "organization",
+      "dependents": 1,
+      "referredBy": [
+        "summary"
+      ],
+      "modules": [
+        "summaries"
+      ]
+    },
+    {
+      "id": "summary",
+      "title": "Shareholder summary",
+      "tier": 7,
+      "kind": "output",
+      "stored": [
+        "daily_summaries",
+        "summary_renders"
+      ],
+      "summary": "A stored snapshot of project progress, as text and image.",
+      "partOf": "audience",
+      "dependents": 1,
+      "referredBy": [
+        "share_link"
+      ],
+      "modules": [
+        "summaries"
+      ]
+    },
+    {
+      "id": "share_link",
+      "title": "Share link",
+      "tier": 7,
+      "kind": "relator",
+      "stored": [
+        "summary_shares"
+      ],
+      "summary": "An expiring link to one summary.",
+      "partOf": "summary",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": [
+        "summaries"
+      ]
+    },
+    {
+      "id": "exported_image",
+      "title": "Exported image",
+      "tier": 7,
+      "kind": "output",
+      "stored": [],
+      "summary": "A watermarked PNG of a view. Not stored; each export is audited.",
+      "partOf": "organization",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "board",
+      "title": "Board, list and Today",
+      "tier": 8,
+      "kind": "view",
+      "stored": [],
+      "summary": "The same tasks, sorted and filtered.",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "gantt",
+      "title": "Gantt model",
+      "tier": 8,
+      "kind": "view",
+      "stored": [],
+      "summary": "Spans, critical path, forecast and risk, computed from plans and dependencies.",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "completion",
+      "title": "Task completion and risk",
+      "tier": 8,
+      "kind": "view",
+      "stored": [],
+      "summary": "Progress computed from leaf tasks; the project's risk level.",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "relations_graph",
+      "title": "Relations graph",
+      "tier": 8,
+      "kind": "view",
+      "stored": [],
+      "summary": "People, agents, tasks, projects, companies and contacts as one graph.",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "sectors",
+      "title": "Sectors",
+      "tier": 8,
+      "kind": "view",
+      "stored": [],
+      "summary": "Tasks regrouped by six labels.",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    },
+    {
+      "id": "brief",
+      "title": "AI brief",
+      "tier": 8,
+      "kind": "view",
+      "stored": [],
+      "summary": "A daily reading of risk, finance and what needs a person.",
+      "dependents": 0,
+      "referredBy": [],
+      "modules": []
+    }
+  ],
+  "rolesAt": [
+    {
+      "at": "system",
+      "title": "System administrator",
+      "heldBy": "user",
+      "summary": "A flag on the user. Admin membership in every organization."
+    },
+    {
+      "at": "organization",
+      "title": "Admin, member or guest",
+      "heldBy": "member",
+      "summary": "One role per person per organization."
+    },
+    {
+      "at": "project",
+      "title": "Person in charge",
+      "heldBy": "member",
+      "summary": "May change the project's stage."
+    },
+    {
+      "at": "task",
+      "title": "Owner",
+      "heldBy": "member",
+      "summary": "A person. Edits, assigns, plans and approves."
+    },
+    {
+      "at": "task",
+      "title": "Worker",
+      "heldBy": "member",
+      "summary": "A person or an agent. Does the work; cannot mark it done."
+    },
+    {
+      "at": "agent",
+      "title": "Supervisor",
+      "heldBy": "member",
+      "summary": "Approves the agent's work and decides its requests."
+    },
+    {
+      "at": "project",
+      "title": "Stakeholder",
+      "heldBy": "contact",
+      "summary": "An outside person with a named role on the project."
+    }
+  ],
+  "roles": [
+    {
+      "id": "admin",
+      "title": "Admin",
+      "summary": "Everything in the organization: members, projects, finance, tokens, agents, summaries, audit."
+    },
+    {
+      "id": "member",
+      "title": "Member",
+      "summary": "Reads tasks, projects, finance and contacts. Creates tasks and comments. Edits what they own."
+    },
+    {
+      "id": "guest",
+      "title": "Guest",
+      "summary": "Reads tasks, the relations graph and the mind map. No finance, no contacts, no writing."
+    },
+    {
+      "id": "agent",
+      "title": "Agent",
+      "summary": "A member of kind agent. Limited by token scopes, its capabilities and temporary grants; finished work waits for a person."
+    }
+  ],
+  "groups": [
+    {
+      "id": "work",
+      "title": "Work",
+      "modules": [
+        "tasks",
+        "projects",
+        "planning",
+        "calendar"
+      ]
+    },
+    {
+      "id": "agents",
+      "title": "Agents and attention",
+      "modules": [
+        "agents",
+        "access",
+        "inbox"
+      ]
+    },
+    {
+      "id": "reporting",
+      "title": "Reporting",
+      "modules": [
+        "assistant",
+        "summaries",
+        "export"
+      ]
+    },
+    {
+      "id": "context",
+      "title": "People and context",
+      "modules": [
+        "crm",
+        "relations",
+        "mind",
+        "sectors"
+      ]
+    },
+    {
+      "id": "platform",
+      "title": "Platform",
+      "modules": [
+        "orgs",
+        "identity",
+        "audit",
+        "kernel"
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "tasks",
+      "title": "Tasks",
+      "summary": "Create, edit, assign, comment and change status; subtasks; labels; Quick Add; search; Today.",
+      "group": "work",
+      "functions": [
+        {
+          "action": "task:edit",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "task:owner",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "task:comment",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "task:create",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "task:assign",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "task:status",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "task:finish",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [],
+      "uses": [],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 4
+        },
+        {
+          "id": "agents",
+          "count": 3
+        },
+        {
+          "id": "assistant",
+          "count": 2
+        },
+        {
+          "id": "projects",
+          "count": 2
+        },
+        {
+          "id": "calendar",
+          "count": 1
+        },
+        {
+          "id": "crm",
+          "count": 1
+        },
+        {
+          "id": "inbox",
+          "count": 1
+        },
+        {
+          "id": "planning",
+          "count": 1
+        },
+        {
+          "id": "relations",
+          "count": 1
+        },
+        {
+          "id": "summaries",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "task_comments",
+          "tasks"
+        ],
+        "routes": [
+          "GET /api/bootstrap",
+          "GET /api/bootstrap/today",
+          "POST /api/quick-add/parse",
+          "POST /api/search",
+          "GET /api/tasks",
+          "POST /api/tasks",
+          "GET /api/tasks/:id",
+          "PATCH /api/tasks/:id",
+          "PATCH /api/tasks/:id/assignment",
+          "GET /api/tasks/:id/comments",
+          "POST /api/tasks/:id/comments",
+          "PATCH /api/tasks/:id/status"
+        ],
+        "tools": [
+          "quickadd.parse",
+          "search.query",
+          "tasks.comments.add",
+          "tasks.comments.list",
+          "tasks.create",
+          "tasks.edit",
+          "tasks.list",
+          "tasks.update"
+        ],
+        "core": [
+          "quick-add.ts",
+          "today-bootstrap.ts"
+        ],
+        "screens": [
+          "/",
+          "/tasks/:id",
+          "quick-add-dialog.tsx",
+          "search-dialog.tsx"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "projects",
+      "title": "Projects and finance",
+      "summary": "Project profile, stage, person in charge, contract amount and payments.",
+      "group": "work",
+      "functions": [
+        {
+          "action": "project:manage",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "project:stage",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "finance:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "finance:manage",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [
+        {
+          "file": "project-finance.md",
+          "title": "project finance",
+          "groups": [
+            {
+              "id": "PF-1",
+              "title": "Reading",
+              "count": 4
+            },
+            {
+              "id": "PF-2",
+              "title": "Managing",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "file": "projects.md",
+          "title": "Project profiles",
+          "groups": [
+            {
+              "id": "PR-1",
+              "title": "Profile fields",
+              "count": 9
+            },
+            {
+              "id": "PR-2",
+              "title": "Authority",
+              "count": 3
+            },
+            {
+              "id": "PR-3",
+              "title": "Board cards",
+              "count": 2
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "crm",
+          "count": 3
+        },
+        {
+          "id": "orgs",
+          "count": 3
+        },
+        {
+          "id": "tasks",
+          "count": 2
+        },
+        {
+          "id": "agents",
+          "count": 1
+        },
+        {
+          "id": "identity",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 2
+        },
+        {
+          "id": "planning",
+          "count": 2
+        },
+        {
+          "id": "agents",
+          "count": 1
+        },
+        {
+          "id": "assistant",
+          "count": 1
+        },
+        {
+          "id": "crm",
+          "count": 1
+        },
+        {
+          "id": "export",
+          "count": 1
+        },
+        {
+          "id": "relations",
+          "count": 1
+        },
+        {
+          "id": "summaries",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "project_payments",
+          "projects"
+        ],
+        "routes": [
+          "GET /api/projects",
+          "POST /api/projects",
+          "PATCH /api/projects/:id",
+          "GET /api/projects/:id/payments",
+          "POST /api/projects/:id/payments"
+        ],
+        "tools": [
+          "projects.create",
+          "projects.edit",
+          "projects.list"
+        ],
+        "core": [
+          "planning.ts"
+        ],
+        "screens": [
+          "/projects/:id",
+          "/projects",
+          "project-finance-panel.tsx"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "planning",
+      "title": "Planning (Gantt)",
+      "summary": "Start and duration per task, milestones and dependencies. Computes the critical path, forecast and project risk on read.",
+      "group": "work",
+      "functions": [
+        {
+          "action": "dependency:edit",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        }
+      ],
+      "specs": [],
+      "uses": [
+        {
+          "id": "agents",
+          "count": 2
+        },
+        {
+          "id": "orgs",
+          "count": 2
+        },
+        {
+          "id": "projects",
+          "count": 2
+        },
+        {
+          "id": "tasks",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 3
+        },
+        {
+          "id": "assistant",
+          "count": 1
+        },
+        {
+          "id": "relations",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "milestones",
+          "task_dependencies",
+          "task_plans"
+        ],
+        "routes": [
+          "POST /api/dependencies",
+          "DELETE /api/dependencies/:id",
+          "DELETE /api/milestones/:id",
+          "PATCH /api/milestones/:id",
+          "GET /api/projects/:id/milestones",
+          "POST /api/projects/:id/milestones",
+          "GET /api/projects/:id/timeline",
+          "PATCH /api/tasks/:id/plan"
+        ],
+        "tools": [
+          "dependencies.add",
+          "dependencies.remove",
+          "tasks.plan",
+          "timeline.get"
+        ],
+        "core": [
+          "plan-model.ts",
+          "timeline.ts"
+        ],
+        "screens": [
+          "timeline-view.tsx",
+          "timeline-scene.tsx"
+        ],
+        "sources": [
+          "apps/web/src/lib/timeline-geometry.ts",
+          "backend/crates/taff-render/src/timeline.rs"
+        ]
+      }
+    },
+    {
+      "id": "calendar",
+      "title": "Calendar",
+      "summary": "Time blocks for tasks, with recurrence, and the unscheduled tray.",
+      "group": "work",
+      "functions": [
+        {
+          "action": "task:schedule",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        }
+      ],
+      "specs": [],
+      "uses": [
+        {
+          "id": "agents",
+          "count": 1
+        },
+        {
+          "id": "orgs",
+          "count": 1
+        },
+        {
+          "id": "tasks",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "task_calendar"
+        ],
+        "routes": [
+          "GET /api/calendar",
+          "GET /api/tasks/:id/calendar",
+          "PATCH /api/tasks/:id/calendar",
+          "PATCH /api/tasks/:id/schedule"
+        ],
+        "tools": [
+          "calendar.list",
+          "calendar.schedule",
+          "calendar.set"
+        ],
+        "core": [
+          "calendar-recurrence.ts",
+          "calendar.ts"
+        ],
+        "screens": [
+          "/calendar"
+        ],
+        "sources": [
+          "backend/crates/taff-render/src/calendar.rs"
+        ]
+      }
+    },
+    {
+      "id": "agents",
+      "title": "Agents, runs and review",
+      "summary": "An agent works a task as a run, records events and deliverables, and waits for a person to approve.",
+      "group": "agents",
+      "functions": [
+        {
+          "action": "task:review",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "run:start",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "run:control",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "run:submit",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "run:request_review",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "files:attach",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "agent:manage",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "grant:request",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "grant:decide",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "review:comment",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": true
+          }
+        }
+      ],
+      "specs": [
+        {
+          "file": "agent-access.md",
+          "title": "agent access",
+          "groups": [
+            {
+              "id": "AA-1",
+              "title": "Tokens",
+              "count": 3
+            },
+            {
+              "id": "AA-2",
+              "title": "Workspace grants",
+              "count": 4
+            },
+            {
+              "id": "AA-3",
+              "title": "Organization policy",
+              "count": 6
+            },
+            {
+              "id": "AA-4",
+              "title": "OAuth roles",
+              "count": 8
+            },
+            {
+              "id": "AA-5",
+              "title": "Permission boundaries",
+              "count": 7
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "orgs",
+          "count": 3
+        },
+        {
+          "id": "tasks",
+          "count": 3
+        },
+        {
+          "id": "audit",
+          "count": 1
+        },
+        {
+          "id": "inbox",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 13
+        },
+        {
+          "id": "assistant",
+          "count": 3
+        },
+        {
+          "id": "access",
+          "count": 2
+        },
+        {
+          "id": "inbox",
+          "count": 2
+        },
+        {
+          "id": "planning",
+          "count": 2
+        },
+        {
+          "id": "calendar",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        },
+        {
+          "id": "relations",
+          "count": 1
+        },
+        {
+          "id": "summaries",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "agent_permissions",
+          "agent_profiles",
+          "approved_agent_receipts",
+          "grants",
+          "review_checks",
+          "review_comments",
+          "review_items",
+          "run_artifacts",
+          "run_events",
+          "runs",
+          "trusted_review_receipts"
+        ],
+        "routes": [
+          "GET /api/agents/:id",
+          "PATCH /api/agents/:id",
+          "POST /api/agents/:id/grants",
+          "PUT /api/agents/:id/permissions",
+          "POST /api/grants/:id/decision",
+          "GET /api/runs",
+          "GET /api/runs/:id",
+          "POST /api/runs/:id/artifacts",
+          "POST /api/runs/:id/comments",
+          "POST /api/runs/:id/control",
+          "POST /api/runs/:id/events",
+          "POST /api/runs/:id/review",
+          "POST /api/runs/:id/submit",
+          "GET /api/tasks/:id/review",
+          "POST /api/tasks/:id/runs",
+          "POST /api/trusted-reviews",
+          "POST /api/trusted-reviews/status"
+        ],
+        "tools": [
+          "files.attach",
+          "grants.request",
+          "inbox.request_review",
+          "runs.control",
+          "runs.event",
+          "runs.get",
+          "runs.start",
+          "runs.submit"
+        ],
+        "core": [
+          "approved-agent-operation.ts",
+          "default-agents.ts",
+          "runs.ts",
+          "trusted-review.ts"
+        ],
+        "screens": [
+          "/agents/:id",
+          "/tasks/:id/review",
+          "run-panel.tsx"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "access",
+      "title": "Access: tokens, OAuth and MCP",
+      "summary": "How an outside agent connects: OAuth approval, token scopes per organization, the permission function and the call log.",
+      "group": "agents",
+      "functions": [
+        {
+          "action": "token:policy",
+          "roles": {
+            "admin": false,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "token:grant",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "token:grant_revoke",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "token:manage",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "token:connect",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "token:revoke",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "capability:use",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": true
+          }
+        }
+      ],
+      "specs": [
+        {
+          "file": "access-matrix.md",
+          "title": "access matrix",
+          "groups": [
+            {
+              "id": "AM-1",
+              "title": "Workspace matrix",
+              "count": 7
+            },
+            {
+              "id": "AM-2",
+              "title": "System matrix",
+              "count": 3
+            },
+            {
+              "id": "AM-3",
+              "title": "Permission publication",
+              "count": 4
+            }
+          ]
+        },
+        {
+          "file": "agent-access.md",
+          "title": "agent access",
+          "groups": [
+            {
+              "id": "AA-1",
+              "title": "Tokens",
+              "count": 3
+            },
+            {
+              "id": "AA-2",
+              "title": "Workspace grants",
+              "count": 4
+            },
+            {
+              "id": "AA-3",
+              "title": "Organization policy",
+              "count": 6
+            },
+            {
+              "id": "AA-4",
+              "title": "OAuth roles",
+              "count": 8
+            },
+            {
+              "id": "AA-5",
+              "title": "Permission boundaries",
+              "count": 7
+            }
+          ]
+        },
+        {
+          "file": "permissions-matrix.md",
+          "title": "Permissions matrix",
+          "groups": []
+        }
+      ],
+      "uses": [
+        {
+          "id": "orgs",
+          "count": 6
+        },
+        {
+          "id": "agents",
+          "count": 2
+        },
+        {
+          "id": "identity",
+          "count": 2
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 3
+        },
+        {
+          "id": "audit",
+          "count": 2
+        },
+        {
+          "id": "identity",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "agent_token_workspaces",
+          "agent_tokens",
+          "mcp_calls",
+          "oauth_clients",
+          "oauth_codes",
+          "oauth_refresh_history"
+        ],
+        "routes": [
+          "GET /.well-known/oauth-authorization-server",
+          "GET /.well-known/oauth-protected-resource",
+          "GET /.well-known/oauth-protected-resource/mcp",
+          "GET /api/admin/access-matrix",
+          "GET /api/admin/agent-tokens",
+          "GET /api/admin/integrations/permissions",
+          "POST /api/agent-token-workspaces/:id/restore",
+          "GET /api/agent-tokens",
+          "POST /api/agent-tokens",
+          "DELETE /api/agent-tokens/:id",
+          "PUT /api/agent-tokens/:id/organization-policy",
+          "POST /api/agent-tokens/:id/restore",
+          "GET /api/agent-tokens/:id/workspaces",
+          "PUT /api/agent-tokens/:id/workspaces",
+          "GET /api/mcp-calls",
+          "GET /api/oauth/consent",
+          "POST /api/oauth/consent",
+          "POST /api/oauth/register",
+          "POST /api/oauth/revoke",
+          "POST /api/oauth/token",
+          "GET /api/tasks/:id/access",
+          "GET /api/workspaces/:id/access",
+          "GET /api/workspaces/:id/access-matrix",
+          "ALL /mcp"
+        ],
+        "tools": [
+          "context.get"
+        ],
+        "core": [
+          "access-matrix.ts",
+          "oauth.ts",
+          "permissions.ts",
+          "token-policy.ts"
+        ],
+        "screens": [
+          "/admin/access",
+          "/me/mcp",
+          "/oauth/authorize",
+          "/orgs/access"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "inbox",
+      "title": "Inbox and notifications",
+      "summary": "Mentions, blocked agents and reviews; preferences; the personal daily digest.",
+      "group": "agents",
+      "functions": [
+        {
+          "action": "notification:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "notification:update",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "digest:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "inbox:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "inbox:update",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [],
+      "uses": [
+        {
+          "id": "agents",
+          "count": 2
+        },
+        {
+          "id": "orgs",
+          "count": 2
+        },
+        {
+          "id": "identity",
+          "count": 1
+        },
+        {
+          "id": "tasks",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 2
+        },
+        {
+          "id": "agents",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "daily_digests",
+          "inbox_items",
+          "notification_preferences"
+        ],
+        "routes": [
+          "GET /api/digests",
+          "GET /api/digests/:id",
+          "GET /api/inbox",
+          "PATCH /api/inbox/:id",
+          "GET /api/me/notifications",
+          "PATCH /api/me/notifications"
+        ],
+        "tools": [],
+        "core": [
+          "notifications-time.ts",
+          "notifications.ts"
+        ],
+        "screens": [
+          "/digests/:id",
+          "/digests",
+          "/inbox",
+          "/me/notifications"
+        ],
+        "sources": [
+          "apps/worker/src/digests.ts"
+        ]
+      }
+    },
+    {
+      "id": "assistant",
+      "title": "AI brief, Ask and suggestions",
+      "summary": "Rule-based daily brief and answers, an optional model path per organization, and suggestions a person applies or undoes.",
+      "group": "reporting",
+      "functions": [
+        {
+          "action": "suggestion:create",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "suggestion:decide",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "suggestion:undo",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [
+        {
+          "file": "brief.md",
+          "title": "Brief and rules-based questions",
+          "groups": [
+            {
+              "id": "BR-1",
+              "title": "Rules and workload",
+              "count": 5
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "agents",
+          "count": 3
+        },
+        {
+          "id": "orgs",
+          "count": 3
+        },
+        {
+          "id": "tasks",
+          "count": 2
+        },
+        {
+          "id": "identity",
+          "count": 1
+        },
+        {
+          "id": "planning",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        }
+      ],
+      "usedBy": [],
+      "details": {
+        "tables": [
+          "suggestions"
+        ],
+        "routes": [
+          "POST /api/ask",
+          "GET /api/brief",
+          "POST /api/suggestions",
+          "POST /api/suggestions/:id/apply",
+          "POST /api/suggestions/:id/dismiss",
+          "POST /api/suggestions/:id/undo",
+          "GET /api/workspaces/:id/ai",
+          "PATCH /api/workspaces/:id/ai",
+          "GET /api/workspaces/:id/suggestions"
+        ],
+        "tools": [
+          "brief.get",
+          "suggestions.create"
+        ],
+        "core": [
+          "ai-provider.ts",
+          "ask.ts",
+          "assistant.ts",
+          "brief.ts",
+          "suggestions.ts"
+        ],
+        "screens": [
+          "/brief"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "summaries",
+      "title": "Shareholder summaries",
+      "summary": "A daily project summary per audience, as text and image, with expiring share links.",
+      "group": "reporting",
+      "functions": [
+        {
+          "action": "audience:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "audience:manage",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "summary:read",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": true
+          }
+        },
+        {
+          "action": "summary:preview",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "summary:share",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "summary:revoke",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [
+        {
+          "file": "daily-summary.md",
+          "title": "shareholder daily summary",
+          "groups": [
+            {
+              "id": "DS-1",
+              "title": "Audience tags",
+              "count": 5
+            },
+            {
+              "id": "DS-2",
+              "title": "Recipients",
+              "count": 4
+            },
+            {
+              "id": "DS-3",
+              "title": "Generation",
+              "count": 5
+            },
+            {
+              "id": "DS-4",
+              "title": "Content",
+              "count": 6
+            },
+            {
+              "id": "DS-5",
+              "title": "Reading in the app",
+              "count": 3
+            },
+            {
+              "id": "DS-6",
+              "title": "Share links",
+              "count": 6
+            },
+            {
+              "id": "DS-7",
+              "title": "Permissions",
+              "count": 0
+            },
+            {
+              "id": "DS-8",
+              "title": "Stored renders",
+              "count": 7
+            },
+            {
+              "id": "DS-9",
+              "title": "Agent reads",
+              "count": 5
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "orgs",
+          "count": 2
+        },
+        {
+          "id": "agents",
+          "count": 1
+        },
+        {
+          "id": "audit",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        },
+        {
+          "id": "tasks",
+          "count": 1
+        }
+      ],
+      "usedBy": [],
+      "details": {
+        "tables": [
+          "audience_recipients",
+          "audience_tags",
+          "daily_summaries",
+          "project_audience_tags",
+          "summary_renders",
+          "summary_shares"
+        ],
+        "routes": [
+          "PATCH /api/audience-recipients/:id",
+          "PATCH /api/audience-tags/:id",
+          "GET /api/audience-tags/:id/recipients",
+          "POST /api/audience-tags/:id/recipients",
+          "GET /api/projects/:id/audience-tags",
+          "PUT /api/projects/:id/audience-tags",
+          "POST /api/shared-summary",
+          "GET /api/summaries",
+          "GET /api/summaries/:id",
+          "GET /api/summaries/:id/render",
+          "GET /api/summaries/:id/shares",
+          "POST /api/summaries/:id/shares",
+          "POST /api/summaries/preview",
+          "DELETE /api/summary-shares/:id",
+          "GET /api/workspaces/:id/audience-tags",
+          "POST /api/workspaces/:id/audience-tags"
+        ],
+        "tools": [
+          "summaries.get",
+          "summaries.image",
+          "summaries.list"
+        ],
+        "core": [
+          "summaries.ts",
+          "summary-layout.ts",
+          "summary-messages.ts",
+          "summary-model.ts",
+          "summary-renders.ts",
+          "summary-text.ts"
+        ],
+        "screens": [
+          "/orgs/summaries",
+          "/s/:token",
+          "/summaries/:id",
+          "/summaries"
+        ],
+        "sources": [
+          "apps/worker/src/summaries.ts",
+          "backend/crates/taff-render/src/designed.rs"
+        ]
+      }
+    },
+    {
+      "id": "export",
+      "title": "Exported view images",
+      "summary": "Project, timeline, week, month, mind and relations as a watermarked PNG. Images are not stored.",
+      "group": "reporting",
+      "functions": [
+        {
+          "action": "view:export",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": true
+          }
+        }
+      ],
+      "specs": [
+        {
+          "file": "view-export.md",
+          "title": "Exported view images",
+          "groups": [
+            {
+              "id": "VE-1",
+              "title": "Content",
+              "count": 8
+            },
+            {
+              "id": "VE-2",
+              "title": "Access",
+              "count": 4
+            },
+            {
+              "id": "VE-3",
+              "title": "Delivery",
+              "count": 8
+            },
+            {
+              "id": "VE-4",
+              "title": "Timeline exports",
+              "count": 8
+            },
+            {
+              "id": "VE-5",
+              "title": "Calendar exports",
+              "count": 9
+            },
+            {
+              "id": "VE-6",
+              "title": "Mind and relations exports",
+              "count": 11
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "audit",
+          "count": 1
+        },
+        {
+          "id": "orgs",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        }
+      ],
+      "usedBy": [],
+      "details": {
+        "tables": [],
+        "routes": [
+          "GET /api/workspaces/:id/view-image"
+        ],
+        "tools": [
+          "views.image"
+        ],
+        "core": [
+          "view-export.ts"
+        ],
+        "screens": [
+          "view-export.tsx"
+        ],
+        "sources": [
+          "backend/crates/taff-render/src/main.rs"
+        ]
+      }
+    },
+    {
+      "id": "crm",
+      "title": "Companies and contacts",
+      "summary": "Client and partner companies, people, and their roles on a company, project or task.",
+      "group": "context",
+      "functions": [
+        {
+          "action": "contact:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "contact:details",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "contact:manage",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "crm:archive",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "crm:audit",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [],
+      "uses": [
+        {
+          "id": "orgs",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        },
+        {
+          "id": "tasks",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 6
+        },
+        {
+          "id": "relations",
+          "count": 4
+        },
+        {
+          "id": "projects",
+          "count": 3
+        }
+      ],
+      "details": {
+        "tables": [
+          "companies",
+          "company_contacts",
+          "contact_roles",
+          "contacts",
+          "project_contacts",
+          "task_contacts"
+        ],
+        "routes": [
+          "GET /api/companies",
+          "POST /api/companies",
+          "DELETE /api/companies/:id",
+          "GET /api/companies/:id",
+          "PATCH /api/companies/:id",
+          "GET /api/contacts",
+          "POST /api/contacts",
+          "DELETE /api/contacts/:id",
+          "GET /api/contacts/:id",
+          "PATCH /api/contacts/:id",
+          "PATCH /api/contacts/:id/company",
+          "POST /api/crm/undo",
+          "GET /api/workspaces/:id/crm/audit",
+          "GET /api/workspaces/:id/crm/search"
+        ],
+        "tools": [
+          "companies.list",
+          "contacts.get",
+          "contacts.list"
+        ],
+        "core": [
+          "crm.ts"
+        ],
+        "screens": [
+          "/companies/:id",
+          "/companies",
+          "/contacts/:id",
+          "/contacts",
+          "crm/stakeholders-view.tsx"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "relations",
+      "title": "Relations graph",
+      "summary": "One picture of people, agents, tasks, projects, companies and contacts. A read model that stores nothing.",
+      "group": "context",
+      "functions": [],
+      "specs": [],
+      "uses": [
+        {
+          "id": "crm",
+          "count": 4
+        },
+        {
+          "id": "orgs",
+          "count": 2
+        },
+        {
+          "id": "agents",
+          "count": 1
+        },
+        {
+          "id": "planning",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        },
+        {
+          "id": "tasks",
+          "count": 1
+        }
+      ],
+      "usedBy": [],
+      "details": {
+        "tables": [],
+        "routes": [
+          "GET /api/workspaces/:id/graph"
+        ],
+        "tools": [
+          "relations.get"
+        ],
+        "core": [
+          "relation-graph.ts",
+          "relations.ts"
+        ],
+        "screens": [
+          "relations-view.tsx"
+        ],
+        "sources": [
+          "backend/crates/taff-render/src/graph.rs"
+        ]
+      }
+    },
+    {
+      "id": "mind",
+      "title": "Mind map",
+      "summary": "Layered nodes with evidence sources; a node can link to a task.",
+      "group": "context",
+      "functions": [
+        {
+          "action": "mind:write",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "mind:archive",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [],
+      "uses": [],
+      "usedBy": [],
+      "details": {
+        "tables": [
+          "mind_edges",
+          "mind_node_sources",
+          "mind_nodes",
+          "mind_sources"
+        ],
+        "routes": [
+          "DELETE /api/mind/edges/:id",
+          "PATCH /api/mind/edges/:id",
+          "PATCH /api/mind/nodes/:id",
+          "DELETE /api/mind/nodes/:id/sources/:sourceId",
+          "PUT /api/mind/nodes/:id/sources/:sourceId",
+          "POST /api/mind/nodes/:id/task",
+          "PATCH /api/mind/sources/:id",
+          "GET /api/workspaces/:id/mind",
+          "POST /api/workspaces/:id/mind/edges",
+          "POST /api/workspaces/:id/mind/nodes",
+          "POST /api/workspaces/:id/mind/sources"
+        ],
+        "tools": [],
+        "core": [
+          "mind.ts",
+          "prototype-mind.ts"
+        ],
+        "screens": [
+          "mind-view.tsx"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "sectors",
+      "title": "Sectors (operation template)",
+      "summary": "Regroups tasks by six sector labels. A view over task labels; nothing is stored.",
+      "group": "context",
+      "functions": [],
+      "specs": [
+        {
+          "file": "operation-templates.md",
+          "title": "Operation view templates",
+          "groups": [
+            {
+              "id": "OT-1",
+              "title": "Regrouping",
+              "count": 6
+            },
+            {
+              "id": "OT-2",
+              "title": "Phone and tagging",
+              "count": 3
+            },
+            {
+              "id": "OT-3",
+              "title": "XIDING setup order",
+              "count": 2
+            }
+          ]
+        }
+      ],
+      "uses": [],
+      "usedBy": [],
+      "details": {
+        "tables": [],
+        "routes": [],
+        "tools": [],
+        "core": [],
+        "screens": [],
+        "sources": [
+          "packages/schemas/src/operation-templates.ts",
+          "apps/web/src/lib/xiding-setup-order.ts"
+        ]
+      }
+    },
+    {
+      "id": "orgs",
+      "title": "Organizations and members",
+      "summary": "Create, archive and restore an organization; invite people; set roles; the login default.",
+      "group": "platform",
+      "functions": [
+        {
+          "action": "workspace:archive",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "workspace:default",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "workspace:create",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "workspace:join",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "workspace:manage",
+          "roles": {
+            "admin": true,
+            "member": false,
+            "guest": false,
+            "agent": false
+          }
+        },
+        {
+          "action": "workspace:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": true
+          }
+        }
+      ],
+      "specs": [
+        {
+          "file": "workspaces.md",
+          "title": "Workspace lifecycle",
+          "groups": [
+            {
+              "id": "WS-1",
+              "title": "Lifecycle and authority",
+              "count": 8
+            },
+            {
+              "id": "WS-2",
+              "title": "Lists and screens",
+              "count": 7
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "identity",
+          "count": 3
+        },
+        {
+          "id": "audit",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "access",
+          "count": 6
+        },
+        {
+          "id": "kernel",
+          "count": 6
+        },
+        {
+          "id": "agents",
+          "count": 3
+        },
+        {
+          "id": "assistant",
+          "count": 3
+        },
+        {
+          "id": "projects",
+          "count": 3
+        },
+        {
+          "id": "identity",
+          "count": 2
+        },
+        {
+          "id": "inbox",
+          "count": 2
+        },
+        {
+          "id": "planning",
+          "count": 2
+        },
+        {
+          "id": "relations",
+          "count": 2
+        },
+        {
+          "id": "summaries",
+          "count": 2
+        },
+        {
+          "id": "audit",
+          "count": 1
+        },
+        {
+          "id": "calendar",
+          "count": 1
+        },
+        {
+          "id": "crm",
+          "count": 1
+        },
+        {
+          "id": "export",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "members",
+          "workspace_invites",
+          "workspaces"
+        ],
+        "routes": [
+          "GET /api/admin/workspaces",
+          "PATCH /api/users/:id/default-workspace",
+          "DELETE /api/workspace-invites/:id",
+          "POST /api/workspace-invites/accept",
+          "POST /api/workspaces",
+          "DELETE /api/workspaces/:id",
+          "GET /api/workspaces/:id/invites",
+          "POST /api/workspaces/:id/invites",
+          "POST /api/workspaces/:id/members",
+          "PATCH /api/workspaces/:id/members/:memberId",
+          "POST /api/workspaces/:id/restore",
+          "GET /api/workspaces/archived"
+        ],
+        "tools": [
+          "workspaces.list"
+        ],
+        "core": [
+          "administration.ts",
+          "cleanup-organizations.ts",
+          "provision-administration.ts",
+          "workspace-lifecycle.ts"
+        ],
+        "screens": [
+          "/admin",
+          "/orgs"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "identity",
+      "title": "Sign-in and profile",
+      "summary": "Email, username, phone and SMS sign-in; locale and time zone.",
+      "group": "platform",
+      "functions": [
+        {
+          "action": "profile:read",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        },
+        {
+          "action": "profile:update",
+          "roles": {
+            "admin": true,
+            "member": true,
+            "guest": true,
+            "agent": false
+          }
+        }
+      ],
+      "specs": [],
+      "uses": [
+        {
+          "id": "orgs",
+          "count": 2
+        },
+        {
+          "id": "access",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "kernel",
+          "count": 3
+        },
+        {
+          "id": "orgs",
+          "count": 3
+        },
+        {
+          "id": "access",
+          "count": 2
+        },
+        {
+          "id": "assistant",
+          "count": 1
+        },
+        {
+          "id": "inbox",
+          "count": 1
+        },
+        {
+          "id": "projects",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "accounts",
+          "sessions",
+          "sms_auth_challenges",
+          "sms_auth_limits",
+          "users",
+          "verifications"
+        ],
+        "routes": [
+          "GET /api/auth/methods",
+          "POST /api/auth/sign-in/email",
+          "POST /api/auth/sign-in/username",
+          "POST /api/auth/sign-out",
+          "POST /api/auth/sign-up/email",
+          "GET /api/me",
+          "GET /api/me/email-verification",
+          "POST /api/me/email-verification/request",
+          "POST /api/me/email-verification/verify",
+          "GET /api/members",
+          "PATCH /api/profile"
+        ],
+        "tools": [],
+        "core": [
+          "actor-timezone.ts",
+          "email-messages.ts",
+          "email-verification.ts",
+          "email.ts",
+          "sms-auth.ts",
+          "tencent-sms.ts"
+        ],
+        "screens": [
+          "/me"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "audit",
+      "title": "Audit and realtime",
+      "summary": "Every write records who did what; a database notification tells open browsers what to refresh.",
+      "group": "platform",
+      "functions": [],
+      "specs": [
+        {
+          "file": "audit.md",
+          "title": "workspace audit log",
+          "groups": [
+            {
+              "id": "AU-1",
+              "title": "Reading",
+              "count": 4
+            },
+            {
+              "id": "AU-2",
+              "title": "Screen",
+              "count": 5
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "access",
+          "count": 2
+        },
+        {
+          "id": "orgs",
+          "count": 1
+        }
+      ],
+      "usedBy": [
+        {
+          "id": "agents",
+          "count": 1
+        },
+        {
+          "id": "export",
+          "count": 1
+        },
+        {
+          "id": "kernel",
+          "count": 1
+        },
+        {
+          "id": "orgs",
+          "count": 1
+        },
+        {
+          "id": "summaries",
+          "count": 1
+        }
+      ],
+      "details": {
+        "tables": [
+          "activity"
+        ],
+        "routes": [
+          "GET /api/admin/audit/search",
+          "GET /api/admin/audit/trace/:trace_id",
+          "GET /api/realtime"
+        ],
+        "tools": [],
+        "core": [
+          "integration-audit.ts"
+        ],
+        "screens": [
+          "/orgs/audit"
+        ],
+        "sources": [
+          "apps/api/src/realtime.ts",
+          "apps/web/src/lib/realtime.ts"
+        ]
+      }
+    },
+    {
+      "id": "kernel",
+      "title": "Kernel",
+      "summary": "createCore wires every module and still holds the task, member and organization operations. Also migrations, seeds and health.",
+      "group": "platform",
+      "functions": [],
+      "specs": [
+        {
+          "file": "runtime.md",
+          "title": "runtime recovery",
+          "groups": [
+            {
+              "id": "RT-1",
+              "title": "Shutdown",
+              "count": 2
+            },
+            {
+              "id": "RT-2",
+              "title": "Database and queue recovery",
+              "count": 5
+            },
+            {
+              "id": "RT-3",
+              "title": "Browser realtime refresh",
+              "count": 3
+            }
+          ]
+        }
+      ],
+      "uses": [
+        {
+          "id": "agents",
+          "count": 13
+        },
+        {
+          "id": "crm",
+          "count": 6
+        },
+        {
+          "id": "orgs",
+          "count": 6
+        },
+        {
+          "id": "tasks",
+          "count": 4
+        },
+        {
+          "id": "access",
+          "count": 3
+        },
+        {
+          "id": "identity",
+          "count": 3
+        },
+        {
+          "id": "planning",
+          "count": 3
+        },
+        {
+          "id": "inbox",
+          "count": 2
+        },
+        {
+          "id": "projects",
+          "count": 2
+        },
+        {
+          "id": "audit",
+          "count": 1
+        },
+        {
+          "id": "calendar",
+          "count": 1
+        }
+      ],
+      "usedBy": [],
+      "details": {
+        "tables": [],
+        "routes": [
+          "GET /api/health"
+        ],
+        "tools": [],
+        "core": [
+          "index.ts",
+          "mcp-benchmark.mts",
+          "migrate.ts",
+          "prototype-seed.ts",
+          "runtime-faults.mts",
+          "seed.ts"
+        ],
+        "screens": [],
+        "sources": []
+      }
+    }
+  ],
+  "crossSpecs": [
+    {
+      "file": "client-navigation.md",
+      "title": "client navigation and optimistic state",
+      "groups": [
+        {
+          "id": "CN-1",
+          "title": "Loading feedback",
+          "count": 2
+        },
+        {
+          "id": "CN-2",
+          "title": "Concurrent optimistic edits",
+          "count": 3
+        },
+        {
+          "id": "CN-3",
+          "title": "Project management after phone filters",
+          "count": 6
+        },
+        {
+          "id": "CN-4",
+          "title": "Board task access",
+          "count": 2
+        },
+        {
+          "id": "CN-5",
+          "title": "Settings back navigation",
+          "count": 3
+        },
+        {
+          "id": "CN-6",
+          "title": "Me settings navigation",
+          "count": 2
+        },
+        {
+          "id": "CN-7",
+          "title": "Organization agent rows",
+          "count": 2
+        },
+        {
+          "id": "CN-8",
+          "title": "Cold route reads",
+          "count": 1
+        },
+        {
+          "id": "CN-9",
+          "title": "Calendar day start",
+          "count": 1
+        },
+        {
+          "id": "CN-10",
+          "title": "Standalone phone review",
+          "count": 2
+        },
+        {
+          "id": "CN-11",
+          "title": "Tasks on Today",
+          "count": 3
+        },
+        {
+          "id": "CN-12",
+          "title": "Phone task details",
+          "count": 2
+        },
+        {
+          "id": "CN-13",
+          "title": "Search keyboard hint",
+          "count": 1
+        },
+        {
+          "id": "CN-14",
+          "title": "Mind map labels",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "file": "tooling.md",
+      "title": "TypeScript tooling",
+      "groups": [
+        {
+          "id": "TT-1",
+          "title": "Checked sources",
+          "count": 2
+        },
+        {
+          "id": "TT-2",
+          "title": "Private live runner",
+          "count": 2
+        },
+        {
+          "id": "TT-3",
+          "title": "Operator scripts",
+          "count": 1
+        },
+        {
+          "id": "TT-4",
+          "title": "UI capture drivers",
+          "count": 7
+        },
+        {
+          "id": "TT-5",
+          "title": "Service worker source",
+          "count": 3
+        },
+        {
+          "id": "TT-6",
+          "title": "Language policy",
+          "count": 3
+        },
+        {
+          "id": "TT-7",
+          "title": "The single check command",
+          "count": 6
+        },
+        {
+          "id": "TT-8",
+          "title": "Browser font budgets",
+          "count": 2
+        },
+        {
+          "id": "TT-9",
+          "title": "Architecture model",
+          "count": 8
+        }
+      ]
+    }
+  ],
+  "flows": [
+    {
+      "id": "handoff",
+      "title": "A person hands work to an agent and approves it",
+      "steps": [
+        {
+          "module": "tasks",
+          "title": "Task",
+          "text": "A person creates a task and sets an agent as worker."
+        },
+        {
+          "module": "agents",
+          "title": "Run",
+          "text": "The agent starts a run; events and deliverables are recorded."
+        },
+        {
+          "module": "access",
+          "title": "Permission",
+          "text": "Each step is checked against scopes and capabilities. An “ask” capability pauses the run."
+        },
+        {
+          "module": "inbox",
+          "title": "Inbox",
+          "text": "The request, and later the finished work, reach the supervisor's inbox."
+        },
+        {
+          "module": "agents",
+          "title": "Review",
+          "text": "The owner or supervisor approves or asks for changes in the review workspace."
+        },
+        {
+          "module": "tasks",
+          "title": "Done",
+          "text": "Only a person moves the task to done."
+        }
+      ]
+    },
+    {
+      "id": "plan",
+      "title": "A plan becomes a risk line and a report",
+      "steps": [
+        {
+          "module": "tasks",
+          "title": "Tasks",
+          "text": "Status, due dates and subtasks."
+        },
+        {
+          "module": "planning",
+          "title": "Plan",
+          "text": "Start, duration, milestones and dependencies; the model computes critical path, forecast and risk."
+        },
+        {
+          "module": "assistant",
+          "title": "Brief",
+          "text": "The AI brief reports risk and finance per project."
+        },
+        {
+          "module": "summaries",
+          "title": "Summary",
+          "text": "The shareholder summary reuses the same model."
+        },
+        {
+          "module": "export",
+          "title": "Image",
+          "text": "The timeline exports as a watermarked PNG."
+        }
+      ]
+    },
+    {
+      "id": "shareholder",
+      "title": "A project reaches a shareholder",
+      "steps": [
+        {
+          "module": "projects",
+          "title": "Project",
+          "text": "Progress, stage, contract and payments are kept on the project."
+        },
+        {
+          "module": "summaries",
+          "title": "Audience",
+          "text": "An admin creates an audience tag, adds recipients and tags projects."
+        },
+        {
+          "module": "summaries",
+          "title": "Snapshot",
+          "text": "At each recipient's delivery time the worker stores a snapshot with a content hash."
+        },
+        {
+          "module": "export",
+          "title": "Render",
+          "text": "Text in core, PNG from the Rust renderer, both watermarked."
+        },
+        {
+          "module": "identity",
+          "title": "Read",
+          "text": "The recipient signs in to read it, or an admin shares an expiring link."
+        }
+      ]
+    },
+    {
+      "id": "connect",
+      "title": "An outside agent gets access",
+      "steps": [
+        {
+          "module": "access",
+          "title": "Connect",
+          "text": "The agent's client opens the OAuth flow at /mcp."
+        },
+        {
+          "module": "orgs",
+          "title": "Role cap",
+          "text": "An admin approves scopes, never above their own role in that organization."
+        },
+        {
+          "module": "access",
+          "title": "Token",
+          "text": "The token is tied to one agent member, with grants per organization."
+        },
+        {
+          "module": "tasks",
+          "title": "Call",
+          "text": "Each tool call runs as that member through the same rules as a person."
+        },
+        {
+          "module": "audit",
+          "title": "Record",
+          "text": "The call is logged and the write is audited."
+        }
+      ]
+    },
+    {
+      "id": "refresh",
+      "title": "A change appears on another screen",
+      "steps": [
+        {
+          "module": "tasks",
+          "title": "Write",
+          "text": "REST or MCP calls core inside one transaction."
+        },
+        {
+          "module": "kernel",
+          "title": "Core",
+          "text": "The mutation helper applies the rule and the version check."
+        },
+        {
+          "module": "audit",
+          "title": "Audit",
+          "text": "A trigger writes the activity row and sends a notification with ids only."
+        },
+        {
+          "module": "audit",
+          "title": "Socket",
+          "text": "The API forwards it to that organization's open browsers, which refetch what changed."
+        }
+      ]
+    }
+  ],
+  "perspectives": [
+    {
+      "id": "things",
+      "title": "Things",
+      "question": "What exists, and what matters most?",
+      "relation": "ranked by tier, then by dependents",
+      "form": "Ranked list",
+      "built": true
+    },
+    {
+      "id": "structure",
+      "title": "Structure",
+      "question": "What contains what, and who holds a role there?",
+      "relation": "part of, holds role",
+      "form": "Tree",
+      "built": true
+    },
+    {
+      "id": "authority",
+      "title": "Authority",
+      "question": "Who may do what?",
+      "relation": "may do",
+      "form": "Matrix",
+      "built": true
+    },
+    {
+      "id": "dependency",
+      "title": "Dependency",
+      "question": "Which module needs which?",
+      "relation": "depends on",
+      "form": "Graph",
+      "built": true
+    },
+    {
+      "id": "flow",
+      "title": "Flow",
+      "question": "How does it happen, step by step?",
+      "relation": "hands to",
+      "form": "Numbered path",
+      "built": true
+    },
+    {
+      "id": "data",
+      "title": "Data",
+      "question": "What is stored and what refers to what?",
+      "relation": "refers to",
+      "form": "Entity diagram",
+      "built": false
+    },
+    {
+      "id": "time",
+      "title": "Time",
+      "question": "When: planned, scheduled, due, past?",
+      "relation": "before, during",
+      "form": "Timeline",
+      "built": false
+    },
+    {
+      "id": "purpose",
+      "title": "Purpose",
+      "question": "Why does it exist?",
+      "relation": "satisfies",
+      "form": "Traceability matrix",
+      "built": false
+    },
+    {
+      "id": "measure",
+      "title": "Measure",
+      "question": "How much: progress, risk, money?",
+      "relation": "derived quantity",
+      "form": "Numbers",
+      "built": false
+    },
+    {
+      "id": "deployment",
+      "title": "Deployment",
+      "question": "Where does it run?",
+      "relation": "runs on, calls",
+      "form": "Layer diagram",
+      "built": false
+    }
+  ]
+}

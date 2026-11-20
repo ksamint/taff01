@@ -43,6 +43,25 @@ folded away. It is written in TypeScript in this repository and needs no
 dependency beyond the esbuild already present. LikeC4 remains the detailed
 view and the vocabulary check.
 
+## Amendment, 2026-11-20: unlikec4, ontology first
+
+Owner: "encode the ontology and rebuild the map with perspective switch, and
+remember this unlikec4 we will merge it into tda01".
+
+1. The source of truth is the ontology, not a diagram: every kind of thing,
+   ranked. The tier is a judgement about purpose; the order inside a tier is
+   measured from the schema as the number of tables that cannot exist
+   without the thing. Anything recomputed on read is a view and ranks last.
+2. A perspective is one relation drawn in the form that fits it: containment
+   as a tree, permission as a matrix, dependency as a graph, sequence as a
+   numbered path. Five are built; Data, Time, Purpose, Measure and
+   Deployment are named and planned.
+3. The engine is `scripts/unlikec4/` and is kept free of any taff01 import,
+   because it will be merged into tda01. taff01 keeps only its ontology and
+   its adapter in `scripts/architecture/`.
+4. `architecture/ontology.json` is committed, so a change to the ontology
+   or to the code it maps appears as a diff.
+
 ## Consequences
 
 - A change that adds a table, route, tool, core file or page must also name
