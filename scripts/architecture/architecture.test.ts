@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "vitest";
+import { focusModel } from "./focus-model.ts";
 import { inventory, repoRoot } from "./inventory.ts";
 import { assign, render } from "./model.ts";
 import { MODULES } from "./modules.ts";
@@ -53,4 +54,28 @@ test("the committed generated model is current", () => {
       "utf8",
     ),
   ).toBe(render(assignment));
+});
+
+test("the function map places every module, permission action, spec and flow step", () => {
+  const map = focusModel(found);
+  expect(map.problems).toEqual([]);
+  expect(map.modules.map((module) => module.id).sort()).toEqual(
+    MODULES.map((module) => module.id).sort(),
+  );
+  // Every action of the generated permissions matrix is some module's function.
+  const actions = map.modules.flatMap((module) => module.functions);
+  expect(actions.length).toBeGreaterThan(0);
+  expect(new Set(actions.map((fn) => fn.action)).size).toBe(actions.length);
+  expect(
+    map.modules.find((module) => module.id === "tasks")?.functions,
+  ).toContainEqual({
+    action: "task:create",
+    roles: { admin: true, member: true, guest: false, agent: true },
+  });
+  // Planning reads the tasks table, so it depends on the tasks module.
+  expect(
+    map.modules
+      .find((module) => module.id === "planning")
+      ?.uses.map((use) => use.id),
+  ).toContain("tasks");
 });

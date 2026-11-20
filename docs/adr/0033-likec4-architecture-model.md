@@ -32,6 +32,17 @@ model, writes layout edits back to the source, and has an MCP server.
    unchanged, and the gate needs no network for it.
 5. Joining this model to the tda01 ontology is a separate decision.
 
+## Amendment, 2026-11-20: the function map
+
+The owner found the LikeC4 pages hard to read and to explore: every element
+has the same weight, and the canvas is built for diagrams, not for questions.
+The model stays; a second view is added. `pnpm arch:map` builds the function
+map from the same inventory and puts what matters first: modules, functions,
+roles, requirements, flows and relations, with tables, routes and files
+folded away. It is written in TypeScript in this repository and needs no
+dependency beyond the esbuild already present. LikeC4 remains the detailed
+view and the vocabulary check.
+
 ## Consequences
 
 - A change that adds a table, route, tool, core file or page must also name

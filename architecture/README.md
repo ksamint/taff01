@@ -8,10 +8,22 @@ Contract: `docs/spec/tooling.md` TT-9.
 ## See it
 
 ```bash
+pnpm arch:map
+```
+
+Writes `architecture/.site/map.html`, the **function map**: one page to open
+in a browser. This is the place to start. It shows the 18 modules in five
+lanes and, for the module you click, its functions and who may use them, the
+requirements it must satisfy, the flows it takes part in and the modules it
+depends on. A role switch and a flow switch light up the map. Tables, routes,
+tools and files are folded under each module.
+
+```bash
 pnpm arch:view
 ```
 
-Opens the model in a browser with live reload. Start at **Taff · landscape**.
+Opens the full LikeC4 diagrams with live reload, for the detail the map
+folds away. Start at **Taff · landscape**.
 
 | View | Answers |
 | --- | --- |
@@ -33,7 +45,21 @@ Opens the model in a browser with live reload. Start at **Taff · landscape**.
 | `views.c4` | hand | The overview diagrams |
 | `generated/modules.c4` | `pnpm arch:gen` | The 18 function modules, read from the code |
 
+## What the function map adds
+
+| Layer | Read from | Mapped in |
+| --- | --- | --- |
+| Functions and roles | `docs/spec/permissions-matrix.md`, generated from `can()` | `ACTION_RULES` in `scripts/architecture/focus.ts` |
+| Requirements | Requirement groups of every `docs/spec/*.md` | `SPEC_MODULES` |
+| Flows | Written by hand | `FLOWS` |
+| Relations | Which core file imports which module's tables | derived |
+| Lanes | Written by hand | `GROUPS` |
+
 ## Change it
+
+- **A new permission action or specification.** Name its module in
+  `scripts/architecture/focus.ts`. `pnpm test` fails until you do.
+- **A new flow.** Add it to `FLOWS`; each step names a module.
 
 - **A new table, route, MCP tool, core file or page.** Add it to the module
   that owns it in `scripts/architecture/modules.ts`, then run `pnpm arch:gen`
