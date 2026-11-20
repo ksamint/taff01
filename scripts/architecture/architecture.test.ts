@@ -2,6 +2,8 @@ import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "vitest";
 import { tree, validate as validateOmv, view } from "../omv/omv.ts";
+import { CAPABILITIES, GROUPS } from "./benchmark.ts";
+import { markdown } from "./benchmark-doc.mts";
 import { focusModel } from "./focus-model.ts";
 import { inventory, repoRoot } from "./inventory.ts";
 import { assign, render } from "./model.ts";
@@ -186,4 +188,25 @@ test("a view is one centre, one question, and says what produced it", () => {
       ?.items.map((item) => item.id),
   ).toContain("module:tasks");
   expect(() => view(built.doc, "concept:task", "nonsense")).toThrow();
+});
+
+// Spec TT-9.11: the function map claims only what the model can show.
+test("every 'where in Taff' of the function map is an object of the model", () => {
+  const ids = new Set(built.doc.m.objects.map((object) => object.id));
+  const unknown = CAPABILITIES.flatMap((item) =>
+    item.where.filter((id) => !ids.has(id)).map((id) => `${item.name}: ${id}`),
+  );
+  expect(unknown).toEqual([]);
+  expect(CAPABILITIES.filter((item) => !GROUPS.includes(item.group))).toEqual(
+    [],
+  );
+  // A function Taff fully has must point at something, or say why not.
+  expect(
+    CAPABILITIES.filter(
+      (item) => item.taff === "yes" && item.where.length === 0 && !item.note,
+    ),
+  ).toEqual([]);
+  expect(
+    readFileSync(path.join(repoRoot, "docs/benchmark/function-map.md"), "utf8"),
+  ).toBe(markdown());
 });
