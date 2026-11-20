@@ -160,19 +160,69 @@ function pathForm(): string {
     state.centre,
     ...rels("kept_by", "from", state.centre),
   ]);
+  const lane = (id: string) => {
+    const value = objects.get(id)?.attrs?.lane;
+    return typeof value === "string" ? value : "";
+  };
   return flows
     .map((flow) => {
       const steps = rels("step_of", "to", flow).sort(
-        (a, b) => num(objects.get(a), "order") - num(objects.get(b), "order"),
+        (x, y) => num(objects.get(x), "order") - num(objects.get(y), "order"),
       );
-      return `<section class="group"><h4><button type="button" class="link" data-centre="${esc(flow)}">${esc(title(flow))}</button></h4><ol class="flow">${steps
-        .map((step) => {
-          const place = rels("happens_in", "from", step)[0] ?? "";
-          return `<li class="${here.has(place) || step === state.centre ? "here" : ""}"><button type="button" data-centre="${esc(place)}"><strong>${esc(title(step))}</strong><em>${esc(title(place))}</em><span>${esc(objects.get(step)?.summary ?? "")}</span></button></li>`;
-        })
-        .join("")}</ol></section>`;
+      // One row per actor, in the order they first appear.
+      const lanes = [...new Set(steps.map(lane))];
+      return `<section class="group"><h4><button type="button" class="link" data-centre="${esc(flow)}">${esc(title(flow))}</button></h4>
+        <div class="scroll swim-scroll"><div class="swim" style="--steps:${steps.length};--lanes:${lanes.length}"><svg class="swim-wires" aria-hidden="true"></svg>${lanes
+          .map(
+            (name, index) =>
+              `<div class="swim-band" style="--lane:${index + 1}"></div><div class="swim-lane lane-${esc(name.toLowerCase() || "none")}" style="--lane:${index + 1}">${esc(name || "Steps")}</div>`,
+          )
+          .join("")}${steps
+          .map((step, index) => {
+            const place = rels("happens_in", "from", step)[0] ?? "";
+            return `<button type="button" class="swim-step lane-${esc(lane(step).toLowerCase() || "none")}${here.has(place) || step === state.centre ? " here" : ""}" style="--i:${index + 1};--lane:${lanes.indexOf(lane(step)) + 1}" data-centre="${esc(place)}"><b>${index + 1}</b><strong>${esc(title(step))}</strong><em>${esc(title(place))}</em><span>${esc(objects.get(step)?.summary ?? "")}</span></button>`;
+          })
+          .join("")}</div></div></section>`;
     })
     .join("");
+}
+/** Draws the arrows of each swimlane from one step to the next. */
+function wire() {
+  for (const swim of document.querySelectorAll<HTMLElement>(".swim")) {
+    const svg = swim.querySelector("svg");
+    if (!svg) continue;
+    const origin = swim.getBoundingClientRect();
+    svg.setAttribute("width", String(swim.scrollWidth));
+    svg.setAttribute("height", String(swim.scrollHeight));
+    const boxes = [...swim.querySelectorAll<HTMLElement>(".swim-step")].map(
+      (el) => {
+        const r = el.getBoundingClientRect();
+        return {
+          l: r.left - origin.left,
+          t: r.top - origin.top,
+          r: r.right - origin.left,
+          b: r.bottom - origin.top,
+        };
+      },
+    );
+    const paths = boxes.slice(0, -1).map((from, index) => {
+      const to = boxes[index + 1];
+      if (!to) return "";
+      if (to.l >= from.r - 2) {
+        // Left to right: leave the right edge, enter the left edge.
+        const y1 = (from.t + from.b) / 2;
+        const y2 = (to.t + to.b) / 2;
+        const mid = (from.r + to.l) / 2;
+        return `<path d="M${from.r} ${y1}C${mid} ${y1} ${mid} ${y2} ${to.l - 5} ${y2}"/>`;
+      }
+      // Top to bottom on a narrow screen.
+      const x1 = (from.l + from.r) / 2;
+      const x2 = (to.l + to.r) / 2;
+      const mid = (from.b + to.t) / 2;
+      return `<path d="M${x1} ${from.b}C${x1} ${mid} ${x2} ${mid} ${x2} ${to.t - 5}"/>`;
+    });
+    svg.innerHTML = `<defs><marker id="swim-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="swim-head" d="M0 0L10 5L0 10z"/></marker></defs>${paths.join("")}`;
+  }
 }
 
 function centreCard(): string {
@@ -223,9 +273,11 @@ function render(keepFocus = false) {
   app.innerHTML = `<header class="top"><p class="eyebrow">${esc(doc.name)} · OMV map</p><h1>${esc(q?.ask ?? "")}</h1>
     <div class="controls"><div class="seg" role="tablist" aria-label="Question">${doc.v.questions.map((item) => `<button type="button" role="tab" data-question="${item.id}" aria-selected="${item.id === state.question}" aria-pressed="${item.id === state.question}">${esc(item.title)}</button>`).join("")}</div>
     <label class="pick">Viewer<select id="viewer"><option value="">Anyone</option>${doc.v.viewers.map((id) => `<option value="${esc(id)}"${state.viewer === id ? " selected" : ""}>${esc(title(id))}</option>`).join("")}</select></label></div>
-    <p class="prov"><b>View(M; o, q, c, r)</b> <span>o = ${esc(v.provenance.centre)}</span><span>q = ${esc(v.provenance.question)}</span><span>c = ${esc(v.provenance.conditions.join("; "))}</span><span>r = ${esc(v.provenance.form)}</span><span>M = ${esc(v.provenance.source)}, ${doc.m.objects.length} objects, ${doc.m.relations.length} relations</span></p></header>
+    <dl class="prov"><div><dt>Looking from</dt><dd>${esc(v.provenance.centre)}</dd></div><div><dt>Asking</dt><dd>${esc(v.provenance.question)}</dd></div><div><dt>Seen by</dt><dd>${esc(v.provenance.conditions[0]?.replace("viewer: ", "") ?? "")}</dd></div><div><dt>Drawn as</dt><dd>${esc(v.provenance.form)}</dd></div><div><dt>From model</dt><dd>${esc(v.provenance.source)} · ${doc.m.objects.length} objects, ${doc.m.relations.length} relations</dd></div></dl>
+    <details class="how"><summary>How to read this page</summary><p>Every view here is produced the same way: <b>View(M; o, q, c, r)</b>.</p><ul><li><b>M, the model:</b> everything known about ${esc(doc.name)}, as objects and the relations between them.</li><li><b>o, the centre:</b> the one object you are looking from. Pick it in the list on the left.</li><li><b>q, the question:</b> what you want to know about it. Pick it in the tabs above.</li><li><b>c, the context:</b> who is looking and which version of the model.</li><li><b>r, the form:</b> how the answer is drawn: a tree, a matrix, a path or groups.</li></ul><p>Change the centre and the same question gets a different answer; change the question and the same centre shows another side.</p></details></header>
     <div class="omv"><nav class="picker" id="picker" aria-label="Centre"><input id="query" type="search" placeholder="Find an object…" aria-label="Find an object" value="${esc(state.query)}">${picker()}</nav>
     <div class="stage">${centreCard()}${body || `<p class="note empty">M holds no relation of this kind for this centre. Try the question on ${chip(doc.root)} or on a module.</p>`}${q?.gap ? `<p class="note gap">${esc(q.gap)}</p>` : ""}${definitions()}</div></div>`;
+  wire();
   const pickerEl = document.getElementById("picker");
   if (pickerEl) pickerEl.scrollTop = scroll;
   if (keepFocus) {
@@ -268,6 +320,7 @@ app.addEventListener("input", (event) => {
   state.query = target.value;
   render(true);
 });
+window.addEventListener("resize", wire);
 const fromHash = () => {
   const id = location.hash.slice(1);
   if (doc.v.questions.some((q) => q.id === id)) state.question = id;

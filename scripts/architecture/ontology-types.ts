@@ -57,7 +57,7 @@ export type Module = {
 export type Flow = {
   id: string;
   title: string;
-  steps: { module: string; title: string; text: string }[];
+  steps: { lane?: string; module: string; title: string; text: string }[];
 };
 export type Perspective = {
   id: string;
