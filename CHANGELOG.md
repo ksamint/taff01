@@ -3,7 +3,7 @@
 ## Unreleased
 
 - Tooling only, nothing changes in the app: `pnpm check` runs the whole local gate in one command, binds the result to the tree and writes the table for pull requests. The repository now follows the tda01 Start baseline (version 1): a pull request template, a deploy runbook, a deploy report per attempt and a stop list in `AGENTS.md`.
-- Tooling only, nothing changes in the app: the repository now carries an architecture model in LikeC4 (`architecture/`, ADR 0033). `pnpm arch:map` builds the function map (modules, functions, roles, requirements, flows and relations on one page); `pnpm arch:view` opens the detailed diagrams; `pnpm arch:gen` rebuilds the module map from the code, and the unit tests fail when a table, route, MCP tool, core file or page belongs to no module.
+- Tooling only, nothing changes in the app: the repository now carries an architecture model in LikeC4 (`architecture/`, ADR 0033). `pnpm arch:map` builds the ontology map with a perspective switch (things ranked by importance, structure, authority, dependency and flow) from `architecture/ontology.json`; `pnpm arch:view` opens the detailed diagrams; `pnpm arch:gen` rebuilds the module map from the code, and the unit tests fail when a table, route, MCP tool, core file or page belongs to no module.
 - Decided (owner, 2026-11-15; ADR 0032): from v0.2.27 new backend behaviour is written in Rust and the TypeScript backend takes fixes only. The plan is `docs/plans/0001-rust-backend-port.md`.
 
 ## v0.2.26 — UI simplification (candidate)

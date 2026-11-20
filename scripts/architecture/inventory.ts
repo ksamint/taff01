@@ -121,3 +121,31 @@ export function inventory(): Inventory {
     pages: pages(),
   };
 }
+
+/** Declared references between tables: `from` cannot exist without `to`. */
+export function references(): { from: string; to: string }[] {
+  const source = read("packages/db/src/schema.ts");
+  const starts = [
+    ...source.matchAll(/export const (\w+) = pgTable\(\s*"(\w+)"/g),
+  ].map((match) => ({
+    exportName: match[1]!,
+    name: match[2]!,
+    at: match.index,
+  }));
+  const nameOf = new Map(starts.map((table) => [table.exportName, table.name]));
+  const found = new Set<string>();
+  starts.forEach((table, index) => {
+    const body = source.slice(table.at, starts[index + 1]?.at ?? source.length);
+    for (const match of [
+      ...body.matchAll(/references\(\(\) => (\w+)\.id/g),
+      ...body.matchAll(/foreignColumns: \[\w+\.\w+, (\w+)\.id/g),
+    ]) {
+      const target = nameOf.get(match[1]!);
+      if (target && target !== table.name) found.add(`${table.name}>${target}`);
+    }
+  });
+  return [...found].sort().map((pair) => {
+    const [from, to] = pair.split(">");
+    return { from: from!, to: to! };
+  });
+}

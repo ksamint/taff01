@@ -154,6 +154,18 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   folded detail. The unit tests shall fail when a module is in no lane, when
   a permission action or a specification has no module, or when a flow step
   names a module that does not exist.
+- TT-9.7 `scripts/architecture/ontology.ts` shall list every kind of thing
+  the product has, each with a tier, a kind, where it is stored and what
+  contains it. Every table shall belong to exactly one thing. `pnpm arch:map`
+  shall write `architecture/ontology.json`, adding for each thing the number
+  of tables that cannot exist without it, read from the schema, and the
+  modules that own its storage. The page shall offer the perspectives Things,
+  Structure, Authority, Dependency and Flow over that one document. The unit
+  tests shall fail when a table belongs to no thing or to two, when a
+  reference does not resolve, or when the committed document is stale.
+- TT-9.8 `scripts/unlikec4/` (format, validation, viewer, page builder)
+  shall import nothing from outside its folder, so it can move to another
+  repository unchanged.
 - TT-9.5 The model describes the code; it grants nothing and no runtime reads
   it. A sub-project level and a level above the organization appear in
   `domain.c4` marked `not_modelled` until the owner decides them.
@@ -187,7 +199,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | TT-5.3 | Build CSS: 22 stylesheets byte-identical to the former JS config; no-config control emits no Tailwind; Turbopack dev CSS identical ([milestone 105](../milestones/105-typescript-and-rust-only.md)) |
 | TT-6.1, TT-6.2 | scripts/language-policy.test.ts |
 | TT-6.3 | scripts/neighbor-preservation.test.ts (10, incl. CLI exit code; 6,000-case differential run in [milestone 107](../milestones/107-report-web-and-ports.md)); scripts/live-email-proof.test.ts (4); scripts/audit-contract.test.ts (5) |
-| TT-9 | scripts/architecture/architecture.test.ts (5); function map opened in Chromium at 1440 and 400 px with no page error ([milestone 158](../milestones/158-function-map.md)); `pnpm arch:check` valid on LikeC4 1.60.0 ([milestone 157](../milestones/157-architecture-model.md)) |
+| TT-9 | scripts/architecture/architecture.test.ts (9); five perspectives exercised in Chromium ([milestone 159](../milestones/159-unlikec4-ontology.md)); function map opened in Chromium at 1440 and 400 px with no page error ([milestone 158](../milestones/158-function-map.md)); `pnpm arch:check` valid on LikeC4 1.60.0 ([milestone 157](../milestones/157-architecture-model.md)) |
 | TT-7 | scripts/check-plan.test.ts (9); full run recorded in [milestone 131](../milestones/131-tda01-start-baseline.md) |
 | Runtime/artifact parity | scripts/live-harness.test.ts; capture-runtime.test.ts; visual-clock.test.ts; OAuth integration tests |
 
