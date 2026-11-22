@@ -78,6 +78,13 @@ Backend port to Rust (owner, 2026-11-15: "yes for all"; plan
   every release, the full `pnpm check` is required.
 - Sign-in, OAuth and SMS move to Rust last (plan Wave 4).
 
+Plan 0004 queue (owner, 2026-11-22: "yes for all … not gate just do it";
+goal `docs/agent-goal-v0.2.27-function-map-in-rust.md`). Every new function
+is built in Rust, with its screens in TypeScript. The queue has no decision
+stops and no review waits. A PR in it merges on the fast checks named in
+that goal, and the full `pnpm check` runs once on each release head before
+the deploy. The hard limits under "Stop and report" still apply.
+
 ## Stop and report
 
 Stop and report, never work around:

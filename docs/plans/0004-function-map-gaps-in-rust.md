@@ -1,7 +1,9 @@
 # 0004 · Agent queue: close function-map gaps, new backend in Rust
 
-- **Status:** proposed. The planner wrote it on 2026-11-22. Nothing here has
-  started. The owner decides which N tasks to build (see "Decisions").
+- **Status:** approved (owner, 2026-11-22: "yes for all … not gate just do
+  it"). Nothing here has started. The agent goal is
+  [v0.2.27](../agent-goal-v0.2.27-function-map-in-rust.md); it holds the
+  prompt, the design per task, and the execution mode.
 - **Who executes:** the local dev agent on the operator machine. The planner
   (Claude) updates this file on a branch, and the agent adopts it in its own PRs.
 - **Reads first:** `AGENTS.md`, [plan 0001](0001-rust-backend-port.md),
@@ -51,7 +53,7 @@ Plan 0004 adds the following:
 | R0.3a | `API_RS_PORT` defaults to 3002, which is the renderer's port (`compose.yaml`, `compose.prod.yaml`). Choose a free port for `taff-api` before R0.3 merges. | R0.3 | Local compose with renderer and `taff-api` both up | No port shared with the renderer or with any neighbour | F |
 | R0.7 | First production Rust process. Add `taff-api` to `compose.prod.yaml` and to its own image. Add one Caddy matcher per new path prefix in Taff's own Caddyfile (plan 0001 rule 4). Neither Traefik nor a neighbour's route changes. | R0.4, R0.6, R0.3a | Deploy runbook dry run: switch, check, switch back, check | Rollback is removing the matcher line and the container; deploy report lists before and after | F + deploy |
 
-Before R0.7 print `NEEDS-DECISION: run taff-api in production for new path prefixes only — recommend yes`.
+R0.7 is approved (owner, 2026-11-22). No decision stop before it.
 
 ## N · New functions (Rust backend, TypeScript screens)
 
@@ -91,7 +93,14 @@ that would see money it cannot see today.
 
 ## Decisions (owner)
 
-- `NEEDS-DECISION: approve N1–N4 for v0.2.27 — recommend yes` (no personal data, no change to existing routes)
-- `NEEDS-DECISION: N5–N7 cost side — recommend after N1 ships; decide who sees hourly rates first`
-- `NEEDS-DECISION: N8 phases — recommend after Wave 1 timeline reads`
-- `NEEDS-DECISION: R0.7 taff-api in production for new prefixes only — recommend yes`
+2026-11-22, "yes for all", which approves the following:
+- N1–N4 for v0.2.27.
+- N5–N7 after N1 ships. Hourly rates are visible only to workspace admins;
+  a member sees only their own entries and rate. The owner may change this
+  default later.
+- N8 after the timeline reads are ported to Rust, which approves the Wave 1
+  timeline family.
+- R0.7: `taff-api` in production for new path prefixes only.
+- "Not gate just do it": no decision stops and no review waits in this
+  queue. The execution mode in the agent goal replaces plan 0002's "print
+  NEEDS-DECISION and wait" after R0.6 for this work.
