@@ -7,7 +7,7 @@ import { tree, validate as validateOmv, view } from "../omv/omv.ts";
 import { ASSESSMENT } from "./benchmark.ts";
 import { known, taffMarkdown } from "./benchmark-doc.mts";
 import { focusModel } from "./focus-model.ts";
-import { inventory, repoRoot } from "./inventory.ts";
+import { inventory, repoRoot, rustRoutes } from "./inventory.ts";
 import { assign, render } from "./model.ts";
 import { MODULES } from "./modules.ts";
 import { omv } from "./omv-model.ts";
@@ -35,6 +35,29 @@ test("the scan finds every kind of thing the model maps", () => {
 test("every table, core file, route, tool and page belongs to one module", () => {
   expect(assignment.unmapped).toEqual([]);
   expect(assignment.conflicts).toEqual([]);
+});
+
+test("unplaced Rust routes fail the same placement check as Node routes", () => {
+  const file = "backend/crates/taff-api/src/routes/fixture.rs";
+  const routes = rustRoutes(
+    `Router::new().route(
+      "/api/unplaced/{id}",
+      get(handlers::fixture).patch(update).delete(remove),
+    )`,
+    file,
+  );
+  expect(routes).toEqual(
+    ["GET", "PATCH", "DELETE"].map((method) => ({
+      method,
+      path: "/api/unplaced/{id}",
+      file,
+    })),
+  );
+  expect(assign({ ...found, routes }).unmapped).toEqual([
+    "route GET /api/unplaced/{id}",
+    "route PATCH /api/unplaced/{id}",
+    "route DELETE /api/unplaced/{id}",
+  ]);
 });
 
 test("module ids are unique and every listed screen and source file exists", () => {

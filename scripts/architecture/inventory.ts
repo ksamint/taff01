@@ -1,7 +1,7 @@
 // Reads what the code declares: tables, REST routes, MCP tools, core source
 // files, pages, and which tables each core file imports. Nothing here is
 // written by hand, so the architecture model cannot drift from the code.
-import { readdirSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 export const repoRoot = path.resolve(import.meta.dirname, "../..");
@@ -54,9 +54,33 @@ export function routes(): Route[] {
       /\bapp\.(get|post|patch|put|delete|all)\(\s*"([^"]+)"/g,
     ))
       found.push({ method: method!.toUpperCase(), path: route!, file });
+  const rustApi = "backend/crates/taff-api/src";
+  if (existsSync(path.join(repoRoot, rustApi))) {
+    for (const file of walk(
+      rustApi,
+      (name) => name.endsWith(".rs") && !isTest(name),
+    ))
+      found.push(...rustRoutes(read(file), file));
+  }
   return found.sort(
     (a, b) => a.path.localeCompare(b.path) || a.method.localeCompare(b.method),
   );
+}
+
+export function rustRoutes(source: string, file: string): Route[] {
+  // shortcut: scans literal paths and named handlers; extend if the API starts composing routers.
+  const found: Route[] = [];
+  for (const [, route, handlers] of source.matchAll(
+    /\.route\(\s*"([^"]+)"\s*,\s*((?:get|post|patch|put|delete|head|options|trace|any)\s*\([\w:\s]+\)(?:\s*\.\s*(?:get|post|patch|put|delete|head|options|trace)\s*\([\w:\s]+\))*)/g,
+  )) {
+    for (const [, method] of handlers!.matchAll(/(\w+)\s*\(/g))
+      found.push({
+        method: method === "any" ? "ALL" : method!.toUpperCase(),
+        path: route!,
+        file,
+      });
+  }
+  return found;
 }
 
 export function tools(): Tool[] {
