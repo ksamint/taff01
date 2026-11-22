@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/taff-core", "crates/taff-domain", "crates/taff-db", "crates/taff-render"]
+members = ["crates/taff-contract", "crates/taff-core", "crates/taff-domain", "crates/taff-db", "crates/taff-render"]
 
 [workspace.package]
 version = "0.1.0"

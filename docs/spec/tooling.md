@@ -136,6 +136,9 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 - TT-10.2 The schema test shall compare the generated REST manifest with
   the live Hono registrations. The Rust fixture generator shall regenerate
   the shared schemas so the local Rust check can detect drift.
+- TT-10.3 The `taff-contract` crate shall generate Serde types from the
+  committed REST, MCP and renderer manifests at build time. The renderer
+  fixtures shall round-trip byte-for-byte after canonical JSON ordering.
 
 ### Architecture model (TT-9)
 
@@ -215,7 +218,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | Requirement | Evidence |
 | --- | --- |
 | TT-8 | `pnpm perf:budget`, `e2e/font-loading.spec.ts`, `scripts/ui/fonts.test.ts` |
-| TT-10 | `apps/api/scripts/rest-contracts.test.ts` and `apps/api/src/mcp-tool-args.test.ts` |
+| TT-10 | `apps/api/scripts/rest-contracts.test.ts`, `apps/api/src/mcp-tool-args.test.ts`, and `backend/crates/taff-contract/tests/round_trip.rs` |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal on pinned production 9.1.2; native persisted-state proof in [milestone 104](../milestones/104-v0.2.20.md) |
