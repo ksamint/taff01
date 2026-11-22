@@ -2388,7 +2388,7 @@
     "type": "requirement",
     "title": "TT-10 Shared wire schemas",
     "attrs": {
-     "statements": 2
+     "statements": 3
     }
    },
    {

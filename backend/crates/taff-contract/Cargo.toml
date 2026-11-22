@@ -1,0 +1,28 @@
+[package]
+name = "taff-contract"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+chrono.workspace = true
+regress = "0.12"
+serde.workspace = true
+serde_json.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+taff-domain = { path = "../taff-domain" }
+
+[build-dependencies]
+anyhow.workspace = true
+prettyplease = "0.2"
+proc-macro2 = "1"
+quote = "1"
+schemars = "0.8.22"
+serde.workspace = true
+serde_json.workspace = true
+syn = { version = "2", features = ["full"] }
+typify = { version = "0.8", default-features = false }
