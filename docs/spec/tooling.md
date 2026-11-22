@@ -134,8 +134,9 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   hand; `generated/modules.c4` is generated.
 - TT-9.2 `pnpm arch:gen` shall build the generated file from the code: every
   table in `packages/db/src/schema.ts`, every REST route and MCP tool in
-  `apps/api/src`, every source file in `packages/core/src`, every page in
-  `apps/web/app`, and which tables each core file imports.
+  `apps/api/src`, every literal Axum route with named handlers in
+  `backend/crates/taff-api/src`, every source file in `packages/core/src`,
+  every page in `apps/web/app`, and which tables each core file imports.
 - TT-9.3 `scripts/architecture/modules.ts` shall assign each of those to
   exactly one function module. The unit tests shall fail when the code gains a
   table, core file, route, tool or page that no module claims, when two
