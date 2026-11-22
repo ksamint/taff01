@@ -2384,6 +2384,14 @@
     }
    },
    {
+    "id": "requirement:TT-10",
+    "type": "requirement",
+    "title": "TT-10 Shared wire schemas",
+    "attrs": {
+     "statements": 2
+    }
+   },
+   {
     "id": "requirement:TT-9",
     "type": "requirement",
     "title": "TT-9 Architecture model",
@@ -10059,6 +10067,11 @@
    },
    {
     "from": "product:taff",
+    "to": "requirement:TT-10",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "product:taff",
     "to": "requirement:TT-9",
     "type": "must_satisfy"
    },
@@ -10364,6 +10377,11 @@
    },
    {
     "from": "requirement:TT-8",
+    "to": "spec:tooling.md",
+    "type": "stated_in"
+   },
+   {
+    "from": "requirement:TT-10",
     "to": "spec:tooling.md",
     "type": "stated_in"
    },

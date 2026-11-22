@@ -17,6 +17,7 @@ const generators = [
   "scripts/rust-calendar-golden.mts",
   "scripts/rust-graph-golden.mts",
   "apps/api/scripts/summary-schema-gen.mts",
+  "apps/api/scripts/rest-schema-gen.mts",
 ];
 const root = fileURLToPath(new URL("..", import.meta.url));
 // The summary model's own input/expected contract remains the sole snapshot source.

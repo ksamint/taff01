@@ -36,7 +36,7 @@
     "arch:check": "node node_modules/tsx/dist/cli.mjs scripts/architecture/generate.mts --check && pnpm dlx likec4@1.60.0 validate architecture",
     "arch:view": "pnpm dlx likec4@1.60.0 start architecture",
     "arch:build": "pnpm dlx likec4@1.60.0 build architecture --output architecture/.site --output-single-file --use-hash-history --title \"Taff Architecture\"",
-    "schema:gen": "node node_modules/tsx/dist/cli.mjs apps/api/scripts/summary-schema-gen.mts"
+    "schema:gen": "node node_modules/tsx/dist/cli.mjs apps/api/scripts/summary-schema-gen.mts && node node_modules/tsx/dist/cli.mjs apps/api/scripts/mcp-schema-gen.mts && node node_modules/tsx/dist/cli.mjs apps/api/scripts/rest-schema-gen.mts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.15",

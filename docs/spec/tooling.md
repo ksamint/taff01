@@ -126,6 +126,17 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   bytes than Today. Me uses Manrope and the common CJK subset in Chinese,
   with platform fallback for glyphs outside that subset.
 
+### Shared wire schemas (TT-10)
+
+- TT-10.1 `pnpm schema:gen` shall generate Draft 7 JSON Schema for registered
+  REST request bodies, successful REST responses, and registered MCP tool
+  arguments in `packages/schemas/generated/`. A bodyless request shall have
+  a null request schema, and attachment responses shall declare their media
+  types.
+- TT-10.2 The schema test shall compare the generated REST manifest with
+  the live Hono registrations. The Rust fixture generator shall regenerate
+  the shared schemas so the local Rust check can detect drift.
+
 ### Architecture model (TT-9)
 
 - TT-9.1 The repository shall hold one architecture model in LikeC4 source
@@ -204,6 +215,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | Requirement | Evidence |
 | --- | --- |
 | TT-8 | `pnpm perf:budget`, `e2e/font-loading.spec.ts`, `scripts/ui/fonts.test.ts` |
+| TT-10 | `apps/api/scripts/rest-contracts.test.ts` and `apps/api/src/mcp-tool-args.test.ts` |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |
 | TT-3 | Native release:stack health/worker readiness; scripts/valkey-rehearsal.mts seven-check rehearsal on pinned production 9.1.2; native persisted-state proof in [milestone 104](../milestones/104-v0.2.20.md) |
