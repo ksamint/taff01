@@ -1,0 +1,47 @@
+// The pictures. Each view is a query over the model, so a view never goes
+// stale on its own. Module views are generated in generated/modules.c4.
+views {
+  view index {
+    title 'Taff · landscape'
+    description 'Who uses Taff and the two ways to read it: what runs, and what it does.'
+    include person, agent_client, shareholder, taff, fn, domain
+  }
+
+  view runtime of taff {
+    title 'Runtime · what runs'
+    description 'A request enters at Caddy and reaches PostgreSQL through core. Only the renderer is Rust today.'
+    include *, taff.api.*
+    include person, agent_client, shareholder
+  }
+
+  view rust_port of taff {
+    title 'Runtime · the Rust port'
+    description 'Tagged moves_to_rust: replaced by the decided port. Tagged rust: Rust already.'
+    include *
+    style element.tag = #moves_to_rust {
+      color red
+    }
+    style element.tag = #rust {
+      color green
+    }
+  }
+
+  view structure of domain {
+    title 'Structure · the levels work lives in'
+    description 'System, organization, project, task, subtask, and who holds a role at each. Dashed red: asked about, not modelled.'
+    include *
+  }
+
+  view modules of fn {
+    title 'Function modules · who depends on whom'
+    description 'An arrow from A to B means code in A imports a table that B owns.'
+    include *
+  }
+
+  view data of fn {
+    title 'Data · tables by module'
+    description 'All tables, grouped by the module that owns them.'
+    include fn.*
+    include fn.** where kind is table
+  }
+}

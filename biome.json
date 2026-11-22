@@ -9,6 +9,7 @@
       "!!backend/**/tests/fixtures",
       "!!**/__fixtures__",
       "!!packages/schemas/generated",
+      "!!architecture/omv.json",
       "!!docs/ui/prototype",
       "!!docs/ui/prototype-v2",
       "!!pnpm-lock.yaml",

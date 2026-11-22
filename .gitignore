@@ -26,3 +26,5 @@ backend/target/
 
 # Generated from apps/web/src/sw/sw.ts before dev/build.
 apps/web/public/sw.js
+# LikeC4 static build (pnpm arch:build)
+architecture/.site
