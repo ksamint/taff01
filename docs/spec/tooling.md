@@ -174,10 +174,13 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   builder, standard repository vocabulary) shall import nothing from outside
   its folder, so it can move to another repository unchanged.
 - TT-9.11 `pnpm arch:benchmark` shall write `docs/benchmark/function-map.md`
-  from `scripts/architecture/benchmark.ts`: functions that other products
-  offer, by group and category, the products each is seen in, and whether
-  Taff has it. Each function Taff has or partly has shall name objects of the
-  OMV model. The unit tests shall fail when a named object does not exist or
+  with the func-map skill (`.claude/skills/func-map/`): the skill's
+  project-management catalog (functions by group and category, and the
+  products each is seen in) and Taff's assessment in
+  `scripts/architecture/benchmark.ts` (one mark per catalog function). Each
+  group on the page shall fold open and shut. Each function Taff has or partly has shall name objects of the
+  OMV model. The unit tests shall fail when a named object does not exist,
+  when a catalog function has no mark, when a partial mark has no note, or
   when the committed table is stale. The table states what the reading
   material says about other products; it does not claim to have tested them.
 - TT-9.5 The model describes the code; it grants nothing and no runtime reads

@@ -11,7 +11,9 @@ table that sets it against what Taff does today.
 
 ## How the function map is kept honest
 
-- The rows are written by hand in `scripts/architecture/benchmark.ts`.
+- It is built with the **func-map** skill (`.claude/skills/func-map/`). The
+  functions come from the skill's project-management catalog; Taff's marks
+  are in `scripts/architecture/benchmark.ts`.
 - **Seen in** repeats what the reading material says. It comes from vendor
   documentation and has not been tested by hand.
 - **Taff** is Yes, Partly or No. Each Yes or Partly names objects of Taff's own

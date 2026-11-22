@@ -1,9 +1,11 @@
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test } from "vitest";
+import { CATALOG } from "../../.claude/skills/func-map/catalogs/project-management.ts";
+import { check } from "../../.claude/skills/func-map/scripts/func-map.ts";
 import { tree, validate as validateOmv, view } from "../omv/omv.ts";
-import { CAPABILITIES, GROUPS } from "./benchmark.ts";
-import { markdown } from "./benchmark-doc.mts";
+import { ASSESSMENT } from "./benchmark.ts";
+import { known, taffMarkdown } from "./benchmark-doc.mts";
 import { focusModel } from "./focus-model.ts";
 import { inventory, repoRoot } from "./inventory.ts";
 import { assign, render } from "./model.ts";
@@ -191,22 +193,23 @@ test("a view is one centre, one question, and says what produced it", () => {
 });
 
 // Spec TT-9.11: the function map claims only what the model can show.
-test("every 'where in Taff' of the function map is an object of the model", () => {
-  const ids = new Set(built.doc.m.objects.map((object) => object.id));
-  const unknown = CAPABILITIES.flatMap((item) =>
-    item.where.filter((id) => !ids.has(id)).map((id) => `${item.name}: ${id}`),
-  );
-  expect(unknown).toEqual([]);
-  expect(CAPABILITIES.filter((item) => !GROUPS.includes(item.group))).toEqual(
-    [],
-  );
-  // A function Taff fully has must point at something, or say why not.
-  expect(
-    CAPABILITIES.filter(
-      (item) => item.taff === "yes" && item.where.length === 0 && !item.note,
-    ),
-  ).toEqual([]);
+test("Taff's function map marks every catalog function and points at real objects", () => {
+  const evidence = known();
+  expect(check(CATALOG, ASSESSMENT, evidence)).toEqual([]);
   expect(
     readFileSync(path.join(repoRoot, "docs/benchmark/function-map.md"), "utf8"),
-  ).toBe(markdown());
+  ).toBe(taffMarkdown(evidence));
+  // The check catches a claim that points at nothing and an unmarked function.
+  const broken = {
+    ...ASSESSMENT,
+    marks: {
+      ...ASSESSMENT.marks,
+      projects: { status: "yes" as const, where: ["concept:nothing"] },
+    },
+  };
+  delete (broken.marks as Record<string, unknown>).labels;
+  expect(check(CATALOG, broken, evidence)).toEqual([
+    "function projects points at unknown concept:nothing",
+    "function labels has no mark",
+  ]);
 });

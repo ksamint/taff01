@@ -91,6 +91,8 @@ Architecture model (owner, 2026-11-20; ADR 0033, spec `tooling.md` TT-9):
   before changing structure. A new table, route, MCP tool, core file, page,
   permission action or specification must be placed in
   `scripts/architecture/` in the same commit; `pnpm test` fails otherwise.
+- The func-map skill (`.claude/skills/func-map/`) sets Taff against a
+  catalog of the field's functions; `pnpm arch:benchmark` writes the table.
 - `scripts/omv/` is the portable engine and will be merged into tda01.
   Keep it free of any import from the rest of this repository.
 
