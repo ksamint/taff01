@@ -5,6 +5,13 @@ use taff_domain::{CoreError, Result};
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use uuid::Uuid;
 
+/// Identity from an unexpired session. The credential itself stays private.
+pub struct Session {
+    pub id: String,
+    pub user_id: String,
+    pub expires_at: chrono::DateTime<chrono::Utc>,
+}
+
 /// A read-only handle to the Taff database. Phase 1 of the migration: this
 /// connects and reads the existing `packages/db` schema but never writes,
 /// so `packages/core` remains the sole authority for mutations.
@@ -42,6 +49,18 @@ impl Db {
             .await
             .map_err(|e| CoreError::Other(e.into()))?;
         Ok(())
+    }
+
+    /// Looks up a verified cookie token without refreshing or deleting its session.
+    pub async fn active_session(&self, token: &str) -> Result<Option<Session>> {
+        sqlx::query_as!(
+            Session,
+            "SELECT id, user_id, expires_at FROM sessions WHERE token = $1 AND expires_at > now()",
+            token
+        )
+        .fetch_optional(&self.pool)
+        .await
+        .map_err(|error| CoreError::Other(error.into()))
     }
 
     /// Reads a workspace by id, including archived rows; callers enforce archive visibility.

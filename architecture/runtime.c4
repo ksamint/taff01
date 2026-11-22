@@ -63,7 +63,7 @@ model {
     contract = library 'Contract' {
       #typescript
       technology 'Zod'
-      description 'Schemas for every request and response, shared by web, API and core. Stays TypeScript and will emit the JSON Schema Rust reads.'
+      description 'Shared Zod contracts for web, API and core. The generated JSON Schema is compiled to Serde types by taff-contract.'
       link ../packages/schemas/src/index.ts
     }
     render = service 'Renderer' {
@@ -77,6 +77,12 @@ model {
       technology 'Rust: taff-domain, taff-db, taff-core'
       description 'A port of the permission function, calendar rules and time zones, tested against the TypeScript. Serves no request yet.'
       link ../backend/crates/taff-domain/src/lib.rs
+    }
+    rust_api = service 'Rust API' {
+      #rust
+      technology 'Axum'
+      description 'Local loopback on port 3003. Health and read-only validation of existing Node sessions.'
+      link ../backend/crates/taff-api/src/main.rs
     }
     db = store 'PostgreSQL' {
       #db
@@ -109,6 +115,8 @@ model {
     worker -> render 'PNG request'
     core -> contract 'types from'
     core -> db 'reads and writes'
+    rust_api -> db 'reads active sessions'
+    rust_api -> contract 'generates wire types from'
     db -> core 'change notification'
     rust_domain -[planned]-> core 'replaces, from v0.2.27'
   }

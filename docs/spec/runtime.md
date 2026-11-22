@@ -43,6 +43,17 @@ Status: API/worker recovery shipped in v0.2.20, source `596272a`; persisted Valk
 - RT-3.2 When an optimistic mutation is pending, ordinary event refreshes shall wait until it settles. Socket authentication revocation shall immediately clear session data and revalidate Me, independently of pending writes or ordinary refreshes.
 - RT-3.3 On the first socket open, even during a pending mutation, the browser shall revalidate Me and mark other query families stale without queuing their reads or discarding a pending ordinary change. Reconnection shall refresh the families; stopping the connection shall prevent queued trailing refreshes and stale socket callbacks.
 
+### Local Rust API (RT-4)
+
+- RT-4.1 The local Rust API shall listen on loopback and default to TCP
+  port 3003. Its health endpoint shall return the Node health response.
+- RT-4.2 Session validation shall require an authentic Node-issued cookie
+  and an unexpired session row. The Rust API shall return unauthorized for
+  missing, tampered or expired sessions. A session read shall leave the row
+  and cookie unchanged.
+- RT-4.3 The Rust API shall return the same machine error and HTTP status
+  as Node for 400, 401, 403, 404 and 409.
+
 ## Non-functional
 
 - PostgreSQL, Valkey, existing schemas and neighboring services retain their
@@ -68,6 +79,7 @@ Status: API/worker recovery shipped in v0.2.20, source `596272a`; persisted Valk
 | RT-2.3 | scripts/apuch-compose.test.ts; scripts/valkey-rehearsal.mts seven checks on 9.1.2; actual native RDB restore and cold AOF restart parity in [milestone 104](../milestones/104-v0.2.20.md) |
 | RT-2.5 | Dockerfiles; non-root image smoke; release closeout |
 | RT-3 | apps/web/src/lib/realtime.test.ts: actual QueryObserver burst, independent read, trailing freshness, mutation, cleanup and immediate revocation cases; existing routing/first-open/reconnect cases |
+| RT-4 | `backend/crates/taff-api/tests/session_parity.rs` and the local port rehearsal |
 
 ## Open decisions
 
