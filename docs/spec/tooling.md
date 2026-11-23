@@ -138,7 +138,9 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   the shared schemas so the local Rust check can detect drift.
 - TT-10.3 The `taff-contract` crate shall generate Serde types from the
   committed REST, MCP and renderer manifests at build time. The renderer
-  fixtures shall round-trip byte-for-byte after canonical JSON ordering.
+  fixtures shall round-trip byte-for-byte after canonical JSON ordering. The
+  standalone Rust API build shall compile only the generated routes it serves.
+  The default contract crate and workspace checks retain the full catalog.
 
 ### Architecture model (TT-9)
 

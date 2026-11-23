@@ -83,12 +83,17 @@ fn module(key: &str, schemas: impl IntoIterator<Item = (Ident, Schema)>) -> Resu
 
 fn main() -> Result<()> {
     let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../packages/schemas/generated");
+    // The deployable Rust API compiles only the generated routes it serves.
+    let full_catalog = cfg!(feature = "node-catalog");
     let rest: BTreeMap<String, Route> = read(&dir, "rest.json")?;
     let mcp: BTreeMap<String, Schema> = read(&dir, "mcp-tools.json")?;
 
     let mut names = BTreeSet::new();
     let mut rest_modules = Vec::new();
     for (key, route) in rest {
+        if !full_catalog && key != "GET /api/health" {
+            continue;
+        }
         ensure!(
             names.insert(module_name(&key)),
             "duplicate Rust route module: {key}"
@@ -109,7 +114,7 @@ fn main() -> Result<()> {
 
     names.clear();
     let mut tool_modules = Vec::new();
-    for (key, schema) in mcp {
+    for (key, schema) in mcp.into_iter().filter(|_| full_catalog) {
         ensure!(
             names.insert(module_name(&key)),
             "duplicate Rust tool module: {key}"
@@ -123,7 +128,10 @@ fn main() -> Result<()> {
         "daily-summary",
         "graph-image",
         "timeline-image",
-    ] {
+    ]
+    .into_iter()
+    .filter(|_| full_catalog)
+    {
         let schema = read(&dir, &format!("{image}.json"))?;
         render_modules.push(module(image, [(format_ident!("RequestBody"), schema)])?);
     }

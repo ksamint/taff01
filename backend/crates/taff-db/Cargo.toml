@@ -14,7 +14,7 @@ chrono.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
-taff-contract = { path = "../taff-contract" }
+taff-contract = { path = "../taff-contract", default-features = false }
 taff-domain = { path = "../taff-domain" }
 
 [dev-dependencies]
