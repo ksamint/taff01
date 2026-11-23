@@ -64,6 +64,7 @@ export const SPEC_MODULES: Record<string, string[]> = {
   "time-tracking.md": ["tasks"],
   "projects.md": ["projects"],
   "runtime.md": ["kernel"],
+  "architecture-tooling.md": [],
   "tooling.md": [],
   "view-export.md": ["export"],
   "workspaces.md": ["orgs"],

@@ -2365,6 +2365,22 @@
     }
    },
    {
+    "id": "spec:architecture-tooling.md",
+    "type": "spec",
+    "title": "Architecture tooling",
+    "attrs": {
+     "file": "docs/spec/architecture-tooling.md"
+    }
+   },
+   {
+    "id": "requirement:TT-9",
+    "type": "requirement",
+    "title": "TT-9 Architecture model",
+    "attrs": {
+     "statements": 11
+    }
+   },
+   {
     "id": "spec:client-navigation.md",
     "type": "spec",
     "title": "client navigation and optimistic state",
@@ -2570,14 +2586,6 @@
     "title": "TT-10 Shared wire schemas",
     "attrs": {
      "statements": 3
-    }
-   },
-   {
-    "id": "requirement:TT-9",
-    "type": "requirement",
-    "title": "TT-9 Architecture model",
-    "attrs": {
-     "statements": 11
     }
    },
    {
@@ -10991,6 +10999,16 @@
    },
    {
     "from": "product:taff",
+    "to": "spec:architecture-tooling.md",
+    "type": "specified_by"
+   },
+   {
+    "from": "product:taff",
+    "to": "requirement:TT-9",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "product:taff",
     "to": "spec:client-navigation.md",
     "type": "specified_by"
    },
@@ -11117,11 +11135,6 @@
    {
     "from": "product:taff",
     "to": "requirement:TT-10",
-    "type": "must_satisfy"
-   },
-   {
-    "from": "product:taff",
-    "to": "requirement:TT-9",
     "type": "must_satisfy"
    },
    {
@@ -11360,6 +11373,11 @@
     "type": "stated_in"
    },
    {
+    "from": "requirement:TT-9",
+    "to": "spec:architecture-tooling.md",
+    "type": "stated_in"
+   },
+   {
     "from": "requirement:CN-1",
     "to": "spec:client-navigation.md",
     "type": "stated_in"
@@ -11476,11 +11494,6 @@
    },
    {
     "from": "requirement:TT-10",
-    "to": "spec:tooling.md",
-    "type": "stated_in"
-   },
-   {
-    "from": "requirement:TT-9",
     "to": "spec:tooling.md",
     "type": "stated_in"
    },
