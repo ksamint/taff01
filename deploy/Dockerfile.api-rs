@@ -5,8 +5,11 @@ WORKDIR /repo
 COPY backend ./backend
 COPY packages/schemas/generated ./packages/schemas/generated
 ENV SQLX_OFFLINE=true
-RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/repo/backend/target \
-    cd backend && cargo +"$RUST_VERSION" build --release --locked --jobs 2 -p taff-api && cp target/release/taff-api /taff-api
+# Cached Cargo outputs can be newer than sources from another checkout.
+RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/repo/backend/target,sharing=locked \
+    cd backend \
+    && find crates ../packages/schemas/generated -type f -exec touch {} + \
+    && cargo +"$RUST_VERSION" build --release --locked --jobs 2 -p taff-api && cp target/release/taff-api /taff-api
 
 FROM alpine:3.23
 RUN addgroup -S taff && adduser -S -G taff taff
