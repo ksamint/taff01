@@ -394,6 +394,15 @@ export const THINGS: Thing[] = [
     "Money received. Append-only.",
   ),
   thing(
+    "project-budget",
+    "Project budget",
+    5,
+    "attribute",
+    ["project_budgets"],
+    "project",
+    "An amount in currency micros for comparison with actual costs.",
+  ),
+  thing(
     "project_health_update",
     "Project health update",
     5,

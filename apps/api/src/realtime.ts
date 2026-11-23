@@ -50,7 +50,7 @@ export async function createRealtime(core: ReturnType<typeof createCore>) {
         event.action,
       );
     // CRM and payments (finance, ADR 0021) reach people, never guests.
-    const peopleOnly = /^project_payments\./.test(event.action);
+    const peopleOnly = /^project_(payments|budgets)\./.test(event.action);
     const crmEvent =
       /^(companies|contacts|company_contacts|project_contacts|task_contacts|contact_roles)\./.test(
         event.action,

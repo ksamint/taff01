@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey, request } from "../lib/api";
+import { decimalToMicros } from "../lib/money-micros";
 import { useMembers } from "../lib/queries";
 import { memberRatesFamily, useMemberRates } from "../lib/time-queries";
 import { useWorkspace } from "./app-shell";
@@ -41,11 +42,7 @@ export function MemberRateSheet({
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("");
   const [validFrom, setValidFrom] = useState(today);
-  // Assemble an integer from decimal digits to preserve the submitted micros.
-  const digits = /^(\d+)(?:\.(\d{1,6}))?$/.exec(amount);
-  const rateMicrosPerHour = digits
-    ? Number(digits[1] + (digits[2] ?? "").padEnd(6, "0"))
-    : Number.NaN;
+  const rateMicrosPerHour = decimalToMicros(amount);
   const input = memberRateSchema.safeParse({
     workspaceId: workspace.id,
     personId,

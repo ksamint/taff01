@@ -18,6 +18,7 @@ import { useWorkspaceAccess } from "../lib/queries";
 import { timelineKey } from "../lib/timeline-queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
+import { ProjectBudgetActual } from "./project-budget-actual";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -169,6 +170,14 @@ export function ProjectFinancePanel({ project }: { project: Project }) {
           </div>
         )}
       </dl>
+      {canReadCost && (
+        <ProjectBudgetActual
+          key={project.id}
+          projectId={project.id}
+          projectCurrency={project.currency}
+          canManage={canManage}
+        />
+      )}
       {!canManage && (
         <p className="project-finance-note">{t("projectFinance.readOnly")}</p>
       )}

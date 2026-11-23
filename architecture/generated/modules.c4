@@ -1021,8 +1021,10 @@ GET /api/workspaces/archived'
       }
       rest = layer 'REST routes' {
         #api
-        api_costs = routes '/api/costs (1)' {
-          description 'GET /api/costs/projects/{id}'
+        api_costs = routes '/api/costs (3)' {
+          description 'GET /api/costs/projects/{id}
+GET /api/costs/projects/{id}/actual
+POST /api/costs/projects/{id}/budget'
           link ../../backend/crates/taff-api/src/lib.rs
         }
         api_project_updates = routes '/api/project-updates (2)' {
@@ -1062,6 +1064,7 @@ POST /api/projects/:id/payments'
       }
       data = layer 'Tables' {
         #db
+        project_budgets = table 'project_budgets'
         project_payments = table 'project_payments'
         project_updates = table 'project_updates'
         projects = table 'projects'

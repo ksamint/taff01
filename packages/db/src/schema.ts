@@ -1391,6 +1391,30 @@ export const taskDependencies = pgTable(
     index("task_dependencies_workspace_idx").on(t.workspaceId),
   ],
 );
+export const projectBudgets = pgTable(
+  "project_budgets",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    amountMicros: bigint("amount_micros", { mode: "number" }).notNull(),
+    currency: text("currency").notNull(),
+  },
+  (t) => [
+    unique("project_budgets_project_unique").on(t.projectId),
+    foreignKey({
+      name: "project_budgets_project_fk",
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+    }).onDelete("cascade"),
+    check(
+      "project_budgets_amount_check",
+      sql`${t.amountMicros} BETWEEN 0 AND 9007199254740991`,
+    ),
+    check("project_budgets_currency_check", sql`${t.currency} ~ '^[A-Z]{3}$'`),
+  ],
+);
+
 export const projectPayments = pgTable(
   "project_payments",
   {

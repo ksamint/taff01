@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT rate.currency AS \"currency?\",\n               coalesce(div(sum(entries.minutes::numeric * rate.rate_micros_per_hour) + 30, 60), 0)::bigint AS \"time_micros!\",\n               sum(entries.minutes)::bigint AS \"minutes!\"\n        FROM time_entries AS entries\n        JOIN tasks ON tasks.id = entries.task_id AND tasks.workspace_id = entries.workspace_id\n        LEFT JOIN LATERAL (\n            SELECT currency, rate_micros_per_hour\n            FROM member_rates\n            WHERE workspace_id = entries.workspace_id AND person_id = entries.person_id\n              AND valid_from <= entries.day\n            ORDER BY valid_from DESC\n            LIMIT 1\n        ) AS rate ON true\n        WHERE entries.workspace_id = $1 AND tasks.project_id = $2\n        GROUP BY rate.currency\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "currency?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "time_micros!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "minutes!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [false, null, null]
+  },
+  "hash": "0fc73eae04768f031be6c63afabbdef629e761465c2a9d2ca0189a079c4e0750"
+}

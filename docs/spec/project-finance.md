@@ -61,9 +61,20 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
 - PF-3.3 Task detail and project finance shall display the authorized USD
   total in the reader's locale.
 
+### Budget and actual (PF-4)
+
+- PF-4.1 People with `finance:read` shall see a project budget and recorded
+  actuals in the finance panel. People with `finance:manage` shall set the
+  budget in one currency.
+- PF-4.2 Actuals shall include every run in the project and the rated time
+  logged against its tasks. Each entry uses the latest rate effective on the
+  entry day. Sum rated labor before rounding to a micro per currency.
+- PF-4.3 Display each currency separately and flag unrated minutes. The
+  actual response omits the rates and the identities of people who logged time.
+
 ## Non-functional
 
-- The cost endpoints require no migration. The panel loads with the lazy timeline view,
+- The panel loads with the lazy timeline view,
   so Today's initial JavaScript is unchanged. Strings in en, zh-CN and zh-HK.
 
 ## Acceptance
@@ -75,6 +86,7 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
 | PF-1.2 | `e2e/finance-visibility.spec.ts`; `packages/core/src/planning.integration.test.ts` |
 | PF-1.3 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
 | PF-2.1 | `packages/core/src/planning.integration.test.ts` (admin, member, guest flags) |
+| PF-4 | `backend/crates/taff-api/tests/project_actual.rs` and `e2e/project-budget-actual.spec.ts` |
 | PF-3 | `backend/crates/taff-api/tests/agent_cost.rs` and `e2e/agent-cost.spec.ts` |
 
 ## Sources
