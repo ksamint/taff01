@@ -3,13 +3,14 @@ name: func-map
 description: Build a function map that sets one product against everything its field offers - a catalog of functions by group and category, the products each is seen in, and whether the product has it (yes, partly, no) with evidence that points at real things in its code or model. Writes a committed Markdown table and a page where each group folds open, and a check that fails when a claim points at nothing or a catalog function is left unmarked. Use when the user asks for a function map, feature matrix, capability map, benchmark or competitor comparison, "what do we have versus the market", gap analysis, 功能地图, 功能对比, 竞品对标 or 功能盘点, even if they never say func-map.
 metadata:
   author: ksamint
-  origin: taff01
-  version: "1.0.0"
+  origin: ksamint/taff01
+  repository: ksamint/ksaskill01
+  version: "1.0.1"
 ---
 
 # func-map
 
-**Version:** 1.0.0
+**Version:** 1.0.1
 
 A function map answers one question: *of everything products in this field
 do, what does ours do today, and how do we know?* It has two inputs that are
@@ -83,8 +84,17 @@ next quarter). The assessment never edits the catalog.
 - A competitor assessment needs evidence too: its API reference or
   documentation, dated. Without that, mark it in a note, not as `yes`.
 
-## In this repository
+## Worked example
 
-taff01's assessment is `scripts/architecture/benchmark.ts`, checked against
-the OMV model. `pnpm arch:benchmark` writes `docs/benchmark/function-map.md`;
-the reading material it was built from is in `docs/benchmark/reading/`.
+taff01 is the first subject. Its assessment is
+`scripts/architecture/benchmark.ts`, checked against its OMV model
+(`architecture/omv.json`); `pnpm arch:benchmark` writes
+`docs/benchmark/function-map.md`, and a unit test in
+`scripts/architecture/architecture.test.ts` gates it. The reading material the
+catalog was built from is in its `docs/benchmark/reading/`.
+
+## Where this skill lives
+
+The canonical copy is `skills/func-map/` in ksamint/ksaskill01. A
+repository that uses it keeps an identical copy in `.claude/skills/func-map/`;
+change the canonical copy first, then copy it over.
