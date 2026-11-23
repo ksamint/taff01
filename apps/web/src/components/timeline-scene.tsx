@@ -118,7 +118,10 @@ function ProjectTimeline({ project }: { project: Project }) {
   const saveMilestone = useSaveMilestone(project.id);
   const access = useWorkspaceAccess(workspace.id);
   const canManagePhases =
-    confirmed && access.isSuccess && access.data.canManageProjects;
+    confirmed &&
+    !project.archived &&
+    access.isSuccess &&
+    access.data.canManageProjects;
   const [phaseDialog, setPhaseDialog] = useState<{
     projectId: string;
     phase: ProjectPhase | null;
@@ -1104,12 +1107,8 @@ function ProjectTimeline({ project }: { project: Project }) {
                       height={14}
                       rx={3}
                       className={`timeline-phase-track${canManagePhases ? " is-editable" : ""}`}
-                      onPointerDown={
-                        canManagePhases
-                          ? (event) => {
-                              if (event.button === 0) choosePhase(phase);
-                            }
-                          : undefined
+                      onClick={
+                        canManagePhases ? () => choosePhase(phase) : undefined
                       }
                     >
                       <title>{range}</title>

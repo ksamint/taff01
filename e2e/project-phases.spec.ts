@@ -114,8 +114,13 @@ test("edits ordered phase rows across the civil range and keeps task planning vi
   await add.getByRole("button", { name: m.planning.save }).click();
   await expect(rows).toContainText([first.name, second.name, added.name]);
 
-  await rows.nth(1).getByRole("button").click();
   const edit = page.getByRole("dialog", { name: m.timeline.editPhase });
+  await secondBar.dispatchEvent("pointerdown", {
+    button: 0,
+    pointerType: "touch",
+  });
+  await expect(edit).toHaveCount(0);
+  await secondBar.click();
   await expect(edit.getByLabel(m.timeline.start)).toHaveValue(second.start);
   await edit.getByLabel(m.timeline.phaseName).fill(edited.name);
   await edit.getByLabel(m.timeline.phaseEnd).fill(edited.end);
@@ -144,4 +149,17 @@ test("edits ordered phase rows across the civil range and keeps task planning vi
   await expect(page.getByTestId("timeline-risk")).toBeVisible();
   await expect(page.getByTestId("timeline-row")).toContainText(task.title);
   await expect(rows).toContainText([first.name, edited.name, added.name]);
+
+  const archived = await page.request.patch(`/api/projects/${project.id}`, {
+    data: { version: project.version, archived: true },
+  });
+  expect(archived.status()).toBe(200);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await expect(rows).toContainText([first.name, edited.name, added.name]);
+  await expect(
+    page.getByRole("button", { name: m.timeline.addPhase }),
+  ).toHaveCount(0);
+  await expect(rows.getByRole("button")).toHaveCount(0);
+  await secondBar.dispatchEvent("click");
+  await expect(edit).toHaveCount(0);
 });

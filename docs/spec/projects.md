@@ -64,8 +64,10 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
   in persisted position order. The timeline shall show phases even when the
   project has no scheduled tasks.
 - PR-5.2 A person with project management authority shall create and edit
-  phase names and inclusive civil-date spans. New phases append; start shall
-  be on or before end. The phase list and audit shall be workspace scoped.
+  phase names and inclusive civil-date spans on active projects. Archived
+  project phases shall be read-only. A phase bar shall open its editor on
+  click or tap. New phases append. The start date shall be on or before the
+  end date. The phase list and audit shall be workspace scoped.
 
 ## Non-functional
 
