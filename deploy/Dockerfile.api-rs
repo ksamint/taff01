@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1.7
+FROM rust:1.97.1-alpine AS build
+RUN apk add --no-cache musl-dev
+WORKDIR /repo
+COPY backend ./backend
+COPY packages/schemas/generated ./packages/schemas/generated
+ENV SQLX_OFFLINE=true
+RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/repo/backend/target \
+    cd backend && cargo +"$RUST_VERSION" build --release --locked -p taff-api && cp target/release/taff-api /taff-api
+
+FROM alpine:3.23
+RUN addgroup -S taff && adduser -S -G taff taff
+COPY --from=build /taff-api /usr/local/bin/taff-api
+USER taff
+EXPOSE 3003
+HEALTHCHECK --interval=10s --timeout=3s --retries=5 CMD wget -qO- http://127.0.0.1:3003/api/health || exit 1
+CMD ["/usr/local/bin/taff-api"]

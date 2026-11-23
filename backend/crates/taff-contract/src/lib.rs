@@ -10,3 +10,21 @@ mod generated {
 }
 
 pub use generated::{mcp, render, rest};
+
+pub const MAX_AGENT_COST_TOTAL: u64 = (1 << 53) - 1;
+
+/// Summed costs in USD micro-units for all runs in the requested scope.
+#[derive(Debug, PartialEq, serde::Deserialize, serde::Serialize, schemars::JsonSchema)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub struct AgentCost {
+    #[schemars(range(max = "MAX_AGENT_COST_TOTAL"))]
+    pub cost_micros: u64,
+    #[schemars(range(max = "MAX_AGENT_COST_TOTAL"))]
+    pub runs: u64,
+    #[schemars(range(max = "MAX_AGENT_COST_TOTAL"))]
+    pub failed_runs: u64,
+    #[schemars(range(max = "MAX_AGENT_COST_TOTAL"))]
+    pub failed_cost_micros: u64,
+    #[schemars(range(max = "MAX_AGENT_COST_TOTAL"))]
+    pub duration_ms: u64,
+}

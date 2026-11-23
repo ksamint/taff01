@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            WITH target AS (\n                SELECT workspace_id, project_id FROM tasks WHERE id = $1\n                UNION ALL\n                SELECT workspace_id, id AS project_id FROM projects WHERE id = $2\n            )\n            SELECT target.workspace_id AS \"workspace_id!\", target.project_id AS \"project_id?\",\n                   members.id AS \"member_id?\", members.role::text AS \"role?\"\n            FROM target\n            LEFT JOIN workspaces\n                ON workspaces.id = target.workspace_id AND workspaces.archived_at IS NULL\n            LEFT JOIN members\n                ON members.workspace_id = workspaces.id AND members.user_id = $3\n                AND members.kind = 'person'\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "workspace_id!",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "project_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "member_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "role?",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Text"]
+    },
+    "nullable": [null, null, false, null]
+  },
+  "hash": "b36f4a056d92ca05e8af3bef932e875c94a86b10e92b427153ede612ca0d5e98"
+}

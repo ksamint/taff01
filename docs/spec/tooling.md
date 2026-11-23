@@ -101,7 +101,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   lint, typecheck, licences, the Rust gate, unit and integration tests,
   migrate and seed, both builds, the bundle budget, the browser suite, then
   the production SSR case, the release checklist and the MCP smoke against a
-  production-mode stack it starts and stops itself, then the four image
+  production-mode stack it starts and stops itself, then the five image
   builds. It shall stop at the first failure.
 - TT-7.2 It shall print `tree=<git rev-parse HEAD^{tree}>` first and refuse a
   working tree with uncommitted changes unless `--allow-dirty` is given.

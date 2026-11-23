@@ -1,6 +1,6 @@
 use axum::{
     Json, Router,
-    extract::FromRequestParts,
+    extract::{FromRequestParts, Path, State, rejection::PathRejection},
     http::{StatusCode, header, request::Parts},
     response::{IntoResponse, Response},
     routing::get,
@@ -11,9 +11,10 @@ use percent_encoding::percent_decode_str;
 use serde_json::json;
 use sha2::Sha256;
 use std::sync::Arc;
-use taff_contract::rest::get_api_health::Response200;
-use taff_db::{Db, Session};
+use taff_contract::{AgentCost, rest::get_api_health::Response200};
+use taff_db::{CostTarget, Db, Session};
 use taff_domain::CoreError;
+use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -100,8 +101,42 @@ async fn health() -> Json<Response200> {
     })
 }
 
+async fn task_cost(
+    State(state): State<AppState>,
+    AuthenticatedSession(session): AuthenticatedSession,
+    path: Result<Path<Uuid>, PathRejection>,
+) -> Result<impl IntoResponse, ApiError> {
+    let Path(id) = path.map_err(|_| ApiError(CoreError::InvalidInput))?;
+    state
+        .db
+        .agent_cost(&session.user_id, CostTarget::Task(id))
+        .await
+        .map(cost_response)
+        .map_err(ApiError)
+}
+
+async fn project_cost(
+    State(state): State<AppState>,
+    AuthenticatedSession(session): AuthenticatedSession,
+    path: Result<Path<Uuid>, PathRejection>,
+) -> Result<impl IntoResponse, ApiError> {
+    let Path(id) = path.map_err(|_| ApiError(CoreError::InvalidInput))?;
+    state
+        .db
+        .agent_cost(&session.user_id, CostTarget::Project(id))
+        .await
+        .map(cost_response)
+        .map_err(ApiError)
+}
+
+fn cost_response(cost: AgentCost) -> impl IntoResponse {
+    ([(header::CACHE_CONTROL, "private, no-store")], Json(cost))
+}
+
 pub fn router() -> Router<AppState> {
     Router::new()
         .route("/api/health", get(health))
+        .route("/api/costs/tasks/{id}", get(task_cost))
+        .route("/api/costs/projects/{id}", get(project_cost))
         .fallback(|| async { ApiError(CoreError::NotFound) })
 }

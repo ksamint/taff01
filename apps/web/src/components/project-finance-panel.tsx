@@ -10,6 +10,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatAgentCost, useAgentCost } from "../lib/agent-cost";
 import { errorKey, request } from "../lib/api";
 import { useCompanies } from "../lib/crm-queries";
 import { useManageProject } from "../lib/mutations/projects";
@@ -52,12 +53,15 @@ const cents = (value: string) => {
  * payments. The cumulative collected amount is the sum of payments.
  */
 export function ProjectFinancePanel({ project }: { project: Project }) {
-  const { workspace, me } = useWorkspace();
+  const { workspace, me, confirmed } = useWorkspace();
   const { t, i18n } = useTranslation();
   const locale = i18n.resolvedLanguage ?? "en";
-  const access = useWorkspaceAccess(workspace.id).data;
+  const workspaceAccess = useWorkspaceAccess(workspace.id);
+  const access = workspaceAccess.data;
   const canRead = !!access?.canReadFinance;
   const canManage = !!access?.canManageFinance;
+  const canReadCost = confirmed && workspaceAccess.isSuccess && canRead;
+  const agentCost = useAgentCost("projects", project.id, canReadCost);
   const client = useQueryClient();
   const payments = useQuery({
     queryKey: paymentsKey(project.id),
@@ -152,6 +156,12 @@ export function ProjectFinancePanel({ project }: { project: Project }) {
               ` · ${new Intl.NumberFormat(locale, { style: "percent" }).format(percent / 100)}`}
           </dd>
         </div>
+        {canReadCost && agentCost.isSuccess && (
+          <div>
+            <dt>{t("projectFinance.agentCost")}</dt>
+            <dd>{formatAgentCost(agentCost.data.costMicros, locale)}</dd>
+          </div>
+        )}
         {canManage && (
           <div>
             <dt>{t("projectFinance.client")}</dt>

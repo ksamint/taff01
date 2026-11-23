@@ -1808,6 +1808,14 @@
     }
    },
    {
+    "id": "requirement:PF-3",
+    "type": "requirement",
+    "title": "PF-3 Agent run cost",
+    "attrs": {
+     "statements": 3
+    }
+   },
+   {
     "id": "spec:projects.md",
     "type": "spec",
     "title": "Project profiles",
@@ -4948,6 +4956,14 @@
     "title": "projects"
    },
    {
+    "id": "route:GET /api/costs/projects/{id}",
+    "type": "route",
+    "title": "GET /api/costs/projects/{id}",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
     "id": "route:GET /api/projects",
     "type": "route",
     "title": "GET /api/projects",
@@ -5067,6 +5083,14 @@
     "title": "GET /api/bootstrap/today",
     "attrs": {
      "file": "apps/api/src/app.ts"
+    }
+   },
+   {
+    "id": "route:GET /api/costs/tasks/{id}",
+    "type": "route",
+    "title": "GET /api/costs/tasks/{id}",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
     }
    },
    {
@@ -6773,6 +6797,26 @@
    {
     "from": "concept:payment",
     "to": "requirement:PF-2",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "module:projects",
+    "to": "requirement:PF-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project",
+    "to": "requirement:PF-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:contract",
+    "to": "requirement:PF-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:payment",
+    "to": "requirement:PF-3",
     "type": "must_satisfy"
    },
    {
@@ -10125,6 +10169,11 @@
     "type": "stated_in"
    },
    {
+    "from": "requirement:PF-3",
+    "to": "spec:project-finance.md",
+    "type": "stated_in"
+   },
+   {
     "from": "requirement:PR-1",
     "to": "spec:projects.md",
     "type": "stated_in"
@@ -12590,6 +12639,11 @@
     "type": "belongs_to"
    },
    {
+    "from": "route:GET /api/costs/projects/{id}",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
     "from": "route:GET /api/projects",
     "to": "module:projects",
     "type": "belongs_to"
@@ -12666,6 +12720,11 @@
    },
    {
     "from": "route:GET /api/bootstrap/today",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/costs/tasks/{id}",
     "to": "module:tasks",
     "type": "belongs_to"
    },

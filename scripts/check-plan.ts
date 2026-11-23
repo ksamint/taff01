@@ -74,6 +74,7 @@ export const CHECK_STEPS: readonly CheckStep[] = [
   image("taff-check-worker", "deploy/Dockerfile.server", "worker"),
   image("taff-check-web", "deploy/Dockerfile.web"),
   image("taff-check-render", "deploy/Dockerfile.render"),
+  image("taff-check-api-rs", "deploy/Dockerfile.api-rs"),
 ];
 
 export type CheckOptions = {

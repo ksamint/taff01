@@ -181,8 +181,11 @@ export const ASSESSMENT: Assessment = {
       where: ["concept:run", "concept:agent"],
     },
     "cost-result-including-failed": {
-      status: "no",
-      note: "Run cost is not added up per task or project.",
+      status: "yes",
+      where: [
+        "route:GET /api/costs/tasks/{id}",
+        "route:GET /api/costs/projects/{id}",
+      ],
     },
     "agents-any-provider-through": {
       status: "yes",

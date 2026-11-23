@@ -1601,6 +1601,7 @@
   },
   "projectFinance": {
     "title": "财务",
+    "agentCost": "智能体成本",
     "contract": "合同金额",
     "currency": "币种",
     "client": "客户公司",

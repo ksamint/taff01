@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT coalesce(sum(runs.cost_micros), 0)::bigint AS \"cost_micros!\",\n                   count(*) AS \"runs!\",\n                   count(*) FILTER (WHERE runs.status = 'failed') AS \"failed_runs!\",\n                   coalesce(sum(runs.cost_micros) FILTER (WHERE runs.status = 'failed'), 0)::bigint AS \"failed_cost_micros!\",\n                   coalesce(sum(runs.duration_ms), 0)::bigint AS \"duration_ms!\"\n            FROM runs\n            JOIN tasks ON tasks.id = runs.task_id AND tasks.workspace_id = runs.workspace_id\n            WHERE runs.workspace_id = $1\n              AND (tasks.id = $2 OR tasks.project_id = $3)\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "cost_micros!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "runs!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 2,
+        "name": "failed_runs!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "failed_cost_micros!",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "duration_ms!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Uuid"]
+    },
+    "nullable": [null, null, null, null, null]
+  },
+  "hash": "4691b9e4fdcb4b4ba9d0d5b34cb040139a84031d361b5801113d16c220b3ae35"
+}

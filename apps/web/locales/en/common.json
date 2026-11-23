@@ -1601,6 +1601,7 @@
   },
   "projectFinance": {
     "title": "Finance",
+    "agentCost": "Agent cost",
     "contract": "Contract amount",
     "currency": "Currency",
     "client": "Client company",

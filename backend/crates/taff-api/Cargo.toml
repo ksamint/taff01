@@ -19,6 +19,7 @@ taff-db = { path = "../taff-db" }
 taff-domain = { path = "../taff-domain" }
 tokio.workspace = true
 url = "2"
+uuid.workspace = true
 
 [dev-dependencies]
 serde.workspace = true
