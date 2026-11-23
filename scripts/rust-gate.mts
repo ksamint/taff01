@@ -26,6 +26,7 @@ for (const [command, args, cwd] of [
       "--exit-code",
       "--",
       "backend/crates/taff-core/tests/fixtures",
+      "backend/crates/taff-domain/tests/fixtures",
       "backend/crates/taff-render/tests/fixtures",
       "packages/core/src/__fixtures__",
       "packages/schemas/generated",

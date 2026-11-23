@@ -7,6 +7,7 @@ pub use costs::CostTarget;
 mod task_criteria;
 mod task_links;
 mod time_tracking;
+mod timeline;
 pub use schema::{User, Workspace};
 pub use time_tracking::PersonalRecordsScope;
 mod write;
@@ -14,6 +15,7 @@ use taff_domain::{CoreError, Result};
 pub use write::{MutationActor, MutationError};
 
 use sqlx::postgres::{PgPool, PgPoolOptions};
+use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
 /// Identity from an unexpired session. The credential itself stays private.
@@ -30,6 +32,15 @@ pub struct Db {
 }
 
 impl Db {
+    async fn read_snapshot(&self) -> Result<Transaction<'_, Postgres>> {
+        let mut tx = self.pool.begin().await.map_err(write::database_error)?;
+        sqlx::query!("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
+            .execute(&mut *tx)
+            .await
+            .map_err(write::database_error)?;
+        Ok(tx)
+    }
+
     /// Connects with a bounded pool and an independent 20 s read deadline.
     /// Node connectDatabase currently bounds its pool to 10 without a statement timeout.
     pub async fn connect(url: &str) -> Result<Self> {

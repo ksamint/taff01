@@ -14,6 +14,7 @@ const generators = [
   "scripts/rust-token-policy-golden.mts",
   "scripts/rust-summary-text-golden.mts",
   "scripts/rust-timeline-golden.mts",
+  "scripts/rust-plan-model-golden.mts",
   "scripts/rust-calendar-golden.mts",
   "scripts/rust-graph-golden.mts",
   "apps/api/scripts/summary-schema-gen.mts",

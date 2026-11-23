@@ -1,5 +1,5 @@
 use crate::{Db, write::database_error};
-use sqlx::{PgConnection, Postgres, Transaction};
+use sqlx::PgConnection;
 use taff_contract::{AgentCost, MAX_AGENT_COST_TOTAL};
 use taff_domain::{Action, Actor, CoreError, Resource, Result, Role, can};
 use uuid::Uuid;
@@ -14,17 +14,6 @@ fn total(value: i64) -> Result<u64> {
         .ok()
         .filter(|value| *value <= MAX_AGENT_COST_TOTAL)
         .ok_or_else(|| CoreError::Other(anyhow::anyhow!("run total outside wire range")))
-}
-
-impl Db {
-    pub(crate) async fn cost_snapshot(&self) -> Result<Transaction<'_, Postgres>> {
-        let mut transaction = self.pool.begin().await.map_err(database_error)?;
-        sqlx::query!("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ READ ONLY")
-            .execute(&mut *transaction)
-            .await
-            .map_err(database_error)?;
-        Ok(transaction)
-    }
 }
 
 pub(crate) async fn cost_workspace(
@@ -128,7 +117,7 @@ impl Db {
             CostTarget::Task(id) => (Some(id), None),
             CostTarget::Project(id) => (None, Some(id)),
         };
-        let mut transaction = self.cost_snapshot().await?;
+        let mut transaction = self.read_snapshot().await?;
         let workspace_id = cost_workspace(&mut transaction, user_id, task_id, project_id).await?;
         let totals = agent_totals(&mut transaction, workspace_id, task_id, project_id).await?;
         transaction.commit().await.map_err(database_error)?;

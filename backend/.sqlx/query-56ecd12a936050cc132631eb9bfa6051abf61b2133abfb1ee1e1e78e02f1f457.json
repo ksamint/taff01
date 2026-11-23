@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, name, date, version, created_at, updated_at\n         FROM milestones\n         WHERE workspace_id = $1 AND project_id = $2 AND archived_at IS NULL\n         ORDER BY date, id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "date",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "version",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [false, false, false, false, false, false]
+  },
+  "hash": "56ecd12a936050cc132631eb9bfa6051abf61b2133abfb1ee1e1e78e02f1f457"
+}

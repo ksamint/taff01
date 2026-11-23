@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT projects.workspace_id, projects.contract_amount::text AS \"contract_amount?\",\n               projects.currency, members.id AS \"member_id?\", members.role::text AS \"role?\"\n        FROM projects\n        LEFT JOIN workspaces ON workspaces.id = projects.workspace_id AND workspaces.archived_at IS NULL\n        LEFT JOIN members ON members.workspace_id = workspaces.id\n                         AND members.user_id = $2 AND members.kind = 'person'\n        WHERE projects.id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "contract_amount?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "currency",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "member_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "role?",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Text"]
+    },
+    "nullable": [false, null, true, false, null]
+  },
+  "hash": "db681182948650f4c45d47359123f711897e692f038c9a9b550cb7159b134067"
+}

@@ -3,6 +3,7 @@ mod project_health;
 mod task_criteria;
 mod task_links;
 mod time_tracking;
+mod timeline;
 
 use axum::{
     Json, Router,
@@ -161,6 +162,9 @@ pub fn router() -> Router<AppState> {
         .route("/api/health", get(health))
         .route("/api/costs/tasks/{id}", get(task_cost))
         .route("/api/costs/projects/{id}", get(project_cost))
+        .route("/api/projects/{id}/timeline", get(timeline::timeline))
+        .route("/api/projects/{id}/milestones", get(timeline::milestones))
+        .route("/api/projects/{id}/payments", get(timeline::payments))
         .route(
             "/api/costs/projects/{id}/actual",
             get(project_actual::actual),

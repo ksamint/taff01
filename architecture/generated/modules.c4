@@ -1033,12 +1033,15 @@ GET /api/costs/projects/{id}/margin'
 POST /api/project-updates'
           link ../../backend/crates/taff-api/src/lib.rs
         }
-        api_projects = routes '/api/projects (5)' {
+        api_projects = routes '/api/projects (8)' {
           description 'GET /api/projects
 POST /api/projects
 PATCH /api/projects/:id
 GET /api/projects/:id/payments
-POST /api/projects/:id/payments'
+POST /api/projects/:id/payments
+GET /api/projects/{id}/milestones
+GET /api/projects/{id}/payments
+GET /api/projects/{id}/timeline'
           link ../../apps/api/src/app.ts
         }
       }

@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, predecessor_task_id, predecessor_milestone_id, successor_task_id, successor_milestone_id\n             FROM task_dependencies\n             WHERE workspace_id = $1 AND (\n                 predecessor_task_id = ANY($2::uuid[]) OR successor_task_id = ANY($2::uuid[])\n                 OR predecessor_milestone_id = ANY($3::uuid[]) OR successor_milestone_id = ANY($3::uuid[])\n             )\n             ORDER BY created_at, id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "predecessor_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "predecessor_milestone_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "successor_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "successor_milestone_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "UuidArray", "UuidArray"]
+    },
+    "nullable": [false, true, true, true, true]
+  },
+  "hash": "804f598689e4d5ec4c40791c1ae7edd2cc8c4f03e2d27e28bbc85439e311eb0f"
+}

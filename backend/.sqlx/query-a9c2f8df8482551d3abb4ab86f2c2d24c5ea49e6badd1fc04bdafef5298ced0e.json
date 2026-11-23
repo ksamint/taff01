@@ -1,0 +1,98 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT tasks.id, tasks.parent_id, tasks.title, tasks.status::text AS \"status!\",\n                   tasks.priority, tasks.due_at, tasks.owner_id, tasks.worker_id, tasks.version,\n                   task_plans.start_date AS \"start_date?\", task_plans.duration_days AS \"duration_days?\",\n                   task_plans.version AS \"plan_version?\",\n                   coalesce(worker.kind = 'agent', false) AS \"worker_is_agent!\",\n                   exists (\n                       SELECT 1 FROM grants\n                       WHERE grants.workspace_id = tasks.workspace_id AND grants.task_id = tasks.id\n                         AND grants.status = 'pending'\n                   ) AS \"blocked!\"\n            FROM tasks\n            LEFT JOIN task_plans ON task_plans.id = tasks.id AND task_plans.archived_at IS NULL\n            LEFT JOIN members AS worker ON worker.id = tasks.worker_id\n            WHERE tasks.workspace_id = $1 AND tasks.project_id = $2 AND tasks.archived_at IS NULL\n            ORDER BY tasks.number\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "parent_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "status!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "priority",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "due_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 6,
+        "name": "owner_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 7,
+        "name": "worker_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 8,
+        "name": "version",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "start_date?",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 10,
+        "name": "duration_days?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 11,
+        "name": "plan_version?",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "worker_is_agent!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 13,
+        "name": "blocked!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [
+      false,
+      true,
+      false,
+      null,
+      false,
+      true,
+      false,
+      true,
+      false,
+      false,
+      false,
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "a9c2f8df8482551d3abb4ab86f2c2d24c5ea49e6badd1fc04bdafef5298ced0e"
+}
