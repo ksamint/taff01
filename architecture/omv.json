@@ -478,7 +478,7 @@
     "attrs": {
      "tier": 2,
      "kind": "kind",
-     "dependents": 5,
+     "dependents": 6,
      "stored": [
       "projects"
      ]
@@ -795,6 +795,20 @@
      "dependents": 0,
      "stored": [
       "project_payments"
+     ]
+    }
+   },
+   {
+    "id": "concept:project_health_update",
+    "type": "concept",
+    "title": "Project health update",
+    "summary": "An append-only health statement from the project lead or an admin.",
+    "attrs": {
+     "tier": 5,
+     "kind": "event",
+     "dependents": 0,
+     "stored": [
+      "project_updates"
      ]
     }
    },
@@ -1845,6 +1859,14 @@
     "title": "PR-3 Board cards",
     "attrs": {
      "statements": 2
+    }
+   },
+   {
+    "id": "requirement:PR-4",
+    "type": "requirement",
+    "title": "PR-4 Health updates",
+    "attrs": {
+     "statements": 3
     }
    },
    {
@@ -4951,6 +4973,11 @@
     "title": "project_payments"
    },
    {
+    "id": "table:project_updates",
+    "type": "table",
+    "title": "project_updates"
+   },
+   {
     "id": "table:projects",
     "type": "table",
     "title": "projects"
@@ -4959,6 +4986,22 @@
     "id": "route:GET /api/costs/projects/{id}",
     "type": "route",
     "title": "GET /api/costs/projects/{id}",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:GET /api/project-updates",
+    "type": "route",
+    "title": "GET /api/project-updates",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:POST /api/project-updates",
+    "type": "route",
+    "title": "POST /api/project-updates",
     "attrs": {
      "file": "backend/crates/taff-api/src/lib.rs"
     }
@@ -5587,6 +5630,11 @@
     "type": "requires"
    },
    {
+    "from": "concept:project_health_update",
+    "to": "concept:project",
+    "type": "requires"
+   },
+   {
     "from": "concept:stakeholder",
     "to": "concept:project",
     "type": "requires"
@@ -5903,6 +5951,16 @@
    },
    {
     "from": "concept:payment",
+    "to": "module:projects",
+    "type": "kept_by"
+   },
+   {
+    "from": "concept:project_health_update",
+    "to": "concept:project",
+    "type": "part_of"
+   },
+   {
+    "from": "concept:project_health_update",
     "to": "module:projects",
     "type": "kept_by"
    },
@@ -6610,6 +6668,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:project_health_update",
+    "to": "function:project:manage",
+    "type": "has_function"
+   },
+   {
     "from": "role:admin",
     "to": "function:project:manage",
     "type": "may_do"
@@ -6645,6 +6708,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:project_health_update",
+    "to": "function:project:stage",
+    "type": "has_function"
+   },
+   {
     "from": "role:admin",
     "to": "function:project:stage",
     "type": "may_do"
@@ -6676,6 +6744,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "function:finance:read",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:project_health_update",
     "to": "function:finance:read",
     "type": "has_function"
    },
@@ -6716,6 +6789,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "function:finance:manage",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:project_health_update",
     "to": "function:finance:manage",
     "type": "has_function"
    },
@@ -6780,6 +6858,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project_health_update",
+    "to": "requirement:PF-1",
+    "type": "must_satisfy"
+   },
+   {
     "from": "module:projects",
     "to": "requirement:PF-2",
     "type": "must_satisfy"
@@ -6800,6 +6883,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project_health_update",
+    "to": "requirement:PF-2",
+    "type": "must_satisfy"
+   },
+   {
     "from": "module:projects",
     "to": "requirement:PF-3",
     "type": "must_satisfy"
@@ -6816,6 +6904,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "requirement:PF-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project_health_update",
     "to": "requirement:PF-3",
     "type": "must_satisfy"
    },
@@ -6845,6 +6938,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project_health_update",
+    "to": "requirement:PR-1",
+    "type": "must_satisfy"
+   },
+   {
     "from": "module:projects",
     "to": "requirement:PR-2",
     "type": "must_satisfy"
@@ -6865,6 +6963,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project_health_update",
+    "to": "requirement:PR-2",
+    "type": "must_satisfy"
+   },
+   {
     "from": "module:projects",
     "to": "requirement:PR-3",
     "type": "must_satisfy"
@@ -6882,6 +6985,36 @@
    {
     "from": "concept:payment",
     "to": "requirement:PR-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project_health_update",
+    "to": "requirement:PR-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "module:projects",
+    "to": "requirement:PR-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project",
+    "to": "requirement:PR-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:contract",
+    "to": "requirement:PR-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:payment",
+    "to": "requirement:PR-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project_health_update",
+    "to": "requirement:PR-4",
     "type": "must_satisfy"
    },
    {
@@ -10189,6 +10322,11 @@
     "type": "stated_in"
    },
    {
+    "from": "requirement:PR-4",
+    "to": "spec:projects.md",
+    "type": "stated_in"
+   },
+   {
     "from": "requirement:AA-1",
     "to": "spec:agent-access.md",
     "type": "stated_in"
@@ -10870,6 +11008,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "flow:shareholder",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:project_health_update",
     "to": "flow:shareholder",
     "type": "in_flow"
    },
@@ -12634,12 +12777,27 @@
     "type": "belongs_to"
    },
    {
+    "from": "table:project_updates",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
     "from": "table:projects",
     "to": "module:projects",
     "type": "belongs_to"
    },
    {
     "from": "route:GET /api/costs/projects/{id}",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/project-updates",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:POST /api/project-updates",
     "to": "module:projects",
     "type": "belongs_to"
    },
@@ -14154,6 +14312,11 @@
     "type": "refers_to"
    },
    {
+    "from": "table:project_updates",
+    "to": "table:projects",
+    "type": "refers_to"
+   },
+   {
     "from": "table:projects",
     "to": "table:companies",
     "type": "refers_to"
@@ -14491,6 +14654,11 @@
    {
     "from": "concept:payment",
     "to": "table:project_payments",
+    "type": "stored_in"
+   },
+   {
+    "from": "concept:project_health_update",
+    "to": "table:project_updates",
     "type": "stored_in"
    },
    {

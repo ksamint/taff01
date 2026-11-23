@@ -210,6 +210,130 @@
     "result": false
   },
   {
+    "name": "health admin can post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "admin"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent"
+    },
+    "result": true
+  },
+  {
+    "name": "health lead can post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "leadId": "person"
+    },
+    "result": true
+  },
+  {
+    "name": "health ordinary member denied",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent"
+    },
+    "result": false
+  },
+  {
+    "name": "health guest lead can post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "guest"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "leadId": "person"
+    },
+    "result": true
+  },
+  {
+    "name": "health agent denied",
+    "now": 1793923200000,
+    "actor": {
+      "id": "agent",
+      "workspaceId": "ws",
+      "userId": "agent",
+      "name": "Agent",
+      "kind": "agent",
+      "role": "member",
+      "scopes": [
+        "tasks:read",
+        "tasks:write",
+        "calendar:write",
+        "inbox:review",
+        "files:write"
+      ],
+      "reviewPolicy": "always_review"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "leadId": "agent"
+    },
+    "result": false
+  },
+  {
+    "name": "health foreign workspace denied",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "other",
+      "leadId": "person"
+    },
+    "result": false
+  },
+  {
     "name": "user selects own default",
     "now": 1793923200000,
     "actor": {
@@ -2190,6 +2314,149 @@
     "now": 1793923200000,
     "actor": null,
     "action": "project:stage",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "admin: project:health:post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "admin"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": true
+  },
+  {
+    "name": "member: project:health:post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "guest: project:health:post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "guest"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "agent: project:health:post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "agent",
+      "workspaceId": "ws",
+      "userId": "agent",
+      "name": "Agent",
+      "kind": "agent",
+      "role": "member",
+      "scopes": [
+        "tasks:read",
+        "tasks:write",
+        "calendar:write",
+        "inbox:review",
+        "files:write",
+        "summaries:read"
+      ],
+      "reviewPolicy": "always_review"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "system administrator: project:health:post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "ws",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member",
+      "systemAdmin": true
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "outsider: project:health:post",
+    "now": 1793923200000,
+    "actor": {
+      "id": "person",
+      "workspaceId": "other",
+      "userId": "person",
+      "name": "Person",
+      "kind": "person",
+      "role": "member"
+    },
+    "action": "project:health:post",
+    "resource": {
+      "workspaceId": "ws",
+      "ownerId": "person",
+      "workerId": "agent",
+      "userId": "person"
+    },
+    "result": false
+  },
+  {
+    "name": "anonymous: project:health:post",
+    "now": 1793923200000,
+    "actor": null,
+    "action": "project:health:post",
     "resource": {
       "workspaceId": "ws",
       "ownerId": "person",

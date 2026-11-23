@@ -1599,6 +1599,20 @@
     "noPendingGrants": "没有待处理的能力授权请求。",
     "request": "请求"
   },
+  "projectUpdates": {
+    "title": "项目动态",
+    "post": "发布动态",
+    "healthLabel": "项目状态",
+    "health": {
+      "on_track": "进展正常",
+      "at_risk": "存在风险",
+      "off_track": "偏离计划"
+    },
+    "notes": "动态内容",
+    "bodyLimit": "最多可输入 {{max}} 个字符。",
+    "empty": "暂无项目动态。",
+    "older": "加载更早的动态"
+  },
   "projectFinance": {
     "title": "财务",
     "agentCost": "智能体成本",

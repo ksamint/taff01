@@ -204,8 +204,11 @@ export const ASSESSMENT: Assessment = {
       where: ["concept:suggestion"],
     },
     "person-s-health-update": {
-      status: "no",
-      note: "Risk is computed; nobody states it.",
+      status: "yes",
+      where: [
+        "concept:project_health_update",
+        "route:POST /api/project-updates",
+      ],
     },
     "risk-computed-plan": {
       status: "yes",

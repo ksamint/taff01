@@ -13,6 +13,7 @@ Baseline: actors share a workspace; people are unrelated to the task owner; the 
 | workspace:manage | Yes | No | No | No |
 | project:manage | Yes | No | No | No |
 | project:stage | Yes | No | No | No |
+| project:health:post | Yes | No | No | No |
 | task:edit | Yes | No | No | Yes |
 | task:owner | Yes | No | No | No |
 | task:comment | Yes | Yes | No | Yes |

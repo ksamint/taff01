@@ -44,13 +44,23 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
 - PR-3.2 On a 412 × 915 phone viewport, a card with a one-line title, a
   due date and one owner shall be at most 120 CSS px tall when closed.
 
+### Health updates (PR-4)
+
+- PR-4.1 A project reader shall see the latest stated health beside the
+  computed risk and may page through updates newest first, 20 per page.
+- PR-4.2 The project lead or a workspace admin shall be able to post a
+  health update. Agent credentials and foreign origins shall be refused.
+- PR-4.3 A health update shall record the member who posted it, the time,
+  one of `on_track`, `at_risk` or `off_track`, and up to 2,000 characters
+  of text. Updates are append-only.
+
 ## Non-functional
 
 - The existing `POST /api/projects` and versioned `PATCH /api/projects/:id`
   contracts remain authoritative; `packages/schemas` validates ISO instants
   and bounded integer progress.
 - English, Simplified Chinese and Traditional Chinese (Hong Kong) labels ship
-  together. No new dependency, migration or permission action is introduced.
+  together.
 - Export limits and privacy remain specified in [view export](view-export.md).
 
 ## Out of scope in v1
@@ -70,6 +80,7 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
 | PR-1.9 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
 | PR-3 | `e2e/board-access.spec.ts`, card height, target sizes and controls in three locales |
 | PR-2.1–2.3 | `e2e/project-profile.spec.ts` member/lead reads, rejected field writes, stage control and open-editor authority loss; `packages/core/src/permissions.test.ts` |
+| PR-4 | `backend/crates/taff-api/tests/project_health.rs`, `e2e/project-health-updates.spec.ts` |
 
 ## Open decisions
 

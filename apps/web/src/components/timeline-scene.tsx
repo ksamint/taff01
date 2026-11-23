@@ -61,6 +61,7 @@ import { useTimeline } from "../lib/timeline-queries";
 import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
 import { ProjectFinancePanel } from "./project-finance-panel";
+import { ProjectHealthUpdates } from "./project-health-updates";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
 import { ViewExportButton } from "./view-export";
@@ -489,6 +490,11 @@ function ProjectTimeline({ project }: { project: Project }) {
           t={t}
           locale={locale}
           short={dates.short}
+        />
+        <ProjectHealthUpdates
+          key={project.id}
+          project={project}
+          members={members.data ?? []}
         />
         {desktop && (
           <ul className="timeline-legend" aria-label={t("timeline.legend")}>

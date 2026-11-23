@@ -92,6 +92,37 @@ const cases: Case[] = [
     "project:stage",
     { workspaceId: "other", leadId: "person" },
   ],
+  [
+    "health admin can post",
+    { ...person, role: "admin" },
+    "project:health:post",
+    task,
+  ],
+  [
+    "health lead can post",
+    person,
+    "project:health:post",
+    { ...task, leadId: "person" },
+  ],
+  ["health ordinary member denied", person, "project:health:post", task],
+  [
+    "health guest lead can post",
+    { ...person, role: "guest" },
+    "project:health:post",
+    { ...task, leadId: "person" },
+  ],
+  [
+    "health agent denied",
+    agent,
+    "project:health:post",
+    { ...task, leadId: "agent" },
+  ],
+  [
+    "health foreign workspace denied",
+    person,
+    "project:health:post",
+    { workspaceId: "other", leadId: "person" },
+  ],
   // workspace:default
   [
     "user selects own default",

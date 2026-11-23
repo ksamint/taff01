@@ -158,6 +158,8 @@ pub enum Action {
     ProjectManage,
     #[serde(rename = "project:stage")]
     ProjectStage,
+    #[serde(rename = "project:health:post")]
+    ProjectHealthPost,
     #[serde(rename = "task:edit")]
     TaskEdit,
     #[serde(rename = "task:owner")]
@@ -410,6 +412,12 @@ pub fn can_at(actor: Option<&Actor>, action: Action, resource: &Resource, now: i
     };
     if actor.workspace_id != resource_ws {
         return false;
+    }
+
+    if action == Action::ProjectHealthPost {
+        return actor.kind == MemberKind::Person
+            && (actor.role == Role::Admin
+                || resource.lead_id.as_deref() == Some(actor.id.as_str()));
     }
 
     if actor.role == Role::Guest

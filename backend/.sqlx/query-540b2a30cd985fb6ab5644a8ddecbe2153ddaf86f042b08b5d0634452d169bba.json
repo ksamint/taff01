@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO project_updates (workspace_id, project_id, author_id, health, body)\n                VALUES ($1, $2, $3, $4::text::project_health, $5)\n                RETURNING id, workspace_id, project_id, author_id, health::text AS \"health!\", body, created_at\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "project_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "author_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "health!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "body",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Uuid", "Text", "Text"]
+    },
+    "nullable": [false, false, false, false, null, false, false]
+  },
+  "hash": "540b2a30cd985fb6ab5644a8ddecbe2153ddaf86f042b08b5d0634452d169bba"
+}

@@ -1599,6 +1599,20 @@
     "noPendingGrants": "沒有待處理的能力授權請求。",
     "request": "請求"
   },
+  "projectUpdates": {
+    "title": "項目動態",
+    "post": "發佈動態",
+    "healthLabel": "項目狀態",
+    "health": {
+      "on_track": "進展正常",
+      "at_risk": "存在風險",
+      "off_track": "偏離計劃"
+    },
+    "notes": "動態內容",
+    "bodyLimit": "最多可輸入 {{max}} 個字元。",
+    "empty": "暫無項目動態。",
+    "older": "載入較早的動態"
+  },
   "projectFinance": {
     "title": "財務",
     "agentCost": "智能體成本",

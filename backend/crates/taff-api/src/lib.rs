@@ -1,3 +1,5 @@
+mod project_health;
+
 use axum::{
     Json, Router,
     extract::{FromRequestParts, Path, State, rejection::PathRejection},
@@ -21,6 +23,7 @@ pub struct AppState {
     db: Db,
     auth_secret: Arc<[u8]>,
     cookie_name: &'static str,
+    auth_origin: String,
 }
 
 impl AppState {
@@ -38,6 +41,7 @@ impl AppState {
             db,
             auth_secret: Arc::from(auth_secret.into_bytes()),
             cookie_name,
+            auth_origin: auth_url.origin().ascii_serialization(),
         })
     }
 }
@@ -64,6 +68,21 @@ fn verify_cookie(headers: &axum::http::HeaderMap, state: &AppState) -> Option<St
     hmac.update(token.as_bytes());
     hmac.verify_slice(&signature).ok()?;
     Some(token.to_owned())
+}
+
+pub(crate) struct SameOrigin;
+
+impl FromRequestParts<AppState> for SameOrigin {
+    type Rejection = ApiError;
+
+    async fn from_request_parts(parts: &mut Parts, state: &AppState) -> Result<Self, ApiError> {
+        if let Some(origin) = parts.headers.get(header::ORIGIN)
+            && origin != state.auth_origin.as_str()
+        {
+            return Err(ApiError(CoreError::Forbidden));
+        }
+        Ok(Self)
+    }
 }
 
 /// Reads an existing session; the Node API remains the authority for cookies.
@@ -138,5 +157,9 @@ pub fn router() -> Router<AppState> {
         .route("/api/health", get(health))
         .route("/api/costs/tasks/{id}", get(task_cost))
         .route("/api/costs/projects/{id}", get(project_cost))
+        .route(
+            "/api/project-updates",
+            get(project_health::list).post(project_health::post),
+        )
         .fallback(|| async { ApiError(CoreError::NotFound) })
 }
