@@ -432,6 +432,17 @@
     "fieldSaved": "{{field}} updated",
     "descriptionPlaceholder": "Add a description"
   },
+  "taskCriteria": {
+    "title": "Acceptance criteria",
+    "add": "Add criterion",
+    "edit": "Edit criterion",
+    "text": "Criterion",
+    "empty": "No acceptance criteria yet.",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "maxLength": "Use 300 characters or fewer.",
+    "save": "Save criterion"
+  },
   "run": {
     "title": "Agent run",
     "start": "Start agent",

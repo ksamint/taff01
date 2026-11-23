@@ -20,6 +20,7 @@ const FAMILIES = [
   "task-access",
   "task-comments",
   "task-links",
+  "task-criteria",
   "projects",
   "search",
   "invites",

@@ -80,7 +80,7 @@ and database, with no access to the other applications' databases.
 Copy `.env.production.example` to a private, mode-0600 `.env.production`.
 Set `AUTH_URL=https://taff.apuch.cn` and a URL-encoded password in
 `DATABASE_URL`, using the certificate DNS name `postgres01.internal.apuch.art`
-and retaining `sslmode=verify-full`. The migrator, API and worker map this name
+and retaining `sslmode=verify-full`. The migrator, Node API, Rust API and worker map this name
 to `10.206.103.13` with Compose `extra_hosts`, so both certificate identity and
 private routing are preserved. Keep the DNS name in the URL: the installed
 Postgres.js client does not set TLS `servername` for an IP literal, which can
@@ -88,8 +88,9 @@ make Node verify `localhost` instead of the requested database host.
 Copy only the public
 `/srv/postgresql/tls/ca.crt` from the PostgreSQL host to
 `/srv/taff/secrets/postgresql-ca.crt` and set `POSTGRES_CA_FILE` accordingly.
-The app, worker and migrator mount this CA read-only and trust it via
-`NODE_EXTRA_CA_CERTS`; the PostgreSQL host requires TLS.
+The Node API, worker and migrator trust the read-only CA via
+`NODE_EXTRA_CA_CERTS`. The Rust API uses the same mount via
+`PGSSLROOTCERT`. The PostgreSQL host requires TLS.
 Generate independent `AUTH_SECRET` and `TOKEN_PEPPER` values.
 `POSTGRES_PASSWORD` is unused by this layout but remains required while Compose
 parses the base file. Set `TAFF_TAG` to the exact released Git SHA.

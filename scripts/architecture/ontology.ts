@@ -180,6 +180,16 @@ export const THINGS: Thing[] = [
   ),
 
   thing(
+    "acceptance-criterion",
+    "Acceptance criterion",
+    2,
+    "kind",
+    ["task_criteria"],
+    "task",
+    "A task requirement that a human reviewer can check.",
+  ),
+
+  thing(
     "run",
     "Run",
     3,

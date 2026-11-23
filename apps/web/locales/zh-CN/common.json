@@ -432,6 +432,17 @@
     "fieldSaved": "已更新{{field}}",
     "descriptionPlaceholder": "添加描述"
   },
+  "taskCriteria": {
+    "title": "验收标准",
+    "add": "添加标准",
+    "edit": "编辑标准",
+    "text": "标准内容",
+    "empty": "还没有验收标准。",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "maxLength": "请输入不超过 300 个字符。",
+    "save": "保存标准"
+  },
   "run": {
     "title": "智能体执行",
     "start": "启动智能体",

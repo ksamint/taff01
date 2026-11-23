@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (511 distinct, 2395 uses)
+## Test ids (512 distinct, 2397 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -587,6 +587,7 @@ several do). “Also rendered by” lists the other files.
 | `item-comment-submit` | 2 |  | agent-review.spec.ts, optimistic-m4.spec.ts |
 | `review-approve` | 18 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-artifact` | 18 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts, scripts/ui/app-shots.mts, ui-v2.spec.ts |
+| `review-check-matchesDescription` | 1 |  | task-criteria.spec.ts |
 | `review-comment` | 5 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-readonly` | 10 |  | accessibility.spec.ts, agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
 | `review-request-changes` | 4 |  | agent-review.spec.ts, live/release/checklist.spec.ts, optimistic-m4.spec.ts, release/checklist.spec.ts |
@@ -747,7 +748,7 @@ several do). “Also rendered by” lists the other files.
 | `subtask-title` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `task-comment` | 8 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `task-comment-submit` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `task-detail-heading` | 46 |  | accessibility.spec.ts, agent-cost.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, operation-templates.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, task-contacts.spec.ts, task-detail.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
+| `task-detail-heading` | 47 |  | accessibility.spec.ts, agent-cost.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, operation-templates.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, task-contacts.spec.ts, task-criteria.spec.ts, task-detail.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
 | `task-field-due` | 3 |  | planning.spec.ts, task-detail.spec.ts |
 | `task-field-labels` | 1 |  | task-detail.spec.ts |
 | `task-field-owner` | 1 |  | task-detail.spec.ts |
@@ -868,6 +869,10 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.run.cancel` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.sms.send` | 2 | sms-auth.spec.ts |
 | `button — name: m.sms.verify` | 3 | sms-auth.spec.ts |
+| `button — name: m.taskCriteria.add` | 1 | task-criteria.spec.ts |
+| `button — name: m.taskCriteria.edit` | 2 | task-criteria.spec.ts |
+| `button — name: m.taskCriteria.moveUp` | 1 | task-criteria.spec.ts |
+| `button — name: m.taskCriteria.save` | 1 | task-criteria.spec.ts |
 | `button — name: m.taskLinks.add` | 2 | task-links.spec.ts |
 | `button — name: messages[info.project.name as TestLocale].signOut` | 1 | organization-default.spec.ts |
 | `button — name: messages[locale].grants.request` | 1 | optimistic-m4.spec.ts |
@@ -881,14 +886,17 @@ several do). “Also rendered by” lists the other files.
 | `button — name: text.saveGrant` | 1 | mcp.spec.ts |
 | `button — name: undo` | 1 | agent-review.spec.ts |
 | `checkbox — name: "summaries:read"` | 1 | access.spec.ts |
+| `checkbox — name: first` | 1 | task-criteria.spec.ts |
 | `checkbox — name: m.audience.includeFinance` | 1 | audience-editing.spec.ts |
 | `checkbox — name: m.audience.showPeople` | 1 | audience-editing.spec.ts |
+| `checkbox — name: second` | 1 | task-criteria.spec.ts |
 | `combobox` | 1 | cold-font-layout.spec.ts |
 | `combobox — name: "Scope"` | 1 | native-select-fonts.spec.ts |
 | `combobox — name: m.organization.roleFor.replace("{{name}}", "Access member")` | 1 | access.spec.ts |
 | `combobox — name: m.organization.roleFor.replace("{{name}}", admin.user.name)` | 1 | access.spec.ts |
 | `complementary` | 3 | delivery-visual.spec.ts |
 | `dialog` | 76 | access.spec.ts, agent-creation.spec.ts, agent-review.spec.ts, audience-editing.spec.ts, calendar.spec.ts, delivery-visual.spec.ts, live/release/checklist.spec.ts, live/v021-feature-gaps.spec.ts, me.spec.ts, operation-templates.spec.ts, planning.spec.ts, release/checklist.spec.ts, release/support.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, ssr-session.spec.ts, support/tasks.ts, today.spec.ts, token-grants.spec.ts, ui-v2.spec.ts, v021-feature-gaps.spec.ts, workspace-lifecycle.spec.ts |
+| `dialog — name: button` | 1 | task-criteria.spec.ts |
 | `dialog — name: m.brief.proposal.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.brief.title` | 2 | brief.spec.ts, live/brief.spec.ts |
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
@@ -936,6 +944,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: task.title` | 8 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `list` | 1 | planning.spec.ts |
+| `listitem` | 3 | task-criteria.spec.ts |
 | `navigation — name: m.projects.views` | 2 | project-graph-view.spec.ts, project-header.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
 | `option — name: /Task to link/` | 1 | task-links.spec.ts |
@@ -944,6 +953,7 @@ several do). “Also rendered by” lists the other files.
 | `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
+| `region — name: m.taskCriteria.title` | 1 | task-criteria.spec.ts |
 | `region — name: m.taskLinks.title` | 1 | task-links.spec.ts |
 | `region — name: messages[locale].todayDue` | 3 | today.spec.ts, ui-v2.spec.ts |
 | `region — name: text.workspaceGrants` | 1 | mcp.spec.ts |
@@ -972,6 +982,7 @@ several do). “Also rendered by” lists the other files.
 | `m.projectUpdates.healthLabel` | 1 | project-health-updates.spec.ts |
 | `m.projectUpdates.notes` | 1 | project-health-updates.spec.ts |
 | `m.sms.code` | 5 | sms-auth.spec.ts |
+| `m.taskCriteria.text` | 1 | task-criteria.spec.ts |
 | `m.taskLinks.kindLabel` | 1 | task-links.spec.ts |
 | `m.taskLinks.task` | 1 | task-links.spec.ts |
 | `m.usernameOptional` | 1 | username-auth.spec.ts |
@@ -1370,6 +1381,13 @@ Keys read from `apps/web/locales/*/common.json` through
 | `summary.preview` | 1 | summaries.spec.ts |
 | `summary.print` | 1 | summaries.spec.ts |
 | `summary.unavailableTitle` | 1 | summaries.spec.ts |
+| `taskCriteria.add` | 2 | task-criteria.spec.ts |
+| `taskCriteria.edit` | 3 | task-criteria.spec.ts |
+| `taskCriteria.empty` | 1 | task-criteria.spec.ts |
+| `taskCriteria.moveUp` | 1 | task-criteria.spec.ts |
+| `taskCriteria.save` | 1 | task-criteria.spec.ts |
+| `taskCriteria.text` | 1 | task-criteria.spec.ts |
+| `taskCriteria.title` | 1 | task-criteria.spec.ts |
 | `taskDetail.back` | 1 | calendar.spec.ts |
 | `taskDetail.moreFields` | 1 | task-detail.spec.ts |
 | `taskDetail.statusChanged` | 1 | optimistic-m4.spec.ts |

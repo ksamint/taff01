@@ -1086,6 +1086,37 @@ export const inboxItems = pgTable(
   ],
 );
 
+export const taskCriteria = pgTable(
+  "task_criteria",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    taskId: uuid("task_id").notNull(),
+    position: integer("position").notNull(),
+    text: text("text").notNull(),
+    checkedBy: uuid("checked_by"),
+    checkedAt: timestamp("checked_at", { withTimezone: true }),
+  },
+  (t) => [
+    foreignKey({
+      name: "task_criteria_task_fk",
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+    }).onDelete("cascade"),
+    // Deferred in the migration so one atomic reorder can swap positions.
+    unique("task_criteria_task_position_unique").on(t.taskId, t.position),
+    check("task_criteria_position_check", sql`${t.position} >= 0`),
+    check(
+      "task_criteria_text_check",
+      sql`char_length(${t.text}) BETWEEN 1 AND 300 AND btrim(${t.text}) <> ''`,
+    ),
+    check(
+      "task_criteria_checked_pair_check",
+      sql`(${t.checkedBy} IS NULL) = (${t.checkedAt} IS NULL)`,
+    ),
+  ],
+);
+
 export const taskComments = pgTable(
   "task_comments",
   {

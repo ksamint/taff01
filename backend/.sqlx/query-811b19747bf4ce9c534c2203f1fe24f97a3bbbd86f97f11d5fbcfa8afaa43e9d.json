@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO task_criteria (workspace_id, task_id, position, text)\n                 SELECT $1, $2, COALESCE(max(position) + 1, 0), $3 FROM task_criteria\n                 WHERE workspace_id = $1 AND task_id = $2\n                 RETURNING id, workspace_id, task_id, position, text, checked_by, checked_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "position",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 4,
+        "name": "text",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "checked_by",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 6,
+        "name": "checked_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Text"]
+    },
+    "nullable": [false, false, false, false, false, true, true]
+  },
+  "hash": "811b19747bf4ce9c534c2203f1fe24f97a3bbbd86f97f11d5fbcfa8afaa43e9d"
+}

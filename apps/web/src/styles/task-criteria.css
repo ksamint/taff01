@@ -1,0 +1,41 @@
+.task-criteria {
+  min-width: 0;
+}
+
+.task-criteria h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.task-criteria-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task-criteria-list > li {
+  min-width: 0;
+  border-top: var(--hairline) solid var(--border-line);
+}
+
+.task-criteria-list input {
+  flex-shrink: 0;
+}
+
+.task-criteria-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: var(--space-xs);
+}
+
+.task-criteria-form {
+  display: grid;
+  gap: var(--space-sm);
+  justify-items: start;
+}
+
+.task-criteria-form .field {
+  justify-self: stretch;
+}

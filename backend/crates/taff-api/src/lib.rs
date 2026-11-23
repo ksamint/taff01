@@ -1,4 +1,5 @@
 mod project_health;
+mod task_criteria;
 mod task_links;
 
 use axum::{
@@ -6,7 +7,7 @@ use axum::{
     extract::{FromRequestParts, Path, State, rejection::PathRejection},
     http::{StatusCode, header, request::Parts},
     response::{IntoResponse, Response},
-    routing::{delete, get},
+    routing::{delete, get, patch, post},
 };
 use base64::{Engine, engine::general_purpose::STANDARD};
 use hmac::{Hmac, Mac};
@@ -167,5 +168,16 @@ pub fn router() -> Router<AppState> {
             get(task_links::list).post(task_links::create),
         )
         .route("/api/task-links/{id}", delete(task_links::remove))
+        .route(
+            "/api/task-criteria",
+            get(task_criteria::list).post(task_criteria::create),
+        )
+        .route("/api/task-criteria/reorder", post(task_criteria::reorder))
+        .route("/api/task-criteria/{id}", patch(task_criteria::edit))
+        .route("/api/task-criteria/{id}/check", post(task_criteria::check))
+        .route(
+            "/api/task-criteria/{id}/uncheck",
+            post(task_criteria::uncheck),
+        )
         .fallback(|| async { ApiError(CoreError::NotFound) })
 }

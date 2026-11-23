@@ -18,7 +18,7 @@ pub enum MutationError {
     Database(#[from] sqlx::Error),
 }
 
-fn database_error(error: sqlx::Error) -> CoreError {
+pub(crate) fn database_error(error: sqlx::Error) -> CoreError {
     match error.as_database_error().map(|error| error.message()) {
         Some("taff_conflict") => CoreError::Conflict,
         Some("taff_invalid") => CoreError::InvalidInput,

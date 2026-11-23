@@ -2,6 +2,7 @@ mod costs;
 mod project_health;
 mod schema;
 pub use costs::CostTarget;
+mod task_criteria;
 mod task_links;
 pub use schema::{User, Workspace};
 mod write;
@@ -18,9 +19,7 @@ pub struct Session {
     pub expires_at: chrono::DateTime<chrono::Utc>,
 }
 
-/// A read-only handle to the Taff database. Phase 1 of the migration: this
-/// connects and reads the existing `packages/db` schema but never writes,
-/// so `packages/core` remains the sole authority for mutations.
+/// Pool over the existing Taff schema. Mutations use the audited transaction helper.
 #[derive(Clone)]
 pub struct Db {
     pool: PgPool,
