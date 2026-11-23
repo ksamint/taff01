@@ -2451,6 +2451,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "taff-api"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "axum",
+ "base64 0.22.1",
+ "hmac",
+ "percent-encoding",
+ "serde",
+ "serde_json",
+ "sha2",
+ "sqlx",
+ "taff-contract",
+ "taff-db",
+ "taff-domain",
+ "tokio",
+ "tower",
+ "url",
+]
+
+[[package]]
 name = "taff-contract"
 version = "0.1.0"
 dependencies = [

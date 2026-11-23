@@ -186,6 +186,7 @@ export function omv(inventory: Inventory): {
   }
 
   // Code and data, each owned by one module.
+  const routeKeys = new Set<string>();
   for (const entry of assign(inventory).modules) {
     const owner = `module:${entry.module.id}`;
     const own = (
@@ -199,13 +200,14 @@ export function omv(inventory: Inventory): {
     };
     for (const table of entry.tables)
       own(`table:${table.name}`, "table", table.name);
-    for (const route of entry.routes)
-      own(
-        `route:${route.method} ${route.path}`,
-        "route",
-        `${route.method} ${route.path}`,
-        { file: route.file },
-      );
+    for (const route of entry.routes) {
+      const title = `${route.method} ${route.path}`;
+      const key = `route:${title}`;
+      own(routeKeys.has(key) ? `${key} (${route.file})` : key, "route", title, {
+        file: route.file,
+      });
+      routeKeys.add(key);
+    }
     for (const tool of entry.tools)
       own(`tool:${tool.name}`, "tool", tool.name, { title: tool.title });
     for (const file of entry.core)

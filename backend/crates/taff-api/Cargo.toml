@@ -1,0 +1,26 @@
+[package]
+name = "taff-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+
+[dependencies]
+anyhow.workspace = true
+axum.workspace = true
+base64 = "0.22"
+hmac = "0.12"
+percent-encoding = "2"
+serde_json.workspace = true
+sha2.workspace = true
+taff-contract = { path = "../taff-contract" }
+taff-db = { path = "../taff-db" }
+taff-domain = { path = "../taff-domain" }
+tokio.workspace = true
+url = "2"
+
+[dev-dependencies]
+serde.workspace = true
+sqlx.workspace = true
+tower = { version = "0.5", features = ["util"] }

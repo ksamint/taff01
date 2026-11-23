@@ -1156,8 +1156,9 @@ PATCH /api/tasks/:id/status'
       description 'createCore wires every module and still holds the task, member and organization operations. Also migrations, seeds and health.'
       rest = layer 'REST routes' {
         #api
-        api_health = routes '/api/health (1)' {
-          description 'GET /api/health'
+        api_health = routes '/api/health (2)' {
+          description 'GET /api/health
+GET /api/health'
           link ../../apps/api/src/app.ts
         }
       }

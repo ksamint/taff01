@@ -2192,6 +2192,14 @@
     }
    },
    {
+    "id": "requirement:RT-4",
+    "type": "requirement",
+    "title": "RT-4 Local Rust API",
+    "attrs": {
+     "statements": 3
+    }
+   },
+   {
     "id": "spec:client-navigation.md",
     "type": "spec",
     "title": "client navigation and optimistic state",
@@ -5251,6 +5259,14 @@
     "title": "GET /api/health",
     "attrs": {
      "file": "apps/api/src/app.ts"
+    }
+   },
+   {
+    "id": "route:GET /api/health (backend/crates/taff-api/src/lib.rs)",
+    "type": "route",
+    "title": "GET /api/health",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
     }
    },
    {
@@ -9946,6 +9962,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "module:kernel",
+    "to": "requirement:RT-4",
+    "type": "must_satisfy"
+   },
+   {
     "from": "product:taff",
     "to": "spec:client-navigation.md",
     "type": "specified_by"
@@ -10267,6 +10288,11 @@
    },
    {
     "from": "requirement:RT-3",
+    "to": "spec:runtime.md",
+    "type": "stated_in"
+   },
+   {
+    "from": "requirement:RT-4",
     "to": "spec:runtime.md",
     "type": "stated_in"
    },
@@ -12742,6 +12768,11 @@
    },
    {
     "from": "route:GET /api/health",
+    "to": "module:kernel",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/health (backend/crates/taff-api/src/lib.rs)",
     "to": "module:kernel",
     "type": "belongs_to"
    },
