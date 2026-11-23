@@ -9,6 +9,7 @@ const FAMILIES = [
   "run",
   "agent-cost",
   "project-actual",
+  "project-margin",
   "review",
   "inbox",
   "agent",

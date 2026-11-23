@@ -26,6 +26,25 @@ pub(crate) async fn actual(
     Ok(([(header::CACHE_CONTROL, "private, no-store")], Json(actual)))
 }
 
+pub(crate) async fn margin(
+    State(state): State<AppState>,
+    session: Result<AuthenticatedSession, ApiError>,
+    path: Result<Path<Uuid>, PathRejection>,
+) -> impl IntoResponse {
+    let margin = async {
+        let AuthenticatedSession(session) = session?;
+        let Path(id) = path.map_err(|_| ApiError(CoreError::InvalidInput))?;
+        state
+            .db
+            .project_margin(&session.user_id, id)
+            .await
+            .map(Json)
+            .map_err(ApiError)
+    }
+    .await;
+    ([(header::CACHE_CONTROL, "private, no-store")], margin)
+}
+
 pub(crate) async fn set_budget(
     State(state): State<AppState>,
     _: SameOrigin,

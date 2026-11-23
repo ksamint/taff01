@@ -403,6 +403,15 @@ export const THINGS: Thing[] = [
     "An amount in currency micros for comparison with actual costs.",
   ),
   thing(
+    "project-margin",
+    "Project margin",
+    5,
+    "view",
+    [],
+    "project",
+    "Payments received minus actual costs in the same currency.",
+  ),
+  thing(
     "project_health_update",
     "Project health update",
     5,

@@ -1,6 +1,7 @@
 mod costs;
 mod project_actual;
 mod project_health;
+mod project_margin;
 mod schema;
 pub use costs::CostTarget;
 mod task_criteria;

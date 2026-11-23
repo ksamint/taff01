@@ -170,6 +170,10 @@ pub fn router() -> Router<AppState> {
             post(project_actual::set_budget),
         )
         .route(
+            "/api/costs/projects/{id}/margin",
+            get(project_actual::margin),
+        )
+        .route(
             "/api/project-updates",
             get(project_health::list).post(project_health::post),
         )

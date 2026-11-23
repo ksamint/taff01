@@ -9,10 +9,11 @@ export function decimalToMicros(amount: string) {
 }
 
 export function microsToDecimal(micros: number) {
-  const digits = String(micros).padStart(7, "0");
+  const digits = String(Math.abs(micros)).padStart(7, "0");
   const fraction = digits.slice(-6).replace(/0+$/, "");
   const whole = digits.slice(0, -6);
-  return (fraction ? `${whole}.${fraction}` : whole) as `${number}`;
+  const sign = micros < 0 ? "-" : "";
+  return `${sign}${whole}${fraction ? `.${fraction}` : ""}` as `${number}`;
 }
 
 export function formatMoneyMicros(

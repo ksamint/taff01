@@ -72,6 +72,18 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
 - PF-4.3 Display each currency separately and flag unrated minutes. The
   actual response omits the rates and the identities of people who logged time.
 
+### Margin (PF-5)
+
+- PF-5.1 A person with `finance:read` shall see margin as payments received
+  minus actual costs in currency micros. Payments, rates and runs shall come
+  from one database snapshot. A project with no payments and no known
+  currency may use its only actual currency. An empty project has zero
+  margin without a currency. A legacy payment without a currency cannot be
+  compared.
+- PF-5.2 The API shall report a currency mismatch if nonzero actual costs
+  cannot be compared in the payment currency. It shall report incomplete
+  cost if any time is unrated. The panel shall explain either condition.
+
 ## Non-functional
 
 - The panel loads with the lazy timeline view,
@@ -86,6 +98,7 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
 | PF-1.2 | `e2e/finance-visibility.spec.ts`; `packages/core/src/planning.integration.test.ts` |
 | PF-1.3 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
 | PF-2.1 | `packages/core/src/planning.integration.test.ts` (admin, member, guest flags) |
+| PF-5 | `backend/crates/taff-api/tests/project_margin.rs` and `e2e/project-margin.spec.ts` |
 | PF-4 | `backend/crates/taff-api/tests/project_actual.rs` and `e2e/project-budget-actual.spec.ts` |
 | PF-3 | `backend/crates/taff-api/tests/agent_cost.rs` and `e2e/agent-cost.spec.ts` |
 

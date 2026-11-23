@@ -273,8 +273,8 @@ export const ASSESSMENT: Assessment = {
     },
     "staffing-utilization-forecast": { status: "no" },
     "profit-margin-project": {
-      status: "no",
-      note: "Money in is known; money out is not.",
+      status: "yes",
+      where: ["concept:project-margin", "module:projects"],
     },
     invoicing: { status: "no" },
     "deciding-which-work-fund": { status: "no" },

@@ -63,6 +63,8 @@
     "not_found": "此項目已不存在，請重新整理後重試。",
     "invalid_input": "請檢查填寫的資料後重試。",
     "conflict": "此項目已在其他地方更改，請重新整理後重試。",
+    "currency_mismatch": "計算利潤需要收款和實際成本使用同一幣種。",
+    "cost_incomplete": "所有已記錄工時都設有小時費率後，即可計算利潤。",
     "internal_error": "出現問題，請重試。",
     "network": "無法連線，請檢查網絡後重試。",
     "auth": "無法登入，請檢查用戶名稱、手機號碼或電郵及密碼後重試。",
@@ -1668,6 +1670,7 @@
   "projectFinance": {
     "title": "財務",
     "agentCost": "智能體成本",
+    "margin": "利潤",
     "budgetActual": "預算 / 實際成本",
     "budget": "預算",
     "budgetAmount": "預算金額",
