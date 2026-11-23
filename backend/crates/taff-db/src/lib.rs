@@ -4,7 +4,9 @@ mod schema;
 pub use costs::CostTarget;
 mod task_criteria;
 mod task_links;
+mod time_tracking;
 pub use schema::{User, Workspace};
+pub use time_tracking::PersonalRecordsScope;
 mod write;
 use taff_domain::{CoreError, Result};
 pub use write::{MutationActor, MutationError};
@@ -71,7 +73,7 @@ impl Db {
     /// Reads a workspace by id, including archived rows; callers enforce archive visibility.
     pub async fn workspace(&self, id: Uuid) -> Result<Option<Workspace>> {
         let row = sqlx::query_as::<_, Workspace>(
-            "SELECT id, name, key, personal_owner_id, ai_enabled, seed_key, archived_at, created_at, updated_at \
+            "SELECT id, name, key, personal_owner_id, ai_enabled, time_zone, seed_key, archived_at, created_at, updated_at \
              FROM workspaces WHERE id = $1",
         )
         .bind(id)

@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM members WHERE id = $1 AND workspace_id = $2 AND kind = 'person' FOR SHARE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [false]
+  },
+  "hash": "53d8240774d2cd620fe5381f99c1637d78e8f47506c0411603cd092a85ebc9cf"
+}

@@ -435,7 +435,7 @@
     "attrs": {
      "tier": 1,
      "kind": "kind",
-     "dependents": 15,
+     "dependents": 16,
      "stored": [
       "workspaces",
       "workspace_invites"
@@ -504,7 +504,7 @@
     "attrs": {
      "tier": 2,
      "kind": "kind",
-     "dependents": 12,
+     "dependents": 13,
      "stored": [
       "tasks"
      ]
@@ -549,6 +549,34 @@
      "dependents": 0,
      "stored": [
       "task_criteria"
+     ]
+    }
+   },
+   {
+    "id": "concept:time-entry",
+    "type": "concept",
+    "title": "Time entry",
+    "summary": "A person records minutes of work on a task for one workspace-local day.",
+    "attrs": {
+     "tier": 3,
+     "kind": "event",
+     "dependents": 0,
+     "stored": [
+      "time_entries"
+     ]
+    }
+   },
+   {
+    "id": "concept:member-rate",
+    "type": "concept",
+    "title": "Hourly rate",
+    "summary": "An hourly rate in one currency, starting on a civil date.",
+    "attrs": {
+     "tier": 2,
+     "kind": "attribute",
+     "dependents": 0,
+     "stored": [
+      "member_rates"
      ]
     }
    },
@@ -1823,6 +1851,14 @@
     "summary": "createCore wires every module and still holds the task, member and organization operations. Also migrations, seeds and health.",
     "attrs": {
      "lane": "Platform"
+    }
+   },
+   {
+    "id": "spec:time-tracking.md",
+    "type": "spec",
+    "title": "time tracking",
+    "attrs": {
+     "file": "docs/spec/time-tracking.md"
     }
    },
    {
@@ -4765,6 +4801,22 @@
     }
    },
    {
+    "id": "route:GET /api/member-rates",
+    "type": "route",
+    "title": "GET /api/member-rates",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:POST /api/member-rates",
+    "type": "route",
+    "title": "POST /api/member-rates",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
     "id": "route:GET /api/members",
     "type": "route",
     "title": "GET /api/members",
@@ -5139,6 +5191,11 @@
     }
    },
    {
+    "id": "table:member_rates",
+    "type": "table",
+    "title": "member_rates"
+   },
+   {
     "id": "table:task_comments",
     "type": "table",
     "title": "task_comments"
@@ -5157,6 +5214,11 @@
     "id": "table:tasks",
     "type": "table",
     "title": "tasks"
+   },
+   {
+    "id": "table:time_entries",
+    "type": "table",
+    "title": "time_entries"
    },
    {
     "id": "route:GET /api/bootstrap",
@@ -5335,6 +5397,38 @@
     }
    },
    {
+    "id": "route:GET /api/time-entries",
+    "type": "route",
+    "title": "GET /api/time-entries",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:POST /api/time-entries",
+    "type": "route",
+    "title": "POST /api/time-entries",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:DELETE /api/time-entries/{id}",
+    "type": "route",
+    "title": "DELETE /api/time-entries/{id}",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:PATCH /api/time-entries/{id}",
+    "type": "route",
+    "title": "PATCH /api/time-entries/{id}",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
     "id": "tool:quickadd.parse",
     "type": "tool",
     "title": "quickadd.parse",
@@ -5412,6 +5506,14 @@
     "title": "today-bootstrap.ts",
     "attrs": {
      "path": "packages/core/src/today-bootstrap.ts"
+    }
+   },
+   {
+    "id": "screen:/me/time",
+    "type": "screen",
+    "title": "/me/time",
+    "attrs": {
+     "file": "apps/web/app/me/time/page.tsx"
     }
    },
    {
@@ -5584,6 +5686,11 @@
    },
    {
     "from": "concept:member",
+    "to": "concept:organization",
+    "type": "requires"
+   },
+   {
+    "from": "concept:member-rate",
     "to": "concept:organization",
     "type": "requires"
    },
@@ -5838,6 +5945,11 @@
     "type": "requires"
    },
    {
+    "from": "concept:time-entry",
+    "to": "concept:task",
+    "type": "requires"
+   },
+   {
     "from": "concept:subtask",
     "to": "concept:task",
     "type": "part_of"
@@ -5864,6 +5976,26 @@
    },
    {
     "from": "concept:acceptance-criterion",
+    "to": "module:tasks",
+    "type": "kept_by"
+   },
+   {
+    "from": "concept:time-entry",
+    "to": "concept:task",
+    "type": "part_of"
+   },
+   {
+    "from": "concept:time-entry",
+    "to": "module:tasks",
+    "type": "kept_by"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "concept:member",
+    "type": "part_of"
+   },
+   {
+    "from": "concept:member-rate",
     "to": "module:tasks",
     "type": "kept_by"
    },
@@ -6471,6 +6603,16 @@
     "type": "has_function"
    },
    {
+    "from": "concept:time-entry",
+    "to": "function:task:edit",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "function:task:edit",
+    "type": "has_function"
+   },
+   {
     "from": "concept:due_date",
     "to": "function:task:edit",
     "type": "has_function"
@@ -6531,6 +6673,16 @@
     "type": "has_function"
    },
    {
+    "from": "concept:time-entry",
+    "to": "function:task:owner",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "function:task:owner",
+    "type": "has_function"
+   },
+   {
     "from": "concept:due_date",
     "to": "function:task:owner",
     "type": "has_function"
@@ -6582,6 +6734,16 @@
    },
    {
     "from": "concept:acceptance-criterion",
+    "to": "function:task:comment",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:time-entry",
+    "to": "function:task:comment",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:member-rate",
     "to": "function:task:comment",
     "type": "has_function"
    },
@@ -6651,6 +6813,16 @@
     "type": "has_function"
    },
    {
+    "from": "concept:time-entry",
+    "to": "function:task:create",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "function:task:create",
+    "type": "has_function"
+   },
+   {
     "from": "concept:due_date",
     "to": "function:task:create",
     "type": "has_function"
@@ -6716,6 +6888,16 @@
     "type": "has_function"
    },
    {
+    "from": "concept:time-entry",
+    "to": "function:task:assign",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "function:task:assign",
+    "type": "has_function"
+   },
+   {
     "from": "concept:due_date",
     "to": "function:task:assign",
     "type": "has_function"
@@ -6767,6 +6949,16 @@
    },
    {
     "from": "concept:acceptance-criterion",
+    "to": "function:task:status",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:time-entry",
+    "to": "function:task:status",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:member-rate",
     "to": "function:task:status",
     "type": "has_function"
    },
@@ -6831,6 +7023,16 @@
     "type": "has_function"
    },
    {
+    "from": "concept:time-entry",
+    "to": "function:task:finish",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "function:task:finish",
+    "type": "has_function"
+   },
+   {
     "from": "concept:due_date",
     "to": "function:task:finish",
     "type": "has_function"
@@ -6849,6 +7051,11 @@
     "from": "role:admin",
     "to": "function:task:finish",
     "type": "may_do"
+   },
+   {
+    "from": "module:tasks",
+    "to": "spec:time-tracking.md",
+    "type": "specified_by"
    },
    {
     "from": "module:projects",
@@ -10945,6 +11152,16 @@
     "type": "in_flow"
    },
    {
+    "from": "concept:time-entry",
+    "to": "flow:handoff",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "flow:handoff",
+    "type": "in_flow"
+   },
+   {
     "from": "concept:due_date",
     "to": "flow:handoff",
     "type": "in_flow"
@@ -11111,6 +11328,16 @@
    },
    {
     "from": "concept:acceptance-criterion",
+    "to": "flow:plan",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:time-entry",
+    "to": "flow:plan",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:member-rate",
     "to": "flow:plan",
     "type": "in_flow"
    },
@@ -11415,6 +11642,16 @@
     "type": "in_flow"
    },
    {
+    "from": "concept:time-entry",
+    "to": "flow:connect",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "flow:connect",
+    "type": "in_flow"
+   },
+   {
     "from": "concept:due_date",
     "to": "flow:connect",
     "type": "in_flow"
@@ -11506,6 +11743,16 @@
    },
    {
     "from": "concept:acceptance-criterion",
+    "to": "flow:refresh",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:time-entry",
+    "to": "flow:refresh",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:member-rate",
     "to": "flow:refresh",
     "type": "in_flow"
    },
@@ -12885,6 +13132,16 @@
     "type": "belongs_to"
    },
    {
+    "from": "route:GET /api/member-rates",
+    "to": "module:identity",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:POST /api/member-rates",
+    "to": "module:identity",
+    "type": "belongs_to"
+   },
+   {
     "from": "route:GET /api/members",
     "to": "module:identity",
     "type": "belongs_to"
@@ -13130,6 +13387,11 @@
     "type": "belongs_to"
    },
    {
+    "from": "table:member_rates",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
     "from": "table:task_comments",
     "to": "module:tasks",
     "type": "belongs_to"
@@ -13146,6 +13408,11 @@
    },
    {
     "from": "table:tasks",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "table:time_entries",
     "to": "module:tasks",
     "type": "belongs_to"
    },
@@ -13260,6 +13527,26 @@
     "type": "belongs_to"
    },
    {
+    "from": "route:GET /api/time-entries",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:POST /api/time-entries",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:DELETE /api/time-entries/{id}",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:PATCH /api/time-entries/{id}",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
     "from": "tool:quickadd.parse",
     "to": "module:tasks",
     "type": "belongs_to"
@@ -13306,6 +13593,11 @@
    },
    {
     "from": "file:packages/core/src/today-bootstrap.ts",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "screen:/me/time",
     "to": "module:tasks",
     "type": "belongs_to"
    },
@@ -14525,6 +14817,11 @@
     "type": "refers_to"
    },
    {
+    "from": "table:member_rates",
+    "to": "table:workspaces",
+    "type": "refers_to"
+   },
+   {
     "from": "table:members",
     "to": "table:users",
     "type": "refers_to"
@@ -14785,6 +15082,11 @@
     "type": "refers_to"
    },
    {
+    "from": "table:time_entries",
+    "to": "table:tasks",
+    "type": "refers_to"
+   },
+   {
     "from": "table:trusted_review_receipts",
     "to": "table:workspaces",
     "type": "refers_to"
@@ -14877,6 +15179,16 @@
    {
     "from": "concept:acceptance-criterion",
     "to": "table:task_criteria",
+    "type": "stored_in"
+   },
+   {
+    "from": "concept:time-entry",
+    "to": "table:time_entries",
+    "type": "stored_in"
+   },
+   {
+    "from": "concept:member-rate",
+    "to": "table:member_rates",
     "type": "stored_in"
    },
    {

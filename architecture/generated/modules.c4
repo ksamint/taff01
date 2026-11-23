@@ -888,6 +888,11 @@ POST /api/me/email-verification/request
 POST /api/me/email-verification/verify'
           link ../../apps/api/src/app.ts
         }
+        api_member_rates = routes '/api/member-rates (2)' {
+          description 'GET /api/member-rates
+POST /api/member-rates'
+          link ../../backend/crates/taff-api/src/lib.rs
+        }
         api_members = routes '/api/members (1)' {
           description 'GET /api/members'
           link ../../apps/api/src/app.ts
@@ -1069,6 +1074,9 @@ POST /api/projects/:id/payments'
       description 'Create, edit, assign, comment and change status; subtasks; labels; Quick Add; search; Today.'
       ui = layer 'Screens' {
         #web
+        page_me_time = screen '/me/time' {
+          link ../../apps/web/app/me/time/page.tsx
+        }
         page = screen '/' {
           link ../../apps/web/app/page.tsx
         }
@@ -1127,6 +1135,13 @@ POST /api/tasks/:id/comments
 PATCH /api/tasks/:id/status'
           link ../../apps/api/src/app.ts
         }
+        api_time_entries = routes '/api/time-entries (4)' {
+          description 'GET /api/time-entries
+POST /api/time-entries
+DELETE /api/time-entries/{id}
+PATCH /api/time-entries/{id}'
+          link ../../backend/crates/taff-api/src/lib.rs
+        }
       }
       mcp = layer 'MCP tools' {
         #mcp
@@ -1174,10 +1189,12 @@ PATCH /api/tasks/:id/status'
       }
       data = layer 'Tables' {
         #db
+        member_rates = table 'member_rates'
         task_comments = table 'task_comments'
         task_criteria = table 'task_criteria'
         task_links = table 'task_links'
         tasks = table 'tasks'
+        time_entries = table 'time_entries'
       }
       ui -> rest 'calls'
       rest -> rules 'calls'

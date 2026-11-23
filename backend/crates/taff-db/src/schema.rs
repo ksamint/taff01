@@ -14,6 +14,7 @@ pub struct Workspace {
     pub key: String,
     pub personal_owner_id: Option<String>,
     pub ai_enabled: bool,
+    pub time_zone: String,
     pub seed_key: Option<String>,
     pub archived_at: Option<DateTime<Utc>>,
     pub created_at: DateTime<Utc>,

@@ -20,6 +20,8 @@ const FAMILIES = [
   "task-access",
   "task-comments",
   "task-links",
+  "time-entries",
+  "member-rates",
   "task-criteria",
   "projects",
   "search",

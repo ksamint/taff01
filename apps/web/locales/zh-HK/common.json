@@ -407,6 +407,33 @@
       "confirm": "確認更改策略"
     }
   },
+  "timeTracking": {
+    "title": "我的工時",
+    "log": "記錄工時",
+    "minutes": "分鐘",
+    "minutesRange": "請輸入 1 至 1440 分鐘。",
+    "day": "日期",
+    "note": "備註",
+    "noteLimit": "最多可輸入 {{max}} 個字元。",
+    "zone": "日期以 {{timeZone}} 時區為準。",
+    "empty": "暫無工時記錄。",
+    "unavailableTask": "任務不可用",
+    "duration": "{{count}} 分鐘",
+    "edit": "編輯工時",
+    "remove": "刪除工時",
+    "removeQuestion": "刪除此工時記錄？",
+    "ownRate": "我的小時費率",
+    "noRate": "尚未設定費率。",
+    "perHour": "每小時 {{rate}}",
+    "setRate": "設定小時費率",
+    "person": "人員",
+    "currentRate": "目前費率為每小時 {{rate}}",
+    "amount": "每小時金額",
+    "invalidRate": "請輸入非負金額，最多六位小數。",
+    "currency": "幣種代碼",
+    "invalidCurrency": "請輸入三字母幣種代碼。",
+    "validFrom": "生效日期"
+  },
   "taskLinks": {
     "title": "任務關聯",
     "add": "新增關聯",

@@ -158,6 +158,7 @@ export const workspaces = pgTable("workspaces", {
   archivedAt: timestamp("archived_at", { withTimezone: true }),
   /** Opt-in for the optional model path of Ask taff (D6, ADR 0016). */
   aiEnabled: boolean("ai_enabled").default(false).notNull(),
+  timeZone: text("time_zone").default("UTC").notNull(),
   ...dates,
 });
 export const memberKind = pgEnum("member_kind", ["person", "agent"]);
@@ -1082,6 +1083,77 @@ export const inboxItems = pgTable(
     check(
       "inbox_items_kind",
       sql`${t.kind} IN ('review','blocker','mention','done','digest')`,
+    ),
+  ],
+);
+
+export const timeEntries = pgTable(
+  "time_entries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    taskId: uuid("task_id").notNull(),
+    personId: uuid("person_id").notNull(),
+    minutes: integer("minutes").notNull(),
+    day: date("day", { mode: "string" }).notNull(),
+    note: text("note").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    foreignKey({
+      name: "time_entries_task_fk",
+      columns: [t.workspaceId, t.taskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+    }).onDelete("cascade"),
+    index("time_entries_person_day_idx").on(
+      t.workspaceId,
+      t.personId,
+      t.day.desc(),
+    ),
+    index("time_entries_task_day_idx").on(
+      t.workspaceId,
+      t.taskId,
+      t.day.desc(),
+    ),
+    check("time_entries_minutes_check", sql`${t.minutes} BETWEEN 1 AND 1440`),
+    check("time_entries_note_check", sql`char_length(${t.note}) <= 2000`),
+    check(
+      "time_entries_day_check",
+      sql`${t.day} BETWEEN DATE '0001-01-01' AND DATE '9999-12-31'`,
+    ),
+  ],
+);
+
+export const memberRates = pgTable(
+  "member_rates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    personId: uuid("person_id").notNull(),
+    rateMicrosPerHour: bigint("rate_micros_per_hour", {
+      mode: "number",
+    }).notNull(),
+    currency: text("currency").notNull(),
+    validFrom: date("valid_from", { mode: "string" }).notNull(),
+  },
+  (t) => [
+    unique("member_rates_effective_date_unique").on(
+      t.workspaceId,
+      t.personId,
+      t.validFrom,
+    ),
+    check(
+      "member_rates_amount_check",
+      sql`${t.rateMicrosPerHour} BETWEEN 0 AND 9007199254740991`,
+    ),
+    check("member_rates_currency_check", sql`${t.currency} ~ '^[A-Z]{3}$'`),
+    check(
+      "member_rates_day_check",
+      sql`${t.validFrom} BETWEEN DATE '0001-01-01' AND DATE '9999-12-31'`,
     ),
   ],
 );

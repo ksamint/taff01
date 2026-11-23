@@ -1,0 +1,38 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT workspace_id, person_id, rate_micros_per_hour, currency, valid_from\n             FROM member_rates\n             WHERE workspace_id = $1 AND ($2::uuid IS NULL OR person_id = $2)\n             ORDER BY valid_from DESC, person_id",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "person_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "rate_micros_per_hour",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "currency",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "valid_from",
+        "type_info": "Date"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [false, false, false, false, false]
+  },
+  "hash": "783f16b1fe819e3ae571d4143c57a9545c22a25c281125bb63ddfd77804a977f"
+}

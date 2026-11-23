@@ -190,6 +190,25 @@ export const THINGS: Thing[] = [
   ),
 
   thing(
+    "time-entry",
+    "Time entry",
+    3,
+    "event",
+    ["time_entries"],
+    "task",
+    "A person records minutes of work on a task for one workspace-local day.",
+  ),
+  thing(
+    "member-rate",
+    "Hourly rate",
+    2,
+    "attribute",
+    ["member_rates"],
+    "member",
+    "An hourly rate in one currency, starting on a civil date.",
+  ),
+
+  thing(
     "run",
     "Run",
     3,

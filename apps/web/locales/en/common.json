@@ -407,6 +407,33 @@
       "confirm": "Confirm policy change"
     }
   },
+  "timeTracking": {
+    "title": "My time",
+    "log": "Log time",
+    "minutes": "Minutes",
+    "minutesRange": "Enter 1–1,440 minutes.",
+    "day": "Date",
+    "note": "Note",
+    "noteLimit": "Use up to {{max}} characters.",
+    "zone": "Dates use {{timeZone}}.",
+    "empty": "No time logged yet.",
+    "unavailableTask": "Task unavailable",
+    "duration": "{{count}} min",
+    "edit": "Edit time",
+    "remove": "Delete time",
+    "removeQuestion": "Delete this time entry?",
+    "ownRate": "My hourly rate",
+    "noRate": "No rate set.",
+    "perHour": "{{rate}} per hour",
+    "setRate": "Set hourly rate",
+    "person": "Person",
+    "currentRate": "Current rate {{rate}} per hour",
+    "amount": "Hourly amount",
+    "invalidRate": "Enter a nonnegative amount with up to six decimal places.",
+    "currency": "Currency code",
+    "invalidCurrency": "Enter a three-letter currency code.",
+    "validFrom": "Effective from"
+  },
   "taskLinks": {
     "title": "Links",
     "add": "Add link",
