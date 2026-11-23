@@ -20,6 +20,7 @@
     "e2e": "node --env-file=.env node_modules/@playwright/test/cli.js test",
     "perf:budget": "node --env-file=.env node_modules/tsx/dist/cli.mjs scripts/bundle-budget.mts",
     "mcp:smoke": "node --env-file=.env node_modules/tsx/dist/cli.mjs apps/api/scripts/mcp-smoke.mts",
+    "replay": "node scripts/replay/cli.mts",
     "release:checklist": "node --env-file-if-exists=.env node_modules/@playwright/test/cli.js test --config playwright.release.config.ts",
     "release:stack": "node --env-file-if-exists=.env scripts/release-stack.mts",
     "build:server": "node node_modules/tsx/dist/cli.mjs scripts/build-server.mts",

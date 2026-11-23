@@ -204,6 +204,20 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
   it. A sub-project level and a level above the organization appear in
   `domain.c4` marked `not_modelled` until the owner decides them.
 
+### Local wire replay (TT-11)
+
+- TT-11.1 An opt-in capture shall record registered REST route templates and
+  MCP method and tool identifiers from in-process and HTTP test requests.
+  Captures shall remain private local fixtures. Headers, credentials, raw
+  URLs and unapproved payload fields are excluded.
+- TT-11.2 Supported fixture reads shall compare against a loopback target.
+  Comparison shall preserve array order, normalize JSON key order and
+  RFC 3339 offsets, and report the route and exact changed JSON pointer.
+  Only the documented per-recipe exceptions apply.
+- TT-11.3 Coverage shall state registered, observed and replayed routes and
+  tools, with stateful exchanges identified separately. A route family needs
+  its own zero-diff fixture replay before proxy cutover.
+
 ## Non-functional
 
 - No new dependency name; web declares the same esbuild version already used
@@ -220,6 +234,7 @@ Status: T0–T3 shipped in v0.2.20, source `596272a`; complete exact-source rele
 | Requirement | Evidence |
 | --- | --- |
 | TT-8 | `pnpm perf:budget`, `e2e/font-loading.spec.ts`, `scripts/ui/fonts.test.ts` |
+| TT-11 | `scripts/replay/replay.test.ts`; [operator commands](../../scripts/replay/README.md) |
 | TT-10 | `apps/api/scripts/rest-contracts.test.ts`, `apps/api/src/mcp-tool-args.test.ts`, and `backend/crates/taff-contract/tests/round_trip.rs` |
 | TT-1 | pnpm typecheck; pnpm lint; tsconfig.scripts.json |
 | TT-2 | scripts/live-harness.test.ts; native Node runner/worker preload regression; 147-case discovery |

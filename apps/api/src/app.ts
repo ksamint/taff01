@@ -65,6 +65,7 @@ import {
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { cors } from "hono/cors";
+import { matchedRoutes } from "hono/route";
 import type { Logger } from "pino";
 import { createMcpHttpHandler, describeCall } from "./mcp";
 import { registerConsentRoutes, registerPublicOAuthRoutes } from "./oauth";
@@ -121,6 +122,33 @@ export function createApp(
 ) {
   const origin = new URL(authUrl).origin;
   const app = new Hono<AppEnv>();
+  // A local test preload supplies this observer. Normal server startup does
+  // not parse, clone, or write any replay data.
+  const observe = (
+    globalThis as typeof globalThis & {
+      taffReplayObserve?: (
+        request: Request,
+      ) =>
+        | ((
+            registeredPath: string | undefined,
+            response: Response,
+          ) => Promise<void>)
+        | undefined;
+    }
+  ).taffReplayObserve;
+  if (observe && process.env.NODE_ENV !== "production") {
+    app.use("*", async (c, next) => {
+      const finish = observe(c.req.raw);
+      await next();
+      if (finish)
+        await finish(
+          matchedRoutes(c)
+            .filter((route) => route.method === c.req.method)
+            .at(-1)?.path,
+          c.res,
+        );
+    });
+  }
   const mcp = createMcpHttpHandler(core, logger, viewExport);
   // Clients discover the authorization server from a 401 (RFC 9728 §5.1).
   const challenge = `Bearer realm="taff", resource_metadata="${core.oauthMetadata().resourceMetadataUrl}"`;
