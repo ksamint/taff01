@@ -31,6 +31,10 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
 - PR-1.8 When an authorized person exports the project after its date or progress changes, the PNG shall use the saved fields and its content hash shall change with the export snapshot.
 - PR-1.9 The timeline and AI Brief shall label the calculated, duration-weighted progress of leaf tasks as Task completion. The project profile shall label its saved value as Delivery progress.
 
+- PR-1.10 The three project timeline, milestone and payment GETs shall
+  preserve the saved profile time zone, stable ordering and finance
+  authority. Taff's Caddy matcher dispatches only those GETs to Rust.
+
 ### Authority (PR-2)
 
 - PR-2.1 When the user lacks `project:manage`, the client shall hide the project profile editor and the API shall refuse due-date or delivery-progress updates, including updates by a project lead.
@@ -77,6 +81,7 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
 | PR-1.5 | `e2e/project-header.spec.ts` and `e2e/project-profile.spec.ts` in three locales |
 | PR-1.6–1.7 | `e2e/project-profile.spec.ts` rejected stage rollback and stale delivery edit; `apps/web/src/lib/mutations/cache-updates.test.ts` |
 | PR-1.8 | `e2e/project-profile.spec.ts` real PNG/header-hash before/after; `packages/core/src/summary-model.test.ts`; `packages/core/src/view-export.integration.test.ts` |
+| PR-1.10 | `scripts/replay/timeline-parity.mts` and `backend/crates/taff-api/tests/timeline_read.rs` |
 | PR-1.9 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
 | PR-3 | `e2e/board-access.spec.ts`, card height, target sizes and controls in three locales |
 | PR-2.1–2.3 | `e2e/project-profile.spec.ts` member/lead reads, rejected field writes, stage control and open-editor authority loss; `packages/core/src/permissions.test.ts` |

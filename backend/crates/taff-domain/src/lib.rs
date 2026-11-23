@@ -1,6 +1,7 @@
 mod calendar;
 mod error;
 mod permissions;
+pub mod plan_model;
 mod security;
 mod tz;
 

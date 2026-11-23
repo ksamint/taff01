@@ -91,7 +91,15 @@ fn main() -> Result<()> {
     let mut names = BTreeSet::new();
     let mut rest_modules = Vec::new();
     for (key, route) in rest {
-        if !full_catalog && key != "GET /api/health" {
+        if !full_catalog
+            && !matches!(
+                key.as_str(),
+                "GET /api/health"
+                    | "GET /api/projects/:id/milestones"
+                    | "GET /api/projects/:id/payments"
+                    | "GET /api/projects/:id/timeline"
+            )
+        {
             continue;
         }
         ensure!(

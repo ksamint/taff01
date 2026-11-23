@@ -1947,7 +1947,7 @@
     "type": "requirement",
     "title": "PR-1 Profile fields",
     "attrs": {
-     "statements": 9
+     "statements": 10
     }
    },
    {
@@ -5210,6 +5210,30 @@
     "title": "POST /api/projects/:id/payments",
     "attrs": {
      "file": "apps/api/src/routes/timeline.ts"
+    }
+   },
+   {
+    "id": "route:GET /api/projects/{id}/milestones",
+    "type": "route",
+    "title": "GET /api/projects/{id}/milestones",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:GET /api/projects/{id}/payments",
+    "type": "route",
+    "title": "GET /api/projects/{id}/payments",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:GET /api/projects/{id}/timeline",
+    "type": "route",
+    "title": "GET /api/projects/{id}/timeline",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
     }
    },
    {
@@ -13606,6 +13630,21 @@
    },
    {
     "from": "route:POST /api/projects/:id/payments",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/projects/{id}/milestones",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/projects/{id}/payments",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/projects/{id}/timeline",
     "to": "module:projects",
     "type": "belongs_to"
    },

@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT tz FROM users WHERE id = $1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "tz",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": ["Text"]
+    },
+    "nullable": [false]
+  },
+  "hash": "4abef3c3c1d5e24e0fff1138cddcd7fe09a0e812700a0d79ee1e3eab72c509bf"
+}

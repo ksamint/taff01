@@ -90,7 +90,7 @@ pub(crate) async fn actual_costs(
 
 impl Db {
     pub async fn project_actual(&self, user_id: &str, project_id: Uuid) -> Result<ProjectActual> {
-        let mut tx = self.cost_snapshot().await?;
+        let mut tx = self.read_snapshot().await?;
         let workspace_id = cost_workspace(&mut tx, user_id, None, Some(project_id)).await?;
         let budget = sqlx::query_as!(
             ProjectBudget,

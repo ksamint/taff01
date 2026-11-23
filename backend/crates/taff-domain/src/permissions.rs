@@ -38,7 +38,7 @@ pub enum Scope {
     SummariesRead,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Deserialize, serde::Serialize)]
 pub enum TaskStatus {
     #[serde(rename = "todo")]
     Todo,

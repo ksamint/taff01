@@ -46,7 +46,7 @@ fn margin(
 
 impl Db {
     pub async fn project_margin(&self, user_id: &str, project_id: Uuid) -> Result<ProjectMargin> {
-        let mut tx = self.cost_snapshot().await?;
+        let mut tx = self.read_snapshot().await?;
         let workspace_id = cost_workspace(&mut tx, user_id, None, Some(project_id)).await?;
         let (by_currency, unrated_minutes) =
             actual_costs(&mut tx, workspace_id, project_id).await?;
