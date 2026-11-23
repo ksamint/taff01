@@ -14,7 +14,7 @@ import { omv } from "./omv-model.ts";
 import { ontology } from "./ontology-model.ts";
 import { validate } from "./ontology-types.ts";
 
-// Spec docs/spec/tooling.md TT-9: the architecture model follows the code.
+// Spec docs/spec/architecture-tooling.md TT-9: the architecture model follows the code.
 const found = inventory();
 const assignment = assign(found);
 

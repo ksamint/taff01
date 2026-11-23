@@ -3,7 +3,7 @@
 One model of how Taff is built, in [LikeC4](https://likec4.dev) source files.
 The diagrams are queries over the model, so they follow it. The model's
 history is the Git history of this folder. Decision: [ADR 0033](../docs/adr/0033-likec4-architecture-model.md).
-Contract: `docs/spec/tooling.md` TT-9.
+Contract: `docs/spec/architecture-tooling.md` TT-9.
 
 ## See it
 
