@@ -47,3 +47,5 @@ mod project_actual;
 pub use project_actual::{ActualCurrency, MAX_PROJECT_FINANCE_TOTAL, ProjectActual, ProjectBudget};
 mod project_margin;
 pub use project_margin::ProjectMargin;
+mod project_phase;
+pub use project_phase::{ProjectPhase, ProjectPhaseEdit, ProjectPhaseInput};

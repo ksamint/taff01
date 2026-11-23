@@ -34,6 +34,7 @@ it("preserves the released default-agent migration and appends approval/project 
     "0046_task_criteria",
     "0047_time_tracking",
     "0048_project_budgets",
+    "0049_project_phases",
   ]);
   for (const entry of pending) {
     expect(entry.when).toBeGreaterThan(journal.entries[33].when);

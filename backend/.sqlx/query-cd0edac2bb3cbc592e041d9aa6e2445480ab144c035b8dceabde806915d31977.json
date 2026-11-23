@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE project_phases SET name = $4, start_date = $5, end_date = $6\n                   WHERE id = $1 AND workspace_id = $2 AND project_id = $3\n                   RETURNING id, workspace_id, project_id, name, position, start_date AS start, end_date AS \"end\"",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "project_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "position",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "start",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "end",
+        "type_info": "Date"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Uuid", "Text", "Date", "Date"]
+    },
+    "nullable": [false, false, false, false, false, false, false]
+  },
+  "hash": "cd0edac2bb3cbc592e041d9aa6e2445480ab144c035b8dceabde806915d31977"
+}

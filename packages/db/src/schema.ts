@@ -1391,6 +1391,36 @@ export const taskDependencies = pgTable(
     index("task_dependencies_workspace_idx").on(t.workspaceId),
   ],
 );
+export const projectPhases = pgTable(
+  "project_phases",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    name: text("name").notNull(),
+    position: integer("position").notNull(),
+    start: date("start_date", { mode: "string" }).notNull(),
+    end: date("end_date", { mode: "string" }).notNull(),
+  },
+  (t) => [
+    unique("project_phases_position_unique").on(t.projectId, t.position),
+    foreignKey({
+      name: "project_phases_project_fk",
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+    }).onDelete("cascade"),
+    check("project_phases_position_check", sql`${t.position} >= 0`),
+    check(
+      "project_phases_name_check",
+      sql`char_length(btrim(${t.name})) BETWEEN 1 AND 120`,
+    ),
+    check(
+      "project_phases_span_check",
+      sql`${t.start} >= DATE '1970-01-01' AND ${t.start} <= ${t.end} AND ${t.end} < DATE '2200-01-01'`,
+    ),
+  ],
+);
+
 export const projectBudgets = pgTable(
   "project_budgets",
   {

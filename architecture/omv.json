@@ -474,11 +474,11 @@
     "id": "concept:project",
     "type": "concept",
     "title": "Project",
-    "summary": "Flat. Stage, person in charge, saved progress, client company.",
+    "summary": "Stage, person in charge, saved progress, client company and phases.",
     "attrs": {
      "tier": 2,
      "kind": "kind",
-     "dependents": 7,
+     "dependents": 8,
      "stored": [
       "projects"
      ]
@@ -487,13 +487,27 @@
    {
     "id": "concept:subproject",
     "type": "concept",
-    "title": "Sub-project or phase",
-    "summary": "Not modelled. A project has no parent and no children.",
+    "title": "Sub-project",
+    "summary": "A project has no parent or child projects.",
     "attrs": {
      "tier": 2,
      "kind": "not modelled",
      "dependents": 0,
      "missing": true
+    }
+   },
+   {
+    "id": "concept:project-phase",
+    "type": "concept",
+    "title": "Project phase",
+    "summary": "A named span with inclusive start and end dates in the project timeline.",
+    "attrs": {
+     "tier": 2,
+     "kind": "kind",
+     "dependents": 0,
+     "stored": [
+      "project_phases"
+     ]
     }
    },
    {
@@ -1972,6 +1986,14 @@
     "title": "PR-4 Health updates",
     "attrs": {
      "statements": 3
+    }
+   },
+   {
+    "id": "requirement:PR-5",
+    "type": "requirement",
+    "title": "PR-5 Project phases",
+    "attrs": {
+     "statements": 2
     }
    },
    {
@@ -5115,6 +5137,11 @@
     "title": "project_payments"
    },
    {
+    "id": "table:project_phases",
+    "type": "table",
+    "title": "project_phases"
+   },
+   {
     "id": "table:project_updates",
     "type": "table",
     "title": "project_updates"
@@ -5152,6 +5179,30 @@
     "id": "route:GET /api/costs/projects/{id}/margin",
     "type": "route",
     "title": "GET /api/costs/projects/{id}/margin",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:GET /api/project-phases",
+    "type": "route",
+    "title": "GET /api/project-phases",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:POST /api/project-phases",
+    "type": "route",
+    "title": "POST /api/project-phases",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:PATCH /api/project-phases/{id}",
+    "type": "route",
+    "title": "PATCH /api/project-phases/{id}",
     "attrs": {
      "file": "backend/crates/taff-api/src/lib.rs"
     }
@@ -5962,6 +6013,11 @@
     "type": "requires"
    },
    {
+    "from": "concept:project-phase",
+    "to": "concept:project",
+    "type": "requires"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "concept:project",
     "type": "requires"
@@ -5980,6 +6036,16 @@
     "from": "concept:subproject",
     "to": "concept:project",
     "type": "part_of"
+   },
+   {
+    "from": "concept:project-phase",
+    "to": "concept:project",
+    "type": "part_of"
+   },
+   {
+    "from": "concept:project-phase",
+    "to": "module:projects",
+    "type": "kept_by"
    },
    {
     "from": "concept:task",
@@ -7205,6 +7271,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:project-phase",
+    "to": "function:project:manage",
+    "type": "has_function"
+   },
+   {
     "from": "concept:contract",
     "to": "function:project:manage",
     "type": "has_function"
@@ -7250,6 +7321,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:project-phase",
+    "to": "function:project:stage",
+    "type": "has_function"
+   },
+   {
     "from": "concept:contract",
     "to": "function:project:stage",
     "type": "has_function"
@@ -7291,6 +7367,11 @@
    },
    {
     "from": "concept:project",
+    "to": "function:finance:read",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:project-phase",
     "to": "function:finance:read",
     "type": "has_function"
    },
@@ -7341,6 +7422,11 @@
    },
    {
     "from": "concept:project",
+    "to": "function:finance:manage",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:project-phase",
     "to": "function:finance:manage",
     "type": "has_function"
    },
@@ -7415,6 +7501,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-phase",
+    "to": "requirement:PF-1",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:contract",
     "to": "requirement:PF-1",
     "type": "must_satisfy"
@@ -7441,6 +7532,11 @@
    },
    {
     "from": "concept:project",
+    "to": "requirement:PF-2",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-phase",
     "to": "requirement:PF-2",
     "type": "must_satisfy"
    },
@@ -7471,6 +7567,11 @@
    },
    {
     "from": "concept:project",
+    "to": "requirement:PF-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-phase",
     "to": "requirement:PF-3",
     "type": "must_satisfy"
    },
@@ -7501,6 +7602,11 @@
    },
    {
     "from": "concept:project",
+    "to": "requirement:PF-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-phase",
     "to": "requirement:PF-4",
     "type": "must_satisfy"
    },
@@ -7531,6 +7637,11 @@
    },
    {
     "from": "concept:project",
+    "to": "requirement:PF-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-phase",
     "to": "requirement:PF-5",
     "type": "must_satisfy"
    },
@@ -7570,6 +7681,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-phase",
+    "to": "requirement:PR-1",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:contract",
     "to": "requirement:PR-1",
     "type": "must_satisfy"
@@ -7600,6 +7716,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-phase",
+    "to": "requirement:PR-2",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:contract",
     "to": "requirement:PR-2",
     "type": "must_satisfy"
@@ -7630,6 +7751,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-phase",
+    "to": "requirement:PR-3",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:contract",
     "to": "requirement:PR-3",
     "type": "must_satisfy"
@@ -7660,6 +7786,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-phase",
+    "to": "requirement:PR-4",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:contract",
     "to": "requirement:PR-4",
     "type": "must_satisfy"
@@ -7677,6 +7808,41 @@
    {
     "from": "concept:project_health_update",
     "to": "requirement:PR-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "module:projects",
+    "to": "requirement:PR-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project",
+    "to": "requirement:PR-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-phase",
+    "to": "requirement:PR-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:contract",
+    "to": "requirement:PR-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:payment",
+    "to": "requirement:PR-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-budget",
+    "to": "requirement:PR-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project_health_update",
+    "to": "requirement:PR-5",
     "type": "must_satisfy"
    },
    {
@@ -11009,6 +11175,11 @@
     "type": "stated_in"
    },
    {
+    "from": "requirement:PR-5",
+    "to": "spec:projects.md",
+    "type": "stated_in"
+   },
+   {
     "from": "requirement:AA-1",
     "to": "spec:agent-access.md",
     "type": "stated_in"
@@ -11730,6 +11901,11 @@
    },
    {
     "from": "concept:project",
+    "to": "flow:shareholder",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:project-phase",
     "to": "flow:shareholder",
     "type": "in_flow"
    },
@@ -13569,6 +13745,11 @@
     "type": "belongs_to"
    },
    {
+    "from": "table:project_phases",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
     "from": "table:project_updates",
     "to": "module:projects",
     "type": "belongs_to"
@@ -13595,6 +13776,21 @@
    },
    {
     "from": "route:GET /api/costs/projects/{id}/margin",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/project-phases",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:POST /api/project-phases",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:PATCH /api/project-phases/{id}",
     "to": "module:projects",
     "type": "belongs_to"
    },
@@ -15234,6 +15430,11 @@
     "type": "refers_to"
    },
    {
+    "from": "table:project_phases",
+    "to": "table:projects",
+    "type": "refers_to"
+   },
+   {
     "from": "table:project_updates",
     "to": "table:projects",
     "type": "refers_to"
@@ -15466,6 +15667,11 @@
    {
     "from": "concept:project",
     "to": "table:projects",
+    "type": "stored_in"
+   },
+   {
+    "from": "concept:project-phase",
+    "to": "table:project_phases",
     "type": "stored_in"
    },
    {

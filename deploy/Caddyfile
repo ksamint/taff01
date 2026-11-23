@@ -33,6 +33,10 @@
 	handle @timelineReads {
 		reverse_proxy api-rs:3003
 	}
+	@projectPhases path /api/project-phases /api/project-phases/*
+	handle @projectPhases {
+		reverse_proxy api-rs:3003
+	}
 	reverse_proxy @backend api:3001
 	reverse_proxy web:3000
 }

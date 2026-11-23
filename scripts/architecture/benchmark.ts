@@ -33,9 +33,8 @@ export const ASSESSMENT: Assessment = {
     },
     projects: { status: "yes", where: ["concept:project", "module:projects"] },
     "phases-sections-inside-project": {
-      status: "no",
-      where: ["concept:subproject"],
-      note: "Marked not modelled. Open decision.",
+      status: "yes",
+      where: ["concept:project-phase", "module:projects"],
     },
     "milestones-checkpoints": {
       status: "yes",

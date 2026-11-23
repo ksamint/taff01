@@ -58,6 +58,15 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
   one of `on_track`, `at_risk` or `off_track`, and up to 2,000 characters
   of text. Updates are append-only.
 
+### Project phases (PR-5)
+
+- PR-5.1 Project readers shall see named phase spans on the project timeline
+  in persisted position order. The timeline shall show phases even when the
+  project has no scheduled tasks.
+- PR-5.2 A person with project management authority shall create and edit
+  phase names and inclusive civil-date spans. New phases append; start shall
+  be on or before end. The phase list and audit shall be workspace scoped.
+
 ## Non-functional
 
 - The existing `POST /api/projects` and versioned `PATCH /api/projects/:id`
@@ -85,6 +94,7 @@ Status: introduced in v0.2.24 (`ff411c6`) and retained in deployed v0.2.25 (`e5a
 | PR-1.9 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
 | PR-3 | `e2e/board-access.spec.ts`, card height, target sizes and controls in three locales |
 | PR-2.1–2.3 | `e2e/project-profile.spec.ts` member/lead reads, rejected field writes, stage control and open-editor authority loss; `packages/core/src/permissions.test.ts` |
+| PR-5 | `backend/crates/taff-api/tests/project_phases.rs` and `e2e/project-phases.spec.ts` |
 | PR-4 | `backend/crates/taff-api/tests/project_health.rs`, `e2e/project-health-updates.spec.ts` |
 
 ## Open decisions

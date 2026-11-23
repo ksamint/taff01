@@ -36,6 +36,7 @@ const FAMILIES = [
   "dailyDigest",
   // Planning (ADR 0015), keyed by project: ["timeline", projectId] and so on.
   "timeline",
+  "project-phases",
   "project-updates",
   "milestones",
   "payments",
