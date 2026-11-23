@@ -2559,6 +2559,14 @@
     }
    },
    {
+    "id": "requirement:TT-11",
+    "type": "requirement",
+    "title": "TT-11 Local wire replay",
+    "attrs": {
+     "statements": 3
+    }
+   },
+   {
     "id": "flow:handoff",
     "type": "flow",
     "title": "A person hands work to an agent and approves it"
@@ -10927,6 +10935,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "product:taff",
+    "to": "requirement:TT-11",
+    "type": "must_satisfy"
+   },
+   {
     "from": "requirement:PF-1",
     "to": "spec:project-finance.md",
     "type": "stated_in"
@@ -11273,6 +11286,11 @@
    },
    {
     "from": "requirement:TT-9",
+    "to": "spec:tooling.md",
+    "type": "stated_in"
+   },
+   {
+    "from": "requirement:TT-11",
     "to": "spec:tooling.md",
     "type": "stated_in"
    },
