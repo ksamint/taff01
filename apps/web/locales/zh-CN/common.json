@@ -62,6 +62,8 @@
     "not_found": "此项目已不存在，请刷新后重试。",
     "invalid_input": "请检查填写的信息后重试。",
     "conflict": "此项目已在其他地方更改，请刷新后重试。",
+    "currency_mismatch": "计算利润需要收款和实际成本使用同一币种。",
+    "cost_incomplete": "所有已记录工时都设有小时费率后，即可计算利润。",
     "internal_error": "出现问题，请重试。",
     "network": "无法连接，请检查网络后重试。",
     "auth": "无法登录，请检查用户名、手机号或邮箱及密码后重试。",
@@ -1668,6 +1670,7 @@
   "projectFinance": {
     "title": "财务",
     "agentCost": "智能体成本",
+    "margin": "利润",
     "budgetActual": "预算 / 实际成本",
     "budget": "预算",
     "budgetAmount": "预算金额",

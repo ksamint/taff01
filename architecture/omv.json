@@ -869,6 +869,17 @@
     }
    },
    {
+    "id": "concept:project-margin",
+    "type": "concept",
+    "title": "Project margin",
+    "summary": "Payments received minus actual costs in the same currency.",
+    "attrs": {
+     "tier": 5,
+     "kind": "view",
+     "dependents": 0
+    }
+   },
+   {
     "id": "concept:project_health_update",
     "type": "concept",
     "title": "Project health update",
@@ -1913,6 +1924,14 @@
     "title": "PF-4 Budget and actual",
     "attrs": {
      "statements": 3
+    }
+   },
+   {
+    "id": "requirement:PF-5",
+    "type": "requirement",
+    "title": "PF-5 Margin",
+    "attrs": {
+     "statements": 2
     }
    },
    {
@@ -5122,6 +5141,14 @@
     }
    },
    {
+    "id": "route:GET /api/costs/projects/{id}/margin",
+    "type": "route",
+    "title": "GET /api/costs/projects/{id}/margin",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
     "id": "route:GET /api/project-updates",
     "type": "route",
     "title": "GET /api/project-updates",
@@ -6293,6 +6320,11 @@
     "type": "kept_by"
    },
    {
+    "from": "concept:project-margin",
+    "to": "concept:project",
+    "type": "part_of"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "concept:project",
     "type": "part_of"
@@ -7458,6 +7490,36 @@
    {
     "from": "concept:project_health_update",
     "to": "requirement:PF-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "module:projects",
+    "to": "requirement:PF-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project",
+    "to": "requirement:PF-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:contract",
+    "to": "requirement:PF-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:payment",
+    "to": "requirement:PF-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-budget",
+    "to": "requirement:PF-5",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project_health_update",
+    "to": "requirement:PF-5",
     "type": "must_satisfy"
    },
    {
@@ -10885,6 +10947,11 @@
     "type": "stated_in"
    },
    {
+    "from": "requirement:PF-5",
+    "to": "spec:project-finance.md",
+    "type": "stated_in"
+   },
+   {
     "from": "requirement:PR-1",
     "to": "spec:projects.md",
     "type": "stated_in"
@@ -13481,6 +13548,11 @@
    },
    {
     "from": "route:POST /api/costs/projects/{id}/budget",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/costs/projects/{id}/margin",
     "to": "module:projects",
     "type": "belongs_to"
    },

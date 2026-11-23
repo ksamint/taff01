@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (512 distinct, 2398 uses)
+## Test ids (513 distinct, 2401 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -495,6 +495,12 @@ several do). “Also rendered by” lists the other files.
 | `project-payment-note` | 1 |  | project-finance.spec.ts |
 | `project-payment-save` | 2 |  | project-finance.spec.ts |
 
+### project-margin.tsx
+
+| Test id | Uses | Also rendered by | Used in |
+| --- | ---: | --- | --- |
+| `project-finance-margin` | 1 |  | project-margin.spec.ts |
+
 ### projects-scene.tsx
 
 | Test id | Uses | Also rendered by | Used in |
@@ -780,7 +786,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-dependency-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-duration` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-finance` | 9 |  | finance-visibility.spec.ts, live/platform.spec.ts, timeline.spec.ts |
-| `timeline-finance-toggle` | 6 |  | agent-cost.spec.ts, project-budget-actual.spec.ts, project-finance.spec.ts, timeline.spec.ts |
+| `timeline-finance-toggle` | 8 |  | agent-cost.spec.ts, project-budget-actual.spec.ts, project-finance.spec.ts, project-margin.spec.ts, timeline.spec.ts |
 | `timeline-footer` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-hint` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-mode` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -840,7 +846,7 @@ several do). “Also rendered by” lists the other files.
 
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
-| `alert` | 40 | agent-creation.spec.ts, audience-editing.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts, workspace-lifecycle.spec.ts |
+| `alert` | 42 | agent-creation.spec.ts, audience-editing.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, project-margin.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts, workspace-lifecycle.spec.ts |
 | `button` | 12 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, project-header.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
 | `button — name: /Repeated task/` | 1 | task-links.spec.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
@@ -869,6 +875,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.projectUpdates.older` | 1 | project-health-updates.spec.ts |
 | `button — name: m.projectUpdates.post` | 2 | project-health-updates.spec.ts |
 | `button — name: m.projectUpdates.title` | 1 | project-health-updates.spec.ts |
+| `button — name: m.retry` | 2 | project-margin.spec.ts |
 | `button — name: m.run.cancel` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.sms.send` | 2 | sms-auth.spec.ts |
 | `button — name: m.sms.verify` | 3 | sms-auth.spec.ts |
@@ -1276,6 +1283,8 @@ Keys read from `apps/web/locales/*/common.json` through
 | `en` | 1 | me.spec.ts |
 | `errors.auth` | 6 | sms-auth.spec.ts, username-auth.spec.ts |
 | `errors.conflict` | 13 | audience-editing.spec.ts, calendar.spec.ts, planning.spec.ts, project-profile.spec.ts |
+| `errors.cost_incomplete` | 1 | project-margin.spec.ts |
+| `errors.currency_mismatch` | 1 | project-margin.spec.ts |
 | `errors.email_verification_required` | 5 | planning.spec.ts |
 | `errors.forbidden` | 16 | access.spec.ts, agent-creation.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts |
 | `errors.internal_error` | 3 | calendar.spec.ts, workspace-lifecycle.spec.ts |
@@ -1380,7 +1389,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `pwa.reconnect` | 1 | persistence.spec.ts |
 | `relations.edge.depends_on.out` | 14 | live/timeline.spec.ts, timeline.spec.ts |
-| `retry` | 2 | calendar.spec.ts, ssr-session.spec.ts |
+| `retry` | 4 | calendar.spec.ts, project-margin.spec.ts, ssr-session.spec.ts |
 | `review.approved` | 1 | accessibility.spec.ts |
 | `run.cancel` | 2 | optimistic-m4.spec.ts |
 | `run.keep` | 1 | optimistic-m4.spec.ts |

@@ -62,6 +62,8 @@
     "not_found": "That item is no longer available. Refresh and try again.",
     "invalid_input": "Check the details and try again.",
     "conflict": "This changed elsewhere. Refresh and try again.",
+    "currency_mismatch": "Margin needs payments and actual costs in one currency.",
+    "cost_incomplete": "Margin is available once all logged time has an hourly rate.",
     "internal_error": "Something went wrong. Please try again.",
     "network": "Couldn’t connect. Check your connection and try again.",
     "auth": "Can't sign in. Check your username, mobile or email and password, then try again.",
@@ -1668,6 +1670,7 @@
   "projectFinance": {
     "title": "Finance",
     "agentCost": "Agent cost",
+    "margin": "Margin",
     "budgetActual": "Budget / Actual",
     "budget": "Budget",
     "budgetAmount": "Budget amount",

@@ -19,6 +19,7 @@ import { timelineKey } from "../lib/timeline-queries";
 import { showToast } from "../lib/toast";
 import { useWorkspace } from "./app-shell";
 import { ProjectBudgetActual } from "./project-budget-actual";
+import { ProjectMargin, projectMarginKey } from "./project-margin";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -102,6 +103,7 @@ export function ProjectFinancePanel({ project }: { project: Project }) {
   const refresh = () => {
     void client.invalidateQueries({ queryKey: paymentsKey(project.id) });
     void client.invalidateQueries({ queryKey: timelineKey(project.id) });
+    void client.invalidateQueries({ queryKey: projectMarginKey(project.id) });
   };
 
   return (
@@ -162,6 +164,9 @@ export function ProjectFinancePanel({ project }: { project: Project }) {
             <dt>{t("projectFinance.agentCost")}</dt>
             <dd>{formatAgentCost(agentCost.data.costMicros, locale)}</dd>
           </div>
+        )}
+        {canReadCost && (
+          <ProjectMargin key={project.id} projectId={project.id} />
         )}
         {canManage && (
           <div>

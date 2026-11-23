@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT projects.currency, coalesce((\n                SELECT sum(amount) * 1000000\n                FROM project_payments\n                WHERE project_payments.workspace_id = projects.workspace_id\n                  AND project_payments.project_id = projects.id\n            ), 0)::bigint AS \"paid_micros!\"\n            FROM projects\n            WHERE projects.workspace_id = $1 AND projects.id = $2\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "currency",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "paid_micros!",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [true, null]
+  },
+  "hash": "76fd3ac3f8016604e49ea839408b355c0deac2f682ad341b6db42dc227eadbb5"
+}

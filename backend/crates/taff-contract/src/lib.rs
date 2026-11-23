@@ -45,3 +45,5 @@ pub use time_tracking::{
 };
 mod project_actual;
 pub use project_actual::{ActualCurrency, MAX_PROJECT_FINANCE_TOTAL, ProjectActual, ProjectBudget};
+mod project_margin;
+pub use project_margin::ProjectMargin;

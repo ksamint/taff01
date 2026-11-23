@@ -191,6 +191,8 @@ export const errorSchema = object({
     "not_found",
     "invalid_input",
     "conflict",
+    "currency_mismatch",
+    "cost_incomplete",
     "internal_error",
     "rate_limited",
     "sms_unavailable",

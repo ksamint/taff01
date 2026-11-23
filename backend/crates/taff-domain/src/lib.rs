@@ -27,6 +27,10 @@ mod tests {
         assert_eq!(CoreError::Forbidden.status(), 403);
         assert_eq!(CoreError::NotFound.status(), 404);
         assert_eq!(CoreError::Conflict.status(), 409);
+        assert_eq!(CoreError::CostIncomplete.status(), 409);
+        assert_eq!(CoreError::CostIncomplete.code(), "cost_incomplete");
+        assert_eq!(CoreError::CurrencyMismatch.status(), 409);
+        assert_eq!(CoreError::CurrencyMismatch.code(), "currency_mismatch");
         assert_eq!(CoreError::RateLimited.status(), 429);
         assert_eq!(CoreError::RateLimited.code(), "rate_limited");
         assert_eq!(

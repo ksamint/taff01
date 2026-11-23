@@ -10,7 +10,7 @@ use taff_contract::{ActualCurrency, MAX_PROJECT_FINANCE_TOTAL, ProjectActual, Pr
 use taff_domain::{Action, CoreError, Result};
 use uuid::Uuid;
 
-fn finance_total(value: i64) -> Result<i64> {
+pub(crate) fn finance_total(value: i64) -> Result<i64> {
     if (0..=MAX_PROJECT_FINANCE_TOTAL).contains(&value) {
         Ok(value)
     } else {

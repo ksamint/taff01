@@ -15,6 +15,10 @@ pub enum CoreError {
     RateLimited,
     #[error("conflict")]
     Conflict,
+    #[error("cost_incomplete")]
+    CostIncomplete,
+    #[error("currency_mismatch")]
+    CurrencyMismatch,
     #[error(transparent)]
     Other(#[from] anyhow::Error),
 }
@@ -27,7 +31,7 @@ impl CoreError {
             CoreError::Unauthorized => 401,
             CoreError::Forbidden => 403,
             CoreError::NotFound => 404,
-            CoreError::Conflict => 409,
+            CoreError::Conflict | CoreError::CostIncomplete | CoreError::CurrencyMismatch => 409,
             CoreError::RateLimited => 429,
             CoreError::Other(_) => 500,
         }
@@ -42,6 +46,8 @@ impl CoreError {
             CoreError::Forbidden => "forbidden",
             CoreError::NotFound => "not_found",
             CoreError::Conflict => "conflict",
+            CoreError::CostIncomplete => "cost_incomplete",
+            CoreError::CurrencyMismatch => "currency_mismatch",
             CoreError::RateLimited => "rate_limited",
             CoreError::Other(_) => "internal_error",
         }
