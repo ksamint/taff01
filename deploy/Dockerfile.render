@@ -5,8 +5,11 @@ WORKDIR /repo
 COPY backend ./backend
 COPY packages/schemas/generated ./packages/schemas/generated
 # Build with the pinned image toolchain. The local Rust gate runs rustfmt and Clippy.
-RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/repo/backend/target \
-    cd backend && cargo +"$RUST_VERSION" build --release --locked -p taff-render && cp target/release/taff-render /taff-render
+# Cached Cargo outputs can be newer than sources from another checkout.
+RUN --mount=type=cache,target=/usr/local/cargo/registry --mount=type=cache,target=/repo/backend/target,sharing=locked \
+    cd backend \
+    && find crates ../packages/schemas/generated -type f -exec touch {} + \
+    && cargo +"$RUST_VERSION" build --release --locked -p taff-render && cp target/release/taff-render /taff-render
 
 FROM alpine:3.23
 RUN addgroup -S renderer && adduser -S -G renderer renderer
