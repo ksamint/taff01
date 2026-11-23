@@ -16,6 +16,7 @@ export const PERMISSION_ACTIONS = [
   "workspace:manage",
   "project:manage",
   "project:stage",
+  "project:health:post",
   "task:edit",
   "task:owner",
   "task:comment",
@@ -163,6 +164,11 @@ export function can(
     actor.workspaceId !== resource.workspaceId
   )
     return false;
+  if (action === "project:health:post")
+    return (
+      actor.kind === "person" &&
+      (actor.role === "admin" || actor.id === resource.leadId)
+    );
   if (
     actor.role === "guest" &&
     ![

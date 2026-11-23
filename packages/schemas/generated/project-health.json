@@ -1,0 +1,166 @@
+{
+  "input": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "ProjectHealth": {
+        "enum": [
+          "on_track",
+          "at_risk",
+          "off_track"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "body": {
+        "maxLength": 2000,
+        "type": "string"
+      },
+      "health": {
+        "$ref": "#/definitions/ProjectHealth"
+      },
+      "projectId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "body",
+      "health",
+      "projectId"
+    ],
+    "title": "ProjectHealthInput",
+    "type": "object"
+  },
+  "page": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "ProjectHealth": {
+        "enum": [
+          "on_track",
+          "at_risk",
+          "off_track"
+        ],
+        "type": "string"
+      },
+      "ProjectHealthUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "authorId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "body": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "health": {
+            "$ref": "#/definitions/ProjectHealth"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "workspaceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "authorId",
+          "body",
+          "createdAt",
+          "health",
+          "id",
+          "projectId",
+          "workspaceId"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "nextCursor": {
+        "format": "uuid",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "updates": {
+        "items": {
+          "$ref": "#/definitions/ProjectHealthUpdate"
+        },
+        "type": "array"
+      }
+    },
+    "required": [
+      "updates"
+    ],
+    "title": "ProjectHealthPage",
+    "type": "object"
+  },
+  "update": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "ProjectHealth": {
+        "enum": [
+          "on_track",
+          "at_risk",
+          "off_track"
+        ],
+        "type": "string"
+      }
+    },
+    "properties": {
+      "authorId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "body": {
+        "maxLength": 2000,
+        "type": "string"
+      },
+      "createdAt": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "health": {
+        "$ref": "#/definitions/ProjectHealth"
+      },
+      "id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "projectId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "workspaceId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "authorId",
+      "body",
+      "createdAt",
+      "health",
+      "id",
+      "projectId",
+      "workspaceId"
+    ],
+    "title": "ProjectHealthUpdate",
+    "type": "object"
+  }
+}

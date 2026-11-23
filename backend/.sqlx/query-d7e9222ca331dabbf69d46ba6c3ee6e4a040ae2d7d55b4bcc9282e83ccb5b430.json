@@ -1,0 +1,33 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT projects.workspace_id, projects.lead_id, members.id AS member_id,\n               members.role::text AS \"role!\"\n        FROM projects\n        JOIN workspaces ON workspaces.id = projects.workspace_id AND workspaces.archived_at IS NULL\n        JOIN members ON members.workspace_id = projects.workspace_id\n                     AND members.user_id = $2 AND members.kind = 'person'\n        WHERE projects.id = $1\n        FOR SHARE OF projects, members, workspaces\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "lead_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "member_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "role!",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Text"]
+    },
+    "nullable": [false, true, false, null]
+  },
+  "hash": "d7e9222ca331dabbf69d46ba6c3ee6e4a040ae2d7d55b4bcc9282e83ccb5b430"
+}

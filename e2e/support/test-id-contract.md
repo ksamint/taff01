@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (511 distinct, 2393 uses)
+## Test ids (511 distinct, 2395 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -786,7 +786,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-new-milestone` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-predecessor` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-rename-milestone` | 6 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
-| `timeline-risk` | 1 |  | timeline.spec.ts |
+| `timeline-risk` | 3 |  | project-health-updates.spec.ts, timeline.spec.ts |
 | `timeline-row` | 5 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-save` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-start` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -861,6 +861,9 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.organization.invite` | 9 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.planning.close` | 7 | access.spec.ts, live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.projects.archive` | 1 | project-profile.spec.ts |
+| `button — name: m.projectUpdates.older` | 1 | project-health-updates.spec.ts |
+| `button — name: m.projectUpdates.post` | 2 | project-health-updates.spec.ts |
+| `button — name: m.projectUpdates.title` | 1 | project-health-updates.spec.ts |
 | `button — name: m.run.cancel` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.sms.send` | 2 | sms-auth.spec.ts |
 | `button — name: m.sms.verify` | 3 | sms-auth.spec.ts |
@@ -889,6 +892,8 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: m.crm.contacts.add` | 3 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
+| `dialog — name: m.projectUpdates.post` | 1 | project-health-updates.spec.ts |
+| `dialog — name: m.projectUpdates.title` | 1 | project-health-updates.spec.ts |
 | `dialog — name: title` | 1 | view-export.spec.ts |
 | `heading` | 8 | audit.spec.ts, board-access.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
 | `heading — name: heading` | 1 | font-loading.spec.ts |
@@ -958,6 +963,8 @@ several do). “Also rendered by” lists the other files.
 | Label | Uses | Used in |
 | --- | ---: | --- |
 | `m.accountIdentifier` | 1 | sms-auth.spec.ts |
+| `m.projectUpdates.healthLabel` | 1 | project-health-updates.spec.ts |
+| `m.projectUpdates.notes` | 1 | project-health-updates.spec.ts |
 | `m.sms.code` | 5 | sms-auth.spec.ts |
 | `m.usernameOptional` | 1 | username-auth.spec.ts |
 | `messages[locale].accountIdentifier` | 2 | sms-auth.spec.ts, username-auth.spec.ts |
@@ -1312,6 +1319,13 @@ Keys read from `apps/web/locales/*/common.json` through
 | `projects.sectorsHint` | 2 | operation-templates.spec.ts |
 | `projects.stages.proposal_sent` | 4 | project-profile.spec.ts |
 | `projects.views` | 2 | project-graph-view.spec.ts, project-header.spec.ts |
+| `projectUpdates.health.at_risk` | 1 | project-health-updates.spec.ts |
+| `projectUpdates.health.off_track` | 1 | project-health-updates.spec.ts |
+| `projectUpdates.healthLabel` | 1 | project-health-updates.spec.ts |
+| `projectUpdates.notes` | 1 | project-health-updates.spec.ts |
+| `projectUpdates.older` | 1 | project-health-updates.spec.ts |
+| `projectUpdates.post` | 3 | project-health-updates.spec.ts |
+| `projectUpdates.title` | 2 | project-health-updates.spec.ts |
 | `pwa.offlineTitle` | 1 | persistence.spec.ts |
 | `pwa.reconnect` | 1 | persistence.spec.ts |
 | `relations.edge.depends_on.out` | 14 | live/timeline.spec.ts, timeline.spec.ts |

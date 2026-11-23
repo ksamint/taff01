@@ -12,10 +12,10 @@ sqlx = { workspace = true, features = ["macros"] }
 uuid.workspace = true
 chrono.workspace = true
 serde.workspace = true
+serde_json.workspace = true
 thiserror.workspace = true
 taff-contract = { path = "../taff-contract" }
 taff-domain = { path = "../taff-domain" }
 
 [dev-dependencies]
 tokio.workspace = true
-serde_json.workspace = true

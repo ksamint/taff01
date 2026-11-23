@@ -28,3 +28,7 @@ pub struct AgentCost {
     #[schemars(range(max = "MAX_AGENT_COST_TOTAL"))]
     pub duration_ms: u64,
 }
+mod project_health;
+pub use project_health::{
+    ProjectHealth, ProjectHealthInput, ProjectHealthPage, ProjectHealthUpdate,
+};

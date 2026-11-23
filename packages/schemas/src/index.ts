@@ -1019,6 +1019,7 @@ export const mcpSummariesImageArgs = strictObject({
 export { type AgentCost, agentCostSchema } from "./agent-cost";
 export * from "./calendar-image";
 export * from "./graph-image";
+export * from "./project-health";
 export * from "./summary-image";
 export * from "./summary-layout";
 export * from "./timeline-image";

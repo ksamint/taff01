@@ -272,6 +272,42 @@ export const projects = pgTable(
     }),
   ],
 );
+export const projectHealth = pgEnum("project_health", [
+  "on_track",
+  "at_risk",
+  "off_track",
+]);
+
+export const projectUpdates = pgTable(
+  "project_updates",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    /** Historical member ID remains available after membership removal. */
+    authorId: uuid("author_id").notNull(),
+    health: projectHealth("health").notNull(),
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.projectId],
+      foreignColumns: [projects.workspaceId, projects.id],
+      name: "project_updates_project_fk",
+    }).onDelete("cascade"),
+    check("project_updates_body", sql`char_length(${t.body}) <= 2000`),
+    index("project_updates_history_idx").on(
+      t.workspaceId,
+      t.projectId,
+      t.createdAt.desc().nullsFirst(),
+      t.id.desc().nullsFirst(),
+    ),
+  ],
+);
+
 export const tasks = pgTable(
   "tasks",
   {

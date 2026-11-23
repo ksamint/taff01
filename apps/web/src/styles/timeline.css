@@ -81,6 +81,46 @@
 .timeline-risk.is-high .timeline-risk-level {
   color: var(--danger);
 }
+.project-health-controls,
+.project-health-history li header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+}
+.project-health-chip {
+  border-radius: var(--radius-control);
+  padding: 3px 8px;
+  font-size: 12px;
+  font-weight: var(--weight-label);
+  background: var(--success-bg);
+  color: var(--success);
+}
+.project-health-chip.is-at_risk {
+  background: var(--warning-bg);
+  color: var(--warning);
+}
+.project-health-chip.is-off_track {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+.project-health-history {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.project-health-history li {
+  border-bottom: var(--hairline) solid var(--border);
+  padding-block: var(--space-sm);
+}
+.project-health-history li header {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.project-health-history p {
+  margin: var(--space-sm) 0 0;
+  overflow-wrap: anywhere;
+}
 .timeline-legend {
   display: flex;
   gap: 14px;

@@ -355,6 +355,15 @@ export const THINGS: Thing[] = [
     "project",
     "Money received. Append-only.",
   ),
+  thing(
+    "project_health_update",
+    "Project health update",
+    5,
+    "event",
+    ["project_updates"],
+    "project",
+    "An append-only health statement from the project lead or an admin.",
+  ),
 
   thing(
     "company",

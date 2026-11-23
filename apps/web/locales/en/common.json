@@ -1599,6 +1599,20 @@
     "noPendingGrants": "No pending capability requests.",
     "request": "Request"
   },
+  "projectUpdates": {
+    "title": "Project updates",
+    "post": "Post update",
+    "healthLabel": "Project health",
+    "health": {
+      "on_track": "On track",
+      "at_risk": "At risk",
+      "off_track": "Off track"
+    },
+    "notes": "Update",
+    "bodyLimit": "Use up to {{max}} characters.",
+    "empty": "No updates yet.",
+    "older": "Load earlier updates"
+  },
   "projectFinance": {
     "title": "Finance",
     "agentCost": "Agent cost",

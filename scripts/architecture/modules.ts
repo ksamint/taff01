@@ -328,9 +328,13 @@ export const MODULES: ModuleMap[] = [
     title: "Projects and finance",
     summary:
       "Project profile, stage, person in charge, contract amount and payments.",
-    tables: ["projects", "project_payments"],
+    tables: ["projects", "project_payments", "project_updates"],
     core: ["planning.ts"],
-    routes: [/^\/api\/projects/, /^\/api\/costs\/projects\//],
+    routes: [
+      /^\/api\/projects/,
+      /^\/api\/costs\/projects\//,
+      /^\/api\/project-updates$/,
+    ],
     tools: [/^projects\./],
     pages: [/^\/projects/],
     components: ["project-finance-panel.tsx"],
