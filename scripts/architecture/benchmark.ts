@@ -259,7 +259,14 @@ export const ASSESSMENT: Assessment = {
       status: "yes",
       where: ["concept:contract", "concept:payment"],
     },
-    "budget-against-actual-cost": { status: "no" },
+    "budget-against-actual-cost": {
+      status: "yes",
+      where: [
+        "concept:project-budget",
+        "concept:time-entry",
+        "module:projects",
+      ],
+    },
     "time-tracking": {
       status: "yes",
       where: ["concept:time-entry", "concept:member-rate"],

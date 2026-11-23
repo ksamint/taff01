@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "INSERT INTO project_budgets (workspace_id, project_id, amount_micros, currency)\n                 VALUES ($1, $2, $3, $4)\n                 ON CONFLICT (project_id) DO UPDATE SET amount_micros = EXCLUDED.amount_micros, currency = EXCLUDED.currency\n                 RETURNING amount_micros, currency",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "amount_micros",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "currency",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Int8", "Text"]
+    },
+    "nullable": [false, false]
+  },
+  "hash": "7602eab1205a92619871732a9fc88abbd4a479ab77dfe3d2c9bb9031b882e5c0"
+}

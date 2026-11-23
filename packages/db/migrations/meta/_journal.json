@@ -337,6 +337,13 @@
       "when": 1795396538249,
       "tag": "0047_time_tracking",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "7",
+      "when": 1795397097531,
+      "tag": "0048_project_budgets",
+      "breakpoints": true
     }
   ]
 }

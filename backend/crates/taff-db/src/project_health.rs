@@ -33,7 +33,7 @@ fn update(row: UpdateRow) -> Result<ProjectHealthUpdate> {
     })
 }
 
-async fn require_project(
+pub(crate) async fn require_project(
     connection: &mut PgConnection,
     user_id: &str,
     project_id: Uuid,

@@ -58,6 +58,30 @@
   font-size: 13px;
   color: var(--text-muted);
 }
+.project-budget-actual {
+  display: grid;
+  gap: var(--space-sm);
+  padding-top: var(--space-sm);
+  border-top: var(--hairline) solid var(--border-line);
+}
+.project-budget-actual .project-finance-head h3,
+.project-budget-warning {
+  margin: 0;
+}
+.project-budget-actual .project-finance-facts dd {
+  overflow-wrap: anywhere;
+}
+.project-finance-facts .project-budget-detail {
+  font-size: 12px;
+  font-weight: var(--weight-body);
+  color: var(--text-muted);
+}
+.project-budget-warning {
+  padding: var(--space-sm);
+  border-radius: var(--radius-control);
+  background: var(--warning-bg);
+  color: var(--warning);
+}
 .project-finance-payments {
   display: grid;
   gap: 4px;

@@ -43,3 +43,5 @@ pub use time_tracking::{
     MAX_RATE_MICROS_PER_HOUR, MemberRate, MemberRateInput, TimeEntries, TimeEntry, TimeEntryEdit,
     TimeEntryInput,
 };
+mod project_actual;
+pub use project_actual::{ActualCurrency, MAX_PROJECT_FINANCE_TOTAL, ProjectActual, ProjectBudget};

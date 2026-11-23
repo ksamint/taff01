@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (512 distinct, 2397 uses)
+## Test ids (512 distinct, 2398 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -780,7 +780,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-dependency-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-duration` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-finance` | 9 |  | finance-visibility.spec.ts, live/platform.spec.ts, timeline.spec.ts |
-| `timeline-finance-toggle` | 5 |  | agent-cost.spec.ts, project-finance.spec.ts, timeline.spec.ts |
+| `timeline-finance-toggle` | 6 |  | agent-cost.spec.ts, project-budget-actual.spec.ts, project-finance.spec.ts, timeline.spec.ts |
 | `timeline-footer` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-hint` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-mode` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -863,6 +863,8 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.organization.invite` | 9 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.planning.close` | 7 | access.spec.ts, live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.planning.save` | 3 | time-tracking.spec.ts |
+| `button — name: m.projectFinance.editBudget` | 2 | project-budget-actual.spec.ts |
+| `button — name: m.projectFinance.save` | 1 | project-budget-actual.spec.ts |
 | `button — name: m.projects.archive` | 1 | project-profile.spec.ts |
 | `button — name: m.projectUpdates.older` | 1 | project-health-updates.spec.ts |
 | `button — name: m.projectUpdates.post` | 2 | project-health-updates.spec.ts |
@@ -907,6 +909,7 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.crm.companies.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: m.crm.contacts.add` | 3 | crm.spec.ts, live/crm.spec.ts, task-contacts.spec.ts |
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
+| `dialog — name: m.projectFinance.editBudget` | 1 | project-budget-actual.spec.ts |
 | `dialog — name: m.projectUpdates.post` | 1 | project-health-updates.spec.ts |
 | `dialog — name: m.projectUpdates.title` | 1 | project-health-updates.spec.ts |
 | `dialog — name: m.taskLinks.add` | 1 | task-links.spec.ts |
@@ -962,6 +965,7 @@ several do). “Also rendered by” lists the other files.
 | `progressbar` | 1 | summaries.spec.ts |
 | `region — name: m.access.agents` | 1 | access.spec.ts |
 | `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
+| `region — name: m.projectFinance.budgetActual` | 1 | project-budget-actual.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
 | `region — name: m.taskCriteria.title` | 1 | task-criteria.spec.ts |
@@ -972,7 +976,7 @@ several do). “Also rendered by” lists the other files.
 | `row` | 3 | access.spec.ts |
 | `rowheader — name: client.client_name` | 1 | access.spec.ts |
 | `rowheader — name: token.name` | 2 | access.spec.ts |
-| `status` | 3 | audience-editing.spec.ts, completion.spec.ts, sms-auth.spec.ts |
+| `status` | 4 | audience-editing.spec.ts, completion.spec.ts, project-budget-actual.spec.ts, sms-auth.spec.ts |
 | `status — name: ""` | 1 | access.spec.ts |
 | `switch` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `tab — name: m.access.agents` | 1 | access.spec.ts |
@@ -991,6 +995,7 @@ several do). “Also rendered by” lists the other files.
 | Label | Uses | Used in |
 | --- | ---: | --- |
 | `m.accountIdentifier` | 1 | sms-auth.spec.ts |
+| `m.projectFinance.budgetAmount` | 2 | project-budget-actual.spec.ts |
 | `m.projectUpdates.healthLabel` | 1 | project-health-updates.spec.ts |
 | `m.projectUpdates.notes` | 1 | project-health-updates.spec.ts |
 | `m.sms.code` | 5 | sms-auth.spec.ts |
@@ -998,7 +1003,7 @@ several do). “Also rendered by” lists the other files.
 | `m.taskLinks.kindLabel` | 1 | task-links.spec.ts |
 | `m.taskLinks.task` | 1 | task-links.spec.ts |
 | `m.timeTracking.amount` | 1 | time-tracking.spec.ts |
-| `m.timeTracking.currency` | 1 | time-tracking.spec.ts |
+| `m.timeTracking.currency` | 2 | project-budget-actual.spec.ts, time-tracking.spec.ts |
 | `m.timeTracking.day` | 1 | time-tracking.spec.ts |
 | `m.timeTracking.minutes` | 2 | time-tracking.spec.ts |
 | `m.timeTracking.note` | 2 | time-tracking.spec.ts |
@@ -1344,11 +1349,18 @@ Keys read from `apps/web/locales/*/common.json` through
 | `planning.close` | 22 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
 | `planning.high` | 1 | task-detail.spec.ts |
 | `planning.save` | 3 | time-tracking.spec.ts |
+| `projectFinance.actualInCurrency` | 1 | project-budget-actual.spec.ts |
 | `projectFinance.agentCost` | 1 | agent-cost.spec.ts |
+| `projectFinance.budgetActual` | 1 | project-budget-actual.spec.ts |
+| `projectFinance.budgetAmount` | 2 | project-budget-actual.spec.ts |
+| `projectFinance.editBudget` | 3 | project-budget-actual.spec.ts |
 | `projectFinance.invalidAmount` | 1 | project-finance.spec.ts |
+| `projectFinance.noBudget` | 2 | project-budget-actual.spec.ts |
 | `projectFinance.noContract` | 1 | project-finance.spec.ts |
 | `projectFinance.positiveAmount` | 1 | project-finance.spec.ts |
 | `projectFinance.readOnly` | 1 | project-finance.spec.ts |
+| `projectFinance.save` | 1 | project-budget-actual.spec.ts |
+| `projectFinance.unratedMinutes` | 1 | project-budget-actual.spec.ts |
 | `projects.archive` | 2 | project-profile.spec.ts |
 | `projects.deliveryProgress` | 5 | project-profile.spec.ts, timeline.spec.ts |
 | `projects.dueDate` | 2 | project-profile.spec.ts |
@@ -1424,7 +1436,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `timeline.rescheduled` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.resized` | 7 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeTracking.amount` | 1 | time-tracking.spec.ts |
-| `timeTracking.currency` | 1 | time-tracking.spec.ts |
+| `timeTracking.currency` | 2 | project-budget-actual.spec.ts, time-tracking.spec.ts |
 | `timeTracking.day` | 1 | time-tracking.spec.ts |
 | `timeTracking.edit` | 2 | time-tracking.spec.ts |
 | `timeTracking.empty` | 1 | time-tracking.spec.ts |

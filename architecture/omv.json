@@ -478,7 +478,7 @@
     "attrs": {
      "tier": 2,
      "kind": "kind",
-     "dependents": 6,
+     "dependents": 7,
      "stored": [
       "projects"
      ]
@@ -851,6 +851,20 @@
      "dependents": 0,
      "stored": [
       "project_payments"
+     ]
+    }
+   },
+   {
+    "id": "concept:project-budget",
+    "type": "concept",
+    "title": "Project budget",
+    "summary": "An amount in currency micros for comparison with actual costs.",
+    "attrs": {
+     "tier": 5,
+     "kind": "attribute",
+     "dependents": 0,
+     "stored": [
+      "project_budgets"
      ]
     }
    },
@@ -1889,6 +1903,14 @@
     "id": "requirement:PF-3",
     "type": "requirement",
     "title": "PF-3 Agent run cost",
+    "attrs": {
+     "statements": 3
+    }
+   },
+   {
+    "id": "requirement:PF-4",
+    "type": "requirement",
+    "title": "PF-4 Budget and actual",
     "attrs": {
      "statements": 3
     }
@@ -5056,6 +5078,11 @@
     }
    },
    {
+    "id": "table:project_budgets",
+    "type": "table",
+    "title": "project_budgets"
+   },
+   {
     "id": "table:project_payments",
     "type": "table",
     "title": "project_payments"
@@ -5074,6 +5101,22 @@
     "id": "route:GET /api/costs/projects/{id}",
     "type": "route",
     "title": "GET /api/costs/projects/{id}",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:GET /api/costs/projects/{id}/actual",
+    "type": "route",
+    "title": "GET /api/costs/projects/{id}/actual",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:POST /api/costs/projects/{id}/budget",
+    "type": "route",
+    "title": "POST /api/costs/projects/{id}/budget",
     "attrs": {
      "file": "backend/crates/taff-api/src/lib.rs"
     }
@@ -5855,6 +5898,11 @@
     "type": "requires"
    },
    {
+    "from": "concept:project-budget",
+    "to": "concept:project",
+    "type": "requires"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "concept:project",
     "type": "requires"
@@ -6231,6 +6279,16 @@
    },
    {
     "from": "concept:payment",
+    "to": "module:projects",
+    "type": "kept_by"
+   },
+   {
+    "from": "concept:project-budget",
+    "to": "concept:project",
+    "type": "part_of"
+   },
+   {
+    "from": "concept:project-budget",
     "to": "module:projects",
     "type": "kept_by"
    },
@@ -7093,6 +7151,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:project-budget",
+    "to": "function:project:manage",
+    "type": "has_function"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "function:project:manage",
     "type": "has_function"
@@ -7133,6 +7196,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:project-budget",
+    "to": "function:project:stage",
+    "type": "has_function"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "function:project:stage",
     "type": "has_function"
@@ -7169,6 +7237,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "function:finance:read",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:project-budget",
     "to": "function:finance:read",
     "type": "has_function"
    },
@@ -7214,6 +7287,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "function:finance:manage",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:project-budget",
     "to": "function:finance:manage",
     "type": "has_function"
    },
@@ -7283,6 +7361,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-budget",
+    "to": "requirement:PF-1",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "requirement:PF-1",
     "type": "must_satisfy"
@@ -7308,6 +7391,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-budget",
+    "to": "requirement:PF-2",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "requirement:PF-2",
     "type": "must_satisfy"
@@ -7333,8 +7421,43 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-budget",
+    "to": "requirement:PF-3",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "requirement:PF-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "module:projects",
+    "to": "requirement:PF-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project",
+    "to": "requirement:PF-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:contract",
+    "to": "requirement:PF-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:payment",
+    "to": "requirement:PF-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-budget",
+    "to": "requirement:PF-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project_health_update",
+    "to": "requirement:PF-4",
     "type": "must_satisfy"
    },
    {
@@ -7363,6 +7486,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-budget",
+    "to": "requirement:PR-1",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "requirement:PR-1",
     "type": "must_satisfy"
@@ -7388,6 +7516,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-budget",
+    "to": "requirement:PR-2",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "requirement:PR-2",
     "type": "must_satisfy"
@@ -7413,6 +7546,11 @@
     "type": "must_satisfy"
    },
    {
+    "from": "concept:project-budget",
+    "to": "requirement:PR-3",
+    "type": "must_satisfy"
+   },
+   {
     "from": "concept:project_health_update",
     "to": "requirement:PR-3",
     "type": "must_satisfy"
@@ -7434,6 +7572,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "requirement:PR-4",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:project-budget",
     "to": "requirement:PR-4",
     "type": "must_satisfy"
    },
@@ -10737,6 +10880,11 @@
     "type": "stated_in"
    },
    {
+    "from": "requirement:PF-4",
+    "to": "spec:project-finance.md",
+    "type": "stated_in"
+   },
+   {
     "from": "requirement:PR-1",
     "to": "spec:projects.md",
     "type": "stated_in"
@@ -11483,6 +11631,11 @@
    },
    {
     "from": "concept:payment",
+    "to": "flow:shareholder",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:project-budget",
     "to": "flow:shareholder",
     "type": "in_flow"
    },
@@ -13297,6 +13450,11 @@
     "type": "belongs_to"
    },
    {
+    "from": "table:project_budgets",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
     "from": "table:project_payments",
     "to": "module:projects",
     "type": "belongs_to"
@@ -13313,6 +13471,16 @@
    },
    {
     "from": "route:GET /api/costs/projects/{id}",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/costs/projects/{id}/actual",
+    "to": "module:projects",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:POST /api/costs/projects/{id}/budget",
     "to": "module:projects",
     "type": "belongs_to"
    },
@@ -14912,6 +15080,11 @@
     "type": "refers_to"
    },
    {
+    "from": "table:project_budgets",
+    "to": "table:projects",
+    "type": "refers_to"
+   },
+   {
     "from": "table:project_contacts",
     "to": "table:contacts",
     "type": "refers_to"
@@ -15309,6 +15482,11 @@
    {
     "from": "concept:payment",
     "to": "table:project_payments",
+    "type": "stored_in"
+   },
+   {
+    "from": "concept:project-budget",
+    "to": "table:project_budgets",
     "type": "stored_in"
    },
    {

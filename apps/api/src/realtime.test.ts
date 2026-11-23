@@ -320,6 +320,7 @@ describe("authenticated realtime boundaries", () => {
       "task_contacts.update",
       "contact_roles.delete",
       "project_payments.update",
+      "project_budgets.update",
     ]) {
       const received = message(alice);
       await deliver(change({ action }));

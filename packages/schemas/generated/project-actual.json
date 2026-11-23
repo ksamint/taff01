@@ -1,0 +1,115 @@
+{
+  "actual": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "ActualCurrency": {
+        "additionalProperties": false,
+        "properties": {
+          "agentMicros": {
+            "format": "int64",
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "timeMicros": {
+            "format": "int64",
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "totalMicros": {
+            "format": "int64",
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "agentMicros",
+          "currency",
+          "timeMicros",
+          "totalMicros"
+        ],
+        "type": "object"
+      },
+      "ProjectBudget": {
+        "additionalProperties": false,
+        "properties": {
+          "amountMicros": {
+            "format": "int64",
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "amountMicros",
+          "currency"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "budget": {
+        "anyOf": [
+          {
+            "$ref": "#/definitions/ProjectBudget"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "byCurrency": {
+        "items": {
+          "$ref": "#/definitions/ActualCurrency"
+        },
+        "type": "array"
+      },
+      "unratedMinutes": {
+        "format": "int64",
+        "maximum": 9007199254740991.0,
+        "minimum": 0.0,
+        "type": "integer"
+      }
+    },
+    "required": [
+      "budget",
+      "byCurrency",
+      "unratedMinutes"
+    ],
+    "title": "ProjectActual",
+    "type": "object"
+  },
+  "budget": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "amountMicros": {
+        "format": "int64",
+        "maximum": 9007199254740991.0,
+        "minimum": 0.0,
+        "type": "integer"
+      },
+      "currency": {
+        "pattern": "^[A-Z]{3}$",
+        "type": "string"
+      }
+    },
+    "required": [
+      "amountMicros",
+      "currency"
+    ],
+    "title": "ProjectBudget",
+    "type": "object"
+  }
+}

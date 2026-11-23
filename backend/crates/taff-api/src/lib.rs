@@ -1,3 +1,4 @@
+mod project_actual;
 mod project_health;
 mod task_criteria;
 mod task_links;
@@ -160,6 +161,14 @@ pub fn router() -> Router<AppState> {
         .route("/api/health", get(health))
         .route("/api/costs/tasks/{id}", get(task_cost))
         .route("/api/costs/projects/{id}", get(project_cost))
+        .route(
+            "/api/costs/projects/{id}/actual",
+            get(project_actual::actual),
+        )
+        .route(
+            "/api/costs/projects/{id}/budget",
+            post(project_actual::set_budget),
+        )
         .route(
             "/api/project-updates",
             get(project_health::list).post(project_health::post),

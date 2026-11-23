@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT amount_micros, currency FROM project_budgets WHERE workspace_id = $1 AND project_id = $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "amount_micros",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "currency",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [false, false]
+  },
+  "hash": "e9d7d02677b9f614a9be506dfd0e03f724994f9ab223dacfe3ded45d35c242ae"
+}
