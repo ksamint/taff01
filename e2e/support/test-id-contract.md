@@ -886,7 +886,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.taskCriteria.moveUp` | 1 | task-criteria.spec.ts |
 | `button — name: m.taskCriteria.save` | 1 | task-criteria.spec.ts |
 | `button — name: m.taskLinks.add` | 2 | task-links.spec.ts |
-| `button — name: m.timeline.addPhase` | 1 | project-phases.spec.ts |
+| `button — name: m.timeline.addPhase` | 2 | project-phases.spec.ts |
 | `button — name: m.timeTracking.edit` | 1 | time-tracking.spec.ts |
 | `button — name: m.timeTracking.log` | 1 | time-tracking.spec.ts |
 | `button — name: m.timeTracking.remove` | 2 | time-tracking.spec.ts |
@@ -1448,7 +1448,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `taskLinks.kindLabel` | 1 | task-links.spec.ts |
 | `taskLinks.task` | 1 | task-links.spec.ts |
 | `taskLinks.title` | 1 | task-links.spec.ts |
-| `timeline.addPhase` | 2 | project-phases.spec.ts |
+| `timeline.addPhase` | 3 | project-phases.spec.ts |
 | `timeline.cycle` | 7 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depAdded` | 21 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depRemoved` | 14 | live/timeline.spec.ts, timeline.spec.ts |
