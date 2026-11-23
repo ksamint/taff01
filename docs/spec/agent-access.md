@@ -112,6 +112,12 @@ Status: shipped in v0.2.20, deployed source `596272a`; final local and native ac
   or grant access: the existing controller/workspace mapping, current verifier,
   membership, token scopes and capabilities remain authoritative.
 
+- AA-5.8 Task editors shall create, edit and reorder task acceptance criteria.
+  A checked criterion can be edited after a reviewer unchecks it. Only an
+  authorized human reviewer of the active run may check or uncheck a criterion.
+  Agents cannot accept their own work. The review decision keeps its three
+  fixed checks.
+
 ## Non-functional
 
 - Mutations use one transaction, actor audit and PostgreSQL change notification.
@@ -138,6 +144,7 @@ Status: shipped in v0.2.20, deployed source `596272a`; final local and native ac
 | AA-5.3 | authorization.integration.test.ts; token-policy.integration.test.ts |
 | AA-5.4 | access-matrix.integration.test.ts; permissions.test.ts; scripts/permissions-matrix.test.ts |
 | AA-5.5 | workspace-discovery.integration.test.ts; token-policy.integration.test.ts |
+| AA-5.8 | task_criteria.rs integration tests; e2e/task-criteria.spec.ts |
 | AA-5.7 | trusted-review.test.ts; approved-agent-operation.test.ts; integration-audit.test.ts; authorization.integration.test.ts |
 | Three-locale management | e2e/token-grants.spec.ts; full 318-case browser gate and 32-case production checklist passed; [milestone 104](../milestones/104-v0.2.20.md) |
 

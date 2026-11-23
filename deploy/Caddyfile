@@ -18,6 +18,10 @@
 	handle @taskLinks {
 		reverse_proxy api-rs:3003
 	}
+	@taskCriteria path /api/task-criteria /api/task-criteria/*
+	handle @taskCriteria {
+		reverse_proxy api-rs:3003
+	}
 	reverse_proxy @backend api:3001
 	reverse_proxy web:3000
 }

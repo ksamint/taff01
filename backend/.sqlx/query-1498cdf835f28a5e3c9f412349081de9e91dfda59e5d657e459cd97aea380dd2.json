@@ -1,0 +1,12 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE task_criteria AS criteria SET position = (ordering.ordinality - 1)::integer\n                 FROM unnest($3::uuid[]) WITH ORDINALITY AS ordering(id, ordinality)\n                 WHERE criteria.workspace_id = $1 AND criteria.task_id = $2 AND criteria.id = ordering.id\n                   AND criteria.position <> ordering.ordinality - 1",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "UuidArray"]
+    },
+    "nullable": []
+  },
+  "hash": "1498cdf835f28a5e3c9f412349081de9e91dfda59e5d657e459cd97aea380dd2"
+}

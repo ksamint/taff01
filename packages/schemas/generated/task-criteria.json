@@ -1,0 +1,172 @@
+{
+  "criterion": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "checkedAt": {
+        "format": "date-time",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "checkedBy": {
+        "format": "uuid",
+        "type": [
+          "string",
+          "null"
+        ]
+      },
+      "id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "position": {
+        "format": "int32",
+        "minimum": 0.0,
+        "type": "integer"
+      },
+      "taskId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "text": {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+      },
+      "workspaceId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "id",
+      "position",
+      "taskId",
+      "text",
+      "workspaceId"
+    ],
+    "title": "TaskCriterion",
+    "type": "object"
+  },
+  "edit": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "text": {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "text"
+    ],
+    "title": "TaskCriterionEdit",
+    "type": "object"
+  },
+  "input": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "taskId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "text": {
+        "maxLength": 300,
+        "minLength": 1,
+        "type": "string"
+      }
+    },
+    "required": [
+      "taskId",
+      "text"
+    ],
+    "title": "TaskCriterionInput",
+    "type": "object"
+  },
+  "list": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "TaskCriterion": {
+        "additionalProperties": false,
+        "properties": {
+          "checkedAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "checkedBy": {
+            "format": "uuid",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 300,
+            "minLength": 1,
+            "type": "string"
+          },
+          "workspaceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "position",
+          "taskId",
+          "text",
+          "workspaceId"
+        ],
+        "type": "object"
+      }
+    },
+    "items": {
+      "$ref": "#/definitions/TaskCriterion"
+    },
+    "title": "Array_of_TaskCriterion",
+    "type": "array"
+  },
+  "reorder": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "ids": {
+        "items": {
+          "format": "uuid",
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "taskId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "ids",
+      "taskId"
+    ],
+    "title": "TaskCriteriaReorder",
+    "type": "object"
+  }
+}

@@ -432,6 +432,17 @@
     "fieldSaved": "已更新{{field}}",
     "descriptionPlaceholder": "添加描述"
   },
+  "taskCriteria": {
+    "title": "驗收標準",
+    "add": "新增標準",
+    "edit": "編輯標準",
+    "text": "標準內容",
+    "empty": "還沒有驗收標準。",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "maxLength": "請輸入不多於 300 個字元。",
+    "save": "儲存標準"
+  },
   "run": {
     "title": "智能體執行",
     "start": "啟動智能體",

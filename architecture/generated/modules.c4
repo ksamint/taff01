@@ -1101,6 +1101,15 @@ GET /api/bootstrap/today'
           description 'POST /api/search'
           link ../../apps/api/src/app.ts
         }
+        api_task_criteria = routes '/api/task-criteria (6)' {
+          description 'GET /api/task-criteria
+POST /api/task-criteria
+PATCH /api/task-criteria/{id}
+POST /api/task-criteria/{id}/check
+POST /api/task-criteria/{id}/uncheck
+POST /api/task-criteria/reorder'
+          link ../../backend/crates/taff-api/src/lib.rs
+        }
         api_task_links = routes '/api/task-links (3)' {
           description 'GET /api/task-links
 POST /api/task-links
@@ -1166,6 +1175,7 @@ PATCH /api/tasks/:id/status'
       data = layer 'Tables' {
         #db
         task_comments = table 'task_comments'
+        task_criteria = table 'task_criteria'
         task_links = table 'task_links'
         tasks = table 'tasks'
       }

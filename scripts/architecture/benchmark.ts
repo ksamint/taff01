@@ -175,9 +175,8 @@ export const ASSESSMENT: Assessment = {
       where: ["concept:review", "function:task:finish"],
     },
     "acceptance-criteria-stated-task": {
-      status: "partial",
-      where: ["concept:review"],
-      note: "Three fixed review checks; a task has no criteria field.",
+      status: "yes",
+      where: ["concept:acceptance-criterion", "concept:review"],
     },
     "cost-time-limit-agent": {
       status: "yes",

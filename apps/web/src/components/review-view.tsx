@@ -14,6 +14,7 @@ import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { errorKey } from "../lib/api";
 import { invalidateM3, useReview } from "../lib/m3-queries";
+import { useTaskAccess } from "../lib/m5-queries";
 import {
   reviewDraftKey,
   useAddReviewComment,
@@ -23,6 +24,7 @@ import { m3MutationKey } from "../lib/optimistic-m3";
 import { useMembers } from "../lib/queries";
 import { useWorkspace } from "./app-shell";
 import { RunPanel } from "./run-panel";
+import { TaskCriteria } from "./task-criteria";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -74,6 +76,7 @@ function ReviewEditor({
   const { t, i18n } = useTranslation();
   const { me } = useWorkspace();
   const members = useMembers(data.task.workspaceId);
+  const access = useTaskAccess(data.task.id);
   const authorId = me.workspaces.find(
     ({ id }) => id === data.task.workspaceId,
   )?.memberId;
@@ -411,6 +414,13 @@ function ReviewEditor({
         </div>
         <aside className="review-sidebar">
           <RunPanel detail={data} refresh={() => void invalidateM3(client)} />
+          {(eligible || access.data?.canEdit) && (
+            <TaskCriteria
+              taskId={data.task.id}
+              canEdit={embedded && access.data?.canEdit}
+              canCheck={eligible && !busy}
+            />
+          )}
           <section className="review-checklist">
             <h2>{t("review.checklist")}</h2>
             <p className="section-hint">

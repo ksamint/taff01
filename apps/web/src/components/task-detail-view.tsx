@@ -20,6 +20,7 @@ import { MemberOptions } from "./member-options";
 import { ReviewView } from "./review-view";
 import { RunPanel } from "./run-panel";
 import { TaskContacts } from "./task-contacts";
+import { TaskCriteria } from "./task-criteria";
 import { TaskEditor } from "./task-editor";
 import { TaskLinks } from "./task-links";
 import { Badge } from "./ui/badge";
@@ -309,7 +310,13 @@ export function TaskDetailView({
                   )}
                 </p>
               )}
-              {hasReview && <ReviewView taskId={taskId} embedded />}
+              {hasReview ? (
+                <ReviewView taskId={taskId} embedded />
+              ) : (
+                access.data?.canEdit && (
+                  <TaskCriteria key={taskId} taskId={taskId} canEdit />
+                )
+              )}
             </>
           }
         />

@@ -34,3 +34,7 @@ pub use project_health::{
 };
 mod task_link;
 pub use task_link::{TaskLink, TaskLinkInput, TaskLinkKind};
+mod task_criteria;
+pub use task_criteria::{
+    TaskCriteriaReorder, TaskCriterion, TaskCriterionEdit, TaskCriterionInput,
+};
