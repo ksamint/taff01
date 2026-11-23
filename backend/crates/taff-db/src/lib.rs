@@ -2,6 +2,7 @@ mod costs;
 mod project_health;
 mod schema;
 pub use costs::CostTarget;
+mod task_links;
 pub use schema::{User, Workspace};
 mod write;
 use taff_domain::{CoreError, Result};

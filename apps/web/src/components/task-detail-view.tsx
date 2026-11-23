@@ -21,6 +21,7 @@ import { ReviewView } from "./review-view";
 import { RunPanel } from "./run-panel";
 import { TaskContacts } from "./task-contacts";
 import { TaskEditor } from "./task-editor";
+import { TaskLinks } from "./task-links";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -290,6 +291,9 @@ export function TaskDetailView({
           }
           afterDescription={
             <>
+              {confirmed && access.isSuccess && access.data.canEdit && (
+                <TaskLinks key={taskId} task={task.data} />
+              )}
               {(assign.isError ||
                 start.isError ||
                 members.isError ||

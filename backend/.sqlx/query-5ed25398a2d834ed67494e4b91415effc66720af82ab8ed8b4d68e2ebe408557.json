@@ -1,0 +1,48 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT links.id, links.kind::text AS \"kind!\", links.from_task_id, links.to_task_id,\n                   other.id AS other_task_id, other.title AS other_task_title, other.owner_id\n            FROM task_links AS links\n            JOIN tasks AS other ON other.workspace_id = links.workspace_id\n                AND other.id = CASE WHEN links.from_task_id = $2 THEN links.to_task_id\n                                    ELSE links.from_task_id END\n                AND other.archived_at IS NULL\n            WHERE links.workspace_id = $1 AND (links.from_task_id = $2 OR links.to_task_id = $2)\n            ORDER BY links.created_at, links.id\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "kind!",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "from_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "to_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "other_task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 5,
+        "name": "other_task_title",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "owner_id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid"]
+    },
+    "nullable": [false, null, false, false, false, false, false]
+  },
+  "hash": "5ed25398a2d834ed67494e4b91415effc66720af82ab8ed8b4d68e2ebe408557"
+}

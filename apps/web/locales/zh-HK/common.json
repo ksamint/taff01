@@ -407,6 +407,20 @@
       "confirm": "確認更改策略"
     }
   },
+  "taskLinks": {
+    "title": "任務關聯",
+    "add": "新增關聯",
+    "kindLabel": "關聯類型",
+    "kind": {
+      "related": "相關",
+      "duplicate": "重複"
+    },
+    "task": "任務",
+    "choose": "選擇任務",
+    "removeNamed": "移除與 {{title}} 的{{kind}}關聯",
+    "empty": "暫無關聯任務。",
+    "noneAvailable": "沒有其他可選任務。"
+  },
   "taskDetail": {
     "moreFields": "更多",
     "back": "返回今天",

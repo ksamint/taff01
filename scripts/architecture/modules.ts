@@ -344,11 +344,12 @@ export const MODULES: ModuleMap[] = [
     title: "Tasks",
     summary:
       "Create, edit, assign, comment and change status; subtasks; labels; Quick Add; search; Today.",
-    tables: ["tasks", "task_comments"],
+    tables: ["tasks", "task_comments", "task_links"],
     core: ["quick-add.ts", "today-bootstrap.ts"],
     routes: [
       /^\/api\/tasks/,
       /^\/api\/costs\/tasks\//,
+      /^\/api\/task-links(?:\/|$)/,
       /^\/api\/quick-add/,
       /^\/api\/search/,
       /^\/api\/bootstrap/,

@@ -14,6 +14,10 @@
 	handle /api/project-updates {
 		reverse_proxy api-rs:3003
 	}
+	@taskLinks path /api/task-links /api/task-links/*
+	handle @taskLinks {
+		reverse_proxy api-rs:3003
+	}
 	reverse_proxy @backend api:3001
 	reverse_proxy web:3000
 }

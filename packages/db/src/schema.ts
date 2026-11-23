@@ -373,6 +373,44 @@ export const tasks = pgTable(
     check("tasks_title", sql`length(btrim(${t.title})) BETWEEN 1 AND 200`),
   ],
 );
+export const taskLinkKind = pgEnum("task_link_kind", ["related", "duplicate"]);
+
+export const taskLinks = pgTable(
+  "task_links",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    fromTaskId: uuid("from_task_id").notNull(),
+    toTaskId: uuid("to_task_id").notNull(),
+    kind: taskLinkKind("kind").notNull(),
+    /** Historical member ID remains available after membership removal. */
+    createdBy: uuid("created_by").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.workspaceId, t.fromTaskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "task_links_from_task_fk",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [t.workspaceId, t.toTaskId],
+      foreignColumns: [tasks.workspaceId, tasks.id],
+      name: "task_links_to_task_fk",
+    }).onDelete("cascade"),
+    check("task_links_canonical_pair", sql`${t.fromTaskId} < ${t.toTaskId}`),
+    unique("task_links_pair_kind").on(
+      t.workspaceId,
+      t.fromTaskId,
+      t.toTaskId,
+      t.kind,
+    ),
+    index("task_links_to_task_idx").on(t.workspaceId, t.toTaskId),
+  ],
+);
+
 export const activity = pgTable(
   "activity",
   {

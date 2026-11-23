@@ -329,6 +329,15 @@ export const THINGS: Thing[] = [
     "This cannot start or finish before that.",
   ),
   thing(
+    "task_link",
+    "Task link",
+    5,
+    "relator",
+    ["task_links"],
+    "task",
+    "A related or duplicate connection between tasks.",
+  ),
+  thing(
     "milestone",
     "Milestone",
     5,

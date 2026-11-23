@@ -407,6 +407,20 @@
       "confirm": "Confirm policy change"
     }
   },
+  "taskLinks": {
+    "title": "Links",
+    "add": "Add link",
+    "kindLabel": "Link type",
+    "kind": {
+      "related": "Related",
+      "duplicate": "Duplicate"
+    },
+    "task": "Task",
+    "choose": "Choose a task",
+    "removeNamed": "Remove {{kind}} link to {{title}}",
+    "empty": "No linked tasks.",
+    "noneAvailable": "No other tasks available."
+  },
   "taskDetail": {
     "moreFields": "More",
     "back": "Back to Today",
