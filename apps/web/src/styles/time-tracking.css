@@ -1,0 +1,27 @@
+.my-time-rate,
+.my-time-entries li {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-md);
+  padding-block: var(--space-sm);
+  border-bottom: var(--hairline) solid var(--border);
+}
+.my-time-rate h2 {
+  margin: 0;
+  font-size: 14px;
+}
+.my-time-rate p,
+.my-time-entry-details p {
+  margin: 4px 0 0;
+}
+.my-time-entries {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.my-time-entry-details {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

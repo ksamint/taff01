@@ -1,6 +1,7 @@
 mod project_health;
 mod task_criteria;
 mod task_links;
+mod time_tracking;
 
 use axum::{
     Json, Router,
@@ -178,6 +179,18 @@ pub fn router() -> Router<AppState> {
         .route(
             "/api/task-criteria/{id}/uncheck",
             post(task_criteria::uncheck),
+        )
+        .route(
+            "/api/time-entries",
+            get(time_tracking::entries).post(time_tracking::create_entry),
+        )
+        .route(
+            "/api/time-entries/{id}",
+            patch(time_tracking::edit_entry).delete(time_tracking::delete_entry),
+        )
+        .route(
+            "/api/member-rates",
+            get(time_tracking::rates).post(time_tracking::upsert_rate),
         )
         .fallback(|| async { ApiError(CoreError::NotFound) })
 }

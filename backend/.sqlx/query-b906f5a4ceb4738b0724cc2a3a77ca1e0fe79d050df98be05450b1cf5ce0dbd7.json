@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id, workspace_id, task_id, person_id, minutes, day, note, created_at\n             FROM time_entries\n             WHERE workspace_id = $1 AND ($2::uuid IS NULL OR person_id = $2)\n               AND ($3::uuid IS NULL OR task_id = $3)\n             ORDER BY day DESC, created_at DESC, id DESC",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "person_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "minutes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "day",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "note",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Uuid"]
+    },
+    "nullable": [false, false, false, false, false, false, false, false]
+  },
+  "hash": "b906f5a4ceb4738b0724cc2a3a77ca1e0fe79d050df98be05450b1cf5ce0dbd7"
+}

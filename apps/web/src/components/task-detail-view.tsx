@@ -23,6 +23,7 @@ import { TaskContacts } from "./task-contacts";
 import { TaskCriteria } from "./task-criteria";
 import { TaskEditor } from "./task-editor";
 import { TaskLinks } from "./task-links";
+import { TaskTime } from "./task-time";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Label } from "./ui/label";
@@ -292,6 +293,13 @@ export function TaskDetailView({
           }
           afterDescription={
             <>
+              {confirmed && (
+                <TaskTime
+                  key={taskId}
+                  taskId={taskId}
+                  workspaceId={workspaceId}
+                />
+              )}
               {confirmed && access.isSuccess && access.data.canEdit && (
                 <TaskLinks key={taskId} task={task.data} />
               )}

@@ -407,6 +407,33 @@
       "confirm": "确认更改策略"
     }
   },
+  "timeTracking": {
+    "title": "我的工时",
+    "log": "记录工时",
+    "minutes": "分钟",
+    "minutesRange": "请输入 1 至 1440 分钟。",
+    "day": "日期",
+    "note": "备注",
+    "noteLimit": "最多可输入 {{max}} 个字符。",
+    "zone": "日期以 {{timeZone}} 时区为准。",
+    "empty": "暂无工时记录。",
+    "unavailableTask": "任务不可用",
+    "duration": "{{count}} 分钟",
+    "edit": "编辑工时",
+    "remove": "删除工时",
+    "removeQuestion": "删除此工时记录？",
+    "ownRate": "我的小时费率",
+    "noRate": "尚未设置费率。",
+    "perHour": "每小时 {{rate}}",
+    "setRate": "设置小时费率",
+    "person": "人员",
+    "currentRate": "当前费率为每小时 {{rate}}",
+    "amount": "每小时金额",
+    "invalidRate": "请输入非负金额，最多六位小数。",
+    "currency": "币种代码",
+    "invalidCurrency": "请输入三字母币种代码。",
+    "validFrom": "生效日期"
+  },
   "taskLinks": {
     "title": "任务关联",
     "add": "添加关联",

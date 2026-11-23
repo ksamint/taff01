@@ -61,6 +61,7 @@ export const SPEC_MODULES: Record<string, string[]> = {
   "operation-templates.md": ["sectors"],
   "permissions-matrix.md": ["access"],
   "project-finance.md": ["projects"],
+  "time-tracking.md": ["tasks"],
   "projects.md": ["projects"],
   "runtime.md": ["kernel"],
   "tooling.md": [],

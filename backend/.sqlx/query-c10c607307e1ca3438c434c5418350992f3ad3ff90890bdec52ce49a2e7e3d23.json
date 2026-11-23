@@ -1,0 +1,53 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE time_entries SET minutes = $4, day = $5, note = $6\n                 WHERE id = $1 AND workspace_id = $2 AND person_id = $3\n                 RETURNING id, workspace_id, task_id, person_id, minutes, day, note, created_at",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "workspace_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "task_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "person_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "minutes",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "day",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 6,
+        "name": "note",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 7,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid", "Uuid", "Uuid", "Int4", "Date", "Text"]
+    },
+    "nullable": [false, false, false, false, false, false, false, false]
+  },
+  "hash": "c10c607307e1ca3438c434c5418350992f3ad3ff90890bdec52ce49a2e7e3d23"
+}

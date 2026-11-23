@@ -862,6 +862,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.invite` | 9 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.planning.close` | 7 | access.spec.ts, live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
+| `button — name: m.planning.save` | 3 | time-tracking.spec.ts |
 | `button — name: m.projects.archive` | 1 | project-profile.spec.ts |
 | `button — name: m.projectUpdates.older` | 1 | project-health-updates.spec.ts |
 | `button — name: m.projectUpdates.post` | 2 | project-health-updates.spec.ts |
@@ -874,6 +875,10 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.taskCriteria.moveUp` | 1 | task-criteria.spec.ts |
 | `button — name: m.taskCriteria.save` | 1 | task-criteria.spec.ts |
 | `button — name: m.taskLinks.add` | 2 | task-links.spec.ts |
+| `button — name: m.timeTracking.edit` | 1 | time-tracking.spec.ts |
+| `button — name: m.timeTracking.log` | 1 | time-tracking.spec.ts |
+| `button — name: m.timeTracking.remove` | 2 | time-tracking.spec.ts |
+| `button — name: m.timeTracking.setRate` | 1 | time-tracking.spec.ts |
 | `button — name: messages[info.project.name as TestLocale].signOut` | 1 | organization-default.spec.ts |
 | `button — name: messages[locale].grants.request` | 1 | optimistic-m4.spec.ts |
 | `button — name: messages[locale].planning.close` | 5 | notifications.spec.ts, persistence.spec.ts, today.spec.ts |
@@ -905,6 +910,10 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.projectUpdates.post` | 1 | project-health-updates.spec.ts |
 | `dialog — name: m.projectUpdates.title` | 1 | project-health-updates.spec.ts |
 | `dialog — name: m.taskLinks.add` | 1 | task-links.spec.ts |
+| `dialog — name: m.timeTracking.edit` | 1 | time-tracking.spec.ts |
+| `dialog — name: m.timeTracking.log` | 1 | time-tracking.spec.ts |
+| `dialog — name: m.timeTracking.removeQuestion` | 1 | time-tracking.spec.ts |
+| `dialog — name: m.timeTracking.setRate` | 1 | time-tracking.spec.ts |
 | `dialog — name: title` | 1 | view-export.spec.ts |
 | `heading` | 8 | audit.spec.ts, board-access.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
 | `heading — name: heading` | 1 | font-loading.spec.ts |
@@ -913,6 +922,7 @@ several do). “Also rendered by” lists the other files.
 | `heading — name: m.me.title` | 1 | me.spec.ts |
 | `heading — name: m.organization.invites` | 1 | planning.spec.ts |
 | `heading — name: m.organization.team` | 1 | me.spec.ts |
+| `heading — name: m.timeTracking.title` | 1 | time-tracking.spec.ts |
 | `heading — name: messages[locale].calendar.title` | 1 | calendar.spec.ts |
 | `heading — name: messages[locale].notifications.title` | 1 | notifications.spec.ts |
 | `heading — name: messages[locale].pwa.offlineTitle` | 1 | persistence.spec.ts |
@@ -934,6 +944,7 @@ several do). “Also rendered by” lists the other files.
 | `link — name: m.organization.accept` | 1 | planning.spec.ts |
 | `link — name: m.organization.create` | 1 | me.spec.ts |
 | `link — name: m.projects.graphView` | 1 | project-graph-view.spec.ts |
+| `link — name: m.timeTracking.title` | 1 | time-tracking.spec.ts |
 | `link — name: messages[locale].nav.calendar` | 1 | calendar.spec.ts |
 | `link — name: messages[locale].pwa.reconnect` | 1 | persistence.spec.ts |
 | `link — name: missed` | 1 | realtime.spec.ts |
@@ -955,6 +966,7 @@ several do). “Also rendered by” lists the other files.
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
 | `region — name: m.taskCriteria.title` | 1 | task-criteria.spec.ts |
 | `region — name: m.taskLinks.title` | 1 | task-links.spec.ts |
+| `region — name: m.timeTracking.ownRate` | 1 | time-tracking.spec.ts |
 | `region — name: messages[locale].todayDue` | 3 | today.spec.ts, ui-v2.spec.ts |
 | `region — name: text.workspaceGrants` | 1 | mcp.spec.ts |
 | `row` | 3 | access.spec.ts |
@@ -985,6 +997,13 @@ several do). “Also rendered by” lists the other files.
 | `m.taskCriteria.text` | 1 | task-criteria.spec.ts |
 | `m.taskLinks.kindLabel` | 1 | task-links.spec.ts |
 | `m.taskLinks.task` | 1 | task-links.spec.ts |
+| `m.timeTracking.amount` | 1 | time-tracking.spec.ts |
+| `m.timeTracking.currency` | 1 | time-tracking.spec.ts |
+| `m.timeTracking.day` | 1 | time-tracking.spec.ts |
+| `m.timeTracking.minutes` | 2 | time-tracking.spec.ts |
+| `m.timeTracking.note` | 2 | time-tracking.spec.ts |
+| `m.timeTracking.person` | 1 | time-tracking.spec.ts |
+| `m.timeTracking.validFrom` | 1 | time-tracking.spec.ts |
 | `m.usernameOptional` | 1 | username-auth.spec.ts |
 | `messages[locale].accountIdentifier` | 2 | sms-auth.spec.ts, username-auth.spec.ts |
 | `text.targetAgent` | 1 | mcp.spec.ts |
@@ -1324,6 +1343,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 22 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
 | `planning.high` | 1 | task-detail.spec.ts |
+| `planning.save` | 3 | time-tracking.spec.ts |
 | `projectFinance.agentCost` | 1 | agent-cost.spec.ts |
 | `projectFinance.invalidAmount` | 1 | project-finance.spec.ts |
 | `projectFinance.noContract` | 1 | project-finance.spec.ts |
@@ -1403,6 +1423,21 @@ Keys read from `apps/web/locales/*/common.json` through
 | `timeline.depRemoved` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.rescheduled` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.resized` | 7 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeTracking.amount` | 1 | time-tracking.spec.ts |
+| `timeTracking.currency` | 1 | time-tracking.spec.ts |
+| `timeTracking.day` | 1 | time-tracking.spec.ts |
+| `timeTracking.edit` | 2 | time-tracking.spec.ts |
+| `timeTracking.empty` | 1 | time-tracking.spec.ts |
+| `timeTracking.log` | 2 | time-tracking.spec.ts |
+| `timeTracking.minutes` | 2 | time-tracking.spec.ts |
+| `timeTracking.note` | 2 | time-tracking.spec.ts |
+| `timeTracking.ownRate` | 1 | time-tracking.spec.ts |
+| `timeTracking.person` | 1 | time-tracking.spec.ts |
+| `timeTracking.remove` | 2 | time-tracking.spec.ts |
+| `timeTracking.removeQuestion` | 1 | time-tracking.spec.ts |
+| `timeTracking.setRate` | 2 | time-tracking.spec.ts |
+| `timeTracking.title` | 2 | time-tracking.spec.ts |
+| `timeTracking.validFrom` | 1 | time-tracking.spec.ts |
 | `today` | 26 | font-loading.spec.ts, live/live.ts, live/platform.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, sms-auth.spec.ts, ssr-session.spec.ts, support/account.ts, username-auth.spec.ts |
 | `todayDue` | 3 | today.spec.ts, ui-v2.spec.ts |
 | `todayUndated` | 2 | today.spec.ts, ui-v2.spec.ts |

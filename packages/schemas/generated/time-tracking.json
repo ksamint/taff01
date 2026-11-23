@@ -1,0 +1,310 @@
+{
+  "edit": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "day": {
+        "format": "date",
+        "type": "string"
+      },
+      "minutes": {
+        "format": "int32",
+        "maximum": 1440.0,
+        "minimum": 1.0,
+        "type": "integer"
+      },
+      "note": {
+        "maxLength": 2000,
+        "type": "string"
+      }
+    },
+    "required": [
+      "day",
+      "minutes",
+      "note"
+    ],
+    "title": "TimeEntryEdit",
+    "type": "object"
+  },
+  "entry": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "createdAt": {
+        "format": "date-time",
+        "type": "string"
+      },
+      "day": {
+        "format": "date",
+        "type": "string"
+      },
+      "id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "minutes": {
+        "format": "int32",
+        "maximum": 1440.0,
+        "minimum": 1.0,
+        "type": "integer"
+      },
+      "note": {
+        "maxLength": 2000,
+        "type": "string"
+      },
+      "personId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "taskId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "workspaceId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "createdAt",
+      "day",
+      "id",
+      "minutes",
+      "note",
+      "personId",
+      "taskId",
+      "workspaceId"
+    ],
+    "title": "TimeEntry",
+    "type": "object"
+  },
+  "input": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "day": {
+        "format": "date",
+        "type": "string"
+      },
+      "minutes": {
+        "format": "int32",
+        "maximum": 1440.0,
+        "minimum": 1.0,
+        "type": "integer"
+      },
+      "note": {
+        "maxLength": 2000,
+        "type": "string"
+      },
+      "taskId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "day",
+      "minutes",
+      "note",
+      "taskId"
+    ],
+    "title": "TimeEntryInput",
+    "type": "object"
+  },
+  "list": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+      "TimeEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "day": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "minutes": {
+            "format": "int32",
+            "maximum": 1440.0,
+            "minimum": 1.0,
+            "type": "integer"
+          },
+          "note": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "taskId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "workspaceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "createdAt",
+          "day",
+          "id",
+          "minutes",
+          "note",
+          "personId",
+          "taskId",
+          "workspaceId"
+        ],
+        "type": "object"
+      }
+    },
+    "properties": {
+      "entries": {
+        "items": {
+          "$ref": "#/definitions/TimeEntry"
+        },
+        "type": "array"
+      },
+      "timeZone": {
+        "type": "string"
+      },
+      "today": {
+        "format": "date",
+        "type": "string"
+      }
+    },
+    "required": [
+      "entries",
+      "timeZone",
+      "today"
+    ],
+    "title": "TimeEntries",
+    "type": "object"
+  },
+  "rate": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "currency": {
+        "pattern": "^[A-Z]{3}$",
+        "type": "string"
+      },
+      "personId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "rateMicrosPerHour": {
+        "format": "int64",
+        "maximum": 9007199254740991.0,
+        "minimum": 0.0,
+        "type": "integer"
+      },
+      "validFrom": {
+        "format": "date",
+        "type": "string"
+      },
+      "workspaceId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "currency",
+      "personId",
+      "rateMicrosPerHour",
+      "validFrom",
+      "workspaceId"
+    ],
+    "title": "MemberRate",
+    "type": "object"
+  },
+  "rateInput": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "currency": {
+        "pattern": "^[A-Z]{3}$",
+        "type": "string"
+      },
+      "personId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "rateMicrosPerHour": {
+        "format": "int64",
+        "maximum": 9007199254740991.0,
+        "minimum": 0.0,
+        "type": "integer"
+      },
+      "validFrom": {
+        "format": "date",
+        "type": "string"
+      },
+      "workspaceId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "currency",
+      "personId",
+      "rateMicrosPerHour",
+      "validFrom",
+      "workspaceId"
+    ],
+    "title": "MemberRateInput",
+    "type": "object"
+  },
+  "rates": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "MemberRate": {
+        "additionalProperties": false,
+        "properties": {
+          "currency": {
+            "pattern": "^[A-Z]{3}$",
+            "type": "string"
+          },
+          "personId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "rateMicrosPerHour": {
+            "format": "int64",
+            "maximum": 9007199254740991.0,
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "validFrom": {
+            "format": "date",
+            "type": "string"
+          },
+          "workspaceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "currency",
+          "personId",
+          "rateMicrosPerHour",
+          "validFrom",
+          "workspaceId"
+        ],
+        "type": "object"
+      }
+    },
+    "items": {
+      "$ref": "#/definitions/MemberRate"
+    },
+    "title": "Array_of_MemberRate",
+    "type": "array"
+  }
+}

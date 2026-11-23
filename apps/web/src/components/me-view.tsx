@@ -8,6 +8,7 @@ import {
   CalendarDays,
   ChevronDown,
   ChevronRight,
+  Clock3,
   FileText,
   Inbox,
   Languages,
@@ -379,6 +380,7 @@ export function MeSettingsLinks({ desktop = false }: { desktop?: boolean }) {
   const { workspace } = useWorkspace();
   const { t } = useTranslation();
   const links = [
+    { href: "/me/time", title: "timeTracking.title", icon: Clock3 },
     { href: "/orgs", title: "organization.title", icon: Building2 },
     { href: "/digests", title: "notifications.history", icon: CalendarDays },
     ...(workspace.role === "admin"

@@ -260,7 +260,10 @@ export const ASSESSMENT: Assessment = {
       where: ["concept:contract", "concept:payment"],
     },
     "budget-against-actual-cost": { status: "no" },
-    "time-tracking": { status: "no" },
+    "time-tracking": {
+      status: "yes",
+      where: ["concept:time-entry", "concept:member-rate"],
+    },
     "staffing-utilization-forecast": { status: "no" },
     "profit-margin-project": {
       status: "no",

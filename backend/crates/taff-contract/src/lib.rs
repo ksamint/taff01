@@ -38,3 +38,8 @@ mod task_criteria;
 pub use task_criteria::{
     TaskCriteriaReorder, TaskCriterion, TaskCriterionEdit, TaskCriterionInput,
 };
+mod time_tracking;
+pub use time_tracking::{
+    MAX_RATE_MICROS_PER_HOUR, MemberRate, MemberRateInput, TimeEntries, TimeEntry, TimeEntryEdit,
+    TimeEntryInput,
+};
