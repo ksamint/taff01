@@ -29,6 +29,9 @@ it("preserves the released default-agent migration and appends approval/project 
     "0041_summary_renders",
     "0042_oauth_refresh_history",
     "0043_oauth_refresh_scopes",
+    "0044_project_updates",
+    "0045_task_links",
+    "0046_task_criteria",
   ]);
   for (const entry of pending) {
     expect(entry.when).toBeGreaterThan(journal.entries[33].when);
