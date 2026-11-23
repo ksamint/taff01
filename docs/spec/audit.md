@@ -47,6 +47,15 @@ Status: audit screen deployed in v0.2.22; export audit additions implemented for
   labels defined by this specification shall be localized. Other actions
   shall show their recorded keys.
 
+### Rust writes (AU-3)
+
+- AU-3.1 A Rust mutation shall set the trusted actor for its transaction
+  and take the shared workspace lifecycle lock before resource locks. An
+  agent write shall lock that agent membership before resource locks.
+- AU-3.2 A committed change to an audited table shall create one activity
+  row and emit the linked `taff_changes` event through PostgreSQL's audit
+  trigger. A rolled-back change shall leave no row or event.
+
 ## Non-functional
 
 - No migration or new route; the screen is a lazy route outside Today's budget.
@@ -61,6 +70,7 @@ Status: audit screen deployed in v0.2.22; export audit additions implemented for
 | AU-1.2, AU-1.3 | `apps/api/src/app.test.ts` "integration audit REST boundaries"; `runs.integration.test.ts` member refusal |
 | AU-1.4 | `packages/core/src/view-export.integration.test.ts` |
 | AU-2 | `e2e/audit.spec.ts` in en, zh-CN and zh-HK |
+| AU-3 | `backend/crates/taff-db/tests/write_parity.rs` |
 
 ## Sources
 

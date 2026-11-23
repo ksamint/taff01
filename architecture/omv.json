@@ -2160,6 +2160,14 @@
     }
    },
    {
+    "id": "requirement:AU-3",
+    "type": "requirement",
+    "title": "AU-3 Rust writes",
+    "attrs": {
+     "statements": 2
+    }
+   },
+   {
     "id": "spec:runtime.md",
     "type": "spec",
     "title": "runtime recovery",
@@ -9871,6 +9879,16 @@
     "type": "must_satisfy"
    },
    {
+    "from": "module:audit",
+    "to": "requirement:AU-3",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "concept:audit_record",
+    "to": "requirement:AU-3",
+    "type": "must_satisfy"
+   },
+   {
     "from": "module:kernel",
     "to": "product:taff",
     "type": "part_of"
@@ -10273,6 +10291,11 @@
    },
    {
     "from": "requirement:AU-2",
+    "to": "spec:audit.md",
+    "type": "stated_in"
+   },
+   {
+    "from": "requirement:AU-3",
     "to": "spec:audit.md",
     "type": "stated_in"
    },

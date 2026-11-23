@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT id FROM members WHERE id = $1 FOR SHARE",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": ["Uuid"]
+    },
+    "nullable": [false]
+  },
+  "hash": "3c2820e8a0c83db064910bab2135017558f1ad36e6e5bdc1bfd6126b7450cbfc"
+}

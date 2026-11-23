@@ -1,6 +1,8 @@
 mod schema;
 pub use schema::{User, Workspace};
+mod write;
 use taff_domain::{CoreError, Result};
+pub use write::{MutationActor, MutationError};
 
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use uuid::Uuid;
