@@ -1022,6 +1022,7 @@ export * from "./graph-image";
 export * from "./project-actual";
 export * from "./project-health";
 export * from "./project-margin";
+export * from "./project-phase";
 export * from "./summary-image";
 export * from "./summary-layout";
 export * from "./task-criteria";

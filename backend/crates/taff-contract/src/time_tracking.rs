@@ -76,7 +76,9 @@ pub struct MemberRateInput {
     pub valid_from: NaiveDate,
 }
 
-fn civil_date<'de, D: Deserializer<'de>>(deserializer: D) -> Result<NaiveDate, D::Error> {
+pub(super) fn civil_date<'de, D: Deserializer<'de>>(
+    deserializer: D,
+) -> Result<NaiveDate, D::Error> {
     let text = String::deserialize(deserializer)?;
     let date = text.parse::<NaiveDate>().map_err(D::Error::custom)?;
     if date.year() < 1 || text.len() != 10 || date.to_string() != text {

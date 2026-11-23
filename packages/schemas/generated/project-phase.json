@@ -1,0 +1,159 @@
+{
+  "edit": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "end": {
+        "format": "date",
+        "type": "string"
+      },
+      "name": {
+        "description": "The trimmed name contains 1 to 120 Unicode characters.",
+        "type": "string"
+      },
+      "start": {
+        "format": "date",
+        "type": "string"
+      }
+    },
+    "required": [
+      "end",
+      "name",
+      "start"
+    ],
+    "title": "ProjectPhaseEdit",
+    "type": "object"
+  },
+  "input": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "end": {
+        "format": "date",
+        "type": "string"
+      },
+      "name": {
+        "description": "The trimmed name contains 1 to 120 Unicode characters.",
+        "type": "string"
+      },
+      "projectId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "start": {
+        "format": "date",
+        "type": "string"
+      }
+    },
+    "required": [
+      "end",
+      "name",
+      "projectId",
+      "start"
+    ],
+    "title": "ProjectPhaseInput",
+    "type": "object"
+  },
+  "list": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+      "ProjectPhase": {
+        "additionalProperties": false,
+        "properties": {
+          "end": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "minimum": 0.0,
+            "type": "integer"
+          },
+          "projectId": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "start": {
+            "format": "date",
+            "type": "string"
+          },
+          "workspaceId": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "end",
+          "id",
+          "name",
+          "position",
+          "projectId",
+          "start",
+          "workspaceId"
+        ],
+        "type": "object"
+      }
+    },
+    "items": {
+      "$ref": "#/definitions/ProjectPhase"
+    },
+    "title": "Array_of_ProjectPhase",
+    "type": "array"
+  },
+  "phase": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "properties": {
+      "end": {
+        "format": "date",
+        "type": "string"
+      },
+      "id": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "name": {
+        "maxLength": 120,
+        "minLength": 1,
+        "type": "string"
+      },
+      "position": {
+        "format": "int32",
+        "minimum": 0.0,
+        "type": "integer"
+      },
+      "projectId": {
+        "format": "uuid",
+        "type": "string"
+      },
+      "start": {
+        "format": "date",
+        "type": "string"
+      },
+      "workspaceId": {
+        "format": "uuid",
+        "type": "string"
+      }
+    },
+    "required": [
+      "end",
+      "id",
+      "name",
+      "position",
+      "projectId",
+      "start",
+      "workspaceId"
+    ],
+    "title": "ProjectPhase",
+    "type": "object"
+  }
+}

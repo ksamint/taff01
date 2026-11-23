@@ -1,5 +1,6 @@
 mod project_actual;
 mod project_health;
+mod project_phases;
 mod task_criteria;
 mod task_links;
 mod time_tracking;
@@ -209,5 +210,10 @@ pub fn router() -> Router<AppState> {
             "/api/member-rates",
             get(time_tracking::rates).post(time_tracking::upsert_rate),
         )
+        .route(
+            "/api/project-phases",
+            get(project_phases::list).post(project_phases::create),
+        )
+        .route("/api/project-phases/{id}", patch(project_phases::edit))
         .fallback(|| async { ApiError(CoreError::NotFound) })
 }

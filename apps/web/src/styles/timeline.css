@@ -347,6 +347,35 @@
 .timeline-row-title.is-strong {
   font-weight: var(--weight-heading);
 }
+.timeline-phase-label {
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  padding-left: 12px;
+}
+.timeline-phase-label:not(button) {
+  cursor: default;
+}
+.timeline-phase-label .timeline-row-title,
+.timeline-phase-range {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.timeline-phase-range {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.timeline-phase-track {
+  fill: var(--color-deep-blue-muted);
+  stroke: var(--color-deep-blue-fixed-dim);
+}
+.timeline-phase-track.is-editable {
+  cursor: pointer;
+}
 .timeline-chart {
   position: absolute;
   overflow: visible;

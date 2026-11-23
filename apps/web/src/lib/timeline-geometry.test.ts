@@ -133,6 +133,27 @@ describe("date ↔ x", () => {
   });
 });
 
+it("includes phase-only civil spans and windows ticks without changing bar widths", () => {
+  const phases = [{ start: "1970-01-01", end: "2199-12-31" }];
+  const empty = scaleFor(timeline([]), 24, phases);
+  expect(empty.origin).toBe("1969-12-22");
+  expect(dateToX(empty, phases[0].end)).toBeLessThan(
+    empty.days * empty.dayWidth,
+  );
+  const from = daysBetween(empty.origin, phases[0].end);
+  const tail = ticks(empty, from, from + 3).days;
+  expect(tail.map((tick) => tick.date)).toEqual([
+    "2199-12-31",
+    "2200-01-01",
+    "2200-01-02",
+  ]);
+  expect(tail[0].x).toBe(dateToX(empty, phases[0].end));
+  const task = item(1);
+  const base = scaleFor(timeline([task]), 24);
+  const expanded = scaleFor(timeline([task]), 24, phases);
+  expect(barGeometry(expanded, task).width).toBe(barGeometry(base, task).width);
+});
+
 describe("arrows", () => {
   it("draws an elbow when the successor starts later", () => {
     expect(arrowPath({ x: 10, y: 18 }, { x: 60, y: 54 }, 36)).toBe(

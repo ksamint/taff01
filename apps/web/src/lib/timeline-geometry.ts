@@ -44,6 +44,7 @@ export function dayWidthFor(zoom: Zoom, phone: boolean) {
 export function scaleFor(
   timeline: Pick<Timeline, "items" | "today">,
   dayWidth: number,
+  phases: readonly { start: string; end: string }[] = [],
 ): Scale {
   let first = timeline.today;
   let last = timeline.today;
@@ -51,6 +52,10 @@ export function scaleFor(
     if (item.start < first) first = item.start;
     const end = item.forecastEnd > item.end ? item.forecastEnd : item.end;
     if (end > last) last = end;
+  }
+  for (const phase of phases) {
+    if (phase.start < first) first = phase.start;
+    if (phase.end > last) last = phase.end;
   }
   const origin = addDays(first, -weekday(first) - 7);
   return { origin, days: daysBetween(origin, last) + 15, dayWidth };
@@ -78,11 +83,11 @@ export function barGeometry(scale: Scale, item: TimelineItem) {
   };
 }
 
-/** Week starts (Mondays) and every day, for the header and the grid. */
-export function ticks(scale: Scale) {
+/** Week starts (Mondays) and each day in the requested window. */
+export function ticks(scale: Scale, from = 0, to = scale.days) {
   const weeks: { date: string; x: number }[] = [];
   const days: { date: string; x: number; weekend: boolean }[] = [];
-  for (let i = 0; i < scale.days; i++) {
+  for (let i = from; i < to; i++) {
     const date = addDays(scale.origin, i);
     const x = i * scale.dayWidth;
     const day = weekday(date);

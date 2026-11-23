@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (513 distinct, 2401 uses)
+## Test ids (515 distinct, 2407 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -791,10 +791,12 @@ several do). “Also rendered by” lists the other files.
 | `timeline-link-hint` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-mode` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-new-milestone` | 2 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
+| `timeline-phase-bar` | 2 |  | project-phases.spec.ts |
+| `timeline-phase-row` | 1 |  | project-phases.spec.ts |
 | `timeline-predecessor` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-rename-milestone` | 6 |  | live/v021-feature-gaps.spec.ts, v021-feature-gaps.spec.ts |
-| `timeline-risk` | 3 |  | project-health-updates.spec.ts, timeline.spec.ts |
-| `timeline-row` | 5 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, v021-feature-gaps.spec.ts |
+| `timeline-risk` | 4 |  | project-health-updates.spec.ts, project-phases.spec.ts, timeline.spec.ts |
+| `timeline-row` | 7 |  | live/timeline.spec.ts, live/v021-feature-gaps.spec.ts, project-phases.spec.ts, scripts/perf-lcp.mts, timeline.spec.ts, v021-feature-gaps.spec.ts |
 | `timeline-save` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-start` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-view` | 8 |  | finance-visibility.spec.ts, live/platform.spec.ts, live/timeline.spec.ts, project-finance.spec.ts, timeline.spec.ts |
@@ -847,7 +849,7 @@ several do). “Also rendered by” lists the other files.
 | Role — name | Uses | Used in |
 | --- | ---: | --- |
 | `alert` | 42 | agent-creation.spec.ts, audience-editing.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, project-margin.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts, workspace-lifecycle.spec.ts |
-| `button` | 12 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, project-header.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
+| `button` | 13 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, project-header.spec.ts, project-phases.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
 | `button — name: /Repeated task/` | 1 | task-links.spec.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
@@ -868,7 +870,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.organization.create` | 6 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.organization.invite` | 9 | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `button — name: m.planning.close` | 7 | access.spec.ts, live/release/checklist.spec.ts, me.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `button — name: m.planning.save` | 3 | time-tracking.spec.ts |
+| `button — name: m.planning.save` | 5 | project-phases.spec.ts, time-tracking.spec.ts |
 | `button — name: m.projectFinance.editBudget` | 2 | project-budget-actual.spec.ts |
 | `button — name: m.projectFinance.save` | 1 | project-budget-actual.spec.ts |
 | `button — name: m.projects.archive` | 1 | project-profile.spec.ts |
@@ -884,6 +886,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.taskCriteria.moveUp` | 1 | task-criteria.spec.ts |
 | `button — name: m.taskCriteria.save` | 1 | task-criteria.spec.ts |
 | `button — name: m.taskLinks.add` | 2 | task-links.spec.ts |
+| `button — name: m.timeline.addPhase` | 1 | project-phases.spec.ts |
 | `button — name: m.timeTracking.edit` | 1 | time-tracking.spec.ts |
 | `button — name: m.timeTracking.log` | 1 | time-tracking.spec.ts |
 | `button — name: m.timeTracking.remove` | 2 | time-tracking.spec.ts |
@@ -920,6 +923,8 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.projectUpdates.post` | 1 | project-health-updates.spec.ts |
 | `dialog — name: m.projectUpdates.title` | 1 | project-health-updates.spec.ts |
 | `dialog — name: m.taskLinks.add` | 1 | task-links.spec.ts |
+| `dialog — name: m.timeline.addPhase` | 1 | project-phases.spec.ts |
+| `dialog — name: m.timeline.editPhase` | 1 | project-phases.spec.ts |
 | `dialog — name: m.timeTracking.edit` | 1 | time-tracking.spec.ts |
 | `dialog — name: m.timeTracking.log` | 1 | time-tracking.spec.ts |
 | `dialog — name: m.timeTracking.removeQuestion` | 1 | time-tracking.spec.ts |
@@ -1009,6 +1014,9 @@ several do). “Also rendered by” lists the other files.
 | `m.taskCriteria.text` | 1 | task-criteria.spec.ts |
 | `m.taskLinks.kindLabel` | 1 | task-links.spec.ts |
 | `m.taskLinks.task` | 1 | task-links.spec.ts |
+| `m.timeline.phaseEnd` | 2 | project-phases.spec.ts |
+| `m.timeline.phaseName` | 2 | project-phases.spec.ts |
+| `m.timeline.start` | 2 | project-phases.spec.ts |
 | `m.timeTracking.amount` | 1 | time-tracking.spec.ts |
 | `m.timeTracking.currency` | 2 | project-budget-actual.spec.ts, time-tracking.spec.ts |
 | `m.timeTracking.day` | 1 | time-tracking.spec.ts |
@@ -1126,6 +1134,7 @@ read (`data-event-id`, `data-date`).
 | `.team-directory > h1` | 3 | agent-creation.spec.ts, planning.spec.ts, ui-v2.spec.ts |
 | `.team-directory-list > li` | 1 | scripts/ui/app-shots.mts |
 | `.team-directory-list li` | 1 | ui-v2.spec.ts |
+| `.timeline-day-label` | 1 | project-phases.spec.ts |
 | `.toast-region` | 14 | brief.spec.ts, live/brief.spec.ts |
 | `.today-activity` | 2 | today.spec.ts |
 | `.today-avatar-link` | 2 | ssr-session.spec.ts |
@@ -1357,7 +1366,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 22 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
 | `planning.high` | 1 | task-detail.spec.ts |
-| `planning.save` | 3 | time-tracking.spec.ts |
+| `planning.save` | 5 | project-phases.spec.ts, time-tracking.spec.ts |
 | `projectFinance.actualInCurrency` | 1 | project-budget-actual.spec.ts |
 | `projectFinance.agentCost` | 1 | agent-cost.spec.ts |
 | `projectFinance.budgetActual` | 1 | project-budget-actual.spec.ts |
@@ -1439,11 +1448,16 @@ Keys read from `apps/web/locales/*/common.json` through
 | `taskLinks.kindLabel` | 1 | task-links.spec.ts |
 | `taskLinks.task` | 1 | task-links.spec.ts |
 | `taskLinks.title` | 1 | task-links.spec.ts |
+| `timeline.addPhase` | 2 | project-phases.spec.ts |
 | `timeline.cycle` | 7 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depAdded` | 21 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depRemoved` | 14 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline.editPhase` | 1 | project-phases.spec.ts |
+| `timeline.phaseEnd` | 2 | project-phases.spec.ts |
+| `timeline.phaseName` | 2 | project-phases.spec.ts |
 | `timeline.rescheduled` | 14 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.resized` | 7 | live/timeline.spec.ts, timeline.spec.ts |
+| `timeline.start` | 2 | project-phases.spec.ts |
 | `timeTracking.amount` | 1 | time-tracking.spec.ts |
 | `timeTracking.currency` | 2 | project-budget-actual.spec.ts, time-tracking.spec.ts |
 | `timeTracking.day` | 1 | time-tracking.spec.ts |

@@ -4,7 +4,7 @@ import "../styles/timeline.css";
 // SVG Gantt over the server's plan model. The client renders the model and
 // never recomputes it; drags and the selection footer call the plan and
 // dependency APIs through `lib/mutations/timeline.ts`.
-import type { Project, Task } from "@taff/schemas";
+import type { Project, ProjectPhase, Task } from "@taff/schemas";
 import { taskReference } from "@taff/schemas/base";
 import type {
   Timeline,
@@ -44,14 +44,17 @@ import {
   useSaveMilestone,
   useSetPlan,
 } from "../lib/mutations/timeline";
+import { useProjectPhases } from "../lib/project-phases";
 import { useMembers, useTasks, useWorkspaceAccess } from "../lib/queries";
 import {
   addDays,
   arrowPath,
   barGeometry,
   dateToX,
+  daysBetween,
   dayWidthFor,
   deltaDays,
+  type Scale,
   scaleFor,
   ticks,
   visibleRows,
@@ -62,6 +65,7 @@ import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
 import { ProjectFinancePanel } from "./project-finance-panel";
 import { ProjectHealthUpdates } from "./project-health-updates";
+import { ProjectPhaseSheet } from "./project-phase-sheet";
 import { Button } from "./ui/button";
 import { SheetDialog } from "./ui/sheet-dialog";
 import { ViewExportButton } from "./view-export";
@@ -75,8 +79,10 @@ type Drag = {
   dx: number;
   x: number;
   y: number;
+  scale: Scale;
 };
 const HEADER = 44;
+const DATE_WINDOW_THRESHOLD = 400;
 
 export function TimelineView({ project }: { project: Project | undefined }) {
   const { t } = useTranslation();
@@ -96,11 +102,27 @@ function ProjectTimeline({ project }: { project: Project }) {
   const desktop = useDesktop();
   const searchParams = useSearchParams();
   const query = useTimeline(project.id);
+  const phaseQuery = useProjectPhases(project.id, confirmed);
+  const phases = useMemo(
+    () =>
+      phaseQuery.isSuccess
+        ? [...phaseQuery.data].sort(
+            (a, b) => a.position - b.position || a.id.localeCompare(b.id),
+          )
+        : [],
+    [phaseQuery.data, phaseQuery.isSuccess],
+  );
   const members = useMembers(workspace.id);
   const tasks = useTasks(workspace.id);
   const setPlan = useSetPlan(project.id);
   const saveMilestone = useSaveMilestone(project.id);
   const access = useWorkspaceAccess(workspace.id);
+  const canManagePhases =
+    confirmed && access.isSuccess && access.data.canManageProjects;
+  const [phaseDialog, setPhaseDialog] = useState<{
+    projectId: string;
+    phase: ProjectPhase | null;
+  } | null>(null);
   const [milestoneDialog, setMilestoneDialog] = useState<{
     item: TimelineItem | null;
     archive?: boolean;
@@ -123,6 +145,7 @@ function ProjectTimeline({ project }: { project: Project }) {
   const [drag, setDrag] = useState<Drag | null>(null);
   const [scrollTop, setScrollTop] = useState(0);
   const [viewport, setViewport] = useState(800);
+  const [horizontal, setHorizontal] = useState({ left: 0, width: 1024 });
   const scroller = useRef<HTMLDivElement>(null);
   const chart = useRef<SVGSVGElement>(null);
   const rowButtons = useRef(new Map<string, HTMLButtonElement>());
@@ -133,36 +156,68 @@ function ProjectTimeline({ project }: { project: Project }) {
   const rowHeight = phone ? 44 : 36;
   const labelWidth = phone ? 132 : 268;
   const handle = phone ? 44 : 24;
-  const scale = useMemo(
-    () => (timeline ? scaleFor(timeline, dayWidthFor(zoom, phone)) : undefined),
-    [timeline, zoom, phone],
+  const layoutScale = useMemo(
+    () =>
+      timeline
+        ? scaleFor(timeline, dayWidthFor(zoom, phone), phases)
+        : undefined,
+    [timeline, zoom, phone, phases],
   );
+  const scale = drag?.scale ?? layoutScale;
   const dates = useMemo(() => {
     const short = new Intl.DateTimeFormat(locale, {
       timeZone: "UTC",
       day: "numeric",
       month: "short",
     });
+    const full = new Intl.DateTimeFormat(locale, {
+      timeZone: "UTC",
+      dateStyle: "medium",
+    });
     const numbers = new Intl.NumberFormat(locale);
     return {
       short: (date: string) => short.format(new Date(`${date}T00:00:00Z`)),
+      full: (date: string) => full.format(new Date(`${date}T00:00:00Z`)),
       day: (date: string) => numbers.format(Number(date.slice(8))),
       number: (value: number) => numbers.format(value),
     };
   }, [locale]);
 
-  // Start the view a couple of days before today, and again on zoom.
+  // Keep the visible date anchored when a phase extends the range to the left.
   const todayX = scale && timeline ? dateToX(scale, timeline.today) : 0;
-  const scrolledFor = useRef("");
+  const scrolledFor = useRef<{
+    key: string;
+    origin: string;
+    element: HTMLDivElement;
+  } | null>(null);
   useLayoutEffect(() => {
     const element = scroller.current;
     if (!element || !scale || !timeline) return;
     const key = `${project.id}:${zoom}`;
-    if (scrolledFor.current === key) return;
-    scrolledFor.current = key;
-    element.scrollLeft = Math.max(0, todayX - scale.dayWidth * 3);
+    const previous = scrolledFor.current;
+    if (previous?.key !== key || previous.element !== element) {
+      const firstPhase = phases.reduce(
+        (first, phase) => (phase.start < first ? phase.start : first),
+        phases[0]?.start ?? timeline.today,
+      );
+      const anchorX = timeline.items.length
+        ? todayX
+        : dateToX(scale, firstPhase);
+      element.scrollLeft = Math.max(0, anchorX - scale.dayWidth * 3);
+    } else if (previous.origin !== scale.origin) {
+      element.scrollLeft += dateToX(scale, previous.origin);
+    }
+    scrolledFor.current = { key, origin: scale.origin, element };
     setViewport(element.clientHeight);
-  }, [project.id, zoom, scale, timeline, todayX]);
+    if (scale.days > DATE_WINDOW_THRESHOLD) {
+      const measure = () =>
+        setHorizontal({ left: element.scrollLeft, width: element.clientWidth });
+      measure();
+      const observer = new ResizeObserver(measure);
+      observer.observe(element);
+      return () => observer.disconnect();
+    }
+  }, [project.id, zoom, scale, timeline, todayX, phases]);
 
   const items = timeline?.items ?? [];
   const index = useMemo(
@@ -208,15 +263,29 @@ function ProjectTimeline({ project }: { project: Project }) {
     timeline.dependencies.filter((dep) => dep.conflict).map((dep) => dep.to.id),
   );
   const chartWidth = scale.days * scale.dayWidth;
-  const rowsHeight = items.length * rowHeight;
-  const { from, to } = visibleRows(
-    items.length,
-    scrollTop,
-    viewport,
-    rowHeight,
-  );
+  const rowCount = items.length + phases.length;
+  const rowsHeight = rowCount * rowHeight;
+  const { from, to } = visibleRows(rowCount, scrollTop, viewport, rowHeight);
   const rows = items.slice(from, to);
-  const { weeks, days } = ticks(scale);
+  const fromPhase = Math.max(0, from - items.length);
+  const phaseRows = phases.slice(fromPhase, Math.max(0, to - items.length));
+  const daysOnScreen = visibleRows(
+    scale.days,
+    horizontal.left,
+    horizontal.width,
+    scale.dayWidth,
+    DATE_WINDOW_THRESHOLD,
+    14,
+  );
+  const { weeks, days } = ticks(scale, daysOnScreen.from, daysOnScreen.to);
+  const phaseRange = (phase: ProjectPhase) =>
+    t("timeline.phaseRange", {
+      start: dates.full(phase.start),
+      end: dates.full(phase.end),
+    });
+  const choosePhase = (phase: ProjectPhase | null) => {
+    setPhaseDialog({ projectId: project.id, phase });
+  };
 
   const endOf = (item: TimelineItem) => ({ kind: item.kind, id: item.id });
   const pick = (item: TimelineItem) => {
@@ -336,6 +405,7 @@ function ProjectTimeline({ project }: { project: Project }) {
       dx: 0,
       x: at.x,
       y: at.y,
+      scale,
     });
   };
   const onMove = (event: PointerEvent) => {
@@ -441,6 +511,12 @@ function ProjectTimeline({ project }: { project: Project }) {
           >
             <Plus size={16} aria-hidden="true" />
             {t("timeline.newMilestone")}
+          </Button>
+        )}
+        {canManagePhases && (
+          <Button type="button" onClick={() => choosePhase(null)}>
+            <Plus size={16} aria-hidden="true" />
+            {t("timeline.addPhase")}
           </Button>
         )}
         <div
@@ -574,7 +650,17 @@ function ProjectTimeline({ project }: { project: Project }) {
       <p className="sr-only" id={hintId}>
         {t("timeline.keyboardHint")}
       </p>
-      {items.length === 0 ? (
+      {phaseQuery.error && (
+        <div className="timeline-alert" role="alert">
+          <p>{t(errorKey(phaseQuery.error))}</p>
+          <Button type="button" onClick={() => void phaseQuery.refetch()}>
+            {t("retry")}
+          </Button>
+        </div>
+      )}
+      {rowCount === 0 && confirmed && phaseQuery.isPending ? (
+        <p className="loading timeline-loading">{t("loading")}</p>
+      ) : rowCount === 0 ? (
         <p className="timeline-empty" data-testid="timeline-empty">
           {t("timeline.empty")}
         </p>
@@ -583,10 +669,15 @@ function ProjectTimeline({ project }: { project: Project }) {
           className="timeline-scroll"
           ref={scroller}
           onScroll={(event) => {
-            if (items.length > 200) {
+            if (rowCount > 200) {
               setScrollTop(event.currentTarget.scrollTop);
               setViewport(event.currentTarget.clientHeight);
             }
+            if (scale.days > DATE_WINDOW_THRESHOLD)
+              setHorizontal({
+                left: event.currentTarget.scrollLeft,
+                width: event.currentTarget.clientWidth,
+              });
           }}
         >
           <div
@@ -601,7 +692,11 @@ function ProjectTimeline({ project }: { project: Project }) {
                 className="timeline-header-label"
                 style={{ width: labelWidth }}
               >
-                {t("timeline.colTask")}
+                {t(
+                  phases.length
+                    ? "timeline.colTaskOrPhase"
+                    : "timeline.colTask",
+                )}
               </div>
               <svg
                 className="timeline-header-ticks"
@@ -685,6 +780,48 @@ function ProjectTimeline({ project }: { project: Project }) {
                         {item.title}
                       </span>
                     </button>
+                  </li>
+                );
+              })}
+              {phaseRows.map((phase, i) => {
+                const top = (items.length + fromPhase + i) * rowHeight;
+                const range = phaseRange(phase);
+                const label = t("timeline.phaseLabel", {
+                  name: phase.name,
+                  range,
+                });
+                const content = (
+                  <>
+                    <span className="timeline-row-title is-strong">
+                      {phase.name}
+                    </span>
+                    <span className="timeline-phase-range">{range}</span>
+                  </>
+                );
+                return (
+                  <li
+                    key={phase.id}
+                    style={{ top, height: rowHeight }}
+                    data-testid="timeline-phase-row"
+                  >
+                    {canManagePhases ? (
+                      <button
+                        type="button"
+                        className="timeline-row-label timeline-phase-label"
+                        aria-label={label}
+                        title={label}
+                        onClick={() => choosePhase(phase)}
+                      >
+                        {content}
+                      </button>
+                    ) : (
+                      <div
+                        className="timeline-row-label timeline-phase-label"
+                        title={label}
+                      >
+                        {content}
+                      </div>
+                    )}
                   </li>
                 );
               })}
@@ -939,6 +1076,54 @@ function ProjectTimeline({ project }: { project: Project }) {
                   className="timeline-link-preview"
                 />
               )}
+              {phaseRows.map((phase, i) => {
+                const index = items.length + fromPhase + i;
+                const x = dateToX(scale, phase.start);
+                const width =
+                  (daysBetween(phase.start, phase.end) + 1) * scale.dayWidth;
+                const cy = centerY(index);
+                const bottom = (index + 1) * rowHeight - 0.5;
+                const range = phaseRange(phase);
+                return (
+                  <g key={phase.id}>
+                    <line
+                      x1={0}
+                      x2={chartWidth}
+                      y1={bottom}
+                      y2={bottom}
+                      className="timeline-grid"
+                    />
+                    <rect
+                      data-testid="timeline-phase-bar"
+                      data-id={phase.id}
+                      data-start={phase.start}
+                      data-end={phase.end}
+                      x={x}
+                      y={cy - 7}
+                      width={width}
+                      height={14}
+                      rx={3}
+                      className={`timeline-phase-track${canManagePhases ? " is-editable" : ""}`}
+                      onPointerDown={
+                        canManagePhases
+                          ? (event) => {
+                              if (event.button === 0) choosePhase(phase);
+                            }
+                          : undefined
+                      }
+                    >
+                      <title>{range}</title>
+                    </rect>
+                    <text
+                      x={x + width + 8}
+                      y={cy + 4}
+                      className="timeline-meta"
+                    >
+                      {range}
+                    </text>
+                  </g>
+                );
+              })}
             </svg>
           </div>
         </div>
@@ -1010,6 +1195,14 @@ function ProjectTimeline({ project }: { project: Project }) {
               },
             )
           }
+        />
+      )}
+      {canManagePhases && phaseDialog?.projectId === project.id && (
+        <ProjectPhaseSheet
+          projectId={project.id}
+          phase={phaseDialog.phase}
+          today={timeline.today}
+          onClose={() => setPhaseDialog(null)}
         />
       )}
     </section>

@@ -1028,6 +1028,12 @@ POST /api/costs/projects/{id}/budget
 GET /api/costs/projects/{id}/margin'
           link ../../backend/crates/taff-api/src/lib.rs
         }
+        api_project_phases = routes '/api/project-phases (3)' {
+          description 'GET /api/project-phases
+POST /api/project-phases
+PATCH /api/project-phases/{id}'
+          link ../../backend/crates/taff-api/src/lib.rs
+        }
         api_project_updates = routes '/api/project-updates (2)' {
           description 'GET /api/project-updates
 POST /api/project-updates'
@@ -1070,6 +1076,7 @@ GET /api/projects/{id}/timeline'
         #db
         project_budgets = table 'project_budgets'
         project_payments = table 'project_payments'
+        project_phases = table 'project_phases'
         project_updates = table 'project_updates'
         projects = table 'projects'
       }
