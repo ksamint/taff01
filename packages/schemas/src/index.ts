@@ -1016,6 +1016,7 @@ export const mcpSummariesImageArgs = strictObject({
   workspaceId: optional(idSchema),
 });
 
+export { type AgentCost, agentCostSchema } from "./agent-cost";
 export * from "./calendar-image";
 export * from "./graph-image";
 export * from "./summary-image";

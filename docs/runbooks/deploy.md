@@ -18,9 +18,10 @@ host. `pnpm check` is the one command for step 1.
    verified database dump, before any migration.
 4. **Migrate.** Run the bundled migrator. Migrations are additive; record its
    exit code and the journal before and after.
-5. **Replace.** Start the renderer and wait until it is healthy, then replace
-   API, worker and web with the images built from the gated commit. Nothing
-   else on the host is touched.
+5. **Replace.** Start the renderer and the Rust API from the verified images
+   and wait for both health checks. Replace API, worker and web with the
+   images built from the gated commit. Activate the Rust path matchers in
+   Taff's own Caddyfile and check the path through Caddy before closeout.
 6. **Verify.** Closeout checks 2 to 4: the replaced services run the recorded
    images, are healthy and have not restarted; `node
    scripts/deploy/neighbor-preservation.mts` reports no unexplained drift;
@@ -35,11 +36,13 @@ host. `pnpm check` is the one command for step 1.
 Roll back when any check in step 6 fails, before the lock is released.
 
 1. Restore the environment backup from step 3.
-2. Recreate **only** API, worker, web and renderer from the previous accepted
-   release's images (the release milestone names them).
-3. Keep the database, its additive migrations and current data, Valkey, Caddy,
-   the route, DNS and every neighbouring service as they are. An additive
-   migration is never reverted by a rollback (ADR 0011).
+2. Restore Taff's previous Caddyfile and reload Taff's proxy. On the first
+   Rust rollout this removes the `/api/costs/*` matcher. Remove the Rust
+   service if the previous accepted release had none.
+3. Recreate the app services from the previous accepted release's images
+   (the release milestone names them). Preserve PostgreSQL, its additive
+   migrations and current data, Valkey, DNS and every neighbouring service
+   (ADR 0011).
 4. Re-run step 6 against the previous release.
 5. Write the deploy report with the result `rolled back`, and say why.
 

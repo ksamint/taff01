@@ -49,9 +49,21 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
 - PF-2.4 Invalid input shall be reported before sending; server errors keep the
   form open with the localized error.
 
+### Agent run cost (PF-3)
+
+- PF-3.1 The Rust cost endpoints for a project and for a task shall return
+  total USD cost in micros, run count, failed run count, failed cost and
+  total duration in milliseconds. Each project shall include every run of
+  its tasks in the workspace, including failed runs and rework.
+- PF-3.2 A person shall need `finance:read` to fetch a project's costs or a
+  cost for a task in that project. Only a workspace admin shall fetch costs
+  for an unprojected task.
+- PF-3.3 Task detail and project finance shall display the authorized USD
+  total in the reader's locale.
+
 ## Non-functional
 
-- No migration and no new route; the panel loads with the lazy timeline view,
+- The cost endpoints require no migration. The panel loads with the lazy timeline view,
   so Today's initial JavaScript is unchanged. Strings in en, zh-CN and zh-HK.
 
 ## Acceptance
@@ -63,6 +75,7 @@ Status: back end since v0.2.10; the management screen is on `main` for v0.2.22, 
 | PF-1.2 | `e2e/finance-visibility.spec.ts`; `packages/core/src/planning.integration.test.ts` |
 | PF-1.3 | `e2e/timeline.spec.ts`, distinct progress labels in three locales |
 | PF-2.1 | `packages/core/src/planning.integration.test.ts` (admin, member, guest flags) |
+| PF-3 | `backend/crates/taff-api/tests/agent_cost.rs` and `e2e/agent-cost.spec.ts` |
 
 ## Sources
 

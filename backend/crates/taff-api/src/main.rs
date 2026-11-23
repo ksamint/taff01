@@ -1,5 +1,5 @@
 use anyhow::{Context, Result};
-use std::{env, net::Ipv4Addr};
+use std::{env, net::IpAddr};
 use taff_api::{AppState, router};
 use taff_db::Db;
 use tokio::{net::TcpListener, signal};
@@ -10,6 +10,10 @@ async fn main() -> Result<()> {
         .unwrap_or_else(|_| "3003".into())
         .parse()
         .context("API_RS_PORT must be a TCP port")?;
+    let host: IpAddr = env::var("API_RS_HOST")
+        .unwrap_or_else(|_| "127.0.0.1".into())
+        .parse()
+        .context("API_RS_HOST must be an IP address")?;
     let database = env::var("DATABASE_URL").context("missing DATABASE_URL")?;
     let db = Db::connect(&database)
         .await
@@ -20,7 +24,7 @@ async fn main() -> Result<()> {
         .parse()
         .map_err(|_| anyhow::anyhow!("AUTH_URL is invalid"))?;
     let state = AppState::new(db, auth_secret, &auth_url)?;
-    let listener = TcpListener::bind((Ipv4Addr::LOCALHOST, port)).await?;
+    let listener = TcpListener::bind((host, port)).await?;
     let mut terminate = signal::unix::signal(signal::unix::SignalKind::terminate())?;
     axum::serve(listener, router().with_state(state))
         .with_graceful_shutdown(async move {

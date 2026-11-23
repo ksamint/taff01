@@ -47,7 +47,6 @@ test("the gate covers every command the release closeout names", () => {
   expect(CHECK_STEPS.map((item) => item.command)).toContain(
     "pnpm release:checklist",
   );
-  // The four images: api, worker, web, render.
   expect(
     CHECK_STEPS.filter((item) => item.argv[0] === "docker").map((item) =>
       item.argv.slice(3, -3).join(" "),
@@ -57,6 +56,7 @@ test("the gate covers every command the release closeout names", () => {
     "deploy/Dockerfile.server --build-arg TARGET=worker",
     "deploy/Dockerfile.web",
     "deploy/Dockerfile.render",
+    "deploy/Dockerfile.api-rs",
   ]);
 });
 

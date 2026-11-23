@@ -69,6 +69,7 @@ export function invalidateM3(client: QueryClient) {
         "task",
         "runs",
         "run",
+        "agent-cost",
         "review",
         "agent",
         "access-matrix",

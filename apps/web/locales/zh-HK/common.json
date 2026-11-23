@@ -1601,6 +1601,7 @@
   },
   "projectFinance": {
     "title": "財務",
+    "agentCost": "智能體成本",
     "contract": "合約金額",
     "currency": "貨幣",
     "client": "客戶公司",

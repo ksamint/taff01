@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { useId, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatAgentCost } from "../lib/agent-cost";
 import { errorKey } from "../lib/api";
 import { isLocale } from "../lib/i18n";
 import { useAgent } from "../lib/m3-queries";
@@ -59,12 +60,7 @@ export function RunPanel({
     unit: "second",
     maximumFractionDigits: 1,
   }).format(run.durationMs / 1000);
-  const cost = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 6,
-  }).format(run.costMicros / 1_000_000);
+  const cost = formatAgentCost(run.costMicros, locale);
   const active = ["running", "paused", "changes_requested"].includes(
     run.status,
   );

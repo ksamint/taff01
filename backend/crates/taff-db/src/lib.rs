@@ -1,4 +1,6 @@
+mod costs;
 mod schema;
+pub use costs::CostTarget;
 pub use schema::{User, Workspace};
 mod write;
 use taff_domain::{CoreError, Result};

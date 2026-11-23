@@ -9,6 +9,7 @@ repository.workspace = true
 [dependencies]
 chrono.workspace = true
 regress = "0.12"
+schemars = "0.8.22"
 serde.workspace = true
 serde_json.workspace = true
 uuid.workspace = true

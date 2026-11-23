@@ -7,11 +7,13 @@ rust-version.workspace = true
 repository.workspace = true
 
 [dependencies]
+anyhow.workspace = true
 sqlx = { workspace = true, features = ["macros"] }
 uuid.workspace = true
 chrono.workspace = true
 serde.workspace = true
 thiserror.workspace = true
+taff-contract = { path = "../taff-contract" }
 taff-domain = { path = "../taff-domain" }
 
 [dev-dependencies]

@@ -2469,6 +2469,7 @@ dependencies = [
  "tokio",
  "tower",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -2506,10 +2507,12 @@ dependencies = [
 name = "taff-db"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "chrono",
  "serde",
  "serde_json",
  "sqlx",
+ "taff-contract",
  "taff-domain",
  "thiserror",
  "tokio",

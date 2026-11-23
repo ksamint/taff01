@@ -138,6 +138,16 @@
 .task-parent-link:hover {
   color: var(--text);
 }
+.task-agent-cost {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  margin: 0;
+}
+.task-agent-cost dd {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
 .task-source-heading {
   margin: 0 0 16px;
 }

@@ -13,7 +13,7 @@ the CSS locators and the message keys, or change the suites in the same PR.
 on `today-heading` and the `auth-*` ids; the visual suite
 (`e2e/ui-v2.spec.ts`) is listed with the rest.
 
-## Test ids (511 distinct, 2390 uses)
+## Test ids (511 distinct, 2393 uses)
 
 Grouped by the component file that renders the id today (first match when
 several do). “Also rendered by” lists the other files.
@@ -479,7 +479,7 @@ several do). “Also rendered by” lists the other files.
 
 | Test id | Uses | Also rendered by | Used in |
 | --- | ---: | --- | --- |
-| `project-finance` | 4 |  | project-finance.spec.ts, timeline.spec.ts |
+| `project-finance` | 5 |  | agent-cost.spec.ts, project-finance.spec.ts, timeline.spec.ts |
 | `project-finance-collected` | 1 |  | project-finance.spec.ts |
 | `project-finance-contract` | 1 |  | project-finance.spec.ts |
 | `project-finance-contract-input` | 2 |  | project-finance.spec.ts |
@@ -747,7 +747,7 @@ several do). “Also rendered by” lists the other files.
 | `subtask-title` | 4 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `task-comment` | 8 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
 | `task-comment-submit` | 6 |  | live/release/checklist.spec.ts, planning.spec.ts, release/checklist.spec.ts |
-| `task-detail-heading` | 45 |  | accessibility.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, operation-templates.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, task-contacts.spec.ts, task-detail.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
+| `task-detail-heading` | 46 |  | accessibility.spec.ts, agent-cost.spec.ts, agent-review.spec.ts, crm.spec.ts, live/crm.spec.ts, live/mind.spec.ts, live/release/checklist.spec.ts, live/timeline.spec.ts, mind.spec.ts, operation-templates.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, release/checklist.spec.ts, scripts/ui/a11y-audit.mts, scripts/ui/app-shots.mts, task-contacts.spec.ts, task-detail.spec.ts, timeline.spec.ts, today.spec.ts, ui-v2.spec.ts |
 | `task-field-due` | 3 |  | planning.spec.ts, task-detail.spec.ts |
 | `task-field-labels` | 1 |  | task-detail.spec.ts |
 | `task-field-owner` | 1 |  | task-detail.spec.ts |
@@ -779,7 +779,7 @@ several do). “Also rendered by” lists the other files.
 | `timeline-dependency-hit` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-duration` | 2 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-finance` | 9 |  | finance-visibility.spec.ts, live/platform.spec.ts, timeline.spec.ts |
-| `timeline-finance-toggle` | 4 |  | project-finance.spec.ts, timeline.spec.ts |
+| `timeline-finance-toggle` | 5 |  | agent-cost.spec.ts, project-finance.spec.ts, timeline.spec.ts |
 | `timeline-footer` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-hint` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline-link-mode` | 4 |  | live/timeline.spec.ts, timeline.spec.ts |
@@ -1298,6 +1298,7 @@ Keys read from `apps/web/locales/*/common.json` through
 | `organization.team` | 1 | me.spec.ts |
 | `planning.close` | 22 | access.spec.ts, me.spec.ts, notifications.spec.ts, persistence.spec.ts, planning.spec.ts, today.spec.ts |
 | `planning.high` | 1 | task-detail.spec.ts |
+| `projectFinance.agentCost` | 1 | agent-cost.spec.ts |
 | `projectFinance.invalidAmount` | 1 | project-finance.spec.ts |
 | `projectFinance.noContract` | 1 | project-finance.spec.ts |
 | `projectFinance.positiveAmount` | 1 | project-finance.spec.ts |

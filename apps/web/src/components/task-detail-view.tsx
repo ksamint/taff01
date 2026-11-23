@@ -7,12 +7,13 @@ import { ArrowLeft, ArrowRight, ChevronDown, Sparkles, X } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { formatAgentCost, useAgentCost } from "../lib/agent-cost";
 import { errorKey } from "../lib/api";
 import { invalidateM3, useRun, useRuns, useTask } from "../lib/m3-queries";
 import { useTaskAccess } from "../lib/m5-queries";
 import { useAssignTask, useStartRun } from "../lib/mutations/tasks";
 import { m3MutationKey } from "../lib/optimistic-m3";
-import { useMembers } from "../lib/queries";
+import { useMembers, useWorkspaceAccess } from "../lib/queries";
 import { useDesktop } from "../lib/use-desktop";
 import { useWorkspace } from "./app-shell";
 import { MemberOptions } from "./member-options";
@@ -38,8 +39,8 @@ export function TaskDetailView({
   embedded?: boolean;
   onClose?: () => void;
 }) {
-  const { workspace } = useWorkspace();
-  const { t } = useTranslation();
+  const { workspace, me, confirmed } = useWorkspace();
+  const { t, i18n } = useTranslation();
   const desktop = useDesktop();
   const workerId = useId();
   const [workerEditing, setWorkerEditing] = useState(false);
@@ -48,6 +49,16 @@ export function TaskDetailView({
   const task = useTask(taskId);
   const access = useTaskAccess(taskId);
   const workspaceId = task.data?.workspaceId ?? workspace.id;
+  const workspaceAccess = useWorkspaceAccess(workspaceId);
+  const canReadCost =
+    confirmed &&
+    task.isSuccess &&
+    (task.data.projectId
+      ? workspaceAccess.isSuccess && workspaceAccess.data.canReadFinance
+      : me.workspaces.some(
+          (entry) => entry.id === workspaceId && entry.role === "admin",
+        ));
+  const agentCost = useAgentCost("tasks", taskId, canReadCost);
   const members = useMembers(workspaceId);
   const runs = useRuns(workspaceId);
   const latest = runs.data
@@ -253,16 +264,29 @@ export function TaskDetailView({
           workerControl={workerControl}
           contacts={<TaskContacts task={task.data} />}
           runControl={
-            detail.isError ? (
-              <p className="alert" role="alert">
-                {t(errorKey(detail.error))}
-              </p>
-            ) : detail.data && !hasReview ? (
-              <RunPanel
-                detail={detail.data}
-                refresh={() => void invalidateM3(client)}
-              />
-            ) : null
+            <>
+              {detail.isError ? (
+                <p className="alert" role="alert">
+                  {t(errorKey(detail.error))}
+                </p>
+              ) : detail.data && !hasReview ? (
+                <RunPanel
+                  detail={detail.data}
+                  refresh={() => void invalidateM3(client)}
+                />
+              ) : null}
+              {canReadCost && agentCost.isSuccess && (
+                <dl className="task-agent-cost">
+                  <dt>{t("projectFinance.agentCost")}</dt>
+                  <dd>
+                    {formatAgentCost(
+                      agentCost.data.costMicros,
+                      i18n.resolvedLanguage ?? me.user.locale,
+                    )}
+                  </dd>
+                </dl>
+              )}
+            </>
           }
           afterDescription={
             <>

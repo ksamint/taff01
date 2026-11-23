@@ -85,6 +85,26 @@ services:
       interval: 10s
       timeout: 3s
       retries: 10
+  api-rs:
+    image: ${TAFF_IMAGE_API_RS:-taff-api-rs}:${TAFF_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.api-rs
+    restart: unless-stopped
+    stop_grace_period: 30s
+    environment:
+      DATABASE_URL: postgres://taff:${POSTGRES_PASSWORD}@postgres:5432/taff
+      AUTH_URL: ${AUTH_URL}
+      AUTH_SECRET: ${AUTH_SECRET}
+      API_RS_HOST: "0.0.0.0"
+      API_RS_PORT: "3003"
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3003/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
   worker:
     image: ${TAFF_IMAGE_WORKER:-taff-worker}:${TAFF_TAG:-latest}
     build:
@@ -134,6 +154,7 @@ services:
     depends_on:
       - web
       - api
+      - api-rs
 volumes:
   postgres18_data:
   valkey_data:

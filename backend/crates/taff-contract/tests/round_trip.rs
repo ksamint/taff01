@@ -1,7 +1,7 @@
 use serde::{Serialize, de::DeserializeOwned};
 use serde_json::{Value, json};
 use std::{fs, path::Path};
-use taff_contract::{mcp, render, rest};
+use taff_contract::{AgentCost, mcp, render, rest};
 use taff_domain::canonical_json;
 
 fn round_trip<T: Serialize + DeserializeOwned>(source: Value, name: &str) {
@@ -39,5 +39,17 @@ fn rest_and_mcp_types_round_trip() {
     round_trip::<mcp::timeline_get::Arguments>(
         json!({"projectId": "00000000-0000-4000-8000-000000000001"}),
         "timeline.get",
+    );
+}
+
+#[test]
+fn agent_cost_schema_matches_the_web_contract() {
+    let shared: Value = serde_json::from_str(include_str!(
+        "../../../../packages/schemas/generated/agent-cost.json"
+    ))
+    .unwrap();
+    assert_eq!(
+        serde_json::to_value(schemars::schema_for!(AgentCost)).unwrap(),
+        shared
     );
 }

@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "AgentCost",
+  "description": "Summed costs in USD micro-units for all runs in the requested scope.",
+  "type": "object",
+  "required": [
+    "costMicros",
+    "durationMs",
+    "failedCostMicros",
+    "failedRuns",
+    "runs"
+  ],
+  "properties": {
+    "costMicros": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991.0,
+      "minimum": 0.0
+    },
+    "durationMs": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991.0,
+      "minimum": 0.0
+    },
+    "failedCostMicros": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991.0,
+      "minimum": 0.0
+    },
+    "failedRuns": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991.0,
+      "minimum": 0.0
+    },
+    "runs": {
+      "type": "integer",
+      "format": "uint64",
+      "maximum": 9007199254740991.0,
+      "minimum": 0.0
+    }
+  },
+  "additionalProperties": false
+}

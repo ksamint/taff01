@@ -81,7 +81,7 @@ model {
     rust_api = service 'Rust API' {
       #rust
       technology 'Axum'
-      description 'Local loopback on port 3003. Health and read-only validation of existing Node sessions.'
+      description 'Axum on port 3003. Private Compose access for agent costs and loopback for local development.'
       link ../backend/crates/taff-api/src/main.rs
     }
     db = store 'PostgreSQL' {
@@ -97,6 +97,7 @@ model {
 
     edge -> web 'pages'
     edge -> api.rest '/api'
+    edge -> rust_api '/api/costs'
     edge -> api.mcp '/mcp'
     edge -> api.oauth '/api/oauth'
     web -> api.rest 'server render and browser calls'

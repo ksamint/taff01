@@ -28,9 +28,10 @@ source as a process gap in the milestone and fix the capture step below.
    `SSR_PRODUCTION=1 pnpm e2e e2e/ssr-session.spec.ts --grep "production SSR HTML is private"` against
    the local production stack (Next's development server always sends only
    `no-store`), `release:stack` then
-   `release:checklist`, `pnpm mcp:smoke` against that stack, and the four
+   `release:checklist`, `pnpm mcp:smoke` against that stack, and the five
    image builds (`deploy/Dockerfile.server` with `TARGET=api` and
-   `TARGET=worker`, `deploy/Dockerfile.web`, `deploy/Dockerfile.render`). Once `backend/` exists, add
+   `TARGET=worker`, `deploy/Dockerfile.web`, `deploy/Dockerfile.render` and
+   `deploy/Dockerfile.api-rs`). Once `backend/` exists, add
    `cargo fmt --check`, `cargo clippy --all-targets -- -D warnings` and
    `cargo test --locked`, `cargo deny check licenses` and regeneration of all
    Node fixtures with a clean diff (`pnpm rust:gate`). Source: the command output, with pass and fail

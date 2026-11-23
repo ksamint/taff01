@@ -1016,6 +1016,10 @@ GET /api/workspaces/archived'
       }
       rest = layer 'REST routes' {
         #api
+        api_costs = routes '/api/costs (1)' {
+          description 'GET /api/costs/projects/{id}'
+          link ../../backend/crates/taff-api/src/lib.rs
+        }
         api_projects = routes '/api/projects (5)' {
           description 'GET /api/projects
 POST /api/projects
@@ -1078,6 +1082,10 @@ POST /api/projects/:id/payments'
           description 'GET /api/bootstrap
 GET /api/bootstrap/today'
           link ../../apps/api/src/app.ts
+        }
+        api_costs = routes '/api/costs (1)' {
+          description 'GET /api/costs/tasks/{id}'
+          link ../../backend/crates/taff-api/src/lib.rs
         }
         api_quick_add = routes '/api/quick-add (1)' {
           description 'POST /api/quick-add/parse'
