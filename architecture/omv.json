@@ -504,7 +504,7 @@
     "attrs": {
      "tier": 2,
      "kind": "kind",
-     "dependents": 10,
+     "dependents": 11,
      "stored": [
       "tasks"
      ]
@@ -753,6 +753,20 @@
      "dependents": 0,
      "stored": [
       "task_dependencies"
+     ]
+    }
+   },
+   {
+    "id": "concept:task_link",
+    "type": "concept",
+    "title": "Task link",
+    "summary": "A related or duplicate connection between tasks.",
+    "attrs": {
+     "tier": 5,
+     "kind": "relator",
+     "dependents": 0,
+     "stored": [
+      "task_links"
      ]
     }
    },
@@ -2355,6 +2369,14 @@
     "title": "CN-14 Mind map labels",
     "attrs": {
      "statements": 1
+    }
+   },
+   {
+    "id": "requirement:CN-15",
+    "type": "requirement",
+    "title": "CN-15 Task links",
+    "attrs": {
+     "statements": 2
     }
    },
    {
@@ -5108,6 +5130,11 @@
     "title": "task_comments"
    },
    {
+    "id": "table:task_links",
+    "type": "table",
+    "title": "task_links"
+   },
+   {
     "id": "table:tasks",
     "type": "table",
     "title": "tasks"
@@ -5150,6 +5177,30 @@
     "title": "POST /api/search",
     "attrs": {
      "file": "apps/api/src/app.ts"
+    }
+   },
+   {
+    "id": "route:GET /api/task-links",
+    "type": "route",
+    "title": "GET /api/task-links",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:POST /api/task-links",
+    "type": "route",
+    "title": "POST /api/task-links",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
+    }
+   },
+   {
+    "id": "route:DELETE /api/task-links/{id}",
+    "type": "route",
+    "title": "DELETE /api/task-links/{id}",
+    "attrs": {
+     "file": "backend/crates/taff-api/src/lib.rs"
     }
    },
    {
@@ -5710,6 +5761,11 @@
     "type": "requires"
    },
    {
+    "from": "concept:task_link",
+    "to": "concept:task",
+    "type": "requires"
+   },
+   {
     "from": "concept:subtask",
     "to": "concept:task",
     "type": "part_of"
@@ -5917,6 +5973,16 @@
    {
     "from": "concept:dependency",
     "to": "module:planning",
+    "type": "kept_by"
+   },
+   {
+    "from": "concept:task_link",
+    "to": "concept:task",
+    "type": "part_of"
+   },
+   {
+    "from": "concept:task_link",
+    "to": "module:tasks",
     "type": "kept_by"
    },
    {
@@ -6323,6 +6389,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:task_link",
+    "to": "function:task:edit",
+    "type": "has_function"
+   },
+   {
     "from": "concept:label",
     "to": "function:task:edit",
     "type": "has_function"
@@ -6373,6 +6444,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:task_link",
+    "to": "function:task:owner",
+    "type": "has_function"
+   },
+   {
     "from": "concept:label",
     "to": "function:task:owner",
     "type": "has_function"
@@ -6414,6 +6490,11 @@
    },
    {
     "from": "concept:due_date",
+    "to": "function:task:comment",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:task_link",
     "to": "function:task:comment",
     "type": "has_function"
    },
@@ -6473,6 +6554,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:task_link",
+    "to": "function:task:create",
+    "type": "has_function"
+   },
+   {
     "from": "concept:label",
     "to": "function:task:create",
     "type": "has_function"
@@ -6528,6 +6614,11 @@
     "type": "has_function"
    },
    {
+    "from": "concept:task_link",
+    "to": "function:task:assign",
+    "type": "has_function"
+   },
+   {
     "from": "concept:label",
     "to": "function:task:assign",
     "type": "has_function"
@@ -6569,6 +6660,11 @@
    },
    {
     "from": "concept:due_date",
+    "to": "function:task:status",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:task_link",
     "to": "function:task:status",
     "type": "has_function"
    },
@@ -6619,6 +6715,11 @@
    },
    {
     "from": "concept:due_date",
+    "to": "function:task:finish",
+    "type": "has_function"
+   },
+   {
+    "from": "concept:task_link",
     "to": "function:task:finish",
     "type": "has_function"
    },
@@ -10238,6 +10339,11 @@
    },
    {
     "from": "product:taff",
+    "to": "requirement:CN-15",
+    "type": "must_satisfy"
+   },
+   {
+    "from": "product:taff",
     "to": "spec:tooling.md",
     "type": "specified_by"
    },
@@ -10577,6 +10683,11 @@
     "type": "stated_in"
    },
    {
+    "from": "requirement:CN-15",
+    "to": "spec:client-navigation.md",
+    "type": "stated_in"
+   },
+   {
     "from": "requirement:TT-1",
     "to": "spec:tooling.md",
     "type": "stated_in"
@@ -10713,6 +10824,11 @@
    },
    {
     "from": "concept:due_date",
+    "to": "flow:handoff",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:task_link",
     "to": "flow:handoff",
     "type": "in_flow"
    },
@@ -10873,6 +10989,11 @@
    },
    {
     "from": "concept:due_date",
+    "to": "flow:plan",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:task_link",
     "to": "flow:plan",
     "type": "in_flow"
    },
@@ -11167,6 +11288,11 @@
     "type": "in_flow"
    },
    {
+    "from": "concept:task_link",
+    "to": "flow:connect",
+    "type": "in_flow"
+   },
+   {
     "from": "concept:label",
     "to": "flow:connect",
     "type": "in_flow"
@@ -11248,6 +11374,11 @@
    },
    {
     "from": "concept:due_date",
+    "to": "flow:refresh",
+    "type": "in_flow"
+   },
+   {
+    "from": "concept:task_link",
     "to": "flow:refresh",
     "type": "in_flow"
    },
@@ -12867,6 +12998,11 @@
     "type": "belongs_to"
    },
    {
+    "from": "table:task_links",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
     "from": "table:tasks",
     "to": "module:tasks",
     "type": "belongs_to"
@@ -12893,6 +13029,21 @@
    },
    {
     "from": "route:POST /api/search",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:GET /api/task-links",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:POST /api/task-links",
+    "to": "module:tasks",
+    "type": "belongs_to"
+   },
+   {
+    "from": "route:DELETE /api/task-links/{id}",
     "to": "module:tasks",
     "type": "belongs_to"
    },
@@ -14432,6 +14583,11 @@
     "type": "refers_to"
    },
    {
+    "from": "table:task_links",
+    "to": "table:tasks",
+    "type": "refers_to"
+   },
+   {
     "from": "table:task_plans",
     "to": "table:tasks",
     "type": "refers_to"
@@ -14644,6 +14800,11 @@
    {
     "from": "concept:dependency",
     "to": "table:task_dependencies",
+    "type": "stored_in"
+   },
+   {
+    "from": "concept:task_link",
+    "to": "table:task_links",
     "type": "stored_in"
    },
    {

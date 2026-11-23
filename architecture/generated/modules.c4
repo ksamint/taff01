@@ -1101,6 +1101,12 @@ GET /api/bootstrap/today'
           description 'POST /api/search'
           link ../../apps/api/src/app.ts
         }
+        api_task_links = routes '/api/task-links (3)' {
+          description 'GET /api/task-links
+POST /api/task-links
+DELETE /api/task-links/{id}'
+          link ../../backend/crates/taff-api/src/lib.rs
+        }
         api_tasks = routes '/api/tasks (8)' {
           description 'GET /api/tasks
 POST /api/tasks
@@ -1160,6 +1166,7 @@ PATCH /api/tasks/:id/status'
       data = layer 'Tables' {
         #db
         task_comments = table 'task_comments'
+        task_links = table 'task_links'
         tasks = table 'tasks'
       }
       ui -> rest 'calls'

@@ -147,6 +147,15 @@ is implemented for v0.2.26, not yet deployed.
   and innermost ring labels separate on the phone viewport. The centre label
   shall stay legible if the offset places it beyond the centre circle.
 
+### Task links (CN-15)
+
+- CN-15.1 An editor of both tasks shall be able to add or remove a related
+  or duplicate link within one workspace. Each unordered pair shall have
+  at most one link of each kind.
+- CN-15.2 Task detail shall show links from either side when the viewer can
+  edit both tasks. A link with an archived or deleted endpoint shall be
+  omitted.
+
 ## Non-functional
 
 - No new client dependency. Today's initial JavaScript remains within its budget.
@@ -177,6 +186,7 @@ is implemented for v0.2.26, not yet deployed.
 | CN-12 | e2e/task-detail.spec.ts, e2e/task-contacts.spec.ts and e2e/calendar.spec.ts in all three locales |
 | CN-13 | `e2e/search-hint.spec.ts`, touch and desktop in three locales |
 | CN-14 | `e2e/mind.spec.ts`, centre label bounds on the phone |
+| CN-15 | `backend/crates/taff-api/tests/task_links.rs` and `e2e/task-links.spec.ts` |
 
 ## Open decisions
 

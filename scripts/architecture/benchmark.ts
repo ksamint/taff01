@@ -65,7 +65,10 @@ export const ASSESSMENT: Assessment = {
       status: "yes",
       where: ["concept:dependency"],
     },
-    "other-task-links-related": { status: "no" },
+    "other-task-links-related": {
+      status: "yes",
+      where: ["concept:task_link", "route:GET /api/task-links"],
+    },
     "due-dates": { status: "yes", where: ["concept:due_date"] },
     "calendar-blocks-repeat": {
       status: "yes",

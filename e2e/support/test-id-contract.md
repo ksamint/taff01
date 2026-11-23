@@ -841,6 +841,7 @@ several do). “Also rendered by” lists the other files.
 | --- | ---: | --- |
 | `alert` | 40 | agent-creation.spec.ts, audience-editing.spec.ts, calendar.spec.ts, live/mind.spec.ts, me.spec.ts, mind.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, planning.spec.ts, sms-auth.spec.ts, today.spec.ts, username-auth.spec.ts, workspace-lifecycle.spec.ts |
 | `button` | 12 | calendar.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, me.spec.ts, persistence.spec.ts, project-header.spec.ts, release/checklist.spec.ts, support/preferences.ts, support/task-fields.ts, token-grants.spec.ts |
+| `button — name: /Repeated task/` | 1 | task-links.spec.ts |
 | `button — name: cancel` | 1 | agent-review.spec.ts |
 | `button — name: label` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: languageNames[locale]` | 2 | support/preferences.ts |
@@ -867,6 +868,7 @@ several do). “Also rendered by” lists the other files.
 | `button — name: m.run.cancel` | 2 | live/release/checklist.spec.ts, release/checklist.spec.ts |
 | `button — name: m.sms.send` | 2 | sms-auth.spec.ts |
 | `button — name: m.sms.verify` | 3 | sms-auth.spec.ts |
+| `button — name: m.taskLinks.add` | 2 | task-links.spec.ts |
 | `button — name: messages[info.project.name as TestLocale].signOut` | 1 | organization-default.spec.ts |
 | `button — name: messages[locale].grants.request` | 1 | optimistic-m4.spec.ts |
 | `button — name: messages[locale].planning.close` | 5 | notifications.spec.ts, persistence.spec.ts, today.spec.ts |
@@ -894,6 +896,7 @@ several do). “Also rendered by” lists the other files.
 | `dialog — name: m.crm.contacts.delete` | 2 | crm.spec.ts, live/crm.spec.ts |
 | `dialog — name: m.projectUpdates.post` | 1 | project-health-updates.spec.ts |
 | `dialog — name: m.projectUpdates.title` | 1 | project-health-updates.spec.ts |
+| `dialog — name: m.taskLinks.add` | 1 | task-links.spec.ts |
 | `dialog — name: title` | 1 | view-export.spec.ts |
 | `heading` | 8 | audit.spec.ts, board-access.spec.ts, live/release/checklist.spec.ts, mcp.spec.ts, release/checklist.spec.ts, summaries.spec.ts |
 | `heading — name: heading` | 1 | font-loading.spec.ts |
@@ -929,16 +932,19 @@ several do). “Also rendered by” lists the other files.
 | `link — name: original.title` | 2 | persistence.spec.ts |
 | `link — name: receivables.title` | 1 | operation-templates.spec.ts |
 | `link — name: renamed` | 2 | persistence.spec.ts |
+| `link — name: target.title` | 1 | task-links.spec.ts |
 | `link — name: task.title` | 8 | live/release/checklist.spec.ts, notifications.spec.ts, optimistic-m4.spec.ts, persistence.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `link — name: title` | 9 | agent-review.spec.ts, live/platform.spec.ts, live/release/checklist.spec.ts, realtime.spec.ts, release/checklist.spec.ts, today.spec.ts |
 | `list` | 1 | planning.spec.ts |
 | `navigation — name: m.projects.views` | 2 | project-graph-view.spec.ts, project-header.spec.ts |
 | `navigation — name: messages[locale].nav.label` | 1 | calendar.spec.ts |
+| `option — name: /Task to link/` | 1 | task-links.spec.ts |
 | `progressbar` | 1 | summaries.spec.ts |
 | `region — name: m.access.agents` | 1 | access.spec.ts |
 | `region — name: m.mcp.workspaceGrants` | 1 | access.spec.ts |
 | `region — name: m.signIn` | 1 | sms-auth.spec.ts |
 | `region — name: m.sms.title` | 4 | sms-auth.spec.ts |
+| `region — name: m.taskLinks.title` | 1 | task-links.spec.ts |
 | `region — name: messages[locale].todayDue` | 3 | today.spec.ts, ui-v2.spec.ts |
 | `region — name: text.workspaceGrants` | 1 | mcp.spec.ts |
 | `row` | 3 | access.spec.ts |
@@ -966,6 +972,8 @@ several do). “Also rendered by” lists the other files.
 | `m.projectUpdates.healthLabel` | 1 | project-health-updates.spec.ts |
 | `m.projectUpdates.notes` | 1 | project-health-updates.spec.ts |
 | `m.sms.code` | 5 | sms-auth.spec.ts |
+| `m.taskLinks.kindLabel` | 1 | task-links.spec.ts |
+| `m.taskLinks.task` | 1 | task-links.spec.ts |
 | `m.usernameOptional` | 1 | username-auth.spec.ts |
 | `messages[locale].accountIdentifier` | 2 | sms-auth.spec.ts, username-auth.spec.ts |
 | `text.targetAgent` | 1 | mcp.spec.ts |
@@ -1366,6 +1374,12 @@ Keys read from `apps/web/locales/*/common.json` through
 | `taskDetail.moreFields` | 1 | task-detail.spec.ts |
 | `taskDetail.statusChanged` | 1 | optimistic-m4.spec.ts |
 | `taskDetail.unscheduled` | 1 | task-detail.spec.ts |
+| `taskLinks.add` | 3 | task-links.spec.ts |
+| `taskLinks.empty` | 2 | task-links.spec.ts |
+| `taskLinks.kind.duplicate` | 1 | task-links.spec.ts |
+| `taskLinks.kindLabel` | 1 | task-links.spec.ts |
+| `taskLinks.task` | 1 | task-links.spec.ts |
+| `taskLinks.title` | 1 | task-links.spec.ts |
 | `timeline.cycle` | 7 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depAdded` | 21 | live/timeline.spec.ts, timeline.spec.ts |
 | `timeline.depRemoved` | 14 | live/timeline.spec.ts, timeline.spec.ts |

@@ -1022,5 +1022,6 @@ export * from "./graph-image";
 export * from "./project-health";
 export * from "./summary-image";
 export * from "./summary-layout";
+export * from "./task-link";
 export * from "./timeline-image";
 export * from "./view-export";

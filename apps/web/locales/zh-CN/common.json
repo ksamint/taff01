@@ -407,6 +407,20 @@
       "confirm": "确认更改策略"
     }
   },
+  "taskLinks": {
+    "title": "任务关联",
+    "add": "添加关联",
+    "kindLabel": "关联类型",
+    "kind": {
+      "related": "相关",
+      "duplicate": "重复"
+    },
+    "task": "任务",
+    "choose": "选择任务",
+    "removeNamed": "移除与 {{title}} 的{{kind}}关联",
+    "empty": "暂无关联任务。",
+    "noneAvailable": "没有其他可选任务。"
+  },
   "taskDetail": {
     "moreFields": "更多",
     "back": "返回今天",

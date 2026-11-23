@@ -1,11 +1,12 @@
 mod project_health;
+mod task_links;
 
 use axum::{
     Json, Router,
     extract::{FromRequestParts, Path, State, rejection::PathRejection},
     http::{StatusCode, header, request::Parts},
     response::{IntoResponse, Response},
-    routing::get,
+    routing::{delete, get},
 };
 use base64::{Engine, engine::general_purpose::STANDARD};
 use hmac::{Hmac, Mac};
@@ -161,5 +162,10 @@ pub fn router() -> Router<AppState> {
             "/api/project-updates",
             get(project_health::list).post(project_health::post),
         )
+        .route(
+            "/api/task-links",
+            get(task_links::list).post(task_links::create),
+        )
+        .route("/api/task-links/{id}", delete(task_links::remove))
         .fallback(|| async { ApiError(CoreError::NotFound) })
 }
