@@ -11,6 +11,7 @@ sqlx = { workspace = true, features = ["macros"] }
 uuid.workspace = true
 chrono.workspace = true
 serde.workspace = true
+thiserror.workspace = true
 taff-domain = { path = "../taff-domain" }
 
 [dev-dependencies]

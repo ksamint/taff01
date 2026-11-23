@@ -117,6 +117,7 @@ model {
     core -> db 'reads and writes'
     rust_api -> db 'reads active sessions'
     rust_api -> contract 'generates wire types from'
+    rust_domain -> db 'runs audited transactions'
     db -> core 'change notification'
     rust_domain -[planned]-> core 'replaces, from v0.2.27'
   }

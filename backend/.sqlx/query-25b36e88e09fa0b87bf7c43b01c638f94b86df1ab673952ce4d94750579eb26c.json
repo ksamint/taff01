@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT set_config('taff.actor_id', $1, true) AS actor_id, pg_advisory_xact_lock_shared(hashtextextended('taff:workspace-lifecycle', 0))::text AS lifecycle_lock",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "actor_id",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "lifecycle_lock",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": ["Text"]
+    },
+    "nullable": [null, null]
+  },
+  "hash": "25b36e88e09fa0b87bf7c43b01c638f94b86df1ab673952ce4d94750579eb26c"
+}
