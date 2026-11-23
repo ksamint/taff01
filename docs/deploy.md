@@ -3240,3 +3240,16 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - Closeout checks 7–8 record the receipt, accepted marker, keeper release
   and independent lock probe after this docs checkpoint. Owner-only checks
   are tracked in [owner checks](owner-checks.md).
+
+### Function map and Rust API v0.2.27 checkpoint
+
+- Source `7bc5695eb5d1cefe4450a1132b3c8df285287640`, tree
+  `991b8c0b0026f604ea1b4fc1ed6ca8e6d8272bfa`. The [release source PR](https://github.com/ksamint/taff01/pull/126)
+  merged on the exact checked tree. The annotated tag resolves to its source.
+- The 19-step local check and read-only live checks passed. The
+  [milestone](milestones/176-v0.2.27.md) records the shipped features and the
+  [deploy report](../deploy/reports/20261123T033721Z-991b8c0b0026.md) records checksums, migration 47,
+  and container preservation. v0.2.26 remains the rollback source.
+- The private receiver receipt and independent lock probe capture checks 7–8
+  after the docs checkpoint. Pending account-only checks are listed under
+  [Owner checks](owner-checks.md).
