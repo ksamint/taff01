@@ -3253,3 +3253,16 @@ with conflict. Phone login offers "Use password instead" after a mobile number.
 - The private receiver receipt and independent lock probe capture checks 7–8
   after the docs checkpoint. Pending account-only checks are listed under
   [Owner checks](owner-checks.md).
+
+### Time tracking and project finance v0.2.28 checkpoint
+
+- Source `2217d1f5d025c3f32a80a6a1213c6308bc674402`, tree
+  `4aa1a12a4dc5a282d89fe75af7d4ef5634b00e7a`. The [release source PR](https://github.com/ksamint/taff01/pull/131)
+  merged on the exact checked tree. The annotated tag resolves to its source.
+- The 19-step local check and read-only live checks passed. The
+  [milestone](milestones/180-v0.2.28.md) records the shipped features and the
+  [deploy report](../deploy/reports/20261123T054932Z-4aa1a12a4dc5.md) records checksums, migration 49,
+  and container preservation. v0.2.27 remains the rollback source.
+- The private receiver receipt and independent lock probe capture checks 7–8
+  after the docs checkpoint. Pending account-only checks are listed under
+  [Owner checks](owner-checks.md).
