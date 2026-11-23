@@ -6,6 +6,10 @@ license.workspace = true
 rust-version.workspace = true
 repository.workspace = true
 
+[features]
+default = ["node-catalog"]
+node-catalog = []
+
 [dependencies]
 chrono.workspace = true
 regress = "0.12"
