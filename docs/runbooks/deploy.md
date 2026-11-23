@@ -46,6 +46,24 @@ Roll back when any check in step 6 fails, before the lock is released.
 Restoring the database dump is a destructive data operation: stop and ask the
 owner, with the dump verified first.
 
+## Local proxy switch rehearsal
+
+Before changing a Rust route matcher, rehearse the switch with a
+standalone, loopback-only Caddy instance. Start the local Node API and
+`taff-api`, then confirm that Caddy serves `/api/health` from Node.
+Add this block before the fallback for the local site:
+
+```caddyfile
+handle /api/health {
+	reverse_proxy 127.0.0.1:3003
+}
+```
+
+Reload the local instance using its dedicated admin address. Verify
+`/api/health` reaches Rust and an ordinary API path still reaches Node.
+Remove the block, reload and confirm health returns to Node. Record the
+status and upstream for each probe.
+
 ## Report
 
 Every attempt, accepted or rolled back, leaves
