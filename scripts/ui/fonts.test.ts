@@ -81,7 +81,8 @@ test("English relations symbols stay in tiny disjoint assets", () => {
   expect(remaining).toHaveLength(10);
   // Summary strings add 13 glyphs (ADR 0027); image actions add 片 (ADR 0029);
   // finance, audit and permission strings add 寬幣臨誌貨踪蹤追 (v0.2.22).
-  expect(remaining.reduce((sum, asset) => sum + asset.mappings, 0)).toBe(748);
+  // The v0.2.28 finance vocabulary adds two TC mappings.
+  expect(remaining.reduce((sum, asset) => sum + asset.mappings, 0)).toBe(750);
   for (const asset of remaining) {
     expect(asset.bytes).toBeLessThanOrEqual(48 * 1024);
     expect(asset.mappings).toBeLessThanOrEqual(80);
