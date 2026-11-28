@@ -1,7 +1,8 @@
 # 0004 · Agent queue: close function-map gaps, new backend in Rust
 
-- **Status:** approved (owner, 2026-11-22: "yes for all … not gate just do
-  it"). Nothing here has started. The agent goal is
+- **Status:** F, R and N1–N8 are done and in production as v0.2.29
+  ([milestone 184](../milestones/184-v0.2.29.md)). Open: release v0.2.30 and
+  the queue under "Decisions of 2026-11-28" below. The agent goal is
   [v0.2.27](../agent-goal-v0.2.27-function-map-in-rust.md); it holds the
   prompt, the design per task, and the execution mode.
 - **Who executes:** the local dev agent on the operator machine. The planner
@@ -104,3 +105,34 @@ that would see money it cannot see today.
 - "Not gate just do it": no decision stops and no review waits in this
   queue. The execution mode in the agent goal replaces plan 0002's "print
   NEEDS-DECISION and wait" after R0.6 for this work.
+
+## Decisions of 2026-11-28
+
+Owner, on the planner's review of `main` at `30d1e96`: "yes for all, close pr
+114 and ship v0.2.30", then "Do not deploy yet", then "prepare plan for agent
+to dev with no gate to complete current pr and plan". PR 114 is closed;
+`main` has held its 51 files since PR 115.
+
+The agent goal is
+[v0.2.30 to v0.2.33](../agent-goal-v0.2.30-agent-reads-and-export.md). It
+holds the prompt, the design per task and the stops. The execution mode of
+the v0.2.27 goal continues: no decision stops, fast checks per PR, one full
+`pnpm check` per release head. Production stays on v0.2.29 until the owner
+pastes that prompt.
+
+| ID | Task | Language | Acceptance | Release |
+| --- | --- | --- | --- | --- |
+| P0 | Adopt the planner branch; add the `CHANGELOG.md` entries for v0.2.27 to v0.2.29; correct the status lines of plan 0001 and the v0.2.27 goal | docs | `pnpm lint` | v0.2.30 |
+| H1 | `modules.ts`: the Sign-in pattern `^/api/me` also takes `/api/members` and `/api/member-rates`; narrow it and regenerate | TypeScript | The two routes sit in Organizations and in Tasks | v0.2.30 |
+| V30 | Release the phase editing fix of PR 138 | none new | `docs/release-closeout.md`, checks 1 to 8 | v0.2.30 |
+| S1 | A session stays fresh for a client that only uses the Rust reads | TypeScript | Browser test: the expiry of an aged session moves on the Gantt | v0.2.31 |
+| A2 | The exported Gantt matches the screen: `taff-api` serves the timeline image and draws phases | Rust, TypeScript schema | Zero replay differences without phases; a project with phases exports them and its hash changes | v0.2.31 |
+| R0.5b | The replay compares MCP `tools/list` and read-only `tools/call` | TypeScript | Every read exchange of `pnpm mcp:smoke` is compared | v0.2.32 |
+| A1a | The agent principal in Rust, read-only | Rust | Equals Node for every token state on the seed | v0.2.32 |
+| A1b | `taff-api` fronts `/mcp` and passes every call to Node unchanged | Rust | Zero replay differences; 69 smoke assertions through the front | v0.2.32 |
+| A1c | Agents read acceptance criteria, task links, phases and health updates: four tools answered in Rust | Rust | 42 tools; each tool tested with the lowest scope and after that scope, token or grant is revoked | v0.2.33 |
+| A3 | The agent's Gantt image has phases (`views.image`, timeline view) | Rust | Equals Node without phases; phases drawn with them | v0.2.33 |
+
+A1b to A3 are the first slice of plan 0001 Wave 3. Not queued: tools for
+milestones, CRM writes, the mind map, the inbox and Ask; the other read
+families of Wave 1; Waves 2, 4 and 5.
