@@ -14,8 +14,9 @@ It covers four production deploys.
 
 ```text
 Goal: Taff v0.2.30 to v0.2.33. Work through
-docs/agent-goal-v0.2.30-agent-reads-and-export.md on
-origin/claude/sweet-gates-88eygu from top to bottom without stopping.
+docs/agent-goal-v0.2.30-agent-reads-and-export.md from top to bottom without
+stopping. It is on main once PR 139 is merged; until then read it on
+origin/claude/sweet-gates-88eygu.
 Plan 0004 "Decisions of 2026-11-28" lists the tasks. Owner 2026-11-28:
 "dev with no gate". Do not wait for review or approval and do not print
 NEEDS-DECISION for anything in that file. Where something is unclear, pick the
@@ -54,8 +55,9 @@ continues unchanged:
 ## Design per task
 
 ### P0 · Adopt the planner branch
-One docs PR takes `claude/sweet-gates-88eygu` onto `main`: this file, the
-plan 0004 section and the `AGENTS.md` line. It also adds the missing
+[PR 139](https://github.com/ksamint/taff01/pull/139) takes
+`claude/sweet-gates-88eygu` onto `main`: this file, the plan 0004 section and
+the `AGENTS.md` line. Merge it if it is still open. One more docs PR adds the missing
 `CHANGELOG.md` entries for v0.2.27, v0.2.28 and v0.2.29 from milestones 176,
 180 and 184, and corrects the status lines of plan 0001 and the v0.2.27 goal.
 
