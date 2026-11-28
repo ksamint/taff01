@@ -106,37 +106,33 @@ that would see money it cannot see today.
   queue. The execution mode in the agent goal replaces plan 0002's "print
   NEEDS-DECISION and wait" after R0.6 for this work.
 
-## Decisions of 2026-11-28 (owner: "yes for all, close pr 114 and ship v0.2.30")
+## Decisions of 2026-11-28
 
-Source: the planner's review of `main` at `30d1e96`. PR 114 is closed; `main`
-has held its 51 files since PR 115.
+Owner, on the planner's review of `main` at `30d1e96`: "yes for all, close pr
+114 and ship v0.2.30", then "Do not deploy yet", then "prepare plan for agent
+to dev with no gate to complete current pr and plan". PR 114 is closed;
+`main` has held its 51 files since PR 115.
 
-| ID | Task | Language | Acceptance | Gate |
+The agent goal is
+[v0.2.30 to v0.2.33](../agent-goal-v0.2.30-agent-reads-and-export.md). It
+holds the prompt, the design per task and the stops. The execution mode of
+the v0.2.27 goal continues: no decision stops, fast checks per PR, one full
+`pnpm check` per release head. Production stays on v0.2.29 until the owner
+pastes that prompt.
+
+| ID | Task | Language | Acceptance | Release |
 | --- | --- | --- | --- | --- |
-| V30 | Release v0.2.30 from `main` `30d1e96`, tree `eff54d3c7b29`. The full check passed on this tree in PR 138. Runtime change since v0.2.29: `apps/web/src/components/timeline-scene.tsx` only. No migration, environment value, compose or Caddy change. The closeout docs PR also adds the missing `CHANGELOG.md` entries for v0.2.27 to v0.2.30 and corrects the status lines of plan 0001 and the v0.2.27 goal. | none new | `docs/release-closeout.md`, checks 1 to 8 | F + deploy |
-| H1 | `scripts/architecture/modules.ts`: the Sign-in pattern `^/api/me` also takes `/api/members` and `/api/member-rates`. Narrow it to `^/api/me(/|$)`, then `pnpm arch:gen` and `pnpm arch:map`. | TypeScript | The two routes sit in Organizations and in Tasks | fast checks |
-| A2 | The exported Gantt matches the screen: phase spans in the timeline image, for a person's export and for `views.image`. | Rust (`taff-api`, `taff-render`), TypeScript screens | A project with phases exports them; the content hash changes when a phase changes; specs `view-export.md` and `projects.md` PR-5 say so | F + deploy |
-| A1 | First slice of plan 0001 Wave 3: agents read task acceptance criteria, task links, project phases and project health updates. | Rust | `pnpm mcp:smoke` lists and calls the four tools; each is tested with the lowest scope that reaches it and after that scope is revoked (`AGENTS.md`, access changes) | F + deploy |
+| P0 | Adopt the planner branch; add the `CHANGELOG.md` entries for v0.2.27 to v0.2.29; correct the status lines of plan 0001 and the v0.2.27 goal | docs | `pnpm lint` | v0.2.30 |
+| H1 | `modules.ts`: the Sign-in pattern `^/api/me` also takes `/api/members` and `/api/member-rates`; narrow it and regenerate | TypeScript | The two routes sit in Organizations and in Tasks | v0.2.30 |
+| V30 | Release the phase editing fix of PR 138 | none new | `docs/release-closeout.md`, checks 1 to 8 | v0.2.30 |
+| S1 | A session stays fresh for a client that only uses the Rust reads | TypeScript | Browser test: the expiry of an aged session moves on the Gantt | v0.2.31 |
+| A2 | The exported Gantt matches the screen: `taff-api` serves the timeline image and draws phases | Rust, TypeScript schema | Zero replay differences without phases; a project with phases exports them and its hash changes | v0.2.31 |
+| R0.5b | The replay compares MCP `tools/list` and read-only `tools/call` | TypeScript | Every read exchange of `pnpm mcp:smoke` is compared | v0.2.32 |
+| A1a | The agent principal in Rust, read-only | Rust | Equals Node for every token state on the seed | v0.2.32 |
+| A1b | `taff-api` fronts `/mcp` and passes every call to Node unchanged | Rust | Zero replay differences; 69 smoke assertions through the front | v0.2.32 |
+| A1c | Agents read acceptance criteria, task links, phases and health updates: four tools answered in Rust | Rust | 42 tools; each tool tested with the lowest scope and after that scope, token or grant is revoked | v0.2.33 |
+| A3 | The agent's Gantt image has phases (`views.image`, timeline view) | Rust | Equals Node without phases; phases drawn with them | v0.2.33 |
 
-Order: V30 first. The owner held the deploy later the same day ("Do not
-deploy yet"), so production stays on v0.2.29 until the owner says to ship.
-H1, A2 and A1 are approved and start when the owner tells the agent to
-continue this queue.
-
-Design limits the planner found. The agent confirms each against the code in
-its first PR and records the choice in the milestone:
-
-- **A2.** `packages/core/src/view-export.ts` builds the image model and is
-  frozen (rule N0). The timeline reads are already Rust. The Rust API
-  therefore serves the timeline image itself, calling `taff-render` in
-  process (plan 0001 Wave 2 names this), under one Caddy matcher for the
-  timeline view. Other views stay on Node.
-- **A1.** `/mcp` is one endpoint, served by Node, and a new tool in Node breaks
-  the freeze. Recommended: `taff-api` becomes the front for `/mcp`, answers
-  the four new tools itself and passes every other call to Node unchanged.
-  It validates an agent token read-only, the way R0.3 validates a session;
-  Node still issues and revokes. `TOKEN_PEPPER` reaches `api-rs` through the
-  existing secret path, never through a commit.
-- **Stays closed to agents:** agent cost, budget, margin and member rates
-  (finance is not shown to agents), posting a health update (N2) and ticking a
-  criterion (AA-5.8).
+A1b to A3 are the first slice of plan 0001 Wave 3. Not queued: tools for
+milestones, CRM writes, the mind map, the inbox and Ask; the other read
+families of Wave 1; Waves 2, 4 and 5.

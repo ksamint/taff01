@@ -84,6 +84,9 @@ is built in Rust, with its screens in TypeScript. The queue has no decision
 stops and no review waits. A PR in it merges on the fast checks named in
 that goal, and the full `pnpm check` runs once on each release head before
 the deploy. The hard limits under "Stop and report" still apply.
+From 2026-11-28 the queue continues in
+`docs/agent-goal-v0.2.30-agent-reads-and-export.md` (owner: "dev with no
+gate") under the same mode and the same hard limits.
 
 Architecture model (owner, 2026-11-20; ADR 0033, spec `architecture-tooling.md` TT-9):
 - `pnpm arch:map` builds the OMV map (O defines, M holds, V views; method in
