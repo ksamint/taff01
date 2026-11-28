@@ -118,8 +118,10 @@ has held its 51 files since PR 115.
 | A2 | The exported Gantt matches the screen: phase spans in the timeline image, for a person's export and for `views.image`. | Rust (`taff-api`, `taff-render`), TypeScript screens | A project with phases exports them; the content hash changes when a phase changes; specs `view-export.md` and `projects.md` PR-5 say so | F + deploy |
 | A1 | First slice of plan 0001 Wave 3: agents read task acceptance criteria, task links, project phases and project health updates. | Rust | `pnpm mcp:smoke` lists and calls the four tools; each is tested with the lowest scope that reaches it and after that scope is revoked (`AGENTS.md`, access changes) | F + deploy |
 
-Order: V30 now. H1, A2 and A1 are approved and start when the owner tells the
-agent to continue this queue.
+Order: V30 first. The owner held the deploy later the same day ("Do not
+deploy yet"), so production stays on v0.2.29 until the owner says to ship.
+H1, A2 and A1 are approved and start when the owner tells the agent to
+continue this queue.
 
 Design limits the planner found. The agent confirms each against the code in
 its first PR and records the choice in the milestone:
